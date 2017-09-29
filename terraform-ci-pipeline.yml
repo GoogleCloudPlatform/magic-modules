@@ -10,7 +10,7 @@ resources:
 - name: terraform-ci
   type: git
   source:
-    uri: git@github.com:selmanj/terraform-provider-google-ci.git
+    uri: https://github.com/selmanj/terraform-provider-google-ci.git
     branch: master
 
 jobs:
@@ -21,6 +21,7 @@ jobs:
     trigger: true
   - get: ci
     resource: terraform-ci
+    trigger: true
 
   - task: run-acceptance-tests
     config:
