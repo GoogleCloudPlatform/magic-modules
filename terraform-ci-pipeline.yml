@@ -1,0 +1,36 @@
+resources:
+- name: jsselman-repo
+  type: git
+  source:
+    uri: https://github.com/selmanj/terraform-provider-google.git
+    branch: master
+    paths:
+    - google/*
+
+- name: terraform-ci
+  type: git
+  source:
+    uri: git@github.com:selmanj/terraform-provider-google-ci.git
+    branch: master
+
+jobs:
+- name: acceptance-tests
+  plan:
+  - get: terraform
+    resource: jsselman-repo
+    trigger: true
+  - get: ci
+    resource: terraform-ci
+
+  - task: run-acceptance-tests
+    config:
+      platform: linux
+      params:
+        google_json_account: ((terraform-ci-acc-tests-json))
+      inputs:
+      - name: terraform
+      image_resource:
+        type: docker-image
+        source: {repository: golang}
+      run:
+        path: ci/run-acceptance-tests.sh
