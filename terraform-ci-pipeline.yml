@@ -16,7 +16,7 @@ resources:
 jobs:
 - name: acceptance-tests
   plan:
-  - get: terraform
+  - get: terraform-provider-google
     resource: jsselman-repo
     trigger: true
   - get: ci
