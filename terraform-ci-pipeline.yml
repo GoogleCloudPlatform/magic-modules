@@ -30,6 +30,7 @@ jobs:
         google_json_account: ((terraform-ci-acc-tests-json))
       inputs:
       - name: terraform
+      - name: ci
       image_resource:
         type: docker-image
         source: {repository: golang}
