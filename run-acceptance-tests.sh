@@ -22,4 +22,4 @@ ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-pro
 
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 go test ./google -c -o google-test
-./google-test --test.list 'TestAcc.*' | xargs -P 8 -I {} -e './google-test -test.run {} -test.v'
+./google-test --test.list 'TestAcc.*' | xargs -P 8 -I {} -e ./google-test -test.run {} -test.v
