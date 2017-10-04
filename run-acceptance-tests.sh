@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
+
 export GOOGLE_CREDENTIALS_FILE="/tmp/google-account.json"
 export GCLOUD_PROJECT="terraform-ci-acc-tests"
 export TF_ACC=1
@@ -15,6 +15,7 @@ export GOPATH=${PWD}/go
 # to disk for use in tests.
 echo "${google_json_account}" > /tmp/google-account.json
 
+set -x
 
 # Create GOPATH structure
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
