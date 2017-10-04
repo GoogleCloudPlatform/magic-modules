@@ -15,9 +15,11 @@ export GOPATH=${PWD}/go
 # to disk for use in tests.
 echo "${GOOGLE_ACCOUNT_JSON}" > /tmp/google-account.json
 
+set -x
 # Create GOPATH structure
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
-make testacc TEST=./google
+go test ./google -c -o google-test
+./google-test --test.list 'TestAcc.*' | xargs -P 8 -I {} -e './google-test -test.run {} -test.v'
