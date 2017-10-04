@@ -22,8 +22,8 @@ mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 
 # Install teamcity runner
-go install github.com/jen20/teamcity-go-test
+go get github.com/jen20/teamcity-go-test
 
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 go test ./google -c -o google-test
-./google-test --test.list 'TestAcc.*' | teamcity-go-test -test google-test -parallelism 8
+./google-test --test.list 'TestAcc.*' | "${GOPATH}/bin/teamcity-go-test" -test google-test -parallelism 8
