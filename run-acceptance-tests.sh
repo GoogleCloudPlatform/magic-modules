@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-
+set -x
 export GOOGLE_CREDENTIALS_FILE="/tmp/google-account.json"
 export GCLOUD_PROJECT="terraform-ci-acc-tests"
 export TF_ACC=1
@@ -15,15 +15,11 @@ export GOPATH=${PWD}/go
 # to disk for use in tests.
 echo "${google_json_account}" > /tmp/google-account.json
 
-set -x
 
 # Create GOPATH structure
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 
-# Install teamcity runner
-go install github.com/jen20/teamcity-go-test
-
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 go test ./google -c -o google-test
-./google-test --test.list 'TestAcc.*' | teamcity-go-test -test google-test -parallelism 8
+./google-test --test.list 'TestAcc.*' | xargs -P 8 -I {} -e ./google-test -test.run {} -test.v
