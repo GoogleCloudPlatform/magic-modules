@@ -13,7 +13,7 @@ export GOPATH=${PWD}/go
 
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
-echo "${GOOGLE_ACCOUNT_JSON}" > /tmp/google-account.json
+echo "${GOOGLE_JSON_ACCOUNT}" > /tmp/google-account.json
 
 
 # Create GOPATH structure
