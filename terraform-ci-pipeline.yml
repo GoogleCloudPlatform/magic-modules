@@ -1,8 +1,9 @@
+# List of resources
 resources:
-- name: jsselman-repo
+- name: terraform-provider-google
   type: git
   source:
-    uri: https://github.com/selmanj/terraform-provider-google.git
+    uri: https://github.com/terraform-providers/terraform-provider-google.git
     branch: master
     paths:
     - google/*
@@ -17,11 +18,9 @@ jobs:
 - name: acceptance-tests
   plan:
   - get: terraform-provider-google
-    resource: jsselman-repo
-    trigger: true
+    resource: terraform-provider-google
   - get: ci
     resource: terraform-ci
-    trigger: true
 
   - task: run-acceptance-tests
     config:

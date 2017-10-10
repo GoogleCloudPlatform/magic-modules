@@ -22,5 +22,4 @@ mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
-go test ./google -c -o google-test
-./google-test --test.list 'TestAcc.*' | xargs -P 8 -I {} -e ./google-test -test.run {} -test.v
+go test ./google -parallel 16
