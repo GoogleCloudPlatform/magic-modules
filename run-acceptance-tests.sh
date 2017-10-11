@@ -23,4 +23,4 @@ ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-pro
 
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 #
-go test -v ./google -parallel 16 -run '^TestAcc'
+go test -v ./google -parallel 16 -run '^TestAcc' -timeout 120m
