@@ -13,7 +13,7 @@ export GOPATH=${PWD}/go
 
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
-echo "${google_json_account}" > /tmp/google-account.json
+echo "${GOOGLE_JSON_ACCOUNT}" > /tmp/google-account.json
 
 set -x
 
@@ -22,5 +22,5 @@ mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 ln -s "${PWD}/terraform-provider-google" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 
 cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
-#
+
 go test -v ./google -parallel 16 -run '^TestAcc' -timeout 120m
