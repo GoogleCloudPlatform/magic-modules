@@ -31,8 +31,10 @@ jobs:
   plan:
   - get: terraform-provider-google
     resource: terraform-provider-google
+    trigger: true
   - get: ci
     resource: terraform-ci
+    trigger: true
 
     # Define the actual work of running acceptance tests.
   - task: run-acceptance-tests
@@ -51,15 +53,14 @@ jobs:
         source: {repository: golang}
       run:
         path: ci/run-acceptance-tests.sh
-
-jobs:
 - name: unit-tests
   plan:
   - get: terraform-provider-google
     resource: terraform-provider-google
+    trigger: true
   - get: ci
     resource: terraform-ci
-
+    trigger: true
   - task: run-unit-tests
     config:
       platform: linux
