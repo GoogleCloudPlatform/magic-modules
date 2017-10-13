@@ -21,7 +21,7 @@ resources:
 - name: terraform-ci
   type: git
   source:
-    uri: https://github.com/selmanj/terraform-provider-google-ci.git
+    uri: https://github.com/rosbo/terraform-provider-google-ci.git
     branch: master
 
 # Jobs link together a set of tasks and resources to make an overall pipeline.
@@ -51,3 +51,23 @@ jobs:
         source: {repository: golang}
       run:
         path: ci/run-acceptance-tests.sh
+
+jobs:
+- name: unit-tests
+  plan:
+  - get: terraform-provider-google
+    resource: terraform-provider-google
+  - get: ci
+    resource: terraform-ci
+
+  - task: run-unit-tests
+    config:
+      platform: linux
+      inputs:
+      - name: terraform-provider-google
+      - name: ci
+      image_resource:
+        type: docker-image
+        source: {repository: golang}
+      run:
+        path: ci/run-unit-tests.sh
