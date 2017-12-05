@@ -31,6 +31,7 @@ jobs:
       file: ci/unit-tests/task.yml
 
 - name: acceptance-tests
+  serial: true
   plan:
     - aggregate:
       - get: terraform-provider-google
