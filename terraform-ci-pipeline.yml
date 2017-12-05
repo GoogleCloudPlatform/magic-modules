@@ -24,8 +24,10 @@ jobs:
   plan:
     - aggregate:
       - get: terraform-provider-google
+        trigger: true
         passed: [build]
       - get: ci
+        trigger: true
         passed: [build]
     - task: run-unit-tests
       file: ci/unit-tests/task.yml
@@ -35,8 +37,10 @@ jobs:
   plan:
     - aggregate:
       - get: terraform-provider-google
+        trigger: true
         passed: [unit-tests]
       - get: ci
+        trigger: true
         passed: [unit-tests]
     - task: run-acceptance-tests
       file: ci/acceptance-tests/task.yml
