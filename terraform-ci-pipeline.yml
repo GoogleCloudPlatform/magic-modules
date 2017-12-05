@@ -1,76 +1,41 @@
-# A 'resource' is a provider/consumer of data. Commonly these are git repos.
-# Somewhat confusingly, resources can both produce data and consume data (e.g.
-# git repos can provide code to concourse to compile, but can also create tags
-# or branches). Not all resources support both input and output.
-#
-# See https://concourse.ci/resource-types.html for more.
 resources:
-  # The main git repo for the terraform google provider.
 - name: terraform-provider-google
   type: git
   source:
     uri: https://github.com/terraform-providers/terraform-provider-google.git
     branch: master
-    # `paths`, when specified, allows filtering on files when checking to see if
-    # there are new versions via check. By using a filter here we ensure we
-    # don't rerun tests when, say, the README.md file changes.
-    paths:
-    - google/*
-
-  # The supporting repo for running CI. Contained in here is the build script.
-- name: terraform-ci
+- name: ci
   type: git
   source:
     uri: https://github.com/rosbo/terraform-provider-google-ci.git
     branch: master
 
-# Jobs link together a set of tasks and resources to make an overall pipeline.
-# See https://concourse.ci/configuring-jobs.html for more details.
 jobs:
-- name: acceptance-tests
+- name: build
   plan:
   - get: terraform-provider-google
-    resource: terraform-provider-google
     trigger: true
   - get: ci
-    resource: terraform-ci
     trigger: true
+  - task: run-build
+    file: ci/build/task.yml
 
-    # Define the actual work of running acceptance tests.
-  - task: run-acceptance-tests
-    config:
-      platform: linux
-      params:
-        # Params are set as environment variables when the run part is executed.
-        # Here we use (()) notation to indicate that we're using a credhub secret.
-        GOOGLE_JSON_ACCOUNT: ((terraform-ci-acc-tests-json))
-      # Both resources are checked out as subdirectories with the same name.
-      inputs:
-      - name: terraform-provider-google
-      - name: ci
-      image_resource:
-        type: docker-image
-        source: {repository: golang}
-      run:
-        path: ci/run-acceptance-tests.sh
 - name: unit-tests
   plan:
-  - get: terraform-provider-google
-    resource: terraform-provider-google
-    trigger: true
-  - get: ci
-    resource: terraform-ci
-    trigger: true
-  - task: run-unit-tests
-    config:
-      platform: linux
-      inputs:
-      - name: terraform-provider-google
-      - name: ci
-      image_resource:
-        type: docker-image
-        source:
-          repository: golang
-          tag: '1.9'
-      run:
-        path: ci/run-unit-tests.sh
+    - aggregate:
+      - get: terraform-provider-google
+        passed: [build]
+      - get: ci
+        passed: [build]
+    - task: run-unit-tests
+      file: ci/unit-tests/task.yml
+
+- name: acceptance-tests
+  plan:
+    - aggregate:
+      - get: terraform-provider-google
+        passed: [unit-tests]
+      - get: ci
+        passed: [unit-tests]
+    - task: run-acceptance-tests
+      file: ci/acceptance-tests/task.yml

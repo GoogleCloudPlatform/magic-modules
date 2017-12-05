@@ -1,0 +1,16 @@
+platform: linux
+params:
+  # Params are set as environment variables when the run part is executed.
+  # Here we use (()) notation to indicate that we're using a credhub secret.
+  GOOGLE_JSON_ACCOUNT: ((terraform-ci-acc-tests-json))
+# Both resources are checked out as subdirectories with the same name.
+inputs:
+- name: terraform-provider-google
+- name: ci
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: '1.9'
+run:
+  path: ci/acceptance-tests/run.sh
