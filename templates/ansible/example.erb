@@ -1,0 +1,42 @@
+---
+#----------------------------------------------------------
+<% resource_name = Google::StringUtils.uncombine(object.name).downcase -%>
+- name: create a <%= resource_name %>
+<%= lines(indent(example, 2)) -%>
+      state: present
+  register: result
+- name: assert changed is true
+  assert:
+    that:
+      - result.changed == true
+      - "result.kind == <%= quote_string(object.kind) -%>"
+# ----------------------------------------------------------------------------
+- name: create a <%= resource_name -%> that already exists
+<%= lines(indent(example, 2)) -%>
+      state: present
+  register: result
+- name: assert changed is false
+  assert:
+    that:
+      - result.changed == false
+      - "result.kind == <%= quote_string(object.kind) -%>"
+#----------------------------------------------------------
+- name: delete a <%= resource_name %>
+<%= lines(indent(example, 2)) -%>
+      state: absent
+  register: result
+- name: assert changed is true
+  assert:
+    that:
+      - result.changed == true
+      - result.has_key('kind') == False
+# ----------------------------------------------------------------------------
+- name: delete a <%= resource_name -%> that does not exist
+<%= lines(indent(example, 2)) -%>
+      state: absent
+  register: result
+- name: assert changed is false
+  assert:
+    that:
+      - result.changed == false
+      - result.has_key('kind') == False
