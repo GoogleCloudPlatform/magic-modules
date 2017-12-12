@@ -19,6 +19,20 @@ module Provider
   # Code generator for Ansible Cookbooks that manage Google Cloud Platform
   # resources.
   class Ansible < Provider::Core
+    INTEGRATION_TEST_DEFAULTS = {
+      project: '"{{ gcp_project }}"',
+      auth_kind: '"{{ gcp_cred_kind }}"',
+      service_account_file: '"{{ gcp_cred_file }}"',
+      name: '"{{ resource_name }}"'
+    }.freeze
+
+    EXAMPLE_DEFAULTS = {
+      name: "testObject",
+      project: "testProject",
+      auth_kind: "service_account",
+      service_account_file: "/tmp/auth.pem"
+    }
+
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -58,20 +72,81 @@ module Provider
       'str'
     end
 
+    # Returns a unicode formatted, quoted string.
+    def unicode_string(string)
+      return 'Invalid value' if string.nil?
+      return "u#{quote_string(string)}" unless string.include? 'u\''
+    end
+
+    def self_link_url(resource)
+      (product_url, resource_url) = self_link_raw_url(resource)
+      full_url = [product_url, resource_url].flatten.join
+      # Double {} replaced with single {} to support Python string interpolation
+      "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+    end
+
+    def collection_url(resource)
+      base_url = resource.base_url.split("\n").map(&:strip).compact
+      full_url = [resource.__product.base_url, base_url].flatten.join
+      # Double {} replaced with single {} to support Python string interpolation
+      "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+    end
+
+    # Returns the name of the module according to Ansible naming standards.
+    # Example: gcp_dns_managed_zone
+    def module_name(object)
+      ["gcp_#{object.__product.prefix[1..-1]}",
+       Google::StringUtils.underscore(object.name)].join('_')
+    end
+
     private
 
     def generate_resource(data)
+      prod_name = Google::StringUtils.underscore(data[:object].name)
+      path = ["products/#{data[:product_name]}",
+              "examples/ansible/#{prod_name}.yaml"].join('/')
+
+      example = compile_template_with_hash(File.open(path).read,
+                                           EXAMPLE_DEFAULTS) if File.file?(path)
+
       target_folder = data[:output_folder]
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:name])
+      name = module_name(data[:object])
       generate_resource_file data.clone.merge(
         default_template: 'templates/ansible/resource.erb',
         out_file: File.join(target_folder,
-                            "lib/ansible/modules/cloud/google/#{name}.py")
+                            "lib/ansible/modules/cloud/google/#{name}.py"),
+        example: example
       )
     end
 
-    def generate_resource_tests(data) end
+    def generate_resource_tests(data)
+      prod_name = Google::StringUtils.underscore(data[:object].name)
+      path = ["products/#{data[:product_name]}",
+              "examples/ansible/#{prod_name}.yaml"].join('/')
+
+      # Unlike other providers, all resources will not be built at once or
+      # in close timing to each other (due to external PRs).
+      # This means that examples might not be built out for every resource
+      # in a GCP product.
+      return unless File.file?(path)
+
+      target_folder = data[:output_folder]
+      FileUtils.mkpath target_folder
+
+      full_name = Google::StringUtils.underscore(data[:name])
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/ansible/example.erb',
+        out_file: File.join(target_folder,
+                            "test/integration/targets/#{full_name}/main.yml"),
+        example: compile_template_with_hash(File.open(path).read,
+                                            INTEGRATION_TEST_DEFAULTS)
+      )
+    end
+
+    def compile_template_with_hash(template, hash)
+      ERB.new(template).result(OpenStruct.new(hash).instance_eval { binding })
+    end
 
     def generate_network_datas(data, object) end
 

@@ -38,6 +38,11 @@ module Google
             .downcase
     end
 
+    # Add spaces before every capitalized word except first.
+    def self.uncombine(source)
+      source.gsub(/(?=[A-Z])/, ' ').strip
+    end
+
     def self.symbolize(key)
       key.to_sym unless key.nil?
     end
