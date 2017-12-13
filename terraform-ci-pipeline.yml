@@ -22,7 +22,6 @@ jobs:
       - get: terraform-provider-google
         trigger: true
       - get: ci
-        trigger: true
     - task: run-build
       file: ci/build/task.yml
 
@@ -33,7 +32,6 @@ jobs:
         trigger: true
         passed: [build]
       - get: ci
-        trigger: true
         passed: [build]
     - task: run-unit-tests
       file: ci/unit-tests/task.yml
@@ -46,7 +44,6 @@ jobs:
         trigger: true
         passed: [unit-tests]
       - get: ci
-        trigger: true
         passed: [unit-tests]
     - task: run-acceptance-tests
       file: ci/acceptance-tests/task.yml
@@ -54,8 +51,8 @@ jobs:
 - name: one-off-build
   plan:
     - aggregate:
-      - get: one-off-terraform-provider-google
-        name: terraform-provider-google
+      - get: terraform-provider-google
+        resource: one-off-terraform-provider-google
         version: every
         trigger: true
       - get: ci
@@ -65,8 +62,8 @@ jobs:
 - name: one-off-unit-tests
   plan:
     - aggregate:
-      - get: one-off-terraform-provider-google
-        name: terraform-provider-google
+      - get: terraform-provider-google
+        resource: one-off-terraform-provider-google
         version: every
         trigger: true
         passed: [one-off-build]
@@ -78,8 +75,8 @@ jobs:
   serial_groups: ["gcp"]
   plan:
     - aggregate:
-      - get: one-off-terraform-provider-google
-        name: terraform-provider-google
+      - get: terraform-provider-google
+        resource: one-off-terraform-provider-google
         version: every
         trigger: true
         passed: [one-off-unit-tests]
