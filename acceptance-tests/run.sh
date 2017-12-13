@@ -23,4 +23,4 @@ cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 # TODO: Run all acceptance tests. We need to run our acceptance tests in an account outside the google org for the following reasons:
 # - Enforcers automatically creates firewall rules which caused all tests creating network to fail to destroy properly
 # - We can't run tests creating projects, folders or managing org policies in the google org.
-go test -v ./google -parallel 16 -run '^TestAccComputeAddress_' -timeout 120m
+go test -v ./google -parallel 10 -run '^TestAcc' -timeout 120m
