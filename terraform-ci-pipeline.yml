@@ -4,6 +4,11 @@ resources:
   source:
     uri: https://github.com/terraform-providers/terraform-provider-google.git
     branch: master
+- name: one-off-terraform-provider-google
+  type: git
+  source:
+    uri: https://github.com/terraform-providers/terraform-provider-google.git
+    branch: one-off
 - name: ci
   type: git
   source:
@@ -13,12 +18,13 @@ resources:
 jobs:
 - name: build
   plan:
-  - get: terraform-provider-google
-    trigger: true
-  - get: ci
-    trigger: true
-  - task: run-build
-    file: ci/build/task.yml
+    - aggregate:
+      - get: terraform-provider-google
+        trigger: true
+      - get: ci
+        trigger: true
+    - task: run-build
+      file: ci/build/task.yml
 
 - name: unit-tests
   plan:
@@ -33,7 +39,7 @@ jobs:
       file: ci/unit-tests/task.yml
 
 - name: acceptance-tests
-  serial: true
+  serial_groups: ["gcp"]
   plan:
     - aggregate:
       - get: terraform-provider-google
@@ -42,5 +48,41 @@ jobs:
       - get: ci
         trigger: true
         passed: [unit-tests]
+    - task: run-acceptance-tests
+      file: ci/acceptance-tests/task.yml
+
+- name: one-off-build
+  plan:
+    - aggregate:
+      - get: one-off-terraform-provider-google
+        name: terraform-provider-google
+        version: every
+        trigger: true
+      - get: ci
+    - task: run-build
+      file: ci/build/task.yml
+
+- name: one-off-unit-tests
+  plan:
+    - aggregate:
+      - get: one-off-terraform-provider-google
+        name: terraform-provider-google
+        version: every
+        trigger: true
+        passed: [one-off-build]
+      - get: ci
+    - task: run-unit-tests
+      file: ci/unit-tests/task.yml
+
+- name: one-off-acceptance-tests
+  serial_groups: ["gcp"]
+  plan:
+    - aggregate:
+      - get: one-off-terraform-provider-google
+        name: terraform-provider-google
+        version: every
+        trigger: true
+        passed: [one-off-unit-tests]
+      - get: ci
     - task: run-acceptance-tests
       file: ci/acceptance-tests/task.yml

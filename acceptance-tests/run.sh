@@ -3,11 +3,8 @@
 set -e
 
 export GOOGLE_CREDENTIALS_FILE="/tmp/google-account.json"
-export GCLOUD_PROJECT="terraform-ci-acc-tests"
 export TF_ACC=1
 export GOOGLE_REGION="us-central1"
-# TODO actually use a separate project for xpn resources
-export GOOGLE_XPN_HOST_PROJECT="man-i-wish-i-was-a-real-project"
 # Setup GOPATH
 export GOPATH=${PWD}/go
 
