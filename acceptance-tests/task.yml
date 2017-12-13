@@ -6,6 +6,7 @@ params:
   GCLOUD_PROJECT: ((ci-test-project))
   GOOGLE_ORG: ((ci-test-org))
   GOOGLE_BILLING_ACCOUNT: ((ci-test-billing-account))
+  GOOGLE_BILLING_ACCOUNT_2: ((ci-test-billing-account-2))
   GOOGLE_PROJECT_NUMBER: ((ci-test-project-number))
 # Both resources are checked out as subdirectories with the same name.
 inputs:
