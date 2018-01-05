@@ -1,0 +1,29 @@
+<% require 'json' -%>
+<%
+  os_support = manifest.operating_systems.map do |os|
+    { operatingsystem: os.name, operatingsystemrelease: os.versions }
+  end
+
+  requirements = manifest.requires.map do |req|
+    { name: req.name, version_requirement: req.versions }
+  end
+
+  output = {
+    name: "google-#{product.prefix}",
+    version: manifest.version,
+    author: 'Google',
+    summary: manifest.summary,
+    license: 'Apache-2.0',
+    source: manifest.source,
+    project_page: manifest.homepage,
+    issues_url: manifest.issues,
+    operatingsystem_support: os_support,
+    dependencies: requirements,
+    tags: manifest.tags,
+    data_provider: nil,
+    # TODO(nelsonjr): Similar to dependencies vs. requirements, check
+    # description vs. summary
+    description: manifest.summary
+  }
+-%>
+<%= JSON.pretty_generate(output) -%>

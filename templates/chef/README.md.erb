@@ -1,0 +1,153 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<% require 'provider/chef/outline' -%>
+# <%= product.name %> Chef Cookbook
+
+<%= lines(manifest.description) -%>
+
+## Requirements
+
+### Platforms
+
+#### Supported Operating Systems
+
+This cookbook was tested on the following operating systems:
+
+<%= lines(manifest.operating_systems.map do |os|
+            ['* ', os.name, ' ', os.versions.join(', ')].join
+          end.join("\n")) -%>
+
+<%# TODO(alexstephen): Remove this example. -%>
+## Example
+
+```ruby
+<%= compile ["products/#{@api.prefix[1..-1]}/files/examples", 'cookbook',
+             'readme.rb'].join('~') -%>
+```
+
+## Credentials
+
+All Google Cloud Platform cookbooks use an unified authentication mechanism,
+provided by the `google-gauth` cookbook. Don't worry, it is automatically
+installed when you install this module.
+
+### Example
+
+```ruby
+<%= compile 'templates/chef/example~auth.rb.erb' %>
+```
+
+For complete details of the authentication cookbook, visit the
+[google-gauth][] cookbook documentation.
+
+## Resources
+
+<% objects = product.objects.select { |o| !o.exclude } -%>
+<% objects.each do |object| -%>
+* [`<%= object.out_name -%>`](#<%= object.out_name -%>) -
+<%= lines(indent(wrap_field(object.description, 6), 2)) -%>
+<% end -%>
+
+
+<% objects.each do |object| -%>
+### <%= object.out_name -%>
+
+<%= object.description %>
+
+#### Example
+
+```ruby
+<%= compile ["products/#{@api.prefix[1..-1]}/files/examples", 'cookbook',
+             "#{Google::StringUtils.underscore(object.name)}.rb"].join('~') %>
+```
+
+#### Reference
+
+```ruby
+<% outline = Provider::ChefOutline.new(self) -%>
+<%= lines(outline.generate(object)) -%>
+```
+
+#### Actions
+
+* `create` -
+<%= lines(wrap_field("Converges the `#{object.out_name}` resource into the final
+state described within the block. If the resource does not exist, Chef will
+attempt to create it.", 0)) -%>
+* `delete` -
+<%= lines(wrap_field("Ensures the `#{object.out_name}` resource is not present.
+If the resource already exists Chef will attempt to delete it.", 0)) -%>
+
+#### Properties
+
+<% # TODO(nelsonjr): Add suffixes "(read only)" "(output only") etc
+   # on all providers -%>
+<%   object.all_user_properties.each do |property| -%>
+* `<%= property.out_name -%>` -
+<%
+  description = []
+  description << 'Required.' if property.required
+  description << 'Output only.' if property.output
+  description << property.description
+-%>
+<%= lines(wrap_field(description.join(' '), 2), 1) -%>
+<% if property.is_a? Api::Type::NestedObject -%>
+<%= build_nested_object(property, property.out_name).join -%>
+<% elsif property.is_a? Api::Type::Array and \
+  property.item_type.is_a? Api::Type::NestedObject -%>
+<%= build_nested_object(property.item_type, "#{property.out_name}[]").join -%>
+<% elsif property.is_a? Api::Type::Array and \
+  property.item_type.is_a? Api::Type::Array
+   raise "Array of arrays. Not supported."
+-%>
+<% end # property.is_a? Api::Type::NestedObject -%>
+<%   end # object.all_user_properties.-%>
+#### Label
+Set the `<%= label_name(object) -%>` property when attempting to set primary key
+of this object. The primary key will always be referred to by the initials of
+the resource followed by "_label"
+
+<% end -%>
+<% unless @config.functions.nil? -%>
+## Functions
+
+### About Functions
+In order to use these functions inside of a Chef recipe, you'll need to import
+the function first. Before calling a function, add the following line:
+
+```ruby
+::Chef::Resource.send(:include, Google::Functions)
+```
+
+<%   @config.functions.each do |fn| -%>
+### `<%= fn.name -%>`
+
+<%= lines(wrap_field(fn.description, 0)) -%>
+
+#### Arguments
+
+<%   fn.arguments.each do |arg| -%>
+  - `<%= arg.name -%>`:
+<%= lines(indent(wrap_field(arg.description, 6), 2), 1) -%>
+<%   end # fn.arguments.each -%>
+<%   unless fn.examples.nil? || fn.examples.empty? -%>
+#### Examples
+
+<%= lines(fn.examples.map { |eg| lines(['```ruby', eg, '```']) }, 1) -%>
+<%   end # fn.examples.nil? || fn.examples.empty? -%>
+<%   end # @config.functions.each -%>
+
+<% end # config.functions.nil? -%>
+[google-gauth]: https://supermarket.chef.io/cookbooks/google-gauth

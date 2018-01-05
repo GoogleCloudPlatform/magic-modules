@@ -1,0 +1,41 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<%= compile 'templates/license.erb' -%>
+
+<%= compile 'templates/autogen_notice.erb' -%>
+
+<%=
+  lines(fn.requires.sort.map { |r| "require '#{r}'" }, 1) \
+    unless fn.requires.nil?
+-%>
+<%= lines(emit_function_doc(fn)) -%>
+Puppet::Functions.create_function(:<%= fn.name -%>) do
+  dispatch :<%= fn.name -%> do
+<% fn.arguments.each do |arg| -%>
+<% type_parts = arg.type.split('::') -%>
+<% if type_parts[0, 2] == %w[Api Type] -%>
+<% type = Google::StringUtils.camelize(type_parts.last, :upper) -%>
+    param '<%= type -%>', :<%= arg.name %>
+<% else # arg.type.starts_with?('Api::Type') -%>
+    param 'Runtime[ruby, "<%= arg.type -%>"]', :<%= arg.name %>
+<% end # arg.type.starts_with?('Api::Type') -%>
+<% end # fn.arguments.each -%>
+  end
+
+  def <%= fn.name -%>(<%= fn.arguments.map { |a| a.name }.join(', ') -%>)
+<%= lines(indent(fn.code, 4)) -%>
+  end
+<%= lines(lines_before(indent(fn.helpers,2))) unless fn.helpers.nil? -%>
+end

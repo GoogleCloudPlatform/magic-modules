@@ -1,0 +1,6 @@
+<%=
+  lines(Google::HashUtils.navigate(config,
+                                   %w[provider_helpers include], []).map do |f|
+          lines(compile(f))
+        end.join("\n"))
+-%>

@@ -1,0 +1,66 @@
+[submodule "build/puppet/dns"]
+	path = build/puppet/dns
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-dns
+[submodule "build/puppet/auth"]
+	path = build/puppet/auth
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-auth
+[submodule "build/puppet/compute"]
+	path = build/puppet/compute
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-compute
+[submodule "build/chef/dns"]
+	path = build/chef/dns
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-dns
+[submodule "build/chef/compute"]
+	path = build/chef/compute
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-compute
+[submodule "build/puppet/storage"]
+	path = build/puppet/storage
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-storage
+[submodule "build/puppet/sql"]
+	path = build/puppet/sql
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-sql
+[submodule "build/puppet/container"]
+	path = build/puppet/container
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-container
+[submodule "build/puppet/_bundle"]
+	path = build/puppet/_bundle
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google
+[submodule "build/chef/auth"]
+	path = build/chef/auth
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-auth
+[submodule "build/chef/storage"]
+	path = build/chef/storage
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-storage
+[submodule "build/chef/container"]
+	path = build/chef/container
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-container
+[submodule "build/chef/sql"]
+	path = build/chef/sql
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-sql
+[submodule "build/puppet/logging"]
+	path = build/puppet/logging
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-logging
+[submodule "build/chef/_bundle"]
+	path = build/chef/_bundle
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google
+[submodule "build/puppet/pubsub"]
+	path = build/puppet/pubsub
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-pubsub
+[submodule "build/chef/pubsub"]
+	path = build/chef/pubsub
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-pubsub
+[submodule "build/puppet/spanner"]
+	path = build/puppet/spanner
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-spanner
+[submodule "build/puppet/resourcemanager"]
+	path = build/puppet/resourcemanager
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-resourcemanager
+[submodule "build/chef/resourcemanager"]
+	path = build/chef/resourcemanager
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-resourcemanager
+[submodule "build/puppet/iam"]
+	path = build/puppet/iam
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/puppet-google-iam
+[submodule "build/chef/logging"]
+	path = build/chef/logging
+	url = https://cloud-internal.googlesource.com/cloud-graphite-team/config-modules/chef-google-logging
