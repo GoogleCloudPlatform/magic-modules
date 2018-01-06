@@ -54,7 +54,7 @@ users. There are various wrappers out there that can envelope a Google API into
 various languages, e.g. Ruby or Java, but the user needs to know all the
 intricacies of the underlying GCP product API.
 
-[Read more about piylosophy][philosophy]
+[Read more about philosophy][philosophy]
 
 ## Current Coverage
 
