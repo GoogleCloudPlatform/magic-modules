@@ -1,0 +1,140 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2017 Google
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+<%= compile 'templates/autogen_notice.erb' -%>
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+################################################################################
+# Documentation
+################################################################################
+
+<%
+  metadata_version = quote_string(@config.manifest.metadata_version)
+  supported_by = quote_string(@config.manifest.metadata_version)
+-%>
+ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
+                    'status': <%= @config.manifest.status -%>,
+                    'supported_by': <%= supported_by -%>}
+
+DOCUMENTATION='''
+---
+module: <%= object.out_name %>
+description: |
+  <%= lines(object.description) -%>
+version_added: <%= lines(@config.manifest.version_added) -%>
+author: <%= lines(@config.manifest.author) -%>
+requirements:
+<% @config.manifest.requirements.each do |line| -%>
+<%= lines(indent(bullet_lines(line, 4), 4)) -%>
+<% end -%>
+options:
+    state:
+        description:
+            - Whether the given object should exist in GCP
+        required: false
+        choices: ['present', 'absent']
+        default: 'present'
+<% object.all_user_properties.reject(&:output).each do |prop| -%>
+    <%= Google::StringUtils.underscore(prop.name) -%>:
+        description:
+<%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
+        required: <%= prop.required ? 'true' : 'false' %>
+<% end -%>
+'''
+
+RETURNS='''
+<% object.all_user_properties.select(&:output).each do |prop| -%>
+    <%= Google::StringUtils.underscore(prop.name) -%>:
+        description:
+<%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
+        returned: success
+        type: <%= lines(prop.type.downcase) -%>
+<% end -%>
+'''
+
+################################################################################
+## Imports
+################################################################################
+
+from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication
+from ansible.module_utils.basic import AnsibleModule
+import json
+
+################################################################################
+# Main
+################################################################################
+
+
+def main():
+    """Main function"""
+
+    module = AnsibleModule(
+        argument_spec=dict(
+            state=dict(default='present', choices=['present', 'absent'], type='str'),
+<% object.all_user_properties.reject(&:output).each do |prop| -%>
+<%
+  line = "#{Google::StringUtils.underscore(prop.out_name)}=dict("
+  options = [
+    ("required=True" if prop.required),
+    "type=#{quote_string(python_type(prop))}"
+  ].compact
+-%>
+<%= lines(indent("#{line}#{options.join(', ')})", 12)) -%>
+<% end -%>
+            project=dict(required=True, type='str'),
+            auth_kind=dict(
+                required=True,
+                choices=['machineaccount', 'serviceaccount', 'application'],
+                type='str'),
+            service_account_email=dict(type='str'),
+            service_account_file=dict(type='path'),
+            scopes=dict(required=True, type='list')
+        ),
+        mutually_exclusive=[['service_account_email', 'service_account_file']],
+    )
+
+    state = module.params['state']
+    kind = <%= lines(quote_string(object.kind)) -%>
+
+    fetch = fetch_resource(module, self_link(module), kind)
+    changed = False
+
+    if fetch:
+        if state == 'present':
+            if is_different(module, fetch):
+                fetch = update(module, self_link(module), kind)
+        else:
+            delete(module, self_link(module), kind)
+            fetch = {}
+            changed = True
+    else:
+        if state == 'present':
+            fetch = create(module, collection(module), kind)
+            changed = True
+
+    if fetch:
+        fetch.update({'changed': changed})
+    else:
+        fetch = {'changed': changed}
+
+    module.exit_json(**fetch)
+
+
+def create(module, link, kind):
+    auth = GcpAuthentication(module)
+    return return_if_object(module, auth.session().post(link, json=resource_to_request(module)), kind)
+
+
+def update(module, link, kind):
+    module.fail_json(msg="<%= object.name -%> cannot be edited")
+
+
+def delete(module, link, kind):
+    auth = GcpAuthentication(module)
+    return return_if_object(module, auth.session().delete(link), kind)
+
+

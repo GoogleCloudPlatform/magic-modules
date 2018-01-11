@@ -1,0 +1,85 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<% if object.kind? -%>
+def self.fetch_resource(resource, self_link, kind)
+  get_request = ::Google::<%= product_ns -%>::Network::Get.new(
+    self_link, fetch_auth(resource)
+  )
+  return_if_object get_request.send, kind
+end
+<% else # object.kind? -%>
+def self.fetch_resource(resource, self_link)
+  get_request = ::Google::<%= product_ns -%>::Network::Get.new(
+    self_link, fetch_auth(resource)
+  )
+  return_if_object get_request.send
+end
+<% end # object.kind? -%>
+
+<% unless object.self_link_query.nil? -%>
+def fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)
+<%=
+  lines(format(
+    [
+      'self.class.fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)',
+      [
+        'self.class.fetch_wrapped_resource(resource, kind, wrap_kind,',
+        indent('wrap_path)', 34) # 34 = align with ( previous line
+      ]
+    ], 2, inside_indent
+  ))
+-%>
+end
+
+def self.fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)
+  result = fetch_resource(resource, self_link(resource), wrap_kind)
+  return if result.nil? || !result.key?(wrap_path)
+  result = unwrap_resource(result[wrap_path], resource)
+  return if result.nil?
+  raise "Incorrect result: #{result['kind']} (expected #{kind})" \
+    unless result['kind'] == kind
+  result
+end
+
+<%   unless false?(Google::HashUtils.navigate(config,
+                                              %w[provider_helpers visible
+                                                 unwrap_resource])) -%>
+def unwrap_resource(result, resource)
+  self.class.unwrap_resource(result, resource)
+end
+
+def self.unwrap_resource(result, resource)
+  query_predicate = unwrap_resource_filter(resource)
+  matches = result.select do |entry|
+    query_predicate.all? do |k, v|
+      entry[k.id2name] == v
+    end
+  end
+  raise "More than 1 result found: #{matches}" if matches.size > 1
+  return if matches.empty?
+  matches.first
+end
+
+<%   end # visible:unwrap_resource -%>
+<% end # object.self_link_query.nil? -%>
+def self.raise_if_errors(response, err_path, msg_field)
+  errors = ::Google::HashUtils.navigate(response, err_path)
+  raise_error(errors, msg_field) unless errors.nil?
+end
+
+def self.raise_error(errors, msg_field)
+  raise IOError, ['Operation failed:',
+                  errors.map { |e| e[msg_field] }.join(', ')].join(' ')
+end

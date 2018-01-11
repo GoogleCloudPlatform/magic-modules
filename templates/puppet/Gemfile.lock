@@ -1,0 +1,108 @@
+GIT
+  remote: https://github.com/nelsonjr/rubocop.git
+  revision: 178b3150b7610195c327783575177520316e1985
+  branch: feature/ignore-parent-exclude
+  specs:
+    rubocop (0.50.0)
+      parallel (~> 1.10)
+      parser (>= 2.3.3.1, < 3.0)
+      powerpack (~> 0.1)
+      rainbow (>= 2.2.2, < 3.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (~> 1.0, >= 1.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ast (2.3.0)
+    diff-lcs (1.3)
+    docile (1.1.5)
+    facter (2.4.6)
+    fast_gettext (1.1.0)
+    gettext (3.2.2)
+      locale (>= 2.0.5)
+      text (>= 1.3.0)
+    gettext-setup (0.18)
+      fast_gettext (~> 1.1.0)
+      gettext (>= 3.0.2)
+      locale
+    hiera (3.3.1)
+    json (2.0.3)
+    json_pure (1.8.6)
+    locale (2.1.2)
+    metaclass (0.0.4)
+    metadata-json-lint (1.1.0)
+      json
+      semantic_puppet (>= 0.1.2, < 2.0.0)
+      spdx-licenses (~> 1.0)
+    mocha (1.2.1)
+      metaclass (~> 0.0.1)
+    parallel (1.12.0)
+    parser (2.4.0.0)
+      ast (~> 2.2)
+    powerpack (0.1.1)
+    puppet (4.10.0)
+      facter (> 2.0, < 4)
+      gettext-setup (>= 0.10, < 1)
+      hiera (>= 2.0, < 4)
+      json_pure (~> 1.8)
+      locale (~> 2.1)
+    puppet-lint (2.1.1)
+    puppet-lint-unquoted_string-check (0.3.0)
+      puppet-lint (>= 1.0, < 3.0)
+    puppet-syntax (2.4.0)
+      rake
+    puppetlabs_spec_helper (2.1.0)
+      mocha (~> 1.0)
+      puppet-lint (~> 2.0)
+      puppet-syntax (~> 2.0)
+      rspec-puppet (~> 2.0)
+    rainbow (2.2.2)
+      rake
+    rake (10.5.0)
+    rspec (3.5.0)
+      rspec-core (~> 3.5.0)
+      rspec-expectations (~> 3.5.0)
+      rspec-mocks (~> 3.5.0)
+    rspec-core (3.5.4)
+      rspec-support (~> 3.5.0)
+    rspec-expectations (3.5.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.5.0)
+    rspec-mocks (3.5.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.5.0)
+    rspec-puppet (2.5.0)
+      rspec
+    rspec-support (3.5.0)
+    ruby-progressbar (1.9.0)
+    semantic_puppet (0.1.4)
+      gettext-setup (>= 0.3)
+    simplecov (0.14.1)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
+    spdx-licenses (1.1.0)
+    text (1.3.1)
+    unicode-display_width (1.3.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  metadata-json-lint
+  puppet (>= 4.2.0)
+  puppet-lint
+  puppet-lint-unquoted_string-check
+  puppet-syntax
+  puppetlabs_spec_helper
+  rake (~> 10.0)
+  rspec
+  rspec-mocks
+  rspec-puppet
+  rubocop!
+  simplecov
+
+BUNDLED WITH
+   1.15.3

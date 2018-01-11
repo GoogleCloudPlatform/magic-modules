@@ -1,0 +1,333 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<%
+  require 'provider/puppet/outline'
+  DEPTH = 5
+  outline = Provider::PuppetOutline.new(self)
+  # TODO(alexstephen): Move this function to Puppet provider.
+  # Builds the properties for a nested object of any depth
+  # This returns an arrays of strings that represent Markdown formatted
+  # properties for the nested object and all nested objects beneath it
+  # Requires:
+  #  prop: A property of type nested object.
+  #  current_path: A string representing all layers above this current property.
+  #                This string will usually be the output names of all
+  #                properties above the current property joined by '/'
+  #                (ex. first_level/second_level) or an array denoted by []
+  #                (ex. array_of_nested_props[])
+  def build_nested_object(prop, current_path)
+    object_lines = []
+    prop.properties.each do |nested_prop|
+      next_path = "#{current_path}/#{nested_prop.out_name}"
+      object_lines << lines(['#' * DEPTH, next_path].join(' '))
+      # TODO(alexstephen): Fix formatting. Required/Output only should be tabbed
+      # in two spaces + only one space in between required/output + description
+      object_lines << 'Required.' if nested_prop.required
+      object_lines << 'Output only.' if nested_prop.output
+      object_lines << lines(wrap_field(nested_prop.description, 0), 1)
+
+      if nested_prop.is_a? Api::Type::NestedObject
+        object_lines.concat(build_nested_object(nested_prop, next_path))
+      elsif nested_prop.is_a? Api::Type::Array and
+        nested_prop.item_type.is_a? Api::Type::NestedObject
+        object_lines.concat(build_nested_object(nested_prop.item_type,
+                                                "#{next_path}[]"))
+      end
+    end
+    object_lines
+  end
+-%>
+# <%= product.name %> Puppet Module
+
+<%= lines(['[![Puppet Forge](',
+           "http://img.shields.io/puppetforge/v/google/#{@api.prefix}.svg",
+           ")](https://forge.puppetlabs.com/google/#{@api.prefix})"].join) -%>
+
+#### Table of Contents
+
+1. [Module Description - What the module does and why it is useful](
+    #module-description)
+2. [Setup - The basics of getting started with <%= product.name -%>](#setup)
+3. [Usage - Configuration options and additional functionality](#usage)
+4. [Reference - An under-the-hood peek at what the module is doing and how](
+   #reference)
+<% unless @config.functions.nil? && @config.bolt_tasks.nil? -%>
+    - [Classes](#classes)
+<% end -%>
+<% unless @config.functions.nil? -%>
+    - [Functions](#functions)
+<% end -%>
+<% unless @config.bolt_tasks.nil? -%>
+    - [Bolt Tasks](#bolt-tasks)
+<% end -%>
+5. [Limitations - OS compatibility, etc.](#limitations)
+6. [Development - Guide for contributing to the module](#development)
+
+## Module Description
+
+This Puppet module manages the resource of <%= @api.name -%>.
+You can manage its resources using standard Puppet DSL and the module will,
+under the hood, ensure the state described will be reflected in the Google
+Cloud Platform resources.
+
+## Setup
+
+To install this module on your Puppet Master (or Puppet Client/Agent), use the
+Puppet module installer:
+
+    puppet module install google-<%= @api.prefix %>
+
+Optionally you can install support to _all_ Google Cloud Platform products at
+once by installing our "bundle" [`google-cloud`][bundle-forge] module:
+
+    puppet module install google-cloud
+
+## Usage
+
+### Credentials
+
+All Google Cloud Platform modules use an unified authentication mechanism,
+provided by the [`google-gauth`][] module. Don't worry, it is automatically
+installed when you install this module.
+
+```puppet
+<%= compile 'templates/puppet/examples~credential.pp.erb' -%>
+```
+
+Please refer to the [`google-gauth`][] module for further requirements, i.e.
+required gems.
+
+### Examples
+
+<% objects = product.objects.select { |o| !o.exclude } -%>
+<% objects.each do |object| -%>
+#### `<%= object.out_name -%>`
+
+```puppet
+<%= compile ["products/#{@api.prefix[1..-1]}/files/examples",
+             "#{Google::StringUtils.underscore(object.name)}.pp"].join('~') %>
+```
+
+<% end # objects.each -%>
+
+### Classes
+
+#### Public classes
+
+<% objects.each do |object| -%>
+* [`<%= object.out_name -%>`][]:
+<%= lines(indent(wrap_field(object.description, 6), 2)) -%>
+<% end -%>
+
+<% if objects.any? { |o| o.all_user_properties.select(&:output).any? } -%>
+### About output only properties
+
+Some fields are output-only. It means you cannot set them because they are
+provided by the Google Cloud Platform. Yet they are still useful to ensure the
+value the API is assigning (or has assigned in the past) is still the value you
+expect.
+
+For example in a DNS the name servers are assigned by the Google Cloud DNS
+service. Checking these values once created is useful to make sure your upstream
+and/or root DNS masters are in sync.  Or if you decide to use the object ID,
+e.g. the VM unique ID, for billing purposes. If the VM gets deleted and
+recreated it will have a different ID, despite the name being the same. If that
+detail is important to you you can verify that the ID of the object did not
+change by asserting it in the manifest.
+
+<% end # objects...:output...any? -%>
+### Parameters
+
+<% objects.each do |object| -%>
+#### `<%= object.out_name -%>`
+
+<%= object.description %>
+
+#### Example
+
+```puppet
+<%= compile ["products/#{@api.prefix[1..-1]}/files/examples",
+             "#{Google::StringUtils.underscore(object.name)}.pp"].join('~') %>
+```
+
+#### Reference
+
+<% outline = Provider::PuppetOutline.new(self) -%>
+```puppet
+<%= lines(outline.generate(object)) -%>
+```
+
+<%   object.all_user_properties.reject(&:output).each do |property| -%>
+##### `<%= property.out_name -%>`
+
+<%= 'Required.' if property.required -%>
+<%= lines(wrap_field(property.description, 0), 1) -%>
+<% if property.is_a? Api::Type::NestedObject -%>
+<%= build_nested_object(property, property.out_name).join -%>
+<% elsif property.is_a? Api::Type::Array and \
+  property.item_type.is_a? Api::Type::NestedObject -%>
+<%= build_nested_object(property.item_type, "#{property.out_name}[]").join -%>
+<% elsif property.is_a? Api::Type::Array and \
+  property.item_type.is_a? Api::Type::Array
+   raise "Array of arrays. Not supported."
+-%>
+<% end # property.is_a? Api::Type::NestedObject -%>
+<%   end # object.all_user_properties.each -%>
+
+<%   output_only = object.all_user_properties.select(&:output) -%>
+<%   unless output_only.empty? -%>
+##### Output-only properties
+
+<%     output_only.each do |property| -%>
+* `<%= property.out_name -%>`: <%= 'Output only.' if property.output %>
+<%= lines(wrap_field(property.description, 0), 1) -%>
+<% if property.is_a? Api::Type::NestedObject -%>
+<%= build_nested_object(property, property.out_name).join -%>
+<% elsif property.is_a? Api::Type::Array and \
+  property.item_type.is_a? Api::Type::NestedObject -%>
+<%= build_nested_object(property.item_type, "#{property.out_name}[]").join -%>
+<% elsif property.is_a? Api::Type::Array and \
+  property.item_type.is_a? Api::Type::Array
+   raise "Array of arrays. Not supported."
+-%>
+<% end # property.is_a? Api::Type::NestedObject -%>
+<%     end # output_only.each -%>
+<%   end # output_only.empty? -%>
+<% end # objects.each -%>
+
+<% unless @config.functions.nil? -%>
+### Functions
+
+<%   @config.functions.each do |fn| -%>
+
+#### `<%= fn.name -%>`
+
+<%= lines(wrap_field(fn.description, 0)) -%>
+
+##### Arguments
+
+<%   fn.arguments.each do |arg| -%>
+  - `<%= arg.name -%>`:
+<%= lines(indent(wrap_field(arg.description, 6), 2), 1) -%>
+<%   end # fn.arguments.each -%>
+<%   unless fn.examples.nil? || fn.examples.empty? -%>
+##### Examples
+
+<%= lines(fn.examples.map do |eg|
+            lines(['```puppet', expand_function_vars(fn, eg), '```'])
+          end, 1) -%>
+<%   end # fn.examples.nil? || fn.examples.empty? -%>
+<%   unless fn.notes.nil? -%>
+##### Notes
+
+<%= lines(wrap_field(expand_function_vars(fn, fn.notes), 0), 1) -%>
+<%   end # fn.examples.nil? || fn.examples.empty? -%>
+<%   end # @config.functions.each -%>
+
+<% end # config.functions.nil? -%>
+<% unless @config.bolt_tasks.nil? -%>
+### Bolt Tasks
+
+<%   @config.bolt_tasks.each do |task| -%>
+
+#### `<%= task.target_file -%>`
+
+<%= lines(wrap_field(task.description, 0)) -%>
+
+<% if task.input == :stdin -%>
+This task takes inputs as JSON from standard input.
+<% else # if task.input == :stdin -%>
+<%   raise "Documentation not supported for '#{task.input}' type" -%>
+<% end # if task.input == :stdin -%>
+
+##### Arguments
+
+<%   task.arguments.each do |arg| -%>
+  - `<%= arg.name -%>`:
+<%= lines(indent(wrap_field(arg.description_display, 6), 2), 1) -%>
+<%   end # task.arguments.each -%>
+<%   end # @config.bolt_tasks.each -%>
+
+<% end # config.bolt_tasks.nil? -%>
+## Limitations
+
+This module has been tested on:
+
+<%= lines(manifest.operating_systems.map do |os|
+            ['* ', os.name, ' ', os.versions.join(', ')].join
+          end.join("\n")) -%>
+
+Testing on other platforms has been minimal and cannot be guaranteed.
+
+## Development
+
+### Automatically Generated Files
+
+Some files in this package are automatically generated by <%= compiler -%>.
+
+We use a code compiler to produce this module in order to avoid repetitive tasks
+and improve code quality. This means all Google Cloud Platform Puppet modules
+use the same underlying authentication, logic, test generation, style checks,
+etc.
+
+Note: Currently `<%= compiler -%>` is not yet generally available, but it will
+be made open source soon. Stay tuned. Please learn more about the way to change
+autogenerated files by reading the [CONTRIBUTING.md][] file.
+
+### Contributing
+
+Contributions to this library are always welcome and highly encouraged.
+
+See [CONTRIBUTING.md][] for more information on how to get
+started.
+
+### Running tests
+
+This project contains tests for [rspec][], [rspec-puppet][] and [rubocop][] to
+verify functionality. For detailed information on using these tools, please see
+their respective documentation.
+
+#### Testing quickstart: Ruby > 2.0.0
+
+<%= compile 'templates/puppet/run-tests-steps.erb' -%>
+
+#### Debugging Tests
+
+In case you need to debug tests in this module you can set the following
+variables to increase verbose output:
+
+Variable                | Side Effect
+------------------------|---------------------------------------------------
+`PUPPET_HTTP_VERBOSE=1` | Prints network access information by Puppet provier.
+`PUPPET_HTTP_DEBUG=1`   | Prints the payload of network calls being made.
+`GOOGLE_HTTP_VERBOSE=1` | Prints debug related to the network calls being made.
+`GOOGLE_HTTP_DEBUG=1`   | Prints the payload of network calls being made.
+
+During test runs (using [rspec][]) you can also set:
+
+Variable                | Side Effect
+------------------------|---------------------------------------------------
+`RSPEC_DEBUG=1`         | Prints debug related to the tests being run.
+`RSPEC_HTTP_VERBOSE=1`  | Prints network expectations and access.
+
+[CONTRIBUTING.md]: CONTRIBUTING.md
+[bundle-forge]: https://forge.puppet.com/google/cloud
+[`google-gauth`]: https://github.com/GoogleCloudPlatform/puppet-google-auth
+[rspec]: http://rspec.info/
+[rspec-puppet]: http://rspec-puppet.com/
+[rubocop]: https://rubocop.readthedocs.io/en/latest/
+<% objects.each do |object| -%>
+[`<%= object.out_name -%>`]: #<%= object.out_name %>
+<% end -%>
