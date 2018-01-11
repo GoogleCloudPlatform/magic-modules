@@ -17,23 +17,6 @@ require 'google/yaml_validator'
 module Api
   # Repesents a base object
   class Object < Google::YamlValidator
-    # Basic functions for defining classes that explicitly marks a property as
-    # not in use, such as Provider::Config::TestData::NONE
-    module MissingObject
-      attr_reader :reason
-
-      def validate
-        return if @validated
-        check_property :reason, String
-        # Now that we verified a reason was provided, delete it so it does not
-        # end in the object mapping (and eventually fail as the type "reason"
-        # will likely never exist)
-        remove_instance_variable('@reason')
-        super
-        @validated = true
-      end
-    end
-
     # Represents an object that has a (mandatory) name
     class Named < Api::Object
       attr_reader :name
