@@ -62,6 +62,7 @@ intricacies of the underlying GCP product API.
 
 - Puppet
 - Chef
+- Terraform
 
 ### Supported Products
 
@@ -149,6 +150,9 @@ Platform | Tool  | Test command
 ---------|-------|--------------
 Puppet   | rspec | bundle exec rspec
 Chef     | rspec | bundle exec rspec
+
+For Terraform, copy the generated code into the main Terraform repo and run the
+tests there as per [instructions](https://github.com/terraform-providers/terraform-provider-google#developing-the-provider).
 
 And refer to the module documentation on how to execute and debug the code or
 tests further.
