@@ -31,6 +31,7 @@ require 'provider/chef/bundle'
 require 'provider/example'
 require 'provider/puppet'
 require 'provider/puppet/bundle'
+require 'provider/terraform'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 catalog = nil
