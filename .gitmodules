@@ -52,3 +52,6 @@
 [submodule "build/ansible"]
 	path = build/ansible
 	url = https://github.com/ansible/ansible.git
+[submodule "build/terraform"]
+	path = build/terraform
+	url = git@github.com:terraform-providers/terraform-provider-google.git
