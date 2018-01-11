@@ -95,6 +95,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
         description: 'Cloud Storage bucket name.'
+        required: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -110,6 +111,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'Unique identifier for the resource.'
+        output: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -120,6 +122,7 @@ objects:
           the first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
+        required: true
   - !ruby/object:Api::Resource
     name: 'BackendService'
     kind: 'compute#backendService'
