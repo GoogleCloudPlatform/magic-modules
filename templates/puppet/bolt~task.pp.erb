@@ -1,0 +1,128 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+#!/bin/bash
+<%= compile 'templates/license.erb' -%>
+
+declare -r puppet='/opt/puppetlabs/bin/puppet'
+declare -r ruby='/opt/puppetlabs/puppet/bin/ruby'
+
+declare -r parser=$(cat <<EOF
+require 'json'
+require 'timeout'
+
+begin
+  Timeout::timeout(3) do
+    puts JSON.parse(STDIN.read).to_json
+  end
+rescue Timeout::Error
+  puts({ status: 'failure', error: "Couldn't read from stdin" }.to_json)
+rescue Exception => e
+  puts({ status: 'failure', error: e.message }.to_json)
+end
+EOF
+)
+
+declare -r input="$(${ruby} -e "${parser}")"
+declare -r run_log="$(mktemp /tmp/bolt-run-XXXXXX)"
+
+if [[ $input =~ status.*failure ]]; then
+  echo "${input}"
+  exit 1
+fi
+
+declare puppet_args
+[[ $BOLT_VERBOSE -ne 1 ]] || puppet_args="${puppet_args} --verbose"
+[[ $BOLT_DEBUG -ne 1 ]] || puppet_args="${puppet_args} --debug"
+readonly puppet_args
+
+trap "rm '${run_log}'" TERM EXIT
+
+$puppet apply ${puppet_args} 1>${run_log} 2>&1 <<EOF
+# <%= task.description_display %>
+#
+# Command line arguments: JSON object from STDIN with the following fields:
+#
+<% task.arguments.each do |arg| -%>
+# - <%= arg.name -%>: <%= arg.description_display %>
+<% end # task.arguments.each -%>
+
+# Load parameters provided by task executor
+\$params = gcompute_task_load_params('${input}')
+
+# Validate and parse user input parameters
+<%=
+  lines(task.arguments.map do |arg|
+    f_name = arg.name == 'name' ? '_name' : arg.name
+    if arg.default?
+      format(
+        [
+          [
+            (wrap_field(arg.comment, 4).split("\n").map { |c| "# #{c.strip}" } \
+               unless arg.comment.nil?),
+            ["\\$#{f_name} = #{@api.prefix}_task_validate_param(",
+             ['\\$params', quote_string(arg.name),
+              quote_string(arg.default.code.to_s.strip)].join(', '),
+             ')'].join
+          ].compact,
+          [
+            (wrap_field(arg.comment, 4).split("\n").map { |c| "# #{c.strip}" } \
+               unless arg.comment.nil?),
+            "\\$#{f_name} = #{@api.prefix}_task_validate_param(",
+            indent(
+              ['\\$params', quote_string(arg.name),
+               quote_string(arg.default.code.to_s.strip)].join(', '), 2),
+            ')'
+          ].compact
+        ]
+      )
+    else
+      format(
+        [
+          [
+            (wrap_field(arg.comment, 4).split("\n").map { |c| "# #{c.strip}" } \
+               unless arg.comment.nil?),
+            ["\\$#{f_name} = ",
+             "#{@api.prefix}_task_validate_param(\\$params, '#{arg.name}', ",
+             quote_string(Provider::Puppet::BOLT_UNDEF_MAGIC), ')'].join
+          ].compact,
+          [
+            (wrap_field(arg.comment, 4).split("\n").map { |c| "# #{c.strip}" } \
+               unless arg.comment.nil?),
+            "\\$#{f_name} = #{@api.prefix}_task_validate_param(",
+            indent([
+                     "\\$params", quote_string(arg.name),
+                     quote_string(Provider::Puppet::BOLT_UNDEF_MAGIC)
+                   ].join(', '), 2),
+            ')'
+          ].compact
+        ]
+      )
+    end
+  end)
+-%>
+<%=
+  lines(compile(task.manifest).gsub('$', '\\$').gsub('\${input}', '${input}'))
+-%>
+EOF
+
+declare -r success_line=$(grep 'Notice:.*task:success.*define.*as' "${run_log}")
+if [[ ! -z ${success_line} ]]; then
+<%= lines(indent(task.code, 2)) -%>
+  exit 0
+else
+  echo "{ \"status\": \"failure\" }"
+  [[ $BOLT_VERBOSE -ne 1 ]] || cat "${run_log}"
+  exit 1
+fi

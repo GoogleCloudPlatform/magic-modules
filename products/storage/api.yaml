@@ -1,0 +1,317 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Google Cloud Storage
+prefix: gstorage
+base_url: https://www.googleapis.com/storage/v1/
+scopes:
+  - https://www.googleapis.com/auth/devstorage.full_control
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Bucket'
+    kind: 'storage#bucket'
+    base_url: b?project={{project}}
+    self_link: b/{{name}}?projection=full
+    exports:
+      - name
+    description: |
+      The Buckets resource represents a bucket in Google Cloud Storage. There is
+      a single global namespace shared by all buckets. For more information, see
+      Bucket Name Requirements.
+
+      Buckets contain objects which can be accessed by their own methods. In
+      addition to the acl property, buckets contain bucketAccessControls, for
+      use in fine-grained manipulation of an existing bucket's access controls.
+
+      A bucket is always owned by the project team owners group.
+    properties:
+      - !ruby/object:Api::Type::Array
+        name: 'acl'
+        item_type: Api::Type::String
+        description: 'Access controls on the bucket.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+<%= indent(compile('products/storage/bucket_access_control.yaml'), 12) %>
+      - !ruby/object:Api::Type::Array
+        name: 'cors'
+        description: |
+          The bucket's Cross-Origin Resource Sharing (CORS) configuration.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'maxAgeSeconds'
+              description: |
+                The value, in seconds, to return in the Access-Control-Max-Age
+                header used in preflight responses.
+            - !ruby/object:Api::Type::Array
+              name: 'method'
+              description: |
+                The list of HTTP methods on which to include CORS response
+                headers, (GET, OPTIONS, POST, etc) Note: "*" is permitted in the
+                list of methods, and means "any method".
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'origin'
+              description: |
+                The list of Origins eligible to receive CORS response headers.
+                Note: "*" is permitted in the list of origins, and means "any
+                Origin".
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Array
+              name: 'responseHeader'
+              description: |
+                The list of HTTP headers other than the simple response headers
+                to give permission for the user-agent to share across domains.
+              item_type: Api::Type::String
+      # TODO(nelsonjr): Implement default object ACL. To be implemented when
+      # ObjectAccessControl is implemented.
+      #- !ruby/object:Api::Type::Array
+      #  name: 'defaultObjectAcl'
+      #  item_type: Api::Type::NestedObject
+      #  description: |
+      #    Default access controls to apply to new objects when no ACL is
+      #    provided.
+      #  input: true
+      #  properties:
+      # | 'etag' is not applicable for state convergene.
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: |
+          The ID of the bucket. For buckets, the id and name properities are the
+          same.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'lifecycle'
+        description: |
+          The bucket's lifecycle configuration.
+
+          See https://developers.google.com/storage/docs/lifecycle for more
+          information.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'rule'
+            description: |
+              A lifecycle management rule, which is made of an action to take
+              and the condition(s) under which the action will be taken.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'action'
+                  description: 'The action to take.'
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'storageClass'
+                      description: |
+                        Target storage class. Required iff the type of the
+                        action is SetStorageClass.
+                    - !ruby/object:Api::Type::Enum
+                      name: 'type'
+                      description: |
+                        Type of the action. Currently, only Delete and
+                        SetStorageClass are supported.
+                      values:
+                        - 'Delete'
+                        - 'SetStorageClass'
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'condition'
+                  description: |
+                    The condition(s) under which the action will be taken.
+                  properties:
+                    - !ruby/object:Api::Type::Integer
+                      name: 'ageDays'
+                      field: 'age'
+                      description: |
+                        Age of an object (in days). This condition is satisfied
+                        when an object reaches the specified age.
+                    - !ruby/object:Api::Type::Time
+                      name: 'createdBefore'
+                      description: |
+                        A date in RFC 3339 format with only the date part (for
+                        instance, "2013-01-15"). This condition is satisfied
+                        when an object is created before midnight of the
+                        specified date in UTC.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'isLive'
+                      description: |
+                        Relevant only for versioned objects.  If the value is
+                        true, this condition matches live objects; if the value
+                        is false, it matches archived objects.
+                    - !ruby/object:Api::Type::Array
+                      name: 'matchesStorageClass'
+                      description: |
+                        Objects having any of the storage classes specified by
+                        this condition will be matched. Values include
+                        MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, STANDARD,
+                        and DURABLE_REDUCED_AVAILABILITY.
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Integer
+                      name: 'numNewerVersions'
+                      description: |
+                        Relevant only for versioned objects. If the value is N,
+                        this condition is satisfied when there are at least N
+                        versions (including the live version) newer than this
+                        version of the object.
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: |
+          The location of the bucket. Object data for objects in the bucket
+          resides in physical storage within this region. Defaults to US. See
+          the developer's guide for the authoritative list.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'logging'
+        description: |
+          The bucket's logging configuration, which defines the destination
+          bucket and optional name prefix for the current bucket's logs.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'logBucket'
+            description: |
+              The destination bucket where the current bucket's logs should be
+              placed.
+          - !ruby/object:Api::Type::String
+            name: 'logObjectPrefix'
+            description: 'A prefix for log object names.'
+      - !ruby/object:Api::Type::Integer
+        name: 'metageneration'
+        description: 'The metadata generation of this bucket.'
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'The name of the bucket'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'owner'
+        description: |
+          The owner of the bucket. This is always the project team's owner
+          group.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'entity'
+            description: 'The entity, in the form project-owner-projectId.'
+          - !ruby/object:Api::Type::String
+            name: 'entityId'
+            description: 'The ID for the entity.'
+            output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'projectNumber'
+        description: 'The project number of the project the bucket belongs to.'
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'storageClass'
+        description: |
+          The bucket's default storage class, used whenever no storageClass is
+          specified for a newly-created object. This defines how objects in the
+          bucket are stored and determines the SLA and the cost of storage.
+          Values include MULTI_REGIONAL, REGIONAL, STANDARD, NEARLINE, COLDLINE,
+          and DURABLE_REDUCED_AVAILABILITY. If this value is not specified when
+          the bucket is created, it will default to STANDARD. For more
+          information, see storage classes.
+        values:
+          - :MULTI_REGIONAL
+          - :REGIONAL
+          - :STANDARD
+          - :NEARLINE
+          - :COLDLINE
+          - :DURABLE_REDUCED_AVAILABILITY
+      - !ruby/object:Api::Type::Time
+        name: 'timeCreated'
+        description: 'The creation time of the bucket in RFC 3339 format.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'updated'
+        description: 'The modification time of the bucket in RFC 3339 format.'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'versioning'
+        description: "The bucket's versioning configuration."
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              While set to true, versioning is fully enabled for this bucket.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'website'
+        description: |
+          The bucket's website configuration, controlling how the service
+          behaves when accessing bucket contents as a web site. See the Static
+          Website Examples for more information.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'mainPageSuffix'
+            description: |
+              If the requested object path is missing, the service will ensure
+              the path has a trailing '/', append this suffix, and attempt to
+              retrieve the resulting object. This allows the creation of
+              index.html objects to represent directory pages.
+          - !ruby/object:Api::Type::String
+            name: 'notFoundPage'
+            description: |
+              If the requested object path is missing, and any mainPageSuffix
+              object is missing, if applicable, the service will return the
+              named object from this bucket as the content for a 404 Not Found
+              result.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'project'
+        description: 'A valid API project identifier.'
+        input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'predefinedDefaultObjectAcl'
+        description: |
+          Apply a predefined set of default object access controls to this
+          bucket.
+
+          Acceptable values are:
+            - "authenticatedRead": Object owner gets OWNER access, and
+              allAuthenticatedUsers get READER access.
+            - "bucketOwnerFullControl": Object owner gets OWNER access, and
+              project team owners get OWNER access.
+            - "bucketOwnerRead": Object owner gets OWNER access, and project
+              team owners get READER access.
+            - "private": Object owner gets OWNER access.
+            - "projectPrivate": Object owner gets OWNER access, and project team
+              members get access according to their roles.
+            - "publicRead": Object owner gets OWNER access, and allUsers get
+              READER access.
+        values:
+          - :authenticatedRead
+          - :bucketOwnerFullControl
+          - :bucketOwnerRead
+          - :private
+          - :projectPrivate
+          - :publicRead
+        input: true
+  - !ruby/object:Api::Resource
+    name: 'BucketAccessControl'
+    kind: 'storage#bucketAccessControl'
+    base_url: b/{{bucket}}/acl
+    self_link: b/{{bucket}}/acl/{{entity}}
+    description: |
+      The BucketAccessControls resource represents the Access Control Lists
+      (ACLs) for buckets within Google Cloud Storage. ACLs let you specify who
+      has access to your data and to what extent.
+
+      There are three roles that can be assigned to an entity:
+
+      READERs can get the bucket, though no acl property will be returned, and
+      list the bucket's objects.  WRITERs are READERs, and they can insert
+      objects into the bucket and delete the bucket's objects.  OWNERs are
+      WRITERs, and they can get the acl property of a bucket, update a bucket,
+      and call all BucketAccessControls methods on the bucket.  For more
+      information, see Access Control, with the caveat that this API uses
+      READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
+    properties:
+<%= indent(compile('products/storage/bucket_access_control.yaml'), 6) %>
+  # | - !ruby/object:Api::Resource
+  # |   name: 'ObjectAccessControl'
+  # TODO(nelsonjr): Update Bucket defaultObjectAcl once ObjectAccessControl is
+  # implemented

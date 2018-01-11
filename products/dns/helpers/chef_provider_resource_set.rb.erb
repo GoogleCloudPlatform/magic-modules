@@ -1,0 +1,69 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+def updated_record
+  {
+    kind: 'dns#resourceRecordSet',
+    name: @new_resource.rrs_label,
+    type: @new_resource.type,
+    ttl: @new_resource.ttl.nil? ? 900 : @new_resource.ttl,
+    rrdatas: @new_resource.target
+  }
+end
+
+# Wraps the SOA resource to fetch from DNS API
+class SOAResource
+  extend Forwardable
+
+  attr_reader :name
+  attr_reader :type
+
+  alias rrs_label name
+
+  def_delegators :@resource, :ttl, :target
+  def_delegators :@resource, :managed_zone, :project, :credential
+  def_delegators :@resource, :resources
+
+  def initialize(args)
+    @name = args[:name] || (raise 'Missing "name"')
+    @type = args[:type] || (raise 'Missing "type"')
+    @resource = SimpleDelegator.new(args[:resource]) \
+      || (raise 'Missing "resource"')
+  end
+end
+
+def unwrap_resource(result, resource)
+  self.class.unwrap_resource(result, resource)
+end
+
+def self.unwrap_resource(result, _resource)
+  # DNS service already did server-side filtering.
+  result.first
+end
+
+def prefetch_soa_resource
+  resource = SOAResource.new(
+    type: 'SOA',
+    name: "#{rrs_label.split('.').drop(1).join('.')}.",
+    resource: @new_resource
+  )
+  result = fetch_wrapped_resource(resource, 'dns#resourceRecordSet',
+                                  'dns#resourceRecordSetsListResponse',
+                                  'rrsets')
+  if result.nil?
+    raise ['Google DNS Managed Zone ', "'#{resource.managed_zone}'",
+           'recipe not found.'].join(' ')
+  end
+  result
+end

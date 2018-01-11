@@ -1,0 +1,92 @@
+<%
+  title_name = 'title_eq_name'
+  title_name = 'title_and_name' if has_name
+  config_path = %w[absent exists] + ['success', title_name]
+
+  # Build out a graph of objects.
+  # This graph, including the current object, will be stored in a
+  # TestObjects instance.
+  collector = Dependencies::DependencyGraph.new(@data_gen)
+  collector.add(object, 0, (name ? :name : :title), action: ':delete')
+
+  # Generate the Chef catalog using the graph of objects above.
+  # This manifest will be ordered by dependencies.
+  resources = catalogger.generate_all_objects(collector, object.name,
+                                              has_name ? :name : :title,
+                                              action: ':delete')
+
+  # Creates the expect_network_* statements required for this test.
+  # This includes the expect statements for all referenced resources.
+  expectations = prop_data.delete_before_data(tests, object,
+                                              {
+                                                path: config_path + %w[before],
+                                                exists: true,
+                                                has_name: has_name
+                                               }, collector)
+
+  resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
+-%>
+before do
+<%=
+  lines(indent(expectations, 2))
+-%>
+end
+
+let(:runner) do
+  # This path ensures that the current cookbook is
+  # loaded for testing.
+  # This path will load all other cookbooks in the
+  # parent directory.
+  # Under most circumstances, this will include the
+  # real google-gauth cookbook.
+  parent_dir = File.join(File.dirname(__FILE__), '..', '..')
+  cookbook_paths = [parent_dir]
+
+  # If there's no real version of the google-gauth ,
+  # add in the mocked version so that the tests do not fail.
+  # Since cookbooks can have any name, we assume that
+  # any directory with the word auth is the google-gauth cookbook.
+  if Dir.entries(parent_dir).select { |p| p.include? 'auth' }.empty?
+    cookbook_paths << File.join(File.dirname(__FILE__), 'cookbooks')
+  end
+  ChefSpec::SoloRunner.new(
+<%= lines(step_into_list(object, 4, 10)) -%>
+    cookbook_path: cookbook_paths,
+    platform: 'ubuntu',
+    version: '16.04'
+  )
+end
+
+let(:chef_run) do
+  apply_recipe(
+    <<-MANIFEST
+<%= lines(indent(resource_block, 6)) -%>
+    MANIFEST
+  ) do |recipe_name|
+    runner.converge(recipe_name) do
+      cred = Google::CredentialResourceMock.new('mycred',
+                                                runner.run_context)
+      runner.resource_collection.insert(cred)
+    end
+  end
+end
+
+subject do
+<%
+  find_lines = [
+    "chef_run.find_resource(:#{object.out_name},",
+    "'title0')"
+  ]
+-%>
+<%=
+  format([
+    [find_lines[0] + " #{find_lines[1]}"],
+    [find_lines[0], indent(find_lines[1], 24)]
+  ], 2, (test_matrix.level + 1) * 2)
+%>
+end
+
+it 'should run test correctly' do
+  expect(chef_run).to delete(:<%= object.out_name -%>,
+                             'title0')
+end
