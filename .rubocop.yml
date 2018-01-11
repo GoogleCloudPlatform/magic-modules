@@ -1,0 +1,28 @@
+AllCops:
+  Exclude:
+    - 'build/**/*'
+    # We do not validate the templates as they will have code that will only be
+    # properly formatted when compiled for the target module. These files should
+    # be checked in their final generated form.
+    - 'products/**/files/*'
+    - 'templates/**/*'
+
+Metrics/AbcSize:
+  Max: 20
+
+# TODO(nelsonjr): Refactor this class and remove Rubocop exemptions below
+Metrics/ClassLength:
+  Exclude:
+    - 'provider/core.rb'
+    - 'provider/puppet.rb'
+    - 'provider/legacy_test_data_formatter.rb'
+    # TODO(alexstephen): Remove this when generate_object is removed
+    - 'provider/chef.rb'
+    - 'tests/end2end/tester_base.rb'
+
+Metrics/MethodLength:
+  Max: 15
+
+Security/Eval:
+  Exclude:
+    - 'provider/legacy_test_data_generator.rb'

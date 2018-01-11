@@ -1,0 +1,125 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<%= compile 'templates/license.erb' -%>
+
+<%= compile 'templates/autogen_notice.erb' -%>
+
+# Put files/directories that should be ignored in this file when uploading
+# to a chef-server or supermarket.
+# Lines that start with '# ' are comments.
+
+# OS generated files #
+######################
+.DS_Store
+Icon?
+nohup.out
+ehthumbs.db
+Thumbs.db
+
+# SASS #
+########
+.sass-cache
+
+# EDITORS #
+###########
+\#*
+.#*
+*~
+*.sw[a-z]
+*.bak
+REVISION
+TAGS*
+tmtags
+*_flymake.*
+*_flymake
+*.tmproj
+.project
+.settings
+mkmf.log
+
+## COMPILED ##
+##############
+a.out
+*.o
+*.pyc
+*.so
+*.com
+*.class
+*.dll
+*.exe
+*/rdoc/
+
+# Testing #
+###########
+.watchr
+.rspec
+spec/*
+spec/fixtures/*
+test/*
+features/*
+examples/*
+Guardfile
+Procfile
+.kitchen*
+.rubocop.yml
+spec/*
+Rakefile
+.travis.yml
+.foodcritic
+.codeclimate.yml
+
+# SCM #
+#######
+.git
+*/.git
+.gitignore
+.gitmodules
+.gitconfig
+.gitattributes
+.svn
+*/.bzr/*
+*/.hg/*
+*/.svn/*
+
+# Berkshelf #
+#############
+Berksfile
+Berksfile.lock
+cookbooks/*
+tmp
+
+# Policyfile #
+##############
+Policyfile.rb
+Policyfile.lock.json
+
+# Cookbooks #
+#############
+CONTRIBUTING*
+CHANGELOG*
+TESTING*
+MAINTAINERS.toml
+
+# Strainer #
+############
+Colanderfile
+Strainerfile
+.colander
+.strainer
+
+# Vagrant #
+###########
+.vagrant
+Vagrantfile

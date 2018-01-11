@@ -1,0 +1,527 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<%= compile 'templates/license.erb' -%>
+
+<%= compile 'templates/autogen_notice.erb' -%>
+
+<%
+  inside_indent = 2
+
+  upd_method = Google::HashUtils.navigate(config, %w[methods update])
+
+  requires = generate_requires(object.all_user_properties)
+  requires << 'google/hash_utils'
+  requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'get')
+  requires << 'puppet'
+  unless object.exports.nil?
+    requires << 'google/object_store'
+  end
+  unless object.readonly
+    requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'delete')
+    requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'post')
+    requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'put')
+  end
+  unless upd_method.nil?
+    requires << emit_google_lib(binding, Compile::Libraries::NETWORK,
+                                upd_method.downcase)
+  end
+
+  custom_requires = Google::HashUtils.navigate(config, %w[requires])
+  unless custom_requires.nil?
+    requires << custom_requires
+  end
+-%>
+<%= lines(emit_requires(requires)) -%>
+
+<% Google::LOGGER.info "Generating #{object.name}: #{object.out_name}" -%>
+Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
+  mk_resource_methods
+
+<%
+  input_only = object.properties.select(&:input)
+  has_input = !input_only.empty?
+-%>
+<%= lines(get_code_multiline(config, 'attributes')) -%>
+  def self.instances
+    debug('instances')
+    raise [
+      '"puppet resource" is not supported at the moment:',
+      'TODO(nelsonjr): https://goto.google.com/graphite-bugs-view?id=167'
+    ].join(' ')
+  end
+
+  def self.prefetch(resources)
+    debug('prefetch')
+    resources.each do |name, resource|
+<% custom_prefetch = get_code_multiline config, 'prefetch' -%>
+<% if custom_prefetch.nil? -%>
+      project = resource[:project]
+      debug("prefetch #{name}") if project.nil?
+      debug("prefetch #{name} @ #{project}") unless project.nil?
+<% if object.self_link_query.nil? -%>
+<%=
+  lines(format(
+    [
+      ('fetch = fetch_resource(resource, self_link(resource))' \
+       unless object.kind?),
+      ['fetch = fetch_resource(resource, self_link(resource),',
+       "'#{object.kind}')"].join(' '),
+      [
+        'fetch = fetch_resource(resource, self_link(resource),',
+        indent("'#{object.kind}')", 23) # 23 = align previous until (
+      ]
+    ].compact, 6
+  ))
+-%>
+<% else -%>
+<%
+  self_link_kind = !object.self_link_query.kind.nil? ? \
+  "'#{object.self_link_query.kind}'," : ''
+
+  obj_kind = object.kind? ? "'#{object.kind}'," : ''
+-%>
+<%=
+  lines(format(
+    [
+      ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
+       "#{self_link_kind}",
+       "'#{object.self_link_query.items}')"].join(' '),
+      [
+        ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
+         "#{self_link_kind}"].join(' '),
+        indent([
+          "'#{object.self_link_query.items}')"
+        ], 31) # 31 = align with ( previous line
+      ],
+      [
+        "fetch = fetch_wrapped_resource(resource, #{obj_kind}",
+        indent([
+          "#{self_link_kind}",
+          "'#{object.self_link_query.items}')"
+        ], 31) # 31 = align with ( previous line
+      ]
+    ], 6
+  ))
+-%>
+<% end -%>
+<% if has_input -%>
+      resource.provider = present(name, fetch, resource) unless fetch.nil?
+<% else # has_input -%>
+      resource.provider = present(name, fetch) unless fetch.nil?
+<% end # has_input -%>
+<% unless object.exports.nil? -%>
+      Google::ObjectStore.instance.add(:<%= object.out_name -%>, resource)
+<% end -%>
+<% else # custom_prefetch.nil? -%>
+<%= lines(indent(custom_prefetch, 6)) -%>
+<% end # custom_prefetch.nil? -%>
+    end
+  end
+
+<%
+  assigns =
+    object.properties.reject(&:input).map do |prop|
+      name = prop.out_name
+      api_name = prop.name
+      type = prop.property_type
+      if api_name.include?('.')
+        fetch_tree = api_name.split('.').join(' ')
+        format([
+          [
+            "#{name}: #{type}.api_munge(",
+            indent("Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])", 2),
+            ')'
+          ],
+          [
+            "#{name}: \\",
+            "#{type}.api_munge(",
+            indent("Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])", 2),
+            ')'
+          ]
+        ], 0, 7)
+      else
+        format([
+          ["#{name}: #{type}.api_munge(fetch['#{prop.field_name}'])"],
+          [
+            "#{name}:",
+            indent("#{type}.api_munge(fetch['#{prop.field_name}'])", 2)
+          ],
+          [
+            "#{name}: #{type}.api_munge(",
+            indent("fetch['#{prop.field_name}']", 2),
+            ')',
+          ],
+          [
+            "#{name}:",
+            indent(["#{type}.api_munge(",
+                    indent("fetch['#{prop.field_name}']", 2),
+                    ')'], 2)
+          ]
+        ], 0, 7) # 6 spaces = indent, 1 space = trailing comma (it's a list)
+      end
+    end
+  assigns.concat(input_only.map do |prop|
+                   "#{prop.out_name}: resource[:#{prop.out_name}]"
+                 end)
+  present_code = [
+    if has_input
+      [
+        'result = new(',
+        indent(
+          ['{ title: name,', ' ',
+           'ensure: :present }.merge(fetch_to_hash(fetch, resource))'].join, 2
+        ),
+        ')'
+      ]
+    else
+      ['result = new({ title: name,',
+       'ensure: :present }.merge(fetch_to_hash(fetch)))'].join(' ')
+    end,
+    ('result.instance_variable_set(:@fetched, fetch)' if \
+       save_api_results?(config, object)),
+    'result'
+  ].compact
+  f2h_code = [
+    '{',
+    indent_list(assigns, 2),
+    '}.reject { |_, v| v.nil? }',
+  ]
+-%>
+<% custom_present = get_code_multiline config, 'present' -%>
+<% if custom_present.nil? -%>
+<%=
+  lines(indent(emit_method('self.present',
+                           has_input ? %w[name fetch resource] : %w[name fetch],
+                           present_code, file_relative), 2), 1)
+-%>
+<% else -%>
+<%= lines(indent(custom_present, 2)) -%>
+<% end -%>
+<%=
+  lines(indent(emit_method('self.fetch_to_hash',
+                           has_input ? %w[fetch resource] : %w[fetch],
+                           f2h_code, file_relative), 2), 1)
+-%>
+<%= lines(get_code_multiline(config, 'constructor')) -%>
+<% unless object.virtual -%>
+  def exists?
+    debug("exists? #{@property_hash[:ensure] == :present}")
+    @property_hash[:ensure] == :present
+  end
+
+<%
+  # TODO(nelsonjr): Investigate if we can have a timeout to wait for operations
+  # that we did not start to complete. For example if you start a firewall
+  # change via Developer Console and attempt to apply the manifest you get:
+  #
+  # Error: /Stage[main]/Main/Gcompute_firewall[test-firewall-allow-ssh]: Could
+  # not evaluate: Operation failed: The resource
+  # 'projects/google.com:graphite-playground/global/firewalls/....'
+  # is not ready
+-%>
+  def create
+    debug('create')
+    @created = true
+<% custom_create = get_code_multiline config, 'create' -%>
+<% if custom_create.nil? -%>
+<%
+  if object.create_verb.nil? || object.create_verb == :POST
+    body_new = 'collection(@resource)'
+    request_new = "Google::#{product_ns}::Network::Post.new"
+  elsif object.create_verb == :PUT
+    body_new = 'self_link(@resource)'
+    request_new = "Google::#{product_ns}::Network::Put.new"
+  end
+
+  request_patch = get_code_multiline config, 'resource_create_patch'
+  custom_resource = true?(Google::HashUtils.navigate(
+    config, %w[provider_helpers custom_create_resource]
+  ))
+-%>
+<%=
+  lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
+    indent([
+      'fetch_auth(@resource)',
+      "'application/json'",
+      "#{custom_resource ? 'resource_to_create' : 'resource_to_request'})"
+    ], request_new.length + 14).split("\n") # 14 = 'create_req = ' + '('
+  ), 4))
+-%>
+<% fetch_assign = save_api_results?(config, object) ? '@fetched = ' : '' -%>
+<% unless object.async -%>
+<% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
+    <%= fetch_assign -%>return_if_object create_req.send<%= obj_kind %>
+<% else -%>
+    <%= fetch_assign -%>wait_for_operation create_req.send, @resource
+<% end -%>
+<% else -%>
+<%= lines(indent(custom_create, 4)) -%>
+<% end -%>
+    @property_hash[:ensure] = :present
+  end
+
+  def destroy
+    debug('destroy')
+    @deleted = true
+<% custom_delete = get_code_multiline config, 'delete' -%>
+<% if custom_delete.nil? -%>
+<%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
+<%=
+  lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
+    indent([
+      'fetch_auth(@resource))'
+    ], dele_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
+  ), 4))
+-%>
+<% kind_param = object.kind? ? ", '#{object.kind}'" : '' -%>
+<% unless object.async -%>
+    return_if_object delete_req.send<%= kind_param %>
+<% else -%>
+    wait_for_operation delete_req.send, @resource
+<% end -%>
+<% else -%>
+<%= lines(indent(custom_delete, 4)) -%>
+<% end -%>
+    @property_hash[:ensure] = :absent
+  end
+
+<% end -%>
+  def flush
+    debug('flush')
+<% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
+    # return on !@dirty is for aiding testing (puppet already guarantees that)
+    return if @created || @deleted || !@dirty
+<% custom_flush = get_code_multiline config, 'flush' -%>
+<%
+   if custom_flush.nil?
+     put_new = if upd_method.nil?
+                 "Google::#{product_ns}::Network::Put.new"
+               else
+                 "Google::#{product_ns}::Network::#{upd_method.capitalize}.new"
+               end
+    custom_resource = true?(Google::HashUtils.navigate(
+      config, %w[provider_helpers custom_update_resource]
+    ))
+-%>
+<%=
+  lines(indent_list(["update_req = #{put_new}(self_link(@resource)"].concat(
+    indent([
+      'fetch_auth(@resource)',
+      "'application/json'",
+      "#{custom_resource ? 'resource_to_update' : 'resource_to_request'})"
+    ], put_new.length + 14).split("\n") # 14 = 'update_req = ' + '('
+  ), 4))
+-%>
+<%   if object.async -%>
+    <%= fetch_assign -%>wait_for_operation update_req.send, @resource
+<%   else # object.async -%>
+  <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
+  <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
+<%   end # object.async -%>
+<% else # custom_flush.nil? -%>
+<%= lines(indent(custom_flush, 4)) -%>
+<% end # custom_flush.nil? -%>
+  end
+
+  def dirty(field, from, to)
+    @dirty = {} if @dirty.nil?
+    @dirty[field] = {
+      from: from,
+      to: to
+    }
+  end
+
+<% unless object.exports.nil? -%>
+<%
+  exp_list = [
+    '{',
+    indent_list(object.exported_properties.map do |p|
+      if p.is_a?(Api::Type::FetchedExternal)
+        "#{p.out_name}: @fetched['#{p.field_name}']"
+      else
+        "#{p.out_name}: resource[:#{p.out_name}]"
+      end
+    end, 2),
+    '}'
+  ]
+-%>
+<%= lines(indent(emit_method('exports', [], exp_list, file_relative), 2), 1) -%>
+<% end -%>
+  private
+<%
+  all_props = object.all_user_properties
+  has_boolean = !all_props.select{ |o| o.is_a?(Api::Type::Boolean) }.empty?
+-%>
+<% if has_boolean -%>
+
+  # Hashes have :true or :false which to_json converts to strings
+  def sym_to_bool(value)
+    if value == :true
+      true
+    elsif value == :false
+      false
+    else
+      value
+    end
+  end
+<% end -%>
+<%
+  all_properties = object.all_user_properties
+  has_project_property = \
+     !object.all_user_properties.select { |o| o.name == 'project' }.empty?
+  project_arg = has_project_property ? [] : ['project: resource[:project]']
+  r2h_code = [
+    '{',
+    indent_list(project_arg.concat([
+      'name: resource[:name]',
+      ("kind: '#{object.kind}'" if object.kind?)
+    ]).concat(all_properties.select { |p| p.name != 'name' }.map do |prop|
+      format([
+        ["#{prop.out_name}: resource[:#{prop.out_name}]"],
+        [
+          "#{prop.out_name}:",
+          indent("resource[:#{prop.out_name}]", 2)
+        ]
+      ], 0, 4)
+    end).compact, 2),
+    '}.reject { |_, v| v.nil? }'
+  ]
+-%>
+
+<%=
+  lines(indent(emit_method('self.resource_to_hash', %w[resource], r2h_code,
+                           file_relative), 2), 1)
+-%>
+<% unless false?(Google::HashUtils.navigate(config,
+                                            %w[provider_helpers visible
+                                               resource_to_request])) -%>
+<%
+  prop_code = []
+  prop_code << "kind: '#{object.kind}'" if object.kind?
+  prop_code.concat(
+    object.properties.select { |p| !p.output }
+                     .map do |prop|
+                       "#{prop.field_name}: @resource[:#{prop.out_name}]"
+                     end
+  )
+  prop_code.concat(
+    (object.parameters || [])
+      .select { |p| p.input }
+      .map do |prop|
+        "#{prop.field_name}: @resource[:#{prop.out_name}]"
+      end
+  )
+
+  r2r_code = []
+  if prop_code.empty?
+    r2r_code << 'request = {}'
+  else
+    r2r_code << 'request = {'
+    r2r_code << indent_list(prop_code, 2)
+    r2r_code << '}.reject { |_, v| v.nil? }'
+  end
+
+  if has_boolean
+    r2r_code << ''
+    r2r_code << '# Convert boolean symbols into JSON compatible value.'
+    r2r_code << ['request = request.inject({})',
+                 '{ |h, (k, v)| h.merge(k => sym_to_bool(v)) }'].join(' ')
+    r2r_code << ''
+  end
+
+  resource_to_request_patch = get_code_multiline config,
+                                                 'resource_to_request_patch'
+  unless resource_to_request_patch.nil?
+    r2r_code << '' unless has_boolean
+    r2r_code << resource_to_request_patch
+    r2r_code << ''
+  end # resource_to_request_patch.nil?
+
+  if object.encoder?
+    r2r_code << '# Format request to conform with API endpoint'
+    r2r_code << "request = #{object.transport.encoder}(request)"
+  end
+
+  r2r_code \
+    << 'debug "request: #{request}" unless ENV[\'PUPPET_HTTP_DEBUG\'].nil?'
+  r2r_code << 'request.to_json'
+-%>
+<%= lines(indent(emit_method('resource_to_request', [], r2r_code,
+                             file_relative), 2), 1) -%>
+<% end # visible:resource_to_request -%>
+<%
+  unless false?(Google::HashUtils.navigate(config,
+                                           %w[provider_helpers visible
+                                              unwrap_resource]))
+    unless object.self_link_query.nil?
+-%>
+<%
+  urf_code = [
+    '{',
+    indent_list(
+      Hash[object.identity.map { |i| [i, "resource[:#{i.out_name}]"] }]
+        .map { |k, v| "#{k.out_name}: #{v}" }, 2
+    ),
+    '}'
+  ]
+-%>
+  def unwrap_resource_filter(resource)
+    self.class.unwrap_resource_filter(resource)
+  end
+
+<%= lines(indent(emit_method('self.unwrap_resource_filter', %w[resource],
+                             urf_code, file_relative), 2), 1) -%>
+<%   end # unless object.self_link_query.nil? -%>
+<% end # visible:unwrap_resource -%>
+  def fetch_auth(resource)
+    self.class.fetch_auth(resource)
+  end
+
+  def self.fetch_auth(resource)
+    Puppet::Type.type(:gauth_credential).fetch(resource)
+  end
+
+  def debug(message)
+    puts("DEBUG: #{message}") if ENV['PUPPET_HTTP_VERBOSE']
+    super(message)
+  end
+
+<% custom_collection = get_code_multiline config, 'collection' -%>
+<% if custom_collection.nil? -%>
+<%= lines(indent(emit_link('collection', collection_url(object), true), 2)) %>
+<% else # custom_collection.nil? -%>
+<%= lines(indent(emit_link('collection', custom_collection, true), 2)) %>
+<% end # custom_collection.nil? -%>
+<% custom_self_link = get_code_multiline config, 'self_link' -%>
+<% if custom_self_link.nil? -%>
+<%= lines(indent(emit_link('self_link', self_link_url(object), true), 2), 1) -%>
+<% else # custom_self_link.nil? -%>
+<%= lines(indent(emit_link('self_link', custom_self_link, true), 2), 1) -%>
+<% end # custom_self_link.nil? -%>
+<% custom_return_if_object = get_code_multiline config, 'return_if_object' -%>
+<% if custom_return_if_object.nil? -%>
+<%= lines(indent(compile('templates/return_if_object.erb'), 2)) %>
+<% else # custom_return_if_object.nil? -%>
+<%= lines(indent(custom_return_if_object, 2), 1) -%>
+<% end # custom_return_if_object.nil? -%>
+<%= lines(indent(compile('templates/expand_variables.erb'), 2)) %>
+<%=
+  if object.async
+    lines(indent(compile('templates/async.erb'), inside_indent), 1)
+  end
+-%>
+<%= lines(indent(compile('templates/provider_helpers.erb'), 2), 1) -%>
+<%= lines(indent(compile('templates/transport.erb'), 2)) -%>
+end

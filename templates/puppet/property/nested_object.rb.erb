@@ -1,0 +1,246 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<%
+  def emit_parse_assignment(prop, method, source)
+    parser = [prop.property_type, method].join('.')
+    format(
+      [
+        ["@#{prop.out_name} = #{parser}(args['#{source}'])"],
+        [
+          "@#{prop.out_name} =",
+          indent("#{parser}(args['#{source}'])", 2)
+        ],
+        [
+          "@#{prop.out_name} = #{parser}(",
+          indent("args['#{source}']", 2),
+          ')'
+        ],
+        [
+          "@#{prop.out_name} =",
+          indent([
+            "#{parser}(",
+            indent("args['#{source}']", 2),
+            ')'
+          ], 2)
+        ]
+      ], 0, 10
+    )
+  end
+-%>
+<%= compile('templates/license.erb') -%>
+
+<%= compile 'templates/autogen_notice.erb' -%>
+
+<% if emit_array -%>
+require 'google/<%= prop_ns_dir -%>/property/array'
+<% end -%>
+require 'puppet/property'
+
+module Google
+  module <%= product_ns %>
+    module Data
+<%= lines(indent(
+      emit_rubocop(binding, :class,
+                   ['Google', product_ns, 'Data', class_name].join('::'),
+                   :disabled),
+      6)) -%>
+<%=
+  lines(format([
+    ["# A class to manage data for #{field} for #{obj_name}."],
+    [
+      "# A class to manage data for #{field} for",
+      "# #{obj_name}."
+    ]
+  ], 6))
+-%>
+      class <%= class_name %>
+        include Comparable
+
+<% if !nested_properties.empty? -%>
+<% nested_properties.each do |prop| -%>
+        attr_reader :<%= prop.out_name %>
+<% end # nested_properties.each -%>
+
+<% end # if !nested_properties.empty? -%>
+<%
+  prop_to_json = []
+  prop_to_s = []
+  nested_properties.each do |prop|
+    prop_to_json << "'#{prop.field_name}' => #{prop.out_name}"
+    prop_to_s <<
+      if prop.is_a?(Api::Type::Array)
+        if prop.item_type.is_a?(Api::Type::NestedObject)
+          [
+            "#{prop.out_name}: ['[',",
+            indent([
+              "#{prop.out_name}.map(&:to_json).join(', '),",
+              "']'].join(' ')"
+            ], prop.out_name.length + 3), # 3 = ": ["
+          ]
+        elsif prop.item_type.is_a?(::String)
+          "#{prop.out_name}: #{prop.out_name}"
+        else
+          raise "Unknown array type"
+        end
+      else
+        "#{prop.out_name}: #{prop.out_name}"
+      end
+  end
+
+  json_code = []
+  json_code << '{'
+  json_code << indent_list(prop_to_json, 2)
+  json_code << '}.reject { |_k, v| v.nil? }.to_json'
+
+  to_s_code = []
+  to_s_code << '{'
+  to_s_code << indent_list(prop_to_s, 2)
+  to_s_code <<
+    '}.reject { |_k, v| v.nil? }.map { |k, v| "#{k}: #{v}" }.join(\', \')'
+-%>
+<%= lines(indent(emit_method('to_json', ['_arg = nil'], json_code,
+                             file_relative), 8),
+          1) -%>
+<%= lines(indent(emit_method('to_s', %w[], to_s_code, file_relative), 8), 1) -%>
+        def ==(other)
+          return false unless other.is_a? <%= class_name %>
+          compare_fields(other).each do |compare|
+            next if compare[:self].nil? || compare[:other].nil?
+            return false if compare[:self] != compare[:other]
+          end
+          true
+        end
+
+        def <=>(other)
+          return false unless other.is_a? <%= class_name %>
+          compare_fields(other).each do |compare|
+            next if compare[:self].nil? || compare[:other].nil?
+            result = compare[:self] <=> compare[:other]
+            return result unless result.zero?
+          end
+          0
+        end
+
+        private
+
+<%
+  compare_code = []
+  compare_code << '['
+  compare_code << indent_list(nested_properties.map do |prop|
+                                format(
+                                  [
+                                    ["{ self: #{prop.out_name}",
+                                     "other: other.#{prop.out_name} }"]
+                                      .join(', '),
+                                    ['{',
+                                     indent_list([
+                                       "self: #{prop.out_name}",
+                                       "other: other.#{prop.out_name}"
+                                     ], 2),
+                                     '}'
+                                    ]
+                                  ], 0, 12
+                                )
+                              end, 2)
+  compare_code << ']'
+-%>
+<%= lines(indent(emit_method('compare_fields', %w[other], compare_code,
+                             file_relative), 8)) -%>
+      end
+
+      # Manages a <%= class_name -%> nested object
+      # Data is coming from the GCP API
+      class <%= class_name -%>Api < <%= class_name %>
+<%
+  init_code = []
+  init_code.concat(nested_properties.map do |prop|
+                     emit_parse_assignment(prop, 'api_munge', prop.field_name)
+                   end)
+-%>
+<%= lines(indent(emit_method('initialize', %w[args], init_code, file_relative,
+                             class_name: "#{class_name}Api"), 8)) -%>
+      end
+
+      # Manages a <%= class_name -%> nested object
+      # Data is coming from the Puppet manifest
+      class <%= class_name -%>Catalog < <%= class_name %>
+<%
+  init_code = []
+  init_code.concat(nested_properties.map do |prop|
+                     emit_parse_assignment(prop, 'unsafe_munge', prop.out_name)
+                   end)
+-%>
+<%= lines(indent(emit_method('initialize', %w[args], init_code, file_relative,
+                             class_name: "#{class_name}Catalog"), 8)) -%>
+      end
+    end
+
+    module Property
+<%=
+  lines(format([
+    ["# A class to manage input to #{field} for #{obj_name}."],
+    [
+      "# A class to manage input to #{field} for",
+      "# #{obj_name}."
+    ]
+  ], 6))
+-%>
+      class <%= class_name %> < Puppet::Property
+        # Used for parsing Puppet catalog
+        def unsafe_munge(value)
+          self.class.unsafe_munge(value)
+        end
+
+        # Used for parsing Puppet catalog
+        def self.unsafe_munge(value)
+          return if value.nil?
+          Data::<%= class_name %>Catalog.new(value)
+        end
+
+        # Used for parsing GCP API responses
+        def self.api_munge(value)
+          return if value.nil?
+          Data::<%= class_name %>Api.new(value)
+        end
+      end
+<% if emit_array -%>
+
+      # A Puppet property that holds an integer
+      class <%= class_name %>Array < Google::<%= product_ns -%>::Property::Array
+        # Used for parsing Puppet catalog
+        def unsafe_munge(value)
+          self.class.unsafe_munge(value)
+        end
+
+        # Used for parsing Puppet catalog
+        def self.unsafe_munge(value)
+          return if value.nil?
+          return <%= class_name %>.unsafe_munge(value) \
+            unless value.is_a?(::Array)
+          value.map { |v| <%= class_name %>.unsafe_munge(v) }
+        end
+
+        # Used for parsing GCP API responses
+        def self.api_munge(value)
+          return if value.nil?
+          return <%= class_name %>.api_munge(value) \
+            unless value.is_a?(::Array)
+          value.map { |v| <%= class_name %>.api_munge(v) }
+        end
+      end
+<% end # if emit_array -%>
+    end
+  end
+end

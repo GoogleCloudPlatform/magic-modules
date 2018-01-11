@@ -1,0 +1,82 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+#!/opt/puppetlabs/puppet/bin/ruby
+<%= compile 'templates/license.erb' -%>
+
+<%=
+  lines(wrap_field(task.description_display, 0).split("\n")
+                                               .map { |d| "# #{d.strip}" })
+-%>
+#
+# Command line arguments: JSON object from STDIN with the following fields:
+#
+<%=
+  lines(task.arguments.map do |arg|
+    format(
+      [
+        "# - #{arg.name}: #{arg.description_display}",
+        [
+          "# - #{arg.name}:",
+          wrap_field(arg.description, 4).split("\n").map do |d|
+            "#     #{d.strip}"
+          end,
+          "#     (default: #{arg.default.display})"
+        ],
+        [
+          "# - #{arg.name}:",
+          wrap_field(arg.description_display, 4).split("\n").map do |d|
+            "#     #{d.strip}"
+          end
+        ]
+      ]
+    )
+  end) # task.arguments.each
+-%>
+
+<%= @api.prefix[1..-1].upcase -%>_ADM_SCOPES = [
+<%= lines(indent_list(@api.scopes.map { |scope| quote_string(scope) }, 2)) -%>
+].freeze
+
+require 'puppet'
+
+# We want to re-use code already written for the GCP modules
+Puppet.initialize_settings
+
+# Puppet apply does special stuff to load library code stored in modules
+# but that magic is available in Bolt so we emulate it here.  We look in
+# the local user's .puppetlabs directory or if running at "root" we look
+# in the directory where Puppet pluginsyncs to.
+libdir = if Puppet.run_mode.user?
+           Dir["#{Puppet.settings[:codedir]}/modules/*/lib"]
+         else
+           File.path("#{Puppet.settings[:vardir]}/lib").to_a
+         end
+libdir << File.expand_path("#{File.dirname(__FILE__)}/../lib")
+libdir.each { |l| $LOAD_PATH.unshift(l) unless $LOAD_PATH.include?(l) }
+
+<%= lines(emit_requires(task.requires)) -%>
+
+# Validates user input
+def validate(params, arg_id, default = nil)
+  arg = arg_id.id2name
+  raise "Missing parameter '#{arg}' from <%= task.input -%>" \
+    if default.nil? && !params.key?(arg)
+  params.key?(arg) ? params[arg] : default
+end
+
+# Parses and validates user input
+<%= lines(emit_bolt_params_ruby(task)) -%>
+
+<%= lines(task.code) -%>

@@ -1,0 +1,162 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<% if emit_array -%>
+require 'google/<%= prop_ns_dir -%>/property/array'
+<% end -%>
+<%# Requires: resource - name of resource being fetched -%>
+<%#           imports - name of property being fetched -%>
+<%= compile('templates/license.erb') -%>
+
+<%= compile 'templates/autogen_notice.erb' -%>
+
+module Google
+  module <%= product_ns %>
+    module Data
+      # Base class for ResourceRefs
+      # Imports <%= imports -%> from <%= resource %>
+<%=
+  lines(indent(emit_rubocop(binding, :class,
+                            ['Google', product_ns, 'Data',
+                             class_name].join('::'),
+                            :disabled), 6))
+-%>
+      class <%= class_name %>
+        include Comparable
+
+        def ==(other)
+          return false unless other.is_a? <%= class_name %>
+          return false if resource != other.resource
+          true
+        end
+
+        def <=>(other)
+          resource <=> other.resource
+        end
+
+        # Overriding inspect method ensures that Chef logs only the
+        # fetched value to the console
+        def inspect
+          "'#{resource}'"
+        end
+      end
+
+      # A class to fetch the resource value from a referenced block
+      # Will return the value exported from a different Chef resource
+<%=
+  lines(indent(emit_rubocop(binding, :class,
+                            ['Google', product_ns, 'Data',
+                             "#{class_name}Title"].join('::'),
+                            :disabled), 6))
+-%>
+      class <%= class_name %>Catalog < <%= class_name %>
+        def initialize(title)
+          @title = title
+        end
+
+        # Chef requires the title for autorequiring
+        def autorequires
+          [@title]
+        end
+
+        def to_s
+          resource.to_s
+        end
+
+        def to_json(_arg = nil)
+          return if resource.nil?
+          resource.to_json
+        end
+
+        def resource
+<% out_name = property.resource_ref.out_name -%>
+          Chef.run_context.resource_collection.each do |entry|
+            return entry.exports[:<%= imports -%>] if entry.name == @title
+          end
+          raise ArgumentError, "<%= out_name -%>[#{@title}] required"
+        end
+      end
+
+      # A class to manage a JSON blob from GCP API
+      # Will immediately return value from JSON blob without changes
+<%=
+  lines(indent(emit_rubocop(binding, :class,
+                            ['Google', product_ns, 'Data',
+                             "#{class_name}Resource"].join('::'),
+                            :disabled), 6))
+-%>
+      class <%= class_name %>Api < <%= class_name %>
+        attr_reader :resource
+
+        def initialize(resource)
+          @resource = resource
+        end
+
+        def to_s
+          @resource.to_s
+        end
+
+        def to_json(_arg = nil)
+          @resource.to_json
+        end
+      end
+    end
+
+    module Property
+      # A class to manage fetching <%= imports -%> from a <%= resource %>
+      class <%= class_name %>
+<%= emit_coerce(product_ns, class_name, 8) -%>
+        def catalog_parse(value)
+          return if value.nil?
+          self.class.catalog_parse(value)
+        end
+
+        def self.catalog_parse(value)
+          return if value.nil?
+          return value if value.is_a? Data::<%= class_name %>
+          Data::<%= class_name %>Catalog.new(value)
+        end
+
+        # Used for fetched JSON values
+        def self.api_parse(value)
+          return if value.nil?
+          return value if value.is_a? Data::<%= class_name %>
+          Data::<%= class_name %>Api.new(value)
+        end
+      end
+<% if emit_array -%>
+
+      # A Chef property that holds an Array of <%= class_name %>
+      class <%= class_name %>Array < Google::<%= product_ns -%>::Property::Array
+<%= emit_coerce(product_ns, "#{class_name}Array", 8) -%>
+        # Used for parsing Chef catalog
+        def self.catalog_parse(value)
+          return if value.nil?
+          return <%= class_name %>.catalog_parse(value) \
+            unless value.is_a?(::Array)
+          value.map { |v| <%= class_name %>.catalog_parse(v) }
+        end
+
+        # Used for parsing GCP API responses
+        def self.api_parse(value)
+          return if value.nil?
+          return <%= class_name %>.api_parse(value) \
+            unless value.is_a?(::Array)
+          value.map { |v| <%= class_name %>.api_parse(v) }
+        end
+      end
+<% end # if emit_array -%>
+    end
+  end
+end

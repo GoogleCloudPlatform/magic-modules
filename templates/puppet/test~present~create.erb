@@ -1,0 +1,93 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<% inside_indent = (test_matrix.level + 2) * 2 -%>
+<%
+  config_path = if name
+                  %w[present not_exist success title_and_name]
+                else
+                  %w[present not_exist success title_eq_name]
+                end
+
+  # Build out a graph of objects.
+  collector = Dependencies::DependencyGraph.new(@data_gen)
+  collector.add(object, 0, (name ? :name : :title), ensure: 'present')
+
+  # Generate the Puppet manifest using the graph of objects above.
+  # This manifest will be ordered by dependencies.
+  resources = manifester.generate_all_objects(collector, object.name,
+                                              name ? :name : :title,
+                                              ensure: 'present')
+
+
+  # Creates the expect_network_* statements required for this test.
+  # This includes the expect statements for all referenced resources.
+  expect_data = @create_data.create_expect_data(config_path + %w[result],
+                                                name, tests, object)
+  expectations = prop_data.create_before_data(tests, object,
+                                              {
+                                                path: config_path + %w[before],
+                                                has_name: name,
+                                                expected_data: expect_data
+                                              }, collector)
+
+  # TODO(nelsonjr): Fix test when object references itself as a ResourceRef,
+  # e.g. a bucket ACL points back to a bucket as a resource ref. When generating
+  # the references the code it oblivious to that fact and attempt to have
+  # various objects created to satisfy the dependency. That leads to collision
+  # of object seed==0, as well as not having objects being tested created to
+  # satisty dependency.
+  references_self_type = false
+  collector.each do |obj|
+    references_self_type = true if obj.parent && \
+      obj.parent.__resource == obj.object
+  end
+
+  resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
+  res_name = "#{object.out_name.capitalize}[title0]"
+-%>
+          before(:each) do
+<%= lines(indent(expectations, inside_indent)) -%>
+          end
+
+          subject do
+            apply_with_error_check(
+              <<-MANIFEST
+<%= lines(indent(resource_block, inside_indent + 2)) -%>
+              MANIFEST
+<%=
+  res_name = "#{object.out_name.capitalize}[title0]"
+  lines(format([
+    [").catalog.resource('#{res_name}').provider.ensure"],
+    [
+      ").catalog.resource('#{res_name}').provider",
+      indent('.ensure', 2)
+    ],
+    [
+      ").catalog.resource('#{res_name}')",
+      indent('.provider.ensure', 2)
+    ],
+  ], inside_indent))
+-%>
+          end
+
+<% # TODO(nelsonjr): Temporarily disable the tests where an object has a
+   # reference to its own type -%>
+<% if references_self_type -%>
+          it 'was expected to be present', broken: true do
+            pending('Implement tests where object references its own type.')
+          end
+<% else # references_self_type -%>
+          it { is_expected.to eq :present }
+<% end # references_self_type -%>

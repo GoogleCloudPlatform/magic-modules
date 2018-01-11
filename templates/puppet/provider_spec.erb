@@ -1,0 +1,456 @@
+<% if false # the license inside this if block assertains to this file -%>
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+<% end -%>
+<%= compile 'templates/license.erb' -%>
+
+<%= compile 'templates/autogen_notice.erb' -%>
+
+require 'spec_helper'
+
+<%
+if object.virtual
+  test_matrix = Provider::TestMatrix.new(template, object, self,
+    exists: {
+      changes: [ # read-only object mistmatch
+        [:no_name, :fail],
+        [:has_name, :fail]
+      ],
+      no_change: [
+        [:no_name, :pass],
+        [:has_name, :pass]
+      ],
+    },
+    missing: [
+      [:no_name, :fail],
+      [:has_name, :fail]
+    ]
+  )
+else
+  test_matrix = Provider::TestMatrix.new(template, object, self,
+    present: {
+      exists: {
+        changes: { # flush
+          no_name: [:pass, :fail],
+          has_name: [:pass, :fail]
+        },
+        no_change: { # no action
+          no_name: [:pass, :fail],
+          has_name: [:pass, :fail]
+        }
+      },
+      missing: { # create
+        # changes == ignore
+        no_name: [:pass, :fail],
+        has_name: [:pass, :fail]
+      }
+    },
+    absent: {
+      exists: { # delete
+        # changes == ignore
+        no_name: [:pass, :fail],
+        has_name: [:pass, :fail]
+      },
+      missing: { # no action
+        # changes == ignore
+        no_name: [:pass, :fail],
+        has_name: [:pass, :fail]
+      }
+    }
+  )
+end
+
+prop_data = Provider::TestData::Expectations.new(self, @data_gen)
+manifester = Provider::PuppetTestManifestFormatter.new self
+-%>
+<%=
+  lines(format(
+    [
+      ["describe Puppet::Type.type(:#{object.out_name}).provider(:google) do"],
+      [
+        "describe Puppet::Type.type(:#{object.out_name})",
+        indent('.provider(:google) do', 21)
+      ]
+    ]))
+-%>
+  before(:all) do
+    cred = Google::FakeAuthorization.new
+    Puppet::Type.type(:gauth_credential)
+                .define_singleton_method(:fetch) { |_resource| cred }
+  end
+
+  it '#instances' do
+    expect { described_class.instances }.to raise_error(StandardError,
+                                                        /not supported/)
+  end
+
+<% if object.virtual -%>
+<% # Object does NOT provides 'ensure' parameter -%>
+<%= test_matrix.push(:ignore, :exists) -%>
+<%= test_matrix.push(:ignore, :exists, :no_change) -%>
+<%= test_matrix.push(:ignore, :exists, :no_change, [:no_name, :pass]) -%>
+        # TODO(nelsonjr): Implement new test format.
+<%= test_matrix.pop(:ignore, :exists, :no_change, [:no_name, :pass]) -%>
+
+<%= test_matrix.push(:ignore, :exists, :no_change, [:has_name, :pass]) -%>
+        # TODO(nelsonjr): Implement new test format.
+<%= test_matrix.pop(:ignore, :exists, :no_change, [:has_name, :pass]) -%>
+<%= test_matrix.pop(:ignore, :exists, :no_change) -%>
+
+<%= test_matrix.push(:ignore, :exists, :changes) -%>
+<%= test_matrix.push(:ignore, :exists, :changes, [:no_name, :fail]) -%>
+        # TODO(nelsonjr): Implement new test format.
+        subject { -> { raise '[placeholder] This should fail.' } }
+        it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :exists, :changes, [:no_name, :fail]) -%>
+
+<%= test_matrix.push(:ignore, :exists, :changes, [:has_name, :fail]) -%>
+        # TODO(nelsonjr): Implement new test format.
+        subject { -> { raise '[placeholder] This should fail.' } }
+        it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :exists, :changes, [:has_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :exists, :changes) -%>
+<%= test_matrix.pop(:ignore, :exists) -%>
+
+<%= test_matrix.push(:ignore, :missing) -%>
+<%= test_matrix.push(:ignore, :missing, :ignore, [:no_name, :fail]) -%>
+      # TODO(nelsonjr): Implement new test format.
+      subject { -> { raise '[placeholder] This should fail.' } }
+      it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :missing, :ignore, [:no_name, :fail]) -%>
+
+<%= test_matrix.push(:ignore, :missing, :ignore, [:has_name, :fail]) -%>
+      # TODO(nelsonjr): Implement new test format.
+      subject { -> { raise '[placeholder] This should fail.' } }
+      it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :missing, :ignore, [:has_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :missing) -%>
+<% else -%>
+<% # Object that provides 'ensure' parameter -%>
+<%= test_matrix.push(:present) -%>
+<%= test_matrix.push(:present, :exists) -%>
+<%= test_matrix.push(:present, :exists, :no_change) -%>
+<%= test_matrix.push(:present, :exists, :no_change, :no_name) -%>
+<%= test_matrix.push(:present, :exists, :no_change, :no_name, :pass) -%>
+<%=
+  # Ensure no changes happened
+  name = false
+  compile('templates/puppet/test~present~no_changes.erb')
+-%>
+<%= test_matrix.pop(:present, :exists, :no_change, :no_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :no_change, :no_name, :fail) -%>
+            # TODO(nelsonjr): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :no_change, :no_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :no_change, :no_name) -%>
+
+<%= test_matrix.push(:present, :exists, :no_change, :has_name) -%>
+<%= test_matrix.push(:present, :exists, :no_change, :has_name, :pass) -%>
+<%=
+  # Ensure no changes happened
+  name = true
+  compile('templates/puppet/test~present~no_changes.erb')
+-%>
+<%= test_matrix.pop(:present, :exists, :no_change, :has_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :no_change, :has_name, :fail) -%>
+            # TODO(nelsonjr): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :no_change, :has_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :no_change, :has_name) -%>
+<%= test_matrix.pop(:present, :exists, :no_change) -%>
+
+<%= test_matrix.push(:present, :exists, :changes) -%>
+<%= test_matrix.push(:present, :exists, :changes, :no_name) -%>
+<%= test_matrix.push(:present, :exists, :changes, :no_name, :pass) -%>
+            # TODO(nelsonjr): Implement new test format.
+<%= test_matrix.pop(:present, :exists, :changes, :no_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :changes, :no_name, :fail) -%>
+            # TODO(nelsonjr): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :changes, :no_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :changes, :no_name) -%>
+
+<%= test_matrix.push(:present, :exists, :changes, :has_name) -%>
+<%= test_matrix.push(:present, :exists, :changes, :has_name, :pass) -%>
+            # TODO(nelsonjr): Implement new test format.
+<%= test_matrix.pop(:present, :exists, :changes, :has_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :changes, :has_name, :fail) -%>
+            # TODO(nelsonjr): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :changes, :has_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :changes, :has_name) -%>
+<%= test_matrix.pop(:present, :exists, :changes) -%>
+<%= test_matrix.pop(:present, :exists) -%>
+
+<%= test_matrix.push(:present, :missing) -%>
+<%= test_matrix.push(:present, :missing, :ignore, :no_name) -%>
+<%= test_matrix.push(:present, :missing, :ignore, :no_name, :pass) -%>
+<%=
+  # Creates the resource
+  name = false
+  compile('templates/puppet/test~present~create.erb')
+-%>
+<%= test_matrix.pop(:present, :missing, :ignore, :no_name, :pass) -%>
+
+<%= test_matrix.push(:present, :missing, :ignore, :no_name, :fail) -%>
+          # TODO(nelsonjr): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :missing, :ignore, :no_name, :fail) -%>
+<%= test_matrix.pop(:present, :missing, :ignore, :no_name) -%>
+
+<%= test_matrix.push(:present, :missing, :ignore, :has_name) -%>
+<%= test_matrix.push(:present, :missing, :ignore, :has_name, :pass) -%>
+<%=
+  # Creates the resource
+  name = true
+  compile('templates/puppet/test~present~create.erb')
+-%>
+<%= test_matrix.pop(:present, :missing, :ignore, :has_name, :pass) -%>
+
+<%= test_matrix.push(:present, :missing, :ignore, :has_name, :fail) -%>
+          # TODO(nelsonjr): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :missing, :ignore, :has_name, :fail) -%>
+<%= test_matrix.pop(:present, :missing, :ignore, :has_name) -%>
+<%= test_matrix.pop(:present, :missing) -%>
+<%= test_matrix.pop(:present) -%>
+
+<%= test_matrix.push(:absent) -%>
+<%= test_matrix.push(:absent, :missing) -%>
+<%= test_matrix.push(:absent, :missing, :ignore, :no_name) -%>
+<%= test_matrix.push(:absent, :missing, :ignore, :no_name, :pass) -%>
+<%=
+  # No action
+  name = false
+  compile('templates/puppet/test~absent~no_action.erb')
+-%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :no_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :missing, :ignore, :no_name, :fail) -%>
+          # TODO(nelsonjr): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :missing, :ignore, :no_name, :fail) -%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :no_name) -%>
+
+<%= test_matrix.push(:absent, :missing, :ignore, :has_name) -%>
+<%= test_matrix.push(:absent, :missing, :ignore, :has_name, :pass) -%>
+<%=
+  # No action
+  name = true
+  compile('templates/puppet/test~absent~no_action.erb')
+-%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :has_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :missing, :ignore, :has_name, :fail) -%>
+          # TODO(nelsonjr): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :missing, :ignore, :has_name, :fail) -%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :has_name) -%>
+<%= test_matrix.pop(:absent, :missing) -%>
+
+<%= test_matrix.push(:absent, :exists) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :no_name) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :no_name, :pass) -%>
+<%=
+  # Delete resource
+  name = false
+  compile('templates/puppet/test~absent~delete.erb')
+-%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :no_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :exists, :ignore, :no_name, :fail) -%>
+          # TODO(nelsonjr): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :exists, :ignore, :no_name, :fail) -%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :no_name) -%>
+
+<%= test_matrix.push(:absent, :exists, :ignore, :has_name) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :has_name, :pass) -%>
+<%=
+  # Delete resource
+  name = true
+  compile('templates/puppet/test~absent~delete.erb')
+-%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :has_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :exists, :ignore, :has_name, :fail) -%>
+          # TODO(nelsonjr): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :exists, :ignore, :has_name, :fail) -%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :has_name) -%>
+<%= test_matrix.pop(:absent, :exists) -%>
+<%= test_matrix.pop(:absent) -%>
+<% end -%>
+
+  context '#flush' do
+    subject do
+      Puppet::Type.type(:<%= object.out_name -%>).new(
+<% unless object.virtual -%>
+        ensure: :present,
+<% end -%>
+        name: 'my-name'
+      ).provider
+    end
+    context 'no-op' do
+      it { subject.flush }
+    end
+    context 'modified object' do
+      before do
+        subject.dirty :some_property, 'current', 'newvalue'
+      end
+      context 'no-op if created' do
+        before { subject.instance_variable_set(:@created, true) }
+        it { expect { subject.flush }.not_to raise_error }
+      end
+      context 'no-op if deleted' do
+        before { subject.instance_variable_set(:@deleted, true) }
+        it { expect { subject.flush }.not_to raise_error }
+      end
+<%= lines_before(lines(indent(get_code_multiline(tests,
+                                                 %w[flush cases]), 6))) -%>
+    end
+  end
+<% unless object.exports.nil? -%>
+<%
+  # Nested Object properties do not work properly with exports tests.
+  # TODO(alexstephen): Custom types will fix this.
+  fetched = object.exported_properties.map do |p|
+    if p.is_a? Api::Type::FetchedExternal
+      object.all_user_properties.select { |j| j.name == p.name }[0]
+    end
+  end
+
+  has_nested = !fetched.select { |p| p.is_a? Api::Type::NestedObject }.empty?
+-%>
+<% unless has_nested -%>
+
+  context '#exports' do
+    context 'exports all properties' do
+      let(:resource1) { create_type 1 }
+      before do
+<% # If the object has mandatory resource references, e.g. a network require a
+   # region to exist, then we need to populate cache with a resource so the
+   # object under test can find and retrieve relevant information, e.g. the
+   # dependent resource selfLink.
+   object.all_user_properties.select(&:required)
+         .select { |p| p.is_a?(Api::Type::ResourceRef) }.each do |ref| -%>
+<% ref_underscore_name = Google::StringUtils.underscore(ref.resource) -%>
+<%= lines(indent("prefetch_#{ref_underscore_name}", 8)) -%>
+<% end # object.all_user_properties....ResourceRef -%>
+        expect_network_get_success 1
+        described_class.prefetch(title0: resource1)
+      end
+
+      subject { resource1.exports }
+
+      let(:expected_results) do
+        {
+<%
+    export_values = object.exported_properties.map do |p|
+                      "#{p.out_name}: '#{@data_gen.value(p.class, p, 0)}'"
+                    end
+-%>
+<%= indent_list(export_values, 10) %>
+        }
+      end
+      it { is_expected.to eq(expected_results) }
+    end
+  end
+<% end # unless has_nested -%>
+<% end -%>
+
+  private
+
+<%= lines(indent(compile('templates/network_mocks.erb'), 2), 1) -%>
+<% object.all_resourcerefs.each do |ref| -%>
+<% unless object.exports.nil? || !ref.required -%>
+<%
+  prop_ref = ref.resource_ref
+  ref_underscore_name = Google::StringUtils.underscore(ref.resource)
+-%>
+  # Creates and prefetch type so exports can be resolved without network access.
+  def prefetch_<%= ref_underscore_name %>
+    expect_network_get_success_<%= ref_underscore_name %> 1
+
+    resource = Puppet::Type.type(:<%= prop_ref.out_name -%>).new(
+      project: 'test project#0 data',
+      name: 'test name#0 data'
+    )
+
+    Puppet::Type.type(:<%= prop_ref.out_name -%>).provider(:google)
+                .prefetch(resource: resource)
+  end
+
+<% end # object.exports.nil? -%>
+<% end # object.all_resourcerefs -%>
+<%=
+  lines(indent(compile('templates/puppet/resourceref_expandvars.erb'), 2), 1)
+-%>
+  def create_type(id)
+    Puppet::Type.type(:<%= object.out_name -%>).new(
+<% unless object.virtual -%>
+      ensure: :present,
+<% end -%>
+<%
+  prop_code = [
+    'title: "title#{id - 1}"',
+    'credential: "cred#{id - 1}"'
+  ].concat(@constants.value_assign(object))
+-%>
+<%= lines(indent_list(prop_code, 6)) -%>
+    )
+  end
+
+  def expand_variables(template, data, extra_data = {})
+    Puppet::Type.type(:<%= object.out_name -%>).provider(:google)
+                .expand_variables(template, data, extra_data)
+  end
+
+<% if object.encoder? -%>
+  def <%= object.transport.encoder -%>(resource)
+    Puppet::Type.type(:<%= object.out_name -%>).provider(:google)
+                .<%= object.transport.encoder -%>(resource)
+  end
+
+<% end # object.encoder? -%>
+<%= lines(indent(compile_if(tests, %w[expectation_helpers]), 2), 1) -%>
+<%= lines(indent(emit_link('collection', collection_url(object), false), 2)) %>
+<%= lines(indent(emit_link('self_link', self_link_url(object), false), 2)) -%>
+
+<% if @constants.value_assign(object).empty? -%>
+  def uri_data(_id)
+    {}
+  end
+<% else # value.keys.empty? -%>
+  # Creates variable test data to comply with self_link URI parameters
+  def uri_data(id)
+    {
+<%= lines(indent_list(@constants.value_assign(object), 6)) -%>
+    }
+  end
+<% end # value.keys.empty? -%>
+end
