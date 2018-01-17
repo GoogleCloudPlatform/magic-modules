@@ -29,8 +29,6 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray::NONE
-  reason: 'No configuration needed for objects.'
 bolt_tasks:
   - !ruby/object:Provider::Puppet::BoltTask
     name: 'upload'
@@ -101,8 +99,6 @@ files: !ruby/object:Provider::Config::Files
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section %>
-test_data: !ruby/object:Provider::Config::TestData::NONE
-  reason: 'Test Data will be automatically generated'
 style:
   - !ruby/object:Provider::Config::StyleException
     name: lib/google/storage/property/bucket_acl.rb

@@ -102,16 +102,6 @@ module Provider
     class TestData < Api::Object
       attr_reader :network
 
-      # A dummy class that identifies the property as deliberately unused.
-      class NONE < TestData
-        include Api::Object::MissingObject
-
-        def validate
-          @network = Api::Resource::HashArray.new
-          super
-        end
-      end
-
       def validate
         super
         check_property :network, Api::Resource::HashArray
@@ -123,11 +113,6 @@ module Provider
       attr_reader :compile
       attr_reader :copy
       attr_reader :permissions
-
-      # A dummy class that identifies the property as deliberately unused.
-      class NONE < Files
-        include Api::Object::MissingObject
-      end
 
       def validate
         super
@@ -205,14 +190,18 @@ module Provider
 
     def validate
       super
-      check_property :examples, Api::Resource::HashArray
-      check_property :files, Provider::Config::Files
-      check_property :objects, Api::Resource::HashArray
-      check_property :test_data, Provider::Config::TestData
+      check_property :examples, Api::Resource::HashArray unless @examples.nil?
+      check_property :files, Provider::Config::Files unless @files.nil?
+      check_property :objects, Api::Resource::HashArray unless @objects.nil?
+      check_property :test_data, Provider::Config::TestData \
+        unless @test_data.nil?
       check_property :tests, Api::Resource::HashArray unless @tests.nil?
-      check_property_list :style, @style, Provider::Config::StyleException
-      check_property_list :changelog, @changelog, Provider::Config::Changelog
-      check_property_list :functions, @functions, Provider::Config::Function
+      check_property_list :style, @style, Provider::Config::StyleException \
+        unless @style.nil?
+      check_property_list :changelog, @changelog, Provider::Config::Changelog \
+        unless @changelog.nil?
+      check_property_list :functions, @functions, Provider::Config::Function \
+        unless @functions.nil?
     end
 
     # Provides the API object to any type that requires, e.g. for validation

@@ -89,11 +89,6 @@ module Api
     #     - data3
     #     - data4
     class HashArray < Api::Object
-      # A dummy class that identifies the property as deliberately unused.
-      class NONE < HashArray
-        include Api::Object::MissingObject
-      end
-
       def consume_api(api)
         @__api = api
       end

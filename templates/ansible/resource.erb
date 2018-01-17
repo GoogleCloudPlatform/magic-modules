@@ -14,17 +14,18 @@ __metaclass__ = type
 
 <%
   metadata_version = quote_string(@config.manifest.metadata_version)
-  supported_by = quote_string(@config.manifest.metadata_version)
+  supported_by = quote_string(@config.manifest.supported_by)
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.status -%>,
                     'supported_by': <%= supported_by -%>}
 
-DOCUMENTATION='''
+DOCUMENTATION = '''
 ---
-module: <%= object.out_name %>
-description: |
-  <%= lines(object.description) -%>
+module: <%= module_name(object) %>
+description:
+<%= lines(indent(bullet_lines(object.description, 4), 4)) -%>
+short_description: Creates a GCP <%= object.name %>
 version_added: <%= lines(@config.manifest.version_added) -%>
 author: <%= lines(@config.manifest.author) -%>
 requirements:
@@ -44,9 +45,19 @@ options:
 <%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
         required: <%= prop.required ? 'true' : 'false' %>
 <% end -%>
+extends_documentation_fragment: gcp
 '''
 
-RETURNS='''
+<% if example -%>
+EXAMPLES = '''
+<% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
+- name: Create a <%= res_readable_name %>
+<%= lines(indent(example, 2)) -%>
+      state: 'present'
+'''
+<% end -%>
+
+RETURNS = '''
 <% object.all_user_properties.select(&:output).each do |prop| -%>
     <%= Google::StringUtils.underscore(prop.name) -%>:
         description:
@@ -57,7 +68,7 @@ RETURNS='''
 '''
 
 ################################################################################
-## Imports
+# Imports
 ################################################################################
 
 from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication
@@ -83,7 +94,7 @@ def main():
     "type=#{quote_string(python_type(prop))}"
   ].compact
 -%>
-<%= lines(indent("#{line}#{options.join(', ')})", 12)) -%>
+<%= lines(indent("#{line}#{options.join(', ')}),", 12)) -%>
 <% end -%>
             project=dict(required=True, type='str'),
             auth_kind=dict(
@@ -138,3 +149,68 @@ def delete(module, link, kind):
     return return_if_object(module, auth.session().delete(link), kind)
 
 
+def resource_to_request(module):
+<%
+  properties_in_request = []
+  properties_in_request += object.parameters if object.parameters
+  properties_in_request += object.properties.reject(&:output)
+  properties_in_request = properties_in_request.compact
+-%>
+    request = {
+        u'kind': <%= quote_string(object.kind) -%>,
+<% properties_in_request.each do |prop| -%>
+<%=
+  lines(indent(
+    ["#{unicode_string(prop.field_name)}:",
+     "module.params[#{quote_string(prop.out_name)}],"].join(' '), 8))
+-%>
+<% end -%>
+    }
+    return {k: v for k, v in request.items() if v}
+
+
+def fetch_resource(module, link, kind):
+    auth = GcpAuthentication(module)
+    return return_if_object(module, auth.session().get(link), kind)
+
+
+def self_link(module):
+    return <%= self_link_url(object) -%>.format(**module.params)
+
+
+def collection(module):
+    return <%= collection_url(object) -%>.format(**module.params)
+
+
+def return_if_object(module, response, kind):
+    # If not found, return nothing.
+    if response.status_code == 404:
+        return None
+
+    # If no content, return nothing.
+    if response.status_code == 204:
+        return None
+
+    try:
+        response.raise_for_status
+        result = response.json()
+    except Exception as inst:
+        module.fail_json(msg="Invalid JSON response with error: %s" % inst)
+
+    if navigate_hash(result, ['error', 'errors']):
+        module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
+    if result['kind'] != kind:
+        module.fail_json(msg="Incorrect result: {kind}".format(**result))
+
+    return result
+
+
+def is_different(module, response):
+    request = resource_to_request(module)
+
+    # Remove all output-only from response.
+    response = {k: v for k, v in response.items() if k in request}
+    return request != response
+
+if __name__ == '__main__':
+    main()
