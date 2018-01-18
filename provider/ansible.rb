@@ -134,11 +134,11 @@ module Provider
       target_folder = data[:output_folder]
       FileUtils.mkpath target_folder
 
-      full_name = Google::StringUtils.underscore(data[:name])
+      name = module_name(data[:object])
       generate_resource_file data.clone.merge(
         default_template: 'templates/ansible/example.erb',
         out_file: File.join(target_folder,
-                            "test/integration/targets/#{full_name}/main.yml"),
+                            "test/integration/targets/#{name}/tasks/main.yml"),
         example: compile_template_with_hash(File.open(path).read,
                                             INTEGRATION_TEST_DEFAULTS)
       )

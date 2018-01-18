@@ -104,4 +104,4 @@ class GcpAuthentication(object):
             return google.auth.compute_engine.Credentials(
                 self.module.params['service_account_email'])
         else:
-   
+            raise Exception("Credential type '%s' not implemented" % cred_type)
