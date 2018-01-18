@@ -161,8 +161,13 @@ module Provider
     end
 
     def list_manual_network_data
+      test_data = if @config.test_data && @config.test_data.network
+                @config.test_data.network
+              else
+                {}
+              end
       create_object_list(
-        @config.test_data.network,
+        test_data,
         lambda do |object, file|
           type = Google::StringUtils.underscore(object.name)
           ["spec/data/network/#{object.out_name}/#{file}.yaml",
