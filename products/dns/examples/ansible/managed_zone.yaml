@@ -1,0 +1,9 @@
+gcp_dns_managed_zone:
+    name: <%= name %>
+    dns_name: test.somewild2.example.com.
+    description: 'test zone'
+    project: <%= project %>
+    auth_kind: <%= auth_kind %>
+    service_account_file: <%= service_account_file %>
+    scopes:
+      - https://www.googleapis.com/auth/ndev.clouddns.readwrite

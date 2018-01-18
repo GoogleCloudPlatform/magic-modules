@@ -14,17 +14,18 @@ __metaclass__ = type
 
 <%
   metadata_version = quote_string(@config.manifest.metadata_version)
-  supported_by = quote_string(@config.manifest.metadata_version)
+  supported_by = quote_string(@config.manifest.supported_by)
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.status -%>,
                     'supported_by': <%= supported_by -%>}
 
-DOCUMENTATION='''
+DOCUMENTATION = '''
 ---
 module: <%= module_name(object) %>
-description: |
-  <%= lines(object.description) -%>
+description:
+<%= lines(indent(bullet_lines(object.description, 4), 4)) -%>
+short_description: Creates a GCP <%= object.name %>
 version_added: <%= lines(@config.manifest.version_added) -%>
 author: <%= lines(@config.manifest.author) -%>
 requirements:
@@ -44,18 +45,19 @@ options:
 <%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
         required: <%= prop.required ? 'true' : 'false' %>
 <% end -%>
+extends_documentation_fragment: gcp
 '''
 
 <% if example -%>
-EXAMPLES='''
+EXAMPLES = '''
 <% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
 - name: Create a <%= res_readable_name %>
-<%= lines(indent(example, 4)) -%>
-        state: 'present'
+<%= lines(indent(example, 2)) -%>
+      state: 'present'
 '''
 <% end -%>
 
-RETURNS='''
+RETURNS = '''
 <% object.all_user_properties.select(&:output).each do |prop| -%>
     <%= Google::StringUtils.underscore(prop.name) -%>:
         description:
@@ -66,7 +68,7 @@ RETURNS='''
 '''
 
 ################################################################################
-## Imports
+# Imports
 ################################################################################
 
 from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication
@@ -92,7 +94,7 @@ def main():
     "type=#{quote_string(python_type(prop))}"
   ].compact
 -%>
-<%= lines(indent("#{line}#{options.join(', ')})", 12)) -%>
+<%= lines(indent("#{line}#{options.join(', ')}),", 12)) -%>
 <% end -%>
             project=dict(required=True, type='str'),
             auth_kind=dict(
@@ -164,14 +166,19 @@ def resource_to_request(module):
 -%>
 <% end -%>
     }
-    return { k: v for k,v in request.items() if v }
+    return {k: v for k, v in request.items() if v}
 
 
-def self_link(module)
+def fetch_resource(module, link, kind):
+    auth = GcpAuthentication(module)
+    return return_if_object(module, auth.session().get(link), kind)
+
+
+def self_link(module):
     return <%= self_link_url(object) -%>.format(**module.params)
 
 
-def collection(module)
+def collection(module):
     return <%= collection_url(object) -%>.format(**module.params)
 
 
