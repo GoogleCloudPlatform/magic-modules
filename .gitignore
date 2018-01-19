@@ -14,5 +14,9 @@
 *.swp
 coverage/*
 
+# IDEA files
+.idea/*
+*.iml
+
 # Keep project coverage statistics under source control
 !coverage/.last_run.json
