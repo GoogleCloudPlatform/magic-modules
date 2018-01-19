@@ -22,30 +22,24 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Project'
     base_url: projects
-    self_link: |
-      projects/{{project_id}}
+    self_link: projects/{{id}}
     description: |
       Represents a GCP Project. A project is a container for ACLs, APIs, App
       Engine Apps, VMs, and other Google Cloud Platform resources.
-#    async: !ruby/object:Api::Async
-#      operation: !ruby/object:Api::Async::Operation
-#        path: 'name'
-#        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
-#        wait_ms: 1000
-#      result: !ruby/object:Api::Async::Result
-#        path: 'targetLink'
-#      status: !ruby/object:Api::Async::Status
-#        path: 'done'
-#        complete: true
-#        allowed:
-#          - true
-#          - false
-#      error: !ruby/object:Api::Async::Error
-#        path: 'error'
-#        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        field: 'projectId'
+        description: |
+          The unique, user-assigned ID of the Project. It must be 6 to 30
+          lowercase letters, digits, or hyphens. It must start with a letter.
+          Trailing hyphens are prohibited.
+        required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::Integer
-        name: 'projectNumber'
+        name: 'number'
+        field: 'projectNumber'
         description: Number uniquely identifying the project.
         output: true
       - !ruby/object:Api::Type::Enum
@@ -58,19 +52,12 @@ objects:
           - :DELETE_REQUESTED
           - :DELETE_IN_PROGRESS
       - !ruby/object:Api::Type::String
-        name: 'project_name'
+        name: 'name'
         description: |
           The user-assigned display name of the Project. It must be 4 to 30
           characters. Allowed characters are: lowercase and uppercase letters,
           numbers, hyphen, single-quote, double-quote, space, and exclamation
           point.
-        field: name
-      - !ruby/object:Api::Type::String
-        name: 'projectId'
-        description: |
-          The unique, user-assigned ID of the Project. It must be 6 to 30
-          lowercase letters, digits, or hyphens. It must start with a letter.
-          Trailing hyphens are prohibited.
       - !ruby/object:Api::Type::Time
         name: 'createTime'
         description: 'Time of creation'
