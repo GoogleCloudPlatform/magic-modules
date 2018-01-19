@@ -62,13 +62,14 @@ func resource<%= resource_name %>() *schema.Resource {
 			},
 
 <% end -%>
+<% if object.base_url.include?("{{project}}") -%>
 			"project": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-
+<% end -%>
 			"self_link": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
