@@ -90,6 +90,10 @@ objects:
       backend bucket rather than a backend service. It can send requests for
       static content to a Cloud Storage bucket and requests for dynamic content
       a virtual machine instance.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/backendBuckets'
 <%= indent(compile('templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
