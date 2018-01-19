@@ -11,16 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Mocked out tests for spec purposes.
 module Presubmit
-  # Mocked out module + factory for testing
-  class MockedModule < Presubmit::Module
-    # A factory to create the mocked module
-    class Factory < Presubmit::Module::Factory
-      def create
-        mock = MockedModule.new
-        mock.add_tests(@testers.map { |x| x.new(mock) })
-        mock
-      end
+  # Mocked out class with a successful result.
+  class SuccessfulTest < Test
+    def run
+      Presubmit::Results.new(self, 0, 'success')
+    end
+  end
+
+  # Mocked out class with a failed result.
+  class FailedTest < Test
+    def run
+      Presubmit::Results.new(self, 1, 'failed')
     end
   end
 end
