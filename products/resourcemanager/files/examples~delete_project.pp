@@ -18,16 +18,44 @@
 <%= compile 'templates/autogen_notice.erb' -%>
 
 <% end # name == README.md -%>
+# To create a new project the authenticated user need the privilege to create
+# new projects, either standalone or under an organization. This example uses
+# the 'application-default' provider, which draws from 'gcloud' (Google Cloud
+# SDK tool) the current user credentials.
+#
+# To make the example work you have to run this command once before applying the
+# manifest and follow its instructions:
+#
+#     gcloud auth application-default login
+#
+# Alternatively you can setup a service account and use the *preferred*
+# 'serviceaccount' provider instead with a JSON key file.
 gauth_credential { 'mycred':
-  provider => defaultuseraccount,
+  provider => defaultuserapplication,
   scopes   => [
     'https://www.googleapis.com/auth/cloud-platform',
   ],
 }
 
-gresourcemanager_project { 'sample-testproj':
-  ensure       => absent,
-  project_id   => $project_id,
-  project_name => 'My Sample Project',
-  credential   => 'mycred',
+# Project ID needs to be unique. Add a random suffix so they are always
+# unique. You should set FACTER_project_suffix, or use any other Puppet
+# supported way, to set a global variable $project_suffix.
+#
+# For example you can define the fact to be an always increasing value:
+#
+# $ FACTER_project_suffix=$(date +%s) puppet apply examples/delete_project.pp
+#
+# To be able to delete the project via Puppet make sure the instance ID matches
+# the ID used during creation. If you used the create example and specified the
+# 'project_suffix', you should match it as well during deletion.
+if !defined('$project_suffix') {
+  fail('For this example to run you need to define a fact named
+       "project_suffix". Please refer to the documentation inside
+       the example file "examples/project.pp"')
+}
+
+gresourcemanager_project { 'My Sample Project':
+  ensure     => absent,
+  id         => "test-project-${project_suffix}",
+  credential => 'mycred',
 }
