@@ -11,16 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Presubmit
-  # Mocked out module + factory for testing
-  class MockedModule < Presubmit::Module
-    # A factory to create the mocked module
-    class Factory < Presubmit::Module::Factory
-      def create
-        mock = MockedModule.new
-        mock.add_tests(@testers.map { |x| x.new(mock) })
-        mock
-      end
-    end
+require 'spec_helper'
+
+describe Presubmit::Module do
+  subject do
+    Presubmit::MockedModule::Factory.new([Presubmit::SuccessfulTest,
+                                          Presubmit::FailedTest]).create
+  end
+
+  it 'should return two results when run' do
+    expect(subject.run.keys.length).to be(2)
+  end
+
+  it 'should have a passing first result and failing second' do
+    expect(subject.run.map { |_k, v| v.success? }).to eq([true, false])
   end
 end

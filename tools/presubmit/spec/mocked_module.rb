@@ -14,7 +14,6 @@
 module Presubmit
   # Mocked out module + factory for testing
   class MockedModule < Presubmit::Module
-    # A factory to create the mocked module
     class Factory < Presubmit::Module::Factory
       def create
         mock = MockedModule.new
