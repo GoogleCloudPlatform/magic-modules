@@ -15,7 +15,7 @@ require 'google/logger'
 require 'google/yaml_validator'
 
 module Api
-  # Repesents a base object
+  # Represents a base object
   class Object < Google::YamlValidator
     # Represents an object that has a (mandatory) name
     class Named < Api::Object
