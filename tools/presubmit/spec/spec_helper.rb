@@ -11,16 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Presubmit
-  # Mocked out module + factory for testing
-  class MockedModule < Presubmit::Module
-    # A factory to create the mocked module
-    class Factory < Presubmit::Module::Factory
-      def create
-        mock = MockedModule.new
-        mock.add_tests(@testers.map { |x| x.new(mock) })
-        mock
-      end
-    end
+require 'rspec'
+
+# Require all of the presubmit files.
+my_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+$LOAD_PATH.unshift(my_dir)
+
+%w[lib spec].each do |subsystem|
+  Dir[File.join(my_dir, subsystem, '*.rb')].reject { |p| File.directory? p }
+                                           .each do |f|
+    puts "Auto requiring #{f}" \
+      if ENV['RSPEC_DEBUG']
+    require f
   end
 end
