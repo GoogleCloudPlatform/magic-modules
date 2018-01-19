@@ -1,5 +1,6 @@
 # Copyright: (c) 2018, Google Inc.
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+<%= compile 'templates/ansible/autogen_notice.erb' -%>
 
 
 class ModuleDocFragment(object):
@@ -34,12 +35,14 @@ options:
       required: true
 notes:
   - For authentication, you can set service_account_file using the
-    GCP_SERVICE_ACCOUNT_FILE env variable.
+    C(GCP_SERVICE_ACCOUNT_FILE) env variable.
   - For authentication, you can set service_account_email using the
-    GCP_SERVICE_ACCOUNT_EMAIL env variable.
-  - For authentication, you can set auth_kind using the GCP_AUTH_KIND env
+    C(GCP_SERVICE_ACCOUNT_EMAIL) env variable.
+  - For authentication, you can set auth_kind using the C(GCP_AUTH_KIND) env
     variable.
-  - For authentication, you can set scopes using the GCP_SCOPES env variable.
+  - For authentication, you can set scopes using the C(GCP_SCOPES) env variable.
   - Environment variables values will only be used if the playbook values are
     not set.
+  - The I(service_account_email) and I(service_account_file) options are
+    mutually exclusive.
 '''
