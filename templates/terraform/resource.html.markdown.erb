@@ -66,7 +66,7 @@ The following arguments are supported:
 <% end -%>
 - - -
 
-<% properties.select{|p| !p.required && !p.output}.each do |prop| -%>
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
 * `<%= Google::StringUtils.underscore(prop.name) %>` - (Optional) <%= prop.description.strip %>
 
 <% end -%>
@@ -83,5 +83,6 @@ In addition to the arguments listed above, the following computed attributes are
 * `<%= Google::StringUtils.underscore(prop.name) %>` - <%= prop.description.strip %>
 
 <% end -%>
+* `self_link` - The URI of the created resource.
 
 TODO: Add import section
