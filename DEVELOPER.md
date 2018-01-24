@@ -127,7 +127,7 @@ Detailed provider documentation:
 It is strongly encouraged to provide live, working examples to end users. It is
 also good practice to test the examples to make sure they do not become stale.
 
-To test examples you can use our `[end2end](tests/end2end)` mini framework.
+To test examples you can use our `[end2end](tools/end2end)` mini framework.
 
 
 ## Types
