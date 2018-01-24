@@ -25,7 +25,7 @@ check_80_chars() {
         $(find . -type f -name "*.${ext}" | grep -v build \
             | grep -v "files/spec~.*yaml" \
             | grep -v "./spec/data/network/.*.yaml" \
-            | grep -v "./tests/end2end/plan.yaml")
+            | grep -v "./tools/end2end/plan.yaml")
       )
     done
 
