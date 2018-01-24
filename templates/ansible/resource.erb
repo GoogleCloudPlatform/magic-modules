@@ -71,8 +71,7 @@ RETURN = '''
 # Imports
 ################################################################################
 
-from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication
-from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication, GcpModule
 import json
 
 ################################################################################
@@ -83,7 +82,7 @@ import json
 def main():
     """Main function"""
 
-    module = AnsibleModule(
+    module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
 <% object.all_user_properties.reject(&:output).each do |prop| -%>
@@ -96,26 +95,7 @@ def main():
 -%>
 <%= lines(indent("#{line}#{options.join(', ')}),", 12)) -%>
 <% end -%>
-            project=dict(required=True, type='str'),
-            auth_kind=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_AUTH_KIND']),
-                choices=['machineaccount', 'serviceaccount', 'application'],
-                type='str'),
-            service_account_email=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_SERVICE_ACCOUNT_EMAIL']),
-                type='str'),
-            service_account_file=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_SERVICE_ACCOUNT_FILE']),
-                type='path'),
-            scopes=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_SCOPES']),
-                type='list')
-        ),
-        mutually_exclusive=[['service_account_email', 'service_account_file']],
+        )
     )
 
     state = module.params['state']
