@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'binding_of_caller'
-require 'tests/end2end/constants'
+require 'tools/end2end/constants'
 
 module Provider
   module End2End

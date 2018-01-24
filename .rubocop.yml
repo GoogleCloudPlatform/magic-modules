@@ -18,7 +18,7 @@ Metrics/ClassLength:
     - 'provider/legacy_test_data_formatter.rb'
     # TODO(alexstephen): Remove this when generate_object is removed
     - 'provider/chef.rb'
-    - 'tests/end2end/tester_base.rb'
+    - 'tools/end2end/tester_base.rb'
 
 Metrics/MethodLength:
   Max: 15

@@ -15,7 +15,7 @@
 # Executes all examples against a real Google Cloud Platform project. The
 # account requires to have Owner (or Editor) to all resources being tested.
 #
-# Usage: tests/end2end/run <project...>
+# Usage: tools/end2end/run <project...>
 #        <project> can be of the form:
 #           - <provider>:<product>          e.g. puppet:dns  only this module
 #           - <provider>:                   e.g. puppet:     all puppet modules
@@ -105,7 +105,7 @@ end
 # To have the output organized at the end (as it runs in parallel it will be
 # mixed between runs you can execute like this:
 #
-#   tests/end2end/run | tee output.log; cat output.log | sort
+#   tools/end2end/run | tee output.log; cat output.log | sort
 PARALLEL = true?(ENV['PARALLEL'] || true)
 log 'end2end', nil, PARALLEL ? 'Parallel mode' : 'Serial mode'
 
