@@ -17,7 +17,7 @@ try:
 except ImportError:
     HAS_GOOGLE_LIBRARIES = False
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule, env_fallback
 import os
 
 
@@ -72,3 +72,49 @@ class GcpAuthentication(object):
                 self.module.params['service_account_email'])
         else:
             raise Exception("Credential type '%s' not implemented" % cred_type)
+
+
+class GcpModule(AnsibleModule):
+    def __init__(self, *args, **kwargs):
+        arg_spec = {}
+        if 'argument_spec' in kwargs:
+            arg_spec = kwargs['argument_spec']
+
+        kwargs['argument_spec'] = self._merge_dictionaries(
+            arg_spec,
+            dict(
+                project=dict(required=True, type='str'),
+                auth_kind=dict(
+                    required=False,
+                    fallback=(env_fallback, ['GCP_AUTH_KIND']),
+                    choices=['machineaccount', 'serviceaccount', 'application'],
+                    type='str'),
+                service_account_email=dict(
+                    required=False,
+                    fallback=(env_fallback, ['GCP_SERVICE_ACCOUNT_EMAIL']),
+                    type='str'),
+                service_account_file=dict(
+                    required=False,
+                    fallback=(env_fallback, ['GCP_SERVICE_ACCOUNT_FILE']),
+                    type='path'),
+                scopes=dict(
+                    required=False,
+                    fallback=(env_fallback, ['GCP_SCOPES']),
+                    type='list')
+            )
+        )
+
+        mutual = []
+        if 'mutually_exclusive' in kwargs:
+            mutual = kwargs['mutually_exclusive']
+
+        kwargs['mutually_exclusive'] = mutual.append(
+            ['service_account_email', 'service_account_file']
+        )
+
+        AnsibleModule.__init__(self, *args, **kwargs)
+
+    def _merge_dictionaries(self, a, b):
+        new = a.copy()
+        new.update(b)
+        return new
