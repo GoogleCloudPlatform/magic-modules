@@ -22,8 +22,7 @@ func expand<%= prefix %><%= titlelize_property(property) %>(v interface{}) inter
       original := raw.(map[string]interface{})
       transformed := make(map[string]interface{})
 
-      // TODO: Handle ignored nested property
-      <% property.properties.each do |prop| -%>
+      <% effective_properties(config, property.properties).each do |prop| -%>
         transformed["<%= prop.name %>"] =
         expand<%= prefix %><%= titlelize_property(property) %><%= titlelize_property(prop) %>(original["<%= Google::StringUtils.underscore(prop.name) %>"])
       <% end -%>
@@ -38,8 +37,7 @@ func expand<%= prefix %><%= titlelize_property(property) %>(v interface{}) inter
 }
 
 <% if property.is_a?(Api::Type::NestedObject) -%>
-  <% property.properties.each do |prop| -%>
-    // TODO: Handle ignored nested property
+  <% effective_properties(config, property.properties).each do |prop| -%>
     <%= build_expand_method(config, prefix + titlelize_property(property), prop) %>
   <% end -%>
 <% end -%>

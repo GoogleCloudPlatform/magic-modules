@@ -40,8 +40,7 @@ Type: <%= tf_types[property.class] -%>,
   MaxItems: 1,
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      // TODO: Handle ignored nested property
-      <% order_properties(property.properties).each do |prop| -%>
+      <% order_properties(effective_properties(config, property.properties)).each do |prop| -%>
         <%= build_schema_property(config, prop) %>
       <% end -%>
     },
