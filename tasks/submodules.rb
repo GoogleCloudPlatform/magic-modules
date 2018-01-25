@@ -13,37 +13,42 @@
 
 require 'tasks/common'
 
-def compile_module(provider, mod)
+TEST_RUNNER = {
+  puppet: 'rake test',
+  chef: 'rake test',
+  ansible: 'exit 1'
+}.freeze
+
+def test_module(provider, mod)
   output = PROVIDER_FOLDERS[provider.to_sym] % mod
-  `./compiler -p products/#{mod} -e #{provider} -o #{output}`
+  %x(cd #{output} && #{TEST_RUNNER[provider]})
 end
 
-def all_compile
+def all_test
   provider_list.map do |x|
-    all_tasks_for_provider(x, 'compile:')
+    all_tasks_for_provider(x, 'test_mod:')
   end
 end
 
 def all_tasks_for_provider(prov, prefix = '')
-  modules_for_provider(prov).map { |x| "#{prefix}#{prov}:#{x}" }
+  modules_for_provider(prov).map { |mod| "#{prefix}#{prov}:#{mod}" }
 end
 
 # Compiling Tasks
-desc 'Compile all modules'
-multitask compile: all_compile.flatten
+desc 'Test all modules'
+multitask test_mod: all_test.flatten
 
-namespace :compile do
+namespace :test_mod do
   provider_list.each do |provider|
     # Each provider should default to compiling everything.
-    desc "Compile all modules for #{provider.capitalize}"
+    desc "Test all modules for #{provider.capitalize}"
     multitask provider.to_sym => all_tasks_for_provider(provider)
 
     namespace provider.to_sym do
       modules_for_provider(provider).each do |mod|
         # Each module should have its own task for compiling.
-        desc "Compile the #{mod} module for #{provider.capitalize}"
         task mod.to_sym do
-          compile_module(provider, mod)
+          test_module(provider, mod)
         end
       end
     end
