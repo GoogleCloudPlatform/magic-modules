@@ -1,4 +1,4 @@
-<% if false # the license inside this if block ascertains to this file -%>
+<% if false # the license inside this if block pertains to this file -%>
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 <%
   object_name_snake = Google::StringUtils.underscore(object.name)
   api_name_lower = product_ns.downcase
-  ignored = get_code_multiline(config, 'ignore')
+  ignored = get_code_multiline(config, 'ignore') || []
   properties = object.all_user_properties
     .keep_if{ |p| !ignored.include?(p.name) }
 -%>
