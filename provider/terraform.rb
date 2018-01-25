@@ -41,21 +41,14 @@ module Provider
         Api::Type::Boolean => 'schema.TypeBool',
         Api::Type::Integer => 'schema.TypeInt',
         Api::Type::String => 'schema.TypeString',
-        Api::Type::Time => 'schema.TypeString'
+        Api::Type::Time => 'schema.TypeString',
+        Api::Type::Enum => 'schema.TypeString',
+        Api::Type::ResourceRef => 'schema.TypeString',
+        Api::Type::NestedObject => 'schema.TypeList'
       }
     end
 
-    # Converts between the Magic Modules type of an object and its type in Go
-    def go_types
-      {
-        Api::Type::Boolean => 'bool',
-        Api::Type::Integer => 'int',
-        Api::Type::String => 'string',
-        Api::Type::Time => 'string'
-      }
-    end
-
-    # Puts together the links to use to make API calls for a given resource type.
+    # Puts together the links to use to make API calls for a given resource type
     def self_link_url(resource)
       (product_url, resource_url) = self_link_raw_url(resource)
       [product_url, resource_url].flatten.join
@@ -66,7 +59,51 @@ module Provider
       [resource.__product.base_url, base_url].flatten.join
     end
 
+    def build_schema_property(config, property)
+      if property.is_a?(Api::Type::Primitive) ||
+         property.is_a?(Api::Type::ResourceRef) ||
+         property.is_a?(Api::Type::NestedObject)
+        compile_template'templates/terraform/schema_property.erb',
+                        property: property,
+                        config: config
+      else
+        "// TODO: Unsupported '#{property.name}' of type #{property.class}"
+      end
+    end
+
+    # Transforms a Cloud API representation of a property into a Terraform
+    # schema representation.
+    def build_flatten_method(config, prefix, property)
+      compile_template 'templates/terraform/flatten_property_method.erb',
+                       prefix: prefix,
+                       property: property,
+                       config: config
+    end
+
+    # Transforms a Terraform schema representation of a property into a
+    # representation used by the Cloud API.
+    def build_expand_method(config, prefix, property)
+      compile_template 'templates/terraform/expand_property_method.erb',
+                       prefix: prefix,
+                       property: property,
+                       config: config
+    end
+
+    # Capitalize the first letter of a property name.
+    # E.g. "creationTimestamp" becomes "CreationTimestamp".
+    def titlelize_property(property)
+      p = property.name.clone
+      p[0] = p[0].capitalize
+      p
+    end
+
     private
+
+    def compile_template(template_file, data)
+      ctx = binding
+      data.each { |name, value| ctx.local_variable_set(name, value) }
+      compile_file(ctx, template_file).join("\n")
+    end
 
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
