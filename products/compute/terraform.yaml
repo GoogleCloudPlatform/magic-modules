@@ -14,11 +14,24 @@
 --- !ruby/object:Provider::Terraform::Config
 objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
-      id: "name"
-      ignore: ["id"]
-      # TODO: look into moving validation into api.yaml
-      validation:
-        name: "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$"
+    id: "name"
+    ignore: ["id"]
+    # TODO: look into moving validation into api.yaml
+    validation:
+      name: "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$"
+  Image:
+    id: "name"
+    # TODO: Add support for aliasing. For instance, the sha1_checksum field
+    # in raw_disk is currently named `sha1` in our Terraform provider.
+    ignore:
+      - id
+      - deprecated
+      - guestOsFeatures
+      - imageEncryptionKey
+      - sourceDiskEncryptionKey
+      - sourceDiskId
+      - sourceType
+      - licenses
 
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
