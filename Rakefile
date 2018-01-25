@@ -24,6 +24,6 @@ end
 # Ignore those with multiple levels like rubocop:auto_correct
 tests = Rake.application.tasks.select do |task|
   /^test:[a-z]*$/ =~ task.name
-end.map(&:name).compact
+end.map(&:name)
 
 multitask 'test' => tests
