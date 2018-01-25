@@ -24,6 +24,7 @@ module Api
     attr_reader :required
 
     attr_reader :__resource
+    attr_reader :__parent # is nil for top-level properties
 
     MAX_NAME = 20
 
@@ -57,6 +58,10 @@ module Api
 
     def field_name
       @field || @name
+    end
+
+    def parent
+      @__parent
     end
 
     private
@@ -161,6 +166,7 @@ module Api
         if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
           @item_type.set_variable(@name, :__name)
           @item_type.set_variable(@__resource, :__resource)
+          @item_type.set_variable(self, :__parent)
         end
         check_property :item_type, [::String, NestedObject, ResourceRef]
         unless @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef) \
@@ -322,7 +328,10 @@ module Api
         @description = 'A nested object resource' if @description.nil?
         @name = @__name if @name.nil?
         super
-        @properties.each { |p| p.set_variable(@__resource, :__resource) }
+        @properties.each do |p|
+          p.set_variable(@__resource, :__resource)
+          p.set_variable(self, :__parent)
+        end
         check_property_list :properties, @properties, Api::Type
       end
 

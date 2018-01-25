@@ -97,12 +97,35 @@ module Provider
       p
     end
 
+    # Returns the resource properties without those ignored.
+    def effective_properties(config, properties)
+      ignored = get_code_multiline(config, 'ignore') || []
+
+      properties.keep_if { |p| !ignored.include?(construct_ignore_string(p)) }
+    end
+
     private
 
     def compile_template(template_file, data)
       ctx = binding
       data.each { |name, value| ctx.local_variable_set(name, value) }
       compile_file(ctx, template_file).join("\n")
+    end
+
+    # Constructs the prefix to be used when looking for ignored properties.
+    #
+    # The 'ignore' list supports three formats:
+    # - 'foo': Ignores top-level property 'foo'
+    # - 'foo.bar': Ignores field 'bar' nested under 'foo'
+    # - 'foo.*.bar': Ignores field 'bar' of all nested objects in list 'foo'
+    def construct_ignore_string(property)
+      return property.name if property.parent.nil?
+
+      if property.parent.is_a?(Api::Type::Array)
+        construct_ignore_string(property.parent) + '.*'
+      else
+        construct_ignore_string(property.parent) + '.' + property.name
+      end
     end
 
     # This function uses the resource.erb template to create one file
