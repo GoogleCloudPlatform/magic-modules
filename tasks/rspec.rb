@@ -11,19 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$LOAD_PATH.unshift File.dirname(__FILE__)
-Dir.chdir(File.dirname(__FILE__))
+require 'rspec/core/rake_task'
 
-# Load all tasks from tasks/
-Dir[File.join('tasks', '*.rb')].reject { |p| File.directory? p }
-                               .each do |f|
-  require f
+namespace 'test' do
+  RSpec::Core::RakeTask.new(:spec)
 end
-
-# Find all tasks under the test namespace
-# Ignore those with multiple levels like rubocop:auto_correct
-tests = Rake.application.tasks.select do |task|
-  /^test:[a-z]*$/ =~ task.name
-end.map(&:name).compact
-
-multitask 'test' => tests
