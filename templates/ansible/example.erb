@@ -1,11 +1,11 @@
 ---
 <%= compile 'templates/ansible/autogen_notice.erb' -%>
-<% if example.dependencies -%>
+<% if example.dependencies and !example.dependencies.empty? -%>
 #---------------------------------------------------------
 # Pre-test setup
-<% object.dependencies.each do |depend| -%>
-<%= lines(dependent.build_test('present', false)) -%>
-<% end # object.dependencies.each -%>
+<% example.dependencies.each do |depend| -%>
+<%= lines(depend.build_test('present', false)) -%>
+<% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
 #----------------------------------------------------------
 <% resource_name = Google::StringUtils.uncombine(object.name).downcase -%>
@@ -40,10 +40,10 @@
     that:
       - result.changed == false
       - result.has_key('kind') == False
-<% if example.dependencies -%>
+<% if example.dependencies and !example.dependencies.empty? -%>
 #---------------------------------------------------------
 # Post-test teardown
-<% object.dependencies.each do |depend| -%>
-<%= lines(dependent.build_test('absent', false)) -%>
-<% end # object.dependencies.each -%>
+<% example.dependencies.reverse.each do |depend| -%>
+<%= lines(depend.build_test('absent', false)) -%>
+<% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
