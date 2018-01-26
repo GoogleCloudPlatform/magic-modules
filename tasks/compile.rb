@@ -15,7 +15,7 @@ require 'tasks/common'
 
 def compile_module(provider, mod)
   output = PROVIDER_FOLDERS[provider.to_sym] % mod
-  `./compiler -p products/#{mod} -e #{provider} -o #{output}`
+  %x(bundle exec compiler -p products/#{mod} -e #{provider} -o #{output})
 end
 
 def all_compile
