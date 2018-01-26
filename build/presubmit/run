@@ -267,6 +267,11 @@ module_checker() {
     continue
   fi
 
+  if [[ $mod == 'build/ansible' ]]; then
+    warn 'Skipping Ansible as it is not compatible with presubmit'
+    continue
+  fi
+
   declare module_init=0
 
   submodule_init
@@ -323,7 +328,8 @@ module_checker() {
     if $compile; then
       # Let's generate the code and see if changes happen
       pushd "$my_dir" 1>/dev/null
-      ./compiler -p "products/${product}" -e "${provider}" -o "$mod" 2>/dev/null
+      bundle exec compiler -p "products/${product}" -e "${provider}" \
+          -o "$mod" 2>/dev/null
       err=$?
       popd 1>/dev/null
       if [[ $err -ne 0 ]]; then

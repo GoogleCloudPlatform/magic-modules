@@ -14,7 +14,10 @@
 module End2End
   # Provides constants that can be used for creating end-to-end test examples.
   module Constants
-    TEST_FILE_REGEX = /.*tools.*/
+    TEST_FILE_REGEX = [
+      /.*\.tools.*/,
+      /.*\/tests~.*/
+    ]
     TEST_FOLDER = '.tools/end2end/data'.freeze
   end
 end
