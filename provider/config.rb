@@ -13,6 +13,7 @@
 
 require 'api/object'
 require 'provider/compiler'
+require 'provider/objects'
 require 'compile/core'
 
 module Provider
@@ -192,7 +193,15 @@ module Provider
       super
       check_property :examples, Api::Resource::HashArray unless @examples.nil?
       check_property :files, Provider::Config::Files unless @files.nil?
-      check_property :objects, Api::Resource::HashArray unless @objects.nil?
+
+      # TODO(alexstephen): Remove HashArray checking when all provider.yamls
+      # using Provider::Objects
+      if @objects.is_a? Provider::Objects
+        check_property :objects, Provider::Objects unless @objects.nil?
+      else
+        check_property :objects, Api::Resource::HashArray unless @objects.nil?
+      end
+
       check_property :test_data, Provider::Config::TestData \
         unless @test_data.nil?
       check_property :tests, Api::Resource::HashArray unless @tests.nil?
