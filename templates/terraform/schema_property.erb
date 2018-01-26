@@ -14,7 +14,7 @@
 <% end -%>
 <% if tf_types.include?(property.class) -%>
 "<%= Google::StringUtils.underscore(property.name) %>": {
-Type: <%= tf_types[property.class] -%>,
+  Type: <%= tf_types[property.class] -%>,
 <% if property.required -%>
   Required: true,
 <% elsif property.output -%>
@@ -45,8 +45,32 @@ Type: <%= tf_types[property.class] -%>,
       <% end -%>
     },
   },
+<% elsif property.is_a?(Api::Type::Array) -%>
+  <% if property.item_type.is_a?(Api::Type::NestedObject) -%>
+      Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+          <% order_properties(effective_properties(config, property.item_type.properties)).each do |prop| -%>
+            <%= build_schema_property(config, prop) %>
+          <% end -%>
+        },
+      },
+  <% elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
+      Elem: &schema.Schema{
+      Type: <%= tf_types[property.item_type] %>,
+      <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
+        DiffSuppressFunc: compareSelfLinkOrResourceName,
+      <% end -%>
+      },
+  <% else # array of basic types -%>
+      Elem: &schema.Schema{
+        Type: <%= tf_types[property.item_type.class] %>,
+        <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
+          DiffSuppressFunc: compareSelfLinkOrResourceName,
+        <% end -%>
+      },
+  <% end -%>
 <% end -%>
 },
 <% else -%>
   // TODO: Property '<%= property.name %>' of type <%= property.class %> is not supported
-<% end -%>
+<% end # tf_types.include?(property.class) -%>

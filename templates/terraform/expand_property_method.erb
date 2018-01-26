@@ -12,32 +12,43 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 <% end -%>
+<% if tf_types.include?(property.class) -%>
 func expand<%= prefix %><%= titlelize_property(property) %>(v interface{}) interface{} {
-  <% if property.is_a?(Api::Type::Primitive) || property.is_a?(Api::Type::ResourceRef) -%>
-    return v
-  <% elsif property.is_a?(Api::Type::NestedObject) -%>
-    l := v.([]interface{})
-    req := make([]interface{}, 0, len(l))
-    for _, raw := range l {
-      original := raw.(map[string]interface{})
-      transformed := make(map[string]interface{})
+<%
+  if property.is_a?(Api::Type::NestedObject) ||
+      (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject))
+    if property.is_a?(Api::Type::NestedObject)
+      properties = property.properties
+    else # Array of NestedObject
+      properties = property.item_type.properties
+    end
+    # Remove ignored properties
+    properties = effective_properties(config, properties)
+    # Don't expand output properties
+    properties = properties.reject(&:output)
+-%>
+  l := v.([]interface{})
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    transformed := make(map[string]interface{})
 
-      <% effective_properties(config, property.properties).each do |prop| -%>
-        transformed["<%= prop.name %>"] =
-        expand<%= prefix %><%= titlelize_property(property) %><%= titlelize_property(prop) %>(original["<%= Google::StringUtils.underscore(prop.name) %>"])
-      <% end -%>
+    <% properties.each do |prop| -%>
+      transformed["<%= prop.name %>"] =
+      expand<%= prefix %><%= titlelize_property(property) %><%= titlelize_property(prop) %>(original["<%= Google::StringUtils.underscore(prop.name) %>"])
+    <% end -%>
 
-      req = append(req, transformed)
-    }
-    return req
-  <% else -%>
-    // TODO: Property '<%= property.name %>' of type <%= property.class %> is not supported"
-    return nil
-  <% end -%>
+    req = append(req, transformed)
+  }
+  return req
 }
-
-<% if property.is_a?(Api::Type::NestedObject) -%>
-  <% effective_properties(config, property.properties).each do |prop| -%>
+  <% properties.each do |prop| -%>
     <%= build_expand_method(config, prefix + titlelize_property(property), prop) %>
   <% end -%>
+<% else -%>
+  return v
+}
 <% end -%>
+<% else -%>
+  // TODO: Property '<%= property.name %>' of type <%= property.class %> is not supported
+<% end # tf_types.include?(property.class) -%>

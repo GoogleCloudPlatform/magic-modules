@@ -12,24 +12,41 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 <% end -%>
+<% if tf_types.include?(property.class) -%>
 func flatten<%= prefix %><%= titlelize_property(property) %>(v interface{}) interface{} {
-  <% if property.is_a?(Api::Type::Primitive) || property.is_a?(Api::Type::ResourceRef) -%>
-    return v
-  <% elsif property.is_a?(Api::Type::NestedObject) -%>
-    original := v.(map[string]interface{})
-    transformed := make(map[string]interface{})
-    <% effective_properties(config, property.properties).each do |prop| -%>
-      transformed["<%= Google::StringUtils.underscore(prop.name) %>"] =
-          flatten<%= prefix %><%= titlelize_property(property) %><%= titlelize_property(prop) %>(original["<%= prop.name %>"])
-    <% end -%>
-    return []interface{}{transformed}
-  <% else -%>
-    // TODO: Property '<%= property.name %>' of type <%= property.class %> is not supported"
-    return nil
+<% if property.is_a?(Api::Type::NestedObject) -%>
+  original := v.(map[string]interface{})
+  transformed := make(map[string]interface{})
+  <% effective_properties(config, property.properties).each do |prop| -%>
+    transformed["<%= Google::StringUtils.underscore(prop.name) %>"] =
+    flatten<%= prefix %><%= titlelize_property(property) %><%= titlelize_property(prop) %>(original["<%= prop.name %>"])
   <% end -%>
+  return []interface{}{transformed}
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
+  l := v.([]interface{})
+  transformed := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    transformed = append(transformed, map[string]interface{}{
+    <% effective_properties(config, property.item_type.properties).each do |prop| -%>
+      "<%= Google::StringUtils.underscore(prop.name) %>": flatten<%= prefix %><%= titlelize_property(property) %><%= titlelize_property(prop) %>(original["<%= prop.name %>"]),
+    <% end -%>
+    })
+  }
+  return transformed
+<% else -%>
+  return v
+<% end # property.is_a?(Api::Type::NestedObject) -%>
 }
 <% if property.is_a?(Api::Type::NestedObject) -%>
   <% effective_properties(config, property.properties).each do |prop| -%>
     <%= build_flatten_method(config, prefix + titlelize_property(property), prop) %>
   <% end -%>
-<% end -%>
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
+  <% effective_properties(config, property.item_type.properties).each do |prop| -%>
+    <%= build_flatten_method(config, prefix + titlelize_property(property), prop) %>
+  <% end -%>
+<% end # property.is_a?(Api::Type::NestedObject) -%>
+<% else -%>
+  // TODO: Property '<%= property.name %>' of type <%= property.class %> is not supported
+<% end # tf_types.include?(property.class) -%>

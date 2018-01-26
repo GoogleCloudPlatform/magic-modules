@@ -41,10 +41,13 @@ module Provider
         Api::Type::Boolean => 'schema.TypeBool',
         Api::Type::Integer => 'schema.TypeInt',
         Api::Type::String => 'schema.TypeString',
+        # Anonymous string property used in array of strings.
+        'Api::Type::String' => 'schema.TypeString',
         Api::Type::Time => 'schema.TypeString',
         Api::Type::Enum => 'schema.TypeString',
         Api::Type::ResourceRef => 'schema.TypeString',
-        Api::Type::NestedObject => 'schema.TypeList'
+        Api::Type::NestedObject => 'schema.TypeList',
+        Api::Type::Array => 'schema.TypeList'
       }
     end
 
@@ -60,15 +63,9 @@ module Provider
     end
 
     def build_schema_property(config, property)
-      if property.is_a?(Api::Type::Primitive) ||
-         property.is_a?(Api::Type::ResourceRef) ||
-         property.is_a?(Api::Type::NestedObject)
-        compile_template'templates/terraform/schema_property.erb',
-                        property: property,
-                        config: config
-      else
-        "// TODO: Unsupported '#{property.name}' of type #{property.class}"
-      end
+      compile_template'templates/terraform/schema_property.erb',
+                      property: property,
+                      config: config
     end
 
     # Transforms a Cloud API representation of a property into a Terraform
