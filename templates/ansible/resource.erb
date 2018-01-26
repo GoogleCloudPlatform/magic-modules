@@ -52,9 +52,9 @@ extends_documentation_fragment: gcp
 EXAMPLES = '''
 <% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
 <% if example.dependencies -%>
-<%   object.dependencies.each do |depend| -%>
-<%= lines(dependent.build_test('present', false)) -%>
-<%   end # object.dependencies.each -%>
+<%   example.dependencies.each do |depend| -%>
+<%= lines(depend.build_test('present', false)) -%>
+<%   end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
 <%= lines(example.task.build_example('present')) -%>
 '''
@@ -120,7 +120,17 @@ def main():
     state = module.params['state']
     kind = <%= lines(quote_string(object.kind)) -%>
 
+<% if object.self_link_query.nil? -%>
+<%   if object.kind? -%>
     fetch = fetch_resource(module, self_link(module), kind)
+<%   else # object.kind? -%>
+    fetch = fetch_resource(module, self_link(module))
+<%   end # object.kind? -%>
+<% else # object.self_link_query.nil? -%>
+    fetch = fetch_wrapped_resource(module, '<%= object.kind -%>',
+                                   '<%= object.self_link_query.kind -%>',
+                                   '<%= object.self_link_query.items -%>')
+<% end # object.self_link_query.nil? -%>
     changed = False
 
     if fetch:

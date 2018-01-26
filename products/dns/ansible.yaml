@@ -28,7 +28,30 @@ objects: !ruby/object:Api::Resource::HashArray
   Project:
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     skip: true
-# This is for a list of example files.
+  ResourceRecordSet:
+    create: |
+      change = create_change(None, updated_record(module), module)
+      change_id = int(change['id'])
+      if change['status'] == 'pending':
+          wait_for_change_to_complete(change_id, module)
+    delete: |
+      change = create_change(fetch, None, module)
+      change_id = int(change['id'])
+      if change['status'] == 'pending':
+          wait_for_change_to_complete(change_id, module)
+    update: |
+      change = create_change(fetch, updated_record(module), module)
+      change_id = int(change['id'])
+      if change['status'] == 'pending':
+          wait_for_change_to_complete(change_id, module)
+    access_api_results: true
+    provider_helpers:
+      visible:
+        unwrap_resource: false
+        resource_to_request: false
+        return_if_object: false
+      include:
+        - 'products/dns/helpers/ansible_provider_resource_set.py.erb'
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
@@ -41,6 +64,12 @@ files: !ruby/object:Provider::Config::Files
     'test/integration/targets/gcp_dns_managed_zone/defaults/main.yml':
       'templates/ansible/defaults_main.yaml'
     'test/integration/targets/gcp_dns_managed_zone/meta/main.yml':
+      'provider/ansible/blank_file.yaml'
+    'test/integration/targets/gcp_dns_resource_record_set/aliases':
+      'templates/ansible/aliases'
+    'test/integration/targets/gcp_dns_resource_record_set/defaults/main.yml':
+      'templates/ansible/defaults_main.yaml'
+    'test/integration/targets/gcp_dns_resource_record_set/meta/main.yml':
       'provider/ansible/blank_file.yaml'
 tests: !ruby/object:Api::Resource::HashArray
 # This would be for custom network responses. Tests work by running some block
