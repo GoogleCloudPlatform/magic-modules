@@ -43,7 +43,8 @@ module Provider
         filename = binding.of_caller(1).local_variable_get(:name)
 
         res_name = name
-        res_name = "#{provider_name}-e2e-#{name}" if filename =~ TEST_FILE_REGEX
+        res_name = "#{provider_name}-e2e-#{name}" \
+          if TEST_FILE_REGEX.any? { |f| filename =~ f }
 
         quote_string(res_name)
       end
