@@ -125,18 +125,33 @@ def main():
     module.exit_json(**fetch)
 
 
+<% custom_create = get_code_multiline config, 'create' -%>
+<% if custom_create.nil? -%>
 def create(module, link, kind):
     auth = GcpAuthentication(module)
     return return_if_object(module, auth.session().post(link, json=resource_to_request(module)), kind)
+<% else -%>
+<%= lines(indent(custom_create, 4)) -%>
+<% end -%>
 
 
+<% custom_update = get_code_multiline config, 'update' -%>
+<% if custom_update.nil? -%>
 def update(module, link, kind):
     module.fail_json(msg="<%= object.name -%> cannot be edited")
+<% else -%>
+<%= lines(indent(custom_update, 4)) -%>
+<% end -%>
 
 
+<% custom_update = get_code_multiline config, 'delete' -%>
+<% if custom_update.nil? -%>
 def delete(module, link, kind):
     auth = GcpAuthentication(module)
     return return_if_object(module, auth.session().delete(link), kind)
+<% else -%>
+<%= lines(indent(custom_delete, 4)) -%>
+<% end -%>
 
 
 def resource_to_request(module):
