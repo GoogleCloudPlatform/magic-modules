@@ -41,6 +41,7 @@ module Provider
       include Compile::Core
       attr_reader :name
       attr_reader :code
+      attr_reader :register
 
       def validate
         super
@@ -69,8 +70,9 @@ module Provider
           "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
           indent("#{@name}:", 2),
           indent(compile_template_with_hash(@code, hash), 6).to_s,
-          indent("state: #{state}", 6)
-        ].join("\n")
+          indent("state: #{state}", 6),
+          (indent("register: #{@register}", 2) unless @register.nil?)
+        ].compact.join("\n")
       end
 
       def compile_template_with_hash(template, hash)
