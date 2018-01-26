@@ -32,6 +32,12 @@ objects: !ruby/object:Api::Resource::HashArray
       - sourceDiskId
       - sourceType
       - licenses
+  Route:
+    id: "name"
+  TargetPool:
+    id: "name"
+
+
 
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
