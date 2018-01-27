@@ -314,6 +314,7 @@ module Provider
       end
     end
 
+    # rubocop:disable Metrics/AbcSize
     def format_expand_variables(obj_url)
       obj_url = obj_url.split("\n") unless obj_url.is_a?(Array)
       if obj_url.size > 1
@@ -321,9 +322,17 @@ module Provider
          indent_list(obj_url.map { |u| quote_string(u) }, 2),
          '].join,']
       else
-        [obj_url.map { |u| quote_string(u) }[0] + ',']
+        vars = quote_string(obj_url[0])
+        vars_parts = obj_url[0].split('/')
+        format([
+                 [[vars, ','].join],
+                 # vars is too big to fit, split in half
+                 vars_parts.each_slice((vars_parts.size / 2.0).round).to_a
+                   .map { |p| quote_string(p.join('/')) + ',' }
+               ], 0, 8)
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     def build_url(product_url, obj_url, extra = false)
       extra_arg = ''
@@ -565,6 +574,16 @@ module Provider
 
     def emit_requires(requires)
       requires.flatten.sort.uniq.map { |r| "require '#{r}'" }.join("\n")
+    end
+
+    def check_requires(object, *requires)
+      return if @config.objects[object.name]&.key?('requires').nil?
+      requires_list = @config.objects[object.name]['requires']
+      missing = requires.flatten.reject { |r| requires_list.any?(r) }
+      raise <<~ERROR unless missing.empty?
+        Including #{__FILE__} needs the following requires: #{missing}
+        Please add them to 'object > requires' section of <provider>.yaml
+      ERROR
     end
 
     def emit_link_var_args(url, extra_data)

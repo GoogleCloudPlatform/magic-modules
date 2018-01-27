@@ -123,6 +123,15 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
   ].compact, 2) %>
 <%= format_description(p, 4, 'desc') %>
 <%= property_body(p) -%>
+<%
+    validation = get_code_multiline config, 'validate'
+    validation = validation[p.name] unless validation.nil?
+-%>
+<% unless validation.nil? -%>
+    validate do |value|
+<%= lines(indent(validation, 6)) -%>
+    end
+<% end -%>
   end
 <% end -%>
 <% end -%>

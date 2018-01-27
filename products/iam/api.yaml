@@ -22,8 +22,9 @@ scopes:
 objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccount'
-    base_url: projects/{{project}}/serviceAccounts/
+    base_url: projects/{{project}}/serviceAccounts
     transport: !ruby/object:Api::Resource::Transport
+      encoder: encode_request
       decoder: decode_response
     description: |
       A service account in the Identity and Access Management API.
@@ -48,10 +49,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: displayName
         description: User specified description of service account.
-        field: displayName
-      - !ruby/object:Api::Type::String
-        name: etag
-        description: Used to perform a consistent read/modify/write.
+      # 'etag' ignored: not relevant to object convergence.
       - !ruby/object:Api::Type::String
         name: oauth2ClientId
         description: OAuth2 client id for the service account.
@@ -59,6 +57,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccountKey'
     base_url: projects/{{project}}/serviceAccounts/{{service_account}}/keys
+    transport: !ruby/object:Api::Resource::Transport
+      decoder: decode_response
     description: |
       A service account in the Identity and Access Management API.
     parameters:
@@ -67,6 +67,26 @@ objects:
         description: The name of the serviceAccount.
         resource: ServiceAccount
         imports: name
+      # A non-API property to allow writing results to a specific output file.
+      - !ruby/object:Api::Type::String
+        name: path
+        description: |
+          The full name of the file that will hold the service account private
+          key. The management of this file will depend on the value of
+          sync_file parameter.
+
+          File path must be absolute.
+      # A non-API property to allow writing results to a specific output file.
+      - !ruby/object:Api::Type::String
+        name: key_id
+        description: |
+          Used to ensure the deletion of the key in the absence of a key file.
+      - !ruby/object:Api::Type::Boolean
+        name: fail_if_mismatch
+        description: |
+          If set to 'true' protects the target file from being rewritten with a
+          new private key. By default the file is always ensured to have a valid
+          private key on final state.
     properties:
       - !ruby/object:Api::Type::String
         name: name

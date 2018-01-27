@@ -12,30 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<% unless name == "README.md" -%>
+<% unless name == 'README.md' -%>
 <%= compile 'templates/license.erb' -%>
 
 <%= compile 'templates/autogen_notice.erb' -%>
 
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
-<% end # name == README.md -%>
 giam_service_account { 'myaccount':
   ensure       => present,
   name         =>
     'test-23489723@graphite-playground.google.com.iam.gserviceaccount.com',
+  display_name => 'My Puppet test key',
   project      => 'google.com:graphite-playground',
   credential   => 'mycred',
 }
 
+<% end # name == README.md -%>
 giam_service_account_key { 'test-name':
-  ensure               => present,
-  #key_id              => '9669de7d22f7be4d630783e4560f37df78b98297',
-  key_file             => '/home/alexstephen/test.json',
-  overwrite_if_missing => true,
-  service_account      => 'myaccount',
-  key_algorithm        => 'KEY_ALG_UNSPECIFIED',
-  private_key_type     => 'TYPE_GOOGLE_CREDENTIALS_FILE',
-  project              => 'google.com:graphite-playground',
-  credential           => 'mycred',
+  ensure           => present,
+  service_account  => 'myaccount',
+  path             => '/home/nelsona/test.json',
+  key_algorithm    => 'KEY_ALG_RSA_2048',
+  private_key_type => 'TYPE_GOOGLE_CREDENTIALS_FILE',
+  project          => 'google.com:graphite-playground',
+  credential       => 'mycred',
 }
