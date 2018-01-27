@@ -11,18 +11,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<% check_requires(object, 'base64') -%>
+# A module to hold instance information about the service account key file,
+# used during creation/update of the key between GCP <=> key file.
+module ServiceAccountKeyHelper
+  attr_reader :has_key_file
+  attr_reader :fail_if_mismatch
+
+  def init(has_key_file, fail_if_mismatch)
+    @has_key_file = has_key_file
+    @fail_if_mismatch = fail_if_mismatch
+  end
+end
+
 # Format the response to match Puppet's expectations
 def self.decode_response(response)
   response = JSON.parse(response.body)
   if response.key? 'privateKeyData'
-    require 'base64'
-    require 'byebug'
-    @resource[:file]
-    Base64.decode(response['privateKeyData'])
+    response.merge!(JSON.parse(Base64.decode64(response['privateKeyData'])))
   end
   response
 end
 
 def decode_response(response)
   self.class.decode_response(response)
+end
+
+def get_key_id(resource)
+  self.class.get_key_id(resource)
+end
+
+def self.get_key_id(resource)
+  key_file_exists =
+    (File.exist?(resource[:path]) if resource.parameter(:path)) || false
+  if key_file_exists
+    # If key file exists, fetch the key ID from it.
+    file = File.open(resource[:path])
+    [key_file_exists, JSON.parse(file.read)['private_key_id']]
+  elsif !resource.parameter(:key_id).nil?
+    [key_file_exists, resource[:key_id]]
+  end
 end
