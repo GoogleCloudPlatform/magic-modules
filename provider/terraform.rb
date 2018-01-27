@@ -39,6 +39,7 @@ module Provider
     def tf_types
       {
         Api::Type::Boolean => 'schema.TypeBool',
+        Api::Type::Double => 'schema.TypeFloat',
         Api::Type::Integer => 'schema.TypeInt',
         Api::Type::String => 'schema.TypeString',
         # Anonymous string property used in array of strings.
