@@ -19,10 +19,29 @@
 
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
+giam_service_account { 'myaccount':
+  ensure       => present,
+  name         =>
+    'test-23489723@graphite-playground.google.com.iam.gserviceaccount.com',
+  display_name => 'My Puppet test key',
+  project      => 'google.com:graphite-playground',
+  credential   => 'mycred',
+}
+
+# To delete a key you need to either provide a key file or a key ID.
+#
+# $ FACTER_key_id puppet apply <%= name %>
+if !defined('$key_id') {
+  fail('For this example to run you need to define a fact named "key_id".
+        Please refer to the documentation inside the example file
+        "<%= name -%>"')
+}
+
 <% end # name == README.md -%>
-giam_service_account_key { 'testkey1':
+giam_service_account_key { 'mykey':
   ensure           => absent,
-  service_account  => 'test123',
+  key_id           => $key_id,
+  service_account  => 'myaccount',
   project          => 'google.com:graphite-playground',
   credential       => 'mycred',
 }
