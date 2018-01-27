@@ -17,4 +17,4 @@
 'LICENSE': 'templates/LICENSE'
 'Gemfile.lock': 'templates/puppet/Gemfile.lock'
 'spec/data/poor_example.pp': 'templates/puppet/poor_example.pp'
-'.tests/README.md': 'templates/end2end_README.md'
+'.tools/README.md': 'templates/end2end_README.md'
