@@ -1,6 +1,5 @@
 # Copyright (c), Google Inc, 2017
 # Simplified BSD License (see licenses/simplified_bsd.txt or https://opensource.org/licenses/BSD-2-Clause)
-<%= compile 'templates/ansible/autogen_notice.erb' -%>
 
 try:
     import requests
