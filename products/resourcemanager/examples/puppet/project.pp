@@ -17,7 +17,6 @@
 
 <%= compile 'templates/autogen_notice.erb' -%>
 
-<% end # name == README.md -%>
 # To create a new project the authenticated user need the privilege to create
 # new projects, either standalone or under an organization. This example uses
 # the 'application-default' provider, which draws from 'gcloud' (Google Cloud
@@ -54,6 +53,7 @@ if !defined('$project_suffix') {
        the example file "examples/project.pp"')
 }
 
+<% end # name == README.md -%>
 gresourcemanager_project { 'My Sample Project':
   ensure     => present,
   id         => "test-project-${project_suffix}",
