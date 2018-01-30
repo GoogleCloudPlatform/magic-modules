@@ -98,6 +98,22 @@ def main():
         )
     )
 
+<%
+  rrefs = object.all_user_properties
+                .select { |x| x.is_a? Api::Type::ResourceRef }
+-%>
+<% if rrefs -%>
+    # Replace the dictionary of results from other GCP modules with the
+    # proper value only.
+<% rrefs.each do |rref| -%>
+<%
+  rref_module = "module.params['#{Google::StringUtils.underscore(rref.name)}']"
+  import_selector = "['#{Google::StringUtils.underscore(rref.imports)}']"
+-%>
+    <%= rref_module -%> = <%= rref_module -%><%= import_selector %>
+<% end -%>
+
+<% end -%>
     state = module.params['state']
     kind = <%= lines(quote_string(object.kind)) -%>
 
