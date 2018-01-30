@@ -28,7 +28,9 @@ func resource<%= resource_name %>() *schema.Resource {
 	return &schema.Resource{
 		Create: resource<%= resource_name %>Create,
 		Read: resource<%= resource_name %>Read,
+		<% if updatable?(object, properties) -%>
 		Update: resource<%= resource_name %>Update,
+		<% end -%>
 		Delete: resource<%= resource_name %>Delete,
 
 		Importer: &schema.ResourceImporter{
@@ -37,7 +39,7 @@ func resource<%= resource_name %>() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 <% order_properties(properties).each do |prop| -%>
-	<%= build_schema_property(config, prop) %>
+	<%= build_schema_property(config, prop, object) %>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 			"project": &schema.Schema{
@@ -134,6 +136,7 @@ func resource<%= resource_name %>Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
+<% if updatable?(object, properties) -%>
 func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -142,10 +145,11 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
+	<% unless object.input -%>
 	obj := map[string]interface{}{
-<% settable_properties.each do |prop| -%>
-  "<%= prop.name %>": expand<%= resource_name %><%= titlelize_property(prop) %>(d.Get("<%= Google::StringUtils.underscore(prop.name) %>")),
-<% end -%>
+		<% settable_properties.each do |prop| -%>
+		"<%= prop.name %>": expand<%= resource_name %><%= titlelize_property(prop) %>(d.Get("<%= Google::StringUtils.underscore(prop.name) %>")),
+		<% end -%>
 	}
 
 	url, err := replaceVars(d, config, "<%= self_link_url(object) %>")
@@ -154,24 +158,55 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 	}
 
 	log.Printf("[DEBUG] Updating <%= object.name %> %q: %#v", d.Id(), obj)
-	res, err := Put(config, url, obj)
+	res, err := sendRequest(config, "<%= object.update_verb %>", url, obj)
+
 	if err != nil {
 		return fmt.Errorf("Error updating <%= object.name %> %q: %s", d.Id(), err)
 	}
-
-	op := &<%= api_name_lower %>.Operation{}
-	err = Convert(res, op)
+	err = Convert(res, &op)
 	if err != nil {
 		return err
 	}
 
-	err = <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, op, project, "Updating <%= object.name %>")
+	err = <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, &op, project, "Updating <%= object.name %>")
 	if err != nil {
 		return err
 	}
+	<% else # unless object.input -%>
+	var obj map[string]interface{}
+	var url string
+	var res map[string]interface{}
+	var op <%= api_name_lower %>.Operation
+
+	<% settable_properties.reject { |p| p.update_url.nil? }.each do |prop| -%>
+	if d.HasChange("<%= Google::StringUtils.underscore(prop.name) %>") {
+		obj = map[string]interface{}{
+			"<%= prop.name %>": expand<%= resource_name %><%= titlelize_property(prop) %>(d.Get("<%= Google::StringUtils.underscore(prop.name) %>")),
+		}
+		url, err = replaceVars(d, config, "<%= update_url(object, prop.update_url) %>")
+		if err != nil {
+			return err
+		}
+		res, err = sendRequest(config, "<%= prop.update_verb %>", url, obj)
+		if err != nil {
+			return fmt.Errorf("Error updating <%= object.name %> %q: %s", d.Id(), err)
+		}
+		err = Convert(res, &op)
+		if err != nil {
+			return err
+		}
+
+		err = <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, &op, project, "Updating <%= object.name %>")
+		if err != nil {
+			return err
+		}
+	}
+	<% end %>
+	<% end %>
 
 	return resource<%= resource_name %>Read(d, meta)
 }
+<% end %>
 
 func resource<%= resource_name %>Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)

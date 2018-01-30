@@ -24,6 +24,11 @@ objects: !ruby/object:Api::Resource::HashArray
     ignore: ["id"]
     diffSuppressFunc:
       portRange: "portRangeDiffSuppress"
+  GlobalAddress:
+    id: "{{name}}"
+    ignore:
+      - id
+      - region # TODO: Remove this from api.yaml instead of ignoring
   Image:
     id: "{{name}}"
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
@@ -48,7 +53,14 @@ objects: !ruby/object:Api::Resource::HashArray
     ignore: ["id"]
   TargetPool:
     id: "{{name}}"
-
+  TargetHttpProxy:
+    id: "{{name}}"
+    ignore: ["id"]
+    # TODO: Alias id to proxy_id
+  TargetHttpsProxy:
+    id: "{{name}}"
+    ignore: ["id"]
+    # TODO: Alias id to proxy_id
 
 
 # This is for a list of example files.
