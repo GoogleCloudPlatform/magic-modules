@@ -101,7 +101,7 @@ objects: !ruby/object:Api::Resource::HashArray
       - base64
     provider_helpers:
       include:
-        - 'products/iam/helpers/provider_service_account_key.rb'
+        - 'products/iam/helpers/provider_service_account_key.rb.erb'
 examples: !ruby/object:Api::Resource::HashArray
   ServiceAccount:
     - service_account.pp

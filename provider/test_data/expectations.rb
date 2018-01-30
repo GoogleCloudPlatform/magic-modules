@@ -96,7 +96,7 @@ module Provider
           code.flatten.compact.uniq
         else
           # rubocop:disable Security/Eval
-          eval("\"#{cust_before}\"")
+          eval("\"#{cust_before}\"", binding, __FILE__, __LINE__)
           # rubocop:enable Security/Eval
         end
       end
@@ -160,7 +160,7 @@ module Provider
           code.flatten.uniq
         else
           # rubocop:disable Security/Eval
-          eval("\"#{cust_before}\"")
+          eval("\"#{cust_before}\"", binding, __FILE__, __LINE__)
           # rubocop:enable Security/Eval
         end
       end

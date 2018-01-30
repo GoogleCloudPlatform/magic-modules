@@ -54,9 +54,12 @@ class Timers
 
   def print
     @timers.each do |k, v|
-      Logger.instance.log('timer', k.join('/'),
-                          format('%-23s : %s', k.join('/'),
-                                 Time.at(v.total).utc.strftime('%H:%M:%S.%L')))
+      Logger.instance.log(
+        'timer', k.join('/'),
+        format('%<phase>-23s : %<elapsed>s',
+               phase: k.join('/'),
+               elapsed: Time.at(v.total).utc .strftime('%H:%M:%S.%L'))
+      )
     end
   end
 end

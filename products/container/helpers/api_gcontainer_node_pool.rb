@@ -45,11 +45,13 @@ module Google
         def gcontainer_node_pool_resize
           URI.parse(
             format(
-              '%s/%s',
-              Puppet::Type.type(:gcontainer_node_pool).provider(:google)
-                          .self_link(name: @name, zone: @zone,
-                                     project: @project, cluster: @cluster),
-              'setSize'
+              '%<self_link>s/%<method>s',
+              self_link: Puppet::Type.type(:gcontainer_node_pool)
+                                     .provider(:google)
+                                     .self_link(name: @name, zone: @zone,
+                                                project: @project,
+                                                cluster: @cluster),
+              method: 'setSize'
             )
           )
         end

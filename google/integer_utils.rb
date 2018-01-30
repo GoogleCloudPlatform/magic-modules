@@ -17,9 +17,9 @@ module Google
     def self.underscore(value)
       return '0' if value.zero?
       result = []
-      while value > 0
+      while value.positive?
         value, part = value.divmod(1000)
-        result << format('%03d', part) if value > 0
+        result << format('%03d', part) if value.positive?
         result << part if value.zero?
       end
       result.reverse.join('_')

@@ -28,6 +28,6 @@ def modules_for_provider(provider)
   files = Dir.glob("#{products}/**/#{provider}.yaml")
   files.map do |file|
     match = file.match(%r{^.*products\/([a-z]*)\/.*yaml.*})
-    match.captures[0] if match
+    match&.captures&.at(0)
   end.compact
 end
