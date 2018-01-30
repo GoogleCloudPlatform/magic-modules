@@ -68,6 +68,15 @@ module Provider
       }
     end
 
+    def updatable?(resource, properties)
+      !resource.input || !properties.reject { |p| p.update_url.nil? }.empty?
+    end
+
+    def force_new?(property, resource)
+      !property.output &&
+        (property.input || (resource.input && property.update_url.nil?))
+    end
+
     # Puts together the links to use to make API calls for a given resource type
     def self_link_url(resource)
       (product_url, resource_url) = self_link_raw_url(resource)
@@ -79,10 +88,16 @@ module Provider
       [resource.__product.base_url, base_url].flatten.join
     end
 
-    def build_schema_property(config, property)
+    def update_url(resource, url_part)
+      return self_link_url(resource) if url_part.nil?
+      [resource.__product.base_url, url_part].flatten.join
+    end
+
+    def build_schema_property(config, property, object)
       compile_template'templates/terraform/schema_property.erb',
                       property: property,
-                      config: config
+                      config: config,
+                      object: object
     end
 
     # Transforms a Cloud API representation of a property into a Terraform

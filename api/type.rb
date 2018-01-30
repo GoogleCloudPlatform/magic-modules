@@ -22,6 +22,8 @@ module Api
     attr_reader :input # If set to true value is used only on creation
     attr_reader :field
     attr_reader :required
+    attr_reader :update_verb
+    attr_reader :update_url
 
     attr_reader :__resource
     attr_reader :__parent # is nil for top-level properties
@@ -37,6 +39,10 @@ module Api
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
+
+      check_property_oneof_default \
+        :update_verb, %i[POST PUT PATCH NONE], @__resource.update_verb, Symbol
+      check_property :update_url, ::String unless @update_url.nil?
     end
 
     def type

@@ -37,6 +37,8 @@ module Api
     attr_reader :transport
     attr_reader :references
     attr_reader :create_verb
+    attr_reader :update_verb
+    attr_reader :input # If true, the resource is not updatable as a whole unit
 
     attr_reader :__product
 
@@ -213,14 +215,16 @@ module Api
       check_property :label_override, String unless @label_override.nil?
       check_property :transport, Transport unless @transport.nil?
       check_property :references, ReferenceLinks unless @references.nil?
+
+      check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
+      check_property_oneof_default \
+        :update_verb, %i[POST PUT PATCH], :PUT, Symbol
+      check_property :input, :boolean unless @input.nil?
+
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
       check_property_list :parameters, @parameters, Api::Type
       check_property_list :properties, @properties, Api::Type
-
-      check_property :create_verb, Symbol if @create_verb
-      raise "Invalid create verb #{@create_verb}" \
-        unless @create_verb.nil? || %i[POST PUT].include?(@create_verb)
 
       check_identity unless @identity.nil?
     end
