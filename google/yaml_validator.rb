@@ -103,6 +103,23 @@ module Google
       end
     end
 
+    def check_property_oneof(property, valid_values, type = nil)
+      check_property(property, type)
+      prop_value = instance_variable_get("@#{property}")
+      raise "Invalid #{property} #{prop_value}" \
+        unless valid_values.include?(prop_value)
+    end
+
+    def check_property_oneof_default(prop, valid_values, default, type = nil)
+      prop_value = instance_variable_get("@#{prop}")
+      instance_variable_set("@#{prop}", if prop_value.nil?
+                                          default
+                                        else
+                                          prop_value
+                                        end)
+      check_property_oneof prop, valid_values, type
+    end
+
     def set_variables(objects, property)
       return if objects.nil?
       objects.each do |object|
