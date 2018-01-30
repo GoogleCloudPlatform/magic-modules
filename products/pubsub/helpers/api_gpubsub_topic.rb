@@ -51,11 +51,11 @@ module Google
         def gtopic_publish
           URI.parse(
             format(
-              '%s:%s',
-              Puppet::Type.type(:gpubsub_topic).provider(:google)
-                          .self_link(name: @topic, project: @project,
-                                     cluster: @cluster),
-              'publish'
+              '%<self_link>s/%<method>s',
+              self_link: Puppet::Type.type(:gpubsub_topic).provider(:google)
+                                     .self_link(name: @topic, project: @project,
+                                                cluster: @cluster),
+              method: 'publish'
             )
           )
         end

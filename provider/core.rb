@@ -161,11 +161,7 @@ module Provider
     end
 
     def list_manual_network_data
-      test_data = if @config.test_data && @config.test_data.network
-                @config.test_data.network
-              else
-                {}
-              end
+      test_data = @config&.test_data&.network || {}
       create_object_list(
         test_data,
         lambda do |object, file|
@@ -642,7 +638,7 @@ module Provider
 
     def format_section_ruler(size)
       size_pad = (size - size.to_s.length - 4) # < + > + 2 spaces around number.
-      return unless size_pad > 0
+      return unless size_pad.positive?
       ['<',
        '-' * (size_pad / 2), ' ', size.to_s, ' ', '-' * (size_pad / 2),
        (size_pad.even? ? '' : '-'),
@@ -664,7 +660,7 @@ module Provider
         sources.map do |source|
           source.split("\n").map do |l|
             right_pad_len = size - existing - l.length
-            right_pad = right_pad_len > 0 ? ' ' * right_pad_len : ''
+            right_pad = right_pad_len.positive? ? ' ' * right_pad_len : ''
             '|' + '.' * existing + l + right_pad + '|'
           end
         end

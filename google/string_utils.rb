@@ -43,8 +43,10 @@ module Google
       source.gsub(/(?=[A-Z])/, ' ').strip
     end
 
+    # rubocop:disable Style/SafeNavigation # support Ruby < 2.3.0
     def self.symbolize(key)
       key.to_sym unless key.nil?
     end
+    # rubocop:enable Style/SafeNavigation
   end
 end

@@ -272,7 +272,7 @@ class TesterBase
       '.*',
       eo_or.gsub('[', '\\[').gsub(']', '\\]').gsub('(', '\\(').gsub(')', '\\)'),
       '.*'
-    ].join).match(o)
+    ].join).match?(o)
 
     false
   end
