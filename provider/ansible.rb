@@ -66,6 +66,8 @@ module Provider
     # Returns a string representation of the corresponding Python type
     # for a MM type.
     def python_type(type)
+      # All ResourceRefs are dicts with properties.
+      return 'dict' if type.is_a? Api::Type::ResourceRef
       return 'list' if type.is_a? Api::Type::Array
       return 'bool' if type.is_a? Api::Type::Boolean
       return 'int' if type.is_a? Api::Type::Integer
