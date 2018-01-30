@@ -189,6 +189,8 @@ module Provider
       raise "#{self.class}#provider not implemented"
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
     def validate
       super
       check_property :examples, Api::Resource::HashArray unless @examples.nil?
@@ -212,6 +214,8 @@ module Provider
       check_property_list :functions, @functions, Provider::Config::Function \
         unless @functions.nil?
     end
+    # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     # Provides the API object to any type that requires, e.g. for validation
     # purposes, such as Api::Resource::HashArray which enforces that the keys

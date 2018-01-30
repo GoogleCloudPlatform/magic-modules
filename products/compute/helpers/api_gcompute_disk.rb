@@ -44,10 +44,11 @@ module Google
         def gcompute_disk_snapshot
           URI.parse(
             format(
-              '%s/%s',
-              Puppet::Type.type(:gcompute_disk).provider(:google).self_link(
-                name: @name, zone: @zone, project: @project
-              ), 'createSnapshot'
+              '%<self_link>s/%<method>s',
+              self_link: Puppet::Type.type(:gcompute_disk).provider(:google)
+                                     .self_link(name: @name, zone: @zone,
+                                                project: @project),
+              method: 'createSnapshot'
             )
           )
         end

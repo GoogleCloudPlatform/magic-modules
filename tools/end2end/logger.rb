@@ -27,10 +27,12 @@ class Logger
            .split("\n")
            .each do |l|
              if product.nil?
-               printf "%-30s %s: %s\n", provider, "[#{timestamp}]", l
+               printf "%<where>-30s %<when>s: %<log>s\n",
+                      where: provider, when: "[#{timestamp}]", log: l
              else
-               printf "%-30s %s: %s\n", "#{provider}/#{product}",
-                      "[#{timestamp}]", l
+               printf "%<where>-30s %<when>s: %<log>s\n",
+                      where: "#{provider}/#{product}", when: "[#{timestamp}]",
+                      log: l
              end
            end
   end

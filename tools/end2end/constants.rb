@@ -14,10 +14,14 @@
 module End2End
   # Provides constants that can be used for creating end-to-end test examples.
   module Constants
+    # TODO(nelsonjr): Monitor Rubocop bug and remove this rubocop:disable when
+    # it is fixed: https://github.com/bbatsov/rubocop/issues/5531
+    # rubocop:disable Style/RegexpLiteral
     TEST_FILE_REGEX = [
       /.*\.tools.*/,
       /.*\/tests~.*/
-    ]
+    ].freeze
+    # rubocop:enable Style/RegexpLiteral
     TEST_FOLDER = '.tools/end2end/data'.freeze
   end
 end

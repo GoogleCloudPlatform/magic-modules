@@ -84,6 +84,7 @@ module Puppet
 
       @vars
     end
+    # rubocop:enable Metrics/MethodLength
   end
 
   # A template for a test that follows the virtual test workflow:
@@ -102,8 +103,13 @@ module Puppet
     private
 
     def build_plan
-      file = Google::StringUtils.underscore(@name)
-      @vars = {
+      vars = build_vars(Google::StringUtils.underscore(@name))
+      apply_test_environment vars
+      vars
+    end
+
+    def build_vars(file)
+      {
         'name' => @name,
         'phases' => (@pre || []).concat(
           [
@@ -118,10 +124,6 @@ module Puppet
           ]
         ).concat(@post || [])
       }
-
-      apply_test_environment @vars
-
-      @vars
     end
   end
 end

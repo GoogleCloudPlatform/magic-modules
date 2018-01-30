@@ -131,17 +131,17 @@ module Api
 
       def fetch(key, *args)
         # *args only holds default value. Needs to mimic ::Hash
-        if args.count > 0
-          # args[0] will be returned if key not found
-          @__objects.fetch(key, args[0]) unless @__objects.nil?
-        else
+        if args.empty?
           # KeyErorr will be thrown if key not found
-          @__objects.fetch(key) unless @__objects.nil?
+          @__objects&.fetch(key)
+        else
+          # args[0] will be returned if key not found
+          @__objects&.fetch(key, args[0])
         end
       end
 
       def key?(key)
-        @__objects.key?(key) unless @__objects.nil?
+        @__objects&.key?(key)
       end
 
       private

@@ -42,10 +42,10 @@ module Google
         def gsql_instance_clone
           URI.parse(
             format(
-              '%s/%s',
-              Puppet::Type.type(:gsql_instance).provider(:google).self_link(
-                name: @name, project: @project
-              ), 'clone'
+              '%<self_link>s/%<method>s',
+              self_link: Puppet::Type.type(:gsql_instance).provider(:google)
+                                     .self_link(name: @name, project: @project),
+              method: 'clone'
             )
           )
         end

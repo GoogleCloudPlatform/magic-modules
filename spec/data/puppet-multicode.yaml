@@ -12,10 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Puppet::Config
-examples: !ruby/object:Api::Resource::HashArray::NONE
-  reason: 'we do not need examples during these tests'
-files: !ruby/object:Provider::Config::Files::NONE
-  reason: 'we do not need files during these tests'
 objects: !ruby/object:Api::Resource::HashArray
   MyResource:
     create: |
@@ -23,5 +19,3 @@ objects: !ruby/object:Api::Resource::HashArray
       longline-create-line2
       longline-create-line3
       longline-create-line4
-test_data: !ruby/object:Provider::Config::TestData::NONE
-  reason: 'we do not need test data during these tests'
