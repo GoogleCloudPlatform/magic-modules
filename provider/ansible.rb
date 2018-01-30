@@ -27,11 +27,11 @@ module Provider
     }.freeze
 
     EXAMPLE_DEFAULTS = {
-      name: "testObject",
-      project: "testProject",
-      auth_kind: "service_account",
-      service_account_file: "/tmp/auth.pem"
-    }
+      name: 'testObject',
+      project: 'testProject',
+      auth_kind: 'service_account',
+      service_account_file: '/tmp/auth.pem'
+    }.freeze
 
     # Settings for the provider
     class Config < Provider::Config
@@ -104,13 +104,6 @@ module Provider
     private
 
     def generate_resource(data)
-      prod_name = Google::StringUtils.underscore(data[:object].name)
-      path = ["products/#{data[:product_name]}",
-              "examples/ansible/#{prod_name}.yaml"].join('/')
-
-      example = compile_template_with_hash(File.open(path).read,
-                                           EXAMPLE_DEFAULTS) if File.file?(path)
-
       target_folder = data[:output_folder]
       FileUtils.mkpath target_folder
       name = module_name(data[:object])
@@ -118,8 +111,17 @@ module Provider
         default_template: 'templates/ansible/resource.erb',
         out_file: File.join(target_folder,
                             "lib/ansible/modules/cloud/google/#{name}.py"),
-        example: example
+        example: example_defaults(data)
       )
+    end
+
+    def example_defaults(data)
+      obj_name = Google::StringUtils.underscore(data[:object].name)
+      path = ["products/#{data[:product_name]}",
+              "examples/ansible/#{obj_name}.yaml"].join('/')
+
+      compile_template_with_hash(File.open(path).read, EXAMPLE_DEFAULTS) \
+        if File.file?(path)
     end
 
     def generate_resource_tests(data)

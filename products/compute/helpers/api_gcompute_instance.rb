@@ -40,10 +40,11 @@ module Google
         def gcompute_instance_reset
           URI.parse(
             format(
-              '%s/%s',
-              Puppet::Type.type(:gcompute_instance).provider(:google).self_link(
-                name: @name, zone: @zone, project: @project
-              ), 'reset'
+              '%<self_link>s/%<method>s',
+              self_link: Puppet::Type.type(:gcompute_instance).provider(:google)
+                                     .self_link(name: @name, zone: @zone,
+                                                project: @project),
+              method: 'reset'
             )
           )
         end

@@ -15,9 +15,25 @@ require 'provider/config'
 require 'provider/core'
 
 module Provider
+  # A boilerplate provider where all methods are optional.
+  class TerraformBase < Provider::Core
+    private
+
+    # rubocop:disable Layout/EmptyLineBetweenDefs
+    def generate_resource(data) end
+    def generate_resource_tests(data) end
+    def generate_network_datas(data, object) end
+    def generate_base_property(data) end
+    def generate_simple_property(type, data) end
+    def emit_nested_object(data) end
+    def emit_resourceref_object(data) end
+    def generate_typed_array(data, prop) end
+    # rubocop:enable Layout/EmptyLineBetweenDefs
+  end
+
   # Code generator for Terraform Cookbooks that manage Google Cloud Platform
   # resources.
-  class Terraform < Provider::Core
+  class Terraform < TerraformBase
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -158,32 +174,5 @@ module Provider
         out_file: filepath
       )
     end
-
-    # This function would generate unit tests using a template
-    def generate_resource_tests(data) end
-
-    # This function would automatically generate the files used for verifying
-    # network calls in unit tests. If you comment out the following line,
-    # a bunch of YAML files will be created under the spec/ folder.
-    def generate_network_datas(data, object) end
-
-    # We build a lot of property classes to help validate + coerce types.
-    # The following functions would generate all of these properties.
-    # Some of these property classes help us handle Strings, Times, etc.
-    #
-    # Others (nested objects) ensure that all Hashes contain proper values +
-    # types for its nested properties.
-    #
-    # ResourceRef properties help ensure that links between different objects
-    # (Addresses + Instances for example) work properly, are abstracted away,
-    # and don't require the user to have a large knowledge base of how GCP
-    # works.
-    # rubocop:disable Layout/EmptyLineBetweenDefs
-    def generate_base_property(data) end
-    def generate_simple_property(type, data) end
-    def emit_nested_object(data) end
-    def emit_resourceref_object(data) end
-    def generate_typed_array(data, prop) end
-    # rubocop:enable Layout/EmptyLineBetweenDefs
   end
 end

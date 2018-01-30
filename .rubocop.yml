@@ -26,3 +26,9 @@ Metrics/MethodLength:
 Security/Eval:
   Exclude:
     - 'provider/legacy_test_data_generator.rb'
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Style/CommandLiteral:
+  EnforcedStyle: percent_x
