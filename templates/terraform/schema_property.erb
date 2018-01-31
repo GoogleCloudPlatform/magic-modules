@@ -70,6 +70,9 @@
       },
   <% end -%>
 <% end -%>
+<% if (get_code_multiline(config, 'sensitive') || []).include?(property.name) -%>
+    Sensitive: true,
+<% end -%>
 },
 <% else -%>
   // TODO: Property '<%= property.name %>' of type <%= property.class %> is not supported
