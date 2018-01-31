@@ -103,6 +103,18 @@ module Provider
                        config: config
     end
 
+    def build_property_documentation(config, property)
+      compile_template 'templates/terraform/property_documentation.erb',
+                       property: property,
+                       config: config
+    end
+
+    def build_nested_property_documentation(config, property)
+      compile_template 'templates/terraform/nested_property_documentation.erb',
+                       property: property,
+                       config: config
+    end
+
     # Capitalize the first letter of a property name.
     # E.g. "creationTimestamp" becomes "CreationTimestamp".
     def titlelize_property(property)
@@ -116,6 +128,19 @@ module Provider
       ignored = get_code_multiline(config, 'ignore') || []
 
       properties.keep_if { |p| !ignored.include?(construct_ignore_string(p)) }
+    end
+
+    # Returns the nested properties without those ignored. An empty list is returned
+    # if the property is not a NestedObject or an Array of NestedObjects.
+    def effective_nested_properties(config, property)
+      if property.is_a?(Api::Type::NestedObject)
+        effective_properties(config, property.properties)
+      elsif property.is_a?(Api::Type::Array) &&
+        property.item_type.is_a?(Api::Type::NestedObject)
+        effective_properties(config, property.item_type.properties)
+      else
+        []
+      end
     end
 
     private
