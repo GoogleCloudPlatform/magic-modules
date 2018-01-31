@@ -47,7 +47,7 @@ func resource<%= resource_name %>() *schema.Resource {
 				ForceNew: true,
 			},
 <% end -%>
-<% if object.exports.any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
+<% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 			"self_link": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
