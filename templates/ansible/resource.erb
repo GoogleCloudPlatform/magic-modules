@@ -71,7 +71,7 @@ RETURN = '''
 # Imports
 ################################################################################
 
-from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication, GcpModule
+from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequestException
 import json
 
 ################################################################################
@@ -125,11 +125,12 @@ def main():
     module.exit_json(**fetch)
 
 
+<% prod_name = object.__product.prefix[1::-1] -%>
 <% custom_create = get_code_multiline config, 'create' -%>
 <% if custom_create.nil? -%>
 def create(module, link, kind):
-    auth = GcpAuthentication(module)
-    return return_if_object(module, auth.session().post(link, json=resource_to_request(module)), kind)
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    return return_if_object(module, auth.post(link, resource_to_request(module)), kind)
 <% else -%>
 <%= lines(indent(custom_create, 4)) -%>
 <% end -%>
@@ -147,8 +148,8 @@ def update(module, link, kind):
 <% custom_update = get_code_multiline config, 'delete' -%>
 <% if custom_update.nil? -%>
 def delete(module, link, kind):
-    auth = GcpAuthentication(module)
-    return return_if_object(module, auth.session().delete(link), kind)
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    return return_if_object(module, auth.delete(link), kind)
 <% else -%>
 <%= lines(indent(custom_delete, 4)) -%>
 <% end -%>
@@ -180,8 +181,8 @@ def resource_to_request(module):
 
 
 def fetch_resource(module, link, kind):
-    auth = GcpAuthentication(module)
-    return return_if_object(module, auth.session().get(link), kind)
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    return return_if_object(module, auth.get(link), kind)
 
 
 def self_link(module):
@@ -206,6 +207,8 @@ def return_if_object(module, response, kind):
         result = response.json()
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
+    except GcpRequestException as inst:
+        module.fail_json(msg="Network error: %s" % inst)
 
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
