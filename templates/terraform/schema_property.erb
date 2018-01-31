@@ -33,7 +33,9 @@
 <% unless v.nil? -%>
   ValidateFunc: validateRegexp(`<%= v %>`),
 <% end -%>
-<% if property.is_a?(Api::Type::ResourceRef) -%>
+<% if get_code_multiline(config, 'diffSuppressFunc') && !get_code_multiline(config, 'diffSuppressFunc')[property.name].nil? -%>
+  DiffSuppressFunc: <%= get_code_multiline(config, 'diffSuppressFunc')[property.name] %>,
+<% elsif property.is_a?(Api::Type::ResourceRef) -%>
   DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end -%>
 <% if property.is_a?(Api::Type::NestedObject) -%>
