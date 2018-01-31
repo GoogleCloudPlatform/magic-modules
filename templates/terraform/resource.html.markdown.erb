@@ -18,9 +18,7 @@
 <%
   object_name_snake = Google::StringUtils.underscore(object.name)
   api_name_lower = product_ns.downcase
-  ignored = get_code_multiline(config, 'ignore') || []
-  properties = object.all_user_properties
-    .keep_if{ |p| !ignored.include?(p.name) }
+  properties = effective_properties(config, object.all_user_properties)
 -%>
 ---
 layout: "google"
@@ -60,31 +58,41 @@ resource "google_<%= api_name_lower %>_<%= object_name_snake %>" "default" {
 
 The following arguments are supported:
 
-<% object.required_properties.each do |prop| -%>
-* `<%= Google::StringUtils.underscore(prop.name) %>` - (Required) <%= prop.description.strip %>
-
+<% properties.select(&:required).each do |prop| -%>
+<%= build_property_documentation(config, prop) %>
 <% end -%>
+
+<% properties.select(&:required).each do |prop| -%>
+<%= build_nested_property_documentation(config, prop) %>
+<% end -%>
+
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-* `<%= Google::StringUtils.underscore(prop.name) %>` - (Optional) <%= prop.description.strip %>
-
+<%= build_property_documentation(config, prop) %>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 * `project` (Optional) The project in which the resource belongs.
     If it is not provided, the provider project is used.
-
 <% end -%>
+
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%= build_nested_property_documentation(config, prop) %>
+<% end -%>
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
 <% properties.select(&:output).each do |prop| -%>
-* `<%= Google::StringUtils.underscore(prop.name) %>` - <%= prop.description.strip %>
-
+<%= build_property_documentation(config, prop) %>
 <% end -%>
 <% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 * `self_link` - The URI of the created resource.
+<% end -%>
+
+<% properties.select(&:output).each do |prop| -%>
+<%= build_nested_property_documentation(config, prop) %>
 <% end -%>
 
 TODO: Add import section
