@@ -1,0 +1,10 @@
+* `<%= Google::StringUtils.underscore(property.name) %>` -
+<% if property.required -%>
+  (Required)
+<% elsif !property.output -%>
+  (Optional)
+<% end -%>
+  <%= property.description.strip %>
+<% if property.is_a?(Api::Type::NestedObject) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
+  Structure is documented below.
+<% end -%>
