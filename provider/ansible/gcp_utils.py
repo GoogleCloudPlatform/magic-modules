@@ -32,10 +32,40 @@ def navigate_hash(source, path, default=None):
         return result
 
 
-class GcpAuthentication(object):
-    def __init__(self, module):
+class GcpRequestException(Exception):
+    pass
+
+
+# Handles all authentation and HTTP sessions for GCP API calls.
+class GcpSession(object):
+    def __init__(self, module, product):
         self.module = module
+        self.product = product
         self._validate()
+
+    def get(self, url, body=None):
+        try:
+            return self.session().get(url, json=body, headers=self._headers())
+        except getattr(requests.exceptions, 'RequestException') as inst:
+            raise GcpRequestException(inst.message)
+
+    def post(self, url, body=None):
+        try:
+            return self.session().post(url, json=body, headers=self._headers())
+        except getattr(requests.exceptions, 'RequestException') as inst:
+            raise GcpRequestException(inst.message)
+
+    def delete(self, url, body=None):
+        try:
+            return self.session().delete(url, json=body, headers=self._headers())
+        except getattr(requests.exceptions, 'RequestException') as inst:
+            raise GcpRequestException(inst.message)
+
+    def put(self, url, body=None):
+        try:
+            return self.session().put(url, json=body, headers=self._headers())
+        except getattr(requests.exceptions, 'RequestException') as inst:
+            raise GcpRequestException(inst.message)
 
     def session(self):
         return AuthorizedSession(
@@ -70,7 +100,12 @@ class GcpAuthentication(object):
             return google.auth.compute_engine.Credentials(
                 self.module.params['service_account_email'])
         else:
-            raise Exception("Credential type '%s' not implemented" % cred_type)
+            self.module.fail_json(msg="Credential type '%s' not implmented" % cred_type)
+
+    def _headers(self):
+        return {
+            'User-Agent': "Google-Ansible-MM-{0}".format(self.product)
+        }
 
 
 class GcpModule(AnsibleModule):
