@@ -83,6 +83,8 @@ In addition to the arguments listed above, the following computed attributes are
 * `<%= Google::StringUtils.underscore(prop.name) %>` - <%= prop.description.strip %>
 
 <% end -%>
+<% if object.exports.any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 * `self_link` - The URI of the created resource.
+<% end -%>
 
 TODO: Add import section
