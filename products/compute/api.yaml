@@ -1474,6 +1474,7 @@ objects:
           the first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::NestedObject
         name: 'rawDisk'
         description: The parameters of the raw disk image.
