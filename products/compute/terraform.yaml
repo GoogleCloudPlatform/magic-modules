@@ -19,6 +19,11 @@ objects: !ruby/object:Api::Resource::HashArray
     # TODO: look into moving validation into api.yaml
     validation:
       name: "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$"
+  ForwardingRule:
+    id: "name"
+    ignore: ["id"]
+    diffSuppressFunc:
+      portRange: "portRangeDiffSuppress"
   Image:
     id: "name"
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
