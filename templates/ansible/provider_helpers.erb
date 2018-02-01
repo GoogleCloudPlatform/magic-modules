@@ -1,0 +1,9 @@
+<%
+  provider_helpers = Google::HashUtils.navigate(config,
+                                   %w[provider_helpers include], [])
+-%>
+<% if provider_helpers -%>
+
+
+<%= lines(provider_helpers.map { |f| lines(compile(f)) }.join("\n")) -%>
+<% end -%>
