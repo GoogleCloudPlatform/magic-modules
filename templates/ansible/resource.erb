@@ -123,9 +123,17 @@ def main():
     if fetch:
         if state == 'present':
             if is_different(module, fetch):
+<% if save_api_results?(config, object) -%>
+                fetch = update(module, self_link(module), kind, fetch)
+<% else # if save_api_results -%>
                 fetch = update(module, self_link(module), kind)
+<% end # if save_api_results -%>
         else:
+<% if save_api_results?(config, object) -%>
+            delete(module, self_link(module), kind, fetch)
+<% else # if save_api_results -%>
             delete(module, self_link(module), kind)
+<% end # if save_api_results -%>
             fetch = {}
             changed = True
     else:
@@ -154,7 +162,11 @@ def create(module, link, kind):
 
 <% custom_update = get_code_multiline config, 'update' -%>
 <% if custom_update.nil? -%>
+<% if save_api_results?(config, object) -%>
+def update(module, link, kind, fetch):
+<% else # if save_api_results -%>
 def update(module, link, kind):
+<% end # if save_api_results -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <% else -%>
 <%= lines(indent(custom_update, 4)) -%>
@@ -163,7 +175,11 @@ def update(module, link, kind):
 
 <% custom_update = get_code_multiline config, 'delete' -%>
 <% if custom_update.nil? -%>
+<% if save_api_results?(config, object) -%>
+def delete(module, link, kind, fetch):
+<% else # if save_api_results -%>
 def delete(module, link, kind):
+<% end # if save_api_results -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
     return return_if_object(module, auth.delete(link), kind)
 <% else -%>
