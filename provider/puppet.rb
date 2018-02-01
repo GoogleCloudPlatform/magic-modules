@@ -169,6 +169,30 @@ module Provider
       super(output_folder, types)
     end
 
+    def compile_examples(output_folder)
+      compile_file_map(
+        output_folder,
+        @config.examples,
+        lambda do |_object, file|
+          ["examples/#{file}",
+           "products/#{@api.prefix[1..-1]}/examples/puppet/#{file}"]
+        end
+      )
+    end
+
+    def compile_end2end_tests(output_folder)
+      compile_file_map(
+        output_folder,
+        @config.examples,
+        lambda do |_object, file|
+          # Tests go into hidden folder because we don't need to expose
+          # to regular users.
+          ["#{TEST_FOLDER}/#{file}",
+           "products/#{@api.prefix[1..-1]}/examples/puppet/#{file}"]
+        end
+      )
+    end
+
     def property_body(property)
       prop_generator = property_map.select { |type, _| property.class <= type }
       raise "Unknown property type: #{property}" if prop_generator.empty?

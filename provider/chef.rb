@@ -182,7 +182,7 @@ module Provider
           # Tests go into hidden folder because we don't need to expose
           # to regular Chef users.
           ["recipes/tests~#{file}",
-           "products/#{@api.prefix[1..-1]}/files/examples~cookbook~#{file}"]
+           "products/#{@api.prefix[1..-1]}/examples/chef/#{file}"]
         end
       )
     end
@@ -287,7 +287,7 @@ module Provider
         @config.examples,
         lambda do |_object, file|
           ["recipes/examples~#{file}",
-           "products/#{@api.prefix[1..-1]}/files/examples~cookbook~#{file}"]
+           "products/#{@api.prefix[1..-1]}/examples/chef/#{file}"]
         end
       )
     end

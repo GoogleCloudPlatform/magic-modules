@@ -33,8 +33,7 @@ This cookbook was tested on the following operating systems:
 ## Example
 
 ```ruby
-<%= compile ["products/#{@api.prefix[1..-1]}/files/examples", 'cookbook',
-             'readme.rb'].join('~') -%>
+<%= compile "products/#{@api.prefix[1..-1]}/examples/chef/readme.rb" -%>
 ```
 
 ## Credentials
@@ -69,8 +68,8 @@ For complete details of the authentication cookbook, visit the
 #### Example
 
 ```ruby
-<%= compile ["products/#{@api.prefix[1..-1]}/files/examples", 'cookbook',
-             "#{Google::StringUtils.underscore(object.name)}.rb"].join('~') %>
+<%= compile ["products/#{@api.prefix[1..-1]}/examples/chef/",
+             "#{Google::StringUtils.underscore(object.name)}.rb"].join('') %>
 ```
 
 #### Reference
