@@ -196,11 +196,7 @@ def resource_to_request(module):
     return return_vals
 
 
-def fetch_resource(module, link, kind):
-    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    return return_if_object(module, auth.get(link), kind)
-
-
+<%= lines(compile('templates/ansible/transport.erb'), 2) -%>
 def self_link(module):
     return <%= self_link_url(object) -%>.format(**module.params)
 
