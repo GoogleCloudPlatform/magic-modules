@@ -14,18 +14,18 @@
 --- !ruby/object:Provider::Terraform::Config
 objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
-    id: "name"
+    id: "{{name}}"
     ignore: ["id"]
     # TODO: look into moving validation into api.yaml
     validation:
       name: "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$"
   ForwardingRule:
-    id: "name"
+    id: "{{name}}"
     ignore: ["id"]
     diffSuppressFunc:
       portRange: "portRangeDiffSuppress"
   Image:
-    id: "name"
+    id: "{{name}}"
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
     # in raw_disk is currently named `sha1` in our Terraform provider.
     ignore:
@@ -38,13 +38,16 @@ objects: !ruby/object:Api::Resource::HashArray
       - sourceType
       - licenses
   Route:
-    id: "name"
+    id: "{{name}}"
   SslCertificate:
-    id: "name"
+    id: "{{name}}"
     ignore: ["id"]
     sensitive: ["certificate", "privateKey"]
+  Subnetwork:
+    id: "{{region}}/{{name}}"
+    ignore: ["id"]
   TargetPool:
-    id: "name"
+    id: "{{name}}"
 
 
 
@@ -55,7 +58,8 @@ examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   # All of these files will be copied verbatim.
   copy:
-    'transport.go': 'templates/terraform/transport.go'
+    'google/transport.go': 'templates/terraform/transport.go'
+    'google/transport_test.go': 'templates/terraform/transport_test.go'
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:

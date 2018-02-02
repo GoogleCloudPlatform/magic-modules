@@ -3,14 +3,11 @@ package google
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/googleapi"
-	"log"
 	"reflect"
 )
 
@@ -34,8 +31,6 @@ type serializableBody struct {
 	// requests.
 	NullFields []string
 }
-
-
 
 // MarshalJSON returns a JSON encoding of schema containing only selected fields.
 // A field is selected if any of the following is true:
@@ -104,7 +99,7 @@ func sendRequest(config *Config, method, url string, body map[string]interface{}
 	var buf bytes.Buffer
 	if body != nil {
 		err := json.NewEncoder(&buf).Encode(&serializableBody{
-			body:body})
+			body: body})
 		if err != nil {
 			return nil, err
 		}
@@ -132,55 +127,33 @@ func sendRequest(config *Config, method, url string, body map[string]interface{}
 	return result, nil
 }
 
-func constructUrl(d *schema.ResourceData, config *Config, linkTmpl string) (string, error) {
-	re, err := regexp.Compile("{{([[:word:]]+)}}")
-	if err != nil {
-		return "", err
-	}
+func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([[:word:]]+)}}")
+	var project, region, zone string
+	var err error
 
-	var replaceFunc func(string) string
-	if strings.Contains(linkTmpl, "/global/") {
-		replaceFunc, err = replaceVarsGlobal(d, config, re)
-	} else if strings.Contains(linkTmpl, "/region/") {
-		replaceFunc, err = replaceVarsRegional(d, config, re)
-	} else if strings.Contains(linkTmpl, "/zone/") {
-		replaceFunc, err = replaceVarsZonal(d, config, re)
-	} else {
-		return "", fmt.Errorf("Could not expand variables for URL template %s", linkTmpl)
-	}
-	if err != nil {
-		return "", err
-	}
-	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
-}
-
-func replaceVarsGlobal(d *schema.ResourceData, config *Config, re *regexp.Regexp) (func(string) string, error) {
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	return func(s string) string {
-		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
-			return project
+	if strings.Contains(linkTmpl, "{{project}}") {
+		project, err = getProject(d, config)
+		if err != nil {
+			return "", err
 		}
-		return d.Get(m).(string)
-	}, nil
-}
-
-func replaceVarsRegional(d *schema.ResourceData, config *Config, re *regexp.Regexp) (func(string) string, error) {
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
 	}
 
-	region, err := getRegion(d, config)
-	if err != nil {
-		return nil, err
+	if strings.Contains(linkTmpl, "{{region}}") {
+		region, err = getRegion(d, config)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return func(s string) string {
+	if strings.Contains(linkTmpl, "{{zone}}") {
+		zone, err = getZone(d, config)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	replaceFunc := func(s string) string {
 		m := re.FindStringSubmatch(s)[1]
 		if m == "project" {
 			return project
@@ -188,29 +161,15 @@ func replaceVarsRegional(d *schema.ResourceData, config *Config, re *regexp.Rege
 		if m == "region" {
 			return region
 		}
-		return d.Get(m).(string)
-	}, nil
-}
-
-func replaceVarsZonal(d *schema.ResourceData, config *Config, re *regexp.Regexp) (func(string) string, error) {
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	zone, err := getZone(d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	return func(s string) string {
-		m := re.FindStringSubmatch(s)[1]
-		if m == "project" {
-			return project
-		}
 		if m == "zone" {
 			return zone
 		}
-		return d.Get(m).(string)
-	}, nil
+		v, ok := d.GetOk(m)
+		if ok {
+			return v.(string)
+		}
+		return ""
+	}
+
+	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
 }
