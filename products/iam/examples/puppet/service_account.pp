@@ -20,8 +20,14 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 <% end # name == README.md -%>
-giam_service_account { 'test-23489723@graphite-playground.google.com.iam.gserviceaccount.com':
+<%
+  account = example_resource_name(
+    'test-account@graphite-playground.google.com.iam.gserviceaccount.com'
+  )
+-%>
+giam_service_account { <%= account -%>:
   ensure       => present,
+  display_name => 'My Puppet test key',
   project      => 'google.com:graphite-playground',
   credential   => 'mycred',
 }

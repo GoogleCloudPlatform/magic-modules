@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Puppet::Config
 manifest: !ruby/object:Provider::Puppet::Manifest
-  version: '0.1.0'
+  version: '0.1.1'
   source: 'https://github.com/GoogleCloudPlatform/puppet-google-resourcemanager'
   homepage:
     'https://github.com/GoogleCloudPlatform/puppet-google-resourcemanager'
@@ -27,7 +27,7 @@ manifest: !ruby/object:Provider::Puppet::Manifest
   requires:
     - !ruby/object:Provider::Config::Requirements
       name: 'google/gauth'
-      versions: '< 0.2.0'
+      versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 objects: !ruby/object:Api::Resource::HashArray
@@ -69,6 +69,6 @@ files: !ruby/object:Provider::Config::Files
 <% # common~compile~after.yaml should be the last line of compile: section -%>
 changelog:
   - !ruby/object:Provider::Config::Changelog
-    version: '0.1.0'
-    date: 2017-10-17T09:00:00-0700
+    version: '0.1.1'
+    date: 2018-02-02T21:05:00-0700
     general: 'Initial release'
