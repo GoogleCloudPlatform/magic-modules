@@ -13,13 +13,13 @@
 # limitations under the License.
 <% end -%>
 # Automatically allocated network
-<%= compile('products/compute/examples/puppet/network/auto.pp') -%>
+<%= compile('products/compute/examples/puppet/network~auto.pp') -%>
 
 # Manually allocated network
-<%= compile('products/compute/examples/puppet/network/custom.pp') -%>
+<%= compile('products/compute/examples/puppet/network~custom.pp') -%>
 
 # Legacy network
-<%= compile('products/compute/examples/puppet/network/legacy.pp') -%>
+<%= compile('products/compute/examples/puppet/network~legacy.pp') -%>
 
 # Converting automatic to custom network
-<%= compile('products/compute/examples/puppet/network/convert_to_custom.pp') -%>
+<%= compile('products/compute/examples/puppet/network~convert_to_custom.pp') -%>

@@ -56,6 +56,6 @@ if !defined('$project_suffix') {
 
 gresourcemanager_project { 'My Sample Project':
   ensure     => absent,
-  id         => "test-project-${project_suffix}",
+  id         => <%= example_resource_name('test-project-${project_suffix}') -%>,
   credential => 'mycred',
 }

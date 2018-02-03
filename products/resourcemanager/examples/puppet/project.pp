@@ -56,6 +56,6 @@ if !defined('$project_suffix') {
 <% end # name == README.md -%>
 gresourcemanager_project { 'My Sample Project':
   ensure     => present,
-  id         => "test-project-${project_suffix}",
+  id         => <%= example_resource_name('test-project-${project_suffix}') -%>,
   credential => 'mycred',
 }

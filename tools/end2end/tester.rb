@@ -130,6 +130,8 @@ tests.each { |t| t.test_matrix = ARGV }
 # Ensure we are not missing any products
 missing = Dir[File.join('..', '..', 'build', '*', '*')]
           .reject { |f| f.start_with?('../../build/presubmit/') }
+          .reject { |f| f.start_with?('../../build/ansible/') }
+          .reject { |f| f.start_with?('../../build/terraform/') }
           .reject { |f| f.end_with?('/auth') }
           .reject { |f| f.end_with?('_bundle') }
           .select do |f|
@@ -140,8 +142,9 @@ missing = Dir[File.join('..', '..', 'build', '*', '*')]
 
 bad = Colors::B_RED
 nc = Colors::NC
-puts "#{bad} The following modules are missing: #{missing} #{nc}" unless \
-  missing.empty?
+missing.each do |mod|
+  log 'end2end', 'parser', "#{bad}Missing module: #{mod}#{nc}"
+end
 
 Timers.instance.measure(%w[bundle install]) do
   bundle_install
