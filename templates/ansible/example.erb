@@ -1,10 +1,15 @@
 ---
 <%= compile 'templates/ansible/autogen_notice.erb' -%>
+<% if example.dependencies -%>
+#---------------------------------------------------------
+# Pre-test setup
+<% object.dependencies.each do |depend| -%>
+<%= lines(dependent.build_test('present', false)) -%>
+<% end # object.dependencies.each -%>
+<% end # if example.dependencies -%>
 #----------------------------------------------------------
 <% resource_name = Google::StringUtils.uncombine(object.name).downcase -%>
-- name: create a <%= resource_name %>
-<%= lines(indent(example, 2)) -%>
-      state: present
+<%= lines(example.task.build_test('present', false)) -%>
   register: result
 - name: assert changed is true
   assert:
@@ -12,9 +17,7 @@
       - result.changed == true
       - "result.kind == <%= quote_string(object.kind) -%>"
 # ----------------------------------------------------------------------------
-- name: create a <%= resource_name -%> that already exists
-<%= lines(indent(example, 2)) -%>
-      state: present
+<%= lines(example.task.build_test('present', true)) -%>
   register: result
 - name: assert changed is false
   assert:
@@ -22,9 +25,7 @@
       - result.changed == false
       - "result.kind == <%= quote_string(object.kind) -%>"
 #----------------------------------------------------------
-- name: delete a <%= resource_name %>
-<%= lines(indent(example, 2)) -%>
-      state: absent
+<%= lines(example.task.build_test('absent', false)) -%>
   register: result
 - name: assert changed is true
   assert:
@@ -32,12 +33,17 @@
       - result.changed == true
       - result.has_key('kind') == False
 # ----------------------------------------------------------------------------
-- name: delete a <%= resource_name -%> that does not exist
-<%= lines(indent(example, 2)) -%>
-      state: absent
+<%= lines(example.task.build_test('absent', true)) -%>
   register: result
 - name: assert changed is false
   assert:
     that:
       - result.changed == false
       - result.has_key('kind') == False
+<% if example.dependencies -%>
+#---------------------------------------------------------
+# Post-test teardown
+<% object.dependencies.each do |depend| -%>
+<%= lines(dependent.build_test('absent', false)) -%>
+<% end # object.dependencies.each -%>
+<% end # if example.dependencies -%>
