@@ -51,9 +51,12 @@ extends_documentation_fragment: gcp
 <% if example -%>
 EXAMPLES = '''
 <% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
-- name: Create a <%= res_readable_name %>
-<%= lines(indent(example, 2)) -%>
-      state: 'present'
+<% if example.dependencies -%>
+<%   object.dependencies.each do |depend| -%>
+<%= lines(dependent.build_test('present', false)) -%>
+<%   end # object.dependencies.each -%>
+<% end # if example.dependencies -%>
+<%= example.task.build_example('present') -%>
 '''
 <% end -%>
 
