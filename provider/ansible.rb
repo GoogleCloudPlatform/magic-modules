@@ -14,25 +14,12 @@
 require 'provider/config'
 require 'provider/core'
 require 'provider/ansible/manifest'
+require 'provider/ansible/example'
 
 module Provider
   # Code generator for Ansible Cookbooks that manage Google Cloud Platform
   # resources.
   class Ansible < Provider::Core
-    INTEGRATION_TEST_DEFAULTS = {
-      project: '"{{ gcp_project }}"',
-      auth_kind: '"{{ gcp_cred_kind }}"',
-      service_account_file: '"{{ gcp_cred_file }}"',
-      name: '"{{ resource_name }}"'
-    }.freeze
-
-    EXAMPLE_DEFAULTS = {
-      name: 'testObject',
-      project: 'testProject',
-      auth_kind: 'service_account',
-      service_account_file: '/tmp/auth.pem'
-    }.freeze
-
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -101,7 +88,28 @@ module Provider
        Google::StringUtils.underscore(object.name)].join('_')
     end
 
+
+    def build_object_data(object, output_folder)
+      # Method is overriden to add Ansible example objects to the data object.
+      data = super
+
+      prod_name = Google::StringUtils.underscore(data[:object].name)
+      path = ["products/#{data[:product_name]}",
+              "examples/ansible/#{prod_name}.yaml"].join('/')
+
+      data.merge(example: (get_example(path) if File.file?(path)))
+    end
+
     private
+
+    def get_example(cfg_file)
+      # These examples will have embedded ERB that will be compiled at a later
+      # stage.
+      ex = Google::YamlValidator.parse(File.read(cfg_file))
+      raise "#{cfg_file}(#{ex.class}) is not a Provider::Ansible::Example" \
+        unless ex.is_a?(Provider::Ansible::Example)
+      ex
+    end
 
     def generate_resource(data)
       target_folder = data[:output_folder]
@@ -110,8 +118,7 @@ module Provider
       generate_resource_file data.clone.merge(
         default_template: 'templates/ansible/resource.erb',
         out_file: File.join(target_folder,
-                            "lib/ansible/modules/cloud/google/#{name}.py"),
-        example: example_defaults(data)
+                            "lib/ansible/modules/cloud/google/#{name}.py")
       )
     end
 
@@ -142,14 +149,8 @@ module Provider
       generate_resource_file data.clone.merge(
         default_template: 'templates/ansible/example.erb',
         out_file: File.join(target_folder,
-                            "test/integration/targets/#{name}/tasks/main.yml"),
-        example: compile_template_with_hash(File.open(path).read,
-                                            INTEGRATION_TEST_DEFAULTS)
+                            "test/integration/targets/#{name}/tasks/main.yml")
       )
-    end
-
-    def compile_template_with_hash(template, hash)
-      ERB.new(template).result(OpenStruct.new(hash).instance_eval { binding })
     end
 
     def generate_network_datas(data, object) end
