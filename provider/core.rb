@@ -385,15 +385,6 @@ module Provider
       v
     end
 
-    def quote_string(value)
-      raise 'Invalid value' if value.nil?
-      if value.include?('#{') || value.include?("'")
-        ['"', value, '"'].join
-      else
-        ["'", value, "'"].join
-      end
-    end
-
     # Used to convert a string 'a b c' into a\ b\ c for use in %w[...] form
     def str2warray(value)
       unquote_string(value).gsub(/ /, '\\ ')
