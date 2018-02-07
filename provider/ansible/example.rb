@@ -63,12 +63,13 @@ module Provider
         verb = 'delete' if state == 'absent'
 
         again = ''
-        again = ' again' if noop
+        again = ' that already exists' if noop and state == 'present'
+        again = ' that does not exist' if noop and state == 'absent'
         [
           "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
-          "  #{@name}:",
-          indent(compile_template_with_hash(@code, hash), 4).to_s,
-          "    state: #{state}"
+          indent("#{@name}:", 2),
+          indent(compile_template_with_hash(@code, hash), 6).to_s,
+          indent("state: #{state}", 6)
         ].join("\n")
       end
 

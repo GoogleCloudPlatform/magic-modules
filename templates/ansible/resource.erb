@@ -56,7 +56,7 @@ EXAMPLES = '''
 <%= lines(dependent.build_test('present', false)) -%>
 <%   end # object.dependencies.each -%>
 <% end # if example.dependencies -%>
-<%= example.task.build_example('present') -%>
+<%= lines(example.task.build_example('present')) -%>
 '''
 <% end -%>
 
@@ -105,7 +105,7 @@ def main():
   rrefs = object.all_user_properties
                 .select { |x| x.is_a? Api::Type::ResourceRef }
 -%>
-<% if rrefs -%>
+<% unless rrefs.empty? -%>
     # Replace the dictionary of results from other GCP modules with the
     # proper value only.
 <% rrefs.each do |rref| -%>
@@ -152,10 +152,10 @@ def main():
     module.exit_json(**fetch)
 
 
-<% prod_name = object.__product.prefix[1::-1] -%>
+<% prod_name = object.__product.prefix[1..-1] -%>
 <% custom_create = get_code_multiline config, 'create' -%>
-<% if custom_create.nil? -%>
 def create(module, link, kind):
+<% if custom_create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
     return return_if_object(module, auth.post(link, resource_to_request(module)), kind)
 <% else -%>
@@ -164,30 +164,30 @@ def create(module, link, kind):
 
 
 <% custom_update = get_code_multiline config, 'update' -%>
-<% if custom_update.nil? -%>
 <% if save_api_results?(config, object) -%>
 def update(module, link, kind, fetch):
 <% else # if save_api_results -%>
 def update(module, link, kind):
 <% end # if save_api_results -%>
-    module.fail_json(msg="<%= object.name -%> cannot be edited")
-<% else -%>
-<%= lines(indent(custom_update, 4)) -%>
-<% end -%>
-
-
-<% custom_update = get_code_multiline config, 'delete' -%>
 <% if custom_update.nil? -%>
+    module.fail_json(msg="<%= object.name -%> cannot be edited")
+<% else # if custom_update.nil? -%>
+<%= lines(indent(custom_update, 4)) -%>
+<% end # if custom_update.nil? -%>
+
+
+<% custom_delete = get_code_multiline config, 'delete' -%>
 <% if save_api_results?(config, object) -%>
 def delete(module, link, kind, fetch):
 <% else # if save_api_results -%>
 def delete(module, link, kind):
 <% end # if save_api_results -%>
+<% if custom_delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
     return return_if_object(module, auth.delete(link), kind)
-<% else -%>
+<% else # if custom_delete.nil? -%>
 <%= lines(indent(custom_delete, 4)) -%>
-<% end -%>
+<% end # if custom_delete.nil? -%>
 
 
 def resource_to_request(module):
@@ -257,13 +257,30 @@ def is_different(module, response):
     request = resource_to_request(module)
 
     # Remove all output-only from response.
-    return_vals = {}
+    response_vals = {}
     for k, v in response.items():
         if k in request:
-            return_vals[k] = v
+            response_vals[k] = v
 
-    return request != return_vals
+    request_vals = {}
+    for k, v in request.items():
+        if k in response:
+            request_vals[k] = v
 
-<%= lines(compile('templates/ansible/provider_helpers.erb'), 1) -%>
+    return convert_to_unicode(response_vals) != convert_to_unicode(request_vals)
+
+
+# Convert all entries in a dict to unicode
+def convert_to_unicode(input):
+    if isinstance(input, dict):
+        return dict((convert_to_unicode(key), convert_to_unicode(value)) for key, value in input.items())
+    elif isinstance(input, list):
+        return [convert_to_unicode(element) for element in input]
+    elif isinstance(input, str):
+        return unicode(input)
+    else:
+        return input
+
+<%= compile('templates/ansible/provider_helpers.erb') -%>
 if __name__ == '__main__':
     main()

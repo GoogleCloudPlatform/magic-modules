@@ -92,6 +92,15 @@ module Compile
       File.join(*%w[google].concat([product_ns, lib, file]))
     end
 
+    def quote_string(value)
+      raise 'Invalid value' if value.nil?
+      if value.include?('#{') || value.include?("'")
+        ['"', value, '"'].join
+      else
+        ["'", value, "'"].join
+      end
+    end
+
     private
 
     def get_helper_file(file, remove_copyright_notice = true)

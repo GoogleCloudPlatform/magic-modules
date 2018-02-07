@@ -14,24 +14,25 @@
 <% end -%>
 <% if object.kind? -%>
 def fetch_resource(module, link, kind):
-    auth = GcpAuthentication(module)
-    return return_if_object(module, auth.session().get(link), kind)
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    return return_if_object(module, auth.get(link), kind)
 <% else # object.kind? -%>
 def fetch_resource(module, link):
-    auth = GcpAuthentication(module)
-    return return_if_object(module, auth.session().get(link))
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    return return_if_object(module, auth.get(link))
 
 <% end # object.kind? -%>
 
 <% unless object.self_link_query.nil? -%>
+
 def fetch_wrapped_resource(module, kind, wrap_kind, wrap_path):
     result = fetch_resource(module, self_link(module), wrap_kind)
-    if result == None or not wrap_path in result:
+    if result is None or wrap_path not in result:
         return None
 
     result = unwrap_resource(result[wrap_path], module)
 
-    if result == None:
+    if result is None:
         return None
 
     if result['kind'] != kind:
