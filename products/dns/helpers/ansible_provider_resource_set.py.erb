@@ -77,7 +77,7 @@ def update_soa(module):
     updated_soa = copy.deepcopy(original_soa)
 
     soa_parts = updated_soa['rrdatas'][0].split(' ')
-    soa_parts[2] = unicode(int(soa_parts[2]) + 1)
+    soa_parts[2] = str(int(soa_parts[2]) + 1)
     updated_soa['rrdatas'][0] = ' '.join(soa_parts)
     return [original_soa, updated_soa]
 
