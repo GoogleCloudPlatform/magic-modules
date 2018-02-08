@@ -25,6 +25,9 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
+  Project:
+    # TODO(alexstephen): Re-evaluate merging Project into Ansible
+    skip: true
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
