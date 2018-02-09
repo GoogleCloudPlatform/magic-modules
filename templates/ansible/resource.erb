@@ -133,7 +133,10 @@ def main():
                                    '<%= object.self_link_query.items -%>')
 <% end # object.self_link_query.nil? -%>
     changed = False
-
+<% if object.virtual -%>
+    if not fetch:
+        module.fail_json(msg="<%= object.name -%> is not valid")
+<% else # object.virtual -%>
     if fetch:
         if state == 'present':
             if is_different(module, fetch):
@@ -159,6 +162,7 @@ def main():
         fetch.update({'changed': changed})
     else:
         fetch = {'changed': changed}
+<% end # object.virtual -%>
 
     module.exit_json(**fetch)
 
