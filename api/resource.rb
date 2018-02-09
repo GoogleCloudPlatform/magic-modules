@@ -35,7 +35,6 @@ module Api
     attr_reader :exports
     attr_reader :label_override
     attr_reader :transport
-    attr_reader :references
     attr_reader :create_verb
 
     attr_reader :__product
@@ -75,18 +74,6 @@ module Api
 
       def kind?
         !@kind.nil?
-      end
-    end
-
-    # Represents a list of documentation links.
-    class ReferenceLinks < Api::Object
-      attr_reader :guides
-      attr_reader :api
-
-      def validate
-        super
-        check_property :guides, Hash unless @guide.nil?
-        check_property :api, String unless @guide.nil?
       end
     end
 
@@ -212,7 +199,6 @@ module Api
       check_property :readonly, :boolean unless @readonly.nil?
       check_property :label_override, String unless @label_override.nil?
       check_property :transport, Transport unless @transport.nil?
-      check_property :references, ReferenceLinks unless @references.nil?
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
       check_property_list :parameters, @parameters, Api::Type

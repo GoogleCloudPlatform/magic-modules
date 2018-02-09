@@ -1,3 +1,16 @@
+GIT
+  remote: https://github.com/nelsonjr/rubocop.git
+  revision: 178b3150b7610195c327783575177520316e1985
+  branch: feature/ignore-parent-exclude
+  specs:
+    rubocop (0.50.0)
+      parallel (~> 1.10)
+      parser (>= 2.3.3.1, < 3.0)
+      powerpack (~> 0.1)
+      rainbow (>= 2.2.2, < 3.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (~> 1.0, >= 1.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -11,12 +24,13 @@ GEM
     metaclass (0.0.4)
     mocha (1.2.1)
       metaclass (~> 0.0.1)
-    parallel (1.12.1)
-    parser (2.4.0.2)
-      ast (~> 2.3)
+    parallel (1.12.0)
+    parser (2.4.0.0)
+      ast (~> 2.2)
     powerpack (0.1.1)
-    psych (2.1.0)
-    rainbow (3.0.0)
+    rainbow (2.2.2)
+      rake
+    rake (12.1.0)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -30,13 +44,6 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.5.0)
     rspec-support (3.5.0)
-    rubocop (0.52.1)
-      parallel (~> 1.10)
-      parser (>= 2.4.0.2, < 3.0)
-      powerpack (~> 0.1)
-      rainbow (>= 2.2.2, < 4.0)
-      ruby-progressbar (~> 1.7)
-      unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.9.0)
     simplecov (0.12.0)
       docile (~> 1.1.0)
@@ -51,10 +58,9 @@ PLATFORMS
 DEPENDENCIES
   binding_of_caller
   mocha
-  psych (= 2.1.0)
   rspec
-  rubocop
+  rubocop!
   simplecov
 
 BUNDLED WITH
-   1.16.1
+   1.15.3
