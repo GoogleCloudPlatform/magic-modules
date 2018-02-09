@@ -11,24 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/logger'
-require 'google/yaml_validator'
-
-module Api
-  # Repesents a base object
-  class Object < Google::YamlValidator
-    # Represents an object that has a (mandatory) name
-    class Named < Api::Object
-      attr_reader :name
-
-      def validate
-        super
-        check_property :name, String
-      end
-    end
-
-    def out_name
-      Google::StringUtils.underscore(@name)
-    end
+module End2End
+  # Provides constants that can be used for creating end-to-end test examples.
+  module Constants
+    TEST_FILE_REGEX = /.*tools.*/
+    TEST_FOLDER = '.tools/end2end/data'.freeze
   end
 end

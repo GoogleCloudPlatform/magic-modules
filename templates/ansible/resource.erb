@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2017 Google
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-<%= compile 'templates/ansible/autogen_notice.erb' -%>
+<%= compile 'templates/autogen_notice.erb' -%>
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -36,7 +36,7 @@ options:
     state:
         description:
             - Whether the given object should exist in GCP
-        required: true
+        required: false
         choices: ['present', 'absent']
         default: 'present'
 <% object.all_user_properties.reject(&:output).each do |prop| -%>
@@ -57,13 +57,13 @@ EXAMPLES = '''
 '''
 <% end -%>
 
-RETURN = '''
+RETURNS = '''
 <% object.all_user_properties.select(&:output).each do |prop| -%>
     <%= Google::StringUtils.underscore(prop.name) -%>:
         description:
 <%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
         returned: success
-        type: <%= lines(python_type(prop)) -%>
+        type: <%= lines(prop.type.downcase) -%>
 <% end -%>
 '''
 
@@ -72,7 +72,7 @@ RETURN = '''
 ################################################################################
 
 from ansible.module_utils.gcp_utils import navigate_hash, GcpAuthentication
-from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.basic import AnsibleModule
 import json
 
 ################################################################################
@@ -98,22 +98,12 @@ def main():
 <% end -%>
             project=dict(required=True, type='str'),
             auth_kind=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_AUTH_KIND']),
+                required=True,
                 choices=['machineaccount', 'serviceaccount', 'application'],
                 type='str'),
-            service_account_email=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_SERVICE_ACCOUNT_EMAIL']),
-                type='str'),
-            service_account_file=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_SERVICE_ACCOUNT_FILE']),
-                type='path'),
-            scopes=dict(
-                required=False,
-                fallback=(env_fallback, ['GCP_SCOPES']),
-                type='list')
+            service_account_email=dict(type='str'),
+            service_account_file=dict(type='path'),
+            scopes=dict(required=True, type='list')
         ),
         mutually_exclusive=[['service_account_email', 'service_account_file']],
     )
@@ -176,12 +166,7 @@ def resource_to_request(module):
 -%>
 <% end -%>
     }
-    return_vals = {}
-    for k, v in request.items():
-        if v:
-            return_vals[k] = v
-
-    return return_vals
+    return {k: v for k, v in request.items() if v}
 
 
 def fetch_resource(module, link, kind):
@@ -224,12 +209,8 @@ def is_different(module, response):
     request = resource_to_request(module)
 
     # Remove all output-only from response.
-    return_vals = {}
-    for k, v in response.items():
-        if k in request:
-            return_vals[k] = v
-
-    return request != return_vals
+    response = {k: v for k, v in response.items() if k in request}
+    return request != response
 
 if __name__ == '__main__':
     main()
