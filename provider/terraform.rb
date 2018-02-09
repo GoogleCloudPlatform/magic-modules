@@ -83,22 +83,6 @@ module Provider
       )
       # TODO: error check goimports
       %x(goimports -w #{filepath})
-
-      generate_documentation(data)
-    end
-
-    def generate_documentation(data)
-      target_folder = data[:output_folder]
-      target_folder = File.join(target_folder, 'website', 'docs', 'r')
-      FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
-      product_name = Google::StringUtils.underscore(data[:product_name])
-      filepath =
-        File.join(target_folder, "#{product_name}_#{name}.html.markdown")
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/terraform/resource.html.markdown.erb',
-        out_file: filepath
-      )
     end
 
     # This function would generate unit tests using a template

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+# This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
       id: "name"

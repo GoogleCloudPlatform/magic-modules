@@ -11,24 +11,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/logger'
-require 'google/yaml_validator'
+require 'tester_base'
 
-module Api
-  # Repesents a base object
-  class Object < Google::YamlValidator
-    # Represents an object that has a (mandatory) name
-    class Named < Api::Object
-      attr_reader :name
-
-      def validate
-        super
-        check_property :name, String
-      end
+module Chef
+  # Executes all examples against a real Google Cloud Platform project. The
+  # account requires to have Owner (or Editor) to all resources being tested.
+  class Tester < TesterBase
+    def provider
+      'chef'
     end
 
-    def out_name
-      Google::StringUtils.underscore(@name)
+    def header
+      <<-HEADER
+       _______ _     _ _______ _______
+       |       |_____| |______ |______
+       |_____  |     | |______ |
+
+      HEADER
+    end
+
+    private
+
+    def command(data)
+      %w[bundle exec chef-client -z --runlist] \
+        << "recipe[#{data['run']}]"
+    end
+
+    def variables(env)
+      super env
     end
   end
 end

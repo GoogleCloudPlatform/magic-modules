@@ -46,7 +46,7 @@ files: !ruby/object:Provider::Config::Files
   compile:
 <%= indent(include('provider/chef/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/chef/common~compile~after.yaml'), 4) %>
-<% # common~compile~after.yaml should be the last line of compile: section -%>
+<% # common~compile~after.yaml should be the last line of compile: section %>
 style:
   - !ruby/object:Provider::Config::StyleException
     name: libraries/google/storage/property/bucket_acl.rb
