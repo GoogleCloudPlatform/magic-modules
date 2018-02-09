@@ -13,7 +13,7 @@
 # limitations under the License.
 <% end -%>
 <!---
-<%= compile('templates/autogen_notice.erb').delete("#") -%>
+<%= compile('templates/terraform/autogen_notice.erb').gsub("//", "") -%>
 --->
 <%
   object_name_snake = Google::StringUtils.underscore(object.name)

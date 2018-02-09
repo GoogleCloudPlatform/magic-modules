@@ -82,6 +82,9 @@ objects:
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Backend buckets allow you to use Google Cloud Storage buckets with HTTP(S)
       load balancing.
