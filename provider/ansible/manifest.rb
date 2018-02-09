@@ -33,6 +33,12 @@ module Provider
         check_property :version_added, String
         check_property :author, String
       end
+
+      # Get value from config and fallback to manifest.
+      def get(value, config)
+        return config[value] unless config[value].nil?
+        instance_variable_get("@#{value}".to_sym)
+      end
     end
   end
 end
