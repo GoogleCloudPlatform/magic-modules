@@ -220,8 +220,12 @@ def self_link(module):
     return <%= self_link_url(object) -%>.format(**module.params)
 
 
-def collection(module):
-    return <%= collection_url(object) -%>.format(**module.params)
+<% custom_collection = get_code_multiline config, 'collection' -%>
+<% if custom_collection.nil? -%>
+<%= lines(emit_link('collection', collection_url(object))) -%>
+<% else # custom_collection.nil? -%>
+<%= lines(emit_link('collection', custom_collection)) -%>
+<% end # custom_collection.nil? -%>
 
 
 def return_if_object(module, response, kind):
