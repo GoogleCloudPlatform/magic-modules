@@ -100,6 +100,23 @@ module Provider
       data.merge(example: (get_example(path) if File.file?(path)))
     end
 
+    # Given a URL and function name, emit a URL.
+    def emit_link(name, url, extra_data = false)
+      params = emit_link_var_args(url, extra_data)
+      # Extra if params include a extra parameter (> 1)
+      extra = (" + extra" if params.length > 1) || ''
+      url_code = "return #{url}.format(**module.params)#{extra}"
+      [
+        "def #{name}(#{params.join(', ')}):",
+        indent(url_code, 4).gsub("<|extra|>", ''),
+      ].join("\n")
+    end
+
+    def emit_link_var_args(url, extra_data)
+      extra = url.include?('<|extra|>') || extra_data
+      ['module', ("extra=''" if extra)].compact
+    end
+
     private
 
     def get_example(cfg_file)
