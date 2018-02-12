@@ -44,11 +44,10 @@ module Provider
 
       def validate
         super
-        check_property_list :requires, @requires, String
+        check_property_list :requires, String
         check_property :code, String
-        check_property_list :arguments, @arguments,
-                            Provider::Config::Function::Argument
-        check_property :helpers, String unless @helpers.nil?
+        check_property_list :arguments, Provider::Config::Function::Argument
+        check_optional_property :helpers, String
       end
 
       # An argument required by the function being provided by the module.
@@ -117,10 +116,9 @@ module Provider
 
       def validate
         super
-        check_property :compile, Hash unless @compile.nil?
-        check_property :copy, Hash unless @copy.nil?
-        check_property_list \
-          :permissions, @permissions, Provider::Config::Permission
+        check_optional_property :compile, Hash
+        check_optional_property :copy, Hash
+        check_property_list :permissions, Provider::Config::Permission
       end
     end
 
@@ -145,7 +143,7 @@ module Provider
       def validate
         super
         check_property :pinpoints, Array
-        check_property_list :pinpoints, @pinpoints, Hash
+        check_property_list :pinpoints, Hash
       end
     end
 
@@ -161,9 +159,9 @@ module Provider
         super
         check_property :version, String
         check_property :date, Time
-        check_property :general, String unless @general.nil?
-        check_property_list :features, @features, String
-        check_property_list :fixes, @fixes, String
+        check_optional_property :general, String
+        check_property_list :features, String
+        check_property_list :fixes, String
 
         raise "Required general/features/fixes for change #{@version}." \
           if @general.nil? && @features.nil? && @fixes.nil?
@@ -189,33 +187,24 @@ module Provider
       raise "#{self.class}#provider not implemented"
     end
 
-    # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     def validate
       super
-      check_property :examples, Api::Resource::HashArray unless @examples.nil?
-      check_property :files, Provider::Config::Files unless @files.nil?
+      check_optional_property :examples, Api::Resource::HashArray
+      check_optional_property :files, Provider::Config::Files
 
       # TODO(alexstephen): Remove HashArray checking when all provider.yamls
       # using Provider::Objects
-      if @objects.is_a? Provider::Objects
-        check_property :objects, Provider::Objects unless @objects.nil?
-      else
-        check_property :objects, Api::Resource::HashArray unless @objects.nil?
-      end
+      check_optional_property :objects, [Provider::Objects,
+                                         Api::Resource::HashArray]
 
-      check_property :test_data, Provider::Config::TestData \
-        unless @test_data.nil?
-      check_property :tests, Api::Resource::HashArray unless @tests.nil?
-      check_property_list :style, @style, Provider::Config::StyleException \
-        unless @style.nil?
-      check_property_list :changelog, @changelog, Provider::Config::Changelog \
-        unless @changelog.nil?
-      check_property_list :functions, @functions, Provider::Config::Function \
-        unless @functions.nil?
+      check_optional_property :test_data, Provider::Config::TestData
+      check_optional_property :tests, Api::Resource::HashArray
+      check_optional_property_list :style, Provider::Config::StyleException
+      check_optional_property_list :changelog, Provider::Config::Changelog
+      check_optional_property_list :functions, Provider::Config::Function
     end
     # rubocop:enable Metrics/PerceivedComplexity
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     # Provides the API object to any type that requires, e.g. for validation
     # purposes, such as Api::Resource::HashArray which enforces that the keys

@@ -14,7 +14,7 @@ module Provider
 
       unless @objects.nil?
         check_property :objects, Array
-        check_property_list :objects, @objects, Provider::Resource
+        check_property_list :objects, Provider::Resource
       end
 
       super
@@ -77,7 +77,7 @@ module Provider
   class Resource < Api::Object
     attr_reader :editable
     def validate
-      check_property :editable, Boolean unless @editable.nil?
+      check_optional_property :editable, Boolean
     end
   end
 
@@ -96,22 +96,20 @@ module Provider
     attr_reader :provider_helpers
 
     def validate
-      check_property :create, String unless @create.nil?
-      check_property :update, String unless @update.nil?
-      check_property :delete, String unless @delete.nil?
-      check_property :flush, String unless @delete.nil?
-      check_property :access_api_results, Boolean \
-        unless @access_api_results.nil?
-      check_property :pre_fetch, String unless @pre_fetch.nil?
-      check_property :self_link, String unless @self_link.nil?
-      check_property :collection, String unless @collection.nil?
-      check_property :present, String unless @present.nil?
-      check_property :resource_to_request_patch, String \
-        unless @resource_to_request_patch.nil?
-      check_property :return_if_object, String unless @return_if_object.nil?
+      check_optional_property :create, String
+      check_optional_property :update, String
+      check_optional_property :delete, String
+      check_optional_property :flush, String
+      check_optional_property :access_api_results, Boolean
+      check_optional_property :pre_fetch, String
+      check_optional_property :self_link, String
+      check_optional_property :collection, String
+      check_optional_property :present, String
+      check_optional_property :resource_to_request_patch, String
+      check_optional_property :return_if_object, String
       # TODO(alexstephen): Turn provider_helpers into a proper class instead
       # of a Hash
-      check_property :provider_helpers, Hash unless @provider_helpers.nil?
+      check_optional_property :provider_helpers, Hash
       super
     end
 

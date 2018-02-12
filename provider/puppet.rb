@@ -42,10 +42,9 @@ module Provider
 
       def validate
         super
-        check_property :manifest, Provider::Puppet::Manifest \
-          unless manifest.nil?
-        check_property_list :functions, @functions, Provider::Config::Function
-        check_property_list :bolt_tasks, @bolt_tasks, Provider::Puppet::BoltTask
+        check_optional_property :manifest, Provider::Puppet::Manifest
+        check_property_list :functions, Provider::Config::Function
+        check_property_list :bolt_tasks, Provider::Puppet::BoltTask
       end
     end
 
@@ -106,9 +105,9 @@ module Provider
 
         def validate
           super
-          check_property :required, :boolean unless @required.nil?
-          check_property :default unless @default.nil?
-          check_property :comment unless @comment.nil?
+          check_optional_property :required, :boolean
+          check_optional_property :default
+          check_optional_property :comment
           @default = Default.new(@default) \
             if default? && !@default.is_a?(Default)
         end
@@ -128,7 +127,7 @@ module Provider
           def validate
             @type = Api::Type::Enum.name
             super
-            check_property_list :values, @values, Symbol
+            check_property_list :values, Symbol
           end
 
           def type_metadata(provider)

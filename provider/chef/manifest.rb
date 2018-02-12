@@ -33,9 +33,9 @@ module Provider
         check_property :source, String
         check_property :summary, String
         check_property :version, String
-        check_property_list :depends, @depends, Provider::Config::Requirements
-        check_property_list :operating_systems, @operating_systems,
-                            Provider::Config::OperatingSystem
+        check_property_list :depends, Provider::Config::Requirements
+        check_property_list \
+          :operating_systems, Provider::Config::OperatingSystem
       end
     end
   end

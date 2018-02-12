@@ -100,8 +100,7 @@ module Provider
       def validate
         super
         check_property :task, Task
-        check_property_list :dependencies, @dependencies, Task \
-          unless @dependencies.nil?
+        check_optional_property_list :dependencies, Task
       end
     end
 

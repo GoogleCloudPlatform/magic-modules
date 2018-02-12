@@ -33,9 +33,9 @@ module Provider
         check_property :summary, String
         check_property :tags, Array
         check_property :version, String
-        check_property_list :requires, @requires, Provider::Config::Requirements
-        check_property_list :operating_systems, @operating_systems,
-                            Provider::Config::OperatingSystem
+        check_property_list :requires, Provider::Config::Requirements
+        check_property_list \
+          :operating_systems, Provider::Config::OperatingSystem
       end
     end
   end
