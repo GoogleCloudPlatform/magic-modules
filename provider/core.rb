@@ -215,13 +215,12 @@ module Provider
 
     def generate_object(object, output_folder)
       data = build_object_data(object, output_folder)
+      return if data[:config]['skip']
 
-      unless data[:config]['skip']
-        generate_resource data
-        generate_resource_tests data
-        generate_properties data, object.all_user_properties
-        generate_network_datas data, object
-      end
+      generate_resource data
+      generate_resource_tests data
+      generate_properties data, object.all_user_properties
+      generate_network_datas data, object
     end
 
     # rubocop:disable Metrics/MethodLength

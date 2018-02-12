@@ -70,8 +70,8 @@ module Provider
         verb = verbs[state.to_sym]
 
         again = ''
-        again = ' that already exists' if noop and state == 'present'
-        again = ' that does not exist' if noop and state == 'absent'
+        again = ' that already exists' if noop && state == 'present'
+        again = ' that does not exist' if noop && state == 'absent'
         [
           "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
           indent("#{@name}:", 2),
