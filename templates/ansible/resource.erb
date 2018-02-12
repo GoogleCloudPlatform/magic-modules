@@ -167,7 +167,8 @@ def main():
     module.exit_json(**fetch)
 
 
-<% prod_name = object.__product.prefix[1..-1] -%>
+<% prod_name = object.__product.prefix[1::-1] -%>
+<% unless object.virtual -%>
 <% custom_create = get_code_multiline config, 'create' -%>
 def create(module, link, kind):
 <% if custom_create.nil? -%>
@@ -205,6 +206,7 @@ def delete(module, link, kind):
 <% end # if custom_delete.nil? -%>
 
 
+<% end # unless object.virtual -%>
 def resource_to_request(module):
 <%
   properties_in_request = []
