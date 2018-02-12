@@ -1,0 +1,10 @@
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::VirtualTask
+  name: gcp_compute_region
+  code: |
+      name: 'us-west1'
+      project: <%= project %>
+      auth_kind: <%= auth_kind %>
+      service_account_file: <%= service_account_file %>
+      scopes:
+        - https://www.googleapis.com/auth/compute
