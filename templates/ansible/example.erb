@@ -11,11 +11,21 @@
 <% resource_name = Google::StringUtils.uncombine(object.name).downcase -%>
 <%= lines(example.task.build_test('present', false)) -%>
   register: result
+<% if object.virtual -%>
+- name: assert changed is false
+<% else # if object.virtual -%>
 - name: assert changed is true
+<% end # if object.virtual -%>
   assert:
     that:
+<% if object.virtual -%>
+      # <%= object.name -%> is not altered, just verified.
+      - result.changed == false
+<% else # if object.virtual -%>
       - result.changed == true
+<% end # if object.virtual -%>
       - "result.kind == <%= quote_string(object.kind) -%>"
+<% unless object.virtual -%>
 # ----------------------------------------------------------------------------
 <%= lines(example.task.build_test('present', true)) -%>
   register: result
@@ -40,6 +50,7 @@
     that:
       - result.changed == false
       - result.has_key('kind') == False
+<% end # object.virtual -%>
 <% if example.dependencies and !example.dependencies.empty? -%>
 #---------------------------------------------------------
 # Post-test teardown
