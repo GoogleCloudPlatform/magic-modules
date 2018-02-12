@@ -30,10 +30,10 @@ module Api
       set_variables @objects, :__product
       check_property :base_url, String
       check_property :objects, Array
-      check_property_list :objects, @objects, Api::Resource
+      check_property_list :objects, Api::Resource
       check_property :prefix, String
       check_property :scopes, ::Array
-      check_property_list :scopes, @scopes, String
+      check_property_list :scopes, String
     end
   end
 end

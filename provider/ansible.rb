@@ -29,8 +29,7 @@ module Provider
 
       def validate
         super
-        check_property :manifest, Provider::Ansible::Manifest \
-          unless manifest.nil?
+        check_optional_property :manifest, Provider::Ansible::Manifest
       end
     end
 
@@ -88,7 +87,6 @@ module Provider
       ["gcp_#{object.__product.prefix[1..-1]}",
        Google::StringUtils.underscore(object.name)].join('_')
     end
-
 
     def build_object_data(object, output_folder)
       # Method is overriden to add Ansible example objects to the data object.
