@@ -57,11 +57,17 @@ module Provider
         build_task(state, EXAMPLE_DEFAULTS)
       end
 
+      def verbs
+        {
+          present: 'create',
+          absent: 'delete'
+        }
+      end
+
       private
 
       def build_task(state, hash, noop = false)
-        verb = 'create'
-        verb = 'delete' if state == 'absent'
+        verb = verbs[state.to_sym]
 
         again = ''
         again = ' that already exists' if noop and state == 'present'
@@ -96,6 +102,16 @@ module Provider
         check_property :task, Task
         check_property_list :dependencies, @dependencies, Task \
           unless @dependencies.nil?
+      end
+    end
+
+    # A Task that is used by a virtual object.
+    class VirtualTask < Task
+      def verbs
+        {
+          present: 'verify',
+          absent: 'verify'
+        }
       end
     end
   end
