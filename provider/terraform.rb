@@ -145,13 +145,14 @@ module Provider
       properties.keep_if { |p| !ignored.include?(construct_ignore_string(p)) }
     end
 
-    # Returns the nested properties without those ignored. An empty list is returned
-    # if the property is not a NestedObject or an Array of NestedObjects.
+    # Returns the nested properties without those ignored. An empty list is
+    # returned if the property is not a NestedObject or an Array of
+    # NestedObjects.
     def effective_nested_properties(config, property)
       if property.is_a?(Api::Type::NestedObject)
         effective_properties(config, property.properties)
       elsif property.is_a?(Api::Type::Array) &&
-        property.item_type.is_a?(Api::Type::NestedObject)
+            property.item_type.is_a?(Api::Type::NestedObject)
         effective_properties(config, property.item_type.properties)
       else
         []
