@@ -187,7 +187,6 @@ module Provider
       raise "#{self.class}#provider not implemented"
     end
 
-    # rubocop:disable Metrics/PerceivedComplexity
     def validate
       super
       check_optional_property :examples, Api::Resource::HashArray
@@ -195,8 +194,8 @@ module Provider
 
       # TODO(alexstephen): Remove HashArray checking when all provider.yamls
       # using Provider::Objects
-      check_optional_property :objects, [Provider::Objects,
-                                         Api::Resource::HashArray]
+      check_optional_property \
+        :objects, [Provider::Objects, Api::Resource::HashArray]
 
       check_optional_property :test_data, Provider::Config::TestData
       check_optional_property :tests, Api::Resource::HashArray
@@ -204,7 +203,6 @@ module Provider
       check_optional_property_list :changelog, Provider::Config::Changelog
       check_optional_property_list :functions, Provider::Config::Function
     end
-    # rubocop:enable Metrics/PerceivedComplexity
 
     # Provides the API object to any type that requires, e.g. for validation
     # purposes, such as Api::Resource::HashArray which enforces that the keys

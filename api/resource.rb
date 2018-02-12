@@ -194,9 +194,7 @@ module Api
     # method size and complexity.
     #
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/MethodLength
-    # rubocop:disable Metrics/PerceivedComplexity
     def validate
       super
       check_optional_property :async, Api::Async
@@ -221,17 +219,18 @@ module Api
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
 
+      check_optional_property :input, :boolean
+
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
+
       check_property_list :parameters, Api::Type
       check_property_list :properties, Api::Type
 
       check_identity unless @identity.nil?
     end
     # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/CyclomaticComplexity
     # rubocop:enable Metrics/MethodLength
-    # rubocop:enable Metrics/PerceivedComplexity
 
     def all_user_properties
       (properties || []) + (parameters || [])
