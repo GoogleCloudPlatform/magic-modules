@@ -49,8 +49,8 @@ module Api
 
       def validate
         super
-        check_property :encoder, ::String unless @encoder.nil?
-        check_property :decoder, ::String unless @decoder.nil?
+        check_optional_property :encoder, ::String
+        check_optional_property :decoder, ::String
       end
     end
 
@@ -87,8 +87,8 @@ module Api
 
       def validate
         super
-        check_property :guides, Hash unless @guide.nil?
-        check_property :api, String unless @guide.nil?
+        check_optional_property :guides, Hash
+        check_optional_property :api, String
       end
     end
 
@@ -199,32 +199,32 @@ module Api
     # rubocop:disable Metrics/PerceivedComplexity
     def validate
       super
-      check_property :async, Api::Async unless @async.nil?
-      check_property :base_url, String unless @exclude
+      check_optional_property :async, Api::Async
+      check_optional_property :base_url, String
       check_property :description, String
-      check_property :exclude, :boolean unless @exclude.nil?
-      check_property :kind, String unless @kind.nil?
-      check_property :parameters, Array unless @parameters.nil?
+      check_optional_property :exclude, :boolean
+      check_optional_property :kind, String
+      check_optional_property :parameters, Array
+      check_optional_property :exports, Array
+      check_optional_property :self_link, String
+      check_optional_property :self_link_query, Api::Resource::ResponseList
+      check_optional_property :virtual, :boolean
+      check_optional_property :readonly, :boolean
+      check_optional_property :label_override, String
+      check_optional_property :transport, Transport
+      check_optional_property :references, ReferenceLinks
+
       check_property :properties, Array unless @exclude
-      check_property :exports, Array unless @exports.nil?
-      check_property :self_link, String unless @self_link.nil?
-      check_property :self_link_query, Api::Resource::ResponseList \
-        unless @self_link_query.nil?
-      check_property :virtual, :boolean unless @virtual.nil?
-      check_property :readonly, :boolean unless @readonly.nil?
-      check_property :label_override, String unless @label_override.nil?
-      check_property :transport, Transport unless @transport.nil?
-      check_property :references, ReferenceLinks unless @references.nil?
 
       check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
-      check_property :input, :boolean unless @input.nil?
+      check_optional_property :input, :boolean
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
-      check_property_list :parameters, @parameters, Api::Type
-      check_property_list :properties, @properties, Api::Type
+      check_property_list :parameters, Api::Type
+      check_property_list :properties, Api::Type
 
       check_identity unless @identity.nil?
     end

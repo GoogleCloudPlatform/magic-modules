@@ -29,7 +29,7 @@ module Provider
         check_property :status, Array
         check_property :supported_by, String
         check_property :requirements, Array
-        check_property_list :requirements, @requirements, String
+        check_property_list :requirements, String
         check_property :version_added, String
         check_property :author, String
       end

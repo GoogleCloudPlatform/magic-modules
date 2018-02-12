@@ -76,6 +76,12 @@ module Google
       check_property_value property, instance_variable_get("@#{property}"), type
     end
 
+    def check_optional_property(property, type = nil)
+      value = instance_variable_get("@#{property}")
+      return if value.nil?
+      check_property_value property, value, type
+    end
+
     def check_property_value(property, prop_value, type)
       Google::LOGGER.info "Checking '#{property}' on #{object_display_name}"
       raise "Missing '#{property}' on #{object_display_name}" if prop_value.nil?
@@ -93,7 +99,8 @@ module Google
       end
     end
 
-    def check_property_list(name, obj_list, type = nil)
+    def check_property_list(name, type = nil)
+      obj_list = instance_variable_get("@#{name}")
       if obj_list.nil?
         Google::LOGGER.info "No next level @ #{object_display_name}: #{name}"
       else
@@ -101,6 +108,12 @@ module Google
           "Checking next level for #{object_display_name}: #{name}"
         obj_list.each { |o| check_property_value "#{name}:item", o, type }
       end
+    end
+
+    def check_optional_property_list(name, type = nil)
+      obj_list = instance_variable_get("@#{name}")
+      return if obj_list.nil?
+      check_property_list(name, type)
     end
 
     def check_property_oneof(property, valid_values, type = nil)

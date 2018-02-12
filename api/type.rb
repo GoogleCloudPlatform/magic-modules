@@ -33,16 +33,16 @@ module Api
     def validate
       super
       check_property :description, ::String
-      check_property :output, :boolean unless @output.nil?
-      check_property :field, ::String unless @field.nil?
-      check_property :required, :boolean unless @required.nil?
+      check_optional_property :output, :boolean
+      check_optional_property :field, ::String
+      check_optional_property :required, :boolean
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
 
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH NONE], @__resource.update_verb, Symbol
-      check_property :update_url, ::String unless @update_url.nil?
+      check_optional_property :update_url, ::String
     end
 
     def type
@@ -338,7 +338,7 @@ module Api
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
         end
-        check_property_list :properties, @properties, Api::Type
+        check_property_list :properties, Api::Type
       end
 
       def property_class

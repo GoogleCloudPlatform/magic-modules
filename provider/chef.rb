@@ -35,10 +35,9 @@ module Provider
 
       def validate
         super
-        check_property :manifest, Provider::Chef::Manifest \
-          unless manifest.nil?
-        check_property_list :operating_systems, @operating_systems,
-                            Provider::Config::OperatingSystem
+        check_optional_property :manifest, Provider::Chef::Manifest
+        check_property_list \
+          :operating_systems, Provider::Config::OperatingSystem
       end
     end
 
@@ -48,8 +47,7 @@ module Provider
 
       def validate
         super
-        check_property_list :search_paths, @search_paths,
-                            Provider::Chef::SearchPath
+        check_property_list :search_paths, Provider::Chef::SearchPath
       end
     end
 
