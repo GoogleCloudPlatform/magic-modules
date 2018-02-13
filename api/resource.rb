@@ -282,9 +282,11 @@ module Api
     end
 
     def encoder?
-      return false if @transport.nil?
-      return false if @transport.encoder.nil?
-      true
+      !@transport&.encoder.nil?
+    end
+
+    def decoder?
+      !@transport&.decoder.nil?
     end
 
     private
