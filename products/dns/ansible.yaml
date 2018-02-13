@@ -29,6 +29,7 @@ objects: !ruby/object:Api::Resource::HashArray
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     skip: true
   ResourceRecordSet:
+    version_added: '2.6'
     create: |
       change = create_change(None, updated_record(module), module)
       change_id = int(change['id'])
