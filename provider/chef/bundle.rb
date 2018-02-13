@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'json'
+require 'provider/chef'
 require 'provider/config'
 require 'provider/core'
 
