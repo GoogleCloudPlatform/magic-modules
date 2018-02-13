@@ -101,6 +101,11 @@ style:
           - Metrics/MethodLength
 changelog:
   - !ruby/object:Provider::Config::Changelog
+    version: '0.1.2'
+    date: 2018-02-14T06:00:00-0700
+    fixes:
+      - Improved description of Resource Record Set
+  - !ruby/object:Provider::Config::Changelog
     version: '0.1.1'
     date: 2017-10-10T06:00:00-0700
     fixes:
