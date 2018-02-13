@@ -13,15 +13,15 @@ def self.return_if_object(response)
 <% if object.transport.nil? -%>
   result = JSON.parse(response.body)
 <% else # object.transport.nil? -%>
-<% if object.transport.decoder.nil? -%>
+<% if !object.decoder? -%>
   result = JSON.parse(response.body)
-<% else # object.transport.decoder.nil? -%>
+<% else # !object.decoder? -%>
 <%   if object.kind? -%>
   result = <%= object.transport.decoder -%>(response, kind)
 <%   else # object.kind? -%>
   result = <%= object.transport.decoder -%>(response)
 <%   end # object.kind? -%>
-<% end # object.transport.decoder.nil? -%>
+<% end # !object.decoder? -%>
 <% end # object.transport.nil? -%>
   raise_if_errors result, %w[error errors], 'message'
   raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
