@@ -40,8 +40,8 @@ module Api
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
 
-      check_property_oneof_default \
-        :update_verb, %i[POST PUT PATCH NONE], @__resource.update_verb, Symbol
+      check_optional_property_oneof_default \
+        :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
       check_optional_property :update_url, ::String
     end
 

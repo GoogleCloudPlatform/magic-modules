@@ -116,6 +116,8 @@ module Google
       check_property_list(name, type)
     end
 
+    # Verifies if a property is of a given type and its value are one of the
+    # valid possibilities.
     def check_property_oneof(property, valid_values, type = nil)
       check_property(property, type)
       prop_value = instance_variable_get("@#{property}")
@@ -123,6 +125,7 @@ module Google
         unless valid_values.include?(prop_value)
     end
 
+    # Similar to 'check_property_oneof' but assigns a default value if missing.
     def check_property_oneof_default(prop, valid_values, default, type = nil)
       prop_value = instance_variable_get("@#{prop}")
       instance_variable_set("@#{prop}", if prop_value.nil?
@@ -131,6 +134,15 @@ module Google
                                           prop_value
                                         end)
       check_property_oneof prop, valid_values, type
+    end
+
+    # Similar to 'check_property_oneof_default' but allows the default value to
+    # also be nil with the property being effectively optional.
+    def check_optional_property_oneof_default(prop, valid_values, default,
+                                              type = nil)
+      prop_value = instance_variable_get("@#{prop}")
+      return if prop_value.nil? && default.nil?
+      check_property_oneof_default(prop, valid_values, default, type)
     end
 
     def set_variables(objects, property)

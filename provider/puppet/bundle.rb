@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'json'
+require 'provider/puppet'
 require 'provider/config'
 require 'provider/core'
 
