@@ -73,7 +73,6 @@ def update_soa(module):
     original_soa = prefetch_soa_resource(module)
 
     # Create a clone of the SOA record so we can update it
-    import copy
     updated_soa = copy.deepcopy(original_soa)
 
     soa_parts = updated_soa['rrdatas'][0].split(' ')
@@ -112,7 +111,6 @@ def wait_for_change_to_complete(change_id, module):
     while status == 'pending':
         status = get_change_status(change_id, module)
         if status != 'done':
-            import time
             time.sleep(0.5)
 
 
@@ -123,7 +121,6 @@ def get_change_status(change_id, module):
 
 
 def new_change_request():
-    import datetime
     return {
         'kind': 'dns#change',
         'additions': [],
