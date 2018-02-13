@@ -279,7 +279,11 @@ def return_if_object(module, response, kind):
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
     except GcpRequestException as inst:
         module.fail_json(msg="Network error: %s" % inst)
+<% unless object.decoder? -%>
 
+    result = decode_response(module, result)
+
+<% end -%>
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
     if result['kind'] != kind:
