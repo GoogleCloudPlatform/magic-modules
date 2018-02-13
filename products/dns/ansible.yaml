@@ -30,6 +30,10 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   ResourceRecordSet:
     version_added: '2.6'
+    imports:
+      - copy
+      - datetime
+      - time
     create: |
       change = create_change(None, updated_record(module), module)
       change_id = int(change['id'])
