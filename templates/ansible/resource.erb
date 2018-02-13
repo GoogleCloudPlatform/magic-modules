@@ -198,16 +198,21 @@ def create(module, link, kind):
 
 
 <% custom_update = get_code_multiline config, 'update' -%>
-<% if save_api_results?(config, object) -%>
-def update(module, link, kind, fetch):
-<% else # if save_api_results -%>
-def update(module, link, kind):
-<% end # if save_api_results -%>
 <% if custom_update.nil? -%>
+<%   if save_api_results?(config, object) -%>
+def update(module, link, kind, fetch):
+<%   else # if save_api_results -%>
+def update(module, link, kind):
+<%   end # if save_api_results -%>
+<%   if !object.input -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    return return_if_object(module, auth.put(link, resource_to_request(module)), kind)
+<%   else # !object.input -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
-<% else # if custom_update.nil? -%>
+<%   end # !object.input-%>
+<% else # custom_update.nil? -%>
 <%= lines(indent(custom_update, 4)) -%>
-<% end # if custom_update.nil? -%>
+<% end # custom_update.nil? -%>
 
 
 <% custom_delete = get_code_multiline config, 'delete' -%>
