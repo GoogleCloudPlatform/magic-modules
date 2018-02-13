@@ -125,7 +125,13 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ResourceRecordSet'
     kind: 'dns#resourceRecordSet'
-    description: 'A unit of data that will be returned by the DNS servers.'
+    description: |
+      A single DNS record that exists on a domain name (i.e. in a managed zone).
+      This record defines the information about the domain and where the
+      domain / subdomains direct to.
+
+      The record will include the domain/subdomain name, a type (i.e. A, AAA,
+      CAA, MX, CNAME, NS, etc)
     base_url: |
       projects/{{project}}/managedZones/{{managed_zone}}/changes
       <|extra|>
