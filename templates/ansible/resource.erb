@@ -155,7 +155,16 @@ def main():
             changed = True
     else:
         if state == 'present':
-            fetch = create(module, collection(module), kind)
+<%
+  if object.create_verb.nil? || object.create_verb == :POST
+    create_link = 'collection(module)'
+  elsif object.create_verb == :PUT
+    create_link = 'self_link(module)'
+  else
+    raise "Ansible does not support create_verb #{object.create_verb}"
+  end
+-%>
+            fetch = create(module, <%= create_link -%>, kind)
             changed = True
 
     if fetch:
@@ -173,7 +182,16 @@ def main():
 def create(module, link, kind):
 <% if custom_create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    return return_if_object(module, auth.post(link, resource_to_request(module)), kind)
+<%
+  if object.create_verb.nil? || object.create_verb == :POST
+    create_verb = '.post'
+  elsif object.create_verb == :PUT
+    create_verb = '.put'
+  else
+    raise "Ansible does not support create_verb #{object.create_verb}"
+  end
+-%>
+    return return_if_object(module, auth<%= create_verb -%>(link, resource_to_request(module)), kind)
 <% else -%>
 <%= lines(indent(custom_create, 4)) -%>
 <% end -%>
