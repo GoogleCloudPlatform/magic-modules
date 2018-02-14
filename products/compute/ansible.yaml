@@ -25,8 +25,18 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
+  # Ansible tasks must alter infrastructure.
+  # This means that virtual objects are a poor fit.
+  DiskType:
+    skip: true
+  License:
+    skip: true
+  MachineType:
+    skip: true
   Region:
-    version_added: '2.6'
+    skip: true
+  Zone:
+    skip: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
