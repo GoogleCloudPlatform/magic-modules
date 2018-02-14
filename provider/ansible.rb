@@ -53,7 +53,10 @@ module Provider
     # for a MM type.
     def python_type(type)
       # All ResourceRefs are dicts with properties.
-      return 'dict' if type.is_a? Api::Type::ResourceRef
+      if type.is_a? Api::Type::ResourceRef
+        return 'str' if type.resource_ref.virtual
+        return 'dict'
+      end
       return 'list' if type.is_a? Api::Type::Array
       return 'bool' if type.is_a? Api::Type::Boolean
       return 'int' if type.is_a? Api::Type::Integer
@@ -114,6 +117,13 @@ module Provider
     def emit_link_var_args(url, extra_data)
       extra = url.include?('<|extra|>') || extra_data
       ['module', ("extra=''" if extra)].compact
+    end
+
+    # Returns a list of all first-level ResourceRefs that are not virtual
+    def nonvirtual_rrefs(object)
+      object.all_user_properties
+            .select { |prop| prop.is_a? Api::Type::ResourceRef }
+            .select { |prop| !prop.resource_ref.virtual }
     end
 
     private
