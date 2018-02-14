@@ -108,8 +108,7 @@ def main():
     )
 
 <%
-  rrefs = object.all_user_properties
-                .select { |x| x.is_a? Api::Type::ResourceRef }
+  rrefs = nonvirtual_rrefs(object)
 -%>
 <% unless rrefs.empty? -%>
     # Replace the dictionary of results from other GCP modules with the
