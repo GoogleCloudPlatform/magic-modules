@@ -156,6 +156,8 @@ files: !ruby/object:Provider::Config::Files
   copy:
     'google/transport.go': 'templates/terraform/transport.go'
     'google/transport_test.go': 'templates/terraform/transport_test.go'
+    'google/import.go': 'templates/terraform/import.go'
+    'google/import_test.go': 'templates/terraform/import_test.go'
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
