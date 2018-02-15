@@ -93,6 +93,51 @@ module Provider
       [resource.__product.base_url, url_part].flatten.join
     end
 
+    # Returns a list of acceptable import id formats for a given resource.
+    #
+    # For instance, if the resource base url is:
+    #   projects/{{project}}/global/networks
+    #
+    # It returns 3 formats:
+    # a) self_link: projects/{{project}}/global/networks/{{name}}
+    # b) short id: {{project}}/{{name}}
+    # c) short id w/o defaults: {{name}}
+    #
+    # Fields with default values are `project`, `region` and `zone`.
+    def import_id_formats(resource)
+      underscored_base_url = resource.base_url
+                                     .gsub(/{{[[:word:]]+}}/) do |field_name|
+        Google::StringUtils.underscore(field_name)
+      end
+
+      # TODO: Add support for custom import id
+      # We assume that all resources have a name field
+      self_link_id_format = underscored_base_url + '/{{name}}'
+
+      # short id: {{project}}/{{zone}}/{{name}}
+      field_markers = self_link_id_format.scan(/{{[[:word:]]+}}/)
+      short_id_format = field_markers.join('/')
+
+      # short id without fields with provider-level default: {{name}}
+      field_markers.delete('{{project}}')
+      field_markers.delete('{{region}}')
+      field_markers.delete('{{zone}}')
+      short_id_default_format = field_markers.join('/')
+
+      [self_link_id_format, short_id_format, short_id_default_format]
+    end
+
+    # Transforms a format string with field markers to a regex string with
+    # capture groups.
+    #
+    # For instance,
+    #   projects/{{project}}/global/networks/{{name}}
+    # is transformed to
+    #   projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
+    def format2regex(format)
+      format.gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
+    end
+
     def build_schema_property(config, property, object)
       compile_template'templates/terraform/schema_property.erb',
                       property: property,
