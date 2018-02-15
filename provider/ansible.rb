@@ -80,7 +80,13 @@ module Provider
       base_url = resource.base_url.split("\n").map(&:strip).compact
       full_url = [resource.__product.base_url, base_url].flatten.join
       # Double {} replaced with single {} to support Python string interpolation
-      single_bracket_url = "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+      "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+    end
+
+    def async_operation_url(resource)
+      base_url = resource.__product.base_url
+      url = [base_url, resource.async.operation.base_url].join
+      "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
     end
 
     # Returns the name of the module according to Ansible naming standards.
@@ -102,20 +108,38 @@ module Provider
     end
 
     # Given a URL and function name, emit a URL.
+    # URL functions will have 1-3 parameters.
+    # * module will always be included.
+    # * extra_data is a dict of extra information.
+    # * extra_url will have a URL chunk to be appended after the URL.
     def emit_link(name, url, extra_data = false)
       params = emit_link_var_args(url, extra_data)
-      # Extra if params include a extra parameter (> 1)
-      extra = (' + extra' if params.length > 1) || ''
-      url_code = "return #{url}.format(**module.params)#{extra}"
-      [
-        "def #{name}(#{params.join(', ')}):",
-        indent(url_code, 4).gsub('<|extra|>', '')
-      ].join("\n")
+      extra = (' + extra' if url.include?('<|extra|>')) || ''
+      if extra_data
+        [
+          "def #{name}(#{params.join(', ')}):",
+          indent("if extra_data is None:", 4),
+          indent("extra_data = {}", 8),
+          indent("url = #{url}#{extra}", 4).gsub('<|extra|>', ''),
+          indent("combined = extra_data.copy()", 4),
+          indent("combined.update(module.params)", 4),
+          indent("return url.format(**combined)", 4),
+        ].compact.join("\n")
+      else
+        url_code = "#{url}.format(**module.params)#{extra}"
+        [
+          "def #{name}(#{params.join(', ')}):",
+          indent("return #{url_code}", 4).gsub('<|extra|>', '')
+        ].join("\n")
+      end
     end
 
     def emit_link_var_args(url, extra_data)
-      extra = url.include?('<|extra|>') || extra_data
-      ['module', ("extra=''" if extra)].compact
+      extra_url = url.include?('<|extra|>')
+      [
+       'module', ("extra_url=''" if extra_url),
+       ("extra_data=None" if extra_data)
+      ].compact
     end
 
     # Returns a list of all first-level ResourceRefs that are not virtual
@@ -123,6 +147,11 @@ module Provider
       object.all_user_properties
             .select { |prop| prop.is_a? Api::Type::ResourceRef }
             .select { |prop| !prop.resource_ref.virtual }
+    end
+
+    # Converts a path in the form a/b/c/d into ['a', 'b', 'c', 'd']
+    def path2navigate(path)
+      "[#{path.split('/').map { |x| "'#{x}'" }.join(', ')}]"
     end
 
     private
