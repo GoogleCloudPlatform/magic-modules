@@ -77,11 +77,11 @@ RETURN = '''
 
 from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequestException
 import json
-<% if config['imports'] && !config['imports'].empty? -%>
-<% config['imports'].each do |import| -%>
-<%= lines("import #{import}") -%>
-<% end # config['imports'].each -%>
-<% end # config['imports'] -%>
+<%
+  config['imports'] ||= []
+  config['imports'] << 'time' if object.async
+-%>
+<%= lines(config['imports'].sort.uniq.map { |i| "import #{i}" }) -%>
 
 ################################################################################
 # Main
@@ -195,7 +195,11 @@ def create(module, link, kind):
     raise "Ansible does not support create_verb #{object.create_verb}"
   end
 -%>
+<% if object.async -%>
+    return wait_for_operation(module, auth<%= create_verb -%>(link, resource_to_request(module)))
+<% else # object.async -%>
     return return_if_object(module, auth<%= create_verb -%>(link, resource_to_request(module)), kind)
+<% end -%>
 <% else -%>
 <%= lines(indent(custom_create, 4)) -%>
 <% end -%>
@@ -210,7 +214,11 @@ def update(module, link, kind):
 <%   end # if save_api_results -%>
 <%   if !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% if object.async -%>
+    return wait_for_operation(module, auth.put(link, resource_to_request(module)))
+<% else # object.async -%>
     return return_if_object(module, auth.put(link, resource_to_request(module)), kind)
+<% end # object.async -%>
 <%   else # !object.input -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <%   end # !object.input-%>
@@ -227,7 +235,11 @@ def delete(module, link, kind):
 <% end # if save_api_results -%>
 <% if custom_delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% if object.async -%>
+    return wait_for_operation(module, auth.delete(link))
+<% else # object.async -%>
     return return_if_object(module, auth.delete(link), kind)
+<% end # object.async -%>
 <% else # if custom_delete.nil? -%>
 <%= lines(indent(custom_delete, 4)) -%>
 <% end # if custom_delete.nil? -%>
@@ -333,6 +345,7 @@ def response_to_hash(module, response):
 <%= lines(indent_list(f2h, 8)) -%>
     }
 
+<%= compile('templates/ansible/async.erb') -%>
 <%= compile('templates/ansible/provider_helpers.erb') -%>
 if __name__ == '__main__':
     main()
