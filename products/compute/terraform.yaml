@@ -13,22 +13,53 @@
 
 --- !ruby/object:Provider::Terraform::Config
 objects: !ruby/object:Api::Resource::HashArray
+  Address:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   BackendBucket:
     id: "{{name}}"
     ignore: ["id"]
     # TODO: look into moving validation into api.yaml
     validation:
       name: "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$"
+  BackendService:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Disk:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  DiskType:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Firewall:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   ForwardingRule:
     id: "{{name}}"
     ignore: ["id"]
     diffSuppressFunc:
       portRange: "portRangeDiffSuppress"
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   GlobalAddress:
     id: "{{name}}"
     ignore:
       - id
       - region # TODO: Remove this from api.yaml instead of ignoring
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  GlobalForwardingRule:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  HttpHealthCheck:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  HttpsHealthCheck:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  HealthCheck:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   Image:
     id: "{{name}}"
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
@@ -42,25 +73,78 @@ objects: !ruby/object:Api::Resource::HashArray
       - sourceDiskId
       - sourceType
       - licenses
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Instance:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  InstanceGroup:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  InstanceGroupManager:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  InstanceTemplate:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  License:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  MachineType:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Network:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Region:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   Route:
     id: "{{name}}"
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Snapshot:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   SslCertificate:
     id: "{{name}}"
     ignore: ["id"]
     sensitive: ["certificate", "privateKey"]
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   Subnetwork:
     id: "{{region}}/{{name}}"
     ignore: ["id"]
-  TargetPool:
-    id: "{{name}}"
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   TargetHttpProxy:
     id: "{{name}}"
     ignore: ["id"]
     # TODO: Alias id to proxy_id
+    # TODO: Add support for missing features needed by this resource
+    skip: true
   TargetHttpsProxy:
     id: "{{name}}"
     ignore: ["id"]
     # TODO: Alias id to proxy_id
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  TargetPool:
+    id: "{{name}}"
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  TargetSslProxy:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  TargetTcpProxy:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  UrlMap:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
+  Zone:
+    # TODO: Add support for missing features needed by this resource
+    skip: true
 
 
 # This is for a list of example files.
