@@ -1,0 +1,14 @@
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::Task
+  name: gcp_compute_http_health_check
+  code: |
+      name: <%= name %>
+      healthy_threshold: 10
+      port: 8080
+      timeout_sec: 2
+      unhealthy_threshold: 5
+      project: <%= project %>
+      auth_kind: <%= auth_kind %>
+      service_account_file: <%= service_account_file %>
+      scopes:
+        - https://www.googleapis.com/auth/compute
