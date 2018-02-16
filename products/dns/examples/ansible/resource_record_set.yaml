@@ -12,8 +12,6 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= project %>
     auth_kind: <%= auth_kind %>
     service_account_file: <%= service_account_file %>
-    scopes:
-      - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_dns_managed_zone
@@ -25,5 +23,3 @@ dependencies:
         project: <%= project %>
         auth_kind: <%= auth_kind %>
         service_account_file: <%= service_account_file %>
-        scopes:
-          - https://www.googleapis.com/auth/ndev.clouddns.readwrite
