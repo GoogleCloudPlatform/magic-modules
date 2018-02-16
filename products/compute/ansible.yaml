@@ -25,7 +25,11 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
+<<<<<<< HEAD
   Address:
+=======
+  HttpHealthCheck:
+>>>>>>> Ansible: Compute HTTP Health Checks
     version_added: '2.6'
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
@@ -51,6 +55,11 @@ files: !ruby/object:Provider::Config::Files
     'test/integration/targets/gcp_compute_address/defaults/main.yml':
       'templates/ansible/defaults_main.yaml'
     'test/integration/targets/gcp_compute_address/meta/main.yml':
+    'test/integration/targets/gcp_compute_http_health_check/aliases':
+      'templates/ansible/aliases'
+    'test/integration/targets/gcp_compute_http_health_check/defaults/main.yml':
+      'templates/ansible/defaults_main.yaml'
+    'test/integration/targets/gcp_compute_http_health_check/meta/main.yml':
       'provider/ansible/blank_file.yaml'
 tests: !ruby/object:Api::Resource::HashArray
 # This would be for custom network responses. Tests work by running some block
