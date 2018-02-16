@@ -62,7 +62,7 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<% object.all_user_properties.select(&:output).each do |prop| -%>
+<% object.all_user_properties.each do |prop| -%>
     <%= Google::StringUtils.underscore(prop.name) -%>:
         description:
 <%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
