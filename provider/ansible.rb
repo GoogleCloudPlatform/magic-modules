@@ -81,7 +81,6 @@ module Provider
       full_url = [resource.__product.base_url, base_url].flatten.join
       # Double {} replaced with single {} to support Python string interpolation
       single_bracket_url = "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
-      single_bracket_url.gsub('<|extra|>', '')
     end
 
     # Returns the name of the module according to Ansible naming standards.
