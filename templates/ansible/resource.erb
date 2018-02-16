@@ -180,7 +180,7 @@ def main():
     module.exit_json(**fetch)
 
 
-<% prod_name = object.__product.prefix[1::-1] -%>
+<% prod_name = object.__product.prefix[1..-1] -%>
 <% unless object.virtual -%>
 <% custom_create = get_code_multiline config, 'create' -%>
 def create(module, link, kind):
