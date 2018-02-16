@@ -25,6 +25,8 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
+  Address:
+    version_added: '2.6'
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   DiskType:
@@ -44,11 +46,11 @@ files: !ruby/object:Provider::Config::Files
 <%= indent(include('provider/ansible/common~compile.yaml'), 4) %>
 # TODO(alexstephen): Move to generate_object to allow thse files to be created
 # on a per-resource basis instead of manually listing them all out.
-    'test/integration/targets/gcp_compute_region/aliases':
+    'test/integration/targets/gcp_compute_address/aliases':
       'templates/ansible/aliases'
-    'test/integration/targets/gcp_compute_region/defaults/main.yml':
+    'test/integration/targets/gcp_compute_address/defaults/main.yml':
       'templates/ansible/defaults_main.yaml'
-    'test/integration/targets/gcp_compute_region/meta/main.yml':
+    'test/integration/targets/gcp_compute_address/meta/main.yml':
       'provider/ansible/blank_file.yaml'
 tests: !ruby/object:Api::Resource::HashArray
 # This would be for custom network responses. Tests work by running some block
