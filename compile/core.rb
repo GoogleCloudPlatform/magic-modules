@@ -101,6 +101,20 @@ module Compile
       end
     end
 
+    def lines(code, number = 0)
+      return if code.nil? || code.empty?
+      code = code.join("\n") if code.is_a?(Array)
+      code[-1] = '' while code[-1] == "\n" || code[-1] == "\r"
+      "#{code}#{"\n" * (number + 1)}"
+    end
+
+    def lines_before(code, number = 0)
+      return if code.nil? || code.empty?
+      code = code.join("\n") if code.is_a?(Array)
+      code[0] = '' while code[0] == "\n" || code[0] == "\r"
+      "#{"\n" * (number + 1)}#{code}"
+    end
+
     private
 
     def get_helper_file(file, remove_copyright_notice = true)

@@ -47,12 +47,12 @@ module Provider
         check_property :code, String
       end
 
-      def build_test(state, noop = false)
-        build_task(state, INTEGRATION_TEST_DEFAULTS, noop)
+      def build_test(state, object, noop = false)
+        build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)
       end
 
-      def build_example(state)
-        build_task(state, EXAMPLE_DEFAULTS)
+      def build_example(state, object)
+        build_task(state, EXAMPLE_DEFAULTS, object)
       end
 
       def verbs
@@ -64,7 +64,7 @@ module Provider
 
       private
 
-      def build_task(state, hash, noop = false)
+      def build_task(state, hash, object, noop = false)
         verb = verbs[state.to_sym]
 
         again = ''
@@ -72,13 +72,19 @@ module Provider
         again = ' that does not exist' if noop && state == 'absent'
         [
           "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
-          indent("#{@name}:", 2),
-          indent(compile_template_with_hash(@code, hash), 6).to_s,
-          indent("state: #{state}", 6),
-          (indent("register: #{@register}", 2) unless @register.nil?)
-        ].compact.join("\n")
+          indent([
+            "#{@name}:",
+            indent(compile_template_with_hash(@code, hash), 4),
+            indent("scopes:", 4),
+            indent(lines(object.__product.scopes.map { |x| "- #{x}" }), 6),
+            indent("state: #{state}", 4),
+            ("register: #{@register}" unless @register.nil?)
+          ].compact, 2)
+        ]
       end
 
+      # TODO(alexstephen): Remove this function and use a more standardized
+      # MM approach
       def compile_template_with_hash(template, hash)
         ERB.new(template).result(OpenStruct.new(hash).instance_eval { binding })
       end

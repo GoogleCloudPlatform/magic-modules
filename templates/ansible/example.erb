@@ -4,12 +4,12 @@
 #---------------------------------------------------------
 # Pre-test setup
 <% example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', false)) -%>
+<%= lines(depend.build_test('present', object, false)) -%>
 <% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
 #----------------------------------------------------------
 <% resource_name = Google::StringUtils.uncombine(object.name).downcase -%>
-<%= lines(example.task.build_test('present', false)) -%>
+<%= lines(example.task.build_test('present', object, false)) -%>
   register: result
 <% if object.virtual -%>
 - name: assert changed is false
@@ -27,7 +27,7 @@
       - "result.kind == <%= quote_string(object.kind) -%>"
 <% unless object.virtual -%>
 # ----------------------------------------------------------------------------
-<%= lines(example.task.build_test('present', true)) -%>
+<%= lines(example.task.build_test('present', object, true)) -%>
   register: result
 - name: assert changed is false
   assert:
@@ -35,7 +35,7 @@
       - result.changed == false
       - "result.kind == <%= quote_string(object.kind) -%>"
 #----------------------------------------------------------
-<%= lines(example.task.build_test('absent', false)) -%>
+<%= lines(example.task.build_test('absent', object, false)) -%>
   register: result
 - name: assert changed is true
   assert:
@@ -43,7 +43,7 @@
       - result.changed == true
       - result.has_key('kind') == False
 # ----------------------------------------------------------------------------
-<%= lines(example.task.build_test('absent', true)) -%>
+<%= lines(example.task.build_test('absent', object, true)) -%>
   register: result
 - name: assert changed is false
   assert:
@@ -55,6 +55,6 @@
 #---------------------------------------------------------
 # Post-test teardown
 <% example.dependencies.reverse.each do |depend| -%>
-<%= lines(depend.build_test('absent', false)) -%>
+<%= lines(depend.build_test('absent', object, false)) -%>
 <% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>

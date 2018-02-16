@@ -54,10 +54,10 @@ EXAMPLES = '''
 <% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', false)) -%>
+<%= lines(depend.build_test('present', object, false)) -%>
 <%   end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
-<%= lines(example.task.build_example('present')) -%>
+<%= lines(example.task.build_example('present', object)) -%>
 '''
 <% end -%>
 
