@@ -303,6 +303,7 @@ def return_if_object(module, response, kind):
 
 def is_different(module, response):
     request = resource_to_request(module)
+    response = response_to_hash(module, response)
 
     # Remove all output-only from response.
     response_vals = {}
@@ -316,6 +317,21 @@ def is_different(module, response):
             request_vals[k] = v
 
     return response_vals != request_vals
+
+
+# Remove unnecessary properties from the response.
+# This is for doing comparisons with Ansible's current parameters.
+def response_to_hash(module, response):
+    return {
+<%
+  f2h = []
+  object.properties.map do |prop|
+    name = quote_string(Google::StringUtils.underscore(prop.name))
+    f2h << "#{name}: response.get(#{name})"
+  end
+-%>
+<%= lines(indent_list(f2h, 8)) -%>
+    }
 
 <%= compile('templates/ansible/provider_helpers.erb') -%>
 if __name__ == '__main__':
