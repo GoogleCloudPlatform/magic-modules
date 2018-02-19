@@ -12,28 +12,17 @@
 # limitations under the License.
 
 require 'provider/config'
-require 'provider/core'
+require 'provider/abstract_core'
+require 'provider/terraform/sub_template'
+require 'provider/terraform/import'
 
 module Provider
-  # A boilerplate provider where all methods are optional.
-  class TerraformBase < Provider::Core
-    private
-
-    # rubocop:disable Layout/EmptyLineBetweenDefs
-    def generate_resource(data) end
-    def generate_resource_tests(data) end
-    def generate_network_datas(data, object) end
-    def generate_base_property(data) end
-    def generate_simple_property(type, data) end
-    def emit_nested_object(data) end
-    def emit_resourceref_object(data) end
-    def generate_typed_array(data, prop) end
-    # rubocop:enable Layout/EmptyLineBetweenDefs
-  end
-
-  # Code generator for Terraform Cookbooks that manage Google Cloud Platform
+  # Code generator for Terraform Resources that manage Google Cloud Platform
   # resources.
-  class Terraform < TerraformBase
+  class Terraform < Provider::AbstractCore
+    include Provider::Terraform::Import
+    include Provider::Terraform::SubTemplate
+
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -93,40 +82,6 @@ module Provider
       [resource.__product.base_url, url_part].flatten.join
     end
 
-    # Returns a list of acceptable import id formats for a given resource.
-    #
-    # For instance, if the resource base url is:
-    #   projects/{{project}}/global/networks
-    #
-    # It returns 3 formats:
-    # a) self_link: projects/{{project}}/global/networks/{{name}}
-    # b) short id: {{project}}/{{name}}
-    # c) short id w/o defaults: {{name}}
-    #
-    # Fields with default values are `project`, `region` and `zone`.
-    def import_id_formats(resource)
-      underscored_base_url = resource.base_url
-                                     .gsub(/{{[[:word:]]+}}/) do |field_name|
-        Google::StringUtils.underscore(field_name)
-      end
-
-      # TODO: Add support for custom import id
-      # We assume that all resources have a name field
-      self_link_id_format = underscored_base_url + '/{{name}}'
-
-      # short id: {{project}}/{{zone}}/{{name}}
-      field_markers = self_link_id_format.scan(/{{[[:word:]]+}}/)
-      short_id_format = field_markers.join('/')
-
-      # short id without fields with provider-level default: {{name}}
-      field_markers.delete('{{project}}')
-      field_markers.delete('{{region}}')
-      field_markers.delete('{{zone}}')
-      short_id_default_format = field_markers.join('/')
-
-      [self_link_id_format, short_id_format, short_id_default_format]
-    end
-
     # Transforms a format string with field markers to a regex string with
     # capture groups.
     #
@@ -136,43 +91,6 @@ module Provider
     #   projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
     def format2regex(format)
       format.gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
-    end
-
-    def build_schema_property(config, property, object)
-      compile_template'templates/terraform/schema_property.erb',
-                      property: property,
-                      config: config,
-                      object: object
-    end
-
-    # Transforms a Cloud API representation of a property into a Terraform
-    # schema representation.
-    def build_flatten_method(config, prefix, property)
-      compile_template 'templates/terraform/flatten_property_method.erb',
-                       prefix: prefix,
-                       property: property,
-                       config: config
-    end
-
-    # Transforms a Terraform schema representation of a property into a
-    # representation used by the Cloud API.
-    def build_expand_method(config, prefix, property)
-      compile_template 'templates/terraform/expand_property_method.erb',
-                       prefix: prefix,
-                       property: property,
-                       config: config
-    end
-
-    def build_property_documentation(config, property)
-      compile_template 'templates/terraform/property_documentation.erb',
-                       property: property,
-                       config: config
-    end
-
-    def build_nested_property_documentation(config, property)
-      compile_template 'templates/terraform/nested_property_documentation.erb',
-                       property: property,
-                       config: config
     end
 
     # Capitalize the first letter of a property name.
@@ -205,12 +123,6 @@ module Provider
     end
 
     private
-
-    def compile_template(template_file, data)
-      ctx = binding
-      data.each { |name, value| ctx.local_variable_set(name, value) }
-      compile_file(ctx, template_file).join("\n")
-    end
 
     # Constructs the prefix to be used when looking for ignored properties.
     #
