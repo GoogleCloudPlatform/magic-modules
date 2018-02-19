@@ -94,6 +94,17 @@ In addition to the arguments listed above, the following computed attributes are
 <%= build_nested_property_documentation(config, prop) %>
 <% end -%>
 
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is 4 minutes.
+<% if updatable?(object, properties) -%>
+- `update` - Default is 4 minutes.
+<% end -%>
+- `delete` - Default is 4 minutes.
+
 ## Import
 
 <%= object.name %> can be imported using any of these accepted formats:
