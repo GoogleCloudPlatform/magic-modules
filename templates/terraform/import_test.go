@@ -141,7 +141,7 @@ func TestParseImportId(t *testing.T) {
 				}
 			}
 		} else if !tc.ExpectError {
-			t.Errorf("%s failed; unexpected error: ", tn, err)
+			t.Errorf("%s failed; unexpected error: %s", tn, err)
 		}
 	}
 }
