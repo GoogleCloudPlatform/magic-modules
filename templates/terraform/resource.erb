@@ -37,6 +37,14 @@ func resource<%= resource_name %>() *schema.Resource {
 			State: resource<%= resource_name %>Import,
 		},
 
+		Timeouts: &schema.ResourceTimeout {
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			<% if updatable?(object, properties) -%>
+			Update: schema.DefaultTimeout(4 * time.Minute),
+			<% end -%>
+			Delete: schema.DefaultTimeout(4 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 <% order_properties(properties).each do |prop| -%>
 	<%= build_schema_property(config, prop, object) %>
@@ -97,7 +105,10 @@ func resource<%= resource_name %>Create(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	waitErr := <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, op, project, "Creating <%= object.name %>")
+	waitErr := <%= api_name_lower %>OperationWaitTime(
+		config.client<%= product_ns %>, op, project, "Creating <%= object.name %>",
+		int(d.Timeout(schema.TimeoutCreate).Minutes()))
+
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")
@@ -170,7 +181,10 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	err = <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, op, project, "Updating <%= object.name %>")
+	err = <%= api_name_lower %>OperationWaitTime(
+		config.client<%= product_ns %>, op, project, "Updating <%= object.name %>",
+		int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
 	if err != nil {
 		return err
 	}
@@ -199,7 +213,10 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 			return err
 		}
 
-		err = <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, &op, project, "Updating <%= object.name %>")
+		err = <%= api_name_lower %>OperationWaitTime(
+			config.client<%= product_ns %>, op, project, "Updating <%= object.name %>",
+			int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
 		if err != nil {
 			return err
 		}
@@ -236,7 +253,10 @@ func resource<%= resource_name %>Delete(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	err = <%= api_name_lower %>OperationWait(config.client<%= product_ns %>, op, project, "Deleting <%= object.name %>")
+	err = <%= api_name_lower %>OperationWaitTime(
+		config.client<%= product_ns %>, op, project, "Deleting <%= object.name %>",
+		int(d.Timeout(schema.TimeoutDelete).Minutes()))
+
 	if err != nil {
 		return err
 	}
