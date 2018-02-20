@@ -21,7 +21,7 @@ class File
 end
 
 describe Provider::Terraform do
-  context 'static' do
+  context 'good file product' do
     let(:config) { Provider::Config.parse('spec/data/terraform-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
     let(:provider) { Provider::Terraform.new(config, product) }
@@ -32,24 +32,46 @@ describe Provider::Terraform do
       product.validate
     end
 
-    it 'should generate all accepted import id formats' do
-      a_resource = resource(
-        'base_url: "projects/{{project}}/regions/{{region}}/subnetworks"'
-      )
-      formats = provider.import_id_formats(a_resource)
+    describe '#format2regex' do
+      subject do
+        provider.format2regex 'projects/{{project}}/global/networks/{{name}}'
+      end
 
-      expect(formats).to contain_exactly(
-        'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}',
-        '{{project}}/{{region}}/{{name}}',
-        '{{name}}'
-      )
+      it do
+        is_expected.to eq(
+          'projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)'
+        )
+      end
     end
 
-    it 'should transform id formats to a regex' do
-      r = provider.format2regex 'projects/{{project}}/global/networks/{{name}}'
-      expect(r).to eq(
-        'projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)'
-      )
+    context '#titlelize_property' do
+      describe 'short property name' do
+        subject { provider.titlelize_property(named_property('fooBar')) }
+        it { is_expected.to eq 'FooBar' }
+      end
+
+      describe 'titlelizes long property name' do
+        subject do
+          provider.titlelize_property(named_property('fooBarBazFooBar'))
+        end
+        it { is_expected.to eq 'FooBarBazFooBar' }
+      end
+    end
+
+    describe '#collection_url' do
+      subject { provider.collection_url(product.objects[0]) }
+      it do
+        is_expected.to eq 'http://myproduct.google.com/api/referencedresource'
+      end
+    end
+
+    describe '#self_link_url' do
+      subject { provider.self_link_url(product.objects[0]) }
+      it do
+        is_expected.to eq(
+          'http://myproduct.google.com/api/referencedresource/{{name}}'
+        )
+      end
     end
   end
 
@@ -58,8 +80,10 @@ describe Provider::Terraform do
       .at_least(0)
   end
 
-  def resource(*data)
-    Google::YamlValidator.parse(['--- !ruby/object:Api::Resource'].concat(data)
-                                                                  .join("\n"))
+  def named_property(name)
+    Google::YamlValidator.parse(
+      format("--- !ruby/object:Api::Object::Named\nname: '%<name>s'",
+             name: name)
+    )
   end
 end
