@@ -33,19 +33,36 @@ module Provider
       end
     end
 
-    # Takes in a string and returns a multi-line string, where each line
-    # is less than max_length characters long and all subsequent lines are
-    # indented in by spaces characters
+    # Takes a long string and divides each string into multiple paragraphs,
+    # where each paragraph is a properly indented multi-line bullet point.
+    #
+    # Example:
+    #   - This is a paragraph
+    #     that wraps under
+    #     the bullet properly
+    #   - This is the second
+    #     paragraph.
+    def bullet_lines(line, spaces)
+      line.split(".\n").map { |paragraph| bullet_line(paragraph, spaces) }
+    end
+
+    # Takes in a string (representing a paragraph) and returns a multi-line
+    # string, where each line is less than max_length characters long and all
+    # subsequent lines are indented in by spaces characters
     #
     # Example:
     #   - This is a sentence
     #     that wraps under
     #     the bullet properly
-    def bullet_lines(line, spaces)
+    def bullet_line(paragraph, spaces, add_period=true)
       # - 2 for "- "
-      indented = wrap_field(line, spaces - 2)
+      indented = wrap_field(paragraph, spaces - 2)
       indented = indented.split("\n")
       indented[0] = indented[0].sub(/^../, '- ')
+      # Add in a period at paragraph end unless there's already a period.
+      if add_period
+        indented[-1] += '.' unless indented.last.end_with?('.')
+      end
       indented
     end
 
