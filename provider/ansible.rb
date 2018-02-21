@@ -167,8 +167,7 @@ module Provider
       path = ["products/#{data[:product_name]}",
               "examples/ansible/#{obj_name}.yaml"].join('/')
 
-      compile_template_with_hash(File.open(path).read, EXAMPLE_DEFAULTS) \
-        if File.file?(path)
+      compile_file(EXAMPLE_DEFAULTS, path) if File.file?(path)
     end
 
     def generate_resource_tests(data)
