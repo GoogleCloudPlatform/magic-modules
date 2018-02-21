@@ -41,10 +41,7 @@ options:
         choices: ['present', 'absent']
         default: 'present'
 <% object.all_user_properties.reject(&:output).each do |prop| -%>
-    <%= Google::StringUtils.underscore(prop.name) -%>:
-        description:
-<%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
-        required: <%= prop.required ? 'true' : 'false' %>
+<%= lines(indent(doc_property_yaml(prop, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
 '''
@@ -63,11 +60,7 @@ EXAMPLES = '''
 
 RETURN = '''
 <% object.all_user_properties.each do |prop| -%>
-    <%= Google::StringUtils.underscore(prop.name) -%>:
-        description:
-<%= lines(indent(bullet_lines(prop.description, 12), 12)) -%>
-        returned: success
-        type: <%= lines(python_type(prop)) -%>
+<%= lines(indent(return_property_yaml(prop, 4), 4)) -%>
 <% end -%>
 '''
 
