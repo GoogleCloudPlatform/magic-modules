@@ -115,6 +115,20 @@ module Compile
       "#{"\n" * (number + 1)}#{code}"
     end
 
+    # Compiles an ERB template using the data from a key-value pair.
+    # The key-value pair may be a Hash or a Binding
+    def compile_string(ctx, source)
+      if ctx.is_a? Binding
+        ERB.new(source, nil, '-%>').result(ctx).split("\n")
+      elsif ctx.is_a? Hash
+        ERB.new(source, nil, '-%>').result(
+          OpenStruct.new(ctx).instance_eval { binding }
+        ).split("\n")
+      else
+        raise TypeError, "#{ctx.class} is not a valid type for compilation"
+      end
+    end
+
     private
 
     def get_helper_file(file, remove_copyright_notice = true)

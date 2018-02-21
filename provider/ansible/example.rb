@@ -74,19 +74,15 @@ module Provider
           "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
           indent([
             "#{@name}:",
-            indent(compile_template_with_hash(@code, hash), 4),
-            indent("scopes:", 4),
-            indent(lines(object.__product.scopes.map { |x| "- #{x}" }), 6),
-            indent("state: #{state}", 4),
+            indent([
+              compile_string(hash, @code),
+              "scopes:",
+              indent(lines(object.__product.scopes.map { |x| "- #{x}" }), 2),
+              "state: #{state}",
+            ], 4),
             ("register: #{@register}" unless @register.nil?)
           ].compact, 2)
         ]
-      end
-
-      # TODO(alexstephen): Remove this function and use a more standardized
-      # MM approach
-      def compile_template_with_hash(template, hash)
-        ERB.new(template).result(OpenStruct.new(hash).instance_eval { binding })
       end
 
       def object_name_from_module_name(mod_name)
