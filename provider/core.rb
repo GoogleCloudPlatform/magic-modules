@@ -593,7 +593,7 @@ module Provider
     end
 
     def compile_file(ctx, source)
-      ERB.new(File.read(source), nil, '-%>').result(ctx).split("\n")
+      compile_string(ctx, File.read(source))
     rescue StandardError => e
       puts "Error compiling file: #{source}"
       raise e
