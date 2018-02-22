@@ -18,10 +18,11 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   BackendBucket:
     id: "{{name}}"
-    ignore: ["id"]
+    ignore:
+      - id
     # TODO: look into moving validation into api.yaml
     validation:
-      name: "^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$"
+      name: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   BackendService:
     # TODO: Add support for missing features needed by this resource
     skip: true
@@ -36,9 +37,10 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   ForwardingRule:
     id: "{{name}}"
-    ignore: ["id"]
-    diffSuppressFunc:
-      portRange: "portRangeDiffSuppress"
+    ignore:
+      - id
+    diff_suppress_funcs:
+      port_range: "portRangeDiffSuppress"
     # TODO: Add support for missing features needed by this resource
     skip: true
   GlobalAddress:
@@ -108,24 +110,30 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   SslCertificate:
     id: "{{name}}"
-    ignore: ["id"]
-    sensitive: ["certificate", "privateKey"]
+    ignore:
+      - id
+    sensitive:
+      - certificate
+      - privateKey
     # TODO: Add support for missing features needed by this resource
     skip: true
   Subnetwork:
     id: "{{region}}/{{name}}"
-    ignore: ["id"]
+    ignore:
+      - id
     # TODO: Add support for missing features needed by this resource
     skip: true
   TargetHttpProxy:
     id: "{{name}}"
-    ignore: ["id"]
+    ignore:
+      - id
     # TODO: Alias id to proxy_id
     # TODO: Add support for missing features needed by this resource
     skip: true
   TargetHttpsProxy:
     id: "{{name}}"
-    ignore: ["id"]
+    ignore:
+      - id
     # TODO: Alias id to proxy_id
     # TODO: Add support for missing features needed by this resource
     skip: true
@@ -145,7 +153,6 @@ objects: !ruby/object:Api::Resource::HashArray
   Zone:
     # TODO: Add support for missing features needed by this resource
     skip: true
-
 
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
