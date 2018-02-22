@@ -103,9 +103,9 @@ module Provider
 
     # Returns the resource properties without those ignored.
     def effective_properties(config, properties)
-      ignored = get_code_multiline(config, 'ignore') || []
-
-      properties.keep_if { |p| !ignored.include?(construct_ignore_string(p)) }
+      properties.reject do |p|
+        config['ignore']&.include?(construct_ignore_string(p))
+      end
     end
 
     # Returns the nested properties without those ignored. An empty list is

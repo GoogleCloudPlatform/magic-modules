@@ -93,7 +93,7 @@ func resource<%= resource_name %>Create(d *schema.ResourceData, meta interface{}
 	}
 
 	// Store the ID now
-	id, err := replaceVars(d, config, "<%= get_code_multiline config, 'id' %>")
+	id, err := replaceVars(d, config, "<%= config['id'] -%>")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -269,7 +269,7 @@ func resource<%= resource_name %>Import(d *schema.ResourceData, meta interface{}
 	parseImportId([]string{<%= '"' + import_id_formats(object).map{|s| format2regex s}.join('","') + '"' %>}, d, config)
 
 	// Replace import id for the resource id
-	id, err := replaceVars(d, config, "<%= get_code_multiline config, 'id' %>")
+	id, err := replaceVars(d, config, "<%= config['id'] -%>")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -279,11 +279,9 @@ func resource<%= resource_name %>Import(d *schema.ResourceData, meta interface{}
 }
 
 <% properties.each do |prop| -%>
-  <%= build_flatten_method(config, resource_name, prop) %>
-
+<%= lines(build_flatten_method(config, resource_name, prop), 1) -%>
 <% end -%>
 
 <% settable_properties.each do |prop| -%>
-  <%= build_expand_method(config, resource_name, prop) %>
-
+<%= lines(build_expand_method(config, resource_name, prop), 1) -%>
 <% end -%>
