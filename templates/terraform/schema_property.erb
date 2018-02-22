@@ -25,16 +25,13 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
-<%
-  if get_code_multiline(config, 'validation')
-    v = get_code_multiline(config, 'validation')[property.name]
-  end
--%>
-<% unless v.nil? -%>
-  ValidateFunc: validateRegexp(`<%= v %>`),
+<% validate_fns = config['validation'] -%>
+<% if validate_fns.key?(property.name) -%>
+  ValidateFunc: validateRegexp(`<%= validate_fns[property.name] -%>`),
 <% end -%>
-<% if get_code_multiline(config, 'diffSuppressFunc') && !get_code_multiline(config, 'diffSuppressFunc')[property.name].nil? -%>
-  DiffSuppressFunc: <%= get_code_multiline(config, 'diffSuppressFunc')[property.name] %>,
+<% diff_suppress_fns = config['diff_suppress_funcs'] -%>
+<% if diff_suppress_fns&.key?(property.name) -%>
+  DiffSuppressFunc: <%= diff_suppress_fns[property.name] -%>,
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end -%>
@@ -72,7 +69,7 @@
       },
   <% end -%>
 <% end -%>
-<% if (get_code_multiline(config, 'sensitive') || []).include?(property.name) -%>
+<% if config['sensitive']&.include?(property.name) -%>
     Sensitive: true,
 <% end -%>
 },
