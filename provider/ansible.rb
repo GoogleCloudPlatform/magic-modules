@@ -16,12 +16,21 @@ require 'provider/core'
 require 'provider/ansible/manifest'
 require 'provider/ansible/example'
 require 'provider/ansible/documentation'
+require 'provider/ansible/module'
 
 module Provider
   # Code generator for Ansible Cookbooks that manage Google Cloud Platform
   # resources.
+  PYTHON_TYPE_FROM_MM_TYPE = {
+    'Api::Type::NestedObject' => 'dict',
+    'Api::Type::Array' => 'list',
+    'Api::Type::Boolean' => 'bool',
+    'Api::Type::Integer' => 'int'
+  }.freeze
   class Ansible < Provider::Core
+
     include Ansible::Documentation
+    include Ansible::Module
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -37,16 +46,14 @@ module Provider
 
     # Returns a string representation of the corresponding Python type
     # for a MM type.
-    def python_type(type)
+    def python_type(prop)
+      prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
       # All ResourceRefs are dicts with properties.
-      if type.is_a? Api::Type::ResourceRef
-        return 'str' if type.resource_ref.virtual
+      if prop.is_a? Api::Type::ResourceRef
+        return 'str' if prop.resource_ref.virtual
         return 'dict'
       end
-      return 'list' if type.is_a? Api::Type::Array
-      return 'bool' if type.is_a? Api::Type::Boolean
-      return 'int' if type.is_a? Api::Type::Integer
-      'str'
+      PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
     end
 
     # Returns a unicode formatted, quoted string.
