@@ -45,30 +45,6 @@ module Provider
       compile(file, 2) unless file.nil?
     end
 
-    def indent(text, spaces)
-      indent_array(text, spaces).join("\n")
-    end
-
-    def indent_list(text, spaces)
-      indent_array(text, spaces).join(",\n")
-    end
-
-    def indent_array(text, spaces)
-      return [] if text.nil?
-      lines = text.class <= Array ? text : text.split("\n")
-      lines.map do |line|
-        if line.class <= Array
-          indent(line, spaces)
-        elsif line.include?("\n")
-          indent(line.split("\n"), spaces)
-        elsif line.strip.empty?
-          ''
-        else
-          ' ' * spaces + line.gsub(/\n/, "\n" + ' ' * spaces)
-        end
-      end
-    end
-
     private
 
     def get_helper_file(file, remove_copyright_notice = true)

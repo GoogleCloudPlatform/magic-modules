@@ -47,19 +47,19 @@ module Compile
       compile(file, 2) unless file.nil?
     end
 
-    def indent(text, spaces)
-      indent_array(text, spaces).join("\n")
+    def indent(text, spaces, filler = ' ')
+      indent_array(text, spaces, filler).join("\n")
     end
 
-    def indent_list(text, spaces, last_line_comma = false)
+    def indent_list(text, spaces, last_line_comma = false, filler = ' ')
       if last_line_comma
-        [indent_array(text, spaces).join(",\n"), ','].join
+        [indent_array(text, spaces, filler).join(",\n"), ','].join
       else
-        indent_array(text, spaces).join(",\n")
+        indent_array(text, spaces, filler).join(",\n")
       end
     end
 
-    def indent_array(text, spaces)
+    def indent_array(text, spaces, filler = ' ')
       return [] if text.nil?
       lines = text.class <= Array ? text : text.split("\n")
       lines.map do |line|
