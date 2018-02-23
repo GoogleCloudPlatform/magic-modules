@@ -24,17 +24,17 @@ package google
   api_name_lower[0] = api_name_lower[0].downcase
 -%>
 
-func resource<%= resource_name %>() *schema.Resource {
+func resource<%= resource_name -%>() *schema.Resource {
 	return &schema.Resource{
-		Create: resource<%= resource_name %>Create,
-		Read: resource<%= resource_name %>Read,
+		Create: resource<%= resource_name -%>Create,
+		Read: resource<%= resource_name -%>Read,
 		<% if updatable?(object, properties) -%>
-		Update: resource<%= resource_name %>Update,
+		Update: resource<%= resource_name -%>Update,
 		<% end -%>
-		Delete: resource<%= resource_name %>Delete,
+		Delete: resource<%= resource_name -%>Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: resource<%= resource_name %>Import,
+			State: resource<%= resource_name -%>Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout {
@@ -47,7 +47,7 @@ func resource<%= resource_name %>() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 <% order_properties(properties).each do |prop| -%>
-	<%= build_schema_property(config, prop, object) %>
+	<%= lines(build_schema_property(config, prop, object)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 			"project": &schema.Schema{
@@ -67,7 +67,7 @@ func resource<%= resource_name %>() *schema.Resource {
 	}
 }
 
-func resource<%= resource_name %>Create(d *schema.ResourceData, meta interface{}) error {
+func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	project, err := getProject(d, config)
@@ -77,19 +77,19 @@ func resource<%= resource_name %>Create(d *schema.ResourceData, meta interface{}
 
 	obj := map[string]interface{}{
 <% settable_properties.each do |prop| -%>
-  "<%= prop.name %>": expand<%= resource_name %><%= titlelize_property(prop) %>(d.Get("<%= Google::StringUtils.underscore(prop.name) %>")),
+  "<%= prop.name -%>": expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")),
 <% end -%>
 	}
 
-	url, err := replaceVars(d, config, "<%= collection_url(object) %>")
+	url, err := replaceVars(d, config, "<%= collection_url(object) -%>")
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Creating new <%= object.name %>: %#v", obj)
+	log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
 	res, err := Post(config, url, obj)
 	if err != nil {
-		return fmt.Errorf("Error creating <%= object.name %>: %s", err)
+		return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
 	}
 
 	// Store the ID now
@@ -99,14 +99,14 @@ func resource<%= resource_name %>Create(d *schema.ResourceData, meta interface{}
 	}
 	d.SetId(id)
 
-	op := &<%= api_name_lower %>.Operation{}
+	op := &<%= api_name_lower -%>.Operation{}
 	err = Convert(res, op)
 	if err != nil {
 		return err
 	}
 
-	waitErr := <%= api_name_lower %>OperationWaitTime(
-		config.client<%= product_ns %>, op, project, "Creating <%= object.name %>",
+	waitErr := <%= api_name_lower -%>OperationWaitTime(
+		config.client<%= product_ns -%>, op, project, "Creating <%= object.name -%>",
 		int(d.Timeout(schema.TimeoutCreate).Minutes()))
 
 	if waitErr != nil {
@@ -115,10 +115,10 @@ func resource<%= resource_name %>Create(d *schema.ResourceData, meta interface{}
 		return waitErr
 	}
 
-	return resource<%= resource_name %>Read(d, meta)
+	return resource<%= resource_name -%>Read(d, meta)
 }
 
-func resource<%= resource_name %>Read(d *schema.ResourceData, meta interface{}) error {
+func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	project, err := getProject(d, config)
@@ -126,18 +126,18 @@ func resource<%= resource_name %>Read(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) %>")
+	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
 	if err != nil {
 		return err
 	}
 
 	res, err := Get(config, url)
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name %> %q", d.Id()))
+		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
 
 <% properties.each do |prop| -%>
-  d.Set("<%= Google::StringUtils.underscore(prop.name) %>", flatten<%= resource_name %><%= titlelize_property(prop) %>(res["<%= prop.name %>"]))
+  d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.name -%>"]))
 <% end -%>
 	d.Set("self_link", res["selfLink"])
 <% if object.base_url.include?("{{project}}") -%>
@@ -148,7 +148,7 @@ func resource<%= resource_name %>Read(d *schema.ResourceData, meta interface{}) 
 }
 
 <% if updatable?(object, properties) -%>
-func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}) error {
+func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	project, err := getProject(d, config)
@@ -159,30 +159,30 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 	<% unless object.input -%>
 	obj := map[string]interface{}{
 		<% settable_properties.each do |prop| -%>
-		"<%= prop.name %>": expand<%= resource_name %><%= titlelize_property(prop) %>(d.Get("<%= Google::StringUtils.underscore(prop.name) %>")),
+		"<%= prop.name -%>": expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")),
 		<% end -%>
 	}
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) %>")
+	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Updating <%= object.name %> %q: %#v", d.Id(), obj)
-	res, err := sendRequest(config, "<%= object.update_verb %>", url, obj)
+	log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
+	res, err := sendRequest(config, "<%= object.update_verb -%>", url, obj)
 
 	if err != nil {
-		return fmt.Errorf("Error updating <%= object.name %> %q: %s", d.Id(), err)
+		return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
 	}
 
-	op := &<%= api_name_lower %>.Operation{}
+	op := &<%= api_name_lower -%>.Operation{}
 	err = Convert(res, op)
 	if err != nil {
 		return err
 	}
 
-	err = <%= api_name_lower %>OperationWaitTime(
-		config.client<%= product_ns %>, op, project, "Updating <%= object.name %>",
+	err = <%= api_name_lower -%>OperationWaitTime(
+		config.client<%= product_ns -%>, op, project, "Updating <%= object.name -%>",
 		int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 	if err != nil {
@@ -192,20 +192,20 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 	var obj map[string]interface{}
 	var url string
 	var res map[string]interface{}
-	var op <%= api_name_lower %>.Operation
+	var op <%= api_name_lower -%>.Operation
 
 	<% settable_properties.reject { |p| p.update_url.nil? }.each do |prop| -%>
-	if d.HasChange("<%= Google::StringUtils.underscore(prop.name) %>") {
+	if d.HasChange("<%= Google::StringUtils.underscore(prop.name) -%>") {
 		obj = map[string]interface{}{
-			"<%= prop.name %>": expand<%= resource_name %><%= titlelize_property(prop) %>(d.Get("<%= Google::StringUtils.underscore(prop.name) %>")),
+			"<%= prop.name -%>": expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")),
 		}
-		url, err = replaceVars(d, config, "<%= update_url(object, prop.update_url) %>")
+		url, err = replaceVars(d, config, "<%= update_url(object, prop.update_url) -%>")
 		if err != nil {
 			return err
 		}
-		res, err = sendRequest(config, "<%= prop.update_verb %>", url, obj)
+		res, err = sendRequest(config, "<%= prop.update_verb -%>", url, obj)
 		if err != nil {
-			return fmt.Errorf("Error updating <%= object.name %> %q: %s", d.Id(), err)
+			return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
 		}
 
 		err = Convert(res, &op)
@@ -213,22 +213,22 @@ func resource<%= resource_name %>Update(d *schema.ResourceData, meta interface{}
 			return err
 		}
 
-		err = <%= api_name_lower %>OperationWaitTime(
-			config.client<%= product_ns %>, op, project, "Updating <%= object.name %>",
+		err = <%= api_name_lower -%>OperationWaitTime(
+			config.client<%= product_ns -%>, op, project, "Updating <%= object.name -%>",
 			int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 		if err != nil {
 			return err
 		}
 	}
-	<% end %>
-	<% end %>
+	<% end -%>
+	<% end -%>
 
-	return resource<%= resource_name %>Read(d, meta)
+	return resource<%= resource_name -%>Read(d, meta)
 }
-<% end %>
+<% end -%>
 
-func resource<%= resource_name %>Delete(d *schema.ResourceData, meta interface{}) error {
+func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	project, err := getProject(d, config)
@@ -236,25 +236,25 @@ func resource<%= resource_name %>Delete(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) %>")
+	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Deleting <%= object.name %> %q", d.Id())
+	log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
 	res, err := Delete(config, url)
 	if err != nil {
-		return fmt.Errorf("Error deleting <%= object.name %> %q: %s", d.Id(), err)
+		return fmt.Errorf("Error deleting <%= object.name -%> %q: %s", d.Id(), err)
 	}
 
-	op := &<%= api_name_lower %>.Operation{}
+	op := &<%= api_name_lower -%>.Operation{}
 	err = Convert(res, op)
 	if err != nil {
 		return err
 	}
 
-	err = <%= api_name_lower %>OperationWaitTime(
-		config.client<%= product_ns %>, op, project, "Deleting <%= object.name %>",
+	err = <%= api_name_lower -%>OperationWaitTime(
+		config.client<%= product_ns -%>, op, project, "Deleting <%= object.name -%>",
 		int(d.Timeout(schema.TimeoutDelete).Minutes()))
 
 	if err != nil {
@@ -264,9 +264,9 @@ func resource<%= resource_name %>Delete(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func resource<%= resource_name %>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*Config)
-	parseImportId([]string{<%= '"' + import_id_formats(object).map{|s| format2regex s}.join('","') + '"' %>}, d, config)
+	parseImportId([]string{<%= '"' + import_id_formats(object).map{|s| format2regex s}.join('","') + '"' -%>}, d, config)
 
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "<%= config['id'] -%>")
