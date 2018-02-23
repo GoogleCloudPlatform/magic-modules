@@ -84,19 +84,15 @@ import json
 def main():
     """Main function"""
 
+<%
+  mod_props = object.all_user_properties.reject(&:output).map do |prop|
+    python_dict_for_property(prop)
+  end
+-%>
     module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
-<% object.all_user_properties.reject(&:output).each do |prop| -%>
-<%
-  line = "#{Google::StringUtils.underscore(prop.out_name)}=dict("
-  options = [
-    ("required=True" if prop.required),
-    "type=#{quote_string(python_type(prop))}"
-  ].compact
--%>
-<%= lines(indent("#{line}#{options.join(', ')}),", 12)) -%>
-<% end -%>
+<%= lines(indent_list(mod_props, 12)) -%>
         )
     )
 
