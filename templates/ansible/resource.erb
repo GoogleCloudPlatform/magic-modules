@@ -31,7 +31,7 @@ version_added: <%= lines(@config.manifest.get('version_added', config)) -%>
 author: <%= lines(@config.manifest.get('author', config)) -%>
 requirements:
 <% @config.manifest.get('requirements', config).each do |line| -%>
-<%= lines(indent(bullet_line(line, 4, false), 4)) -%>
+<%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
 options:
     state:

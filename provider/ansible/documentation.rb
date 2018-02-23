@@ -21,6 +21,7 @@ module Provider
   class Ansible
     # Responsible for building out YAML documentation blocks.
     module Documentation
+      UNSAFE_CHARS = %w[' " : &].freeze
       # Takes a long string and divides each string into multiple paragraphs,
       # where each paragraph is a properly indented multi-line bullet point.
       #
@@ -42,15 +43,28 @@ module Provider
       #   - This is a sentence
       #     that wraps under
       #     the bullet properly
-      def bullet_line(paragraph, spaces, add_period=true)
+      #
+      #   - |
+      #     This is a sentence
+      #     that wraps under
+      #     the bullet properly
+      #     because of the :
+      #     character
+      def bullet_line(paragraph, spaces, multiline = true, add_period = true)
         # - 2 for "- "
         indented = wrap_field(paragraph, spaces - 2)
         indented = indented.split("\n")
-        indented[0] = indented[0].sub(/^../, '- ')
-        # Add in a period at paragraph end unless there's already a period.
+
+        if multiline && UNSAFE_CHARS.any? { |c| paragraph.include?(c) }
+          indented = ['- |'] + indented
+        else
+          indented[0] = indented[0].sub(/^../, '- ')
+        end
+
         if add_period
           indented[-1] += '.' unless indented.last.end_with?('.')
         end
+
         indented
       end
 
