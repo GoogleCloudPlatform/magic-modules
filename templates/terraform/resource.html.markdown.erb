@@ -21,34 +21,34 @@
 -%>
 ---
 layout: "google"
-page_title: "Google: google_<%= api_name_lower %>_<%= object.out_name %>"
-sidebar_current: "docs-google-<%= api_name_lower %>-<%= object.out_name.gsub("_", "-") %>"
+page_title: "Google: google_<%= api_name_lower -%>_<%= object.out_name -%>"
+sidebar_current: "docs-google-<%= api_name_lower -%>-<%= object.out_name.gsub("_", "-") -%>"
 description: |-
   <%= object.description.lines.first -%>
 ---
 
-# google\_<%= api_name_lower %>\_<%= object.out_name.gsub("_", "\\_") %>
+# google\_<%= api_name_lower -%>\_<%= object.out_name.gsub("_", "\\_") %>
 
-<%= object.description.strip %>
+<%= lines(object.description) -%>
 
 <% if !object.references.nil? -%>
-To get more information about <%= object.name %>, see:
+To get more information about <%= object.name -%>, see:
 
-<% if !object.references.api.nil? -%>
-* [API documentation](<%= object.references.api %>)
-<% end -%>
-<% if !object.references.guides.empty? -%>
+<%   if !object.references.api.nil? -%>
+* [API documentation](<%= object.references.api -%>)
+<%   end # object...api.nil? -%>
+<%   if !object.references.guides.empty? -%>
 * How-to Guides
-  <% object.references.guides.each do |title, link| -%>
-  * [<%= title %>](<%= link %>)
-  <% end -%>
-<% end -%>
-<% end -%>
+<%     object.references.guides.each do |title, link| -%>
+    * [<%= title -%>](<%= link -%>)
+<%     end # object...guides.each -%>
+<%   end # object...guides.empty? -%>
+<% end # object...api.nil? -%>
 
 ## Example Usage
 
 ```hcl
-resource "google_<%= api_name_lower %>_<%= object.out_name %>" "default" {
+resource "google_<%= api_name_lower -%>_<%= object.out_name -%>" "default" {
   TODO: Add fields
 }
 ```
@@ -58,17 +58,17 @@ resource "google_<%= api_name_lower %>_<%= object.out_name %>" "default" {
 The following arguments are supported:
 
 <% properties.select(&:required).each do |prop| -%>
-<%= build_property_documentation(config, prop) %>
+<%= lines(build_property_documentation(config, prop)) -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
-<%= build_nested_property_documentation(config, prop) %>
+<%= lines(build_nested_property_documentation(config, prop)) -%>
 <% end -%>
 
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= build_property_documentation(config, prop) %>
+<%= lines(build_property_documentation(config, prop)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 * `project` (Optional) The project in which the resource belongs.
@@ -76,7 +76,7 @@ The following arguments are supported:
 <% end -%>
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= build_nested_property_documentation(config, prop) %>
+<%= lines(build_nested_property_documentation(config, prop)) -%>
 <% end -%>
 
 ## Attributes Reference
@@ -84,14 +84,14 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are exported:
 
 <% properties.select(&:output).each do |prop| -%>
-<%= build_property_documentation(config, prop) %>
+<%= lines(build_property_documentation(config, prop)) -%>
 <% end -%>
 <% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
 <% properties.select(&:output).each do |prop| -%>
-<%= build_nested_property_documentation(config, prop) %>
+<%= lines(build_nested_property_documentation(config, prop)) -%>
 <% end -%>
 
 ## Timeouts
@@ -107,10 +107,10 @@ This resource provides the following
 
 ## Import
 
-<%= object.name %> can be imported using any of these accepted formats:
+<%= object.name -%> can be imported using any of these accepted formats:
 
 ```
 <% import_id_formats(object).each do |id_format| -%>
-$ terraform import google_<%= api_name_lower %>_<%= object.out_name %>.default <%= id_format %>
+$ terraform import google_<%= api_name_lower -%>_<%= object.out_name -%>.default <%= id_format %>
 <% end -%>
 ```
