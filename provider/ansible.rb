@@ -17,6 +17,7 @@ require 'provider/ansible/manifest'
 require 'provider/ansible/example'
 require 'provider/ansible/documentation'
 require 'provider/ansible/module'
+require 'provider/ansible/resourceref'
 
 module Provider
   # Code generator for Ansible Cookbooks that manage Google Cloud Platform
@@ -31,6 +32,7 @@ module Provider
 
     include Ansible::Documentation
     include Ansible::Module
+    include Provider::Ansible::ResourceRef
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -137,8 +139,7 @@ module Provider
 
     # Returns a list of all first-level ResourceRefs that are not virtual
     def nonvirtual_rrefs(object)
-      object.all_user_properties
-            .select { |prop| prop.is_a? Api::Type::ResourceRef }
+      object.all_resourcerefs
             .select { |prop| !prop.resource_ref.virtual }
     end
 
