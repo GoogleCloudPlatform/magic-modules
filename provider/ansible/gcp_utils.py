@@ -17,6 +17,7 @@ except ImportError:
     HAS_GOOGLE_LIBRARIES = False
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible.module_utils.six import string_types
 import os
 
 
@@ -147,6 +148,29 @@ class GcpModule(AnsibleModule):
         )
 
         AnsibleModule.__init__(self, *args, **kwargs)
+
+    # Some params are references to other pieces of GCP infrastructure.
+    # These params are passed in as dictionaries.
+    # The dictionaries should be overriden with the proper value.
+    # The proper value is located at key: 'value' of the dictionary
+    def set_value_for_resource(self, path, value, params=None):
+        if params is None:
+            params = self.params
+        try:
+            if len(path) == 1:
+                # Override dictionary with value from the dictionary
+                params[path[0]] = params[path[0]].get(value)
+            else:
+                params = params[path[0]]
+                if isinstance(params, list):
+                    for item in params:
+                        self.set_value_for_resource(path[1:], value, item)
+                else:
+                    self.set_value_for_resource(path[1:], value, params)
+        except KeyError:
+            # Many resources are optional and won't be included.
+            # These errors are expected and should be ignored.
+            pass
 
     def _merge_dictionaries(self, a, b):
         new = a.copy()

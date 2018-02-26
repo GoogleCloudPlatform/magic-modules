@@ -96,21 +96,7 @@ def main():
         )
     )
 
-<%
-  rrefs = nonvirtual_rrefs(object)
--%>
-<% unless rrefs.empty? -%>
-    # Replace the dictionary of results from other GCP modules with the
-    # proper value only.
-<% rrefs.each do |rref| -%>
-<%
-  rref_module = "module.params['#{Google::StringUtils.underscore(rref.name)}']"
-  import_selector = "['#{Google::StringUtils.underscore(rref.imports)}']"
--%>
-    <%= rref_module -%> = <%= rref_module -%><%= import_selector %>
-<% end -%>
-
-<% end -%>
+<%= lines(indent(resourceref_handlers(object), 4), 1) -%>
     state = module.params['state']
     kind = <%= lines(quote_string(object.kind)) -%>
 
