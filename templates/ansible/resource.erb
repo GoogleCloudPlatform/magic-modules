@@ -248,7 +248,7 @@ def resource_to_request(module):
 <%=
   lines(indent(
     ["#{unicode_string(prop.field_name)}:",
-     "module.params[#{quote_string(prop.out_name)}],"].join(' '), 8))
+     "module.params.get(#{quote_string(prop.out_name)}),"].join(' '), 8))
 -%>
 <% end -%>
     }
