@@ -108,7 +108,9 @@ the Magic Modules code and run:
 We are now ready to compile a module!
 
 
-## Compiling a module
+## Compiling modules
+
+### Compiling a single module
 
 Compiling a module is as easy as:
 
@@ -119,6 +121,24 @@ For example, to compile Google Compute Engine for Puppet, you invoke:
     bundle exec compiler -p products/compute -e puppet -o build/puppet/compute
 
 And the generated code should be written to `build/puppet/compute`
+
+### Compiling all modules
+The Rakefile can be used to compile all of the modules at once. The following
+rake command can be used to compile all modules for all providers or just
+a single provider.
+
+    bundle exec rake compile:<optional provider>:<optional module>
+
+The following env variables can be set to have certain providers compile into
+a custom folder. For Terraform and Ansible, only one variable exists. For Chef +
+Puppet, one variable exists per GCP product. Examples include:
+
+Platform       | Variable
+---------------|----------
+Terraform      | COMPILER_TERRAFORM_OUTPUT
+Ansible        | COMPILER_ANSIBLE_OUTPUT
+Puppet Compute | COMPILER_PUPPET_COMPUTE_OUTPUT
+Chef DNS       | COMPILER_CHEF_DNS_OUTPUT
 
 
 ## Expected output

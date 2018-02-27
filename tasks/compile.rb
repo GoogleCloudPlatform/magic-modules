@@ -14,7 +14,9 @@
 require 'tasks/common'
 
 def compile_module(provider, mod)
-  output = PROVIDER_FOLDERS[provider.to_sym] % mod
+  folder = PROVIDER_FOLDERS[provider.to_sym] % mod
+  flag = "COMPILER_#{folder.gsub('build/', '').tr('/', '_').upcase}_OUTPUT"
+  output = ENV[flag] || (PROVIDER_FOLDERS[provider.to_sym] % mod)
   %x(bundle exec compiler -p products/#{mod} -e #{provider} -o #{output})
 end
 
