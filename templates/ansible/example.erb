@@ -1,8 +1,7 @@
 ---
 <%= compile 'templates/ansible/autogen_notice.erb' -%>
-<% if example.dependencies and !example.dependencies.empty? -%>
-#---------------------------------------------------------
 # Pre-test setup
+<% unless example.dependencies.nil? -%>
 <% example.dependencies.each do |depend| -%>
 <%= lines(depend.build_test('present', object, false)) -%>
 <% end # example.dependencies.each -%>
