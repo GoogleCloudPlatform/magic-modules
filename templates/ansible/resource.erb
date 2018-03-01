@@ -247,8 +247,12 @@ def resource_to_request(module):
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-def self_link(module):
-    return <%= self_link_url(object) -%>.format(**module.params)
+<% custom_self_link = get_code_multiline config, 'self_link' -%>
+<% if custom_self_link.nil? -%>
+<%= lines(emit_link('self_link', self_link_url(object))) -%>
+<% else # custom_self_link.nil? -%>
+<%= lines(emit_link('self_link', custom_self_link)) -%>
+<% end # custom_self_link.nil? -%>
 
 
 <% custom_collection = get_code_multiline config, 'collection' -%>
