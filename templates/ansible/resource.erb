@@ -238,6 +238,9 @@ def resource_to_request(module):
 -%>
 <% end -%>
     }
+<% if object.encoder? -%>
+    request = <%= object.transport.encoder -%>(request)
+<% end -%>
     return_vals = {}
     for k, v in request.items():
         if v:
