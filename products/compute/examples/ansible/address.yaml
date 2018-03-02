@@ -19,4 +19,11 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= project %>
     auth_kind: <%= auth_kind %>
     service_account_file: <%= service_account_file %>
-
+verifier: !ruby/object:Provider::Ansible::Verifier
+  command: |
+    gcloud compute addresses describe
+      --project="{{ gcp_project}}"
+      --region=us-west1
+      test-address1
+  failed_name: |
+    'projects/{{ gcp_project }}/regions/us-west1/addresses/test-address1' was not found

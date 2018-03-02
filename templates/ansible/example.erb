@@ -25,6 +25,9 @@
       - result.changed == true
 <% end # if object.virtual -%>
       - "result.kind == <%= quote_string(object.kind) -%>"
+<% unless example.verifier.nil? -%>
+<%= lines(example.verifier.build_task('present', object)) -%>
+<% end -%>
 <% unless object.virtual -%>
 # ----------------------------------------------------------------------------
 <%= lines(example.task.build_test('present', object, true)) -%>
@@ -42,6 +45,9 @@
     that:
       - result.changed == true
       - result.has_key('kind') == False
+<% unless example.verifier.nil? -%>
+<%= lines(example.verifier.build_task('absent', object)) -%>
+<% end -%>
 # ----------------------------------------------------------------------------
 <%= lines(example.task.build_test('absent', object, true)) -%>
   register: result
