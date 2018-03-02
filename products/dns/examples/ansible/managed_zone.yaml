@@ -8,3 +8,9 @@ task: !ruby/object:Provider::Ansible::Task
       project: <%= project %>
       auth_kind: <%= auth_kind %>
       service_account_file: <%= service_account_file %>
+verifier: !ruby/object:Provider::Ansible::Verifier
+  command: |
+    gcloud dns managed-zones describe
+      --project="{{ gcp_project }}"
+      "{{ resource_name }}"
+
