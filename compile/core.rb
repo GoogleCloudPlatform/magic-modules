@@ -30,6 +30,113 @@ module Compile
       get_helper_file(file)
     end
 
+    # Compiles a ERB template.
+    #
+    # This function is used to compile code/docs/tests/etc. by using Embedded
+    # Ruby (ERB).
+    #
+    # This function adjusts the Ruby Bindings* to expose local and instance
+    # variables of the caller stack as locally scopes variables in the ERB
+    # template context. This non-standard behavior allows for easier writing of
+    # templates without having to fetch context from other sources. Any data
+    # that the provider writer wants to expose to the template can be made
+    # available through the bindings.
+    #
+    # This allows for exposing instance variables, such as @api and config, or
+    # provider or function specific data, such as output_folder. Functions such
+    # as Provider::Core::generate_file() or Provider::Core::compile_file() can
+    # allow providers to generate such bindings (by passing them in a Hash to
+    # the function).
+    #
+    # This short notation makes the template easier to write. For example in
+    # GRPC for you to access a context specific variable you have to call a
+    # global function, such as: Contexts.current().get(SOME_GRPC_VAR).
+    #
+    # Note that if more than 1 compile() function is invoked reentrantly the
+    # next run will be adjusted to the same context. So despite the call stack
+    # being modified, the view of the variables will not. In the example below
+    # the text of the 'file2.erb' template will print properly the name of the
+    # product from the @api instance variable of the provider object N stack
+    # traces behind.
+    #
+    #   Call stack:                    Context:
+    #
+    #   provider::some_func
+    #                                  instance variable: @api
+    #                                  local variable: object
+    #                                  local variable: output_file
+    #   compile('file1.erb')
+    #
+    #     ...
+    #     <%= compile('TEST.md.erb') -%>
+    #     ...
+    #
+    #   compile('TEST.md.erb')
+    #
+    #     ...
+    #     We're compiling object '<%= object.name -%>' for '<%= @api.name -%>'.
+    #     This file is named '<%= output_file -%>'.
+    #     ...
+    #
+    # It would generate an output like:
+    #
+    #   We're compiling object 'Disk' for 'Google Compute Engine'.
+    #   This file is named 'build/puppet/compute/TEST.md'.
+    #
+    # The ERB compiler uses a local variable (_erbout) to track the output to be
+    # emitted and on every new instance of the ERB the output is overwritten. To
+    # enable this function to be reentrant we will store the _erbout variable to
+    # preserve the original content and combine the result of the run. Saving
+    # this context is similar to stack push/pop used in Assembly when entering
+    # and leaving a function:
+    #
+    # PROC myfunc
+    #   PUSH EBP
+    #   MOV EBP, ESP
+    #   ...
+    #   ...
+    #   POP EBP
+    # ENDP
+    #
+    # Also note that variables can be overwritten when calling the next level.
+    # For example if you want to overwrite a variable, e.g. indent_level, one
+    # can simply update the variable and call compile. But note that it is the
+    # caller responsibility to restore the variable before exiting the context
+    # (similarly to the PROC specification above).
+    #
+    # If you want to avoid the load/save you can use one helper functions, such
+    # as Provider::Core.compile_file(), which take a hash with overrides. For
+    # example:
+    #
+    # parent.erb:
+    #   <% indent_spaces = 2 -%>
+    #   Parent: <%= indent_spaces -%>
+    #   <%=
+    #     compile_file({ indent_spaces: indent_spaces + 2 },
+    #                  'child.erb')
+    #   -%>
+    #   Parent: <%= indent_spaces -%>
+    #
+    # child.erb:
+    #   Child: <%= indent_spaces -%>
+    #
+    # This would produce something like:
+    #
+    #   Parent: 2
+    #   Child: 4
+    #   Parent 2
+    #
+    # This function is reentrant.
+    #
+    # * Binding: Objects of class Binding encapsulate the execution context at
+    # some particular place in the code and retain this context for future use.
+    # The variables, methods, value of self, and possibly an iterator block that
+    # can be accessed in this context are all retained. Binding objects can be
+    # created using Kernel#binding, and are made available to the callback of
+    # Kernel#set_trace_func. -- https://ruby-doc.org/core-2.2.0/Binding.html
+    #
+    # WARNING: Do *NOT* change caller_frame = 1 value unless you really know
+    # what you're doing. It is reserved for future use.
     def compile(file, caller_frame = 1)
       ctx = binding.of_caller(caller_frame)
       has_erbout = ctx.local_variables.include?(:_erbout)
