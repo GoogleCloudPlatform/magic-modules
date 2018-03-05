@@ -1,0 +1,25 @@
+---
+# This file takes four inputs: the PR-ready MM repo, the inciting PR, the terraform PR, and the CI repo.
+# It spits out the magic-modules repo with a comment file for the inciting PR.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: nmckinley/go-ruby
+        tag: '1.9-2.5'
+
+inputs:
+    - name: magic-modules-out
+    - name: mm-initial-pr
+    - name: terraform-prs-out
+    - name: ci
+
+outputs:
+    - name: magic-modules-comment
+
+run:
+    path: ci/magic-modules/make-comment.sh
+
+params:
+    GH_USERNAME: ""
