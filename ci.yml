@@ -38,7 +38,7 @@ resources:
       type: git
       source:
           uri: git@github.com:((username))/terraform-provider-google-ci.git
-          branch: git-pull-resource
+          branch: master
           private_key: ((repo_key))
 
     - name: mm-approved-prs
