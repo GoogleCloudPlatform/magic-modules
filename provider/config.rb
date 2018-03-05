@@ -176,7 +176,7 @@ module Provider
         unless config.class <= Provider::Config
       # Compile step #2: Now that we have the target class, compile with that
       # class features
-      source = config.compile(cfg_file, 0)
+      source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
