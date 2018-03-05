@@ -1,0 +1,167 @@
+# These resource types are here until the PRs get merged in upstream.  :)
+resource_types:
+    - name: git-branch
+      type: docker-image
+      source:
+          repository: nmckinley/concourse-git-resource
+          tag: v0.1.7
+
+    - name: github-pull-request
+      type: docker-image
+      source:
+          repository: nmckinley/concourse-github-pr-resource
+          tag: v0.1.1
+
+resources:
+    - name: magic-modules
+      type: git-branch
+      source:
+          uri: git@github.com:((username))/magic-modules.git
+          private_key: ((repo_key))
+
+    - name: magic-modules-new-prs
+      type: github-pull-request
+      source:
+          repo: ((username))/magic-modules
+          private_key: ((repo_key))
+          access_token: ((repo_access))
+          only_mergeable: true
+          authorship_restriction: true
+
+    - name: terraform-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((username))/terraform-provider-google.git
+          private_key: ((repo_key))
+
+    - name: ci
+      type: git
+      source:
+          uri: git@github.com:((username))/terraform-provider-google-ci.git
+          branch: git-pull-resource
+          private_key: ((repo_key))
+
+    - name: mm-approved-prs
+      type: github-pull-request
+      source:
+          repo: ((username))/magic-modules
+          private_key: ((repo_key))
+          access_token: ((repo_access))
+          only_mergeable: true
+          require_review_approval: true
+
+    - name: mm-prs-out
+      type: github-pull-request
+      source:
+          repo: ((username))/magic-modules
+          private_key: ((repo_key))
+          access_token: ((repo_access))
+
+    - name: terraform-prs-out
+      type: github-pull-request
+      source:
+          repo: ((username))/terraform-provider-google
+          private_key: ((repo_key))
+          access_token: ((repo_access))
+
+jobs:
+    - name: mm-generate
+      plan:
+          - aggregate:
+              - get: magic-modules
+                resource: magic-modules-new-prs
+                version: every
+                # trigger: true
+                params:
+                    submodules: [build/terraform]
+              - get: ci
+            # TODO(@ndmckinley): This task is too monolithic and should be split up.
+          - task: generate
+            file: ci/magic-modules/generate.yml
+            params:
+                GH_USERNAME: ((username))
+          - put: terraform-intermediate
+            params:
+                repository: mm-output/build/terraform
+                branch_file: mm-output/branchname
+                only_if_diff: true
+
+          # This needs to go below all the submodules because it has a commit which
+          # points to those submodules.
+          - put: magic-modules
+            params:
+                repository: mm-output
+                branch_file: mm-output/branchname
+                only_if_diff: true
+
+    - name: terraform-test
+      plan:
+          - aggregate:
+              - get: ci
+              - get: magic-modules
+                version: every
+                # trigger: true
+                params:
+                    submodules: [build/terraform]
+                passed: [mm-generate]
+          - task: test
+            file: ci/unit-tests/task.yml
+
+    - name: create-prs
+      plan:
+          - get: ci
+          - get: magic-modules
+            version: every
+            # trigger: true
+            params:
+                submodules: [build/terraform]
+            passed: [terraform-test, mm-generate]
+            # TODO(@ndmckinley): This get/task/put/task/put flow is confusing and should be cleaned up.
+          - get: mm-initial-pr
+            resource: magic-modules-new-prs
+            passed: [mm-generate]
+            version: every
+          - task: make-pr
+            file: ci/magic-modules/make-pr.yml
+          - put: magic-modules
+            params:
+                branch_file: mm-initial-pr/.git/branch
+                repository: magic-modules-out
+                only_if_diff: true
+          - put: terraform-prs-out
+            params:
+                path: magic-modules-out/build/terraform
+                status: success
+          - task: make-comment
+            file: ci/magic-modules/make-comment.yml
+            params:
+                GH_USERNAME: ((username))
+          - put: mm-prs-out
+            params:
+                status: success
+                path: magic-modules-comment
+                comment: magic-modules-comment/pr_comment
+
+    - name: merge-prs
+      plan:
+          - get: mm-approved-prs
+          - get: ci
+          - task: merge-and-update
+            file: ci/magic-modules/merge.yml
+            params:
+                CREDS: ((repo_key))
+          - put: magic-modules
+            params:
+                repository: mm-output
+                branch_file: mm-approved-prs/.git/branch
+                only_if_diff: true
+          - put: mm-approved-prs
+            params:
+                path: mm-output
+                status: success
+                merge:
+                    method: squash
+                    commit_msg: mm-output/commit_message
+
+# TODO(@ndmckinley): System for confirming no downstream conflicts.
+# TODO(@ndmckinley): System for building the Docker containers this depends on.
