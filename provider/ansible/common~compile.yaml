@@ -19,3 +19,13 @@
 'test/integration/cloud-config-gcp.yml.template':
   'provider/ansible/test_template.yaml'
 'test/runner/lib/cloud/gcp.py': 'provider/ansible/gcp_integration_runner.py'
+<%
+  api.objects.map do |object|
+    ["gcp_#{object.__product.prefix[1..-1]}",
+     Google::StringUtils.underscore(object.name)].join('_')
+  end.each do |name|
+-%>
+'test/integration/targets/<%= name -%>/aliases': 'templates/ansible/aliases'
+'test/integration/targets/<%= name -%>/defaults/main.yml': 'templates/ansible/defaults_main.yaml'
+'test/integration/targets/<%= name -%>/meta/main.yml': 'provider/ansible/blank_file.yaml'
+<% end -%>
