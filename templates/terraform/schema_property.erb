@@ -13,6 +13,7 @@
   # limitations under the License.
 <% end -%>
 <% if tf_types.include?(property.class) -%>
+<% property_key = construct_property_key(property) -%>
 "<%= Google::StringUtils.underscore(property.name) -%>": {
   Type: <%= tf_types[property.class] %>,
 <% if property.required -%>
@@ -26,12 +27,12 @@
   ForceNew: true,
 <% end -%>
 <% validate_fns = config['validation'] -%>
-<% if validate_fns&.key?(property.name) -%>
-  ValidateFunc: validateRegexp(`<%= validate_fns[property.name] -%>`),
+<% if validate_fns&.key?(property_key) -%>
+  ValidateFunc: validateRegexp(`<%= validate_fns[property_key] -%>`),
 <% end -%>
 <% diff_suppress_fns = config['diff_suppress_funcs'] -%>
-<% if diff_suppress_fns&.key?(property.name) -%>
-  DiffSuppressFunc: <%= diff_suppress_fns[property.name] %>,
+<% if diff_suppress_fns&.key?(property_key) -%>
+  DiffSuppressFunc: <%= diff_suppress_fns[property_key] %>,
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end -%>
@@ -71,6 +72,10 @@
 <% end -%>
 <% if config['sensitive']&.include?(property.name) -%>
     Sensitive: true,
+<% end -%>
+<% default_values = config['default_values'] -%>
+<% if default_values&.include?(property_key) -%>
+    Default: <%= go_literal(default_values[property_key]) -%>,
 <% end -%>
 },
 <% else -%>

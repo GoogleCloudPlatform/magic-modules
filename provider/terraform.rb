@@ -15,6 +15,7 @@ require 'provider/config'
 require 'provider/abstract_core'
 require 'provider/terraform/sub_template'
 require 'provider/terraform/import'
+require 'google/golang_utils'
 
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
@@ -22,6 +23,7 @@ module Provider
   class Terraform < Provider::AbstractCore
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
+    include Google::GolangUtils
 
     # Settings for the provider
     class Config < Provider::Config
@@ -104,7 +106,7 @@ module Provider
     # Returns the resource properties without those ignored.
     def effective_properties(config, properties)
       properties.reject do |p|
-        config['ignore']&.include?(construct_ignore_string(p))
+        config['ignore']&.include?(construct_property_key(p))
       end
     end
 
@@ -124,19 +126,19 @@ module Provider
 
     private
 
-    # Constructs the prefix to be used when looking for ignored properties.
+    # Constructs the key uniquely identifying a property for a given resource.
     #
-    # The 'ignore' list supports three formats:
-    # - 'foo': Ignores top-level property 'foo'
-    # - 'foo.bar': Ignores field 'bar' nested under 'foo'
-    # - 'foo.*.bar': Ignores field 'bar' of all nested objects in list 'foo'
-    def construct_ignore_string(property)
+    # The key can take one of these formats:
+    # - 'foo': Top-level property 'foo'
+    # - 'foo.bar': Property 'bar' nested under property 'foo'
+    # - 'foo.*.bar': Property 'bar' of all nested objects in list 'foo'
+    def construct_property_key(property)
       return property.name if property.parent.nil?
 
       if property.parent.is_a?(Api::Type::Array)
-        construct_ignore_string(property.parent) + '.*'
+        construct_property_key(property.parent) + '.*'
       else
-        construct_ignore_string(property.parent) + '.' + property.name
+        construct_property_key(property.parent) + '.' + property.name
       end
     end
 

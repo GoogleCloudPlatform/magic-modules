@@ -56,6 +56,8 @@ objects: !ruby/object:Api::Resource::HashArray
   HttpHealthCheck:
     # TODO: Add support for missing features needed by this resource
     skip: true
+    default_values:
+      port: 80
   HttpsHealthCheck:
     # TODO: Add support for missing features needed by this resource
     skip: true
