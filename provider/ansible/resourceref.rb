@@ -18,7 +18,7 @@ require 'provider/core'
 require 'provider/ansible/manifest'
 
 module Provider
-  class Ansible
+  module Ansible
     module ResourceRef
       # Builds out a list of statements that handle ResourceRef creation
       def resourceref_handlers(object)
