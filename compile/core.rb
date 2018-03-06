@@ -64,9 +64,9 @@ module Compile
       lines = text.class <= Array ? text : text.split("\n")
       lines.map do |line|
         if line.class <= Array
-          indent(line, spaces)
+          indent(line, spaces, filler)
         elsif line.include?("\n")
-          indent(line.split("\n"), spaces)
+          indent(line.split("\n"), spaces, filler)
         elsif line.strip.empty?
           ''
         else

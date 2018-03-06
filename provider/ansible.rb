@@ -21,7 +21,7 @@ require 'provider/ansible/resourceref'
 
 module Provider
   module Ansible
-    # Settings for the provider
+    # Settings for the Ansible provider
     class Config < Provider::Config
       attr_reader :manifest
       def provider
@@ -34,9 +34,11 @@ module Provider
       end
     end
 
+    # Code generator for Ansible Cookbooks that manage Google Cloud Platform
+    # resources.
+    # TODO(alexstephen): Split up class into multiple modules.
+    # rubocop:disable Metrics/ClassLength
     class Core < Provider::Core
-      # Code generator for Ansible Cookbooks that manage Google Cloud Platform
-      # resources.
       PYTHON_TYPE_FROM_MM_TYPE = {
         'Api::Type::NestedObject' => 'dict',
         'Api::Type::Array' => 'list',
@@ -68,14 +70,16 @@ module Provider
       def self_link_url(resource)
         (product_url, resource_url) = self_link_raw_url(resource)
         full_url = [product_url, resource_url].flatten.join
-        # Double {} replaced with single {} to support Python string interpolation
+        # Double {} replaced with single {} to support Python string
+        # interpolation
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       def collection_url(resource)
         base_url = resource.base_url.split("\n").map(&:strip).compact
         full_url = [resource.__product.base_url, base_url].flatten.join
-        # Double {} replaced with single {} to support Python string interpolation
+        # Double {} replaced with single {} to support Python string
+        # interpolation
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
@@ -108,18 +112,23 @@ module Provider
       # * module will always be included.
       # * extra_data is a dict of extra information.
       # * extra_url will have a URL chunk to be appended after the URL.
+      # rubocop:disable Metrics/MethodLength
       def emit_link(name, url, extra_data = false)
         params = emit_link_var_args(url, extra_data)
         extra = (' + extra' if url.include?('<|extra|>')) || ''
         if extra_data
           [
             "def #{name}(#{params.join(', ')}):",
-            indent("if extra_data is None:", 4),
-            indent("extra_data = {}", 8),
+            indent([
+              'if extra_data is None:',
+              indent('extra_data = {}', 4),
+            ], 4),
             indent("url = #{url}#{extra}", 4).gsub('<|extra|>', ''),
-            indent("combined = extra_data.copy()", 4),
-            indent("combined.update(module.params)", 4),
-            indent("return url.format(**combined)", 4),
+            indent([
+              'combined = extra_data.copy()',
+              'combined.update(module.params)',
+              'return url.format(**combined)'
+            ], 4)
           ].compact.join("\n")
         else
           url_code = "#{url}.format(**module.params)#{extra}"
@@ -129,19 +138,20 @@ module Provider
           ].join("\n")
         end
       end
+      # rubocop:enable Metrics/MethodLength
 
       def emit_link_var_args(url, extra_data)
         extra_url = url.include?('<|extra|>')
         [
-         'module', ("extra_url=''" if extra_url),
-         ("extra_data=None" if extra_data)
+          'module', ("extra_url=''" if extra_url),
+          ('extra_data=None' if extra_data)
         ].compact
       end
 
       # Returns a list of all first-level ResourceRefs that are not virtual
       def nonvirtual_rrefs(object)
         object.all_resourcerefs
-              .select { |prop| !prop.resource_ref.virtual }
+              .reject { |prop| prop.resource_ref.virtual }
       end
 
       # Converts a path in the form a/b/c/d into ['a', 'b', 'c', 'd']
@@ -214,5 +224,6 @@ module Provider
 
       def emit_resourceref_object(data) end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end
