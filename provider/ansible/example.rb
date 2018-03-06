@@ -18,7 +18,7 @@ require 'provider/core'
 require 'provider/ansible/manifest'
 
 module Provider
-  class Ansible
+  module Ansible
     INTEGRATION_TEST_DEFAULTS = {
       project: '"{{ gcp_project }}"',
       auth_kind: '"{{ gcp_cred_kind }}"',

@@ -20,7 +20,7 @@ module Provider
   # A provider to generate the shared files in Ansible.
   # Certain files (mainly the lookup functions) will be a combination
   # of functions from multiple products.
-  class AnsibleBundle < Provider::Ansible
+  class AnsibleBundle < Provider::Ansible::Core
     # The configuration for the "bundle" module (in ansible.yaml)
     class Config < Provider::Config
       attr_reader :manifest

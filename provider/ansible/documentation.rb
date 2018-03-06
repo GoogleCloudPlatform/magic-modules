@@ -18,7 +18,7 @@ require 'provider/core'
 require 'provider/ansible/manifest'
 
 module Provider
-  class Ansible
+  module Ansible
     # Responsible for building out YAML documentation blocks.
     module Documentation
       UNSAFE_CHARS = %w[' " : &].freeze
