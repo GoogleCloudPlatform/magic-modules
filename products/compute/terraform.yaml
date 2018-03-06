@@ -40,7 +40,7 @@ objects: !ruby/object:Api::Resource::HashArray
     ignore:
       - id
     diff_suppress_funcs:
-      port_range: "portRangeDiffSuppress"
+      portRange: "portRangeDiffSuppress"
     # TODO: Add support for missing features needed by this resource
     skip: true
   GlobalAddress:
