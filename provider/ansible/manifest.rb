@@ -14,7 +14,7 @@
 require 'provider/core'
 
 module Provider
-  class Ansible < Provider::Core
+  module Ansible
     # Metadata for manifest.json
     class Manifest < Api::Object
       attr_reader :metadata_version

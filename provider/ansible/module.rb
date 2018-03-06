@@ -12,7 +12,7 @@
 # limitations under the License.
 
 module Provider
-  class Ansible
+  module Ansible
     # Responsible for building out the AnsibleModule code.
     # AnsibleModule is responsible for input validation.
     module Module
