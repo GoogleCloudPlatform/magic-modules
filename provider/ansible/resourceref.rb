@@ -19,19 +19,23 @@ require 'provider/ansible/manifest'
 
 module Provider
   module Ansible
+    # Responsible for building out all logic for handling ResourceRefs
+    # on Ansible.
+    # This includes finding the proper nested resourcerefs and building out
+    # set_value_for_resource function calls in the Ansible modules.
     module ResourceRef
       # Builds out a list of statements that handle ResourceRef creation
       def resourceref_handlers(object)
         rrefs = nonvirtual_rrefs(object)
         return unless rrefs.any?
         comments = [
-         "# Converts data from:",
-         "# foo:",
-         "#   - self_link: 'sl1'",
-         "#     name: 'name1'",
-         "#",
-         "# to",
-         "# foo: 'sl1'"
+          '# Converts data from:',
+          '# foo:',
+          "#   - self_link: 'sl1'",
+          "#     name: 'name1'",
+          '#',
+          '# to',
+          "# foo: 'sl1'"
         ]
         comments + rrefs.map { |rref| resourceref_handler(rref) }
       end
@@ -40,35 +44,34 @@ module Provider
         rref_path = path_for_rref(rref)
         value_path = quote_string(Google::StringUtils.underscore(rref.imports))
         format([
-          ["module.set_value_for_resource(#{rref_path}, #{value_path})"],
-
-          [
-            'module.set_value_for_resource(',
-            indent("#{rref_path}, #{value_path}", 4),
-            ')'
-          ],
-          [
-            'module.set_value_for_resource(',
-            indent_list([rref_path, value_path], 4),
-            ')'
-          ]
-        ])
+                 ["module.set_value_for_resource(#{rref_path}, #{value_path})"],
+                 [
+                   'module.set_value_for_resource(',
+                   indent("#{rref_path}, #{value_path}", 4),
+                   ')'
+                 ],
+                 [
+                   'module.set_value_for_resource(',
+                   indent_list([rref_path, value_path], 4),
+                   ')'
+                 ]
+               ])
       end
 
       private
 
       def path_for_rref(rref)
         past_values = []
-        while !rref.nil?
+        until rref.nil?
           past_values << Google::StringUtils.underscore(rref.name)
           # TODO(alexstephen): Investigate a better way to handle parent
           # pointers on Arrays of NestedObjects
-          if rref.is_a?(Api::Type::NestedObject) && \
-            rref.parent.is_a?(Api::Type::Array)
-            rref = rref.parent.parent
-          else
-            rref = rref.parent
-          end
+          rref = if rref.is_a?(Api::Type::NestedObject) && \
+                    rref.parent.is_a?(Api::Type::Array)
+                   rref.parent.parent
+                 else
+                   rref.parent
+                 end
         end
         "[#{past_values.reverse.map { |x| quote_string(x) }.join(', ')}]"
       end
