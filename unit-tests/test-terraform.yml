@@ -1,6 +1,6 @@
 platform: linux
 inputs:
-  - name: magic-modules
+  - name: terraform
   - name: ci
 image_resource:
   type: docker-image
@@ -10,4 +10,4 @@ image_resource:
 run:
   path: ci/unit-tests/run.sh
   args:
-    - magic-modules/build/terraform/
+    - terraform/
