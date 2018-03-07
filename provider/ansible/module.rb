@@ -18,15 +18,15 @@ module Provider
     module Module
       # Returns the Python dictionary representing a simple property for
       # validation.
-      def python_dict_for_property(prop)
+      def python_dict_for_property(prop, config)
         if prop.is_a?(Api::Type::Array) && \
            prop.item_type.is_a?(Api::Type::NestedObject)
-          nested_obj_dict(prop, prop.item_type.properties)
+          nested_obj_dict(prop, config, prop.item_type.properties)
         elsif prop.is_a? Api::Type::NestedObject
-          nested_obj_dict(prop, prop.properties)
+          nested_obj_dict(prop, config, prop.properties)
         else
           name = Google::StringUtils.underscore(prop.out_name)
-          "#{name}=dict(#{prop_options(prop).join(', ')})"
+          "#{name}=dict(#{prop_options(prop, config).join(', ')})"
         end
       end
 
@@ -34,17 +34,22 @@ module Provider
 
       # Creates a Python dictionary representing a nested object property
       # for validation.
-      def nested_obj_dict(prop, properties)
+      def nested_obj_dict(prop, config, properties)
         name = Google::StringUtils.underscore(prop.out_name)
+        options = prop_options(prop, config).join(', ')
         [
-          "#{name}=dict(#{prop_options(prop).join(', ')}, options=dict(",
-          indent_list(properties.map { |p| python_dict_for_property(p) }, 4),
+          "#{name}=dict(#{options}, options=dict(",
+          indent_list(properties.map do |p|
+            python_dict_for_property(p, config)
+          end, 4),
           '))'
         ]
       end
 
       # Returns an array of all base options for a given property.
-      def prop_options(prop)
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength
+      def prop_options(prop, config)
         [
           ('required=True' if prop.required),
           "type=#{quote_string(python_type(prop))}",
@@ -54,9 +59,16 @@ module Provider
                          end.join(', ')}]"
            end),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
-            if prop.is_a? Api::Type::Array)
+            if prop.is_a? Api::Type::Array),
+          (if config['aliases']&.keys&.include?(prop.name)
+             "aliases=[#{config['aliases'][prop.name].map do |x|
+                           quote_string(x)
+                         end.join(', ')}]"
+           end)
         ].compact
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/MethodLength
     end
   end
 end
