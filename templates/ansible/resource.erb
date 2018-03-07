@@ -41,7 +41,7 @@ options:
         choices: ['present', 'absent']
         default: 'present'
 <% object.all_user_properties.reject(&:output).each do |prop| -%>
-<%= lines(indent(doc_property_yaml(prop, 4), 4)) -%>
+<%= lines(indent(doc_property_yaml(prop, config, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
 '''
@@ -86,7 +86,7 @@ def main():
 
 <%
   mod_props = object.all_user_properties.reject(&:output).map do |prop|
-    python_dict_for_property(prop)
+    python_dict_for_property(prop, config)
   end
 -%>
     module = GcpModule(

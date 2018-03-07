@@ -70,13 +70,13 @@ module Provider
 
       # Builds out a full YAML block for DOCUMENTATION
       # This includes the YAML for the property as well as any nested props
-      def doc_property_yaml(prop, spaces)
-        block = minimal_doc_block(prop, spaces)
+      def doc_property_yaml(prop, config, spaces)
+        block = minimal_doc_block(prop, config, spaces)
         return block unless prop.is_a? Api::Type::NestedObject
         block << indent('suboptions:', 4)
         block.concat(
           prop.properties.map do |p|
-            indent(doc_property_yaml(p, spaces + 4), 8)
+            indent(doc_property_yaml(p, config, spaces + 4), 8)
           end
         )
       end
@@ -97,10 +97,14 @@ module Provider
       private
 
       # Builds out the minimal YAML block for DOCUMENTATION
-      def minimal_doc_block(prop, spaces)
+      def minimal_doc_block(prop, config, spaces)
         [
           minimal_yaml(prop, spaces),
-          indent("required: #{prop.required ? 'true' : 'false'}", 4)
+          indent([
+            "required: #{prop.required ? 'true' : 'false'}",
+            ("aliases: [#{config['aliases'][prop.name].join(', ')}]" \
+             if config['aliases']&.keys&.include?(prop.name))
+          ].compact, 4)
         ]
       end
 

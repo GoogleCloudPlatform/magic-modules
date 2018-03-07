@@ -27,8 +27,23 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 objects: !ruby/object:Api::Resource::HashArray
   Address:
     version_added: '2.6'
+  BackendService:
+    aliases:
+      timeoutSec:
+        - timeout_seconds
+  HealthCheck:
+    aliases:
+      timeoutSec:
+        - timeout_seconds
   HttpHealthCheck:
     version_added: '2.6'
+    aliases:
+      timeoutSec:
+        - timeout_seconds
+  HttpsHealthCheck:
+    aliases:
+      timeoutSec:
+        - timeout_seconds
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   DiskType:
