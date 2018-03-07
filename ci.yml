@@ -3,59 +3,59 @@ resource_types:
     - name: git-branch
       type: docker-image
       source:
-          repository: nmckinley/concourse-git-resource
+          repository: ((dockerhub-account.username))/concourse-git-resource
           tag: v0.1.7
 
     - name: github-pull-request
       type: docker-image
       source:
-          repository: nmckinley/concourse-github-pr-resource
+          repository: ((dockerhub-account.username))/concourse-github-pr-resource
           tag: v0.1.1
 
 resources:
     - name: magic-modules
       type: git-branch
       source:
-          uri: git@github.com:((username))/magic-modules.git
-          private_key: ((repo_key))
+          uri: git@github.com:((github-account.username))/magic-modules.git
+          private_key: ((repo-key.private_key))
 
     - name: magic-modules-new-prs
       type: github-pull-request
       source:
-          repo: ((username))/magic-modules
-          private_key: ((repo_key))
-          access_token: ((repo_access))
+          repo: ((github-account.username))/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
           only_mergeable: true
           authorship_restriction: true
 
     - name: terraform-intermediate
       type: git-branch
       source:
-          uri: git@github.com:((username))/terraform-provider-google.git
-          private_key: ((repo_key))
+          uri: git@github.com:((github-account.username))/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
 
     - name: ci
       type: git
       source:
-          uri: git@github.com:((username))/terraform-provider-google-ci.git
+          uri: git@github.com:((github-account.username))/terraform-provider-google-ci.git
           branch: master
-          private_key: ((repo_key))
+          private_key: ((repo-key.private_key))
 
     - name: mm-approved-prs
       type: github-pull-request
       source:
-          repo: ((username))/magic-modules
-          private_key: ((repo_key))
-          access_token: ((repo_access))
+          repo: ((github-account.username))/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
           only_mergeable: true
           require_review_approval: true
 
     - name: nmckinley-pr
       type: docker-image
       source:
-        repository: nmckinley/concourse-github-pr-resource
-        username: nmckinley
-        password: ((dockerhub_password))
+        repository: ((dockerhub-account.username))/concourse-github-pr-resource
+        username: ((dockerhub-account.username))
+        password: ((dockerhub-account.password))
 jobs:
     - name: mm-generate
       plan:
@@ -71,7 +71,7 @@ jobs:
           - task: generate
             file: ci/magic-modules/generate.yml
             params:
-                GH_USERNAME: ((username))
+                GH_USERNAME: ((github-account.username))
           - put: terraform-intermediate
             params:
                 repository: mm-output/build/terraform
@@ -115,8 +115,8 @@ jobs:
           - task: create-pr
             file: ci/magic-modules/create-pr.yml
             params:
-                GITHUB_TOKEN: ((repo_access))
-                TERRAFORM_REPO: ((username))/terraform-provider-google
+                GITHUB_TOKEN: ((github-account.password))
+                TERRAFORM_REPO: ((github-account.username))/terraform-provider-google
             on_failure:
               put: magic-modules-new-prs
               params:
@@ -140,7 +140,7 @@ jobs:
           - task: merge-and-update
             file: ci/magic-modules/merge.yml
             params:
-                CREDS: ((repo_key))
+                CREDS: ((repo-key.private_key))
           - put: magic-modules
             params:
                 repository: mm-output
