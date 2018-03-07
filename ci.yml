@@ -50,6 +50,12 @@ resources:
           only_mergeable: true
           require_review_approval: true
 
+    - name: nmckinley-pr
+      type: docker-image
+      source:
+        repository: nmckinley/concourse-github-pr-resource
+        username: nmckinley
+        password: ((dockerhub_password))
 jobs:
     - name: mm-generate
       plan:
@@ -148,5 +154,11 @@ jobs:
                     method: squash
                     commit_msg: mm-output/commit_message
 
+    - name: create-pr-image
+      plan:
+          - get: ci
+          - put: nmckinley-pr
+            params:
+              build: ci/containers/pull-request
+
 # TODO(@ndmckinley): System for confirming no downstream conflicts.
-# TODO(@ndmckinley): System for building the Docker containers this depends on.
