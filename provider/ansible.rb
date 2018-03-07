@@ -120,15 +120,15 @@ module Provider
           [
             "def #{name}(#{params.join(', ')}):",
             indent([
-              'if extra_data is None:',
-              indent('extra_data = {}', 4),
-            ], 4),
+                     'if extra_data is None:',
+                     indent('extra_data = {}', 4)
+                   ], 4),
             indent("url = #{url}#{extra}", 4).gsub('<|extra|>', ''),
             indent([
-              'combined = extra_data.copy()',
-              'combined.update(module.params)',
-              'return url.format(**combined)'
-            ], 4)
+                     'combined = extra_data.copy()',
+                     'combined.update(module.params)',
+                     'return url.format(**combined)'
+                   ], 4)
           ].compact.join("\n")
         else
           url_code = "#{url}.format(**module.params)#{extra}"
