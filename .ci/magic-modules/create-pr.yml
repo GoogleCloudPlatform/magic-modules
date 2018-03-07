@@ -1,0 +1,25 @@
+---
+# This takes in the magic-modules repo in detached-HEAD state,
+# creates a PR on downstream modules, and writes a comment into
+# a file so that the PR can be updated with that comment.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: nmckinley/hub
+        tag: 'latest'
+
+inputs:
+    - name: magic-modules
+    - name: ci
+
+outputs:
+    - name: magic-modules-with-comment
+
+run:
+    path: ci/magic-modules/create-pr.sh
+
+params:
+  GITHUB_TOKEN: ""
+  TERRAFORM_REPO: ""
