@@ -76,23 +76,33 @@ jobs:
                 params:
                     submodules: [build/terraform]
               - get: ci
-            # TODO(@ndmckinley): This task is too monolithic and should be split up.
-          - task: generate
-            file: ci/magic-modules/generate.yml
-            params:
-                GH_USERNAME: ((github-account.username))
+            # consumes: ci, magic-modules (detached HEAD)
+            # produces: magic-modules-branched (new branch, with submodule)
+          - task: branch-magic-modules
+            file: ci/magic-modules/branch.yml
+            # consumes: ci, magic-modules-branched
+            # produces: terraform-generated
+          - task: generate-terraform
+            file: ci/magic-modules/generate-terraform.yml
+            # Puts 'terraform-generated' into the robot's fork.
           - put: terraform-intermediate
             params:
-                repository: mm-output/build/terraform
-                branch_file: mm-output/branchname
+                repository: terraform-generated
+                branch_file: magic-modules-branched/branchname
                 only_if_diff: true
-
-          # This needs to go below all the submodules because it has a commit which
+            # consumes: ci, magic-modules-branched
+            # produces: magic-modules-submodules
+          - task: point-to-submodules
+            file: ci/magic-modules/point-to-submodules.yml
+            params:
+              # This needs to match the username for the 'terraform-intermediate' resource.
+                GH_USERNAME: ((github-account.username))
+          # This 'put' needs to go below all the submodules because it has a commit which
           # points to those submodules.
           - put: magic-modules
             params:
-                repository: mm-output
-                branch_file: mm-output/branchname
+                repository: magic-modules-submodules
+                branch_file: magic-modules-branched/branchname
                 only_if_diff: true
 
     - name: terraform-test
