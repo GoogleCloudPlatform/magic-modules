@@ -54,13 +54,27 @@ objects: !ruby/object:Api::Resource::HashArray
     # TODO: Add support for missing features needed by this resource
     skip: true
   HttpHealthCheck:
-    # TODO: Add support for missing features needed by this resource
-    skip: true
+    id: "{{name}}"
+    ignore:
+      - id
     default_values:
+      checkIntervalSec: 5
+      healthyThreshold: 2
       port: 80
+      requestPath: "/"
+      timeoutSec: 5
+      unhealthyThreshold: 2
   HttpsHealthCheck:
-    # TODO: Add support for missing features needed by this resource
-    skip: true
+    id: "{{name}}"
+    ignore:
+      - id
+    default_values:
+      checkIntervalSec: 5
+      healthyThreshold: 2
+      port: 443
+      requestPath: "/"
+      timeoutSec: 5
+      unhealthyThreshold: 2
   HealthCheck:
     # TODO: Add support for missing features needed by this resource
     skip: true
