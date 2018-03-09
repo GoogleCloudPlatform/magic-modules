@@ -276,7 +276,7 @@ def return_if_object(module, response, kind):
         return None
 
     try:
-        response.raise_for_status
+        response.raise_for_status()
         result = response.json()
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
