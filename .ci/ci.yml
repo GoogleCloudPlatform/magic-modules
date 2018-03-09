@@ -3,13 +3,14 @@ resource_types:
     - name: git-branch
       type: docker-image
       source:
-          repository: ((dockerhub-account.username))/concourse-git-resource
+          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
+          repository: nmckinley/concourse-git-resource
           tag: v0.1.7
 
     - name: github-pull-request
       type: docker-image
       source:
-          repository: ((dockerhub-account.username))/concourse-github-pr-resource
+          repository: nmckinley/concourse-github-pr-resource
           tag: v0.1.1
 
 resources:
@@ -32,13 +33,6 @@ resources:
       type: git-branch
       source:
           uri: git@github.com:((github-account.username))/terraform-provider-google.git
-          private_key: ((repo-key.private_key))
-
-    - name: ci
-      type: git
-      source:
-          uri: git@github.com:((github-account.username))/terraform-provider-google-ci.git
-          branch: master
           private_key: ((repo-key.private_key))
 
     - name: mm-approved-prs
@@ -75,25 +69,24 @@ jobs:
                 # trigger: true
                 params:
                     submodules: [build/terraform]
-              - get: ci
-            # consumes: ci, magic-modules (detached HEAD)
+            # consumes: magic-modules (detached HEAD)
             # produces: magic-modules-branched (new branch, with submodule)
           - task: branch-magic-modules
-            file: ci/magic-modules/branch.yml
-            # consumes: ci, magic-modules-branched
+            file: magic-modules/.ci/magic-modules/branch.yml
+            # consumes: magic-modules-branched
             # produces: terraform-generated
           - task: generate-terraform
-            file: ci/magic-modules/generate-terraform.yml
+            file: magic-modules-branched/.ci/magic-modules/generate-terraform.yml
             # Puts 'terraform-generated' into the robot's fork.
           - put: terraform-intermediate
             params:
                 repository: terraform-generated
                 branch_file: magic-modules-branched/branchname
                 only_if_diff: true
-            # consumes: ci, magic-modules-branched
+            # consumes: magic-modules-branched
             # produces: magic-modules-submodules
           - task: point-to-submodules
-            file: ci/magic-modules/point-to-submodules.yml
+            file: magic-modules-branched/.ci/magic-modules/point-to-submodules.yml
             params:
               # This needs to match the username for the 'terraform-intermediate' resource.
                 GH_USERNAME: ((github-account.username))
@@ -108,7 +101,6 @@ jobs:
     - name: terraform-test
       plan:
           - aggregate:
-              - get: ci
               - get: magic-modules
                 version: every
                 # trigger: true
@@ -116,11 +108,10 @@ jobs:
                     submodules: [build/terraform]
                 passed: [mm-generate]
           - task: test
-            file: ci/unit-tests/task.yml
+            file: magic-modules/.ci/unit-tests/task.yml
 
     - name: create-prs
       plan:
-          - get: ci
           - get: magic-modules
             version: every
             # trigger: true
@@ -132,7 +123,7 @@ jobs:
             passed: [mm-generate]
             version: every
           - task: create-pr
-            file: ci/magic-modules/create-pr.yml
+            file: magic-modules/.ci/magic-modules/create-pr.yml
             params:
                 GITHUB_TOKEN: ((github-account.password))
                 TERRAFORM_REPO: ((github-account.username))/terraform-provider-google
@@ -155,9 +146,8 @@ jobs:
     - name: merge-prs
       plan:
           - get: mm-approved-prs
-          - get: ci
           - task: merge-and-update
-            file: ci/magic-modules/merge.yml
+            file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
                 CREDS: ((repo-key.private_key))
           - put: magic-modules
@@ -175,21 +165,21 @@ jobs:
 
     - name: create-pr-image
       plan:
-          - get: ci
+          - get: magic-modules
           - put: nmckinley-pr
             params:
-              build: ci/containers/pull-request
+              build: magic-modules/.ci/containers/pull-request
 
     - name: test-terraform-pr
       plan:
           - aggregate:
-              - get: ci
+              - get: magic-modules
               - get: terraform
                 resource: terraform-pr
                 version: every
                 trigger: true
           - task: test
-            file: ci/unit-tests/test-terraform.yml
+            file: magic-modules/.ci/unit-tests/test-terraform.yml
             on_failure:
               put: terraform-pr
               params:

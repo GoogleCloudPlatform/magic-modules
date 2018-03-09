@@ -12,13 +12,12 @@ image_resource:
 
 inputs:
     - name: magic-modules-branched
-    - name: ci
 
 outputs:
     - name: magic-modules-submodules
 
 run:
-    path: ci/magic-modules/point-to-submodules.sh
+    path: magic-modules-branched/.ci/magic-modules/point-to-submodules.sh
 
 params:
   GH_USERNAME: ""
