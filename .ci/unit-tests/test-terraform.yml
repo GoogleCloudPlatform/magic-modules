@@ -1,13 +1,13 @@
 platform: linux
 inputs:
   - name: terraform
-  - name: ci
+  - name: magic-modules
 image_resource:
   type: docker-image
   source:
     repository: golang
     tag: '1.9.3'
 run:
-  path: ci/unit-tests/run.sh
+  path: magic-modules/.ci/unit-tests/run.sh
   args:
     - terraform/

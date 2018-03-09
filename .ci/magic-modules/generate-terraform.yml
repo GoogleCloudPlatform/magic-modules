@@ -12,10 +12,9 @@ image_resource:
 
 inputs:
     - name: magic-modules-branched
-    - name: ci
 
 outputs:
     - name: terraform-generated
 
 run:
-    path: ci/magic-modules/generate-terraform.sh
+    path: magic-modules-branched/.ci/magic-modules/generate-terraform.sh
