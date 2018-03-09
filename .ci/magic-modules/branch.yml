@@ -1,5 +1,5 @@
 ---
-# This file takes two inputs: magic-modules in detached-HEAD state, and the CI repo.
+# This file takes one input: magic-modules in detached-HEAD state.
 # It spits out "magic-modules-branched", a magic-modules repo on a new branch (named
 # after the HEAD commit on the PR).
 platform: linux
@@ -12,10 +12,9 @@ image_resource:
 
 inputs:
     - name: magic-modules
-    - name: ci
 
 outputs:
     - name: magic-modules-branched
 
 run:
-    path: ci/magic-modules/branch-magic-modules.sh
+    path: magic-modules/.ci/magic-modules/branch-magic-modules.sh

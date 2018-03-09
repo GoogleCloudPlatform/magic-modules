@@ -11,13 +11,12 @@ image_resource:
 
 inputs:
     - name: mm-approved-prs
-    - name: ci
 
 outputs:
     - name: mm-output
 
 run:
-    path: ci/magic-modules/merge-pr.sh
+    path: mm-approved-prs/.ci/magic-modules/merge-pr.sh
 
 params:
     CREDS: ""

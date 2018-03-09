@@ -12,13 +12,12 @@ image_resource:
 
 inputs:
     - name: magic-modules
-    - name: ci
 
 outputs:
     - name: magic-modules-with-comment
 
 run:
-    path: ci/magic-modules/create-pr.sh
+    path: magic-modules/.ci/magic-modules/create-pr.sh
 
 params:
   GITHUB_TOKEN: ""
