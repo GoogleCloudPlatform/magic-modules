@@ -51,8 +51,9 @@ module Provider
       #     because of the :
       #     character
       def bullet_line(paragraph, spaces, multiline = true, add_period = true)
-        # - 2 for "- "
-        indented = wrap_field(paragraph, spaces - 2)
+        # + 2 for "- "
+        # Remove arbitrary newlines created by formatting in YAML files
+        indented = wrap_field(paragraph.tr("\n", ' '), spaces + 2)
         indented = indented.split("\n")
 
         if multiline && UNSAFE_CHARS.any? { |c| paragraph.include?(c) }
