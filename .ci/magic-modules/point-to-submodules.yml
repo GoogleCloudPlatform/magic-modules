@@ -21,3 +21,4 @@ run:
 
 params:
   GH_USERNAME: ""
+  CREDS: ""

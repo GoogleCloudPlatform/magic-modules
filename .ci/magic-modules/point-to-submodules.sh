@@ -11,9 +11,13 @@ BRANCH="$(cat ./branchname)"
 # Update this repo to track the submodules we just pushed:
 git config -f .gitmodules submodule.build/terraform.branch "$BRANCH"
 git config -f .gitmodules submodule.build/terraform.url "git@github.com:$GH_USERNAME/terraform-provider-google.git"
+git submodule sync build/terraform
 
 # Download those submodules so we can add them here.
-git submodule update --remote --init build/terraform
+echo "$CREDS" > ~/github_private_key
+chmod 400 ~/github_private_key
+
+ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform"
 
 # Commit those changes so that they can be tested in the next phase.
 git add build/terraform
