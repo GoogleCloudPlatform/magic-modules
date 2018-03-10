@@ -1026,6 +1026,7 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
         required: true
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'port'
         description: |
@@ -1051,6 +1052,9 @@ objects:
     name: 'HttpsHealthCheck'
     kind: 'compute#httpsHealthCheck'
     base_url: projects/{{project}}/global/httpsHealthChecks
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       An HttpsHealthCheck resource. This resource defines a template for how
       individual VMs should be checked for health, via HTTPS.
@@ -1098,6 +1102,7 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
         required: true
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'port'
         description: |
