@@ -7,7 +7,7 @@ set -e
 set -x
 
 pushd magic-modules-branched
-BRANCH="$(cat ./branchfile)"
+BRANCH="$(cat ./branchname)"
 # Update this repo to track the submodules we just pushed:
 git config -f .gitmodules submodule.build/terraform.branch "$BRANCH"
 git config -f .gitmodules submodule.build/terraform.url "git@github.com:$GH_USERNAME/terraform-provider-google.git"
