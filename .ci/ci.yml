@@ -90,6 +90,7 @@ jobs:
             params:
               # This needs to match the username for the 'terraform-intermediate' resource.
                 GH_USERNAME: ((github-account.username))
+                CREDS: ((repo-key.private_key))
           # This 'put' needs to go below all the submodules because it has a commit which
           # points to those submodules.
           - put: magic-modules
