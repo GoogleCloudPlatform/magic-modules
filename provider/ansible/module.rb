@@ -18,15 +18,15 @@ module Provider
     module Module
       # Returns the Python dictionary representing a simple property for
       # validation.
-      def python_dict_for_property(prop, config)
+      def python_dict_for_property(prop, config, spaces = 0)
         if prop.is_a?(Api::Type::Array) && \
            prop.item_type.is_a?(Api::Type::NestedObject)
-          nested_obj_dict(prop, config, prop.item_type.properties)
+          nested_obj_dict(prop, config, prop.item_type.properties, spaces)
         elsif prop.is_a? Api::Type::NestedObject
-          nested_obj_dict(prop, config, prop.properties)
+          nested_obj_dict(prop, config, prop.properties, spaces)
         else
           name = Google::StringUtils.underscore(prop.out_name)
-          "#{name}=dict(#{prop_options(prop, config).join(', ')})"
+          "#{name}=dict(#{prop_options(prop, config, spaces).join(', ')})"
         end
       end
 
@@ -34,13 +34,13 @@ module Provider
 
       # Creates a Python dictionary representing a nested object property
       # for validation.
-      def nested_obj_dict(prop, config, properties)
+      def nested_obj_dict(prop, config, properties, spaces)
         name = Google::StringUtils.underscore(prop.out_name)
-        options = prop_options(prop, config).join(', ')
+        options = prop_options(prop, config, spaces).join(', ')
         [
           "#{name}=dict(#{options}, options=dict(",
           indent_list(properties.map do |p|
-            python_dict_for_property(p, config)
+            python_dict_for_property(p, config, spaces + 4)
           end, 4),
           '))'
         ]
@@ -48,16 +48,11 @@ module Provider
 
       # Returns an array of all base options for a given property.
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
-      def prop_options(prop, config)
+      def prop_options(prop, config, spaces)
         [
           ('required=True' if prop.required),
           "type=#{quote_string(python_type(prop))}",
-          (if prop.is_a? Api::Type::Enum
-             "choices=[#{prop.values.map do |x|
-                           quote_string(x.to_s)
-                         end.join(', ')}]"
-           end),
+          (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
             if prop.is_a? Api::Type::Array),
           (if config['aliases']&.keys&.include?(prop.name)
@@ -66,6 +61,34 @@ module Provider
                          end.join(', ')}]"
            end)
         ].compact
+      end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/MethodLength
+
+      # Returns a formatted string represented the choices of an enum
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength
+      def choices_enum(prop, spaces)
+        name = Google::StringUtils.underscore(prop.out_name)
+        type = "type=#{quote_string(python_type(prop))}"
+        # + 6 for =dict(
+        choices_indent = spaces + name.length + type.length + 6
+        format([
+                 [
+                   "choices=[#{prop.values.map do |x|
+                                 quote_string(x.to_s)
+                               end.join(', ')}]"
+                 ],
+                 [
+                   "choices=['#{prop.values[0]}'",
+                   prop.values[1..-2].map do |x|
+                     "#{indent(quote_string(x.to_s), choices_indent + 11)},"
+                   end,
+                   # + 11 for ' choices='
+                   indent("#{quote_string(prop.values[-1].to_s)}]",
+                          choices_indent + 11)
+                 ]
+               ], 0, choices_indent)
       end
       # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/MethodLength

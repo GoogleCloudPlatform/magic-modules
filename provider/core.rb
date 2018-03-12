@@ -52,6 +52,7 @@ module Provider
       @prop_data = Provider::TestData::Expectations.new(self, @data_gen)
       @generated = []
       @sourced = []
+      @max_columns = 80
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
@@ -487,7 +488,7 @@ module Provider
     # Formats the code and returns the first candidate that fits the alloted
     # column limit.
     def format(sources, indent = 0, start_indent = 0,
-               max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns])
+               max_columns = @max_columns)
       format2(sources, indent: indent,
                        start_indent: start_indent,
                        max_columns: max_columns)
