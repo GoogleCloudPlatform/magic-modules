@@ -104,7 +104,13 @@ module Provider
           indent([
             "required: #{prop.required ? 'true' : 'false'}",
             ("aliases: [#{config['aliases'][prop.name].join(', ')}]" \
-             if config['aliases']&.keys&.include?(prop.name))
+             if config['aliases']&.keys&.include?(prop.name)),
+            (if prop.is_a? Api::Type::Enum
+               [
+                 'choices:',
+                 "[#{prop.values.map { |x| quote_string(x.to_s) }.join(', ')}]"
+               ].join(' ')
+             end)
           ].compact, 4)
         ]
       end
