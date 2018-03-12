@@ -40,10 +40,10 @@
     The following scopes are recommended, but not required, and by
     default are not included:
 
-    * https://www.googleapis.com/auth/compute is required for mounting
-      persistent storage on your nodes.
-    * https://www.googleapis.com/auth/devstorage.read_only is required
-      for communicating with gcr.io (the Google Container Registry).
+    https://www.googleapis.com/auth/compute is required for mounting
+    persistent storage on your nodes.
+    https://www.googleapis.com/auth/devstorage.read_only is required
+    for communicating with gcr.io (the Google Container Registry).
 
     If unspecified, no scopes are added, unless Cloud Logging or Cloud
     Monitoring are enabled, in which case their required scopes will
