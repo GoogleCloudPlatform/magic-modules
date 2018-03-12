@@ -40,7 +40,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
 }
 <% if !effective_nested_properties(config, property).empty? -%>
   <% effective_nested_properties(config, property).each do |prop| -%>
-    <%= build_flatten_method(config, prefix + titlelize_property(property), prop) -%>
+    <%= lines(build_flatten_method(config, prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% end -%>
 <% else -%>
