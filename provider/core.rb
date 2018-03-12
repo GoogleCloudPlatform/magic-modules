@@ -412,16 +412,18 @@ module Provider
     end
 
     def emit_method(name, args, code, file_name, opts = {})
-      method_decl = "def #{name}"
-      method_decl << "(#{args.join(', ')})" unless args.empty?
       (rubo_off, rubo_on) = emit_rubo_pair(file_name, name, opts)
       [
         (rubo_off unless rubo_off.empty?),
-        method_decl,
+        method_decl(name, args),
         indent(code, 2),
         'end',
         (rubo_on unless rubo_on.empty?)
       ].compact.join("\n")
+    end
+
+    def method_decl(name, args)
+      ["def #{name}", ("(#{args.join(', ')})" unless args.empty)].compact.join
     end
 
     def emit_rubo_pair(file_name, name, opts = {})

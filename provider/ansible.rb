@@ -165,6 +165,18 @@ module Provider
         "[#{path.split('/').map { |x| "'#{x}'" }.join(', ')}]"
       end
 
+      # Generates a method declaration with function name `name` and args `args`
+      # Arguments may have nils and will be ignored.
+      def method_decl(name, args)
+        "def #{name}(#{args.compact.join(', ')}):"
+      end
+
+      # Generates a method call to function name `name` and args `args`
+      # Arguments may have nils and will be ignored.
+      def method_call(name, args)
+        "#{name}(#{args.compact.join(', ')})"
+      end
+
       private
 
       def get_example(cfg_file)
