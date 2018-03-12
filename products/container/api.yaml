@@ -41,12 +41,9 @@ objects:
         name: 'name'
         description: |
           The name of this cluster. The name must be unique within this project
-          and zone, and can be up to 40 characters with the following
-          restrictions:
-
-          * Lowercase letters, numbers, and hyphens only.
-          * Must start with a letter.
-          * Must end with a number or a letter.
+          and zone, and can be up to 40 characters. Must be Lowercase letters,
+          numbers, and hyphens only. Must start with a letter. Must end with a
+          number or a letter.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this cluster.'
@@ -123,8 +120,8 @@ objects:
           The logging service the cluster should use to write logs. Currently
           available options:
 
-          * logging.googleapis.com - the Google Cloud Logging service.
-          * none - no logs will be exported from the cluster.
+          logging.googleapis.com - the Google Cloud Logging service.
+          none - no logs will be exported from the cluster.
 
           if left as an empty string,logging.googleapis.com will be used.
         values:
@@ -136,8 +133,8 @@ objects:
           The monitoring service the cluster should use to write metrics.
           Currently available options:
 
-          * monitoring.googleapis.com - the Google Cloud Monitoring service.
-          * none - no metrics will be exported from the cluster.
+          monitoring.googleapis.com - the Google Cloud Monitoring service.
+          none - no metrics will be exported from the cluster.
 
           if left as an empty string, monitoring.googleapis.com will be used.
         values:
@@ -152,8 +149,8 @@ objects:
           The name of the Google Compute Engine network to which the cluster is
           connected. If left unspecified, the default network will be used.
 
-          * Tip: To ensure it exists and it is operations, configure the network
-            using 'gcompute_network' resource.
+          To ensure it exists and it is operations, configure the network
+          using 'gcompute_network' resource.
       - !ruby/object:Api::Type::String
         name: 'clusterIpv4Cidr'
         description: |
@@ -275,9 +272,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'NodePool'
 <%= indent(compile('products/container/async.yaml'), 4) %>
-    base_url: |
-      projects/{{project}}/zones/{{zone}}/clusters/{{cluster}}/
-      nodePools
+    base_url: projects/{{project}}/zones/{{zone}}/clusters/{{cluster}}/nodePools
     description: |
       NodePool contains the name and configuration for a cluster's node pool.
       Node pools are a set of nodes (i.e. VM's), with a common configuration and
