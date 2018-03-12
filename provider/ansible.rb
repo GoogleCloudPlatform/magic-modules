@@ -49,6 +49,12 @@ module Provider
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
       include Provider::Ansible::ResourceRef
+
+      def initialize(config, api)
+        super(config, api)
+        @max_columns = 160
+      end
+
       # Returns a string representation of the corresponding Python type
       # for a MM type.
       def python_type(prop)
