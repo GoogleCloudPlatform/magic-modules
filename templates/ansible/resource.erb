@@ -98,14 +98,17 @@ def main():
 
 <%= lines(indent(resourceref_handlers(object), 4), 1) -%>
     state = module.params['state']
+<% if object.kind? -%>
     kind = <%= lines(quote_string(object.kind)) -%>
+<% end -%>
 
 <% if object.self_link_query.nil? -%>
-<%   if object.kind? -%>
-    fetch = fetch_resource(module, self_link(module), kind)
-<%   else # object.kind? -%>
-    fetch = fetch_resource(module, self_link(module))
-<%   end # object.kind? -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+    fetch = <%= method %>
 <% else # object.self_link_query.nil? -%>
     fetch = fetch_wrapped_resource(module, '<%= object.kind -%>',
                                    '<%= object.self_link_query.kind -%>',
@@ -119,17 +122,21 @@ def main():
     if fetch:
         if state == 'present':
             if is_different(module, fetch):
-<% if save_api_results?(config, object) -%>
-                fetch = update(module, self_link(module), kind, fetch)
-<% else # if save_api_results -%>
-                fetch = update(module, self_link(module), kind)
-<% end # if save_api_results -%>
+<%
+  method = method_call('update', ['module', 'self_link(module)',
+                                  ('kind' if object.kind?),
+                                  ('fetch' if save_api_results?(config, object))
+                                  ])
+-%>
+<%= lines(indent("fetch = #{method}", 16)) -%>
         else:
-<% if save_api_results?(config, object) -%>
-            delete(module, self_link(module), kind, fetch)
-<% else # if save_api_results -%>
-            delete(module, self_link(module), kind)
-<% end # if save_api_results -%>
+<%
+  method = method_call('delete', ['module', 'self_link(module)',
+                                  ('kind' if object.kind?),
+                                  ('fetch' if save_api_results?(config, object))
+                                  ])
+-%>
+<%= lines(indent(method, 12)) -%>
             fetch = {}
             changed = True
     else:
@@ -142,8 +149,10 @@ def main():
   else
     raise "Ansible does not support create_verb #{object.create_verb}"
   end
+  method = method_call('create', ['module', create_link,
+                                  ('kind' if object.kind?)])
 -%>
-            fetch = create(module, <%= create_link -%>, kind)
+            fetch = <%= method %>
             changed = True
 
     if fetch:
@@ -158,7 +167,7 @@ def main():
 <% prod_name = object.__product.prefix[1..-1] -%>
 <% unless object.virtual -%>
 <% custom_create = get_code_multiline config, 'create' -%>
-def create(module, link, kind):
+<%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
 <% if custom_create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
@@ -170,30 +179,41 @@ def create(module, link, kind):
     raise "Ansible does not support create_verb #{object.create_verb}"
   end
 -%>
-<% if object.async -%>
-    return wait_for_operation(module, auth<%= create_verb -%>(link, resource_to_request(module)))
-<% else # object.async -%>
-    return return_if_object(module, auth<%= create_verb -%>(link, resource_to_request(module)), kind)
-<% end -%>
+<%
+  method = method_call(
+    object.async ? 'wait_for_operation' : 'return_if_object',
+    ['module',
+     method_call("auth#{create_verb}",
+                 ['link', 'resource_to_request(module)']),
+     ('kind' if !object.async && object.kind?)
+   ]
+  )
+-%>
+    return <%= method %>
 <% else -%>
 <%= lines(indent(custom_create, 4)) -%>
 <% end -%>
 
 
 <% custom_update = get_code_multiline config, 'update' -%>
+<%=
+  lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
+                         ('fetch' if save_api_results?(config, object))]))
+-%>
 <% if custom_update.nil? -%>
-<%   if save_api_results?(config, object) -%>
-def update(module, link, kind, fetch):
-<%   else # if save_api_results -%>
-def update(module, link, kind):
-<%   end # if save_api_results -%>
-<%   if !object.input -%>
+<%   if !object.input.nil? && object.input == false -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-<% if object.async -%>
-    return wait_for_operation(module, auth.put(link, resource_to_request(module)))
-<% else # object.async -%>
-    return return_if_object(module, auth.put(link, resource_to_request(module)), kind)
-<% end # object.async -%>
+<%
+  method = method_call(
+    object.async ? 'wait_for_operation' : 'return_if_object',
+    [
+     'module',
+     method_call("auth.put", ['link', 'resource_to_request(module)']),
+     ('kind' if object.kind?)
+   ]
+  )
+-%>
+    return <%= method %>
 <%   else # !object.input -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <%   end # !object.input-%>
@@ -203,18 +223,22 @@ def update(module, link, kind):
 
 
 <% custom_delete = get_code_multiline config, 'delete' -%>
-<% if save_api_results?(config, object) -%>
-def delete(module, link, kind, fetch):
-<% else # if save_api_results -%>
-def delete(module, link, kind):
-<% end # if save_api_results -%>
+<%=
+  lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
+                         ('fetch' if save_api_results?(config, object))]))
+-%>
 <% if custom_delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-<% if object.async -%>
-    return wait_for_operation(module, auth.delete(link))
-<% else # object.async -%>
-    return return_if_object(module, auth.delete(link), kind)
-<% end # object.async -%>
+<%
+  method = method_call(
+    object.async ? 'wait_for_operation' : 'return_if_object',
+    ['module',
+     method_call("auth.delete", ['link']),
+     ('kind' if !object.async && object.kind?)
+   ]
+  )
+-%>
+    return <%= method %>
 <% else # if custom_delete.nil? -%>
 <%= lines(indent(custom_delete, 4)) -%>
 <% end # if custom_delete.nil? -%>
@@ -229,7 +253,9 @@ def resource_to_request(module):
   properties_in_request = properties_in_request.compact
 -%>
     request = {
+<% if object.kind? -%>
         u'kind': <%= quote_string(object.kind) -%>,
+<% end # if object.kind? -%>
 <% properties_in_request.each do |prop| -%>
 <%=
   lines(indent(
@@ -266,7 +292,10 @@ def resource_to_request(module):
 <% end # custom_collection.nil? -%>
 
 
-def return_if_object(module, response, kind):
+<%=
+  lines(method_decl('return_if_object', ['module', 'response',
+                                         ('kind' if object.kind?)]))
+-%>
     # If not found, return nothing.
     if response.status_code == 404:
         return None
@@ -289,8 +318,10 @@ def return_if_object(module, response, kind):
 <% end -%>
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
+<% if object.kind? -%>
     if result['kind'] != kind:
         module.fail_json(msg="Incorrect result: {kind}".format(**result))
+<% end # object.kind? -%>
 
     return result
 
