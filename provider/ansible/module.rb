@@ -80,7 +80,7 @@ module Provider
                                end.join(', ')}]"
                  ],
                  [
-                   "choices=['#{prop.values[0]}'",
+                   "choices=['#{prop.values[0]}',",
                    prop.values[1..-2].map do |x|
                      "#{indent(quote_string(x.to_s), choices_indent + 11)},"
                    end,
