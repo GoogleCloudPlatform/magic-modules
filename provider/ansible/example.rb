@@ -47,6 +47,7 @@ module Provider
       attr_reader :command
       attr_reader :failed_name
       attr_reader :failed_verifier
+      attr_reader :check_on_failure
 
       def validate
         check_property :command, String
@@ -56,6 +57,7 @@ module Provider
         @failed_name ||= '\'{{ resource_name }}\' does not exist'
         @failed_verifier ||=
           "\"\\\"#{@failed_name.strip}\\\" in results.stderr\""
+        @check_on_failure = true unless @check_on_failure == false
       end
 
       # rubocop:disable Metrics/MethodLength
@@ -65,6 +67,7 @@ module Provider
 
         obj_name = Google::StringUtils.underscore(object.name)
         verb = verbs[state.to_sym]
+        check_on_failure = @check_on_failure && state == 'absent'
         status = state == 'present' ? 0 : 1
         [
           "- name: verify that #{obj_name} was #{verb}",
@@ -83,7 +86,7 @@ module Provider
                             'that:',
                             indent([
                               "- results.rc == #{status}",
-                              ("- #{@failed_verifier}" if state == 'absent')
+                              ("- #{@failed_verifier}" if check_on_failure)
                             ].compact, 2)
                           ], 2)
                  ], 2)
