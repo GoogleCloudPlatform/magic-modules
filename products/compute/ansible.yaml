@@ -26,10 +26,6 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 # This is where custom code would be defined eventually.
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
-  BackendService:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
   HealthCheck:
     aliases:
       timeoutSec:
@@ -42,6 +38,52 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
+  # Not implemented yet.
+  BackendBucket:
+    skip: true
+  BackendService:
+    skip: true
+    aliases:
+      timeoutSec:
+        - timeout_seconds
+  Disk:
+    skip: true
+  Firewall:
+    skip: true
+  ForwardingRule:
+    skip: true
+  GlobalForwardingRule:
+    skip: true
+  Image:
+    skip: true
+  Instance:
+    skip: true
+  InstanceGroup:
+    skip: true
+  InstanceGroupManager:
+    skip: true
+  InstanceTemplate:
+    skip: true
+  Route:
+    skip: true
+  Snapshot:
+    skip: true
+  SslCertificate:
+    skip: true
+  Subnetwork:
+    skip: true
+  TargetHttpProxy:
+    skip: true
+  TargetHttpsProxy:
+    skip: true
+  TargetPool:
+    skip: true
+  TargetSslProxy:
+    skip: true
+  TargetTcpProxy:
+    skip: true
+  UrlMap:
+    skip: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   DiskType:
