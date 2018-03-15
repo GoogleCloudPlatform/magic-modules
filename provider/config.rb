@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
-require 'provider/compiler'
+require 'compile/core'
 require 'provider/objects'
 require 'provider/resource_override'
 require 'provider/resource_overrides'

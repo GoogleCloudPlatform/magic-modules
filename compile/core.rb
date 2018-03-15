@@ -143,15 +143,32 @@ module Compile
       content = ctx.local_variable_get(:_erbout) if has_erbout # save code
       ctx.local_variable_set(:compiler, compiler)
       Google::LOGGER.info "Compiling #{file}"
-      input = ERB.new get_helper_file(file, true), nil, '-%>'
+      input = ERB.new get_helper_file(file), nil, '-%>'
       compiled = input.result(ctx)
       ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
       compiled
     end
 
+    # Compiles a ERB template from a file.
+    #
+    # Arguments:
+    #
+    # - ctx: A binding (or hash) that provides the context to expose to the ERB
+    #        environment
+    # - source: A path to a file in ERB format.
+    #
+    # Refer to Compile::Core.compile for full details about the compilation
+    # process.
+    def compile_file(ctx, source)
+      compile_string(ctx, File.read(source))
+    rescue StandardError => e
+      puts "Error compiling file: #{source}"
+      raise e
+    end
+
     def compile_if(config, node)
       file = Google::HashUtils.navigate(config, node)
-      compile(file, 2) unless file.nil?
+      compile(file) unless file.nil?
     end
 
     def indent(text, spaces, filler = ' ')
