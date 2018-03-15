@@ -21,7 +21,7 @@
 # }
 #
 # Format the request to match the expected input by the API
-def encode_request(resource_request):
+def encode_request(resource_request, module):
     return {
         'cluster': resource_request
     }
