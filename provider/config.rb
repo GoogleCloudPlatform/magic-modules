@@ -188,6 +188,8 @@ module Provider
       config = Google::YamlValidator.parse(source)
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
+      # Config must be validated so items are properly setup for next compile
+      config.validate
       # Compile step #2: Now that we have the target class, compile with that
       # class features
       source = config.compile(cfg_file)
@@ -208,6 +210,8 @@ module Provider
 
       # TODO(alexstephen): Remove HashArray checking when all provider.yamls
       # using Provider::Objects
+      @objects ||= Api::Resource::HashArray.new
+
       check_optional_property \
         :objects, [Provider::Objects, Api::Resource::HashArray]
 
@@ -217,6 +221,7 @@ module Provider
       check_optional_property_list :style, Provider::Config::StyleException
       check_optional_property_list :changelog, Provider::Config::Changelog
       check_optional_property_list :functions, Provider::Config::Function
+
     end
 
     # Provides the API object to any type that requires, e.g. for validation
