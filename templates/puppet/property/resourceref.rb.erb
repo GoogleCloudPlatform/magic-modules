@@ -16,7 +16,7 @@
 <%#           imports - name of property being fetched -%>
 <%= compile('templates/license.erb') -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :ruby) -%>
 
 <%
   requires = []

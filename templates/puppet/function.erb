@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :puppet) -%>
 
 <%=
   lines(fn.requires.sort.map { |r| "require '#{r}'" }, 1) \

@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :ruby) -%>
 
 require 'google/<%= product_ns_dir -%>/<%= Compile::Libraries::NETWORK -%>/base'
 

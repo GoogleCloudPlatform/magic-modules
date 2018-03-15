@@ -253,7 +253,33 @@ module Compile
       end
     end
 
+    def autogen_notice(lang)
+      comment_block(compile('templates/autogen_notice.erb').split("\n"), lang)
+    end
+
+    def comment_block(text, lang)
+      case lang
+      when :ruby, :python, :puppet, :chef, :yaml, :git, :gemfile
+        text.map { |t| t&.empty? ? '#' : "# #{t}" }
+      when :go
+        text.map { |t| t&.empty? ? '//' : "// #{t}" }
+      when :html, :markdown
+        [
+          '<!--',
+          indent(text, 2),
+          '-->'
+        ]
+      else
+        raise "Unknown language for comment: #{lang}"
+      end
+    end
+
     private
+
+    def autogen_notice_contrib
+      ['Please read more about how to change this file in README.md and',
+       'CONTRIBUTING.md located at the root of this package.']
+    end
 
     def get_helper_file(file, remove_copyright_notice = true)
       content = IO.read(file)

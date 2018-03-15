@@ -143,6 +143,11 @@ module Provider
           )
         ]
       end
+
+      def autogen_notice_contrib
+        ['Please read more about how to change this file at',
+         'https://www.github.com/GoogleCloudPlatform/magic-modules']
+      end
     end
   end
 end
