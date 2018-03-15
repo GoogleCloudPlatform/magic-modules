@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile('templates/license.erb') -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :ruby) -%>
 
 module Google
   # A dummy authorization handler that responds to the same authorize interface

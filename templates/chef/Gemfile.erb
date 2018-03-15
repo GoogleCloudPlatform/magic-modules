@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :gemfile) -%>
 
 source 'https://rubygems.org'
 

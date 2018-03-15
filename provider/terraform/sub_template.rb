@@ -58,6 +58,15 @@ module Provider
 
       private
 
+      def autogen_notice_contrib
+        ['Please read more about how to change this file in',
+         '.github/CONTRIBUTING.md.']
+      end
+
+      def autogen_notice_text(line)
+        line&.empty? ? '//' : "// #{line}"
+      end
+
       def compile_template(template_file, data)
         ctx = binding
         data.each { |name, value| ctx.local_variable_set(name, value) }

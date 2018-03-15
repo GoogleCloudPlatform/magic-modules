@@ -15,7 +15,7 @@
 <% unless name == "README.md" -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :puppet) -%>
 
 <%
   # TODO(nelsonjr): http://b/63088154 Google Cloud Platform API is returning

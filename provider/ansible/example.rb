@@ -60,6 +60,7 @@ module Provider
         @check_on_failure = true unless @check_on_failure == false
       end
 
+      # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/MethodLength
       def build_task(state, object)
         raise 'State must be present or absent' \
@@ -93,6 +94,7 @@ module Provider
         ].compact
       end
       # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       private
 

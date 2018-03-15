@@ -15,7 +15,7 @@
 <% unless name == "README.md" -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :puppet) -%>
 
 # An example Puppet manifest that ensures Google Cloud Computing DNS Managed
 # Zones in a project do not exist.

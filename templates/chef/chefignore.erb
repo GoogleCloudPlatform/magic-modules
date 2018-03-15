@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :chef) -%>
 
 # Put files/directories that should be ignored in this file when uploading
 # to a chef-server or supermarket.

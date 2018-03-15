@@ -15,7 +15,7 @@
 <% unless name == 'README.md' -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :puppet) -%>
 
 # To create a new project the authenticated user need the privilege to create
 # new projects, either standalone or under an organization. This example uses
