@@ -168,7 +168,7 @@ module Compile
 
     def compile_if(config, node)
       file = Google::HashUtils.navigate(config, node)
-      compile(file) unless file.nil?
+      compile(file, 2) unless file.nil?
     end
 
     def indent(text, spaces, filler = ' ')
