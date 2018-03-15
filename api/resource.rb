@@ -127,8 +127,7 @@ module Api
 
       def select
         return enum_for(:select) unless block_given?
-        @__objects.select { |o| yield o }
-        self
+        @__objects.select { |k, v| yield k, v }
       end
 
       def fetch(key, *args)
@@ -144,6 +143,10 @@ module Api
 
       def key?(key)
         @__objects&.key?(key)
+      end
+
+      def keys
+        @__objects.keys
       end
 
       private
