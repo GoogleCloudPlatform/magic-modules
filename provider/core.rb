@@ -595,23 +595,6 @@ module Provider
       write_file data[:out_file], compile_file(ctx, data[:template])
     end
 
-    # Compiles a ERB template from a file.
-    #
-    # Arguments:
-    #
-    # - ctx: A binding (or hash) that provides the context to expose to the ERB
-    #        environment
-    # - source: A path to a file in ERB format.
-    #
-    # Refer to Compile::Core.compile for full details about the compilation
-    # process.
-    def compile_file(ctx, source)
-      compile_string(ctx, File.read(source))
-    rescue StandardError => e
-      puts "Error compiling file: #{source}"
-      raise e
-    end
-
     # Write the output to a file. We write one line at a time so tests can
     # reason about what's being written and validate the output.
     def write_file(out_file, output)
