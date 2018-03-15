@@ -16,7 +16,7 @@
 
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :chef) -%>
 
 <%
   # TODO(nelsonjr): http://b/63088154 Google Cloud Platform API is returning

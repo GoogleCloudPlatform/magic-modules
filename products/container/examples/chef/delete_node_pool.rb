@@ -16,7 +16,7 @@
 <% if name != "README.md" -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= compile 'templates/autogen_notice.erb' -%>
+<%= lines(autogen_notice :chef) -%>
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 

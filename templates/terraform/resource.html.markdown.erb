@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<!---
-<%= compile('templates/terraform/autogen_notice.erb').gsub("//", "") -%>
---->
+<%= lines(autogen_notice :markdown) -%>
 <%
   api_name_lower = product_ns.downcase
   resource_name = Google::StringUtils.underscore(object.name)
