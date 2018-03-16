@@ -24,6 +24,15 @@ manifest: !ruby/object:Provider::ChefBundle::Manifest
     - !ruby/object:Provider::Config::Requirements
       name: 'google-gauth'
       versions: '< 0.2.0'
+  products:
+    - !ruby/object:Provider::Config::BundledProduct
+      name: 'google-glogging'
+      display_name: 'Google Stackdriver Logging'
+      description: |
+        This cookbook provides the built-in types and services for Chef to
+        manage Google Cloud Stackdriver Logging Agent resources, as native Chef
+        types.
+      source: 'https://github.com/GoogleCloudPlatform/chef-google-logging'
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 files: !ruby/object:Provider::Config::Files
