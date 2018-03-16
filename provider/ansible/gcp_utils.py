@@ -33,10 +33,6 @@ def navigate_hash(source, path, default=None):
         return result
 
 
-class GcpRequestException(Exception):
-    pass
-
-
 # Handles all authentation and HTTP sessions for GCP API calls.
 class GcpSession(object):
     def __init__(self, module, product):
@@ -171,6 +167,12 @@ class GcpModule(AnsibleModule):
             # Many resources are optional and won't be included.
             # These errors are expected and should be ignored.
             pass
+
+    def raise_for_status(self, response):
+        try:
+            response.raise_for_status()
+        except getattr(requests.exceptions, 'RequestException') as inst:
+            self.fail_json(msg="GCP returned error: %s" % response.json())
 
     def _merge_dictionaries(self, a, b):
         new = a.copy()

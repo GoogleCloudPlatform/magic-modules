@@ -68,7 +68,7 @@ RETURN = '''
 # Imports
 ################################################################################
 
-from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequestException
+from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule
 import json
 <%
   config['imports'] ||= []
@@ -312,13 +312,10 @@ def resource_to_request(module):
         return None
 
     try:
-        response.raise_for_status()
+        module.raise_for_status(response)
         result = response.json()
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-    except GcpRequestException as inst:
-        module.fail_json(msg="Network error: %s" % inst)
-<% unless object.decoder? -%>
 
 <%
   decoder_name = if object.decoder?
