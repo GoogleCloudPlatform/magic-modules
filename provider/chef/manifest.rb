@@ -21,6 +21,7 @@ module Provider
       attr_reader :description
       attr_reader :issues
       attr_reader :operating_systems
+      attr_reader :requires
       attr_reader :source
       attr_reader :summary
       attr_reader :version
@@ -36,6 +37,7 @@ module Provider
         check_property_list :depends, Provider::Config::Requirements
         check_property_list \
           :operating_systems, Provider::Config::OperatingSystem
+        super
       end
     end
   end

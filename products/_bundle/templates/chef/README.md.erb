@@ -46,9 +46,10 @@ To install this cookbook, insert the following into your Berksfile.
 The `google/cloud` cookbook installs the following cookbooks automatically:
 
 <%=
-  lines(indent(products.keys.map do |p|
-                 "- [#{p.name}](##{p.name.downcase.tr(' ', '-')})"
-               end, 2))
+  lines(indent(
+          product_details.map { |p| p[:name] }
+                         .map { |p| "- [#{p}](##{p.downcase.tr(' ', '-')})" }, 2
+       ))
 -%>
   - [Google Authentication](#google-authentication)
 
@@ -60,19 +61,21 @@ its intended behavior. For full details about each provider, properties,
 parameters, usage and examples please visit its respective Chef cookbook project
 page.
 
-<% products.each do |product, config| -%>
+<% product_details.each do |product| -%>
 
-### <%= product.name -%>
+### <%= product[:name] -%>
 
 Detailed information can be found at the
-[google-<%= product.prefix -%>][] project home page.
+[google-<%= product[:prefix] -%>][] project home page.
+<% unless product[:objects].nil? -%>
 The list below is a summary of the supported types by the cookbook:
 
-<% product.objects.reject(&:exclude).each do |object| -%>
+<% product[:objects].each do |object| -%>
 
 - `<%= object.out_name -%>`
 <%= wrap_field(object.description, 2) -%>
 
+<% end # objects.nil? -%>
 <% end # objects.each -%>
 <% end # products.each -%>
 
@@ -107,8 +110,8 @@ page.
 [supported-products]: #supported-google-cloud-platform-products
 [supported-types]: #summary-of-supported-products-types--providers
 <%=
-  lines(products.map do |product, config|
-          "[google-#{product.prefix}]: #{config.manifest.source}"
+  lines(product_details.map do |product|
+          "[google-#{product[:prefix]}]: #{product[:source]}"
         end)
 -%>
 [google-gauth]: https://github.com/GoogleCloudPlatform/chef-google-auth/blob/master/README.md

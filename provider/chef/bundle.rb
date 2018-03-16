@@ -34,6 +34,8 @@ module Provider
 
     # A manifest for the "bundle" module
     class Manifest < Provider::Chef::Manifest
+      attr_reader :products
+
       def validate
         @requires = []
         super
@@ -71,6 +73,24 @@ module Provider
                      [product, config]
                    end
         Hash[prod_map.sort_by { |p| p[0].prefix }]
+      end
+    end
+
+    def product_details
+      products.map do |product, config|
+        {
+          name: product.name,
+          prefix: product.prefix,
+          objects: product.objects.reject(&:exclude),
+          source: config.manifest.source
+        }
+      end \
+      + @config.manifest.products.map do |product|
+        {
+          name: product.display_name,
+          prefix: product.prefix,
+          source: product.source
+        }
       end
     end
 
