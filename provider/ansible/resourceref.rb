@@ -42,7 +42,7 @@ module Provider
 
       def resourceref_handler(rref)
         rref_path = path_for_rref(rref)
-        value_path = quote_string(Google::StringUtils.underscore(rref.imports))
+        value_path = quote_string(rref.imports)
         format([
                  ["module.set_value_for_resource(#{rref_path}, #{value_path})"],
                  [
