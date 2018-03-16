@@ -101,6 +101,17 @@ module Provider
       end
     end
 
+    # Adds a reference to another product that should be referenced in the
+    # bundle.
+    class BundledProduct < Api::Object::Named
+      attr_reader :display_name
+      attr_reader :source
+
+      def prefix
+        @name.split('-').last
+      end
+    end
+
     # Reference to a module required by the module
     class TestData < Api::Object
       attr_reader :network
