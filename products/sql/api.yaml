@@ -65,6 +65,7 @@ objects:
           The database engine type and version. For First Generation instances,
           can be MYSQL_5_5, or MYSQL_5_6. For Second Generation instances, can
           be MYSQL_5_6 or MYSQL_5_7. Defaults to MYSQL_5_6.
+          PostgreSQL instances: POSTGRES_9_6
 
           The databaseVersion property can not be changed after instance
           creation.
@@ -72,6 +73,7 @@ objects:
           - :MYSQL_5_5
           - :MYSQL_5_6
           - :MYSQL_5_7
+          - :POSTGRES_9_6
       - !ruby/object:Api::Type::NestedObject
         name: 'failoverReplica'
         description: |
