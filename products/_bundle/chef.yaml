@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::ChefBundle::Config
 manifest: !ruby/object:Provider::ChefBundle::Manifest
-  version: '0.1.0'
+  version: '0.1.1'
   source: 'https://github.com/GoogleCloudPlatform/chef-google'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google/issues'
   summary: 'Bundle cookbook to install all Chef GCP cookbooks.'
@@ -49,3 +49,13 @@ files: !ruby/object:Provider::Config::Files
     'metadata.rb': 'templates/chef/metadata.rb.erb'
     'CONTRIBUTING.md': 'templates/CONTRIBUTING.md.erb'
     # CONTRIBUTING.md has to be the last file to be compiled.
+changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.1.1'
+    date: 2018-03-16T09:00:00-0700
+    features:
+      - Added `google-glogging` cookbook.
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.1.0'
+    date: 2017-10-04T10:00:00-0700
+    general: 'Initial release'

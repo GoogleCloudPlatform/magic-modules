@@ -55,6 +55,7 @@ module Provider
       )
 
       copy_files(output_folder)
+      compile_changelog(output_folder)
       compile_files(output_folder)
     end
 
