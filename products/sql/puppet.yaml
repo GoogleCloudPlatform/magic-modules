@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Puppet::Config
 manifest: !ruby/object:Provider::Puppet::Manifest
-  version: '0.2.0'
+  version: '0.2.1'
   source: 'https://github.com/GoogleCloudPlatform/puppet-google-sql'
   homepage: 'https://github.com/GoogleCloudPlatform/puppet-google-sql'
   issues:
@@ -265,6 +265,7 @@ examples: !ruby/object:Api::Resource::HashArray
     - flag.pp
   Instance:
     - instance.pp
+    - instance~postgres.pp
     - delete_instance.pp
   SslCert:
     - ssl_cert.pp
@@ -333,6 +334,11 @@ style:
         exceptions:
           - Metrics/LineLength
 changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.2.1'
+    date: 2017-10-19T09:00:00-0700
+    features:
+      - Added PostgreSQL support.
   - !ruby/object:Provider::Config::Changelog
     version: '0.2.0'
     date: 2017-10-10T06:00:00-0700
