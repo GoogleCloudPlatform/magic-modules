@@ -24,6 +24,9 @@ manifest: !ruby/object:Provider::ChefBundle::Manifest
     - !ruby/object:Provider::Config::Requirements
       name: 'google-gauth'
       versions: '< 0.2.0'
+    - !ruby/object:Provider::Config::Requirements
+      name: 'google-glogging'
+      versions: '< 0.2.0'
   products:
     - !ruby/object:Provider::Config::BundledProduct
       name: 'google-glogging'
