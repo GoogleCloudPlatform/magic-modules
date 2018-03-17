@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.0'
+  version: '0.1.1'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-compute'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-compute/issues'
   summary: 'A Chef cookbook to manage Google Cloud Compute resources'
@@ -115,6 +115,7 @@ examples: !ruby/object:Api::Resource::HashArray
     - flag.rb
   Instance:
     - instance.rb
+    - instance~postgres.rb
     - delete_instance.rb
   SslCert:
     - ssl_cert.rb
@@ -205,3 +206,13 @@ style:
       - test: Instance > present > not_exist > success > title_and_name > before
         exceptions:
           - Metrics/LineLength
+changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.1.1'
+    date: 2017-10-19T09:00:00-0700
+    features:
+      - Added PostgreSQL support.
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.1.0'
+    date: 2017-10-04T10:00:00-0700
+    general: 'Initial release'
