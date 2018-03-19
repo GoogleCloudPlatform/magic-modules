@@ -38,6 +38,10 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
+  TargetPool:
+    provider_helpers:
+      include:
+        - 'products/compute/helpers/provider_target_pool.py'
   # Not implemented yet.
   BackendBucket:
     skip: true
@@ -71,8 +75,6 @@ objects: !ruby/object:Api::Resource::HashArray
   TargetHttpProxy:
     skip: true
   TargetHttpsProxy:
-    skip: true
-  TargetPool:
     skip: true
   TargetSslProxy:
     skip: true
