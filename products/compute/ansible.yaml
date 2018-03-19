@@ -83,8 +83,6 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
-  Firewall:
-    skip: true
   Instance:
     provider_helpers:
       include:
