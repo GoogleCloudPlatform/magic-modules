@@ -46,8 +46,6 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
-  Disk:
-    skip: true
   Firewall:
     skip: true
   ForwardingRule:
