@@ -167,6 +167,10 @@ class GcpModule(AnsibleModule):
             # Many resources are optional and won't be included.
             # These errors are expected and should be ignored.
             pass
+        except AttributeError:
+            # Many resources are optional and won't be included.
+            # These errors are expected and should be ignored.
+            pass
 
     def raise_for_status(self, response):
         try:
