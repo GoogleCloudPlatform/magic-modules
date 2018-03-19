@@ -246,7 +246,7 @@ module Compile
         ERB.new(source, nil, '-%>').result(ctx).split("\n")
       elsif ctx.is_a? Hash
         ERB.new(source, nil, '-%>').result(
-          OpenStruct.new(ctx).instance_eval { binding }
+          OpenStruct.new(ctx).instance_eval { binding.of_caller(1) }
         ).split("\n")
       else
         raise TypeError, "#{ctx.class} is not a valid type for compilation"

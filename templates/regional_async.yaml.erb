@@ -4,6 +4,10 @@ async: !ruby/object:Api::Async
     path: 'name'
     base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
     wait_ms: 1000
+<% unless ctx[:timeouts].nil? -%>
+    timeouts: !ruby/object:Api::Async::Operation::Timeouts
+<%= lines(indent(ctx[:timeouts].map { |k, v| "#{k}: #{v}" }, 6)) -%>
+<% end -%>
   result: !ruby/object:Api::Async::Result
     path: 'targetLink'
   status: !ruby/object:Api::Async::Status
