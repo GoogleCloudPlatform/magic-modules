@@ -38,11 +38,11 @@ func resource<%= resource_name -%>() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout {
-			Create: schema.DefaultTimeout(4 * time.Minute),
+			Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
 			<% if updatable?(object, properties) -%>
-			Update: schema.DefaultTimeout(4 * time.Minute),
+			Update: schema.DefaultTimeout(<%= object.async.operation.timeouts.update_sec -%> * time.Second),
 			<% end -%>
-			Delete: schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(<%= object.async.operation.timeouts.delete_sec -%> * time.Second),
 		},
 
 		Schema: map[string]*schema.Schema{

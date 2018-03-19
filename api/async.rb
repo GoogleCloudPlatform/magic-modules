@@ -21,6 +21,15 @@ module Api
     attr_reader :status
     attr_reader :error
 
+    def validate
+      super
+
+      check_property :operation, Operation
+      check_property :result, Result
+      check_property :status, Status
+      check_property :error, Error
+    end
+
     # Represents the operations (requests) issues to watch for completion
     class Operation < Api::Object
       attr_reader :kind
