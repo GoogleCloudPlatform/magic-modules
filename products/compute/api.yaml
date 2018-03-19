@@ -41,7 +41,7 @@ objects:
       the instance is assigned a new internal IP address, either by Compute
       Engine or by you. External IP addresses can be either ephemeral or
       static.
-<%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -103,7 +103,7 @@ objects:
       guides:
         'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
       api: 'https://cloud.google.com/compute/docs/reference/latest/backendBuckets'
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
@@ -147,7 +147,7 @@ objects:
     description: |
       Creates a BackendService resource in the specified project using the data
       included in the request.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'affinityCookieTtlSec'
@@ -532,7 +532,12 @@ objects:
 
       Add a persistent disk to your instance when you need reliable and
       affordable storage with consistent performance characteristics.
-<%= indent(compile('templates/zonal_async.yaml.erb'), 4) %>
+<%=
+  # Larger disk were timing out at creation. Bumping up to 5 minutes.
+  # https://github.com/terraform-providers/terraform-provider-google/issues/703
+  indent(compile_file({timeouts: { insert_ms: 300000 }},
+                      'templates/zonal_async.yaml.erb'), 4)
+%>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -747,7 +752,7 @@ objects:
       outgoing traffic and a default "deny" for incoming traffic. For all
       networks except the default network, you must create any firewall rules
       you need.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
       # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
@@ -863,7 +868,7 @@ objects:
       A ForwardingRule resource. A ForwardingRule resource specifies which pool
       of target virtual machines to forward a packet to if it matches the given
       [IPAddress, IPProtocol, portRange] tuple.
-<%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -895,7 +900,7 @@ objects:
       Represents a Global Address resource. Global addresses are used for
       HTTP(S) load balancing.
     input: true
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
         name: 'address'
@@ -950,7 +955,7 @@ objects:
 
       For more information, see
       https://cloud.google.com/compute/docs/load-balancing/http/
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
@@ -986,7 +991,7 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/latest/httpHealthChecks'
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1066,7 +1071,7 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/latest/httpsHealthChecks'
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1140,7 +1145,7 @@ objects:
       An HealthCheck resource. This resource defines a template for how
       individual virtual machines should be checked for health, via one of the
       supported protocols.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1247,7 +1252,7 @@ objects:
       Tip: Disks should be set to autoDelete=true
       so that leftover disks are not left behind on machine deletion.
 <% type = 'InstanceTemplate' -%>
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_response
@@ -1356,7 +1361,7 @@ objects:
       images are available only to your project. You can create a custom image
       from root persistent disks and other images. Then, use the custom image
       to create an instance.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'archiveSizeBytes'
@@ -1576,7 +1581,16 @@ objects:
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
 <% type = 'Instance' -%>
-<%= indent(compile('templates/zonal_async.yaml.erb'), 4) %>
+<%=
+  # Users were experiencing timeouts. Bumping up to 6 minutes.
+  # https://github.com/terraform-providers/terraform-provider-google/issues/852
+  indent(compile_file({timeouts: {
+                        insert_ms: 360000,
+                        update_ms: 360000,
+                        delete_ms: 360000}},
+                      'templates/zonal_async.yaml.erb'), 4)
+
+%>
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_response
@@ -1672,7 +1686,7 @@ objects:
       and can contain identical or different instances. Instance groups do not
       use an instance template. Unlike managed instance groups, you must create
       and add instances to an instance group manually.
-<%= indent(compile('templates/zonal_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -1756,7 +1770,7 @@ objects:
       verify the status of the individual instances.
 
       A managed instance group can have up to 1000 VM instances per group.
-<%= indent(compile('templates/zonal_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -2056,7 +2070,7 @@ objects:
       to one network. All Compute Engine networks use the IPv4 protocol. Compute
       Engine currently does not support IPv6. However, Google is a major
       advocate of IPv6 and it is an important future direction.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -2211,7 +2225,7 @@ objects:
 
       A Routes resources must have exactly one specification of either
       nextHopGateway, nextHopInstance, nextHopIp, or nextHopVpnTunnel.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
         name: 'destRange'
@@ -2310,7 +2324,7 @@ objects:
     # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
     # operation. we'll leave the object as global operation and use the disk's
     # zonal operation for the create action.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'source'
@@ -2426,7 +2440,7 @@ objects:
       An SslCertificate resource. This resource provides a mechanism to upload
       an SSL key and certificate to the load balancer to serve secure
       connections from the user.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
         name: 'certificate'
@@ -2489,7 +2503,15 @@ objects:
       instances in all other subnets of the same VPC network, regardless of
       region, using their RFC1918 private IP addresses. You can isolate portions
       of the network, even entire subnets, using firewall rules.
-<%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
+<%=
+  # Users were experiencing timeout. Bumping up to 6 minutes.
+  # https://github.com/terraform-providers/terraform-provider-google/issues/718
+  indent(compile_file({timeouts: {
+                        insert_ms: 360000,
+                        update_ms: 360000,
+                        delete_ms: 360000}},
+                      'templates/regional_async.yaml.erb'), 4)
+%>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2562,7 +2584,7 @@ objects:
     description: |
       Represents a TargetHttpProxy resource, which is used by one or more global
       forwarding rule to route incoming HTTP requests to a URL map.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2604,7 +2626,7 @@ objects:
     description: |
       Represents a TargetHttpsProxy resource, which is used by one or more
       global forwarding rule to route incoming HTTPS requests to a URL map.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2664,7 +2686,7 @@ objects:
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
-<%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -2777,7 +2799,7 @@ objects:
       Represents a TargetSslProxy resource, which is used by one or more
       global forwarding rule to route incoming SSL requests to a backend
       service.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2833,7 +2855,7 @@ objects:
       Represents a TargetTcpProxy resource, which is used by one or more
       global forwarding rule to route incoming TCP requests to a Backend
       service.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2880,7 +2902,7 @@ objects:
     description: |
       UrlMaps are used to route requests to a backend service based on rules
       that you define for the host and path of an incoming URL.
-<%= indent(compile('templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
