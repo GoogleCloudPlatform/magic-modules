@@ -145,6 +145,18 @@ class GcpModule(AnsibleModule):
 
         AnsibleModule.__init__(self, *args, **kwargs)
 
+<%
+# set_value_for_resource and set_value_with_callback was responsible for
+# traversing user input and altering its results.
+#
+# set_value_for_resource is used for ResourceRefs. It will convert all
+# ResourceRefs at `path` from dictionaries (`register: output` from Ansible)
+# and grab the output value at `value`
+#
+# set_value_with_callback will use a auto-generated callback to verify and
+# alter values at `path`. This is almost exclusively used to convert
+# user-inputted names to self-links
+-%>
     # Some params are references to other pieces of GCP infrastructure.
     # These params are passed in as dictionaries.
     # The dictionaries should be overriden with the proper value.
@@ -163,6 +175,37 @@ class GcpModule(AnsibleModule):
                         self.set_value_for_resource(path[1:], value, item)
                 else:
                     self.set_value_for_resource(path[1:], value, params)
+        except KeyError:
+            # Many resources are optional and won't be included.
+            # These errors are expected and should be ignored.
+            pass
+        except AttributeError:
+            # Many resources are optional and won't be included.
+            # These errors are expected and should be ignored.
+            pass
+
+    # Some params are self-links, but many users will enter them as names.
+    # These params are passed in as strings
+    # These params should be checked and converted to self-links if they
+    # are entered as names
+    # This function is given a path of values that are expected to be
+    # self-links.
+    # This function takes in a callbacks to functions that will check + alter
+    # names to self_links depending on the resource_type.
+    def set_value_with_callback(self, path, callback, params=None):
+        if params is None:
+            params = self.params
+        try:
+            if len(path) == 1:
+                # Override dictionary with value from the dictionary
+                params[path[0]] = callback(params[path[0]], params)
+            else:
+                params = params[path[0]]
+                if isinstance(params, list):
+                    for item in params:
+                        self.set_value_with_callback(path[1:], callback)
+                else:
+                    self.set_value_with_callback(path[1:], callback, params)
         except KeyError:
             # Many resources are optional and won't be included.
             # These errors are expected and should be ignored.
