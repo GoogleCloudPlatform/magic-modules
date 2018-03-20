@@ -535,7 +535,7 @@ objects:
 <%=
   # Larger disk were timing out at creation. Bumping up to 5 minutes.
   # https://github.com/terraform-providers/terraform-provider-google/issues/703
-  indent(compile_file({timeouts: { insert_ms: 300000 }},
+  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
                       'templates/zonal_async.yaml.erb'), 4)
 %>
     parameters:
@@ -1585,9 +1585,9 @@ objects:
   # Users were experiencing timeouts. Bumping up to 6 minutes.
   # https://github.com/terraform-providers/terraform-provider-google/issues/852
   indent(compile_file({timeouts: {
-                        insert_ms: 360000,
-                        update_ms: 360000,
-                        delete_ms: 360000}},
+                        insert_sec: 6 * 60,
+                        update_sec: 6 * 60,
+                        delete_sec: 6 * 60}},
                       'templates/zonal_async.yaml.erb'), 4)
 
 %>
@@ -2507,9 +2507,9 @@ objects:
   # Users were experiencing timeout. Bumping up to 6 minutes.
   # https://github.com/terraform-providers/terraform-provider-google/issues/718
   indent(compile_file({timeouts: {
-                        insert_ms: 360000,
-                        update_ms: 360000,
-                        delete_ms: 360000}},
+                        insert_sec: 6 * 60,
+                        update_sec: 6 * 60,
+                        delete_sec: 6 * 60}},
                       'templates/regional_async.yaml.erb'), 4)
 %>
     properties:
