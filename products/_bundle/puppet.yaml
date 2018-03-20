@@ -33,7 +33,7 @@ manifest: !ruby/object:Provider::PuppetBundle::Manifest
     pubsub: 0.1.0
     resourcemanager: 0.1.1
     spanner: 0.1.0
-    sql: 0.2.0
+    sql: 0.2.1
     storage: 0.2.0
   tags:
     - google
