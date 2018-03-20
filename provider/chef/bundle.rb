@@ -35,9 +35,12 @@ module Provider
     # A manifest for the "bundle" module
     class Manifest < Provider::Chef::Manifest
       attr_reader :products
+      attr_reader :releases
 
       def validate
         @requires = []
+        check_property_list :products, Provider::Config::BundledProduct
+        check_property :releases, Hash
         super
       end
     end
@@ -61,18 +64,17 @@ module Provider
 
     def products
       @products ||= begin
-        prod_map = Dir['products/**/chef.yaml']
-                   .reject { |f| f.include?('bundle') }
-                   .map do |product_config|
-                     product = Api::Compiler.new(
-                       File.join(File.dirname(product_config), 'api.yaml')
-                     ).run
-                     product.validate
-                     config = Provider::Config.parse(product_config, product)
-                     config.validate
+        prod_map =
+          release_files.map do |product_config|
+            product =
+              Api::Compiler.new(File.join(File.dirname(product_config),
+                                          'api.yaml')).run
+            product.validate
+            config = Provider::Config.parse(product_config, product)
+            config.validate
 
-                     [product, config]
-                   end
+            [product, config]
+          end
         Hash[prod_map.sort_by { |p| p[0].prefix }]
       end
     end
@@ -96,6 +98,11 @@ module Provider
     end
 
     private
+
+    def release_files
+      @config.manifest.releases.map { |p, _| "products/#{p}/chef.yaml" }
+             .select { |c| File.exist?(c) }
+    end
 
     def next_version(version)
       [Gem::Version.new(version).bump, 0].join('.')
