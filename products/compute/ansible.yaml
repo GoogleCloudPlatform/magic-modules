@@ -60,8 +60,6 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   Instance:
     skip: true
-  InstanceGroup:
-    skip: true
   InstanceGroupManager:
     skip: true
   InstanceTemplate:
