@@ -21,8 +21,11 @@ module Provider
   class PuppetBundle < Provider::Core
     # A manifest for the "bundle" module
     class Manifest < Puppet::Manifest
+      attr_reader :releases
+
       def validate
         @requires = [] if @requires.nil?
+        check_property :releases, Hash
         super
       end
     end
@@ -37,6 +40,7 @@ module Provider
 
       def validate
         check_property :manifest, Provider::PuppetBundle::Manifest
+        super
       end
     end
 
@@ -57,23 +61,27 @@ module Provider
 
     def products
       @products ||= begin
-        prod_map = Dir['products/**/puppet.yaml']
-                   .reject { |f| f.include?('bundle') }
-                   .map do |product_config|
-                     product = Api::Compiler.new(
-                       File.join(File.dirname(product_config), 'api.yaml')
-                     ).run
-                     product.validate
-                     config = Provider::Config.parse(product_config, product)
-                     config.validate
+        prod_map =
+          release_files.map do |product_config|
+            product =
+              Api::Compiler.new(File.join(File.dirname(product_config),
+                                          'api.yaml')).run
+            product.validate
+            config = Provider::Config.parse(product_config, product)
+            config.validate
 
-                     [product, config]
-                   end
+            [product, config]
+          end
         Hash[prod_map.sort_by { |p| p[0].prefix }]
       end
     end
 
     private
+
+    def release_files
+      @config.manifest.releases.map { |p, _| "products/#{p}/puppet.yaml" }
+             .select { |c| File.exist?(c) }
+    end
 
     def auth_ver
       auth_meta = JSON.parse(IO.read('build/puppet/auth/metadata.json'))
@@ -86,10 +94,10 @@ module Provider
 
     def generate_requirements
       @config.manifest.requires.concat(
-        products.map do |k, v|
+        products.map do |k, _|
+          version = @config.manifest.releases[k.prefix[1..-1]]
           Provider::Config::Requirements.create(
-            "google/#{k.prefix}",
-            ">= #{v.manifest.version} < #{next_version(v.manifest.version)}"
+            "google/#{k.prefix}", ">= #{version} < #{next_version(version)}"
           )
         end
       ).sort_by!(&:name)
