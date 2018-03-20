@@ -25,5 +25,7 @@ verifier: !ruby/object:Provider::Ansible::Verifier
       --project="{{ gcp_project}}"
       --region=us-west1
       test-address1
-  failed_name: |
-    'projects/{{ gcp_project }}/regions/us-west1/addresses/test-address1' was not found
+  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
+    region: regions/us-west1
+    type: addresses
+    name: test-address1

@@ -27,5 +27,6 @@ verifier: !ruby/object:Provider::Ansible::Verifier
     gcloud compute http-health-checks describe
       --project="{{gcp_project}}"
       "{{ resource_name }}"
-  failed_name: |
-    'projects/{{ gcp_project }}/global/httpHealthChecks/{{ resource_name }}' was not found
+  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
+    region: global
+    type: httpHealthChecks
