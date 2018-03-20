@@ -13,9 +13,9 @@
 
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.1'
-  source: 'https://github.com/GoogleCloudPlatform/chef-google-compute'
-  issues: 'https://github.com/GoogleCloudPlatform/chef-google-compute/issues'
+  version: '0.2.0'
+  source: 'https://github.com/GoogleCloudPlatform/chef-google-sql'
+  issues: 'https://github.com/GoogleCloudPlatform/chef-google-sql/issues'
   summary: 'A Chef cookbook to manage Google Cloud Compute resources'
   description: |
     This cookbook provides the built-in types and services for Chef to manage
@@ -208,7 +208,7 @@ style:
           - Metrics/LineLength
 changelog:
   - !ruby/object:Provider::Config::Changelog
-    version: '0.1.1'
+    version: '0.2.0'
     date: 2017-10-19T09:00:00-0700
     features:
       - Added PostgreSQL support.

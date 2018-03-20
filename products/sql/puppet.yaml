@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Puppet::Config
 manifest: !ruby/object:Provider::Puppet::Manifest
-  version: '0.2.1'
+  version: '0.3.0'
   source: 'https://github.com/GoogleCloudPlatform/puppet-google-sql'
   homepage: 'https://github.com/GoogleCloudPlatform/puppet-google-sql'
   issues:
@@ -335,7 +335,7 @@ style:
           - Metrics/LineLength
 changelog:
   - !ruby/object:Provider::Config::Changelog
-    version: '0.2.1'
+    version: '0.3.0'
     date: 2017-10-19T09:00:00-0700
     features:
       - Added PostgreSQL support.

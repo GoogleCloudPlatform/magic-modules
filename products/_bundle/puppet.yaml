@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::PuppetBundle::Config
 manifest: !ruby/object:Provider::PuppetBundle::Manifest
-  version: '0.2.2'
+  version: '0.3.0'
   source: 'https://github.com/GoogleCloudPlatform/puppet-google'
   homepage: 'https://github.com/GoogleCloudPlatform/puppet-google'
   issues:
@@ -33,7 +33,7 @@ manifest: !ruby/object:Provider::PuppetBundle::Manifest
     pubsub: 0.1.0
     resourcemanager: 0.1.1
     spanner: 0.1.0
-    sql: 0.2.1
+    sql: 0.3.0
     storage: 0.2.0
   tags:
     - google
@@ -53,8 +53,14 @@ files: !ruby/object:Provider::Config::Files
     # CONTRIBUTING.md has to be the last file to be compiled.
 changelog:
   - !ruby/object:Provider::Config::Changelog
+    version: '0.3.0'
+    date: 2018-03-19T22:00:00-0700
+    features:
+      - Google Cloud IAM
+      - Google Cloud Resource Manager
+  - !ruby/object:Provider::Config::Changelog
     version: '0.2.2'
-    date: 2017-10-10T13:30:00-0700
+    date: 2017-10-10T15:30:00-0700
     fixes:
       - Added documentation on how to upgrade pre-release versions
   - !ruby/object:Provider::Config::Changelog
