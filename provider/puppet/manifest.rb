@@ -36,6 +36,7 @@ module Provider
         check_property_list :requires, Provider::Config::Requirements
         check_property_list \
           :operating_systems, Provider::Config::OperatingSystem
+        super
       end
     end
   end
