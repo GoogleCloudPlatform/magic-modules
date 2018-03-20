@@ -23,4 +23,5 @@ verifier: !ruby/object:Provider::Ansible::Verifier
     gcloud beta pubsub topics list
       --project="{{ gcp_project}}"
     | grep 'topic: projects/.*/test-topic1'
-  check_on_failure: false
+  failure: !ruby/object:Provider::Ansible::FailureCondition
+    enabled: false

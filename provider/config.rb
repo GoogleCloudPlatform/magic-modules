@@ -222,7 +222,6 @@ module Provider
       check_optional_property_list :style, Provider::Config::StyleException
       check_optional_property_list :changelog, Provider::Config::Changelog
       check_optional_property_list :functions, Provider::Config::Function
-
     end
 
     # Provides the API object to any type that requires, e.g. for validation

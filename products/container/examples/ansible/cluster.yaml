@@ -32,5 +32,6 @@ verifier: !ruby/object:Provider::Ansible::Verifier
       --project="{{ gcp_project}}"
       --zone=us-central1-a
       "{{ resource_name }}"
-  failed_name: |
-    No cluster named '{{ resource_name }}' in {{ gcp_project }}.
+  failure: !ruby/object:Provider::Ansible::FailureCondition
+    error: |
+      No cluster named '{{ resource_name }}' in {{ gcp_project }}.
