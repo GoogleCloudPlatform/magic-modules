@@ -76,7 +76,7 @@ module Provider
         if prop.is_a? Api::Type::NestedObject
           block.concat(nested_doc(prop.properties, config, spaces))
         elsif prop.is_a?(Api::Type::Array) &&
-          prop.item_type.is_a?(Api::Type::NestedObject)
+              prop.item_type.is_a?(Api::Type::NestedObject)
           block.concat(nested_doc(prop.item_type.properties, config, spaces))
         else
           block
@@ -90,7 +90,7 @@ module Provider
         if prop.is_a? Api::Type::NestedObject
           block.concat(nested_return(prop.properties, spaces))
         elsif prop.is_a?(Api::Type::Array) &&
-          prop.item_type.is_a?(Api::Type::NestedObject)
+              prop.item_type.is_a?(Api::Type::NestedObject)
           block.concat(nested_return(prop.item_type.properties, spaces))
         else
           block

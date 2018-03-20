@@ -73,6 +73,7 @@ import json
 <%
   config['imports'] ||= []
   config['imports'] << 'time' if object.async
+  config['imports'] << 're' unless virtual_selflink_rrefs(object).empty?
 -%>
 <%= lines(config['imports'].sort.uniq.map { |i| "import #{i}" }) -%>
 
@@ -97,6 +98,7 @@ def main():
     )
 
 <%= lines(indent(resourceref_handlers(object), 4), 1) -%>
+<%= lines(indent(selflink_handlers(object), 4), 1) -%>
     state = module.params['state']
 <% if object.kind? -%>
     kind = <%= lines(quote_string(object.kind)) -%>
@@ -380,6 +382,7 @@ def response_to_hash(module, response):
 <%= lines(indent_list(f2h, 8)) -%>
     }
 
+<%= lines_before(lines(selflink_functions(object), 1)) -%>
 <%= compile('templates/ansible/async.erb') -%>
 <%= compile('templates/ansible/provider_helpers.erb') -%>
 if __name__ == '__main__':
