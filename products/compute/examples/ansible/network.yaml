@@ -24,5 +24,6 @@ verifier: !ruby/object:Provider::Ansible::Verifier
     gcloud compute networks describe
       --project="{{ gcp_project}}"
       "{{ resource_name }}"
-  failed_name: |
-    'projects/{{ gcp_project }}/global/networks/{{ resource_name }}' was not found
+  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
+    region: global
+    type: networks

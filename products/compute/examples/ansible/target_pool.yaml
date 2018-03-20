@@ -27,3 +27,6 @@ verifier: !ruby/object:Provider::Ansible::Verifier
       "{{ resource_name }}"
   failed_name: |
     'projects/{{ gcp_project }}/regions/us-west1/targetPools/{{ resource_name }}' was not found
+  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
+    region: regions/us-west1
+    type: targetPools

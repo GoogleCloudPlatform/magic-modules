@@ -45,19 +45,13 @@ module Provider
     class Verifier < Api::Object
       include Compile::Core
       attr_reader :command
-      attr_reader :failed_name
-      attr_reader :failed_verifier
-      attr_reader :check_on_failure
+      attr_reader :failure
 
       def validate
-        check_property :command, String
-        check_optional_property :failed_name, String
-        check_optional_property :failed_verifier, String
+        @failure ||= FailureCondition.new
 
-        @failed_name ||= '\'{{ resource_name }}\' does not exist'
-        @failed_verifier ||=
-          "\"\\\"#{@failed_name.strip}\\\" in results.stderr\""
-        @check_on_failure = true unless @check_on_failure == false
+        check_property :command, String
+        check_property :failure, FailureCondition
       end
 
       # rubocop:disable Metrics/AbcSize
@@ -68,7 +62,7 @@ module Provider
 
         obj_name = Google::StringUtils.underscore(object.name)
         verb = verbs[state.to_sym]
-        check_on_failure = @check_on_failure && state == 'absent'
+        check_on_failure = @failure.enabled && state == 'absent'
         status = state == 'present' ? 0 : 1
         [
           "- name: verify that #{obj_name} was #{verb}",
@@ -87,7 +81,7 @@ module Provider
                             'that:',
                             indent([
                               "- results.rc == #{status}",
-                              ("- #{@failed_verifier}" if check_on_failure)
+                              ("- #{@failure.test}" if check_on_failure)
                             ].compact, 2)
                           ], 2)
                  ], 2)
@@ -103,6 +97,50 @@ module Provider
           present: 'created',
           absent: 'deleted'
         }
+      end
+    end
+
+    # A gcloud command failing is not enough to verify that a resource does not
+    # exist
+    # Stderr should be checked to verify that the resource actually does not
+    # exist.
+    # @name - the name of the resource we're looking for
+    # @error - the full line in stderr that's being looked for.
+    # @test - the full test to verify resource does not exist.
+    class FailureCondition < Api::Object
+      attr_reader :enabled
+      attr_reader :name
+      attr_reader :test
+
+      def validate
+        check_optional_property :name, ::String
+        check_optional_property :enabled, [true, false]
+        check_optional_property :test, ::String
+
+        @enabled ||= true
+        @name ||= '{{ resource_name }}'
+        @error ||= "#{@name} was not found."
+        @test ||= "\"\\\"#{@error.strip}\\\" in results.stderr\""
+      end
+    end
+
+    # GCE gcloud commands follow a relatively standard pattern.
+    class ComputeFailureCondition < FailureCondition
+      attr_reader :region
+      attr_reader :type
+
+      def validate
+        raise 'Region must be slash delineated (e.g. regions/us-west1)' \
+          unless @region == 'global' || @region.match?(%r{.*\/.*})
+
+        check_optional_property :type, ::String
+
+        @name ||= '{{ resource_name }}'
+        @error = [
+          "'projects/{{ gcp_project }}/#{@region}/#{@type}/#{@name}\'",
+          'was not found'
+        ].join(' ')
+        super
       end
     end
 
@@ -179,16 +217,6 @@ module Provider
         check_property :task, Task
         check_optional_property :verifier, Verifier
         check_optional_property_list :dependencies, Task
-      end
-    end
-
-    # A Task that is used by a virtual object.
-    class VirtualTask < Task
-      def verbs
-        {
-          present: 'verify',
-          absent: 'verify'
-        }
       end
     end
   end
