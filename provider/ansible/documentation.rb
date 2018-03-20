@@ -73,29 +73,50 @@ module Provider
       # This includes the YAML for the property as well as any nested props
       def doc_property_yaml(prop, config, spaces)
         block = minimal_doc_block(prop, config, spaces)
-        return block unless prop.is_a? Api::Type::NestedObject
-        block << indent('suboptions:', 4)
-        block.concat(
-          prop.properties.map do |p|
-            indent(doc_property_yaml(p, config, spaces + 4), 8)
-          end
-        )
+        if prop.is_a? Api::Type::NestedObject
+          block.concat(nested_doc(prop.properties, config, spaces))
+        elsif prop.is_a?(Api::Type::Array) &&
+          prop.item_type.is_a?(Api::Type::NestedObject)
+          block.concat(nested_doc(prop.item_type.properties, config, spaces))
+        else
+          block
+        end
       end
 
       # Builds out a full YAML block for RETURNS
       # This includes the YAML for the property as well as any nested props
       def return_property_yaml(prop, spaces)
         block = minimal_return_block(prop, spaces)
-        return block unless prop.is_a? Api::Type::NestedObject
-        block << indent('contains:', 4)
+        if prop.is_a? Api::Type::NestedObject
+          block.concat(nested_return(prop.properties, spaces))
+        elsif prop.is_a?(Api::Type::Array) &&
+          prop.item_type.is_a?(Api::Type::NestedObject)
+          block.concat(nested_return(prop.item_type.properties, spaces))
+        else
+          block
+        end
+      end
+
+      private
+
+      # Returns formatted nested documentation for a set of properties.
+      def nested_return(properties, spaces)
+        block = [indent('contains:', 4)]
         block.concat(
-          prop.properties.map do |p|
+          properties.map do |p|
             indent(return_property_yaml(p, spaces + 4), 8)
           end
         )
       end
 
-      private
+      def nested_doc(properties, config, spaces)
+        block = [indent('suboptions:', 4)]
+        block.concat(
+          properties.map do |p|
+            indent(doc_property_yaml(p, config, spaces + 4), 8)
+          end
+        )
+      end
 
       # Builds out the minimal YAML block for DOCUMENTATION
       def minimal_doc_block(prop, config, spaces)
