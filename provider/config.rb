@@ -104,6 +104,7 @@ module Provider
     # Adds a reference to another product that should be referenced in the
     # bundle.
     class BundledProduct < Api::Object::Named
+      attr_reader :description
       attr_reader :display_name
       attr_reader :source
 
