@@ -14,23 +14,23 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_pubsub_subscription
   code: |
-    name: <%= name %>
+    name: <%= ctx[:name] %>
     topic: "{{ topic }}"
     push_config:
       push_endpoint: 'https://myapp.graphite.cloudnativeapp.com/webhook/sub1'
     ack_deadline_seconds: 300
-    project: <%= project %>
-    auth_kind: <%= auth_kind %>
-    service_account_file: <%= service_account_file %>
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_pubsub_topic
     register: topic
     code: |
       name: 'test-topic1'
-      project: <%= project %>
-      auth_kind: <%= auth_kind %>
-      service_account_file: <%= service_account_file %>
+      project: <%= ctx[:project] %>
+      auth_kind: <%= ctx[:auth_kind] %>
+      service_account_file: <%= ctx[:service_account_file] %>
 verifier: !ruby/object:Provider::Ansible::Verifier
   command: |
     gcloud beta pubsub subscriptions list
