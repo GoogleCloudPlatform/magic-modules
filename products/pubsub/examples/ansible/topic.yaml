@@ -15,9 +15,9 @@ task: !ruby/object:Provider::Ansible::Task
   name: gcp_pubsub_topic
   code: |
     name: 'test-topic1'
-    project: <%= project %>
-    auth_kind: <%= auth_kind %>
-    service_account_file: <%= service_account_file %>
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
 verifier: !ruby/object:Provider::Ansible::Verifier
   command: |
     gcloud beta pubsub topics list

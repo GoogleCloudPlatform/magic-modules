@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_ssl_certificate
   code: |
-    name: <%= name %>
+    name: <%= ctx[:name] %>
     description: |
       "A certificate for testing. Do not use this certificate in production"
     certificate: |
@@ -41,9 +41,9 @@ task: !ruby/object:Provider::Ansible::Task
       AwEHoUQDQgAEHGzpcRJ4XzfBJCCPMQeXQpTXwlblimODQCuQ4mzkzTv0dXyB750f
       OGN02HtkpBOZzzvUARTR10JQoSe2/5PIwQ==
       -----END EC PRIVATE KEY-----
-    project: <%= project %>
-    auth_kind: <%= auth_kind %>
-    service_account_file: <%= service_account_file %>
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
 verifier: !ruby/object:Provider::Ansible::Verifier
   command: |
     gcloud compute ssl-certificates describe

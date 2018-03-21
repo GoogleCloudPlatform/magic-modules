@@ -15,13 +15,13 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_container_node_pool
   code: |
-      name: <%= name %>
+      name: <%= ctx[:name] %>
       initial_node_count: 4
       cluster: "{{ cluster }}"
       zone: 'us-central1-a'
-      project: <%= project %>
-      auth_kind: <%= auth_kind %>
-      service_account_file: <%= service_account_file %>
+      project: <%= ctx[:project] %>
+      auth_kind: <%= ctx[:auth_kind] %>
+      service_account_file: <%= ctx[:service_account_file] %>
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_container_cluster
@@ -29,7 +29,7 @@ dependencies:
       name: test-cluster1
       initial_node_count: 4
       zone: 'us-central1-a'
-      project: <%= project %>
-      auth_kind: <%= auth_kind %>
-      service_account_file: <%= service_account_file %>
+      project: <%= ctx[:project] %>
+      auth_kind: <%= ctx[:auth_kind] %>
+      service_account_file: <%= ctx[:service_account_file] %>
     register: cluster

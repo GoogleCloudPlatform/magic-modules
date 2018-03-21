@@ -16,9 +16,9 @@ task: !ruby/object:Provider::Ansible::Task
   code: |
     name: 'test-address1'
     region: 'us-west1'
-    project: <%= project %>
-    auth_kind: <%= auth_kind %>
-    service_account_file: <%= service_account_file %>
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
 verifier: !ruby/object:Provider::Ansible::Verifier
   command: |
     gcloud compute addresses describe
