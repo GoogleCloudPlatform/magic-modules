@@ -21,9 +21,9 @@ task: !ruby/object:Provider::Ansible::Task
     target:
       - 10.1.2.3
       - 40.5.6.7
-    project: <%= project %>
-    auth_kind: <%= auth_kind %>
-    service_account_file: <%= service_account_file %>
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_dns_managed_zone
@@ -32,6 +32,6 @@ dependencies:
         name: 'testzone-4-com'
         dns_name: 'testzone-4.com.'
         description: 'test zone'
-        project: <%= project %>
-        auth_kind: <%= auth_kind %>
-        service_account_file: <%= service_account_file %>
+        project: <%= ctx[:project] %>
+        auth_kind: <%= ctx[:auth_kind] %>
+        service_account_file: <%= ctx[:service_account_file] %>
