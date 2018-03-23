@@ -21,7 +21,11 @@ module Provider
   module Ansible
     # Responsible for building out YAML documentation blocks.
     module Documentation
-      UNSAFE_CHARS = %w[' " : &].freeze
+      # This is not a comprehensive list of unsafe characters.
+      # Ansible's YAML linter is more forgiving than Ruby's.
+      # A more restricted list of unsafe characters allows for more
+      # human readable YAML.
+      UNSAFE_CHARS = %w[:].freeze
       # Takes a long string and divides each string into multiple paragraphs,
       # where each paragraph is a properly indented multi-line bullet point.
       #
@@ -51,19 +55,18 @@ module Provider
       #     because of the :
       #     character
       def bullet_line(paragraph, spaces, multiline = true, add_period = true)
-        # + 2 for "- "
+        # + 2 for "- " and a potential period at the end of the sentence.
         # Remove arbitrary newlines created by formatting in YAML files
-        indented = wrap_field(paragraph.tr("\n", ' '), spaces + 2)
-        indented = indented.split("\n")
+        indented = indent(wrap_field(paragraph.tr("\n", ' '), spaces + 3), 2)
 
         if multiline && UNSAFE_CHARS.any? { |c| paragraph.include?(c) }
-          indented = ['- |'] + indented
+          indented = "- |\n" + indented
         else
-          indented[0] = indented[0].sub(/^../, '- ')
+          indented[0] = '-'
         end
 
         if add_period
-          indented[-1] += '.' unless indented.last.end_with?('.')
+          indented += '.' unless indented.end_with?('.')
         end
 
         indented
@@ -159,7 +162,8 @@ module Provider
           indent(
             [
               'description:',
-              indent(bullet_lines(prop.description, spaces + 4), 4)
+              # + 8 to compensate for name + description.
+              indent(bullet_lines(prop.description, spaces + 8), 4)
             ], 4
           )
         ]
