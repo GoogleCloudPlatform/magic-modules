@@ -25,12 +25,17 @@ pushd magic-modules-branched
 bundle install
 bundle exec compiler -p products/compute -e terraform -o "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google/"
 
+TERRAFORM_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag terraform < .git/body)"
+if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
+  TERRAFORM_COMMIT_MSG="Magic Modules changes."
+fi
+
 pushd "build/terraform"
-git add -A
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
-git commit -m "magic modules change happened here" || true  # don't crash if no changes
-# TODO(@ndmckinley): A better message that comes from the body of the magic-modules PR.
+
+git add -A
+git commit -m "$TERRAFORM_COMMIT_MSG" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 popd
 
