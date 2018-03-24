@@ -1,9 +1,11 @@
-from golang:1.9
+from golang:1.9 as resource
 
 RUN ssh-keyscan github.com >> /known_hosts
 RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
 RUN apt-get update
 RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev
+RUN apt-get install -y python python-pip
+RUN pip install beautifulsoup4 mistune
 
 ENV RUBY_VERSION 2.5.0
 ENV RUBYGEMS_VERSION 2.7.4
@@ -26,4 +28,3 @@ ENV BUNDLE_PATH="$GEM_HOME" \
 ENV PATH $BUNDLE_BIN:$PATH
 RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 	&& chmod 777 "$GEM_HOME" "$BUNDLE_BIN"
-
