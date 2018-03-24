@@ -25,9 +25,9 @@ pushd magic-modules-branched
 bundle install
 bundle exec compiler -p products/compute -e terraform -o "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google/"
 
-TERRAFORM_COMMIT_MSG="$(gawk -v fetch=terraform,all -f ci/magic-modules/extract-from-pr-description.awk < .git/body)"
+TERRAFORM_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag=terraform < .git/body)"
 if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
-  TERRAFORM_COMMIT_MSG="Magic Modules changes"
+  TERRAFORM_COMMIT_MSG="Magic Modules changes."
 fi
 
 pushd "build/terraform"
