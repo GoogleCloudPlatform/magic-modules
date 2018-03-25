@@ -50,7 +50,6 @@ objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
     skip: true
   BackendService:
-    skip: true
     aliases:
       timeoutSec:
         - timeout_seconds
