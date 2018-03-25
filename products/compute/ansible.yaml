@@ -56,8 +56,6 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   GlobalForwardingRule:
     skip: true
-  Image:
-    skip: true
   Instance:
     skip: true
   InstanceGroupManager:
