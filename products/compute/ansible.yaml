@@ -52,8 +52,6 @@ objects: !ruby/object:Api::Resource::HashArray
         - timeout_seconds
   Firewall:
     skip: true
-  ForwardingRule:
-    skip: true
   GlobalForwardingRule:
     skip: true
   Instance:
