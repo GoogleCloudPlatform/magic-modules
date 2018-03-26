@@ -61,6 +61,11 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
+  InstanceTemplate:
+    provider_helpers:
+      include:
+        - 'products/compute/helpers/provider_instance.py'
+        - 'products/compute/helpers/instance_metadata.py'
   HttpHealthCheck:
     aliases:
       timeoutSec:
@@ -86,8 +91,6 @@ objects: !ruby/object:Api::Resource::HashArray
         - 'products/compute/helpers/provider_instance.py'
         - 'products/compute/helpers/instance_metadata.py'
   InstanceGroupManager:
-    skip: true
-  InstanceTemplate:
     skip: true
   Snapshot:
     skip: true
