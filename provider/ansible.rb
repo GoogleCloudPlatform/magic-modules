@@ -56,7 +56,8 @@ module Provider
         'Api::Type::NestedObject' => 'dict',
         'Api::Type::Array' => 'list',
         'Api::Type::Boolean' => 'bool',
-        'Api::Type::Integer' => 'int'
+        'Api::Type::Integer' => 'int',
+        'Api::Type::NameValues' => 'dict'
       }.freeze
 
       include Provider::Ansible::Documentation

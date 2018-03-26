@@ -78,6 +78,35 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
+  Firewall:
+    skip: true
+  Instance:
+    provider_helpers:
+      include:
+        - 'products/compute/helpers/provider_instance.py'
+        - 'products/compute/helpers/instance_metadata.py'
+  InstanceGroupManager:
+    skip: true
+  InstanceTemplate:
+    skip: true
+  Snapshot:
+    skip: true
+  TargetHttpsProxy:
+    skip: true
+  TargetSslProxy:
+    skip: true
+  # Ansible tasks must alter infrastructure.
+  # This means that virtual objects are a poor fit.
+  DiskType:
+    skip: true
+  License:
+    skip: true
+  MachineType:
+    skip: true
+  Region:
+    skip: true
+  Zone:
+    skip: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
