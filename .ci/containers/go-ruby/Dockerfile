@@ -1,12 +1,14 @@
 from golang:1.9 as resource
 
+RUN go get golang.org/x/tools/cmd/goimports
+
+# Set up Github SSH cloning.
 RUN ssh-keyscan github.com >> /known_hosts
 RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
+
+# Install Ruby from source.
 RUN apt-get update
 RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev
-RUN apt-get install -y python python-pip
-RUN pip install beautifulsoup4 mistune
-
 ENV RUBY_VERSION 2.5.0
 ENV RUBYGEMS_VERSION 2.7.4
 ENV BUNDLER_VERSION 1.16.1
@@ -18,8 +20,6 @@ RUN ruby-build "$RUBY_VERSION" /usr/
 RUN gem update --system "$RUBYGEMS_VERSION"
 RUN gem install bundler --version "$BUNDLER_VERSION" --force
 
-# install things globally, for great justice
-# and don't create ".bundle" in all our apps
 ENV GEM_HOME /usr/local/bundle
 ENV BUNDLE_PATH="$GEM_HOME" \
 	BUNDLE_BIN="$GEM_HOME/bin" \
