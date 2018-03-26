@@ -11,7 +11,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.1
+          tag: v0.1.4
 
 resources:
     - name: magic-modules
@@ -23,10 +23,9 @@ resources:
     - name: magic-modules-new-prs
       type: github-pull-request
       source:
-          repo: ((github-account.username))/magic-modules
+          repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
-          only_mergeable: true
           authorship_restriction: true
 
     - name: terraform-intermediate
@@ -123,16 +122,24 @@ jobs:
             resource: magic-modules-new-prs
             passed: [mm-generate]
             version: every
+          # TODO(ndmckinley): This will unconditionally attempt to create a PR - before
+          # we set it to run automatically, we need to add checks to see if a PR needs
+          # to be generated.
           - task: create-pr
             file: magic-modules/.ci/magic-modules/create-pr.yml
             params:
                 GITHUB_TOKEN: ((github-account.password))
-                TERRAFORM_REPO: ((github-account.username))/terraform-provider-google
+                # This is what tells us which terraform repo to write PRs against - this
+                # is what you change if you want to test this in a non-live environment.
+                TERRAFORM_REPO: terraform-providers/terraform-provider-google
             on_failure:
               put: magic-modules-new-prs
               params:
                   status: failure
                   path: mm-initial-pr
+          # TODO(ndmckinley): This will work to update the PR *if* the original PR was opened
+          # from the magic-modules repository.  That's not always going to be true - figure
+          # out what to do if, for instance, we can't modify the PR.
           - put: magic-modules
             params:
                 branch_file: mm-initial-pr/.git/branch
