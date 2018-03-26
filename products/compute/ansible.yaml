@@ -65,8 +65,6 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   Snapshot:
     skip: true
-  TargetHttpProxy:
-    skip: true
   TargetHttpsProxy:
     skip: true
   TargetSslProxy:
