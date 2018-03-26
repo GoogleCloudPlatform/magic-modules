@@ -18,6 +18,7 @@ except ImportError:
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
 from ansible.module_utils.six import string_types
+from ansible.module_utils._text import to_text
 import os
 
 
@@ -225,3 +226,77 @@ class GcpModule(AnsibleModule):
         new = a.copy()
         new.update(b)
         return new
+
+
+# This class takes in two dictionaries `a` and `b`.
+# These are dictionaries of arbitrary depth, but made up of standard Python
+# types only.
+# This differ will compare all values in `a` to those in `b`.
+# Note: Only keys in `a` will be compared. Extra keys in `b` will be ignored.
+# Note: On all lists, order does matter.
+class GcpRequest(object):
+    def __init__(self, request):
+        self.request = request
+
+    def __eq__(self, other):
+        return not self.difference(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    # Returns the difference between `self.request` and `b`
+    def difference(self, b):
+        return self._compare_dicts(self.request, b.request)
+
+    def _compare_dicts(self, dict1, dict2):
+        difference = {}
+        for key in dict1:
+            difference[key] = self._compare_value(dict1.get(key), dict2.get(key))
+
+        # Remove all empty values from difference.
+        difference2 = {}
+        for key in difference:
+            if difference[key]:
+                difference2[key] = difference[key]
+
+        return difference2
+
+    # Takes in two lists and compares them.
+    def _compare_lists(self, list1, list2):
+        difference = []
+        for index in range(len(list1)):
+            value1 = list1[index]
+            if index < len(list2):
+                value2 = list2[index]
+                difference.append(self._compare_value(value1, value2))
+            else:
+                difference.append(value1)
+
+        difference2 = []
+        for value in difference:
+            if value:
+                difference2.append(value)
+
+        return difference2
+
+    def _compare_value(self, value1, value2):
+        diff = None
+        # Looking for Nones
+        if not value2:
+            return value1
+
+        # Can assume non-None types at this point.
+        try:
+            if isinstance(value1, list):
+                diff = self._compare_lists(value1, value2)
+            elif isinstance(value2, dict):
+                diff = self._compare_dicts(value1, value2)
+            # Always use to_text values to avoid unicode issues.
+            elif to_text(value1) != to_text(value2):
+                diff = value1
+        # to_text may throw UnicodeErrors.
+        # These errors shouldn't crash Ansible and should be hidden.
+        except UnicodeError:
+            pass
+
+        return diff

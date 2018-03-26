@@ -68,7 +68,7 @@ RETURN = '''
 # Imports
 ################################################################################
 
-from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule
+from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest
 import json
 <%
   config['imports'] ||= []
@@ -366,7 +366,7 @@ def is_different(module, response):
         if k in response:
             request_vals[k] = v
 
-    return response_vals != request_vals
+    return GcpRequest(request_vals) != GcpRequest(response_vals)
 
 
 # Remove unnecessary properties from the response.
