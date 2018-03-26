@@ -73,8 +73,6 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   TargetTcpProxy:
     skip: true
-  UrlMap:
-    skip: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   DiskType:
