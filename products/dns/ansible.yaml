@@ -25,6 +25,8 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
+  ManagedZone:
+    editable: false
   Project:
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     skip: true

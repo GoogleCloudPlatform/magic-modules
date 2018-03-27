@@ -31,6 +31,7 @@ objects: !ruby/object:Api::Resource::HashArray
       include:
         - 'products/pubsub/helpers/provider_topic.py'
   Subscription:
+    editable: false
     encoder: encode_request
     provider_helpers:
       include:
