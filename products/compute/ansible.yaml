@@ -26,6 +26,10 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 # This is where custom code would be defined eventually.
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
+  Disk:
+    editable: false
+  InstanceGroup:
+    editable: false
   HealthCheck:
     aliases:
       timeoutSec:

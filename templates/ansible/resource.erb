@@ -198,12 +198,13 @@ def main():
 
 
 <% custom_update = get_code_multiline config, 'update' -%>
+<% editable = config['editable'] -%>
 <%=
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
                          ('fetch' if save_api_results?(config, object))]))
 -%>
 <% if custom_update.nil? -%>
-<%   if !object.input.nil? && object.input == false -%>
+<%   if !false?(editable) -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   method = method_call(
@@ -216,9 +217,9 @@ def main():
   )
 -%>
     return <%= method %>
-<%   else # !object.input -%>
+<%   else # !false?(editable) -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
-<%   end # !object.input-%>
+<%   end # !false?(editable) -%>
 <% else # custom_update.nil? -%>
 <%= lines(indent(custom_update, 4)) -%>
 <% end # custom_update.nil? -%>
