@@ -32,7 +32,7 @@ class PrDescriptionTree(object):
         new_depth = int(current_element.name[1:])
         while stack and new_depth <= stack[-1].depth:
           stack.pop()
-        current_node = self.PrDescriptionNode(title=current_element.contents[0],
+        current_node = self.PrDescriptionNode(title=current_element.contents[0].strip('[]{}<>() '),
             body='', parent=stack[-1] if stack else None, depth=new_depth)
         self._nodes[current_node.title] = current_node
       elif current_node:
@@ -53,4 +53,8 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="Extract a description from the full PR description.")
   parser.add_argument("--tag", type=str, required=True)
   args = parser.parse_args()
-  print PrDescriptionTree(sys.stdin.read())[args.tag]
+  tree = PrDescriptionTree(sys.stdin.read())
+  try:
+    print tree[args.tag]
+  except KeyError:
+    print tree['all']
