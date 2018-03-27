@@ -114,7 +114,7 @@ module Provider
 
       def validate
         check_optional_property :name, ::String
-        check_optional_property :enabled, [true, false]
+        check_optional_property :enabled, [TrueClass, FalseClass]
         check_optional_property :test, ::String
 
         @enabled ||= true
