@@ -150,12 +150,14 @@ module Provider
       include Compile::Core
       attr_reader :name
       attr_reader :code
+      attr_reader :scopes
       attr_reader :register
 
       def validate
         super
         check_property :name, String
         check_property :code, String
+        check_optional_property_list :scopes, ::String
       end
 
       def build_test(state, object, noop = false)
@@ -182,7 +184,7 @@ module Provider
         again = ''
         again = ' that already exists' if noop && state == 'present'
         again = ' that does not exist' if noop && state == 'absent'
-        scopes = object.__product.scopes.map { |x| "- #{x}" }
+        scopes = (@scopes || object.__product.scopes).map { |x| "- #{x}" }
         [
           "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
           indent([
