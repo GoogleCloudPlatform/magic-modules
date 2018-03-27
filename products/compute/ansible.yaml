@@ -94,8 +94,6 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   Snapshot:
     skip: true
-  TargetHttpsProxy:
-    skip: true
   TargetSslProxy:
     skip: true
   # Ansible tasks must alter infrastructure.
