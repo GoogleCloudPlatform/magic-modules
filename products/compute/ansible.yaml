@@ -47,8 +47,6 @@ objects: !ruby/object:Api::Resource::HashArray
       include:
         - 'products/compute/helpers/provider_target_pool.py'
   # Not implemented yet.
-  BackendBucket:
-    skip: true
   BackendService:
     aliases:
       timeoutSec:
