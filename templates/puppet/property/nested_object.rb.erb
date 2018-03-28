@@ -43,10 +43,12 @@
 
 <%= lines(autogen_notice :ruby) -%>
 
-<% if emit_array -%>
-require 'google/<%= prop_ns_dir -%>/property/array'
-<% end -%>
-require 'puppet/property'
+<%
+  requires = []
+  requires << "google/#{prop_ns_dir}/property/array" if emit_array
+  requires << "google/#{prop_ns_dir}/property/base"
+-%>
+<%= lines(emit_requires(requires)) -%>
 
 module Google
   module <%= product_ns %>
@@ -197,7 +199,7 @@ module Google
     ]
   ], 6))
 -%>
-      class <%= class_name %> < Puppet::Property
+      class <%= class_name %> < Google::<%= product_ns %>::Property::Base
         # Used for parsing Puppet catalog
         def unsafe_munge(value)
           self.class.unsafe_munge(value)
