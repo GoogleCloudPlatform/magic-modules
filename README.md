@@ -63,6 +63,7 @@ intricacies of the underlying GCP product API.
 - Puppet
 - Chef
 - Terraform
+- Ansible
 
 ### Supported Products
 
