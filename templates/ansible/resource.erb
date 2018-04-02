@@ -261,13 +261,7 @@ def resource_to_request(module):
 <% if object.kind? -%>
         u'kind': <%= quote_string(object.kind) -%>,
 <% end # if object.kind? -%>
-<% properties_in_request.each do |prop| -%>
-<%=
-  lines(indent(
-    ["#{unicode_string(prop.field_name)}:",
-     "module.params.get(#{quote_string(prop.out_name)}),"].join(' '), 8))
--%>
-<% end -%>
+<%= lines(indent(request_properties(properties_in_request), 4)) -%>
     }
 <%
   encoder_name = if object.encoder?
@@ -375,14 +369,7 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return {
-<%
-  f2h = []
-  object.properties.map do |prop|
-    name = quote_string(Google::StringUtils.underscore(prop.name))
-    f2h << "#{name}: response.get(#{name})"
-  end
--%>
-<%= lines(indent_list(f2h, 8)) -%>
+<%= lines(response_properties(object.properties)) -%>
     }
 
 <%= lines_before(lines(selflink_functions(object), 1)) -%>
