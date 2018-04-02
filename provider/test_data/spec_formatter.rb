@@ -25,14 +25,7 @@ module Provider
       # Creates a YAML representation of the test data
       # All keys will be sorted according to sort_by_manifest_key
       def to_yaml(opts = {})
-        YAML.quick_emit(@block, opts) do |out|
-          out.map(nil, to_yaml_style) do |map|
-            @block.keys.sort_by { |k| sort_by_manifest_key(k) }
-                  .each do |k|
-              map.add(k, @block[k])
-            end
-          end
-        end
+        Hash[@block.sort_by { |k, _v| sort_by_manifest_key(k) }].to_yaml
       end
 
       def sort_by_manifest_key(key)
