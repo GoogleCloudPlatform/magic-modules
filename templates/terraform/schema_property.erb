@@ -69,6 +69,12 @@
         <% end -%>
       },
   <% end -%>
+<% elsif property.is_a?(Api::Type::NameValues) -%>
+  Elem: &schema.Schema{Type: schema.TypeString},
+  <% if not (property.key_type == 'Api::Type::String' and property.value_type == 'Api::Type::String') -%>
+    // TODO(magic-modules): Handle this map specially - Terraform maps are String->String only,
+    // but this map is marked as being <%= property.key_type -%>-><%= property.value_type -%>.
+  <% end -%>
 <% end -%>
 <% if config['sensitive']&.include?(property.name) -%>
     Sensitive: true,

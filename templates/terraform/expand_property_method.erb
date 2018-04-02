@@ -12,7 +12,18 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 <% end -%>
-<% if tf_types.include?(property.class) -%>
+<% if property.is_a?(Api::Type::NameValues) -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) map[string]string {
+  if v == nil {
+    return map[string]string{}
+  }
+  m := make(map[string]string)
+  for k, val := range v.(map[string]interface{}) {
+    m[k] = val.(string)
+  }
+  return m
+}
+<% elsif tf_types.include?(property.class) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
 <%
   if !effective_nested_properties(config, property).empty?
