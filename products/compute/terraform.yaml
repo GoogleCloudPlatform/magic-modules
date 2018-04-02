@@ -28,6 +28,9 @@ objects: !ruby/object:Api::Resource::HashArray
     skip: true
   Disk:
     # TODO: Add support for missing features needed by this resource
+    id: "{{name}}"
+    ignore:
+      - id
     skip: true
   DiskType:
     # TODO: Add support for missing features needed by this resource
