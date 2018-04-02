@@ -15,7 +15,6 @@ GEM
     parser (2.4.0.2)
       ast (~> 2.3)
     powerpack (0.1.1)
-    psych (2.1.0)
     rainbow (3.0.0)
     rake (12.3.0)
     rspec (3.7.0)
@@ -52,7 +51,6 @@ PLATFORMS
 DEPENDENCIES
   binding_of_caller
   mocha
-  psych (= 2.1.0)
   rake
   rspec
   rubocop
