@@ -1,0 +1,20 @@
+<% properties_with_classes(object.all_user_properties).each do |prop| -%>
+class <%= prop.property_class[-1] -%>(object):
+    def __init__(self, request):
+        if request:
+            self.request = request
+        else:
+            self.request = {}
+
+    def to_request(self):
+        return remove_nones_from_dict({
+<%= lines(request_properties_in_classes(prop.properties, 12)) -%>
+        })
+
+    def from_response(self):
+        return remove_nones_from_dict({
+<%= lines(response_properties_in_classes(prop.properties, 12)) -%>
+        })
+
+
+<% end -%>

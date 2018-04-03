@@ -68,7 +68,11 @@ RETURN = '''
 # Imports
 ################################################################################
 
-from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest
+<%
+  import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
+  import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
+-%>
+<%= lines(import) -%>
 import json
 <%
   config['imports'] ||= []
@@ -375,5 +379,6 @@ def response_to_hash(module, response):
 <%= lines_before(lines(selflink_functions(object), 1)) -%>
 <%= compile('templates/ansible/async.erb') -%>
 <%= compile('templates/ansible/provider_helpers.erb') -%>
+<%= compile('templates/ansible/properties.erb') -%>
 if __name__ == '__main__':
     main()

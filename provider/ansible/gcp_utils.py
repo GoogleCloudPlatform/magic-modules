@@ -23,6 +23,9 @@ import os
 
 
 def navigate_hash(source, path, default=None):
+    if not source:
+        return None
+
     key = path[0]
     path = path[1:]
     if key not in source:
@@ -32,6 +35,14 @@ def navigate_hash(source, path, default=None):
         return navigate_hash(result, path, default)
     else:
         return result
+
+def remove_nones_from_dict(obj):
+  new_obj = {}
+  for key in obj:
+      value = obj[key]
+      if value is not None:
+          new_obj[key] = value
+  return new_obj
 
 
 # Handles all authentation and HTTP sessions for GCP API calls.
