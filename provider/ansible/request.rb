@@ -19,29 +19,78 @@ module Provider
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
       def request_properties(properties, indent = 4)
-        indent_list(properties.map { |prop| request_property(prop) },
-                    indent)
+        indent_list(
+          properties.map { |prop| request_property(prop, 'module.params') },
+          indent
+        )
       end
 
       def response_properties(properties, indent = 8)
-        indent_list(properties.map { |prop| response_property(prop) },
-                    indent)
+        indent_list(
+          properties.map { |prop| response_property(prop, 'response') },
+          indent
+        )
+      end
+
+      def request_properties_in_classes(properties, indent = 4)
+        indent_list(
+          properties.map { |prop| request_property(prop, 'self.request') },
+          indent
+        )
+      end
+
+      def response_properties_in_classes(properties, indent = 8)
+        indent_list(
+          properties.map { |prop| response_property(prop, 'self.request') },
+          indent
+        )
+      end
+
+      # This returns a list of properties that require classes being built out.
+      def properties_with_classes(properties)
+        properties.map do |p|
+          if p.is_a? Api::Type::NestedObject
+            [p] + properties_with_classes(p.properties)
+          end
+        end.compact.flatten
       end
 
       private
 
-      def request_property(prop)
+      def request_property(prop, hash_name)
         [
-         "#{unicode_string(prop.field_name)}:",
-         "module.params.get(#{quote_string(prop.out_name)})"
+          "#{unicode_string(prop.field_name)}:",
+          request_output(prop, hash_name).to_s
         ].join(' ')
       end
 
-      def response_property(prop)
+      def response_property(prop, hash_name)
         [
-         "#{unicode_string(prop.field_name)}:",
-         "response.get(#{unicode_string(prop.name)})"
+          "#{unicode_string(prop.field_name)}:",
+          response_output(prop, hash_name).to_s
         ].join(' ')
+      end
+
+      def response_output(prop, hash_name)
+        if prop.is_a? Api::Type::NestedObject
+          return [
+            "#{prop.property_class[-1]}(",
+            "#{hash_name}.get(#{unicode_string(prop.name)}, {})",
+            ').from_response()'
+          ].join
+        end
+        "#{hash_name}.get(#{unicode_string(prop.name)})"
+      end
+
+      def request_output(prop, hash_name)
+        if prop.is_a? Api::Type::NestedObject
+          return [
+            "#{prop.property_class[-1]}(",
+            "#{hash_name}.get(#{quote_string(prop.out_name)}, {})",
+            ').to_request()'
+          ].join
+        end
+        "#{hash_name}.get(#{quote_string(prop.out_name)})"
       end
     end
   end
