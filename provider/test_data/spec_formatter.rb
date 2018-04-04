@@ -24,7 +24,7 @@ module Provider
 
       # Creates a YAML representation of the test data
       # All keys will be sorted according to sort_by_manifest_key
-      def to_yaml(opts = {})
+      def to_yaml(_opts = {})
         Hash[@block.sort_by { |k, _v| sort_by_manifest_key(k) }].to_yaml
       end
 
