@@ -178,6 +178,7 @@ module Provider
       private
 
       # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/CyclomaticComplexity
       def build_task(state, hash, object, noop = false)
         verb = verbs[state.to_sym]
 
@@ -200,6 +201,7 @@ module Provider
         ]
       end
       # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures[0]
