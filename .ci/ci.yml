@@ -70,7 +70,7 @@ jobs:
               - get: magic-modules
                 resource: magic-modules-new-prs
                 version: every
-                # trigger: true
+                trigger: true
                 params:
                     submodules: [build/terraform]
             # consumes: magic-modules (detached HEAD)
@@ -87,6 +87,7 @@ jobs:
                 repository: terraform-generated
                 branch_file: magic-modules-branched/branchname
                 only_if_diff: true
+                force: true
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
           - task: point-to-submodules
@@ -108,7 +109,7 @@ jobs:
           - aggregate:
               - get: magic-modules
                 version: every
-                # trigger: true
+                trigger: true
                 params:
                     submodules: [build/terraform]
                 passed: [mm-generate]
