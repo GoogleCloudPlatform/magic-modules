@@ -21,6 +21,7 @@
   properties = effective_properties(config, object.all_user_properties)
   documentation = config["documentation"] || {}
 -%>
+
 ---
 layout: "google"
 page_title: "Google: google_<%= api_name_lower -%>_<%= resource_name -%>"
@@ -71,7 +72,7 @@ The following arguments are supported:
 <%= lines(build_property_documentation(config, prop)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
-* `project` (Optional) The project in which the resource belongs.
+* `project` (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 <% end -%>
 
