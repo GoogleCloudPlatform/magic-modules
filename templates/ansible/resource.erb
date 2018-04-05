@@ -131,6 +131,7 @@ def main():
                                   ])
 -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
+                changed = True
         else:
 <%
   method = method_call('delete', ['module', 'self_link(module)',
@@ -159,8 +160,6 @@ def main():
 
     if fetch:
         fetch.update({'changed': changed})
-    else:
-        fetch = {'changed': changed}
 <% end # object.virtual -%>
 
     module.exit_json(**fetch)
@@ -169,6 +168,9 @@ def main():
 <% prod_name = object.__product.prefix[1..-1] -%>
 <% unless object.virtual -%>
 <% custom_create = get_code_multiline config, 'create' -%>
+<%# TODO: kind param not always needed.
+  # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
+-%>
 <%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
 <% if custom_create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
@@ -212,7 +214,7 @@ def main():
     [
      'module',
      method_call("auth.put", ['link', 'resource_to_request(module)']),
-     ('kind' if object.kind?)
+     ('kind' if !object.async && object.kind?)
    ]
   )
 -%>
