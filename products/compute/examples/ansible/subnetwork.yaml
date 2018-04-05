@@ -16,8 +16,8 @@ dependencies:
     name: gcp_compute_network
     register: network
     code: |
-      name: ansible-mynetwork2
-      auto_create_subnetworks: false
+      name: ansible-mynetwork3
+      auto_create_subnetworks: true
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
@@ -27,7 +27,7 @@ task: !ruby/object:Provider::Ansible::Task
     name: 'ansiblenet'
     region: 'us-west1'
     network: "{{ network }}"
-    ip_cidr_range: '10.138.0.0/20'
+    ip_cidr_range: '172.16.0.0/16'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
