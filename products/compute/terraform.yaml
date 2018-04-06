@@ -12,6 +12,28 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+overrides:
+  - !ruby/object:Provider::Terraform::Override
+    name: 'HttpHealthCheck'
+    description: |
+      {{description}}
+
+      ~> **Note:** google_compute_http_health_check is a legacy health check.
+      The newer [google_compute_health_check](/docs/providers/google/r/compute_health_check.html)
+      should be preferred for all uses except
+      [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
+      which still require the legacy version.
+  - !ruby/object:Provider::Terraform::Override
+    name: 'HttpsHealthCheck'
+    description: |
+      {{description}}
+
+      ~> **Note:** google_compute_https_health_check is a legacy health check.
+      The newer [google_compute_health_check](/docs/providers/google/r/compute_health_check.html)
+      should be preferred for all uses except
+      [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
+      which still require the legacy version.
+# TODO: Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
   Address:
     # TODO: Add support for missing features needed by this resource

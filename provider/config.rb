@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'provider/abstract_override'
 require 'provider/compiler'
 require 'provider/objects'
 require 'compile/core'
@@ -22,6 +23,7 @@ module Provider
     include Compile::Core
     extend Compile::Core
 
+    attr_reader :overrides
     attr_reader :objects
     attr_reader :examples
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
@@ -202,6 +204,7 @@ module Provider
       check_optional_property_list :style, Provider::Config::StyleException
       check_optional_property_list :changelog, Provider::Config::Changelog
       check_optional_property_list :functions, Provider::Config::Function
+      check_optional_property_list :overrides, Provider::AbstractOverride
     end
 
     # Provides the API object to any type that requires, e.g. for validation
@@ -213,6 +216,15 @@ module Provider
         next if visited.include?(var_value)
         visited << var_value
         var_value.consume_api api if var_value.respond_to?(:consume_api)
+
+        # Also spread_api to Api::Object in an Array.
+        if var_value.is_a?(Array)
+          var_value.each do |v|
+            v.consume_api api if v.respond_to?(:consume_api)
+            spread_api(v, api, visited, indent)
+          end
+        end
+
         spread_api(var_value, api, visited, indent)
       end
     end
