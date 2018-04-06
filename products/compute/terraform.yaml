@@ -23,6 +23,21 @@ objects: !ruby/object:Api::Resource::HashArray
     # TODO: look into moving validation into api.yaml
     validation:
       name: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+    documentation:
+      examples: |
+        ```hcl
+        resource "google_compute_backend_bucket" "image_backend" {
+          name        = "image-backend-bucket"
+          description = "Contains beautiful images"
+          bucket_name = "${google_storage_bucket.image_bucket.name}"
+          enable_cdn  = true
+        }
+
+        resource "google_storage_bucket" "image_bucket" {
+          name     = "image-store-bucket"
+          location = "EU"
+        }
+        ```
   BackendService:
     # TODO: Add support for missing features needed by this resource
     skip: true
@@ -67,6 +82,17 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
+    documentation:
+      examples: |
+        ```hcl
+        resource "google_compute_http_health_check" "default" {
+          name         = "authentication-health-check"
+          request_path = "/health_check"
+
+          timeout_sec        = 1
+          check_interval_sec = 1
+        }
+        ```
   HttpsHealthCheck:
     id: "{{name}}"
     ignore:
@@ -78,6 +104,17 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
+    documentation:
+      examples: |
+        ```hcl
+        resource "google_compute_https_health_check" "default" {
+          name         = "test"
+          request_path = "/health_check"
+
+          timeout_sec        = 1
+          check_interval_sec = 1
+        }
+        ```
   HealthCheck:
     # TODO: Add support for missing features needed by this resource
     skip: true

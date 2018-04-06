@@ -17,17 +17,20 @@
 --->
 <%
   api_name_lower = product_ns.downcase
+  resource_name = Google::StringUtils.underscore(object.name)
   properties = effective_properties(config, object.all_user_properties)
+  documentation = config["documentation"] || {}
 -%>
+
 ---
 layout: "google"
-page_title: "Google: google_<%= api_name_lower -%>_<%= object.out_name -%>"
-sidebar_current: "docs-google-<%= api_name_lower -%>-<%= object.out_name.gsub("_", "-") -%>"
+page_title: "Google: google_<%= api_name_lower -%>_<%= resource_name -%>"
+sidebar_current: "docs-google-<%= api_name_lower -%>-<%= resource_name.gsub("_", "-") -%>"
 description: |-
   <%= object.description.lines.first -%>
 ---
 
-# google\_<%= api_name_lower -%>\_<%= object.out_name.gsub("_", "\\_") %>
+# google\_<%= api_name_lower -%>\_<%= resource_name.gsub("_", "\\_") %>
 
 <%= lines(object.description) -%>
 
@@ -45,13 +48,11 @@ To get more information about <%= object.name -%>, see:
 <%   end # object...guides.empty? -%>
 <% end # object...api.nil? -%>
 
+<% if documentation&.key?("examples") -%>
 ## Example Usage
 
-```hcl
-resource "google_<%= api_name_lower -%>_<%= object.out_name -%>" "default" {
-  TODO: Add fields
-}
-```
+<%= documentation["examples"]  -%>
+<% end -%>
 
 ## Argument Reference
 
@@ -71,7 +72,7 @@ The following arguments are supported:
 <%= lines(build_property_documentation(config, prop)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
-* `project` (Optional) The project in which the resource belongs.
+* `project` (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 <% end -%>
 
@@ -111,6 +112,6 @@ This resource provides the following
 
 ```
 <% import_id_formats(object).each do |id_format| -%>
-$ terraform import google_<%= api_name_lower -%>_<%= object.out_name -%>.default <%= id_format %>
+$ terraform import google_<%= api_name_lower -%>_<%= resource_name -%>.default <%= id_format %>
 <% end -%>
 ```
