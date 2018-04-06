@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import mistune
-import sys
-import bs4
-import re
 import argparse
+import os
+import re
+import sys
+
+import bs4
+import mistune
 
 class PrDescriptionTree(object):
   class PrDescriptionNode(object):
@@ -57,4 +59,7 @@ if __name__ == '__main__':
   try:
     print tree[args.tag]
   except KeyError:
-    print tree['all']
+    try:
+      print tree['all']
+    except KeyError:
+        sys.exit(1)
