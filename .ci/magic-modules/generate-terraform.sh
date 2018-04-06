@@ -22,6 +22,7 @@ go get
 popd
 
 pushd magic-modules-branched
+LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 bundle install
 bundle exec compiler -p products/compute -e terraform -o "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google/"
 
@@ -34,11 +35,13 @@ if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
 fi
 
 pushd "build/terraform"
+# These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
 git add -A
-git commit -m "$TERRAFORM_COMMIT_MSG" || true  # don't crash if no changes
+# Set the "author" to the commit's real author.
+git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 popd
 
