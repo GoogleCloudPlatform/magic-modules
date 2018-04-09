@@ -44,6 +44,13 @@ def remove_nones_from_dict(obj):
           new_obj[key] = value
   return new_obj
 
+# Handles the replacement of dicts with values -> the needed value for GCP API
+def replace_resource_dict(item, value):
+    if not item:
+        return item
+    return item.get(value)
+
+
 
 # Handles all authentation and HTTP sessions for GCP API calls.
 class GcpSession(object):
@@ -169,6 +176,7 @@ class GcpModule(AnsibleModule):
 # alter values at `path`. This is almost exclusively used to convert
 # user-inputted names to self-links
 -%>
+
     # Some params are references to other pieces of GCP infrastructure.
     # These params are passed in as dictionaries.
     # The dictionaries should be overriden with the proper value.
