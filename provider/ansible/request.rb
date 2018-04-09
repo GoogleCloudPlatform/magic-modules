@@ -116,6 +116,14 @@ module Provider
             ".get(#{unicode_string(prop_name)}, {}), ",
             "#{quote_string(prop.imports)})"
           ].join
+        elsif prop.is_a?(Api::Type::Array) && \
+          prop.item_type.is_a?(Api::Type::ResourceRef) && \
+          !prop.item_type.resource_ref.virtual
+          [
+            "replace_resource_dict(#{hash_name}",
+            ".get(#{unicode_string(prop.name)}, []), ",
+            "#{quote_string(prop.item_type.imports)})"
+          ].join
         else
           "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
