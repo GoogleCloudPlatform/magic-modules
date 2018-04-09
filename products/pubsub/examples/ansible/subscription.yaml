@@ -27,7 +27,7 @@ dependencies:
     name: gcp_pubsub_topic
     register: topic
     code: |
-      name: 'test-topic1'
+      name: <%= dependency_name('topic', 'subscription') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>

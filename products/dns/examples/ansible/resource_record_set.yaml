@@ -29,7 +29,7 @@ dependencies:
     name: gcp_dns_managed_zone
     register: managed_zone
     code: |
-        name: 'testzone-4-com'
+        name: <%= dependency_name('managedZone', 'rrs') %>
         dns_name: 'testzone-4.com.'
         description: 'test zone'
         project: <%= ctx[:project] %>

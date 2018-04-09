@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_disk
     code: |
-      name: 'test-disk1'
+      name: <%= dependency_name('disk', 'image') %>
       zone: us-central1-a
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>

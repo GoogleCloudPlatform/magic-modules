@@ -15,7 +15,7 @@ dependencies:
  - !ruby/object:Provider::Ansible::Task
    name: gcp_compute_address
    code: |
-     name: 'test-address1'
+     name: <%= dependency_name('address', 'forwardingRule') %>
      region: 'us-west1'
      project: <%= ctx[:project] %>
      auth_kind: <%= ctx[:auth_kind] %>
@@ -24,7 +24,7 @@ dependencies:
  - !ruby/object:Provider::Ansible::Task
    name: gcp_compute_target_pool
    code: |
-     name: 'test-targetpool1'
+     name: <%= dependency_name('targetPool', 'forwardingRule') %>
      region: 'us-west1'
      project: <%= ctx[:project] %>
      auth_kind: <%= ctx[:auth_kind] %>

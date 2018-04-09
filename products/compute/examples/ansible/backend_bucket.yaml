@@ -18,7 +18,7 @@ dependencies:
     scopes:
       - https://www.googleapis.com/auth/devstorage.full_control
     code: |
-      name: 'ansible-storage-module'
+      name: <%= dependency_name('bucket', 'backendBucket') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
