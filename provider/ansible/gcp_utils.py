@@ -46,9 +46,15 @@ def remove_nones_from_dict(obj):
 
 # Handles the replacement of dicts with values -> the needed value for GCP API
 def replace_resource_dict(item, value):
-    if not item:
-        return item
-    return item.get(value)
+    if isinstance(item, list):
+        items = []
+        for i in items:
+            items.append(replace_resource_dict(i, value))
+        return items
+    else:
+        if not item:
+            return item
+        return item.get(value)
 
 
 
