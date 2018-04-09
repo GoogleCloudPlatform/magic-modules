@@ -102,7 +102,6 @@ def main():
         )
     )
 
-<%= lines(indent(resourceref_handlers(object), 4), 1) -%>
 <%= lines(indent(selflink_handlers(object), 4), 1) -%>
     state = module.params['state']
 <% if object.kind? -%>
