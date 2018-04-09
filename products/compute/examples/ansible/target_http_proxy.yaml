@@ -16,7 +16,7 @@ dependencies:
     name: gcp_compute_instance_group
     register: instancegroup
     code: |
-      name: 'test-instancegroup-1'
+      name: <%= dependency_name('instanceGroup', 'targetHttpProxy') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -25,7 +25,7 @@ dependencies:
     name: gcp_compute_http_health_check
     register: healthcheck
     code: |
-      name: 'test-healthcheck1'
+      name: <%= dependency_name('httpHealthCheck', 'targetHttpProxy') %>
       healthy_threshold: 10
       port: 8080
       timeout_sec: 2
@@ -37,7 +37,7 @@ dependencies:
     name: gcp_compute_backend_service
     register: backendservice
     code: |
-      name: 'test-backendservice1'
+      name: <%= dependency_name('backendService', 'targetHttpProxy') %>
       backends:
         - group: "{{ instancegroup }}"
       health_checks:
@@ -50,7 +50,7 @@ dependencies:
     name: gcp_compute_url_map
     register: urlmap
     code: |
-      name: <%= ctx[:name] %>
+      name: <%= dependency_name('urlMap', 'targetHttpProxy') %>
       default_service: "{{ backendservice }}"
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>

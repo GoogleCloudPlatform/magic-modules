@@ -16,7 +16,7 @@ dependencies:
     name: gcp_compute_instance_group
     register: instancegroup
     code: |
-      name: 'test-instancegroup-1'
+      name: <%= dependency_name('instanceGroup', 'urlMap') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -25,7 +25,7 @@ dependencies:
     name: gcp_compute_http_health_check
     register: healthcheck
     code: |
-      name: 'test-healthcheck1'
+      name: <%= dependency_name('httpHealthCheck', 'urlMap') %>
       healthy_threshold: 10
       port: 8080
       timeout_sec: 2
@@ -37,7 +37,7 @@ dependencies:
     name: gcp_compute_backend_service
     register: backendservice
     code: |
-      name: 'test-backendservice1'
+      name: <%= dependency_name('backendService', 'urlMap') %>
       backends:
         - group: "{{ instancegroup }}"
       health_checks:
