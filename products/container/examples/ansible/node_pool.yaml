@@ -26,7 +26,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_container_cluster
     code: |
-      name: test-cluster1
+      name: <%= dependency_name('cluster', 'nodePool') %>
       initial_node_count: 4
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>

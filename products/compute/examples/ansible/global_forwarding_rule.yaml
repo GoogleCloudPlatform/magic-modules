@@ -16,7 +16,7 @@ dependencies:
     name: gcp_compute_global_address
     register: globaladdress
     code: |
-      name: 'myglobaladdress'
+      name: <%= dependency_name('globalAddress', 'globalForwardingRule') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
@@ -24,7 +24,7 @@ dependencies:
     name: gcp_compute_instance_group
     register: instancegroup
     code: |
-      name: 'test-instancegroup-1'
+      name: <%= dependency_name('instanceGroup', 'globalForwardingRule') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -33,7 +33,7 @@ dependencies:
     name: gcp_compute_http_health_check
     register: healthcheck
     code: |
-      name: 'test-healthcheck1'
+      name: <%= dependency_name('httpHealthCheck', 'globalForwardingRule') %>
       healthy_threshold: 10
       port: 8080
       timeout_sec: 2
@@ -45,7 +45,7 @@ dependencies:
     name: gcp_compute_backend_service
     register: backendservice
     code: |
-      name: 'test-backendservice1'
+      name: <%= dependency_name('backendService', 'globalForwardingRule') %>
       backends:
         - group: "{{ instancegroup }}"
       health_checks:
@@ -58,7 +58,7 @@ dependencies:
     name: gcp_compute_url_map
     register: urlmap
     code: |
-      name: 'testurlmap'
+      name: <%= dependency_name('urlMap', 'globalForwardingRule') %>
       default_service: "{{ backendservice }}"
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -67,7 +67,7 @@ dependencies:
     name: gcp_compute_target_http_proxy
     register: httpproxy
     code: |
-      name: 'targethttpproxy'
+      name: <%= dependency_name('targetHttpProxy', 'globalForwardingRule') %>
       url_map: "{{ urlmap }}"
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>

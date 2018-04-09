@@ -16,7 +16,7 @@ dependencies:
     name: gcp_compute_network
     register: network
     code: |
-      name: ansible-mynetwork3
+      name: <%= dependency_name('network', 'subnetwork') %>
       auto_create_subnetworks: true
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>

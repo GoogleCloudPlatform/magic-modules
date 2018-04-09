@@ -207,6 +207,10 @@ module Provider
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures[0]
         product_name.tr('_', ' ')
       end
+
+      def dependency_name(dependency, resource)
+        quote_string("#{dependency.downcase}-#{resource.downcase}")
+      end
     end
 
     # Class responsible for holding all information relating to Ansible
