@@ -17,7 +17,6 @@ require 'provider/ansible/manifest'
 require 'provider/ansible/example'
 require 'provider/ansible/documentation'
 require 'provider/ansible/module'
-require 'provider/ansible/resourceref'
 require 'provider/ansible/request'
 require 'provider/ansible/selflink'
 
@@ -50,7 +49,6 @@ module Provider
 
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
-      include Provider::Ansible::ResourceRef
       include Provider::Ansible::Request
       include Provider::Ansible::SelfLink
 

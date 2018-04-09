@@ -32,16 +32,18 @@ module Provider
         )
       end
 
-      def request_properties_in_classes(properties, indent = 4)
+      def request_properties_in_classes(properties, indent = 4,
+                                        hash_name = 'self.request')
         indent_list(
-          properties.map { |prop| request_property(prop, 'self.request') },
+          properties.map { |prop| request_property(prop, hash_name) },
           indent
         )
       end
 
-      def response_properties_in_classes(properties, indent = 8)
+      def response_properties_in_classes(properties, indent = 8,
+                                         hash_name = 'self.request')
         indent_list(
-          properties.map { |prop| response_property(prop, 'self.request') },
+          properties.map { |prop| response_property(prop, hash_name) },
           indent
         )
       end
@@ -51,6 +53,9 @@ module Provider
         properties.map do |p|
           if p.is_a? Api::Type::NestedObject
             [p] + properties_with_classes(p.properties)
+          elsif p.is_a?(Api::Type::Array) && \
+            p.item_type.is_a?(Api::Type::NestedObject)
+            [p] + properties_with_classes(p.item_type.properties)
           end
         end.compact.flatten
       end
@@ -78,6 +83,13 @@ module Provider
             "#{hash_name}.get(#{unicode_string(prop.name)}, {})",
             ').from_response()'
           ].join
+        elsif prop.is_a?(Api::Type::Array) && \
+          prop.item_type.is_a?(Api::Type::NestedObject)
+          [
+            "#{prop.property_class[-1]}(",
+            "#{hash_name}.get(#{unicode_string(prop.name)}, [])",
+            ').from_response()'
+          ].join
         else
           "#{hash_name}.get(#{unicode_string(prop.name)})"
         end
@@ -88,6 +100,13 @@ module Provider
           [
             "#{prop.property_class[-1]}(",
             "#{hash_name}.get(#{quote_string(prop.out_name)}, {})",
+            ').to_request()'
+          ].join
+        elsif prop.is_a?(Api::Type::Array) && \
+          prop.item_type.is_a?(Api::Type::NestedObject)
+          [
+            "#{prop.property_class[-1]}(",
+            "#{hash_name}.get(#{quote_string(prop.out_name)}, [])",
             ').to_request()'
           ].join
         elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.virtual
