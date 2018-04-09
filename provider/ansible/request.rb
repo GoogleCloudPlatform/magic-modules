@@ -73,24 +73,33 @@ module Provider
 
       def response_output(prop, hash_name)
         if prop.is_a? Api::Type::NestedObject
-          return [
+          [
             "#{prop.property_class[-1]}(",
             "#{hash_name}.get(#{unicode_string(prop.name)}, {})",
             ').from_response()'
           ].join
+        else
+          "#{hash_name}.get(#{unicode_string(prop.name)})"
         end
-        "#{hash_name}.get(#{unicode_string(prop.name)})"
       end
 
       def request_output(prop, hash_name)
         if prop.is_a? Api::Type::NestedObject
-          return [
+          [
             "#{prop.property_class[-1]}(",
             "#{hash_name}.get(#{quote_string(prop.out_name)}, {})",
             ').to_request()'
           ].join
+        elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.virtual
+          prop_name = Google::StringUtils.underscore(prop.name)
+          [
+            "replace_resource_dict(#{hash_name}",
+            ".get(#{unicode_string(prop_name)}, {}), ",
+            "#{quote_string(prop.imports)})"
+          ].join
+        else
+          "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
-        "#{hash_name}.get(#{quote_string(prop.out_name)})"
       end
     end
   end
