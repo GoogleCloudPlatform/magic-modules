@@ -116,6 +116,13 @@ module Provider
             ".get(#{unicode_string(prop_name)}, {}), ",
             "#{quote_string(prop.imports)})"
           ].join
+        elsif prop.is_a?(Api::Type::ResourceRef) && \
+          prop.resource_ref.virtual && prop.imports == 'selfLink'
+          func_name = Google::StringUtils.underscore("#{prop.name}_selflink")
+          [
+            "#{func_name}(#{hash_name}.get(#{quote_string(prop.out_name)}),",
+            "module.params)"
+          ].join(' ')
         elsif prop.is_a?(Api::Type::Array) && \
           prop.item_type.is_a?(Api::Type::ResourceRef) && \
           !prop.item_type.resource_ref.virtual
