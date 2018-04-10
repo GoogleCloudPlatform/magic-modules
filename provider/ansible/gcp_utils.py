@@ -294,8 +294,6 @@ class GcpRequest(object):
             if index < len(list2):
                 value2 = list2[index]
                 difference.append(self._compare_value(value1, value2))
-            else:
-                difference.append(value1)
 
         difference2 = []
         for value in difference:
@@ -306,9 +304,10 @@ class GcpRequest(object):
 
     def _compare_value(self, value1, value2):
         diff = None
-        # Looking for Nones
+        # If a None is found, a difference does not exist.
+        # Only differing values matter.
         if not value2:
-            return value1
+            return None
 
         # Can assume non-None types at this point.
         try:
