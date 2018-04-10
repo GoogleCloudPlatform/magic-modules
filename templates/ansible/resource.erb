@@ -102,7 +102,6 @@ def main():
         )
     )
 
-<%= lines(indent(selflink_handlers(object), 4), 1) -%>
     state = module.params['state']
 <% if object.kind? -%>
     kind = <%= lines(quote_string(object.kind)) -%>
