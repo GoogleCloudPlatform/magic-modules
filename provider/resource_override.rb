@@ -18,10 +18,6 @@ module Provider
   class ResourceOverride < Api::Object
     attr_reader :description
 
-    def consume_api(api)
-      @__api = api
-    end
-
     def validate
       super
 

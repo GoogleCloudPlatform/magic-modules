@@ -217,15 +217,6 @@ module Provider
         next if visited.include?(var_value)
         visited << var_value
         var_value.consume_api api if var_value.respond_to?(:consume_api)
-
-        # Also spread_api to Api::Object in an Array.
-        if var_value.is_a?(Array)
-          var_value.each do |v|
-            v.consume_api api if v.respond_to?(:consume_api)
-            spread_api(v, api, visited, indent)
-          end
-        end
-
         spread_api(var_value, api, visited, indent)
       end
     end
