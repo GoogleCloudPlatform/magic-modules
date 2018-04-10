@@ -160,9 +160,10 @@ def main():
 -%>
             fetch = <%= method %>
             changed = True
+        else:
+            fetch = {}
 
-    if fetch:
-        fetch.update({'changed': changed})
+    fetch.update({'changed': changed})
 <% end # object.virtual -%>
 
     module.exit_json(**fetch)
@@ -374,10 +375,10 @@ def response_to_hash(module, response):
     return {
 <%= lines(response_properties(object.properties)) -%>
     }
+<%= lines_before(selflink_functions(object), 1) -%>
+<%= lines_before(compile('templates/ansible/async.erb'), 1) -%>
+<%= lines_before(compile('templates/ansible/provider_helpers.erb'), 1) -%>
+<%= lines_before(compile('templates/ansible/properties.erb'), 1) -%>
 
-<%= lines_before(lines(selflink_functions(object), 1)) -%>
-<%= compile('templates/ansible/async.erb') -%>
-<%= compile('templates/ansible/provider_helpers.erb') -%>
-<%= compile('templates/ansible/properties.erb') -%>
 if __name__ == '__main__':
     main()

@@ -49,6 +49,9 @@ class <%= prop.property_class[-1] -%>(object):
 -%>
         })
 <% end # prop.is_a? NestedObject -%>
-
-
+<%=
+  unless prop == properties_with_classes(object.all_user_properties).last
+    "\n" * 2
+  end
+-%>
 <% end -%>

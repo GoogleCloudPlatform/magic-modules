@@ -25,7 +25,7 @@ module Provider
       # Ansible's YAML linter is more forgiving than Ruby's.
       # A more restricted list of unsafe characters allows for more
       # human readable YAML.
-      UNSAFE_CHARS = %w[:].freeze
+      UNSAFE_CHARS = %w[: & #].freeze
       # Takes a long string and divides each string into multiple paragraphs,
       # where each paragraph is a properly indented multi-line bullet point.
       #
@@ -76,7 +76,8 @@ module Provider
       # This includes the YAML for the property as well as any nested props
       def doc_property_yaml(prop, config, spaces)
         block = minimal_doc_block(prop, config, spaces)
-        if prop.is_a? Api::Type::NestedObject
+        # Ansible linter does not support nesting options this deep.
+        if prop.is_a?(Api::Type::NestedObject)
           block.concat(nested_doc(prop.properties, config, spaces))
         elsif prop.is_a?(Api::Type::Array) &&
               prop.item_type.is_a?(Api::Type::NestedObject)
@@ -127,6 +128,7 @@ module Provider
           minimal_yaml(prop, spaces),
           indent([
             "required: #{prop.required ? 'true' : 'false'}",
+            ("type: bool" if prop.is_a? Api::Type::Boolean),
             ("aliases: [#{config['aliases'][prop.name].join(', ')}]" \
              if config['aliases']&.keys&.include?(prop.name)),
             (if prop.is_a? Api::Type::Enum
@@ -143,7 +145,11 @@ module Provider
       def minimal_return_block(prop, spaces)
         type = python_type(prop)
         # Complex types only mentioned in reference to RETURNS YAML block
-        type = 'complex' if prop.is_a? Api::Type::NestedObject
+        # Complex types are nested objects traditionally, but arrays of nested
+        # objects will be included to avoid linting errors.
+        type = 'complex' if prop.is_a?(Api::Type::NestedObject)|| \
+          (prop.is_a?(Api::Type::Array) && \
+           prop.item_type.is_a?(Api::Type::NestedObject))
         [
           minimal_yaml(prop, spaces),
           indent([

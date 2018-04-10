@@ -3,6 +3,13 @@
                                    %w[provider_helpers include], [])
 -%>
 <% unless provider_helpers.empty? -%>
-
-<%= lines(provider_helpers.map { |f| lines(compile(f)) }.join("\n")) -%>
+<%=
+  provider_helpers.map do |f|
+    if f == provider_helpers.last
+      lines(compile(f))
+    else
+      lines(compile(f), 2)
+    end
+  end.join
+-%>
 <% end -%>

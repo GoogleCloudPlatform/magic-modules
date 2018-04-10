@@ -123,7 +123,7 @@ module Provider
       # rubocop:disable Metrics/MethodLength
       def emit_link(name, url, extra_data = false)
         params = emit_link_var_args(url, extra_data)
-        extra = (' + extra' if url.include?('<|extra|>')) || ''
+        extra = (' + extra_url' if url.include?('<|extra|>')) || ''
         if extra_data
           [
             "def #{name}(#{params.join(', ')}):",

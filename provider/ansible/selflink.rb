@@ -37,7 +37,13 @@ module Provider
       def selflink_functions(object)
         virtuals = virtual_selflink_rrefs(object).map(&:resource_ref)
                                                  .uniq
-        virtuals.map { |virt| lines(selflink_function(virt), 2) }
+        virtuals.map do |virt|
+          if virt = virtuals.last
+            lines(selflink_function(virt))
+          else
+            lines(selflink_function(virt), 2)
+          end
+        end
       end
 
       # rubocop:disable Metrics/MethodLength
