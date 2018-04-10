@@ -15,9 +15,11 @@ require 'api/object'
 require 'provider/resource_override'
 
 module Provider
-  # A hash of Provider::Override objects where the key is the api name for that object.
+  # A hash of Provider::Override objects where the key is the api name for that
+  # object.
   #
-  # Example usage in a provider.yaml file where you want to extend a resource description:
+  # Example usage in a provider.yaml file where you want to extend a resource
+  # description:
   #
   # overrides: !ruby/object:Provider::ResourceOverrides
   #   SomeResource:
@@ -26,6 +28,7 @@ module Provider
   #       {{ description}}
   #
   #       A tool-specific description complement
+  #   ...
   class ResourceOverrides < Api::Object
     def consume_api(api)
       @__api = api
@@ -81,7 +84,7 @@ module Provider
       end
     end
 
-    # Applies the tool-specific overrides to the api objects.
+    # Applies the tool-specific overrides to the api objects
     def override_objects
       @__objects.each do |name, override|
         api_object = @__api.objects.find { |o| o.name == name }
