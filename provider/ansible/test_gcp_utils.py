@@ -108,7 +108,6 @@ class GCPRequestDifferenceTestCase(unittest.TestCase):
             'foo': [
                 'baz',
                 'bar',
-                'extra'
             ]
         }
 
@@ -121,7 +120,6 @@ class GCPRequestDifferenceTestCase(unittest.TestCase):
         difference = {
             'foo': [
                 'bar',
-                'extra'
             ]
         }
         request1 = GcpRequest(value1)
@@ -169,9 +167,6 @@ class GCPRequestDifferenceTestCase(unittest.TestCase):
                 {
                     'test': 'value',
                     'foo': 'bar'
-                },
-                {
-                    'different': 'dict'
                 }
             ]
         }
