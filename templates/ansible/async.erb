@@ -3,7 +3,6 @@
   stat_path = path2navigate(object.async.status.path)
   res_path = path2navigate(object.async.result.path)
 -%>
-
 <%= lines(emit_link('async_op_url', async_operation_url(object), true), 2) -%>
 def wait_for_operation(module, response):
 <% if object.kind? -%>
@@ -81,5 +80,4 @@ def raise_if_errors(response, err_path, module):
     errors = navigate_hash(response, err_path)
     if errors is not None:
         module.fail_json(msg=errors)
-
 <% end #if object.async -%>
