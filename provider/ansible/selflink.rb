@@ -33,44 +33,10 @@ module Provider
               .select { |prop| prop.imports == 'selfLink' }
       end
 
-      # Builds out a list of statements that handle ResourceRef creation
-      def selflink_handlers(object)
-        rrefs = virtual_selflink_rrefs(object)
-        return unless rrefs.any?
-        comments = ['# Convert to self_links if included.']
-        comments + rrefs.map { |rref| selflink_handler(rref) }
-      end
-
-      # rubocop:disable Metrics/MethodLength
-      def selflink_handler(rref)
-        rref_path = path_for_rref(rref)
-        func_name = Google::StringUtils.underscore("#{rref.name}_selflink")
-        format(
-          [
-            ["module.set_value_with_callback(#{rref_path}, #{func_name})"],
-            [
-              'module.set_value_with_callback(',
-              indent("#{rref_path}, #{func_name}", 4),
-              ')'
-            ],
-            [
-              'module.set_value_with_callback(',
-              indent_list([rref_path,
-                           func_name], 4),
-              ')'
-            ]
-          ]
-        )
-      end
-      # rubocop:enable Metrics/MethodLength
-
       # Build out functions that will check + create selflinks.
       def selflink_functions(object)
-        virtuals = object.all_resourcerefs
-                         .select { |prop| prop.resource_ref.virtual }
-                         .select { |prop| prop.imports == 'selfLink' }
-                         .map(&:resource_ref)
-                         .uniq
+        virtuals = virtual_selflink_rrefs(object).map(&:resource_ref)
+                                                 .uniq
         virtuals.map { |virt| lines(selflink_function(virt), 2) }
       end
 
