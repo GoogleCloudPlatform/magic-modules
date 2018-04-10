@@ -32,12 +32,14 @@ dependencies:
    register: targetpool
 task: !ruby/object:Provider::Ansible::Task
    name: gcp_compute_forwarding_rule
+# TODO(alexstephen): Build out a encoder that automatically creates port ranges
+# if a single number is included.
    code: |
      name: <%= ctx[:name] %>
      region: 'us-west1'
      target: "{{ targetpool }}"
      ip_protocol: 'TCP'
-     port_range: '80'
+     port_range: '80-80'
      ip_address: "{{ address.address }}"
      project: <%= ctx[:project] %>
      auth_kind: <%= ctx[:auth_kind] %>
