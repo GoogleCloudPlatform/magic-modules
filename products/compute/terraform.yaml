@@ -12,9 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides:
-  - !ruby/object:Provider::Terraform::Override
-    name: 'HttpHealthCheck'
+overrides: !ruby/object:Provider::ResourceOverrides
+  HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     description: |
       {{description}}
 
@@ -23,8 +22,7 @@ overrides:
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-  - !ruby/object:Provider::Terraform::Override
-    name: 'HttpsHealthCheck'
+  HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     description: |
       {{description}}
 

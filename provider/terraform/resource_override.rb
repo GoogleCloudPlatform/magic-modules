@@ -12,11 +12,11 @@
 # limitations under the License.
 
 require 'provider/abstract_core'
-require 'provider/abstract_override'
+require 'provider/resource_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
-    class Override < Provider::AbstractOverride
+    class ResourceOverride < Provider::ResourceOverride
       # TODO: Add Terraform specific properties here.
     end
   end

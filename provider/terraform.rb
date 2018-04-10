@@ -14,7 +14,7 @@
 require 'provider/abstract_core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
-require 'provider/terraform/override'
+require 'provider/terraform/resource_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 

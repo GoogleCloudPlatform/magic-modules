@@ -12,9 +12,10 @@
 # limitations under the License.
 
 require 'api/object'
-require 'provider/abstract_override'
+require 'provider/resource_override'
 require 'provider/compiler'
 require 'provider/objects'
+require 'provider/resource_overrides'
 require 'compile/core'
 
 module Provider
@@ -201,10 +202,10 @@ module Provider
 
       check_optional_property :test_data, Provider::Config::TestData
       check_optional_property :tests, Api::Resource::HashArray
+      check_optional_property :overrides, Provider::ResourceOverrides
       check_optional_property_list :style, Provider::Config::StyleException
       check_optional_property_list :changelog, Provider::Config::Changelog
       check_optional_property_list :functions, Provider::Config::Function
-      check_optional_property_list :overrides, Provider::AbstractOverride
     end
 
     # Provides the API object to any type that requires, e.g. for validation

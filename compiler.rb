@@ -81,6 +81,7 @@ api.validate
 pp api if ENV['COMPILER_DEBUG']
 
 config = Provider::Config.parse(File.join(catalog, provider), api)
+config.validate
 pp config if ENV['COMPILER_DEBUG']
 
 provider = config.provider.new(config, api)

@@ -14,8 +14,8 @@
 require 'api/object'
 
 module Provider
-  # A Hash that stores overrides to the list of Api::Resource in api.yaml
-  class AbstractOverride < Api::Object::Named
+  # Override to an Api::Resource in api.yaml
+  class ResourceOverride < Api::Object
     attr_reader :description
 
     def consume_api(api)
@@ -26,12 +26,10 @@ module Provider
       super
 
       check_optional_property :description, String
+    end
 
-      api_resource = @__api.objects.find { |o| o.name == name }
-      raise "The resource to override must exist #{name}" if api_resource.nil?
-
-      # Apply overrides
-      # TODO: Allows for overriding properties and other fields
+    # Apply this override to the given instance of Api::Resource
+    def apply(api_resource)
       extend_string api_resource, :description, @description
     end
 
@@ -41,7 +39,7 @@ module Provider
     def extend_string(object, object_key, override_val)
       return if override_val.nil?
 
-      object_val = object.instance_variable_get("@#{object_key}")
+      object_val = object.send object_key
       new_val = override_val.gsub "{{#{object_key}}}", object_val
 
       object.instance_variable_set("@#{object_key}", new_val)
