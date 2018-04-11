@@ -19,11 +19,12 @@ resources:
       source:
           uri: git@github.com:((github-account.username))/magic-modules.git
           private_key: ((repo-key.private_key))
+
     - name: magic-modules-gcp
-          type: git-branch
-          source:
-              uri: git@github.com:GoogleCloudPlatform/magic-modules.git
-              private_key: ((repo-key.private_key))
+      type: git-branch
+      source:
+          uri: git@github.com:GoogleCloudPlatform/magic-modules.git
+          private_key: ((repo-key.private_key))
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -31,7 +32,7 @@ resources:
           repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
-          authorship_restriction: true
+          authorship_restriction: false
 
     - name: terraform-intermediate
       type: git-branch
@@ -70,7 +71,7 @@ jobs:
               - get: magic-modules
                 resource: magic-modules-new-prs
                 version: every
-                # trigger: true
+                trigger: true
                 params:
                     submodules: [build/terraform]
             # consumes: magic-modules (detached HEAD)
@@ -87,6 +88,7 @@ jobs:
                 repository: terraform-generated
                 branch_file: magic-modules-branched/branchname
                 only_if_diff: true
+                force: true
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
           - task: point-to-submodules
@@ -108,7 +110,7 @@ jobs:
           - aggregate:
               - get: magic-modules
                 version: every
-                # trigger: true
+                trigger: true
                 params:
                     submodules: [build/terraform]
                 passed: [mm-generate]
