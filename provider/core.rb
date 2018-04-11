@@ -216,7 +216,6 @@ module Provider
 
     def generate_object(object, output_folder)
       data = build_object_data(object, output_folder)
-      return if data[:config]['skip']
 
       generate_resource data
       generate_resource_tests data

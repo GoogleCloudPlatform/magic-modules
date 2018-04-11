@@ -18,6 +18,8 @@ require 'provider/ansible/example'
 require 'provider/ansible/documentation'
 require 'provider/ansible/module'
 require 'provider/ansible/request'
+require 'provider/ansible/resourceref'
+require 'provider/ansible/resource_override'
 require 'provider/ansible/selflink'
 
 module Provider
