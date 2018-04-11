@@ -26,13 +26,6 @@ resources:
           uri: git@github.com:GoogleCloudPlatform/magic-modules.git
           private_key: ((repo-key.private_key))
 
-    - name: magic-modules-gcp
-      type: git-branch
-      source:
-          uri: git@github.com:GoogleCloudPlatform/magic-modules.git
-          private_key: ((repo-key.private_key))
-
-
     - name: magic-modules-new-prs
       type: github-pull-request
       source:
