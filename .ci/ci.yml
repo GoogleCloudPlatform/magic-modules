@@ -19,6 +19,11 @@ resources:
       source:
           uri: git@github.com:((github-account.username))/magic-modules.git
           private_key: ((repo-key.private_key))
+    - name: magic-modules-gcp
+          type: git-branch
+          source:
+              uri: git@github.com:GoogleCloudPlatform/magic-modules.git
+              private_key: ((repo-key.private_key))
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -37,7 +42,7 @@ resources:
     - name: mm-approved-prs
       type: github-pull-request
       source:
-          repo: ((github-account.username))/magic-modules
+          repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
           only_mergeable: true
@@ -158,7 +163,7 @@ jobs:
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
                 CREDS: ((repo-key.private_key))
-          - put: magic-modules
+          - put: magic-modules-gcp
             params:
                 repository: mm-output
                 branch_file: mm-approved-prs/.git/branch
