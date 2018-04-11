@@ -37,11 +37,15 @@ def navigate_hash(source, path, default=None):
         return result
 
 
+class GcpRequestException(Exception):
+    pass
+
+
 def remove_nones_from_dict(obj):
     new_obj = {}
     for key in obj:
         value = obj[key]
-        if value is not None:
+        if value is not None and value != {} and value != []:
             new_obj[key] = value
     return new_obj
 
@@ -50,7 +54,7 @@ def remove_nones_from_dict(obj):
 def replace_resource_dict(item, value):
     if isinstance(item, list):
         items = []
-        for i in items:
+        for i in item:
             items.append(replace_resource_dict(i, value))
         return items
     else:
