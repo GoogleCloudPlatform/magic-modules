@@ -20,6 +20,7 @@ require 'provider/ansible/manifest'
 module Provider
   module Ansible
     # Responsible for building out YAML documentation blocks.
+    # rubocop:disable Metrics/ModuleLength
     module Documentation
       # This is not a comprehensive list of unsafe characters.
       # Ansible's YAML linter is more forgiving than Ruby's.
@@ -123,12 +124,13 @@ module Provider
       end
 
       # Builds out the minimal YAML block for DOCUMENTATION
+      # rubocop:disable Metrics/AbcSize
       def minimal_doc_block(prop, config, spaces)
         [
           minimal_yaml(prop, spaces),
           indent([
             "required: #{prop.required ? 'true' : 'false'}",
-            ("type: bool" if prop.is_a? Api::Type::Boolean),
+            ('type: bool' if prop.is_a? Api::Type::Boolean),
             ("aliases: [#{config['aliases'][prop.name].join(', ')}]" \
              if config['aliases']&.keys&.include?(prop.name)),
             (if prop.is_a? Api::Type::Enum
@@ -140,6 +142,7 @@ module Provider
           ].compact, 4)
         ]
       end
+      # rubocop:enable Metrics/AbcSize
 
       # Builds out the minimal YAML block for RETURNS
       def minimal_return_block(prop, spaces)
@@ -147,9 +150,9 @@ module Provider
         # Complex types only mentioned in reference to RETURNS YAML block
         # Complex types are nested objects traditionally, but arrays of nested
         # objects will be included to avoid linting errors.
-        type = 'complex' if prop.is_a?(Api::Type::NestedObject)|| \
-          (prop.is_a?(Api::Type::Array) && \
-           prop.item_type.is_a?(Api::Type::NestedObject))
+        type = 'complex' if prop.is_a?(Api::Type::NestedObject) \
+                            || (prop.is_a?(Api::Type::Array) \
+                            && prop.item_type.is_a?(Api::Type::NestedObject))
         [
           minimal_yaml(prop, spaces),
           indent([
@@ -180,5 +183,6 @@ module Provider
          'https://www.github.com/GoogleCloudPlatform/magic-modules']
       end
     end
+    # rubocop:enable Metrics/ModuleLength
   end
 end
