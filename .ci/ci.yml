@@ -161,14 +161,6 @@ jobs:
               params:
                   status: failure
                   path: mm-initial-pr
-          # TODO(ndmckinley): This will work to update the magic-modules PR *if* the original PR
-          # was opened from the magic-modules repository.  That's not always going to be
-          # true - figure out what to do if, for instance, we can't modify the PR.
-          - put: magic-modules-gcp
-            params:
-                branch_file: mm-initial-pr/.git/branch
-                repository: magic-modules
-                only_if_diff: true
           # This will be a no-op the first time through the pipeline.  This pushes the updated
           # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
           # first time through the pipeline, that branch is unchanged by the create-prs task,
@@ -210,6 +202,9 @@ jobs:
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
                 CREDS: ((repo-key.private_key))
+          # TODO(ndmckinley): This will work to update the magic-modules PR *if* the original PR
+          # was opened from the magic-modules repository.  That's not always going to be
+          # true - figure out what to do if, for instance, we can't modify the PR.
           - put: magic-modules-gcp
             params:
                 repository: mm-output
