@@ -1,7 +1,8 @@
 <% properties_with_classes(object.all_user_properties).each do |prop| -%>
 class <%= prop.property_class[-1] -%>(object):
 <% if prop.is_a?(Api::Type::NestedObject) -%>
-    def __init__(self, request):
+    def __init__(self, request, module):
+        self.module = module
         if request:
             self.request = request
         else:
@@ -17,7 +18,8 @@ class <%= prop.property_class[-1] -%>(object):
 <%= lines(response_properties_in_classes(prop.properties, 12)) -%>
         })
 <% elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject) -%>
-    def __init__(self, request):
+    def __init__(self, request, module):
+        self.module = module
         if request:
             self.request = request
         else:
