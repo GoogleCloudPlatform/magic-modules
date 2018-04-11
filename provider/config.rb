@@ -14,6 +14,8 @@
 require 'api/object'
 require 'provider/compiler'
 require 'provider/objects'
+require 'provider/resource_override'
+require 'provider/resource_overrides'
 require 'compile/core'
 
 module Provider
@@ -22,6 +24,7 @@ module Provider
     include Compile::Core
     extend Compile::Core
 
+    attr_reader :overrides
     attr_reader :objects
     attr_reader :examples
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
@@ -199,6 +202,7 @@ module Provider
 
       check_optional_property :test_data, Provider::Config::TestData
       check_optional_property :tests, Api::Resource::HashArray
+      check_optional_property :overrides, Provider::ResourceOverrides
       check_optional_property_list :style, Provider::Config::StyleException
       check_optional_property_list :changelog, Provider::Config::Changelog
       check_optional_property_list :functions, Provider::Config::Function
