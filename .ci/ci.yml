@@ -19,11 +19,12 @@ resources:
       source:
           uri: git@github.com:((github-account.username))/magic-modules.git
           private_key: ((repo-key.private_key))
+
     - name: magic-modules-gcp
-          type: git-branch
-          source:
-              uri: git@github.com:GoogleCloudPlatform/magic-modules.git
-              private_key: ((repo-key.private_key))
+      type: git-branch
+      source:
+          uri: git@github.com:GoogleCloudPlatform/magic-modules.git
+          private_key: ((repo-key.private_key))
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -31,7 +32,7 @@ resources:
           repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
-          authorship_restriction: true
+          authorship_restriction: false
 
     - name: terraform-intermediate
       type: git-branch
