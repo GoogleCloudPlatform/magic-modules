@@ -11,10 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/config'
 require 'provider/abstract_core'
-require 'provider/terraform/sub_template'
+require 'provider/terraform/config'
 require 'provider/terraform/import'
+require 'provider/terraform/resource_override'
+require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
 module Provider
@@ -24,14 +25,6 @@ module Provider
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
-
-    # Settings for the provider
-    class Config < Provider::Config
-      attr_reader :manifest
-      def provider
-        Provider::Terraform
-      end
-    end
 
     # Sorts properties in the order they should appear in the TF schema:
     # Required, Optional, Computed

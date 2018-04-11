@@ -24,6 +24,7 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.5'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
+# TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
   Address:
     version_added: '2.6'
