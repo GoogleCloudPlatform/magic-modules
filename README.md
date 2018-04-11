@@ -63,6 +63,7 @@ intricacies of the underlying GCP product API.
 - Puppet
 - Chef
 - Terraform
+- Ansible
 
 ### Supported Products
 
@@ -146,10 +147,13 @@ Use `rspec` to test Magic Module changes:
 Each provider has their own testing mechanism. Run the command in the product's
 output folder `build/<provider>/<product>`, e.g. `build/puppet/compute`.
 
-Platform | Tool  | Test command
----------|-------|--------------
-Puppet   | rspec | bundle exec rspec
-Chef     | rspec | bundle exec rspec
+Platform  | Tool    | Test command
+----------|---------|--------------
+Puppet    | rspec   | bundle exec rspec
+Chef      | rspec   | bundle exec rspec
+Terraform | go test | make test, make testacc
+Ansible   | various | [instructions](https://docs.ansible.com/ansible/2.3/dev_guide/testing.html)
+
 
 For Terraform, copy the generated code into the main Terraform repo and run the
 tests there as per [instructions](https://github.com/terraform-providers/terraform-provider-google#developing-the-provider).
