@@ -12,6 +12,7 @@ image_resource:
 
 inputs:
     - name: magic-modules
+    - name: mm-initial-pr
 
 outputs:
     - name: magic-modules-with-comment
