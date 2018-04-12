@@ -2885,6 +2885,14 @@ objects:
       api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
 <%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
     parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        description: |
+          The region this gateway should sit in.
+        required: true
+    properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -2892,12 +2900,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'selfLink'
-        description: |
-          The region this gateway should sit in.
+        input: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2909,6 +2912,7 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
         required: true
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2919,6 +2923,35 @@ objects:
         imports: 'selfLink'
         description: |
           The network this VPN gateway is accepting traffic for.
+        input: true
+      - !ruby/object:Api::Type::Array
+        name: 'tunnels'
+        description: |
+          A list of URLs to VpnTunnel resources associated to this VPN gateway.
+        # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
+        item_type: Api::Type::String
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'forwardingRules'
+        description: |
+          A list of URLs to the ForwardingRule resources associated to this VPN
+          gateway.
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'forwardingRule'
+          resource: 'ForwardingRule'
+          imports: 'selfLink'
+          description: |
+            A ForwardingRule resource associated to this VPN gateway.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        description: 'The status of the VPN gateway.'
+        values:
+          - :CREATING
+          - :DELETING
+          - :FAILED
+          - :READY
+        output: true
   - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
