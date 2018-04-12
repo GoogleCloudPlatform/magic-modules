@@ -24,6 +24,33 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
+overrides: !ruby/object:Provider::ResourceOverrides
+  Firewall: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Instance: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  InstanceGroupManager: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  # Ansible tasks must alter infrastructure.
+  # This means that virtual objects are a poor fit.
+  DiskType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  License: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  MachineType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Region: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Zone: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
   Disk:
@@ -51,32 +78,6 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
-  Firewall:
-    skip: true
-  Instance:
-    skip: true
-  InstanceGroupManager:
-    skip: true
-  InstanceTemplate:
-    skip: true
-  Snapshot:
-    skip: true
-  TargetHttpsProxy:
-    skip: true
-  TargetSslProxy:
-    skip: true
-  # Ansible tasks must alter infrastructure.
-  # This means that virtual objects are a poor fit.
-  DiskType:
-    skip: true
-  License:
-    skip: true
-  MachineType:
-    skip: true
-  Region:
-    skip: true
-  Zone:
-    skip: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:

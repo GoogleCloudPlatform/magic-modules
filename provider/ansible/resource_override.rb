@@ -11,14 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
 require 'provider/resource_override'
 
 module Provider
-  class Terraform < Provider::AbstractCore
-    # Terraform-specific overrides to api.yaml.
+  module Ansible
+    # Ansible-specific overrides to api.yaml.
     class ResourceOverride < Provider::ResourceOverride
-      # TODO: Add Terraform specific properties here.
+      # TODO: Add Ansible specific properties here.
     end
   end
 end
