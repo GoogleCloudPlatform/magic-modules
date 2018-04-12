@@ -2943,6 +2943,7 @@ objects:
           description: |
             A ForwardingRule resource associated to this VPN gateway.
         output: true
+        # status is not useful for state convergence
   - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
