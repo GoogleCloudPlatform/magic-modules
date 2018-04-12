@@ -2943,15 +2943,6 @@ objects:
           description: |
             A ForwardingRule resource associated to this VPN gateway.
         output: true
-      - !ruby/object:Api::Type::Enum
-        name: 'status'
-        description: 'The status of the VPN gateway.'
-        values:
-          - :CREATING
-          - :DELETING
-          - :FAILED
-          - :READY
-        output: true
   - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
