@@ -146,9 +146,10 @@ module Provider
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::ResourceRef) && \
               !prop.item_type.resource_ref.virtual
+          prop_name = Google::StringUtils.underscore(prop.name)
           [
             "replace_resource_dict(#{hash_name}",
-            ".get(#{unicode_string(prop.name)}, []), ",
+            ".get(#{quote_string(prop_name)}, []), ",
             "#{quote_string(prop.item_type.imports)})"
           ].join
         else

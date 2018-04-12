@@ -41,7 +41,7 @@ module Provider
           if virt == virtuals.last
             lines(selflink_function(virt))
           else
-            lines(selflink_function(virt), 2)
+            lines(selflink_function(virt), 1)
           end
         end
       end
