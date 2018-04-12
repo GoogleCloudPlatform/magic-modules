@@ -24,14 +24,16 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.5'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
+overrides: !ruby/object:Provider::ResourceOverrides
+  Project: !ruby/object:Provider::Ansible::ResourceOverride
+    # TODO(alexstephen): Re-evaluate merging Project into Ansible
+    exclude: true
+  Change: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+# TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
-  Change:
-    skip: true
   ManagedZone:
     editable: false
-  Project:
-    # TODO(alexstephen): Re-evaluate merging Project into Ansible
-    skip: true
   ResourceRecordSet:
     version_added: '2.6'
     imports:
