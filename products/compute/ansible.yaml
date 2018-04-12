@@ -90,8 +90,6 @@ objects: !ruby/object:Api::Resource::HashArray
       include:
         - 'products/compute/helpers/provider_instance.py'
         - 'products/compute/helpers/instance_metadata.py'
-  InstanceGroupManager:
-    skip: true
   Snapshot:
     skip: true
   TargetSslProxy:
