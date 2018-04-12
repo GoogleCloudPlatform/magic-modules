@@ -2893,6 +2893,80 @@ objects:
         description: |
           A reference to the BackendService resource.
   - !ruby/object:Api::Resource
+    name: 'TargetVpnGateway'
+    exclude: true
+    kind: 'compute#targetVpnGateway'
+    base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    description: |
+      Represents a VPN gateway running in GCP. This virtual device is managed
+      by Google, but used only by you.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
+<%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        description: |
+          The region this gateway should sit in.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035.  Specifically, the name must be 1-63 characters long and
+          match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+          the first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          The network this VPN gateway is accepting traffic for.
+        input: true
+      - !ruby/object:Api::Type::Array
+        name: 'tunnels'
+        description: |
+          A list of references to VpnTunnel resources associated to this VPN gateway.
+        # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
+        item_type: Api::Type::String
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'forwardingRules'
+        description: |
+          A list of references to the ForwardingRule resources associated to this VPN
+          gateway.
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'forwardingRule'
+          resource: 'ForwardingRule'
+          imports: 'selfLink'
+          description: |
+            A ForwardingRule resource associated to this VPN gateway.
+        output: true
+        # status is not useful for state convergence
+  - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
