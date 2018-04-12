@@ -2905,7 +2905,7 @@ objects:
       by Google, but used only by you.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
-<%= indent(compile('templates/regional_async.yaml.erb'), 4) %>
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
