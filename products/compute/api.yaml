@@ -2927,14 +2927,14 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'tunnels'
         description: |
-          A list of URLs to VpnTunnel resources associated to this VPN gateway.
+          A list of references to VpnTunnel resources associated to this VPN gateway.
         # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
         item_type: Api::Type::String
         output: true
       - !ruby/object:Api::Type::Array
         name: 'forwardingRules'
         description: |
-          A list of URLs to the ForwardingRule resources associated to this VPN
+          A list of references to the ForwardingRule resources associated to this VPN
           gateway.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'forwardingRule'
