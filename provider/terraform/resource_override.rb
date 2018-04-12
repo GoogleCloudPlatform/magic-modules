@@ -16,6 +16,7 @@ require 'provider/resource_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
+    # Terraform-specific overrides to api.yaml.
     class ResourceOverride < Provider::ResourceOverride
       # TODO: Add Terraform specific properties here.
     end

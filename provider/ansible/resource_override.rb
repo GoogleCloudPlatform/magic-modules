@@ -15,6 +15,7 @@ require 'provider/resource_override'
 
 module Provider
   module Ansible
+    # Ansible-specific overrides to api.yaml.
     class ResourceOverride < Provider::ResourceOverride
       # TODO: Add Ansible specific properties here.
     end
