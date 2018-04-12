@@ -92,8 +92,6 @@ objects: !ruby/object:Api::Resource::HashArray
         - 'products/compute/helpers/instance_metadata.py'
   Snapshot:
     skip: true
-  TargetSslProxy:
-    skip: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   DiskType:
