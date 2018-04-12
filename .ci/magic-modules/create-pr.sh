@@ -50,5 +50,11 @@ else
   git branch -f "$ORIGINAL_PR_BRANCH"
   pushd build/terraform
   git branch -f "$ORIGINAL_PR_BRANCH"
+  popd
+  cat << EOF >./pr_comment
+I am (still) a robot that works on MagicModules PRs!
+
+I just wanted to let you know that your changes (as of commit $(git rev-parse --short HEAD)) have been included in your downstream PRs.
+EOF
 
 fi
