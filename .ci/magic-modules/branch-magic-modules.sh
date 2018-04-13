@@ -7,7 +7,8 @@ pushd "magic-modules"
 # them (or introduce other options) unless you also change the
 # logic in create-or-update-pr - because we decide whether to
 # create or to update by which one of these we're prefixed by.
-if git config --get pullrequest.id && [ -z "$USE_SHA" ]; then
+export GH_TOKEN
+if PR_ID=$(git config --get pullrequest.id) && [ -z "$USE_SHA" ] && [ -z "$(python ./.ci/magic-modules/get_downstream_prs.py "$PR_ID")" ]; then
   BRANCH="codegen-pr-$(git config --get pullrequest.id)"
 else
   BRANCH="codegen-sha-$(git rev-parse --short HEAD)"

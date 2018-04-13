@@ -78,18 +78,8 @@ jobs:
             # produces: magic-modules-branched (new branch, with submodule)
           - task: branch-magic-modules
             file: magic-modules/.ci/magic-modules/branch.yml
-            # consumes: magic-modules-branched
-            # produces: magic-modules-branched (but with a different branch, if the other one is taken).
-          - try:
-              get: maybe-get-existing-magic-modules-branch
-              resource: magic-modules
-              params:
-                branch_file: magic-modules-branched/branchname
-              on_success:
-                task: use-sha-instead-of-pr-name
-                file: magic-modules/.ci/magic-modules/branch.yml
-                params:
-                  USE_SHA: true
+            params:
+              GH_TOKEN: ((github-account.password))
             # consumes: magic-modules-branched
             # produces: terraform-generated
           - task: generate-terraform

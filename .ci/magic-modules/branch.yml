@@ -23,6 +23,7 @@ outputs:
 
 params:
   USE_SHA: ""
+  GH_TOKEN: ""
 
 run:
     path: magic-modules/.ci/magic-modules/branch-magic-modules.sh
