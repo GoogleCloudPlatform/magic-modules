@@ -12,8 +12,8 @@ image_resource:
         # bash available, we can switch to that, but it's probably better to
         # minimize the number of containers used than to minimize the size of
         # the container in this particular (very short) task.
-        repository: nmckinley/go-ruby
-        tag: '1.9-2.5'
+        repository: nmckinley/python
+        tag: 'v0.0.1'
 
 inputs:
     - name: magic-modules
