@@ -7,11 +7,8 @@ platform: linux
 image_resource:
     type: docker-image
     source:
-        # Not necessary to have either go or ruby, but it's a container already
-        # in use in this pipeline - if we ever add a container that has git and
-        # bash available, we can switch to that, but it's probably better to
-        # minimize the number of containers used than to minimize the size of
-        # the container in this particular (very short) task.
+        # This task requires a container with 'git', 'python', and the pip
+        # package 'pygithub'.
         repository: nmckinley/python
         tag: 'v0.0.1'
 
