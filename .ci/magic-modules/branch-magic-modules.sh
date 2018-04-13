@@ -8,7 +8,10 @@ pushd "magic-modules"
 # logic in create-or-update-pr - because we decide whether to
 # create or to update by which one of these we're prefixed by.
 export GH_TOKEN
-if PR_ID=$(git config --get pullrequest.id) && [ -z "$USE_SHA" ] && [ -z "$(python ./.ci/magic-modules/get_downstream_prs.py "$PR_ID")" ]; then
+if PR_ID=$(git config --get pullrequest.id) &&
+  [ -z "$USE_SHA" ] &&
+  DEPS=$(python ./.ci/magic-modules/get_downstream_prs.py "$PR_ID") &&
+  [ -z "$DEPS" ]; then
   BRANCH="codegen-pr-$(git config --get pullrequest.id)"
 else
   BRANCH="codegen-sha-$(git rev-parse --short HEAD)"
