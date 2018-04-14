@@ -33,73 +33,75 @@ manifest: !ruby/object:Provider::Puppet::Manifest
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 # TODO(nelsonjr): Match all special behavior Puppet <=> Chef.
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
-objects: !ruby/object:Api::Resource::HashArray
-  BackendService:
-    # TODO(alexstephen): Document the access_api_results field.
-    access_api_results: true
-    resource_to_request_patch: |
-      unless @fetched.nil?
-        # Convert to pure JSON
-        request = JSON.parse(request.to_json)
-        request['fingerprint'] = @fetched['fingerprint']
-      end
-  Disk:
+overrides: !ruby/object:Provider::ResourceOverrides
+  BackendService: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      resource_to_request_patch: |
+        unless @fetched.nil?
+          # Convert to pure JSON
+          request = JSON.parse(request.to_json)
+          request['fingerprint'] = @fetched['fingerprint']
+        end
+  Disk: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(nelsonjr): Implement specific actions, such as resize and setLabels.
-    flush: raise 'Disk cannot be edited'
-  DiskType:
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: raise 'Disk cannot be edited'
+  DiskType: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(nelsonjr): Make sure that attempts to create a disk fails
-    flush: |
-      raise [
-        'DiskType requirements specified in the manifest do not match',
-        "values provided by Google Cloud Platform: #{dirty_display_formatted}"
-      ].join(' ')
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: |
+        raise [
+          'DiskType requirements specified in the manifest do not match',
+          "values provided by Google Cloud Platform: #{dirty_display_formatted}"
+        ].join(' ')
     provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_disk_type.rb'
-  Instance:
+      - 'products/compute/helpers/provider_disk_type.rb'
+  Instance: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_instance.rb'
-        - 'products/compute/helpers/instance_metadata.rb'
-  InstanceGroup:
+      - 'products/compute/helpers/provider_instance.rb'
+      - 'products/compute/helpers/instance_metadata.rb'
+  InstanceGroup: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(nelsonjr): Implement specific actions, such as addInstance and
     # setNamedPorts.
-    flush: raise 'InstanceGroup cannot be edited.'
-  InstanceTemplate:
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: raise 'InstanceGroup cannot be edited.'
+  InstanceTemplate: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_instance_template.rb'
-        - 'products/compute/helpers/instance_metadata.rb'
-  Network:
-    flush: |
-      unless @dirty.keys == [:auto_create_subnetworks]
-        raise ['Network specification mismatch and cannot be edited.',
-               'The only allowed change is from Auto to Custom type.'].join(' ')
-      end
-      handle_auto_to_custom_change
+      - 'products/compute/helpers/provider_instance_template.rb'
+      - 'products/compute/helpers/instance_metadata.rb'
+  Network: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: |
+        unless @dirty.keys == [:auto_create_subnetworks]
+          raise [
+            'Network specification mismatch and cannot be edited.',
+            'The only allowed change is from Auto to Custom type.'
+          ].join(' ')
+        end
+        handle_auto_to_custom_change
     provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_network.rb'
-  Snapshot:
+      - 'products/compute/helpers/provider_network.rb'
+  Snapshot: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      create: |
+        disk = Google::Compute::Api::Disk.new(resource[:source].resource,
+                                              resource[:zone].resource,
+                                              resource[:project],
+                                              fetch_auth(resource))
+        # TODO(nelsonjr): Wait for operation to complete
+        disk.snapshot(
+          resource[:name],
+          Google::HashUtils.symbolize_keys(JSON.parse(resource_to_request))
+        )
     requires:
       - google/compute/api/gcompute_disk
-    create: |
-      disk = Google::Compute::Api::Disk.new(resource[:source].resource,
-                                            resource[:zone].resource,
-                                            resource[:project],
-                                            fetch_auth(resource))
-      # TODO(nelsonjr): Wait for operation to complete
-      disk.snapshot(
-        resource[:name],
-        Google::HashUtils.symbolize_keys(JSON.parse(resource_to_request))
-      )
-  TargetPool:
+  TargetPool: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_target_pool.rb'
-  Region:
+      - 'products/compute/helpers/provider_target_pool.rb'
+  Region: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(nelsonjr): Make sure that attempts to create a region fails
-    flush: raise 'Region cannot be edited' if @dirty
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: raise 'Region cannot be edited' if @dirty
 functions:
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_address_ip'
