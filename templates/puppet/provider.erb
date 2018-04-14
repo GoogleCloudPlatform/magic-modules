@@ -38,10 +38,7 @@
                                 upd_method.downcase)
   end
 
-  custom_requires = Google::HashUtils.navigate(config, %w[requires])
-  unless custom_requires.nil?
-    requires << custom_requires
-  end
+  requires << object&.requires unless object&.requires.nil?
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -234,21 +231,20 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def create
     debug('create')
     @created = true
-<% custom_create = get_code_multiline config, 'create' -%>
-<% if custom_create.nil? -%>
+<% if object&.handlers&.create.nil? -%>
 <%
-  if object.create_verb.nil? || object.create_verb == :POST
-    body_new = 'collection(@resource)'
-    request_new = "Google::#{product_ns}::Network::Post.new"
-  elsif object.create_verb == :PUT
-    body_new = 'self_link(@resource)'
-    request_new = "Google::#{product_ns}::Network::Put.new"
-  end
+     if object.create_verb.nil? || object.create_verb == :POST
+       body_new = 'collection(@resource)'
+       request_new = "Google::#{product_ns}::Network::Post.new"
+     elsif object.create_verb == :PUT
+       body_new = 'self_link(@resource)'
+       request_new = "Google::#{product_ns}::Network::Put.new"
+     end
 
-  request_patch = get_code_multiline config, 'resource_create_patch'
-  custom_resource = true?(Google::HashUtils.navigate(
-    config, %w[provider_helpers custom_create_resource]
-  ))
+     request_patch = get_code_multiline config, 'resource_create_patch'
+     custom_resource = true?(Google::HashUtils.navigate(
+       config, %w[provider_helpers custom_create_resource]
+     ))
 -%>
 <%=
   lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
@@ -266,9 +262,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% else -%>
     <%= fetch_assign -%>wait_for_operation create_req.send, @resource
 <% end -%>
-<% else -%>
-<%= lines(indent(custom_create, 4)) -%>
-<% end -%>
+<% else # object&.handlers&.create.nil? -%>
+<%= lines(indent(object&.handlers&.create, 4)) -%>
+<% end # object&.handlers&.create.nil? -%>
     @property_hash[:ensure] = :present
   end
 
@@ -303,9 +299,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
-<% custom_flush = get_code_multiline config, 'flush' -%>
 <%
-   if custom_flush.nil?
+   if object&.handlers&.flush.nil?
      put_new = if upd_method.nil?
                  "Google::#{product_ns}::Network::Put.new"
                else
@@ -330,9 +325,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
-<% else # custom_flush.nil? -%>
-<%= lines(indent(custom_flush, 4)) -%>
-<% end # custom_flush.nil? -%>
+<% else # object&.handlers&.flush.nil? -%>
+<%= lines(indent(object&.handlers&.flush, 4)) -%>
+<% end # object&.handlers&.flush&.nil? -%>
   end
 
   def dirty(field, from, to)
@@ -441,13 +436,11 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     r2r_code << ''
   end
 
-  resource_to_request_patch = get_code_multiline config,
-                                                 'resource_to_request_patch'
-  unless resource_to_request_patch.nil?
+  unless object&.handlers&.resource_to_request_patch.nil?
     r2r_code << '' unless has_boolean
-    r2r_code << resource_to_request_patch
+    r2r_code << object&.handlers&.resource_to_request_patch
     r2r_code << ''
-  end # resource_to_request_patch.nil?
+  end # object&.handlers&.resource_to_request_patch.nil?
 
   if object.encoder?
     r2r_code << '# Format request to conform with API endpoint'
