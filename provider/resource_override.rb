@@ -16,33 +16,66 @@ require 'api/object'
 module Provider
   # Override to an Api::Resource in api.yaml
   class ResourceOverride < Api::Object
-    attr_reader :description
-    attr_reader :exclude
-
-    def validate
-      super
-
-      check_optional_property :description, String
-      check_optional_property :exclude, :boolean
-    end
+    include Api::Resource::Properties
 
     # Apply this override to the given instance of Api::Resource
     def apply(api_resource)
-      extend_string api_resource, :description, @description
+      ensure_resource_properties
+      update_overriden_properties(api_resource)
 
-      override_boolean api_resource, :exclude, @exclude
+      # TODO(nelsonjr): Enable revalidate the object to make sure we did not
+      # break the object during the override process
+      # | api_resource.validate # check if we did not break the object
     end
 
-    # Replace the `object_key` instance variable on `object` by the
-    # `override_val`. If `override_val` includes the tag '{{<object_key>}}',
-    # this tag will be substituted by the object value.
-    def extend_string(object, object_key, override_val)
-      return if override_val.nil?
+    private
 
-      object_val = object.send object_key
-      new_val = override_val.gsub "{{#{object_key}}}", object_val
+    # Updates the resource property to a new value
+    def update(resource, name, value)
+      resource.instance_variable_set("@#{name}".to_sym, value)
+    end
 
-      object.instance_variable_set("@#{object_key}", new_val)
+    # Attaches the overridden properties to Api::Resource and ensure they are
+    # present on the class.
+    def ensure_resource_properties
+      Api::Resource.send(:include, overriden) # override ...
+      require_module overriden
+      our_override_modules.each { |mod| require_module mod } # ... and verify
+    end
+
+    # Copies all overridable properties from ResourceOverride into
+    # Api::Resource.
+    def update_overriden_properties(api_resource)
+      our_override_modules.each do |mod|
+        mod.instance_methods.each do |method|
+          # If we have a variable for it, copy it.
+          prop_name = "@#{method.id2name}".to_sym
+          var_value = instance_variable_get(prop_name)
+          api_resource.instance_variable_set(prop_name, var_value) \
+            unless var_value.nil?
+        end
+      end
+    end
+
+    # Returns all modules that contain overridable properties.
+    def our_override_modules
+      self.class.included_modules.select do |mod|
+        mod == Api::Resource::Properties \
+          || mod.name.split(':').last == 'OverrideProperties'
+      end
+    end
+
+    # Ensures that Api::Resource includes a module.
+    def require_module(clazz)
+      raise "Api::Resource did not include required #{clazz} module" \
+        unless Api::Resource.included_modules.include?(clazz)
+      raise "#{self.class} did not include required #{clazz} module" \
+        unless self.class.included_modules.include?(clazz)
+    end
+
+    # Returns the module that provides overriden properties for this provider.
+    def overriden
+      raise "overriden property should be implemented in #{self.class}"
     end
 
     def override_boolean(object, object_key, override_val)

@@ -18,27 +18,33 @@ module Api
   # An object available in the product
   # rubocop:disable Metrics/ClassLength
   class Resource < Api::Object::Named
-    attr_reader :description
-    attr_reader :kind
-    attr_reader :base_url
-    attr_reader :self_link
-    attr_reader :self_link_query
-    # identity: an array with items that uniquely identify the resource.
-    # default=name
-    attr_reader :identity
-    attr_reader :parameters
-    attr_reader :properties
-    attr_reader :exclude
-    attr_reader :virtual
-    attr_reader :async
-    attr_reader :readonly
-    attr_reader :exports
-    attr_reader :label_override
-    attr_reader :transport
-    attr_reader :references
-    attr_reader :create_verb
-    attr_reader :update_verb
-    attr_reader :input # If true, the resource is not updatable as a whole unit
+    # The list of properties (attr_reader) that can be overriden in
+    # <provider>.yaml.
+    module Properties
+      attr_reader :description
+      attr_reader :kind
+      attr_reader :base_url
+      attr_reader :self_link
+      attr_reader :self_link_query
+      # identity: an array with items that uniquely identify the resource.
+      # default=name
+      attr_reader :identity
+      attr_reader :parameters
+      attr_reader :properties
+      attr_reader :exclude
+      attr_reader :virtual
+      attr_reader :async
+      attr_reader :readonly
+      attr_reader :exports
+      attr_reader :label_override
+      attr_reader :transport
+      attr_reader :references
+      attr_reader :create_verb
+      attr_reader :update_verb
+      attr_reader :input # If true, resource is not updatable as a whole unit
+    end
+
+    include Properties
 
     attr_reader :__product
 
