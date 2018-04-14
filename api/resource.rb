@@ -190,7 +190,6 @@ module Api
       [@__product.prefix, Google::StringUtils.underscore(@name)].join('_')
     end
 
-    # rubocop:disable Lint/DuplicateMethods
     def identity
       props = all_user_properties
       if @identity.nil?
@@ -199,7 +198,6 @@ module Api
         props.select { |p| @identity.include?(p.name) }
       end
     end
-    # rubocop:enable Lint/DuplicateMethods
 
     # 'identity' is already taken by Ruby.
     def __identity

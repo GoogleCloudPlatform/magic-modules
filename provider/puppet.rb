@@ -18,6 +18,7 @@ require 'provider/config'
 require 'provider/core'
 require 'provider/puppet/codegen'
 require 'provider/puppet/manifest'
+require 'provider/puppet/resource_override'
 require 'provider/puppet/test_manifest'
 require 'provider/test_matrix'
 
@@ -468,14 +469,14 @@ module Provider
     end
 
     # Emits all the Puppet client functions available for use by end users.
-    def generate_client_function(output_folder, fn)
+    def generate_client_function(output_folder, func)
       target_folder = File.join(output_folder, 'lib', 'puppet', 'functions')
       {
-        fn: fn,
+        fn: func,
         target_folder: target_folder,
         template: 'templates/puppet/function.erb',
         output_folder: output_folder,
-        out_file: File.join(target_folder, "#{fn.name}.rb")
+        out_file: File.join(target_folder, "#{func.name}.rb")
       }
     end
 
