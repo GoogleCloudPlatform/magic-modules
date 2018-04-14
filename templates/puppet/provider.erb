@@ -38,7 +38,7 @@
                                 object.update_verb.to_s.downcase)
   end
 
-  requires << object.requires unless object.requires.nil?
+  requires << object&.requires unless object&.requires.nil?
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -230,7 +230,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def create
     debug('create')
     @created = true
-<% if object&.handlers.create.nil? -%>
+<% if object&.handlers&.create.nil? -%>
 <%
      if object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
@@ -241,7 +241,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
      end
 
      request_patch = get_code_multiline config, 'resource_create_patch'
-     custom_resource = true?(object.custom_create_resource)
+     custom_resource = true?(Google::HashUtils.navigate(
+       config, %w[provider_helpers custom_create_resource]
+     ))
 -%>
 <%=
   lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
@@ -434,7 +436,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 
   unless object&.handlers&.resource_to_request_patch.nil?
     r2r_code << '' unless has_boolean
-    r2r_code << object.handlers.resource_to_request_patch
+    r2r_code << object&.handlers&.resource_to_request_patch
     r2r_code << ''
   end # object&.handlers&.resource_to_request_patch.nil?
 
