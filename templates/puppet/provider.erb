@@ -38,7 +38,7 @@
                                 object.update_verb.to_s.downcase)
   end
 
-  requires << object.requires unless object.requires.nil?
+  requires << object&.requires unless object&.requires.nil?
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -231,7 +231,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def create
     debug('create')
     @created = true
-<% if object&.handlers.create.nil? -%>
+<% if object&.handlers&.create.nil? -%>
 <%
      if object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
@@ -242,7 +242,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
      end
 
      request_patch = get_code_multiline config, 'resource_create_patch'
-     custom_resource = true?(object.custom_create_resource)
+     custom_resource = true?(Google::HashUtils.navigate(
+       config, %w[provider_helpers custom_create_resource]
+     ))
 -%>
 <%=
   lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
@@ -260,9 +262,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% else -%>
     <%= fetch_assign -%>wait_for_operation create_req.send, @resource
 <% end -%>
-<% else # object&.handlers.create.nil? -%>
-<%= lines(indent(object.handlers.create, 4)) -%>
-<% end # object&.handlers.create.nil? -%>
+<% else # object&.handlers&.create.nil? -%>
+<%= lines(indent(object&.handlers&.create, 4)) -%>
+<% end # object&.handlers&.create.nil? -%>
     @property_hash[:ensure] = :present
   end
 
@@ -297,8 +299,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
 <%
-   if object&.handlers.flush.nil?
-     put_new = if object.update_verb.nil?
+   if object&.handlers&.flush.nil?
+     put_new = if upd_method.nil?
                  "Google::#{product_ns}::Network::Put.new"
                else
                  [
@@ -324,9 +326,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
-<% else # object&.handlers.flush.nil? -%>
-<%= lines(indent(object.handlers.flush, 4)) -%>
-<% end # object&.handlers.flush.nil? -%>
+<% else # object&.handlers&.flush.nil? -%>
+<%= lines(indent(object&.handlers&.flush, 4)) -%>
+<% end # object&.handlers&.flush&.nil? -%>
   end
 
   def dirty(field, from, to)
@@ -435,7 +437,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 
   unless object&.handlers&.resource_to_request_patch.nil?
     r2r_code << '' unless has_boolean
-    r2r_code << object.handlers.resource_to_request_patch
+    r2r_code << object&.handlers&.resource_to_request_patch
     r2r_code << ''
   end # object&.handlers&.resource_to_request_patch.nil?
 
