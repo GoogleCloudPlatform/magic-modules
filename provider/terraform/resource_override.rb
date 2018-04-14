@@ -16,9 +16,40 @@ require 'provider/resource_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
-    # Terraform-specific overrides to api.yaml.
+    # Collection of properties allowed in the ResourceOverride section for
+    # Terraform. All properties should be `attr_reader :<property>`
+    module OverrideProperties
+    end
+
+    # A class to control overridden properties on terraform.yaml in lieu of
+    # values from api.yaml.
     class ResourceOverride < Provider::ResourceOverride
-      # TODO: Add Terraform specific properties here.
+      include OverrideProperties
+
+      def apply(resource)
+        unless description.nil?
+          @description = format_string(:description, @description,
+                                       resource.description)
+        end
+
+        super
+      end
+
+      private
+
+      def overriden
+        Provider::Terraform::OverrideProperties
+      end
+
+      # Formats the string and potentially uses its old value as part of the new
+      # value. The marker should be in the form `{{name}}` where `name` is the
+      # field being formatted.
+      #
+      # Note: This function only supports the variable with the same name as the
+      # property being updated.
+      def format_string(name, mask, current_value)
+        mask.gsub "{{#{name.id2name}}}", current_value
+      end
     end
   end
 end
