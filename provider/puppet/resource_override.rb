@@ -18,16 +18,9 @@ module Provider
   class Puppet < Provider::Core
     # Puppet specific properties to be added to Api::Resource
     module OverrideProperties
-      attr_reader :access_api_results
-      attr_reader :custom_create_resource
-      attr_reader :custom_update_resource
       attr_reader :handlers
-      attr_reader :manual
       attr_reader :provider_helpers
       attr_reader :requires
-      attr_reader :resource_to_request
-      attr_reader :return_if_object
-      attr_reader :unwrap_resource
     end
 
     # Custom Puppet code to handle type convergence operations
@@ -45,15 +38,12 @@ module Provider
       def validate
         super
 
-        check_optional_property :collection, String
         check_optional_property :create, String
         check_optional_property :delete, String
         check_optional_property :flush, String
         check_optional_property :prefetch, String
         check_optional_property :request_to_query, String
         check_optional_property :resource_to_request_patch, String
-        check_optional_property :return_if_object, String
-        check_optional_property :self_link, String
       end
     end
 
@@ -66,15 +56,8 @@ module Provider
 
         super
 
-        check_property :access_api_results, :boolean
-        check_property :custom_create_resource, :boolean
-        check_property :custom_update_resource, :boolean
+        check_optional_property :access_api_results, :boolean
         check_optional_property :handlers, Provider::Puppet::Handlers
-        check_property :manual, :boolean
-        check_optional_property :requires, Array
-        check_property :resource_to_request, :boolean
-        check_property :return_if_object, :boolean
-        check_property :unwrap_resource, :boolean
 
         check_property_list :provider_helpers, String
         check_property_list :requires, String
