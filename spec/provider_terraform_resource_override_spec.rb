@@ -30,7 +30,7 @@ describe Provider::Terraform::ResourceOverride do
       )
     end
 
-    before do
+    before(:each) do
       allow_open 'spec/data/good-resource.yaml'
 
       resource.validate
@@ -56,17 +56,17 @@ describe Provider::Terraform::ResourceOverride do
     end
   end
 
+  private
+
   def allow_open(file_name)
     IO.expects(:read).with(file_name).returns(File.real_read(file_name))
-      .at_least(0)
+      .at_least(1)
   end
 
   def create_override(property_name, override_val)
     Google::YamlValidator.parse(
-      format("--- !ruby/object:Provider::Terraform::ResourceOverride\n" \
-             "%<k>s: '%<v>s'",
-             k: property_name,
-             v: override_val)
+      ['--- !ruby/object:Provider::Terraform::ResourceOverride',
+       "#{property_name}: '#{override_val}'"].join("\n")
     )
   end
 end
