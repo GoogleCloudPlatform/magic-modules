@@ -36,23 +36,23 @@ describe Provider::Terraform::ResourceOverride do
       resource.validate
     end
 
-    context 'with empty override' do
-      let(:override) { Provider::Terraform::ResourceOverride.new }
-      before { override.apply resource }
+    subject { resource.description }
 
-      it { expect(resource.description).to eq 'foo' }
+    context 'with no override' do
+      before(:each) { Provider::Terraform::ResourceOverride.new.apply resource }
+      it { is_expected.to eq 'foo' }
     end
 
-    it 'extends description' do
-      create_override('description', '{{description}}bar').apply resource
-
-      expect(resource.description).to eq 'foobar'
+    context 'with extend description' do
+      before(:each) do
+        create_override('description', '{{description}}bar').apply resource
+      end
+      it { is_expected.to eq 'foobar' }
     end
 
-    it 'overrides description' do
-      create_override('description', 'bar').apply resource
-
-      expect(resource.description).to eq 'bar'
+    context 'with override description' do
+      before(:each) { create_override('description', 'bar').apply resource }
+      it { is_expected.to eq 'bar' }
     end
   end
 
