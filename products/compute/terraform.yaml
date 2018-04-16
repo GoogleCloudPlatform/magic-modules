@@ -30,21 +30,26 @@ overrides: !ruby/object:Provider::ResourceOverrides
         location = "EU"
       }
       ```
+    id_format: "{{name}}"
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     description: |
       {{description}}
 
@@ -64,6 +69,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     description: |
       {{description}}
 
@@ -83,8 +89,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -103,17 +111,21 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     exclude: true
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -126,6 +138,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
