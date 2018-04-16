@@ -17,6 +17,21 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
+    documentation: !ruby/object:Provider::Terraform::Documentation
+      examples: |
+        ```hcl
+        resource "google_compute_backend_bucket" "image_backend" {
+          name        = "image-backend-bucket"
+          description = "Contains beautiful images"
+          bucket_name = "${google_storage_bucket.image_bucket.name}"
+          enable_cdn  = true
+        }
+
+        resource "google_storage_bucket" "image_bucket" {
+          name     = "image-store-bucket"
+          location = "EU"
+        }
+        ```
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
@@ -44,9 +59,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    properties:
-      checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
-        description: 'blabla'
+    documentation: !ruby/object:Provider::Terraform::Documentation
+      examples: |
+        ```hcl
+        resource "google_compute_http_health_check" "default" {
+          name         = "authentication-health-check"
+          request_path = "/health_check"
+
+          timeout_sec        = 1
+          check_interval_sec = 1
+        }
+        ```
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     description: |
@@ -57,6 +80,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
+    documentation: !ruby/object:Provider::Terraform::Documentation
+      examples: |
+        ```hcl
+        resource "google_compute_https_health_check" "default" {
+          name         = "test"
+          request_path = "/health_check"
+
+          timeout_sec        = 1
+          check_interval_sec = 1
+        }
+        ```
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
@@ -117,21 +151,6 @@ objects: !ruby/object:Api::Resource::HashArray
     # TODO: look into moving validation into api.yaml
     validation:
       name: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
-    documentation:
-      examples: |
-        ```hcl
-        resource "google_compute_backend_bucket" "image_backend" {
-          name        = "image-backend-bucket"
-          description = "Contains beautiful images"
-          bucket_name = "${google_storage_bucket.image_bucket.name}"
-          enable_cdn  = true
-        }
-
-        resource "google_storage_bucket" "image_bucket" {
-          name     = "image-store-bucket"
-          location = "EU"
-        }
-        ```
   Disk:
     ignore:
       - id
@@ -156,17 +175,6 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
-    documentation:
-      examples: |
-        ```hcl
-        resource "google_compute_http_health_check" "default" {
-          name         = "authentication-health-check"
-          request_path = "/health_check"
-
-          timeout_sec        = 1
-          check_interval_sec = 1
-        }
-        ```
   HttpsHealthCheck:
     ignore:
       - id
@@ -177,17 +185,6 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
-    documentation:
-      examples: |
-        ```hcl
-        resource "google_compute_https_health_check" "default" {
-          name         = "test"
-          request_path = "/health_check"
-
-          timeout_sec        = 1
-          check_interval_sec = 1
-        }
-        ```
   Image:
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
     # in raw_disk is currently named `sha1` in our Terraform provider.
