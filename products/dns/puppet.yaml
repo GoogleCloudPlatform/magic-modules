@@ -28,10 +28,10 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Provider::Objects
-  ManagedZone: !ruby/object:Provider::RubyObject
+objects: !ruby/object:Api::Resource::HashArray
+  ManagedZone:
     flush: raise 'DNS Managed Zone cannot be edited' if @dirty
-  ResourceRecordSet: !ruby/object:Provider::RubyObject
+  ResourceRecordSet:
     # template.provider: enables to specify another source for code production
     # | template:
     # |   provider: 'products/dns/templates/resource_record_set.erb'
@@ -66,7 +66,7 @@ objects: !ruby/object:Provider::Objects
       include:
         - 'products/dns/helpers/puppet_provider_resource_set.rb.erb'
         - 'products/dns/helpers/provider_resource_set.rb.erb'
-  Project: !ruby/object:Provider::RubyObject
+  Project:
     flush: raise 'DNS Project cannot be edited' if @dirty
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
