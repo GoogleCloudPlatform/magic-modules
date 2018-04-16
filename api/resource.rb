@@ -313,7 +313,7 @@ module Api
     #   object: An Api::Resource object
     def save_api_results?
       exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
-        || Google::HashUtils.navigate(config, %w[access_api_results])
+        || access_api_results
     end
 
     private
