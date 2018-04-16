@@ -17,13 +17,19 @@ require 'google/string_utils'
 module Api
   # Represents a property type
   class Type < Api::Object::Named
-    attr_reader :description
-    attr_reader :output # If set value will not be sent to server on sync
-    attr_reader :input # If set to true value is used only on creation
-    attr_reader :field
-    attr_reader :required
-    attr_reader :update_verb
-    attr_reader :update_url
+    # The list of properties (attr_reader) that can be overriden in
+    # <provider>.yaml.
+    module Fields
+      attr_reader :description
+      attr_reader :output # If set value will not be sent to server on sync
+      attr_reader :input # If set to true value is used only on creation
+      attr_reader :field
+      attr_reader :required
+      attr_reader :update_verb
+      attr_reader :update_url
+    end
+
+    include Fields
 
     attr_reader :__resource
     attr_reader :__parent # is nil for top-level properties

@@ -30,7 +30,6 @@ module Api
       # default=name
       attr_reader :identity
       attr_reader :parameters
-      attr_reader :properties
       attr_reader :exclude
       attr_reader :virtual
       attr_reader :async
@@ -46,6 +45,8 @@ module Api
 
     include Properties
 
+    # Properties can be overriden via Provider::PropertyOverride.
+    attr_reader :properties
     attr_reader :__product
 
     # Allows overriding snowflake transport requests
