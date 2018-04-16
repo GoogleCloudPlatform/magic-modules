@@ -15,6 +15,7 @@ module Provider
   module Ansible
     # Responsible for building out the resource_to_request and
     # request_from_hash methods.
+    # rubocop:disable Metrics/ModuleLength
     module Request
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
@@ -54,7 +55,7 @@ module Provider
           if p.is_a? Api::Type::NestedObject
             [p] + properties_with_classes(p.properties)
           elsif p.is_a?(Api::Type::Array) && \
-            p.item_type.is_a?(Api::Type::NestedObject)
+                p.item_type.is_a?(Api::Type::NestedObject)
             [p] + properties_with_classes(p.item_type.properties)
           end
         end.compact.flatten
@@ -76,6 +77,7 @@ module Provider
         ].join(' ')
       end
 
+      # rubocop:disable Metrics/MethodLength
       def response_output(prop, hash_name)
         if prop.is_a? Api::Type::NestedObject
           [
@@ -84,7 +86,7 @@ module Provider
             ').from_response()'
           ].join
         elsif prop.is_a?(Api::Type::Array) && \
-          prop.item_type.is_a?(Api::Type::NestedObject)
+              prop.item_type.is_a?(Api::Type::NestedObject)
           [
             "#{prop.property_class[-1]}(",
             "#{hash_name}.get(#{unicode_string(prop.name)}, [])",
@@ -94,7 +96,12 @@ module Provider
           "#{hash_name}.get(#{unicode_string(prop.name)})"
         end
       end
+      # rubocop:enable Metrics/MethodLength
 
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
       def request_output(prop, hash_name)
         if prop.is_a? Api::Type::NestedObject
           [
@@ -103,7 +110,7 @@ module Provider
             ').to_request()'
           ].join
         elsif prop.is_a?(Api::Type::Array) && \
-          prop.item_type.is_a?(Api::Type::NestedObject)
+              prop.item_type.is_a?(Api::Type::NestedObject)
           [
             "#{prop.property_class[-1]}(",
             "#{hash_name}.get(#{quote_string(prop.out_name)}, [])",
@@ -117,15 +124,15 @@ module Provider
             "#{quote_string(prop.imports)})"
           ].join
         elsif prop.is_a?(Api::Type::ResourceRef) && \
-          prop.resource_ref.virtual && prop.imports == 'selfLink'
+              prop.resource_ref.virtual && prop.imports == 'selfLink'
           func_name = Google::StringUtils.underscore("#{prop.name}_selflink")
           [
             "#{func_name}(#{hash_name}.get(#{quote_string(prop.out_name)}),",
-            "module.params)"
+            'module.params)'
           ].join(' ')
         elsif prop.is_a?(Api::Type::Array) && \
-          prop.item_type.is_a?(Api::Type::ResourceRef) && \
-          !prop.item_type.resource_ref.virtual
+              prop.item_type.is_a?(Api::Type::ResourceRef) && \
+              !prop.item_type.resource_ref.virtual
           [
             "replace_resource_dict(#{hash_name}",
             ".get(#{unicode_string(prop.name)}, []), ",
@@ -135,6 +142,11 @@ module Provider
           "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
       end
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
     end
+    # rubocop:enable Metrics/ModuleLength
   end
 end
