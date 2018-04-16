@@ -53,9 +53,7 @@ def self.fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)
   result
 end
 
-<%   unless false?(Google::HashUtils.navigate(config,
-                                              %w[provider_helpers visible
-                                                 unwrap_resource])) -%>
+<%   unless false?(object.unwrap_resource) -%>
 def unwrap_resource(result, resource)
   self.class.unwrap_resource(result, resource)
 end

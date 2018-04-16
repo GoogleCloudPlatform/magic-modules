@@ -186,8 +186,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       ['result = new({ title: name,',
        'ensure: :present }.merge(fetch_to_hash(fetch)))'].join(' ')
     end,
-    ('result.instance_variable_set(:@fetched, fetch)' if \
-       object.save_api_results?(config)),
+    ('result.instance_variable_set(:@fetched, fetch)' \
+       if object.save_api_results?(config)),
     'result'
   ].compact
   f2h_code = [
@@ -242,9 +242,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
      end
 
      request_patch = get_code_multiline config, 'resource_create_patch'
-     custom_resource = true?(Google::HashUtils.navigate(
-       config, %w[provider_helpers custom_create_resource]
-     ))
+     custom_resource = true?(object.custom_create_resource)
 -%>
 <%=
   lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
@@ -271,8 +269,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def destroy
     debug('destroy')
     @deleted = true
-<% custom_delete = get_code_multiline config, 'delete' -%>
-<% if custom_delete.nil? -%>
+<% if object&.handlers&.delete.nil? -%>
 <%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
 <%=
   lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
@@ -282,14 +279,14 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   ), 4))
 -%>
 <% kind_param = object.kind? ? ", '#{object.kind}'" : '' -%>
-<% unless object.async -%>
+<%   unless object.async -%>
     return_if_object delete_req.send<%= kind_param %>
-<% else -%>
+<%   else -%>
     wait_for_operation delete_req.send, @resource
-<% end -%>
-<% else -%>
-<%= lines(indent(custom_delete, 4)) -%>
-<% end -%>
+<%   end -%>
+<% else # object&.handlers&.delete.nil? -%>
+<%= lines(indent(object&.handlers&.delete, 4)) -%>
+<% end # object&.handlers&.delete.nil? -%>
     @property_hash[:ensure] = :absent
   end
 
@@ -306,9 +303,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
                else
                  "Google::#{product_ns}::Network::#{upd_method.capitalize}.new"
                end
-    custom_resource = true?(Google::HashUtils.navigate(
-      config, %w[provider_helpers custom_update_resource]
-    ))
+    custom_resource = true?(object.custom_update_resource)
 -%>
 <%=
   lines(indent_list(["update_req = #{put_new}(self_link(@resource)"].concat(
@@ -399,9 +394,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   lines(indent(emit_method('self.resource_to_hash', %w[resource], r2h_code,
                            file_relative), 2), 1)
 -%>
-<% unless false?(Google::HashUtils.navigate(config,
-                                            %w[provider_helpers visible
-                                               resource_to_request])) -%>
+<% unless false?(object.resource_to_request) -%>
 <%
   prop_code = []
   prop_code << "kind: '#{object.kind}'" if object.kind?
@@ -455,9 +448,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
                              file_relative), 2), 1) -%>
 <% end # visible:resource_to_request -%>
 <%
-  unless false?(Google::HashUtils.navigate(config,
-                                           %w[provider_helpers visible
-                                              unwrap_resource]))
+  unless false?(object.unwrap_resource)
     unless object.self_link_query.nil?
 -%>
 <%
