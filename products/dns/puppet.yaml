@@ -28,46 +28,43 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  ManagedZone:
-    flush: raise 'DNS Managed Zone cannot be edited' if @dirty
-  ResourceRecordSet:
-    # template.provider: enables to specify another source for code production
-    # | template:
-    # |   provider: 'products/dns/templates/resource_record_set.erb'
-    # TODO(alexstephen): Document the access_api_results field.
+overrides: !ruby/object:Provider::ResourceOverrides
+  ManagedZone: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: raise 'DNS Managed Zone cannot be edited' if @dirty
+  ResourceRecordSet: !ruby/object:Provider::Puppet::ResourceOverride
     access_api_results: true
-    create: |
-      change = create_change nil, updated_record, @resource
-      change_id = change['id'].to_i
-      debug("created for transaction '#{change_id}' to complete")
-      wait_for_change_to_complete change_id, @resource \
-        if change['status'] == 'pending'
-    delete: |
-      change = create_change @fetched, nil, @resource
-      change_id = change['id'].to_i
-      debug("created for transaction '#{change_id}' to complete")
-      wait_for_change_to_complete change_id, @resource \
-        if change['status'] == 'pending'
-    flush: |
-      change = create_change @fetched, updated_record, @resource
-      change_id = change['id'].to_i
-      debug("created for transaction '#{change_id}' to complete")
-      wait_for_change_to_complete change_id, @resource \
-        if change['status'] == 'pending'
-    request_to_query: |
-      # DNS service already did server-side filtering of resource.
-      lambda { |resource| true }
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      create: |
+        change = create_change nil, updated_record, @resource
+        change_id = change['id'].to_i
+        debug("created for transaction '#{change_id}' to complete")
+        wait_for_change_to_complete change_id, @resource \
+          if change['status'] == 'pending'
+      delete: |
+        change = create_change @fetched, nil, @resource
+        change_id = change['id'].to_i
+        debug("created for transaction '#{change_id}' to complete")
+        wait_for_change_to_complete change_id, @resource \
+          if change['status'] == 'pending'
+      flush: |
+        change = create_change @fetched, updated_record, @resource
+        change_id = change['id'].to_i
+        debug("created for transaction '#{change_id}' to complete")
+        wait_for_change_to_complete change_id, @resource \
+          if change['status'] == 'pending'
+      request_to_query: |
+        # DNS service already did server-side filtering of resource.
+        lambda { |resource| true }
     provider_helpers:
-      visible:
-        unwrap_resource: false
-        resource_to_request: false
-        return_if_object: false
-      include:
-        - 'products/dns/helpers/puppet_provider_resource_set.rb.erb'
-        - 'products/dns/helpers/provider_resource_set.rb.erb'
-  Project:
-    flush: raise 'DNS Project cannot be edited' if @dirty
+      - 'products/dns/helpers/puppet_provider_resource_set.rb.erb'
+      - 'products/dns/helpers/provider_resource_set.rb.erb'
+    resource_to_request: false
+    return_if_object: false
+    unwrap_resource: false
+  Project: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: raise 'DNS Project cannot be edited' if @dirty
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray
