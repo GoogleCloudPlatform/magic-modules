@@ -13,7 +13,7 @@
 
 require 'spec_helper'
 require 'google/yaml_validator'
-require 'provider/resource_override'
+require 'provider/terraform/resource_override'
 
 class File
   class << self
@@ -22,10 +22,12 @@ class File
   end
 end
 
-describe Provider::ResourceOverride do
+describe Provider::Terraform::ResourceOverride do
   context 'good resource' do
     let(:resource) do
-      Provider::ResourceOverride.parse IO.read('spec/data/good-resource.yaml')
+      Provider::Terraform::ResourceOverride.parse(
+        IO.read('spec/data/good-resource.yaml')
+      )
     end
 
     before do
@@ -35,7 +37,7 @@ describe Provider::ResourceOverride do
     end
 
     context 'with empty override' do
-      let(:override) { Provider::ResourceOverride.new }
+      let(:override) { Provider::Terraform::ResourceOverride.new }
       before { override.apply resource }
 
       it { expect(resource.description).to eq 'foo' }
@@ -61,7 +63,8 @@ describe Provider::ResourceOverride do
 
   def create_override(property_name, override_val)
     Google::YamlValidator.parse(
-      format("--- !ruby/object:Provider::ResourceOverride\n%<k>s: '%<v>s'",
+      format("--- !ruby/object:Provider::Terraform::ResourceOverride\n" \
+             "%<k>s: '%<v>s'",
              k: property_name,
              v: override_val)
     )
