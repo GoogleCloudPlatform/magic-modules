@@ -19,12 +19,21 @@ module Provider
     # Collection of properties allowed in the ResourceOverride section for
     # Terraform. All properties should be `attr_reader :<property>`
     module OverrideProperties
+      # The Terraform resource id format used when calling #setId(...).
+      # For instance, `{{name}}` means the id will be the resource name.
+      attr_reader :id_format
     end
 
     # A class to control overridden properties on terraform.yaml in lieu of
     # values from api.yaml.
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
+
+      def validate
+        super
+
+        check_optional_property :id_format, String
+      end
 
       def apply(resource)
         unless description.nil?

@@ -15,21 +15,27 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     description: |
       {{description}}
 
@@ -38,7 +44,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
+    properties:
+      checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
+        description: 'blabla'
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     description: |
       {{description}}
 
@@ -48,8 +58,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -68,16 +80,21 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
     exclude: true
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -90,11 +107,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
     exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
-    id: "{{name}}"
     ignore:
       - id
     # TODO: look into moving validation into api.yaml
@@ -116,24 +133,20 @@ objects: !ruby/object:Api::Resource::HashArray
         }
         ```
   Disk:
-    id: "{{name}}"
     ignore:
       - id
   ForwardingRule:
-    id: "{{name}}"
     ignore:
       - id
     diff_suppress_funcs:
       portRange: "portRangeDiffSuppress"
     # TODO: Add support for missing features needed by this resource
   GlobalAddress:
-    id: "{{name}}"
     ignore:
       - id
       - region # TODO: Remove this from api.yaml instead of ignoring
     # TODO: Add support for missing features needed by this resource
   HttpHealthCheck:
-    id: "{{name}}"
     ignore:
       - id
     default_values:
@@ -155,7 +168,6 @@ objects: !ruby/object:Api::Resource::HashArray
         }
         ```
   HttpsHealthCheck:
-    id: "{{name}}"
     ignore:
       - id
     default_values:
@@ -177,7 +189,6 @@ objects: !ruby/object:Api::Resource::HashArray
         }
         ```
   Image:
-    id: "{{name}}"
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
     # in raw_disk is currently named `sha1` in our Terraform provider.
     ignore:
@@ -190,11 +201,7 @@ objects: !ruby/object:Api::Resource::HashArray
       - sourceType
       - licenses
     # TODO: Add support for missing features needed by this resource
-  Route:
-    id: "{{name}}"
-    # TODO: Add support for missing features needed by this resource
   SslCertificate:
-    id: "{{name}}"
     ignore:
       - id
     sensitive:
@@ -202,24 +209,18 @@ objects: !ruby/object:Api::Resource::HashArray
       - privateKey
     # TODO: Add support for missing features needed by this resource
   Subnetwork:
-    id: "{{region}}/{{name}}"
     ignore:
       - id
     # TODO: Add support for missing features needed by this resource
   TargetHttpProxy:
-    id: "{{name}}"
     ignore:
       - id
     # TODO: Alias id to proxy_id
     # TODO: Add support for missing features needed by this resource
   TargetHttpsProxy:
-    id: "{{name}}"
     ignore:
       - id
     # TODO: Alias id to proxy_id
-    # TODO: Add support for missing features needed by this resource
-  TargetPool:
-    id: "{{name}}"
     # TODO: Add support for missing features needed by this resource
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
