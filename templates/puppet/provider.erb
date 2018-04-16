@@ -186,8 +186,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       ['result = new({ title: name,',
        'ensure: :present }.merge(fetch_to_hash(fetch)))'].join(' ')
     end,
-    ('result.instance_variable_set(:@fetched, fetch)' if \
-       object.save_api_results?(config)),
+    ('result.instance_variable_set(:@fetched, fetch)' \
+       if object.save_api_results?(config)),
     'result'
   ].compact
   f2h_code = [
@@ -242,9 +242,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
      end
 
      request_patch = get_code_multiline config, 'resource_create_patch'
-     custom_resource = true?(Google::HashUtils.navigate(
-       config, %w[provider_helpers custom_create_resource]
-     ))
+     custom_resource = true?(object.custom_create_resource)
 -%>
 <%=
   lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
@@ -271,7 +269,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def destroy
     debug('destroy')
     @deleted = true
-<% if object&.handlers.delete.nil? -%>
+<% if object&.handlers&.delete.nil? -%>
 <%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
 <%=
   lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
@@ -286,9 +284,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%   else -%>
     wait_for_operation delete_req.send, @resource
 <%   end -%>
-<% else # object&.handlers.delete.nil? -%>
-<%= lines(indent(object.handlers.delete, 4)) -%>
-<% end # object&.handlers.delete.nil? -%>
+<% else # object&.handlers&.delete.nil? -%>
+<%= lines(indent(object&.handlers&.delete, 4)) -%>
+<% end # object&.handlers&.delete.nil? -%>
     @property_hash[:ensure] = :absent
   end
 
