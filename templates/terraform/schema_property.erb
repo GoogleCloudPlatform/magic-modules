@@ -77,9 +77,8 @@
 <% if config['sensitive']&.include?(property.name) -%>
     Sensitive: true,
 <% end -%>
-<% default_values = config['default_values'] -%>
-<% if default_values&.include?(property_key) -%>
-    Default: <%= go_literal(default_values[property_key]) -%>,
+<% unless property.default_value.nil? -%>
+    Default: <%= go_literal(property.default_value) -%>,
 <% end -%>
 },
 <% else -%>

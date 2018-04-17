@@ -51,7 +51,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
-    exclude: false
+    exclude: true
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -90,6 +90,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 5
+      healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 2
+      port: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 80
+      requestPath: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: "/"
+      timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 5
+      unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 2
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     description: |
@@ -113,6 +125,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 5
+      healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 2
+      port: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 443
+      requestPath: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: "/"
+      timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 5
+      unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 2
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
@@ -198,22 +222,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
-  HttpHealthCheck:
-    default_values:
-      checkIntervalSec: 5
-      healthyThreshold: 2
-      port: 80
-      requestPath: "/"
-      timeoutSec: 5
-      unhealthyThreshold: 2
-  HttpsHealthCheck:
-    default_values:
-      checkIntervalSec: 5
-      healthyThreshold: 2
-      port: 443
-      requestPath: "/"
-      timeoutSec: 5
-      unhealthyThreshold: 2
   SslCertificate:
     sensitive:
       - certificate

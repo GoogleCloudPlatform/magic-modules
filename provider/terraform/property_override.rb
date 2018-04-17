@@ -23,6 +23,8 @@ module Provider
       attr_reader :exclude
       # Adds a DiffSuppressFunc to the schema field with the given name
       attr_reader :diff_suppress_func
+      # TODO: Consider sharing this functionality
+      attr_reader :default_value
 
       attr_reader :validation
     end
@@ -56,11 +58,15 @@ module Provider
         check_optional_property :validation, Provider::Terraform::Validation
       end
 
-      def apply(property)
+      def apply(api_property)
         unless description.nil?
           @description = format_string(:description, @description,
-                                       property.description)
+                                       api_property.description)
         end
+
+        # This can't be done in validate because we don't have access to the
+        # api.yaml property yet.
+        check_default_value_property api_property
 
         super
       end
@@ -79,6 +85,20 @@ module Provider
       # property being updated.
       def format_string(name, mask, current_value)
         mask.gsub "{{#{name.id2name}}}", current_value
+      end
+
+      def check_default_value_property(api_property)
+        return if @default_value.nil?
+
+        if api_property.is_a?(Api::Type::String)
+          clazz = String
+        elsif api_property.is_a?(Api::Type::Integer)
+          clazz = Integer
+        else
+          raise "Update 'check_default_value_property' method to support default value for type #{api_property.class}"
+        end
+
+        check_optional_property :default_value, clazz
       end
     end
   end
