@@ -1,8 +1,8 @@
 ---
 platform: linux
 inputs:
-  - name: terraform-generated
-  - name: magic-modules
+  - name: terraform-head
+  - name: magic-modules-gcp
 
 image_resource:
   type: docker-image
@@ -11,9 +11,9 @@ image_resource:
     tag: '1.10'
 
 run:
-  path: magic-modules/.ci/magic-modules/generate-terraform-all-platforms.sh
+  path: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.sh
   args:
-    - terraform-generated
+    - terraform-head
   
 outputs:
   - name: dist

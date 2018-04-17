@@ -45,6 +45,12 @@ resources:
           uri: git@github.com:((github-account.username))/terraform-provider-google.git
           private_key: ((repo-key.private_key))
 
+    - name: terraform-head
+      type: git-branch
+      source:
+          uri: git@github.com:terraform-providers/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
+
     - name: mm-approved-prs
       type: github-pull-request
       source:
@@ -74,7 +80,7 @@ resources:
       source:
         bucket: ((gcp-bucket))
         json_key: ((gcp-bucket-json-key))
-        regexp: dist/terraform-provider-google.(*)
+        regexp: dist/terraform-provider-google.*
 
     - name: night-trigger
       type: time
@@ -260,12 +266,45 @@ jobs:
       plan:
           - get: night-trigger
             trigger: true
-          - get: magic-modules
-          - get: terraform-generated
+          - get: magic-modules-gcp
+          - get: terraform-head
 
           - task: build
-            file: magic-modules/.ci/magic-modules/generate-terraform-all-platforms.yml
+            file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
 
           - put: gcp-bucket
             params:
-              file: dist/terraform-provider-google.(*)
+              file: dist/terraform-provider-google.darwin_amd64
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.freebsd_386
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.freebsd_amd64
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.freebsd_arm
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.linux_386
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.linux_amd64
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.linux_arm
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.openbsd_386
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.openbsd_amd64
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.solaris_amd64
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.windows_386.exe
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.windows_amd64.exe
