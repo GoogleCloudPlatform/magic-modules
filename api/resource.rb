@@ -304,6 +304,16 @@ module Api
       !@transport&.decoder.nil?
     end
 
+    # Returns true if this resource needs access to the saved API response
+    # This response is stored in the @fetched variable
+    # Requires:
+    #   config: The config for an object
+    #   object: An Api::Resource object
+    def save_api_results?(config)
+      exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
+        || Google::HashUtils.navigate(config, %w[access_api_results])
+    end
+
     private
 
     # Given an array of properties, return all ResourceRefs contained within

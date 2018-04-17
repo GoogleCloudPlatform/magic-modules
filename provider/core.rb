@@ -662,19 +662,6 @@ module Provider
       self.class.name.split('::').last.downcase
     end
 
-    # Returns true if this module needs access to the saved API response
-    # This response is stored in the @fetched variable
-    # Requires:
-    #   config: The config for an object
-    #   object: An Api::Resource object
-    def save_api_results?(config, object)
-      fetched_props = object.exported_properties.select do |p|
-        p.is_a? Api::Type::FetchedExternal
-      end
-      Google::HashUtils.navigate(config, %w[access_api_results]) || \
-        !fetched_props.empty?
-    end
-
     # Generates the documentation for the client side function to be
     # included in the module. Call this function immediately before the function
     # definition and the code generator will use data from api.yaml to build the
