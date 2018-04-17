@@ -128,19 +128,21 @@ def main():
         if state == 'present':
             if is_different(module, fetch):
 <%
-  method = method_call('update', ['module', 'self_link(module)',
-                                  ('kind' if object.kind?),
-                                  ('fetch' if save_api_results?(config, object))
-                                  ])
+  method = method_call('update', [
+                                   'module', 'self_link(module)',
+                                   ('kind' if object.kind?),
+                                   ('fetch' if object.save_api_results?(config))
+                                 ])
 -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
                 changed = True
         else:
 <%
-  method = method_call('delete', ['module', 'self_link(module)',
-                                  ('kind' if object.kind?),
-                                  ('fetch' if save_api_results?(config, object))
-                                  ])
+  method = method_call('delete', [
+                                   'module', 'self_link(module)',
+                                   ('kind' if object.kind?),
+                                   ('fetch' if object.save_api_results?(config))
+                                 ])
 -%>
 <%= lines(indent(method, 12)) -%>
             fetch = {}
@@ -207,7 +209,7 @@ def main():
 <% editable = config['editable'] -%>
 <%=
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
-                         ('fetch' if save_api_results?(config, object))]))
+                               ('fetch' if object.save_api_results?(config))]))
 -%>
 <% if custom_update.nil? -%>
 <%   if !false?(editable) -%>
@@ -234,7 +236,7 @@ def main():
 <% custom_delete = get_code_multiline config, 'delete' -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
-                         ('fetch' if save_api_results?(config, object))]))
+                               ('fetch' if object.save_api_results?(config))]))
 -%>
 <% if custom_delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)

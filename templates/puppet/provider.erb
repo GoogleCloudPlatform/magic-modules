@@ -187,7 +187,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
        'ensure: :present }.merge(fetch_to_hash(fetch)))'].join(' ')
     end,
     ('result.instance_variable_set(:@fetched, fetch)' if \
-       save_api_results?(config, object)),
+       object.save_api_results?(config)),
     'result'
   ].compact
   f2h_code = [
@@ -255,7 +255,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     ], request_new.length + 14).split("\n") # 14 = 'create_req = ' + '('
   ), 4))
 -%>
-<% fetch_assign = save_api_results?(config, object) ? '@fetched = ' : '' -%>
+<% fetch_assign = object.save_api_results?(config) ? '@fetched = ' : '' -%>
 <% unless object.async -%>
 <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
     <%= fetch_assign -%>return_if_object create_req.send<%= obj_kind %>
