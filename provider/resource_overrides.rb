@@ -108,17 +108,11 @@ module Provider
 
     def find_property(api_entity, property_path)
       property_name = property_path[0]
-      Google::LOGGER.info "find_property entity #{api_entity}"
-      Google::LOGGER.info "find_property property_name #{property_name}"
       properties = get_properties api_entity
       return nil if properties.nil?
 
-      Google::LOGGER.info "find_property properties #{properties}"
-
       api_property = properties.find { |p| p.name == property_name }
       return nil if api_property.nil?
-
-      Google::LOGGER.info "find_property api_property #{api_property}"
 
       property_path.shift
       if property_path.empty?

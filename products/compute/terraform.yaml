@@ -51,10 +51,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
-    exclude: true
+    exclude: false
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      portRange: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'portRangeDiffSuppress'
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     properties:
@@ -196,10 +198,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
-  ForwardingRule:
-    diff_suppress_funcs:
-      portRange: "portRangeDiffSuppress"
-    # TODO: Add support for missing features needed by this resource
   HttpHealthCheck:
     default_values:
       checkIntervalSec: 5

@@ -29,9 +29,8 @@
 <% unless property.validation.nil? || property.validation.regex.nil? -%>
   ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
 <% end -%>
-<% diff_suppress_fns = config['diff_suppress_funcs'] -%>
-<% if diff_suppress_fns&.key?(property_key) -%>
-  DiffSuppressFunc: <%= diff_suppress_fns[property_key] %>,
+<% if !property.diff_suppress_func.nil? -%>
+  DiffSuppressFunc: <%= property.diff_suppress_func %>,
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end -%>

@@ -21,6 +21,8 @@ module Provider
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
       attr_reader :exclude
+      # Adds a DiffSuppressFunc to the schema field with the given name
+      attr_reader :diff_suppress_func
 
       attr_reader :validation
     end
@@ -49,6 +51,8 @@ module Provider
         @exclude ||= false # sets to false if nil
 
         check_property :exclude, :boolean
+
+        check_optional_property :diff_suppress_func, String
         check_optional_property :validation, Provider::Terraform::Validation
       end
 
