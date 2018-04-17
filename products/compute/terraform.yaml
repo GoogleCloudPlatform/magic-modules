@@ -185,7 +185,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
-    exclude: false
+    exclude: true
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true

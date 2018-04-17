@@ -45,7 +45,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) int
   return req
 }
   <% nested_properties.each do |prop| -%>
-    <%= lines(build_expand_method(config, prefix + titlelize_property(property), prop), 1) -%>
+    <%= lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% else -%>
   return v

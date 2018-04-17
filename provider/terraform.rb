@@ -119,22 +119,6 @@ module Provider
 
     private
 
-    # Constructs the key uniquely identifying a property for a given resource.
-    #
-    # The key can take one of these formats:
-    # - 'foo': Top-level property 'foo'
-    # - 'foo.bar': Property 'bar' nested under property 'foo'
-    # - 'foo.*.bar': Property 'bar' of all nested objects in list 'foo'
-    def construct_property_key(property)
-      return property.name if property.parent.nil?
-
-      if property.parent.is_a?(Api::Type::Array)
-        construct_property_key(property.parent) + '.*'
-      else
-        construct_property_key(property.parent) + '.' + property.name
-      end
-    end
-
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.

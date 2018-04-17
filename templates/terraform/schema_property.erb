@@ -13,7 +13,6 @@
   # limitations under the License.
 <% end -%>
 <% if tf_types.include?(property.class) -%>
-<% property_key = construct_property_key(property) -%>
 "<%= Google::StringUtils.underscore(property.name) -%>": {
   Type: <%= tf_types[property.class] %>,
 <% if property.required -%>
@@ -39,7 +38,7 @@
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
       <% order_properties(effective_properties(property.properties)).each do |prop| -%>
-        <%= lines(build_schema_property(config, prop, object)) -%>
+        <%= lines(build_schema_property(prop, object)) -%>
       <% end -%>
     },
   },
@@ -48,7 +47,7 @@
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
           <% order_properties(effective_properties(property.item_type.properties)).each do |prop| -%>
-            <%= lines(build_schema_property(config, prop, object)) -%>
+            <%= lines(build_schema_property(prop, object)) -%>
           <% end -%>
         },
       },

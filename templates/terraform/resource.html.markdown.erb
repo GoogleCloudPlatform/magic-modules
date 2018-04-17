@@ -56,17 +56,17 @@ To get more information about <%= object.name -%>, see:
 The following arguments are supported:
 
 <% properties.select(&:required).each do |prop| -%>
-<%= lines(build_property_documentation(config, prop)) -%>
+<%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
-<%= lines(build_nested_property_documentation(config, prop)) -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(config, prop)) -%>
+<%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 * `project` (Optional) The ID of the project in which the resource belongs.
@@ -74,7 +74,7 @@ The following arguments are supported:
 <% end -%>
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(config, prop)) -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 ## Attributes Reference
@@ -82,14 +82,14 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are exported:
 
 <% properties.select(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(config, prop)) -%>
+<%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 <% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
 <% properties.select(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(config, prop)) -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 ## Timeouts
