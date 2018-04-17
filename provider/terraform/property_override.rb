@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'api/object'
 require 'provider/abstract_core'
 require 'provider/property_override'
 
@@ -19,13 +20,32 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
-      # Terraform uses this regex of this field must match this regex.
-      attr_reader :validation_regex
+      attr_reader :validation
+    end
+
+    # Adds a ValidateFunc to the schema field.
+    class Validation < Api::Object
+      # Ensures the value matches this regex
+      attr_reader :regex
+
+      # TODO(rosbo): Add support for complex validation (i.e. custom go code)
+
+      def validate
+        super
+
+        check_optional_property :regex, String
+      end
     end
 
     # Terraform-specific overrides to api.yaml.
     class PropertyOverride < Provider::PropertyOverride
       include OverrideFields
+
+      def validate
+        super
+
+        check_optional_property :validation, Provider::Terraform::Validation
+      end
 
       def apply(property)
         unless description.nil?
@@ -35,6 +55,8 @@ module Provider
 
         super
       end
+
+      private
 
       def overriden
         Provider::Terraform::OverrideFields

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'provider/property_override'
 require 'provider/resource_override'
 
 module Provider
@@ -92,6 +93,8 @@ module Provider
         override.apply api_object
 
         override.properties.each do |property_path, property_override|
+          check_property_value "properties['#{property_path}']",
+                               property_override, Provider::PropertyOverride
           api_property = find_property api_object, property_path.split('.')
           if api_property.nil?
             raise "The property to override must exists #{property_path} " \
@@ -114,6 +117,8 @@ module Provider
 
       api_property = properties.find { |p| p.name == property_name }
       return nil if api_property.nil?
+
+      Google::LOGGER.info "find_property api_property #{api_property}"
 
       property_path.shift
       if property_path.empty?

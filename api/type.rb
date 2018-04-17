@@ -17,7 +17,7 @@ require 'google/string_utils'
 module Api
   # Represents a property type
   class Type < Api::Object::Named
-    # The list of properties (attr_reader) that can be overriden in
+    # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
       attr_reader :description

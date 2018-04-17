@@ -26,9 +26,8 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
-<% validate_fns = config['validation'] -%>
-<% if validate_fns&.key?(property_key) -%>
-  ValidateFunc: validateRegexp(`<%= validate_fns[property_key] -%>`),
+<% unless property.validation.nil? || property.validation.regex.nil? -%>
+  ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
 <% end -%>
 <% diff_suppress_fns = config['diff_suppress_funcs'] -%>
 <% if diff_suppress_fns&.key?(property_key) -%>

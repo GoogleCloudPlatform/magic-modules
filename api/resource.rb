@@ -18,7 +18,7 @@ module Api
   # An object available in the product
   # rubocop:disable Metrics/ClassLength
   class Resource < Api::Object::Named
-    # The list of properties (attr_reader) that can be overriden in
+    # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Properties
       attr_reader :description
@@ -45,7 +45,7 @@ module Api
 
     include Properties
 
-    # Properties can be overriden via Provider::PropertyOverride.
+    # Properties can be overridden via Provider::PropertyOverride.
     attr_reader :properties
     attr_reader :__product
 

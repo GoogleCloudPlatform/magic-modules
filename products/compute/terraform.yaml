@@ -31,6 +31,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     id_format: "{{name}}"
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
@@ -145,9 +149,6 @@ objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
     ignore:
       - id
-    # TODO: look into moving validation into api.yaml
-    validation:
-      name: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   Disk:
     ignore:
       - id
