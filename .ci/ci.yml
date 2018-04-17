@@ -256,7 +256,7 @@ jobs:
                 path: terraform-pr
                 status: success
 
-    - name: upload-releases-to-gcp-bucket
+    - name: nightly-build
       plan:
           - get: night-trigger
             trigger: true

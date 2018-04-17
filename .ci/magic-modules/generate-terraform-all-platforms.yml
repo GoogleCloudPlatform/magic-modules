@@ -8,7 +8,7 @@ image_resource:
   type: docker-image
   source:
     repository: golang
-    tag: '1.9.3'
+    tag: '1.10'
 
 run:
   path: magic-modules/.ci/magic-modules/generate-terraform-all-platforms.sh

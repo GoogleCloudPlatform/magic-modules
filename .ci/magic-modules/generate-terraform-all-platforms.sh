@@ -1,37 +1,65 @@
 #!/usr/bin/env bash
 
-set -e
-
-# Setup GOPATH
-export GOPATH=${PWD}/go
-# Setup GOBIN
-export GOBIN=${PWD}/dist
 
 set -x
 
-# Create GOBIN folder
-mkdir -p "$GOBIN"
+function init {
+  START_DIR=${PWD}
+  # Setup GOPATH
+  export GOPATH=${PWD}/go
+  # Setup GOBIN
+  export GOBIN=${PWD}/dist
+  # Create GOBIN folder
+  mkdir -p "$GOBIN"
+  # Create GOPATH structure
+  mkdir -p "${GOPATH}/src/github.com/terraform-providers"
+  # Copy the repo
+  cp -rf "$1" "${GOPATH}/src/github.com/terraform-providers/"
+  # Paths and vars
+  PROVIDER_NAME="google"
+  PROVIDERPATH="$GOPATH/src/github.com/terraform-providers"
+  SRC_DIR="$PROVIDERPATH/terraform-provider-$PROVIDER_NAME"
+  TARGET_DIR="$START_DIR/dist"
+  XC_ARCH=${XC_ARCH:-"386 amd64 arm"}
+  XC_OS=${XC_OS:=linux darwin windows freebsd openbsd solaris}
+  XC_EXCLUDE_OSARCH="!darwin/arm !darwin/386"
+  export CGO_ENABLED=0
+  mkdir -p $TARGET_DIR
+}
 
-# Create GOPATH structure
-mkdir -p "${GOPATH}/src/github.com/terraform-providers"
-yes | cp -rf "$1" "${GOPATH}/src/github.com/terraform-providers/"
+function installGox {
+  if ! which gox > /dev/null; then
+    go get -u github.com/mitchellh/gox
+  fi
+}
 
-cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
+function compile {
+  pushd $SRC_DIR
+  printf "\n"
+  make fmtcheck
 
-# Platforms build
-platforms=("linux/386" "linux/amd64" "linux/arm" "linux/arm64" "linux/ppc64" "linux/ppc64le" "linux/mips" "linux/mipsle" "linux/mips64" "linux/mips64le")
+  # Set LD Flags
+  LD_FLAGS="-s -w"
 
-for platform in "${platforms[@]}"
-do
-    platform_split=(${platform//\// })
-    GOOS=${platform_split[0]}
-    GOARCH=${platform_split[1]}
+  # Clean any old directories (should never be here)
+  rm -f bin/*
+  rm -fr pkg/*
+  # Build with gox
+  $GOBIN/gox \
+    -os="${XC_OS}" \
+    -arch="${XC_ARCH}" \
+    -osarch="${XC_EXCLUDE_OSARCH}" \
+    -ldflags "${LD_FLAGS}" \
+    -output "$TARGET_DIR/terraform-provider-${PROVIDER_NAME}.{{.OS}}_{{.Arch}}" \
+    .
 
-    output_name='terraform-provider-google.'$GOOS'-'$GOARCH
+  popd
+}
 
-    if [ $GOOS = "windows" ]; then
-        output_name+='.exe'
-    fi
+function main {
+  init $1
+  installGox
+  compile
+}
 
-    env GOOS=$GOOS GOARCH=$GOARCH go build -o $GOBIN/$output_name
-done
+main
