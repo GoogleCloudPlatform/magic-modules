@@ -45,10 +45,10 @@ To get more information about <%= object.name -%>, see:
 <%   end # object...guides.empty? -%>
 <% end # object...api.nil? -%>
 
-<% unless object.documentation.examples.nil? -%>
+<% unless object.examples.nil? -%>
 ## Example Usage
 
-<%= object.documentation.examples  -%>
+<%= object.examples  -%>
 <% end -%>
 
 ## Argument Reference

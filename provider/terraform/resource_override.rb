@@ -23,19 +23,7 @@ module Provider
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
 
-      attr_reader :documentation
-    end
-
-    # Terraform specific documentation additions
-    class Documentation < Api::Object
-      # Example Terraform configurations to include in documentation
       attr_reader :examples
-
-      def validate
-        super
-
-        check_optional_property :examples, String
-      end
     end
 
     # A class to control overridden properties on terraform.yaml in lieu of
@@ -46,11 +34,11 @@ module Provider
       def validate
         super
 
-        @documentation ||= Provider::Terraform::Documentation.new
+        @id_format ||= '{{name}}'
 
-        check_property :documentation, Provider::Terraform::Documentation
+        check_property :id_format, String
 
-        check_optional_property :id_format, String
+        check_optional_property :examples, String
       end
 
       def apply(resource)

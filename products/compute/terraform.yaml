@@ -16,41 +16,35 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
-    documentation: !ruby/object:Provider::Terraform::Documentation
-      examples: |
-        ```hcl
-        resource "google_compute_backend_bucket" "image_backend" {
-          name        = "image-backend-bucket"
-          description = "Contains beautiful images"
-          bucket_name = "${google_storage_bucket.image_bucket.name}"
-          enable_cdn  = true
-        }
+    examples: |
+      ```hcl
+      resource "google_compute_backend_bucket" "image_backend" {
+        name        = "image-backend-bucket"
+        description = "Contains beautiful images"
+        bucket_name = "${google_storage_bucket.image_bucket.name}"
+        enable_cdn  = true
+      }
 
-        resource "google_storage_bucket" "image_bucket" {
-          name     = "image-store-bucket"
-          location = "EU"
-        }
-        ```
+      resource "google_storage_bucket" "image_bucket" {
+        name     = "image-store-bucket"
+        location = "EU"
+      }
+      ```
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     description: |
       {{description}}
 
@@ -59,19 +53,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    documentation: !ruby/object:Provider::Terraform::Documentation
-      examples: |
-        ```hcl
-        resource "google_compute_http_health_check" "default" {
-          name         = "authentication-health-check"
-          request_path = "/health_check"
+    examples: |
+      ```hcl
+      resource "google_compute_http_health_check" "default" {
+        name         = "authentication-health-check"
+        request_path = "/health_check"
 
-          timeout_sec        = 1
-          check_interval_sec = 1
-        }
-        ```
+        timeout_sec        = 1
+        check_interval_sec = 1
+      }
+      ```
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     description: |
       {{description}}
 
@@ -80,22 +72,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    documentation: !ruby/object:Provider::Terraform::Documentation
-      examples: |
-        ```hcl
-        resource "google_compute_https_health_check" "default" {
-          name         = "test"
-          request_path = "/health_check"
+    examples: |
+      ```hcl
+      resource "google_compute_https_health_check" "default" {
+        name         = "test"
+        request_path = "/health_check"
 
-          timeout_sec        = 1
-          check_interval_sec = 1
-        }
-        ```
+        timeout_sec        = 1
+        check_interval_sec = 1
+      }
+      ```
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -114,21 +103,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     exclude: true
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -141,7 +126,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{name}}"
     exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
