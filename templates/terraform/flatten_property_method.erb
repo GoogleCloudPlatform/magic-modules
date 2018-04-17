@@ -17,7 +17,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
 <% if property.is_a?(Api::Type::NestedObject) -%>
   original := v.(map[string]interface{})
   transformed := make(map[string]interface{})
-  <% effective_properties(config, property.properties).each do |prop| -%>
+  <% effective_properties(property.properties).each do |prop| -%>
     transformed["<%= Google::StringUtils.underscore(prop.name) -%>"] =
     flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name -%>"])
   <% end -%>
@@ -28,7 +28,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   for _, raw := range l {
     original := raw.(map[string]interface{})
     transformed = append(transformed, map[string]interface{}{
-    <% effective_properties(config, property.item_type.properties).each do |prop| -%>
+    <% effective_properties(property.item_type.properties).each do |prop| -%>
       "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name -%>"]),
     <% end -%>
     })
@@ -38,8 +38,8 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
 }
-<% if !effective_nested_properties(config, property).empty? -%>
-  <% effective_nested_properties(config, property).each do |prop| -%>
+<% if !effective_nested_properties(property).empty? -%>
+  <% effective_nested_properties(property).each do |prop| -%>
     <%= lines(build_flatten_method(config, prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% end -%>

@@ -99,21 +99,19 @@ module Provider
     end
 
     # Returns the resource properties without those ignored.
-    def effective_properties(config, properties)
-      properties.reject do |p|
-        config['ignore']&.include?(construct_property_key(p))
-      end
+    def effective_properties(properties)
+      properties.reject { |p| p.exclude }
     end
 
     # Returns the nested properties without those ignored. An empty list is
     # returned if the property is not a NestedObject or an Array of
     # NestedObjects.
-    def effective_nested_properties(config, property)
+    def effective_nested_properties(property)
       if property.is_a?(Api::Type::NestedObject)
-        effective_properties(config, property.properties)
+        effective_properties(property.properties)
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
-        effective_properties(config, property.item_type.properties)
+        effective_properties(property.item_type.properties)
       else
         []
       end

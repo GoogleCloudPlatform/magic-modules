@@ -20,6 +20,7 @@ module Api
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
+      attr_reader :name # duplicated here
       attr_reader :description
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation

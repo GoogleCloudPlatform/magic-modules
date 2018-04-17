@@ -32,6 +32,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       ```
     id_format: "{{name}}"
     properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
@@ -40,6 +42,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
@@ -47,8 +52,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
     exclude: true
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -72,6 +85,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         check_interval_sec = 1
       }
       ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     description: |
@@ -92,12 +108,34 @@ overrides: !ruby/object:Provider::ResourceOverrides
         check_interval_sec = 1
       }
       ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      deprecated: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      guestOsFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      imageEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      rawDisk.sha1Checksum: !ruby/object:Provider::Terraform::PropertyOverride
+        name: 'sha1'
+      sourceDiskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      sourceDiskId: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      sourceType: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      licenses: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   InstanceGroup: !ruby/object:Provider::Terraform::ResourceOverride
@@ -122,15 +160,27 @@ overrides: !ruby/object:Provider::ResourceOverrides
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: proxy_id
   TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     exclude: true
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: proxy_id
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
@@ -146,26 +196,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
-  BackendBucket:
-    ignore:
-      - id
-  Disk:
-    ignore:
-      - id
   ForwardingRule:
-    ignore:
-      - id
     diff_suppress_funcs:
       portRange: "portRangeDiffSuppress"
     # TODO: Add support for missing features needed by this resource
-  GlobalAddress:
-    ignore:
-      - id
-      - region # TODO: Remove this from api.yaml instead of ignoring
-    # TODO: Add support for missing features needed by this resource
   HttpHealthCheck:
-    ignore:
-      - id
     default_values:
       checkIntervalSec: 5
       healthyThreshold: 2
@@ -174,8 +209,6 @@ objects: !ruby/object:Api::Resource::HashArray
       timeoutSec: 5
       unhealthyThreshold: 2
   HttpsHealthCheck:
-    ignore:
-      - id
     default_values:
       checkIntervalSec: 5
       healthyThreshold: 2
@@ -183,39 +216,10 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
-  Image:
-    # TODO: Add support for aliasing. For instance, the sha1_checksum field
-    # in raw_disk is currently named `sha1` in our Terraform provider.
-    ignore:
-      - id
-      - deprecated
-      - guestOsFeatures
-      - imageEncryptionKey
-      - sourceDiskEncryptionKey
-      - sourceDiskId
-      - sourceType
-      - licenses
-    # TODO: Add support for missing features needed by this resource
   SslCertificate:
-    ignore:
-      - id
     sensitive:
       - certificate
       - privateKey
-    # TODO: Add support for missing features needed by this resource
-  Subnetwork:
-    ignore:
-      - id
-    # TODO: Add support for missing features needed by this resource
-  TargetHttpProxy:
-    ignore:
-      - id
-    # TODO: Alias id to proxy_id
-    # TODO: Add support for missing features needed by this resource
-  TargetHttpsProxy:
-    ignore:
-      - id
-    # TODO: Alias id to proxy_id
     # TODO: Add support for missing features needed by this resource
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray

@@ -20,6 +20,8 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
+      attr_reader :exclude
+
       attr_reader :validation
     end
 
@@ -44,6 +46,9 @@ module Provider
       def validate
         super
 
+        @exclude ||= false # sets to false if nil
+
+        check_property :exclude, :boolean
         check_optional_property :validation, Provider::Terraform::Validation
       end
 

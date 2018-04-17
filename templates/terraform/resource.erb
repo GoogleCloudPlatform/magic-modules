@@ -18,7 +18,7 @@ package google
 
 <%
   resource_name = product_ns + object.name
-  properties = effective_properties(config, object.all_user_properties)
+  properties = effective_properties(object.all_user_properties)
   settable_properties = properties.reject(&:output)
   api_name_lower = String.new(product_ns)
   api_name_lower[0] = api_name_lower[0].downcase
