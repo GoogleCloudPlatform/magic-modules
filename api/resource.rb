@@ -45,7 +45,7 @@ module Api
 
     include Properties
 
-    # Properties can be overridden via Provider::PropertyOverride.
+    # Properties can be overridden via Provider::PropertyOverride
     attr_reader :properties
     attr_reader :__product
 

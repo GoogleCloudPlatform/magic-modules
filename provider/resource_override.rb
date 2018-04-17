@@ -16,10 +16,6 @@ require 'api/object'
 module Provider
   # Override to an Api::Resource in api.yaml
   class ResourceOverride < Api::Object
-    # TODO(rosbo): Find better naming to avoid confusion between properties of
-    # a resource such as its name and description vs the list of properties of
-    # that resource such as archiveSizeBytes, creationTimestamp and so on for
-    # the compute image resource.
     include Api::Resource::Properties
 
     # Hash of properties where the key is the property path and the value is
