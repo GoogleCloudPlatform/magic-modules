@@ -1,0 +1,19 @@
+---
+platform: linux
+inputs:
+  - name: terraform-generated
+  - name: magic-modules
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: '1.9.3'
+
+run:
+  path: magic-modules/.ci/magic-modules/generate-terraform-all-platforms.sh
+  args:
+    - terraform-generated
+  
+outputs:
+  - name: dist
