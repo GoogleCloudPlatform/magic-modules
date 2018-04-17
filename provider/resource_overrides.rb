@@ -102,7 +102,7 @@ module Provider
         api_property = find_property api_object, property_path.split('.')
         if api_property.nil?
           raise "The property to override must exists #{property_path} " \
-              "in resource #{name}"
+              "in resource #{api_object.name}"
         end
 
         property_override.apply api_property

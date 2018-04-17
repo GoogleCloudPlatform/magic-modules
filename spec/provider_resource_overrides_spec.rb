@@ -24,52 +24,69 @@ describe Provider::ResourceOverrides do
   context 'good file product' do
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
-    before do
+    before(:each) do
       allow_open 'spec/data/good-file.yaml'
-      allow_open 'spec/data/good-resource-overrides.yaml'
 
       product.validate
     end
 
-    context 'with resource with overrides' do
+    context 'with overrides' do
       let(:overrides) do
         Provider::ResourceOverride.parse(
           IO.read('spec/data/good-resource-overrides.yaml')
         )
       end
 
-      before do
+      before(:each) do
+        allow_open 'spec/data/good-resource-overrides.yaml'
+
         overrides.consume_api(product)
         overrides.validate
       end
 
-      subject(:resource) do
-        product.objects.find { |o| o.name == 'AnotherResource' }
-      end
-
-      it 'overrides resource description' do
-        expect(resource.description).to eq 'blah blah bar'
-      end
-
-      it 'overrides property description' do
-        property = resource.properties.find { |p| p.name == 'property1' }
-        expect(property.description).to eq 'foo'
-      end
-
-      it 'overrides nested property description' do
-        property = resource.properties.find { |p| p.name == 'nested-property' }
-        nested_property = property.properties.find do |p|
-          p.name == 'property1'
+      context 'for resource' do
+        let(:resource) do
+          product.objects.find { |o| o.name == 'AnotherResource' }
         end
-        expect(nested_property.description).to eq 'bar'
-      end
 
-      it 'overrides array of nested property description' do
-        property = resource.properties.find { |p| p.name == 'array-property' }
-        nested_property = property.item_type.properties.find do |p|
-          p.name == 'property1'
+        context 'overrides resource description' do
+          subject { resource.description }
+          it { is_expected.to eq 'blah blah bar' }
         end
-        expect(nested_property.description).to eq 'baz'
+
+        context 'overrides property description' do
+          subject do
+            resource.properties.find { |p| p.name == 'property1' }.description
+          end
+          it { is_expected.to eq 'foo' }
+        end
+
+        context 'overrides nested property description' do
+          subject do
+            property = resource.properties.find do |p|
+              p.name == 'nested-property'
+            end
+
+            nested_property = property.properties.find do |p|
+              p.name == 'property1'
+            end
+            nested_property.description
+          end
+          it { is_expected.to eq 'bar' }
+        end
+
+        context 'overrides array of nested property description' do
+          subject do
+            property = resource.properties.find do |p|
+              p.name == 'array-property'
+            end
+            nested_property = property.item_type.properties.find do |p|
+              p.name == 'property1'
+            end
+            nested_property.description
+          end
+          it { is_expected.to eq 'baz' }
+        end
       end
     end
 
@@ -140,6 +157,6 @@ describe Provider::ResourceOverrides do
 
   def allow_open(file_name)
     IO.expects(:read).with(file_name).returns(File.real_read(file_name))
-      .at_least(0)
+      .at_least(1)
   end
 end
