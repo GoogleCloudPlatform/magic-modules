@@ -186,8 +186,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       ['result = new({ title: name,',
        'ensure: :present }.merge(fetch_to_hash(fetch)))'].join(' ')
     end,
-    ('result.instance_variable_set(:@fetched, fetch)' \
-       if object.save_api_results?(config)),
+    ('result.instance_variable_set(:@fetched, fetch)' if \
+       object.save_api_results?(config)),
     'result'
   ].compact
   f2h_code = [
