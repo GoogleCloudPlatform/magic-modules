@@ -17,7 +17,6 @@
   api_name_lower = product_ns.downcase
   resource_name = Google::StringUtils.underscore(object.name)
   properties = effective_properties(config, object.all_user_properties)
-  documentation = config["documentation"] || {}
 -%>
 
 ---
@@ -46,10 +45,10 @@ To get more information about <%= object.name -%>, see:
 <%   end # object...guides.empty? -%>
 <% end # object...api.nil? -%>
 
-<% if documentation&.key?("examples") -%>
+<% unless object.examples.nil? -%>
 ## Example Usage
 
-<%= documentation["examples"]  -%>
+<%= object.examples  -%>
 <% end -%>
 
 ## Argument Reference

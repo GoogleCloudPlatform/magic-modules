@@ -15,6 +15,21 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
+    examples: |
+      ```hcl
+      resource "google_compute_backend_bucket" "image_backend" {
+        name        = "image-backend-bucket"
+        description = "Contains beautiful images"
+        bucket_name = "${google_storage_bucket.image_bucket.name}"
+        enable_cdn  = true
+      }
+
+      resource "google_storage_bucket" "image_bucket" {
+        name     = "image-store-bucket"
+        location = "EU"
+      }
+      ```
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
@@ -38,6 +53,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
+    examples: |
+      ```hcl
+      resource "google_compute_http_health_check" "default" {
+        name         = "authentication-health-check"
+        request_path = "/health_check"
+
+        timeout_sec        = 1
+        check_interval_sec = 1
+      }
+      ```
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     description: |
       {{description}}
@@ -47,6 +72,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
+    examples: |
+      ```hcl
+      resource "google_compute_https_health_check" "default" {
+        name         = "test"
+        request_path = "/health_check"
+
+        timeout_sec        = 1
+        check_interval_sec = 1
+      }
+      ```
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
@@ -74,6 +109,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
     exclude: true
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
@@ -94,46 +130,26 @@ overrides: !ruby/object:Provider::ResourceOverrides
 # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
 objects: !ruby/object:Api::Resource::HashArray
   BackendBucket:
-    id: "{{name}}"
     ignore:
       - id
     # TODO: look into moving validation into api.yaml
     validation:
       name: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
-    documentation:
-      examples: |
-        ```hcl
-        resource "google_compute_backend_bucket" "image_backend" {
-          name        = "image-backend-bucket"
-          description = "Contains beautiful images"
-          bucket_name = "${google_storage_bucket.image_bucket.name}"
-          enable_cdn  = true
-        }
-
-        resource "google_storage_bucket" "image_bucket" {
-          name     = "image-store-bucket"
-          location = "EU"
-        }
-        ```
   Disk:
-    id: "{{name}}"
     ignore:
       - id
   ForwardingRule:
-    id: "{{name}}"
     ignore:
       - id
     diff_suppress_funcs:
       portRange: "portRangeDiffSuppress"
     # TODO: Add support for missing features needed by this resource
   GlobalAddress:
-    id: "{{name}}"
     ignore:
       - id
       - region # TODO: Remove this from api.yaml instead of ignoring
     # TODO: Add support for missing features needed by this resource
   HttpHealthCheck:
-    id: "{{name}}"
     ignore:
       - id
     default_values:
@@ -143,19 +159,7 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
-    documentation:
-      examples: |
-        ```hcl
-        resource "google_compute_http_health_check" "default" {
-          name         = "authentication-health-check"
-          request_path = "/health_check"
-
-          timeout_sec        = 1
-          check_interval_sec = 1
-        }
-        ```
   HttpsHealthCheck:
-    id: "{{name}}"
     ignore:
       - id
     default_values:
@@ -165,19 +169,7 @@ objects: !ruby/object:Api::Resource::HashArray
       requestPath: "/"
       timeoutSec: 5
       unhealthyThreshold: 2
-    documentation:
-      examples: |
-        ```hcl
-        resource "google_compute_https_health_check" "default" {
-          name         = "test"
-          request_path = "/health_check"
-
-          timeout_sec        = 1
-          check_interval_sec = 1
-        }
-        ```
   Image:
-    id: "{{name}}"
     # TODO: Add support for aliasing. For instance, the sha1_checksum field
     # in raw_disk is currently named `sha1` in our Terraform provider.
     ignore:
@@ -190,11 +182,7 @@ objects: !ruby/object:Api::Resource::HashArray
       - sourceType
       - licenses
     # TODO: Add support for missing features needed by this resource
-  Route:
-    id: "{{name}}"
-    # TODO: Add support for missing features needed by this resource
   SslCertificate:
-    id: "{{name}}"
     ignore:
       - id
     sensitive:
@@ -202,24 +190,18 @@ objects: !ruby/object:Api::Resource::HashArray
       - privateKey
     # TODO: Add support for missing features needed by this resource
   Subnetwork:
-    id: "{{region}}/{{name}}"
     ignore:
       - id
     # TODO: Add support for missing features needed by this resource
   TargetHttpProxy:
-    id: "{{name}}"
     ignore:
       - id
     # TODO: Alias id to proxy_id
     # TODO: Add support for missing features needed by this resource
   TargetHttpsProxy:
-    id: "{{name}}"
     ignore:
       - id
     # TODO: Alias id to proxy_id
-    # TODO: Add support for missing features needed by this resource
-  TargetPool:
-    id: "{{name}}"
     # TODO: Add support for missing features needed by this resource
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
