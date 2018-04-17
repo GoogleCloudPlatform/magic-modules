@@ -100,7 +100,7 @@ module Provider
 
     # Returns the resource properties without those ignored.
     def effective_properties(properties)
-      properties.reject { |p| p.exclude }
+      properties.reject(&:exclude)
     end
 
     # Returns the nested properties without those ignored. An empty list is

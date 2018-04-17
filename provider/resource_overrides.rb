@@ -91,18 +91,21 @@ module Provider
         raise "The resource to override must exist #{name}" if api_object.nil?
         check_property_value 'overrides', override, Provider::ResourceOverride
         override.apply api_object
+        override_properties api_object, override
+      end
+    end
 
-        override.properties.each do |property_path, property_override|
-          check_property_value "properties['#{property_path}']",
-                               property_override, Provider::PropertyOverride
-          api_property = find_property api_object, property_path.split('.')
-          if api_property.nil?
-            raise "The property to override must exists #{property_path} " \
+    def override_properties(api_object, override)
+      override.properties.each do |property_path, property_override|
+        check_property_value "properties['#{property_path}']",
+                             property_override, Provider::PropertyOverride
+        api_property = find_property api_object, property_path.split('.')
+        if api_property.nil?
+          raise "The property to override must exists #{property_path} " \
               "in resource #{name}"
-          end
-
-          property_override.apply api_property
         end
+
+        property_override.apply api_property
       end
     end
 
