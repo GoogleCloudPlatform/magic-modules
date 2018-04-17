@@ -21,15 +21,17 @@ module Provider
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
       attr_reader :exclude
-      # Adds a DiffSuppressFunc to the schema field with the given name
+      # Adds a DiffSuppressFunc to the schema
       attr_reader :diff_suppress_func
-      # TODO: Consider sharing this functionality
+      # TODO(rosbo): Consider sharing this functionality with the other tools.
       attr_reader :default_value
-
+      # Adds `Sensitive: true` to the schema
+      attr_reader :sensitive
+      # Adds a ValidateFunc to the schema
       attr_reader :validation
     end
 
-    # Adds a ValidateFunc to the schema field.
+    # Support for schema ValidateFunc functionality.
     class Validation < Api::Object
       # Ensures the value matches this regex
       attr_reader :regex
@@ -50,9 +52,12 @@ module Provider
       def validate
         super
 
-        @exclude ||= false # sets to false if nil
+        # Ensures boolean values are set to false if nil
+        @exclude ||= false
+        @sensitive ||= false
 
         check_property :exclude, :boolean
+        check_property :sensitive, :boolean
 
         check_optional_property :diff_suppress_func, String
         check_optional_property :validation, Provider::Terraform::Validation
