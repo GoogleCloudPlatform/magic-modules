@@ -20,6 +20,7 @@ module Provider
     module OverrideProperties
       attr_reader :access_api_results
       attr_reader :handlers
+      attr_reader :manual
       attr_reader :provider_helpers
       attr_reader :requires
       attr_reader :resource_to_request
@@ -66,6 +67,7 @@ module Provider
         check_property :custom_create_resource, :boolean
         check_property :custom_update_resource, :boolean
         check_optional_property :handlers, Provider::Puppet::Handlers
+        check_property :manual, :boolean
         check_optional_property :requires, Array
         check_property :resource_to_request, :boolean
         check_property :return_if_object, :boolean
