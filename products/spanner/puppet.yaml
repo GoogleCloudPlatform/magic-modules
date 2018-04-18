@@ -29,79 +29,77 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  Database:
-    resource_to_request_patch: |
-      request[:create_statement] = "CREATE DATABASE `#{name}`"
-    collection: |
-      URI.join(
-        'https://spanner.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/instances/{{instance}}/databases',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
-    self_link: |
-      URI.join(
-        'https://spanner.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/instances/{{instance}}/databases/{{name}}',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
+overrides: !ruby/object:Provider::ResourceOverrides
+  Database: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      resource_to_request_patch: |
+        request[:create_statement] = "CREATE DATABASE `#{name}`"
+      collection: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instances/{{instance}}/databases',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      self_link: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instances/{{instance}}/databases/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
     provider_helpers:
-      include:
-        - 'products/spanner/helpers/database_helpers.rb.erb'
-  Instance:
-    methods:
-      update: PATCH
-    self_link: |
-      URI.join(
-        'https://spanner.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/instances/{{name}}',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
-    collection: |
-      URI.join(
-        'https://spanner.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/instances',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
+      - 'products/spanner/helpers/database_helpers.rb.erb'
+  Instance: !ruby/object:Provider::Puppet::ResourceOverride
+    custom_create_resource: true
+    custom_update_resource: true
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      collection: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instances',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      self_link: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instances/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
     provider_helpers:
-      custom_create_resource: true
-      custom_update_resource: true
-      include:
-        - 'products/spanner/helpers/instance_helpers.rb.erb'
-  InstanceConfig:
-    collection: |
-      URI.join(
-        'https://spanner.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/instanceConfigs',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
-    self_link: |
-      URI.join(
-        'https://spanner.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/instanceConfigs/{{name}}',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
+      - 'products/spanner/helpers/instance_helpers.rb.erb'
+  InstanceConfig: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      collection: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instanceConfigs',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      self_link: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instanceConfigs/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
     provider_helpers:
-      include:
-        - 'products/spanner/helpers/instance_config_helpers.rb.erb'
+      - 'products/spanner/helpers/instance_config_helpers.rb.erb'
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/spanner/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray
