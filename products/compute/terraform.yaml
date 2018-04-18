@@ -189,6 +189,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpCidrRange'
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
     properties:
