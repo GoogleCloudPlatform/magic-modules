@@ -12,22 +12,25 @@
 # limitations under the License.
 
 require 'api/object'
+require 'provider/property_override'
 require 'provider/resource_override'
 
 module Provider
-  # A hash of Provider::Override objects where the key is the api name for that
-  # object.
+  # A hash of Provider::ResourceOverride objects where the key is the api name
+  # for that object.
   #
   # Example usage in a provider.yaml file where you want to extend a resource
   # description:
   #
   # overrides: !ruby/object:Provider::ResourceOverrides
-  #   SomeResource:
-  #     !ruby/object:Provider::MyProvider::Override
-  #     description: |
-  #       {{ description}}
-  #
-  #       A tool-specific description complement
+  #   SomeResource: !ruby/object:Provider::MyProvider::ResourceOverride
+  #     description: '{{description}} A tool-specific description complement'
+  #     properties:
+  #       someProperty: !ruby/object:Provider::MyProvider::PropertyOverride
+  #         description: 'foobar' # replaces description
+  #       anotherProperty.someNestedProperty:
+  #         !ruby/object:Provider::MyProvider::PropertyOverride
+  #         description: 'baz'
   #   ...
   class ResourceOverrides < Api::Object
     def consume_api(api)
@@ -91,6 +94,47 @@ module Provider
         raise "The resource to override must exist #{name}" if api_object.nil?
         check_property_value 'overrides', override, Provider::ResourceOverride
         override.apply api_object
+        override_properties api_object, override
+      end
+    end
+
+    def override_properties(api_object, override)
+      override.properties.each do |property_path, property_override|
+        check_property_value "properties['#{property_path}']",
+                             property_override, Provider::PropertyOverride
+        api_property = find_property api_object, property_path.split('.')
+        if api_property.nil?
+          raise "The property to override must exists #{property_path} " \
+              "in resource #{api_object.name}"
+        end
+
+        property_override.apply api_property
+      end
+    end
+
+    def find_property(api_entity, property_path)
+      property_name = property_path[0]
+      properties = get_properties api_entity
+      return nil if properties.nil?
+
+      api_property = properties.find { |p| p.name == property_name }
+      return nil if api_property.nil?
+
+      property_path.shift
+      if property_path.empty?
+        api_property
+      else
+        find_property api_property, property_path
+      end
+    end
+
+    def get_properties(api_entity)
+      if api_entity.is_a?(Api::Resource) ||
+         api_entity.is_a?(Api::Type::NestedObject)
+        api_entity.properties
+      elsif api_entity.is_a?(Api::Type::Array) &&
+            api_entity.item_type.is_a?(Api::Type::NestedObject)
+        api_entity.item_type.properties
       end
     end
   end

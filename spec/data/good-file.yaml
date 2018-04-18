@@ -68,3 +68,18 @@ objects:
           - :value1
           - 'value2'
           - 3
+      - !ruby/object:Api::Type::NestedObject
+         name: 'nested-property'
+         description: 'a nested object property'
+         properties:
+           - !ruby/object:Api::Type::String
+             name: 'property1'
+             description: 'a nested property'
+      - !ruby/object:Api::Type::Array
+        name: 'array-property'
+        description: 'an array of nested object property'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+             name: 'property1'
+             description: 'a nested property'

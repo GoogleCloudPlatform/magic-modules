@@ -13,7 +13,6 @@
   # limitations under the License.
 <% end -%>
 <% if tf_types.include?(property.class) -%>
-<% property_key = construct_property_key(property) -%>
 "<%= Google::StringUtils.underscore(property.name) -%>": {
   Type: <%= tf_types[property.class] %>,
 <% if property.required -%>
@@ -26,13 +25,11 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
-<% validate_fns = config['validation'] -%>
-<% if validate_fns&.key?(property_key) -%>
-  ValidateFunc: validateRegexp(`<%= validate_fns[property_key] -%>`),
+<% unless property.validation.nil? || property.validation.regex.nil? -%>
+  ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
 <% end -%>
-<% diff_suppress_fns = config['diff_suppress_funcs'] -%>
-<% if diff_suppress_fns&.key?(property_key) -%>
-  DiffSuppressFunc: <%= diff_suppress_fns[property_key] %>,
+<% if !property.diff_suppress_func.nil? -%>
+  DiffSuppressFunc: <%= property.diff_suppress_func %>,
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end -%>
@@ -40,8 +37,8 @@
   MaxItems: 1,
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      <% order_properties(effective_properties(config, property.properties)).each do |prop| -%>
-        <%= lines(build_schema_property(config, prop, object)) -%>
+      <% order_properties(effective_properties(property.properties)).each do |prop| -%>
+        <%= lines(build_schema_property(prop, object)) -%>
       <% end -%>
     },
   },
@@ -49,8 +46,8 @@
   <% if property.item_type.is_a?(Api::Type::NestedObject) -%>
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
-          <% order_properties(effective_properties(config, property.item_type.properties)).each do |prop| -%>
-            <%= lines(build_schema_property(config, prop, object)) -%>
+          <% order_properties(effective_properties(property.item_type.properties)).each do |prop| -%>
+            <%= lines(build_schema_property(prop, object)) -%>
           <% end -%>
         },
       },
@@ -76,12 +73,11 @@
     // but this map is marked as being <%= property.key_type -%>-><%= property.value_type -%>.
   <% end -%>
 <% end -%>
-<% if config['sensitive']&.include?(property.name) -%>
+<% if property.sensitive -%>
     Sensitive: true,
 <% end -%>
-<% default_values = config['default_values'] -%>
-<% if default_values&.include?(property_key) -%>
-    Default: <%= go_literal(default_values[property_key]) -%>,
+<% unless property.default_value.nil? -%>
+    Default: <%= go_literal(property.default_value) -%>,
 <% end -%>
 },
 <% else -%>

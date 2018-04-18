@@ -18,7 +18,7 @@ package google
 
 <%
   resource_name = product_ns + object.name
-  properties = effective_properties(config, object.all_user_properties)
+  properties = effective_properties(object.all_user_properties)
   settable_properties = properties.reject(&:output)
   api_name_lower = String.new(product_ns)
   api_name_lower[0] = api_name_lower[0].downcase
@@ -47,7 +47,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 <% order_properties(properties).each do |prop| -%>
-	<%= lines(build_schema_property(config, prop, object)) -%>
+	<%= lines(build_schema_property(prop, object)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 			"project": &schema.Schema{
@@ -279,9 +279,9 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 }
 
 <% properties.each do |prop| -%>
-<%= lines(build_flatten_method(config, resource_name, prop), 1) -%>
+<%= lines(build_flatten_method(resource_name, prop), 1) -%>
 <% end -%>
 
 <% settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(config, resource_name, prop), 1) -%>
+<%= lines(build_expand_method(resource_name, prop), 1) -%>
 <% end -%>
