@@ -28,6 +28,9 @@ module Provider
   #     properties:
   #       someProperty: !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'foobar' # replaces description
+  #       anotherProperty.someNestedProperty:
+  #         !ruby/object:Provider::MyProvider::PropertyOverride
+  #         description: 'baz'
   #   ...
   class ResourceOverrides < Api::Object
     def consume_api(api)

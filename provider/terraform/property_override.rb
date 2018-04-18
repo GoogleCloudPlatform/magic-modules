@@ -20,15 +20,11 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
-      attr_reader :exclude
-      # Adds a DiffSuppressFunc to the schema
-      attr_reader :diff_suppress_func
-      # TODO(rosbo): Consider sharing this functionality with the other tools.
-      attr_reader :default_value
-      # Adds `Sensitive: true` to the schema
-      attr_reader :sensitive
-      # Adds a ValidateFunc to the schema
-      attr_reader :validation
+      attr_reader :exclude # TODO(rosbo): Consider moving this to base
+      attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
+      attr_reader :default_value # TODO(rosbo): Consider moving this to base
+      attr_reader :sensitive # Adds `Sensitive: true` to the schema
+      attr_reader :validation # Adds a ValidateFunc to the schema
     end
 
     # Support for schema ValidateFunc functionality.

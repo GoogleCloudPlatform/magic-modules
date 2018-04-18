@@ -16,6 +16,7 @@ require 'api/type'
 
 module Provider
   # Override a resource property (Api::Type) in api.yaml
+  # TODO(rosbo): Shared common logic with ResourceOverride via a base class.
   class PropertyOverride < Api::Object
     include Api::Type::Fields
 

@@ -47,6 +47,7 @@ module Api
 
     # Properties can be overridden via Provider::PropertyOverride
     attr_reader :properties
+
     attr_reader :__product
 
     # Allows overriding snowflake transport requests
