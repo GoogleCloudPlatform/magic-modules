@@ -246,7 +246,7 @@ module Provider
         %w[name title].each do |name|
           out_file = File.join(target_folder, "success#{id + 1}~#{name}.yaml")
           next if manual.include? out_file
-          next if true?(Google::HashUtils.navigate(data[:config], %w[manual]))
+          next if true?(data[:object].manual)
 
           generate_network_data data.clone.merge(
             out_file: File.join(target_folder, "success#{id + 1}~#{name}.yaml"),
