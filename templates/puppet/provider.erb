@@ -230,7 +230,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def create
     debug('create')
     @created = true
-<% if object&.handlers&.create.nil? -%>
+<% if object&.handlers.create.nil? -%>
 <%
      if object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
@@ -268,7 +268,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def destroy
     debug('destroy')
     @deleted = true
-<% if object&.handlers&.delete.nil? -%>
+<% if object&.handlers.delete.nil? -%>
 <%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
 <%=
   lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
