@@ -494,12 +494,11 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% else # custom_self_link.nil? -%>
 <%= lines(indent(emit_link('self_link', custom_self_link, true), 2), 1) -%>
 <% end # custom_self_link.nil? -%>
-<% custom_return_if_object = get_code_multiline config, 'return_if_object' -%>
-<% if custom_return_if_object.nil? -%>
+<% if object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/return_if_object.erb'), 2)) %>
-<% else # custom_return_if_object.nil? -%>
-<%= lines(indent(custom_return_if_object, 2), 1) -%>
-<% end # custom_return_if_object.nil? -%>
+<% else # object&.handlers&.return_if_object.nil? -%>
+<%= lines(indent(object&.handlers&.return_if_object, 2), 1) -%>
+<% end # object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/expand_variables.erb'), 2)) %>
 <%=
   if object.async
