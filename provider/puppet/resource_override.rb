@@ -19,6 +19,8 @@ module Provider
     # Puppet specific properties to be added to Api::Resource
     module OverrideProperties
       attr_reader :access_api_results
+      attr_reader :custom_create_resource
+      attr_reader :custom_update_resource
       attr_reader :handlers
       attr_reader :manual
       attr_reader :provider_helpers
@@ -26,28 +28,30 @@ module Provider
       attr_reader :resource_to_request
       attr_reader :return_if_object
       attr_reader :unwrap_resource
-      attr_reader :custom_create_resource
-      attr_reader :custom_update_resource
     end
 
     # Custom Puppet code to handle type convergence operations
     class Handlers < Api::Object
+      attr_reader :collection  # A custom collection function to use
       attr_reader :create
       attr_reader :delete
       attr_reader :flush
       attr_reader :request_to_query
       attr_reader :resource_to_request_patch
       attr_reader :return_if_object
+      attr_reader :self_link  # A custom self_link function to use
 
       def validate
         super
 
+        check_optional_property :collection, String
         check_optional_property :create, String
         check_optional_property :delete, String
         check_optional_property :flush, String
         check_optional_property :request_to_query, String
         check_optional_property :resource_to_request_patch, String
         check_optional_property :return_if_object, String
+        check_optional_property :self_link, String
       end
     end
 
