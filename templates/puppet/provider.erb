@@ -38,7 +38,7 @@
                                 object.update_verb.to_s.downcase)
   end
 
-  requires << object&.requires unless object&.requires.nil?
+  requires << object.requires unless object.requires.nil?
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -231,7 +231,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def create
     debug('create')
     @created = true
-<% if object&.handlers&.create.nil? -%>
+<% if object&.handlers.create.nil? -%>
 <%
      if object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
@@ -260,16 +260,16 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% else -%>
     <%= fetch_assign -%>wait_for_operation create_req.send, @resource
 <% end -%>
-<% else # object&.handlers&.create.nil? -%>
-<%= lines(indent(object&.handlers&.create, 4)) -%>
-<% end # object&.handlers&.create.nil? -%>
+<% else # object&.handlers.create.nil? -%>
+<%= lines(indent(object.handlers.create, 4)) -%>
+<% end # object&.handlers.create.nil? -%>
     @property_hash[:ensure] = :present
   end
 
   def destroy
     debug('destroy')
     @deleted = true
-<% if object&.handlers&.delete.nil? -%>
+<% if object&.handlers.delete.nil? -%>
 <%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
 <%=
   lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
@@ -284,9 +284,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%   else -%>
     wait_for_operation delete_req.send, @resource
 <%   end -%>
-<% else # object&.handlers&.delete.nil? -%>
-<%= lines(indent(object&.handlers&.delete, 4)) -%>
-<% end # object&.handlers&.delete.nil? -%>
+<% else # object&.handlers.delete.nil? -%>
+<%= lines(indent(object.handlers.delete, 4)) -%>
+<% end # object&.handlers.delete.nil? -%>
     @property_hash[:ensure] = :absent
   end
 
@@ -297,8 +297,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
 <%
-   if object&.handlers&.flush.nil?
-     put_new = if upd_method.nil?
+   if object&.handlers.flush.nil?
+     put_new = if object.update_verb.nil?
                  "Google::#{product_ns}::Network::Put.new"
                else
                  [
@@ -324,9 +324,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
-<% else # object&.handlers&.flush.nil? -%>
-<%= lines(indent(object&.handlers&.flush, 4)) -%>
-<% end # object&.handlers&.flush&.nil? -%>
+<% else # object&.handlers.flush.nil? -%>
+<%= lines(indent(object.handlers.flush, 4)) -%>
+<% end # object&.handlers.flush.nil? -%>
   end
 
   def dirty(field, from, to)
@@ -435,7 +435,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 
   unless object&.handlers&.resource_to_request_patch.nil?
     r2r_code << '' unless has_boolean
-    r2r_code << object&.handlers&.resource_to_request_patch
+    r2r_code << object.handlers.resource_to_request_patch
     r2r_code << ''
   end # object&.handlers&.resource_to_request_patch.nil?
 
@@ -496,13 +496,20 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% if object&.handlers.self_link.nil? -%>
 <%   if object.self_link.nil? -%>
 <%= lines(indent(emit_link('self_link', self_link_url(object), true), 2), 1) -%>
-<% else # custom_self_link.nil? -%>
-<%= lines(indent(emit_link('self_link', custom_self_link, true), 2), 1) -%>
-<% end # custom_self_link.nil? -%>
+<%   else # object.self_link.nil? -%>
+<%= lines(indent(emit_link('self_link', object.self_link, true), 2), 1) -%>
+<%   end # object.self_link.nil? -%>
+<% else # object&.handlers.self_link.nil? -%>
+<%=
+  lines_before(
+    lines(indent(emit_link('self_link', object.handlers.self_link, true), 2), 1)
+  )
+-%>
+<% end # object&.handlers.self_link.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/return_if_object.erb'), 2)) %>
 <% else # object&.handlers&.return_if_object.nil? -%>
-<%= lines(indent(object&.handlers&.return_if_object, 2), 1) -%>
+<%= lines(indent(object.handlers.return_if_object, 2), 1) -%>
 <% end # object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/expand_variables.erb'), 2)) %>
 <%=
