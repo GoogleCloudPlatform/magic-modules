@@ -45,6 +45,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
     base_url: projects/{{project}}/instances
+    update_verb: :PATCH
     description: |
       An isolated set of Cloud Spanner resources on which databases can be
       hosted.
