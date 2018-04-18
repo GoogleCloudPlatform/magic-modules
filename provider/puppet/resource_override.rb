@@ -51,6 +51,7 @@ module Provider
         check_optional_property :prefetch, String
         check_optional_property :request_to_query, String
         check_optional_property :resource_to_request_patch, String
+        check_optional_property :return_if_object, String
       end
     end
 
