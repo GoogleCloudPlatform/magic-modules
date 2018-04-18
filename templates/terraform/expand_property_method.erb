@@ -26,8 +26,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) map
 <% elsif tf_types.include?(property.class) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
 <%
-  if !effective_nested_properties(config, property).empty?
-    nested_properties = effective_nested_properties(config, property)
+  if !effective_nested_properties(property).empty?
+    nested_properties = effective_nested_properties(property)
 -%>
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
@@ -45,7 +45,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) int
   return req
 }
   <% nested_properties.each do |prop| -%>
-    <%= lines(build_expand_method(config, prefix + titlelize_property(property), prop), 1) -%>
+    <%= lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% else -%>
   return v
