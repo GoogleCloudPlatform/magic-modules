@@ -31,16 +31,14 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  Cluster:
+overrides: !ruby/object:Provider::ResourceOverrides
+  Cluster: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      include:
-        - 'products/container/helpers/provider_cluster.rb'
-  NodePool:
+      - 'products/container/helpers/provider_cluster.rb'
+  NodePool: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      include:
-        - 'products/container/helpers/provider_node_pool.rb'
-  KubeConfig:
+      - 'products/container/helpers/provider_node_pool.rb'
+  KubeConfig: !ruby/object:Provider::Puppet::ResourceOverride
     manual: true
 bolt_tasks:
   - !ruby/object:Provider::Puppet::BoltTask

@@ -42,7 +42,7 @@ module Provider
       end
 
       def generate_resource_tests(data)
-        return if true?(Google::HashUtils.navigate(data[:config], %w[manual]))
+        return if true?(data[:object].manual)
         generate_provider_tests data
       end
 
@@ -57,8 +57,7 @@ module Provider
 
       def provider_template_source(data)
         object_name = Google::StringUtils.underscore(data[:object].name)
-        if true?(Google::HashUtils.navigate(data[:config],
-                                            %w[manual]))
+        if true?(data[:object].manual)
           File.join('products', data[:product_name], 'files',
                     "provider~#{object_name}.rb")
         else
