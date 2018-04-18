@@ -37,6 +37,7 @@ module Provider
       attr_reader :flush
       attr_reader :request_to_query
       attr_reader :resource_to_request_patch
+      attr_reader :return_if_object
 
       def validate
         super
@@ -46,6 +47,7 @@ module Provider
         check_optional_property :flush, String
         check_optional_property :request_to_query, String
         check_optional_property :resource_to_request_patch, String
+        check_optional_property :return_if_object, String
       end
     end
 
