@@ -31,13 +31,13 @@ module Provider
     class Validation < Api::Object
       # Ensures the value matches this regex
       attr_reader :regex
-
-      # TODO(rosbo): Add support for complex validation (i.e. custom go code)
+      attr_reader :function
 
       def validate
         super
 
         check_optional_property :regex, String
+        check_optional_property :function, String
       end
     end
 
