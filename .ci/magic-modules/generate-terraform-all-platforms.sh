@@ -14,7 +14,7 @@ function init {
   # Create GOPATH structure
   mkdir -p "${GOPATH}/src/github.com/terraform-providers"
   # Copy the repo
-  cp -rf "$1" "${GOPATH}/src/github.com/terraform-providers/"
+  cp -rf "$1" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
   # Paths and vars
   PROVIDER_NAME="google"
   PROVIDERPATH="$GOPATH/src/github.com/terraform-providers"
@@ -24,7 +24,7 @@ function init {
   XC_OS=${XC_OS:=linux darwin windows freebsd openbsd solaris}
   XC_EXCLUDE_OSARCH="!darwin/arm !darwin/386"
   export CGO_ENABLED=0
-  mkdir -p $TARGET_DIR
+  mkdir -p "$TARGET_DIR"
 }
 
 function installGox {
@@ -34,7 +34,7 @@ function installGox {
 }
 
 function compile {
-  pushd $SRC_DIR
+  pushd "$SRC_DIR"
   printf "\n"
   make fmtcheck
 
@@ -45,7 +45,7 @@ function compile {
   rm -f bin/*
   rm -fr pkg/*
   # Build with gox
-  $GOBIN/gox \
+  "$GOBIN/gox" \
     -os="${XC_OS}" \
     -arch="${XC_ARCH}" \
     -osarch="${XC_EXCLUDE_OSARCH}" \
@@ -57,9 +57,9 @@ function compile {
 }
 
 function main {
-  init $1
+  init "$1"
   installGox
   compile
 }
 
-main
+main "$@"
