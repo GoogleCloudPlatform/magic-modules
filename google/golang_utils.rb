@@ -29,6 +29,8 @@ module Google
         "\"#{value}\""
       elsif value.is_a?(Numeric)
         value.to_s
+      elsif value.is_a?(Symbol)
+        "\"#{value}\""
       else
         raise "Unsupported go literal #{value}"
       end

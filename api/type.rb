@@ -169,6 +169,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :max_size
 
       STRING_ARRAY_TYPE = [Api::Type::Array, Api::Type::String].freeze
       NESTED_ARRAY_TYPE = [Api::Type::Array, Api::Type::NestedObject].freeze
@@ -186,6 +187,8 @@ module Api
           || type?(@item_type)
           raise "Invalid type #{@item_type}"
         end
+
+        check_optional_property :max_size, ::Integer
       end
 
       def item_type_class

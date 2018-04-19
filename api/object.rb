@@ -27,7 +27,13 @@ module Api
 
       include Properties
 
+      # original value of :name before the provider override happens
+      # same as :name if not overridden in provider
+      attr_reader :api_name
+
       def validate
+        @api_name = name
+
         super
         check_property :name, String
       end

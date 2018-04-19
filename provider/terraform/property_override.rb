@@ -95,6 +95,8 @@ module Provider
           clazz = String
         elsif api_property.is_a?(Api::Type::Integer)
           clazz = Integer
+        elsif api_property.is_a?(Api::Type::Enum)
+          clazz = Symbol
         else
           raise "Update 'check_default_value_property' method to support " \
                 "default value for type #{api_property.class}"
