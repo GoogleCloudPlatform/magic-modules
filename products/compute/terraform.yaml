@@ -205,6 +205,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
+    # TODO(rosbo): Support sslCertificates given as name or self_link
+    exclude: true
     examples: |
       ```hcl
       resource "google_compute_target_ssl_proxy" "default" {
