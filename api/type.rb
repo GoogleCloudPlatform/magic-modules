@@ -29,6 +29,7 @@ module Api
       attr_reader :required
       attr_reader :update_verb
       attr_reader :update_url
+      attr_reader :exclude
     end
 
     include Fields
@@ -40,6 +41,11 @@ module Api
 
     def validate
       super
+
+      # Ensures boolean value is set to false if nil
+      @exclude ||= false
+
+      check_property :exclude, :boolean
       check_property :description, ::String
       check_optional_property :output, :boolean
       check_optional_property :field, ::String
