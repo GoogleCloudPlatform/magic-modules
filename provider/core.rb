@@ -246,7 +246,7 @@ module Provider
         %w[name title].each do |name|
           out_file = File.join(target_folder, "success#{id + 1}~#{name}.yaml")
           next if manual.include? out_file
-          next if true?(Google::HashUtils.navigate(data[:config], %w[manual]))
+          next if true?(data[:object].manual)
 
           generate_network_data data.clone.merge(
             out_file: File.join(target_folder, "success#{id + 1}~#{name}.yaml"),
@@ -553,8 +553,8 @@ module Provider
     end
 
     def check_requires(object, *requires)
-      return if @config.objects[object.name]&.key?('requires').nil?
-      requires_list = @config.objects[object.name]['requires']
+      return if object.requires.nil?
+      requires_list = object.requires
       missing = requires.flatten.reject { |r| requires_list.any?(r) }
       raise <<~ERROR unless missing.empty?
         Including #{__FILE__} needs the following requires: #{missing}
@@ -660,19 +660,6 @@ module Provider
 
     def provider_name
       self.class.name.split('::').last.downcase
-    end
-
-    # Returns true if this module needs access to the saved API response
-    # This response is stored in the @fetched variable
-    # Requires:
-    #   config: The config for an object
-    #   object: An Api::Resource object
-    def save_api_results?(config, object)
-      fetched_props = object.exported_properties.select do |p|
-        p.is_a? Api::Type::FetchedExternal
-      end
-      Google::HashUtils.navigate(config, %w[access_api_results]) || \
-        !fetched_props.empty?
     end
 
     # Generates the documentation for the client side function to be

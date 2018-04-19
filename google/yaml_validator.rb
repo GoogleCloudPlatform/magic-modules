@@ -89,6 +89,11 @@ module Google
       prop_value.validate if prop_value.is_a?(Api::Object)
     end
 
+    def default_value_property(property, def_value)
+      value = instance_variable_get("@#{property}")
+      instance_variable_set("@#{property}", def_value) if value.nil?
+    end
+
     def check_extraneous_properties
       instance_variables.each do |variable|
         var_name = variable.id2name[1..-1]

@@ -190,7 +190,6 @@ module Api
       [@__product.prefix, Google::StringUtils.underscore(@name)].join('_')
     end
 
-    # rubocop:disable Lint/DuplicateMethods
     def identity
       props = all_user_properties
       if @identity.nil?
@@ -199,7 +198,6 @@ module Api
         props.select { |p| @identity.include?(p.name) }
       end
     end
-    # rubocop:enable Lint/DuplicateMethods
 
     # 'identity' is already taken by Ruby.
     def __identity
@@ -304,6 +302,16 @@ module Api
 
     def decoder?
       !@transport&.decoder.nil?
+    end
+
+    # Returns true if this resource needs access to the saved API response
+    # This response is stored in the @fetched variable
+    # Requires:
+    #   config: The config for an object
+    #   object: An Api::Resource object
+    def save_api_results?(config)
+      exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
+        || access_api_results
     end
 
     private

@@ -116,12 +116,12 @@ module Google
       property :credential, String, desired_state: false, required: true
       property :project, String, desired_state: false, required: true
 
-<% if save_api_results?(config, object) -%>
+<% if object.save_api_results?(config) -%>
       # TODO(alexstephen): Check w/ Chef how to not expose this property yet
       # allow the resource to store the @fetched API results for exports usage.
       property :__fetched, Hash, desired_state: false, required: false
 
-<% end # save_api_results?(config, object) -%>
+<% end # object.save_api_results?(config) -%>
       action :create do
 <% if object.self_link_query.nil? -%>
 <% if object.kind? -%>
@@ -168,19 +168,19 @@ module Google
 <%
   kind_param = object.kind? ? ", '#{object.kind}'" : ''
 -%>
-<% if save_api_results?(config, object) -%>
+<% if object.save_api_results?(config) -%>
             @new_resource.__fetched =
               return_if_object create_req.send<%= kind_param %>
-<% else # save_api_results?(config, object) -%>
+<% else # object.save_api_results?(config) -%>
             return_if_object create_req.send<%= kind_param %>
-<% end # save_api_results?(config, object) -%>
+<% end # object.save_api_results?(config) -%>
 <% else # object.async -%>
-<% if save_api_results?(config, object) -%>
+<% if object.save_api_results?(config) -%>
             @new_resource.__fetched =
               wait_for_operation create_req.send, @new_resource
-<% else # save_api_results?(config, object) -%>
+<% else # object.save_api_results?(config) -%>
             wait_for_operation create_req.send, @new_resource
-<% end # save_api_results?(config, object) -%>
+<% end # object.save_api_results?(config) -%>
 <% end # object.async -%>
 <% else -%>
 <%= lines(indent(custom_create, 12)) -%>
@@ -252,9 +252,9 @@ module Google
   end
 -%>
 <%= lines(indent(fetch_code, 10)) -%>
-<% if save_api_results?(config, object) -%>
+<% if object.save_api_results?(config) -%>
           @new_resource.__fetched = fetch
-<% end # save_api_results?(config, object) -%>
+<% end # object.save_api_results?(config) -%>
 
           update
         end
