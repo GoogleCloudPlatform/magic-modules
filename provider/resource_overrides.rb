@@ -41,6 +41,10 @@ module Provider
       @__config = config
     end
 
+    def consume_config(config)
+      @__config = config
+    end
+
     def validate
       return unless @__objects.nil? # allows idempotency of calling validate
       return if @__api.nil?
