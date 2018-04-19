@@ -29,21 +29,21 @@ describe Google::StringUtils do
       subject do
         described_class.first_sentence('Lorem ipsum. Dolor sit amet. Elit')
       end
-      it { is_expected.to eq 'Lorem ipsum.'}
+      it { is_expected.to eq 'Lorem ipsum.' }
     end
 
     context 'sentence end with question mark' do
       subject do
         described_class.first_sentence('Lorem ipsum? Dolor sit amet. Elit')
       end
-      it { is_expected.to eq 'Lorem ipsum?'}
+      it { is_expected.to eq 'Lorem ipsum?' }
     end
 
     context 'sentence end with exclamation mark' do
       subject do
         described_class.first_sentence('Lorem ipsum! Dolor sit amet. Elit')
       end
-      it { is_expected.to eq 'Lorem ipsum!'}
+      it { is_expected.to eq 'Lorem ipsum!' }
     end
 
     context 'no period returns full string' do
