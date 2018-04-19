@@ -131,7 +131,7 @@ def main():
   method = method_call('update', [
                                    'module', 'self_link(module)',
                                    ('kind' if object.kind?),
-                                   ('fetch' if object.save_api_results?(config))
+                                   ('fetch' if object.save_api_results?)
                                  ])
 -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
@@ -141,7 +141,7 @@ def main():
   method = method_call('delete', [
                                    'module', 'self_link(module)',
                                    ('kind' if object.kind?),
-                                   ('fetch' if object.save_api_results?(config))
+                                   ('fetch' if object.save_api_results?)
                                  ])
 -%>
 <%= lines(indent(method, 12)) -%>
@@ -209,7 +209,7 @@ def main():
 <% editable = config['editable'] -%>
 <%=
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
-                               ('fetch' if object.save_api_results?(config))]))
+                               ('fetch' if object.save_api_results?)]))
 -%>
 <% if custom_update.nil? -%>
 <%   if !false?(editable) -%>
@@ -236,7 +236,7 @@ def main():
 <% custom_delete = get_code_multiline config, 'delete' -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
-                               ('fetch' if object.save_api_results?(config))]))
+                               ('fetch' if object.save_api_results?)]))
 -%>
 <% if custom_delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)

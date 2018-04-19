@@ -116,12 +116,12 @@ module Google
       property :credential, String, desired_state: false, required: true
       property :project, String, desired_state: false, required: true
 
-<% if object.save_api_results?(config) -%>
+<% if object.save_api_results? -%>
       # TODO(alexstephen): Check w/ Chef how to not expose this property yet
       # allow the resource to store the @fetched API results for exports usage.
       property :__fetched, Hash, desired_state: false, required: false
 
-<% end # object.save_api_results?(config) -%>
+<% end # object.save_api_results? -%>
       action :create do
 <% if object.self_link_query.nil? -%>
 <% if object.kind? -%>
@@ -168,19 +168,19 @@ module Google
 <%
   kind_param = object.kind? ? ", '#{object.kind}'" : ''
 -%>
-<% if object.save_api_results?(config) -%>
+<% if object.save_api_results? -%>
             @new_resource.__fetched =
               return_if_object create_req.send<%= kind_param %>
-<% else # object.save_api_results?(config) -%>
+<% else # object.save_api_results? -%>
             return_if_object create_req.send<%= kind_param %>
-<% end # object.save_api_results?(config) -%>
+<% end # object.save_api_results? -%>
 <% else # object.async -%>
-<% if object.save_api_results?(config) -%>
+<% if object.save_api_results? -%>
             @new_resource.__fetched =
               wait_for_operation create_req.send, @new_resource
-<% else # object.save_api_results?(config) -%>
+<% else # object.save_api_results? -%>
             wait_for_operation create_req.send, @new_resource
-<% end # object.save_api_results?(config) -%>
+<% end # object.save_api_results? -%>
 <% end # object.async -%>
 <% else -%>
 <%= lines(indent(custom_create, 12)) -%>
@@ -252,9 +252,9 @@ module Google
   end
 -%>
 <%= lines(indent(fetch_code, 10)) -%>
-<% if object.save_api_results?(config) -%>
+<% if object.save_api_results? -%>
           @new_resource.__fetched = fetch
-<% end # object.save_api_results?(config) -%>
+<% end # object.save_api_results? -%>
 
           update
         end
