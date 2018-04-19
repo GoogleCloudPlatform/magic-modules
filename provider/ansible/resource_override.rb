@@ -17,11 +17,20 @@ module Provider
   module Ansible
     # Ansible specific properties to be added to Api::Resource
     module OverrideProperties
+      attr_reader :access_api_results
     end
 
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
+
+      def validate
+        super
+
+        default_value_property :access_api_results, false
+
+        check_property :access_api_results, :boolean
+      end
 
       private
 

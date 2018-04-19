@@ -21,6 +21,10 @@ module Provider
       def provider
         Provider::Terraform
       end
+
+      def resource_override
+        Provider::Terraform::ResourceOverride
+      end
     end
   end
 end
