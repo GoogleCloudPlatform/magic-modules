@@ -27,8 +27,13 @@ module Provider
     # Settings for the Ansible provider
     class Config < Provider::Config
       attr_reader :manifest
+
       def provider
         Provider::Ansible::Core
+      end
+
+      def resource_override
+        Provider::Ansible::ResourceOverride
       end
 
       def validate

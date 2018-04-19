@@ -37,10 +37,16 @@ module Provider
       @__api = api
     end
 
+    def consume_config(config)
+      @__config = config
+    end
+
     def validate
       return unless @__objects.nil? # allows idempotency of calling validate
+      return if @__api.nil?
+      populate_nonoverridden_objects
       convert_findings_to_hash
-      override_objects unless @__api.nil?
+      override_objects
       super
     end
 
@@ -135,6 +141,14 @@ module Provider
       elsif api_entity.is_a?(Api::Type::Array) &&
             api_entity.item_type.is_a?(Api::Type::NestedObject)
         api_entity.item_type.properties
+      end
+    end
+
+    def populate_nonoverridden_objects
+      @__api.objects.each do |object|
+        var_name = "@#{object.name}".to_sym
+        instance_variable_set(var_name, @__config.resource_override.new) \
+          unless instance_variables.include?(var_name)
       end
     end
   end
