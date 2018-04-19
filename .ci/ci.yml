@@ -171,6 +171,7 @@ jobs:
             file: magic-modules/.ci/unit-tests/puppet.yml
             params:
               PRODUCT: compute
+              EXCLUDE_PATTERN: spec/gcompute_instance_group_manager_provider_spec.rb,spec/gcompute_instance_provider_spec.rb,spec/gcompute_instance_template_provider_spec.rb,spec/gcompute_target_https_proxy_provider_spec.rb,spec/gcompute_target_ssl_proxy_provider_spec.rb,spec/puppetlint_spec.rb
 
     - name: create-prs
       plan:
@@ -178,7 +179,7 @@ jobs:
             version: every
             # trigger: true
             params:
-                submodules: [build/terraform]
+                submodules: [build/terraform, build/puppet/compute, build/puppet/sql]
             passed: [terraform-test, mm-generate, puppet-test]
           - get: mm-initial-pr
             resource: magic-modules-new-prs
@@ -241,7 +242,7 @@ jobs:
           # time through, it works the same way as the preceding push.
           - put: magic-modules
             params:
-              repository: magic-modules-with-comment/build/terraform
+              repository: magic-modules-with-comment/
               branch_file: magic-modules-with-comment/original_pr_branch_name
               only_if_diff: true
               force: true

@@ -10,3 +10,4 @@ run:
   path: magic-modules/.ci/unit-tests/puppet.sh
 params:
   PRODUCT: ""
+  EXCLUDE_PATTERN: ""
