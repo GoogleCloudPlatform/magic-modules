@@ -193,6 +193,7 @@ module Provider
       # class features
       source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
+      config.default_overrides
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
       config
@@ -204,10 +205,13 @@ module Provider
 
     def validate
       super
+
+      default_overrides
+
       check_property :examples, Api::Resource::HashArray unless @examples.nil?
       check_property :files, Provider::Config::Files unless @files.nil?
       check_property :objects, Api::Resource::HashArray unless @objects.nil?
-      check_optional_property :overrides, Provider::ResourceOverrides
+      check_property :overrides, Provider::ResourceOverrides
       check_property :test_data, Provider::Config::TestData \
         unless @test_data.nil?
       check_property :tests, Api::Resource::HashArray unless @tests.nil?
@@ -230,6 +234,11 @@ module Provider
         var_value.consume_api api if var_value.respond_to?(:consume_api)
         spread_api(var_value, api, visited, indent)
       end
+    end
+
+    def default_overrides
+      @overrides ||= Provider::ResourceOverrides.new
+      @overrides.consume_config self
     end
   end
 end

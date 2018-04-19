@@ -41,8 +41,13 @@ module Provider
         Provider::Puppet
       end
 
+      def resource_override
+        Provider::Puppet::ResourceOverride
+      end
+
       def validate
         super
+
         check_optional_property :manifest, Provider::Puppet::Manifest
         check_property_list :functions, Provider::Config::Function
         check_property_list :bolt_tasks, Provider::Puppet::BoltTask
