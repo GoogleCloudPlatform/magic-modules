@@ -494,11 +494,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 -%>
 <% end # object.collection.nil? -%>
 <% if object&.handlers.self_link.nil? -%>
-<%   if object.self_link.nil? -%>
 <%= lines(indent(emit_link('self_link', self_link_url(object), true), 2), 1) -%>
-<%   else # object.self_link.nil? -%>
-<%= lines(indent(emit_link('self_link', object.self_link, true), 2), 1) -%>
-<%   end # object.self_link.nil? -%>
 <% else # object&.handlers.self_link.nil? -%>
 <%=
   lines_before(
