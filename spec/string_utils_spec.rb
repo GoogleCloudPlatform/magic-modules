@@ -19,8 +19,36 @@ describe Google::StringUtils do
     it { is_expected.to eq 'someStringWithUnderscores' }
   end
 
-  describe '#underscore' do
+  context '#underscore' do
     subject { described_class.underscore('aStringInCamelCase') }
     it { is_expected.to eq 'a_string_in_camel_case' }
+  end
+
+  context '#first_sentence' do
+    context 'sentence end with period' do
+      subject do
+        described_class.first_sentence('Lorem ipsum. Dolor sit amet. Elit')
+      end
+      it { is_expected.to eq 'Lorem ipsum.' }
+    end
+
+    context 'sentence end with question mark' do
+      subject do
+        described_class.first_sentence('Lorem ipsum? Dolor sit amet. Elit')
+      end
+      it { is_expected.to eq 'Lorem ipsum?' }
+    end
+
+    context 'sentence end with exclamation mark' do
+      subject do
+        described_class.first_sentence('Lorem ipsum! Dolor sit amet. Elit')
+      end
+      it { is_expected.to eq 'Lorem ipsum!' }
+    end
+
+    context 'no period returns full string' do
+      subject { described_class.first_sentence('Lorem ipsum dolor') }
+      it { is_expected.to eq 'Lorem ipsum dolor' }
+    end
   end
 end
