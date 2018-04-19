@@ -309,7 +309,7 @@ module Api
     # Requires:
     #   config: The config for an object
     #   object: An Api::Resource object
-    def save_api_results?(config)
+    def save_api_results?
       exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
         || access_api_results
     end
