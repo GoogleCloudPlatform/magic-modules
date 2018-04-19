@@ -19,7 +19,13 @@ module Api
   class Object < Google::YamlValidator
     # Represents an object that has a (mandatory) name
     class Named < Api::Object
-      attr_reader :name
+      # The list of properties (attr_reader) that can be overridden in
+      # <provider>.yaml.
+      module Properties
+        attr_reader :name
+      end
+
+      include Properties
 
       def validate
         super

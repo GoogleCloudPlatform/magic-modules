@@ -21,6 +21,8 @@ module Api
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Properties
+      include Api::Object::Named::Properties
+
       attr_reader :description
       attr_reader :kind
       attr_reader :base_url
@@ -95,7 +97,11 @@ module Api
 
       def validate
         super
-        check_optional_property :guides, Hash
+
+        @guides ||= {}
+
+        check_property :guides, Hash
+
         check_optional_property :api, String
       end
     end
