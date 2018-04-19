@@ -21,7 +21,7 @@ module Api
     # <provider>.yaml.
     module Fields
       include Api::Object::Named::Properties
-      
+
       attr_reader :description
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation
