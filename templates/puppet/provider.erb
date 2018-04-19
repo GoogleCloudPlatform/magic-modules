@@ -260,9 +260,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% else -%>
     <%= fetch_assign -%>wait_for_operation create_req.send, @resource
 <% end -%>
-<% else # object&.handlers.create.nil? -%>
+<% else # object&.handlers&.create.nil? -%>
 <%= lines(indent(object.handlers.create, 4)) -%>
-<% end # object&.handlers.create.nil? -%>
+<% end # object&.handlers&.create.nil? -%>
     @property_hash[:ensure] = :present
   end
 
@@ -284,9 +284,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%   else -%>
     wait_for_operation delete_req.send, @resource
 <%   end -%>
-<% else # object&.handlers.delete.nil? -%>
+<% else # object&.handlers&.delete.nil? -%>
 <%= lines(indent(object.handlers.delete, 4)) -%>
-<% end # object&.handlers.delete.nil? -%>
+<% end # object&.handlers&.delete.nil? -%>
     @property_hash[:ensure] = :absent
   end
 
@@ -297,7 +297,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
 <%
-   if object&.handlers.flush.nil?
+   if object&.handlers&.flush.nil?
      put_new = if object.update_verb.nil?
                  "Google::#{product_ns}::Network::Put.new"
                else
@@ -324,9 +324,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
-<% else # object&.handlers.flush.nil? -%>
+<% else # object&.handlers&.flush.nil? -%>
 <%= lines(indent(object.handlers.flush, 4)) -%>
-<% end # object&.handlers.flush.nil? -%>
+<% end # object&.handlers&.flush&.nil? -%>
   end
 
   def dirty(field, from, to)
@@ -486,22 +486,22 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     super(message)
   end
 
-<% if object&.handlers.collection.nil? -%>
+<% if object&.handlers&.collection.nil? -%>
 <%= lines(indent(emit_link('collection', collection_url(object), true), 2)) %>
-<% else # object.collection.nil? -%>
+<% else # object&.handlers&.collection.nil? -%>
 <%=
   lines(indent(emit_link('collection', object.handlers.collection, true), 2))
 -%>
-<% end # object.collection.nil? -%>
-<% if object&.handlers.self_link.nil? -%>
+<% end # object&.handlers&.collection.nil? -%>
+<% if object&.handlers&.self_link.nil? -%>
 <%= lines(indent(emit_link('self_link', self_link_url(object), true), 2), 1) -%>
-<% else # object&.handlers.self_link.nil? -%>
+<% else # object&.handlers&.self_link.nil? -%>
 <%=
   lines_before(
     lines(indent(emit_link('self_link', object.handlers.self_link, true), 2), 1)
   )
 -%>
-<% end # object&.handlers.self_link.nil? -%>
+<% end # object&.handlers&.self_link.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/return_if_object.erb'), 2)) %>
 <% else # object&.handlers&.return_if_object.nil? -%>
