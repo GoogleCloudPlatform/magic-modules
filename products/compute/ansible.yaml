@@ -70,6 +70,8 @@ objects: !ruby/object:Api::Resource::HashArray
     aliases:
       timeoutSec:
         - timeout_seconds
+      checkIntervalSec:
+        - check_interval_seconds
   HttpsHealthCheck:
     aliases:
       timeoutSec:
