@@ -21,7 +21,8 @@ module Api
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Properties
-      attr_reader :name # Duplicated here to enable overriding
+      include Api::Object::Named::Properties
+
       attr_reader :description
       attr_reader :kind
       attr_reader :base_url
