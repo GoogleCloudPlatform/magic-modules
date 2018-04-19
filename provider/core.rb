@@ -553,8 +553,8 @@ module Provider
     end
 
     def check_requires(object, *requires)
-      return if @config.objects[object.name]&.key?('requires').nil?
-      requires_list = @config.objects[object.name]['requires']
+      return if object.requires.nil?
+      requires_list = object.requires
       missing = requires.flatten.reject { |r| requires_list.any?(r) }
       raise <<~ERROR unless missing.empty?
         Including #{__FILE__} needs the following requires: #{missing}
