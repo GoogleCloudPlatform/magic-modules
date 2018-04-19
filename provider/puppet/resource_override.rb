@@ -32,7 +32,7 @@ module Provider
 
     # Custom Puppet code to handle type convergence operations
     class Handlers < Api::Object
-      attr_reader :collection  # A custom collection function to use
+      attr_reader :collection # A custom collection function to use
       attr_reader :create
       attr_reader :delete
       attr_reader :flush
@@ -40,7 +40,7 @@ module Provider
       attr_reader :request_to_query
       attr_reader :resource_to_request_patch
       attr_reader :return_if_object
-      attr_reader :self_link  # A custom self_link function to use
+      attr_reader :self_link # A custom self_link function to use
 
       def validate
         super
@@ -62,14 +62,7 @@ module Provider
       include OverrideProperties
 
       def validate
-        default_value_property :access_api_results, false
-        default_value_property :custom_create_resource, false
-        default_value_property :custom_update_resource, false
-        default_value_property :manual, false
-        default_value_property :provider_helpers, []
-        default_value_property :resource_to_request, true
-        default_value_property :return_if_object, true
-        default_value_property :unwrap_resource, true
+        assign_defaults
 
         super
 
@@ -88,6 +81,17 @@ module Provider
       end
 
       private
+
+      def assign_defaults
+        default_value_property :access_api_results, false
+        default_value_property :custom_create_resource, false
+        default_value_property :custom_update_resource, false
+        default_value_property :manual, false
+        default_value_property :provider_helpers, []
+        default_value_property :resource_to_request, true
+        default_value_property :return_if_object, true
+        default_value_property :unwrap_resource, true
+      end
 
       def overriden
         Provider::Puppet::OverrideProperties
