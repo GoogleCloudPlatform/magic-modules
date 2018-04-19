@@ -29,68 +29,68 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  Subscription:
-    flush:
-      # TODO(nelsonjr): Implement calling custom methods to update pushConfig.
-      raise 'Subscription cannot be edited.'
-    # TODO(alexstephen): Remove when b/66233673 fixed.
-    self_link: |
-      URI.join(
-        'https://pubsub.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/subscriptions/{{name}}',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
-    # TODO(alexstephen): Remove when b/66233673 fixed.
-    collection: |
-      URI.join(
-        'https://pubsub.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/subscriptions',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                    .join('/')
-      )
-    resource_to_request_patch: |
-      # Conform with gRPC/HTTP topic name
-      request[:topic] = ['projects', @resource[:project], 'topics',
-                         @resource[:topic]].join('/')
-      request[:name] = ['projects', @resource[:project], 'subscriptions',
-                        @resource[:name]].join('/')
+overrides: !ruby/object:Provider::ResourceOverrides
+  Subscription: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush:
+        # TODO(nelsonjr): Implement calling custom methods to update pushConfig.
+        raise 'Subscription cannot be edited.'
+      # TODO(alexstephen): Remove when b/66233673 fixed.
+      self_link: |
+        URI.join(
+          'https://pubsub.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/subscriptions/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      # TODO(alexstephen): Remove when b/66233673 fixed.
+      collection: |
+        URI.join(
+          'https://pubsub.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/subscriptions',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      resource_to_request_patch: |
+        # Conform with gRPC/HTTP topic name
+        request[:topic] = ['projects', @resource[:project], 'topics',
+                           @resource[:topic]].join('/')
+        request[:name] = ['projects', @resource[:project], 'subscriptions',
+                          @resource[:name]].join('/')
     provider_helpers:
-      include:
-        - 'products/pubsub/helpers/provider_subscription.rb'
-  Topic:
-    resource_to_request_patch: |
-      # Conform with gRPC/HTTP topic name
-      request[:name] = ['projects', @resource[:project], 'topics',
-                        @resource[:name]].join('/')
-    # TODO(alexstephen): Remove when b/66233673 fixed.
-    self_link: |
-      URI.join(
-        'https://pubsub.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/topics/{{name}}',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                  .join('/')
-      )
-    # TODO(alexstephen): Remove when b/66233673 fixed.
-    collection: |
-      URI.join(
-        'https://pubsub.googleapis.com/v1/',
-        expand_variables(
-          'projects/{{project}}/topics',
-          data
-        ).split('/').map { |p| p.gsub('%3A', ':') }
-                  .join('/')
-      )
+      - 'products/pubsub/helpers/provider_subscription.rb'
+  Topic: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      resource_to_request_patch: |
+        # Conform with gRPC/HTTP topic name
+        request[:name] = ['projects', @resource[:project], 'topics',
+                          @resource[:name]].join('/')
+      # TODO(alexstephen): Remove when b/66233673 fixed.
+      self_link: |
+        URI.join(
+          'https://pubsub.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/topics/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                    .join('/')
+        )
+      # TODO(alexstephen): Remove when b/66233673 fixed.
+      collection: |
+        URI.join(
+          'https://pubsub.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/topics',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                    .join('/')
+        )
     provider_helpers:
-      include:
-        - 'products/pubsub/helpers/provider_topic.rb'
+      - 'products/pubsub/helpers/provider_topic.rb'
 examples: !ruby/object:Api::Resource::HashArray
   Subscription:
     - subscription.pp
