@@ -37,6 +37,11 @@ describe Google::GolangUtils do
       it { is_expected.to eq '0.987' }
     end
 
+    describe 'symbol' do
+      subject { golang.go_literal(:NONE) }
+      it { is_expected.to eq '"NONE"' }
+    end
+
     describe 'unknown type' do
       subject { -> { golang.go_literal(Class.new) } }
       it { is_expected.to raise_error(/Unsupported/) }
