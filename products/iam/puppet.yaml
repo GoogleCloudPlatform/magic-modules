@@ -30,78 +30,78 @@ manifest: !ruby/object:Provider::Puppet::Manifest
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 # TODO(nelsonjr): Match all special behavior Puppet <=> Chef.
-objects: !ruby/object:Api::Resource::HashArray
-  ServiceAccount:
+overrides: !ruby/object:Provider::ResourceOverrides
+  ServiceAccount: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      include:
-        - 'products/iam/helpers/provider_service_account.rb'
-  ServiceAccountKey:
-    create: |
-      if resource.fail_if_mismatch && resource.has_key_file
-        raise 'Cannot overwrite file as demanded by fail_if_mismatch => true'
-      end
-
-      @created = true
-      create_req = Google::Iam::Network::Post.new(collection(@resource),
-                                                  fetch_auth(@resource),
-                                                  'application/json',
-                                                  resource_to_request)
-      @fetched = return_if_object create_req.send
-      if @fetched['privateKeyData'] && @resource[:path]
-        # Write to file if a file name is provided.
-        json = Base64.decode64(@fetched['privateKeyData'])
-        File.open(@resource[:path], 'w') { |file| file.write(json) }
-      end
-    delete: |
-      (_, key_id) = get_key_id(resource)
-      delete_req = Google::Iam::Network::Delete.new(
-        self_link(service_account: @resource[:service_account],
-                  project: @resource[:project], key_id: key_id),
-        fetch_auth(@resource)
-      )
-      return_if_object delete_req.send
-    flush: |
-      # As there's a mismatch, let's recreate the key
-      create
-    prefetch: |
-      debug("prefetch #{name}")
-      resource.extend(ServiceAccountKeyHelper)
-      fail_if_mismatch = resource.parameter(:fail_if_mismatch)&.value || false
-      (key_file_exists, key_id) = get_key_id(resource)
-      unless key_id.nil?
-        # If key_id, check keys existence.
-        req = Google::Iam::Network::Get.new(
-          self_link(service_account: resource[:service_account],
-                    project: resource[:project], key_id: key_id),
-          fetch_auth(resource)
-        )
-        @fetched = return_if_object req.send
-        unless @fetched.nil?
-          @fetched.merge!('name' => name, 'keyId' => key_id,
-                          # TODO(nelsonjr): Add support to PKCS12 key files
-                          'privateKeyType' => 'TYPE_GOOGLE_CREDENTIALS_FILE')
-          resource.provider = present(name, @fetched)
+      - 'products/iam/helpers/provider_service_account.rb'
+  ServiceAccountKey: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      create: |
+        if resource.fail_if_mismatch && resource.has_key_file
+          raise 'Cannot overwrite file as demanded by fail_if_mismatch => true'
         end
-      end
-      resource.init(key_file_exists, fail_if_mismatch)
-    self_link: |
-      URI.join(
-        'https://iam.googleapis.com/v1/',
-        expand_variables(
-          ['projects/{{project}}/serviceAccounts/{{service_account}}',
-           'keys/{{key_id}}'].join('/'),
-          data
+
+        @created = true
+        create_req = Google::Iam::Network::Post.new(collection(@resource),
+                                                    fetch_auth(@resource),
+                                                    'application/json',
+                                                    resource_to_request)
+        @fetched = return_if_object create_req.send
+        if @fetched['privateKeyData'] && @resource[:path]
+          # Write to file if a file name is provided.
+          json = Base64.decode64(@fetched['privateKeyData'])
+          File.open(@resource[:path], 'w') { |file| file.write(json) }
+        end
+      delete: |
+        (_, key_id) = get_key_id(resource)
+        delete_req = Google::Iam::Network::Delete.new(
+          self_link(service_account: @resource[:service_account],
+                    project: @resource[:project], key_id: key_id),
+          fetch_auth(@resource)
         )
-      )
-    validate:
-      path: |
-        raise "'path' parameter should be an absolute path." \
-          unless (Pathname.new value).absolute?
+        return_if_object delete_req.send
+      flush: |
+        # As there's a mismatch, let's recreate the key
+        create
+      prefetch: |
+        debug("prefetch #{name}")
+        resource.extend(ServiceAccountKeyHelper)
+        fail_if_mismatch = resource.parameter(:fail_if_mismatch)&.value || false
+        (key_file_exists, key_id) = get_key_id(resource)
+        unless key_id.nil?
+          # If key_id, check keys existence.
+          req = Google::Iam::Network::Get.new(
+            self_link(service_account: resource[:service_account],
+                      project: resource[:project], key_id: key_id),
+            fetch_auth(resource)
+          )
+          @fetched = return_if_object req.send
+          unless @fetched.nil?
+            @fetched.merge!('name' => name, 'keyId' => key_id,
+                            # TODO(nelsonjr): Add support to PKCS12 key files
+                            'privateKeyType' => 'TYPE_GOOGLE_CREDENTIALS_FILE')
+            resource.provider = present(name, @fetched)
+          end
+        end
+        resource.init(key_file_exists, fail_if_mismatch)
+      self_link: |
+        URI.join(
+          'https://iam.googleapis.com/v1/',
+          expand_variables(
+            ['projects/{{project}}/serviceAccounts/{{service_account}}',
+             'keys/{{key_id}}'].join('/'),
+            data
+          )
+        )
+    properties:
+      path:
+        validate: |
+          raise "'path' parameter should be an absolute path." \
+            unless (Pathname.new value).absolute?
+    provider_helpers:
+      - 'products/iam/helpers/provider_service_account_key.rb.erb'
     requires:
       - base64
-    provider_helpers:
-      include:
-        - 'products/iam/helpers/provider_service_account_key.rb.erb'
 examples: !ruby/object:Api::Resource::HashArray
   ServiceAccount:
     - service_account.pp

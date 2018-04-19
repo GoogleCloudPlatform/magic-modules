@@ -62,12 +62,11 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   def self.prefetch(resources)
     debug('prefetch')
     resources.each do |name, resource|
-<% custom_prefetch = get_code_multiline config, 'prefetch' -%>
-<% if custom_prefetch.nil? -%>
+<% if object&.handlers&.prefetch.nil? -%>
       project = resource[:project]
       debug("prefetch #{name}") if project.nil?
       debug("prefetch #{name} @ #{project}") unless project.nil?
-<% if object.self_link_query.nil? -%>
+<%   if object.self_link_query.nil? -%>
 <%=
   lines(format(
     [
@@ -82,7 +81,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     ].compact, 6
   ))
 -%>
-<% else -%>
+<%   else # object.self_link_query.nil? -%>
 <%
   self_link_kind = !object.self_link_query.kind.nil? ? \
   "'#{object.self_link_query.kind}'," : ''
@@ -112,18 +111,18 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     ], 6
   ))
 -%>
-<% end -%>
-<% if has_input -%>
+<%   end # object.self_link_query.nil? -%>
+<%   if has_input -%>
       resource.provider = present(name, fetch, resource) unless fetch.nil?
-<% else # has_input -%>
+<%   else # has_input -%>
       resource.provider = present(name, fetch) unless fetch.nil?
-<% end # has_input -%>
-<% unless object.exports.nil? -%>
+<%   end # has_input -%>
+<%   unless object.exports.nil? -%>
       Google::ObjectStore.instance.add(:<%= object.out_name -%>, resource)
-<% end -%>
-<% else # custom_prefetch.nil? -%>
-<%= lines(indent(custom_prefetch, 6)) -%>
-<% end # custom_prefetch.nil? -%>
+<%   end # object.exports.nil? -%>
+<% else # object&.handlers&.prefetch.nil? -%>
+<%= lines(indent(object.handlers.prefetch, 6)) -%>
+<% end # object&.handlers&.prefetch.nil? -%>
     end
   end
 
@@ -326,7 +325,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%   end # object.async -%>
 <% else # object&.handlers&.flush.nil? -%>
 <%= lines(indent(object.handlers.flush, 4)) -%>
-<% end # object&.handlers&.flush&.nil? -%>
+<% end # object&.handlers&.flush.nil? -%>
   end
 
   def dirty(field, from, to)
