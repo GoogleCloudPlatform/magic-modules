@@ -32,7 +32,7 @@ module Api
       attr_reader :api_name
 
       def validate
-        @api_name = name
+        @api_name ||= name
 
         super
         check_property :name, String
