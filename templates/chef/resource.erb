@@ -362,10 +362,8 @@ module Google
   r2r_code << indent_list(prop_code, 2)
   r2r_code << '}.reject { |_, v| v.nil? }'
 
-  resource_to_request_patch = get_code_multiline config,
-                                                 'resource_to_request_patch'
-  unless resource_to_request_patch.nil?
-    r2r_code << resource_to_request_patch
+  unless object&.handlers&.resource_to_request_patch.nil?
+    r2r_code << object.handlers.resource_to_request_patch
     r2r_code << ''
   end # resource_to_request_patch.nil?
 
