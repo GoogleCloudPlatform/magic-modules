@@ -20,7 +20,9 @@ module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
   # resources.
   class Chef < Provider::Core
+    RESERVED_WORDS = %w[updated].freeze
     TEST_FOLDER = 'recipes'.freeze
+
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -173,11 +175,13 @@ module Provider
     # rubocop:enable Metrics/MethodLength
 
     def property_out_name(prop)
-      return label_name(prop.__resource) if prop.name == 'name'
-      override = Google::HashUtils.navigate(@config.objects,
-                                            [prop.__resource.name,
-                                             'overrides', prop.name])
-      override || prop.out_name
+      if prop.name == 'name'
+        label_name(prop.__resource)
+      elsif RESERVED_WORDS.include?(prop.out_name)
+        "_#{prop.out_name}" # avoid conflicts w/ reserved words with '_'
+      else
+        prop.out_name
+      end
     end
 
     def compile_end2end_tests(output_folder)
