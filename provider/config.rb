@@ -193,7 +193,6 @@ module Provider
       # class features
       source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
-      config.default_overrides
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
       config
@@ -206,7 +205,7 @@ module Provider
     def validate
       super
 
-      default_overrides
+      @overrides ||= Provider::ResourceOverrides.new
 
       check_optional_property :examples, Api::Resource::HashArray
       check_optional_property :files, Provider::Config::Files
