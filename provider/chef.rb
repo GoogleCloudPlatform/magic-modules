@@ -15,6 +15,8 @@ require 'provider/config'
 require 'provider/core'
 require 'provider/chef/manifest'
 require 'provider/chef/test_catalog'
+require 'provider/chef/resource_override'
+require 'provider/chef/property_override'
 
 module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
@@ -31,6 +33,14 @@ module Provider
 
       def provider
         Provider::Chef
+      end
+
+      def resource_override
+        Provider::Chef::ResourceOverride
+      end
+
+      def property_override
+        Provider::Chef::PropertyOverride
       end
 
       def validate
@@ -166,10 +176,7 @@ module Provider
 
     def property_out_name(prop)
       return label_name(prop.__resource) if prop.name == 'name'
-      override = Google::HashUtils.navigate(@config.objects,
-                                            [prop.__resource.name,
-                                             'overrides', prop.name])
-      override || prop.out_name
+      prop.out_name
     end
 
     def compile_end2end_tests(output_folder)
