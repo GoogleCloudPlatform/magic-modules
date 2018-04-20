@@ -29,10 +29,6 @@ manifest: !ruby/object:Provider::Chef::Manifest
       versions: '< 0.2.0'
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  Bucket:
-    overrides:
-      updated: _updated
 examples: !ruby/object:Api::Resource::HashArray
   Bucket:
     - bucket.rb
