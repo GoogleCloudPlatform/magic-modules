@@ -11,23 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'api/object'
 require 'provider/abstract_core'
-require 'provider/config'
+require 'provider/property_override'
 
 module Provider
-  class Terraform < Provider::AbstractCore
-    # Settings for the provider
-    class Config < Provider::Config
-      def provider
-        Provider::Terraform
+  class Puppet < Provider::Core
+    # Collection of fields allowed in the PropertyOverride section for
+    # Puppet. All fields should be `attr_reader :<property>`
+    module OverrideFields
+      attr_reader :validation # Adds a validate block to type
+    end
+
+    # Puppet-specific overrides to api.yaml.
+    class PropertyOverride < Provider::PropertyOverride
+      include OverrideFields
+
+      def validate
+        super
+
+        check_optional_property :validation, String
       end
 
-      def resource_override
-        Provider::Terraform::ResourceOverride
-      end
+      private
 
-      def property_override
-        Provider::Terraform::PropertyOverride
+      def overriden
+        Provider::Puppet::OverrideFields
       end
     end
   end

@@ -29,7 +29,6 @@ module Api
       # identity: an array with items that uniquely identify the resource.
       # default=name
       attr_reader :identity
-      attr_reader :parameters
       attr_reader :exclude
       attr_reader :virtual
       attr_reader :async
@@ -44,6 +43,9 @@ module Api
     end
 
     include Properties
+
+    # Parameters can be overridden via Provider::PropertyOverride
+    attr_reader :parameters
 
     # Properties can be overridden via Provider::PropertyOverride
     attr_reader :properties

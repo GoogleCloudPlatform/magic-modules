@@ -94,8 +94,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
           )
         )
     properties:
-      path:
-        validate: |
+      path: !ruby/object:Provider::Puppet::PropertyOverride
+        validation: |
           raise "'path' parameter should be an absolute path." \
             unless (Pathname.new value).absolute?
     provider_helpers:
