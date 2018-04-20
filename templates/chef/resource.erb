@@ -149,41 +149,40 @@ module Google
             # TODO(nelsonjr): Determine how to print green like update converge
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
-<% custom_create = get_code_multiline config, 'create' -%>
-<% if custom_create.nil? -%>
+<% if object&.handlers&.create.nil? -%>
 <%
-  if object.create_verb.nil? || object.create_verb == :POST
-    body_new = 'collection(@new_resource)'
-    request_new = "::Google::#{product_ns}::Network::Post"
-  elsif object.create_verb == :PUT
-    body_new = 'self_link(@new_resource)'
-    request_new = "::Google::#{product_ns}::Network::Put"
-  end
+     if object.create_verb.nil? || object.create_verb == :POST
+       body_new = 'collection(@new_resource)'
+       request_new = "::Google::#{product_ns}::Network::Post"
+     elsif object.create_verb == :PUT
+       body_new = 'self_link(@new_resource)'
+       request_new = "::Google::#{product_ns}::Network::Put"
+     end
 -%>
             create_req = <%= request_new -%>.new(
               <%= body_new -%>, fetch_auth(@new_resource),
               'application/json', resource_to_request
             )
-<% unless object.async -%>
+<%   unless object.async -%>
 <%
   kind_param = object.kind? ? ", '#{object.kind}'" : ''
 -%>
-<% if object.save_api_results? -%>
+<%     if object.save_api_results? -%>
             @new_resource.__fetched =
               return_if_object create_req.send<%= kind_param %>
-<% else # object.save_api_results? -%>
+<%     else # object.save_api_results? -%>
             return_if_object create_req.send<%= kind_param %>
-<% end # object.save_api_results? -%>
-<% else # object.async -%>
-<% if object.save_api_results? -%>
+<%     end # object.save_api_results? -%>
+<%   else # object.async -%>
+<%     if object.save_api_results? -%>
             @new_resource.__fetched =
               wait_for_operation create_req.send, @new_resource
-<% else # object.save_api_results? -%>
+<%     else # object.save_api_results? -%>
             wait_for_operation create_req.send, @new_resource
-<% end # object.save_api_results? -%>
-<% end # object.async -%>
-<% else -%>
-<%= lines(indent(custom_create, 12)) -%>
+<%     end # object.save_api_results? -%>
+<%   end # object.async -%>
+<% else # object&.handlers&.create.nil? -%>
+<%= lines(indent(object.handlers.create, 12)) -%>
 <% end -%>
           end
         else
@@ -289,20 +288,19 @@ module Google
     ]
   ], 10, 0))
 -%>
-<% custom_delete = get_code_multiline config, 'delete' -%>
-<% if custom_delete.nil? -%>
+<% if object&.handlers&.delete.nil? -%>
             delete_req = ::Google::<%= product_ns -%>::Network::Delete.new(
               self_link(@new_resource), fetch_auth(@new_resource)
             )
-<% unless object.async -%>
-<% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
+<%   unless object.async -%>
+<%     obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
             return_if_object delete_req.send<%= obj_kind %>
-<% else -%>
+<%   else # object.async -%>
             wait_for_operation delete_req.send, @new_resource
-<% end -%>
-<% else -%>
-<%= lines(indent(custom_delete, 12)) -%>
-<% end -%>
+<%   end # object.async -%>
+<% else # object&.handlers&.delete.nil? -%>
+<%= lines(indent(object.handlers.delete, 12)) -%>
+<% end # object&.handlers&.delete.nil? -%>
           end
         end
       end
@@ -365,7 +363,7 @@ module Google
   unless object&.handlers&.resource_to_request_patch.nil?
     r2r_code << object.handlers.resource_to_request_patch
     r2r_code << ''
-  end # resource_to_request_patch.nil?
+  end # object&.handlers&.resource_to_request_patch.nil?
 
   if object.encoder?
     r2r_code << '# Format request to conform with API endpoint'
@@ -379,9 +377,7 @@ module Google
                8), 1)
 -%>
 <%
-  unless false?(Google::HashUtils.navigate(config,
-                                           %w[provider_helpers visible
-                                              unwrap_resource]))
+  unless false?(object.unwrap_resource)
     unless object.self_link_query.nil?
 -%>
 <%
@@ -408,8 +404,7 @@ module Google
             # TODO(nelsonjr): Check w/ Chef... can we print this in red?
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
-<% custom_update = get_code_multiline config, 'update' -%>
-<% if custom_update.nil? -%>
+<% if object&.handlers&.update.nil? -%>
 <%   put_new = "::Google::#{product_ns}::Network::Put.new" -%>
 <%= lines(indent("update_req =", 12)) -%>
 <%=
@@ -427,9 +422,9 @@ module Google
 <%   else # object.async -%>
             return_if_object update_req.send, '<%= object.kind -%>'
 <%   end # object.async -%>
-<% else # custom_update.nil? -%>
-<%= lines(indent(custom_update, 12)) -%>
-<% end # custom_update.nil? -%>
+<% else # object&.handlers&.update.nil? -%>
+<%= lines(indent(object.handlers.update, 12)) -%>
+<% end # object&.handlers&.update.nil? -%>
           end
         end
 <% unless object.all_resourcerefs.empty? -%>
@@ -566,24 +561,25 @@ module Google
           Chef::Log.debug(message)
         end
 
-<% custom_collection = get_code_multiline config, 'collection' -%>
-<% if custom_collection.nil? -%>
+<% if object&.handlers&.collection.nil? -%>
 <%= lines(indent(emit_link('collection', collection_url(object), true), 8)) %>
-<% else # custom_collection.nil? -%>
-<%= lines(indent(emit_link('collection', custom_collection, true), 8)) %>
-<% end # custom_collection.nil? -%>
-<% custom_self_link = get_code_multiline config, 'self_link' -%>
-<% if custom_self_link.nil? -%>
+<% else # object&.handlers&.collection.nil? -%>
+<%=
+  lines(indent(emit_link('collection', object.handlers.collection, true), 8))
+ %>
+<% end # object&.handlers&.collection.nil? -%>
+<% if object&.handlers&.self_link.nil? -%>
 <%= lines(indent(emit_link('self_link', self_link_url(object), true), 8), 1) -%>
-<% else # custom_self_link.nil? -%>
-<%= lines(indent(emit_link('self_link', custom_self_link, true), 8), 1) -%>
-<% end # custom_self_link.nil? -%>
-<% custom_return_if_object = get_code_multiline config, 'return_if_object' -%>
-<% if custom_return_if_object.nil? -%>
+<% else # object&.handlers&.self_link.nil? -%>
+<%=
+  lines(indent(emit_link('self_link', object.handlers.self_link, true), 8), 1)
+-%>
+<% end # object&.handlers&.self_link.nil? -%>
+<% if object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/return_if_object.erb'), 8)) %>
-<% else # custom_return_if_object.nil? -%>
-<%= lines(indent(custom_return_if_object, 8), 1) -%>
-<% end # custom_return_if_object.nil? -%>
+<% else # object&.handlers&.return_if_object.nil? -%>
+<%= lines(indent(object.handlers.return_if_object, 8), 1) -%>
+<% end # object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/expand_variables.erb'), 8)) %>
 <%=
   if object.async
