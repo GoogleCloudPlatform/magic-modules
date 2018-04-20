@@ -45,6 +45,18 @@ resources:
           uri: git@github.com:((github-account.username))/terraform-provider-google.git
           private_key: ((repo-key.private_key))
 
+    - name: puppet-compute-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/puppet-google-compute.git
+          private_key: ((repo-key.private_key))
+
+    - name: puppet-sql-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/puppet-google-sql.git
+          private_key: ((repo-key.private_key))
+
     - name: terraform-head
       type: git-branch
       source:
@@ -105,17 +117,40 @@ jobs:
             file: magic-modules/.ci/magic-modules/branch.yml
             params:
               GH_TOKEN: ((github-account.password))
-            # consumes: magic-modules-branched
-            # produces: terraform-generated
-          - task: generate-terraform
-            file: magic-modules-branched/.ci/magic-modules/generate-terraform.yml
-            # Puts 'terraform-generated' into the robot's fork.
-          - put: terraform-intermediate
-            params:
-                repository: terraform-generated
-                branch_file: magic-modules-branched/branchname
-                only_if_diff: true
-                force: true
+          - aggregate:
+            - do:
+                # consumes: magic-modules-branched
+                # produces: terraform-generated
+              - task: generate-terraform
+                file: magic-modules-branched/.ci/magic-modules/generate-terraform.yml
+              # Puts 'terraform-generated' into the robot's fork.
+              - put: terraform-intermediate
+                params:
+                    repository: terraform-generated
+                    branch_file: magic-modules-branched/branchname
+                    only_if_diff: true
+                    force: true
+            - do:
+                # consumes: magic-modules-branched
+                # produces: puppet-compute-generated
+              - task: generate-puppet
+                file: magic-modules-branched/.ci/magic-modules/generate-puppet.yml
+                params:
+                  PRODUCTS: compute,sql
+              - aggregate:
+                - put: puppet-compute-intermediate
+                  params:
+                      repository: puppet-generated/compute
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                - put: puppet-sql-intermediate
+                  params:
+                      repository: puppet-generated/sql
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
           - task: point-to-submodules
@@ -124,8 +159,8 @@ jobs:
               # This needs to match the username for the 'terraform-intermediate' resource.
                 GH_USERNAME: ((github-account.username))
                 CREDS: ((repo-key.private_key))
-          # This 'put' needs to go below all the submodules because it has a commit which
-          # points to those submodules.
+
+          # Push the magic modules branch that contains the updated submodules.
           - put: magic-modules
             params:
                 repository: magic-modules-submodules
@@ -135,15 +170,33 @@ jobs:
 
     - name: terraform-test
       plan:
-          - aggregate:
-              - get: magic-modules
-                version: every
-                trigger: true
-                params:
-                    submodules: [build/terraform]
-                passed: [mm-generate]
-          - task: test
-            file: magic-modules/.ci/unit-tests/task.yml
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [build/terraform]
+          passed: [mm-generate]
+        - task: test
+          file: magic-modules/.ci/unit-tests/task.yml
+
+    - name: puppet-test
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [build/puppet/sql, build/puppet/compute]
+          passed: [mm-generate]
+        - aggregate:
+          - task: test-sql
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            params:
+              PRODUCT: sql
+          - task: test-compute
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            params:
+              PRODUCT: compute
+              EXCLUDE_PATTERN: spec/gcompute_instance_group_manager_provider_spec.rb,spec/gcompute_instance_provider_spec.rb,spec/gcompute_instance_template_provider_spec.rb,spec/gcompute_target_https_proxy_provider_spec.rb,spec/gcompute_target_ssl_proxy_provider_spec.rb,spec/puppetlint_spec.rb
 
     - name: create-prs
       plan:
@@ -151,8 +204,8 @@ jobs:
             version: every
             # trigger: true
             params:
-                submodules: [build/terraform]
-            passed: [terraform-test, mm-generate]
+                submodules: [build/terraform, build/puppet/compute, build/puppet/sql]
+            passed: [terraform-test, mm-generate, puppet-test]
           - get: mm-initial-pr
             resource: magic-modules-new-prs
             passed: [mm-generate]
@@ -172,6 +225,8 @@ jobs:
                 # This is what tells us which terraform repo to write PRs against - this
                 # is what you change if you want to test this in a non-live environment.
                 TERRAFORM_REPO: terraform-providers/terraform-provider-google
+                PUPPET_COMPUTE_REPO: GoogleCloudPlatform/puppet-google-compute
+                PUPPET_SQL_REPO: GoogleCloudPlatform/puppet-google-sql
             on_failure:
               put: magic-modules-new-prs
               params:
@@ -195,11 +250,24 @@ jobs:
               # not push the update even though the commit hashes are different.
               only_if_diff: true
               force: true
+          - put: puppet-compute-intermediate
+            params:
+              repository: magic-modules-with-comment/build/puppet/compute
+              branch_file: magic-modules-with-comment/original_pr_branch_name
+              only_if_diff: true
+              force: true
+          - put: puppet-sql-intermediate
+            params:
+              repository: magic-modules-with-comment/build/puppet/sql
+              branch_file: magic-modules-with-comment/original_pr_branch_name
+              only_if_diff: true
+              force: true
+
           # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
           # time through, it works the same way as the preceding push.
           - put: magic-modules
             params:
-              repository: magic-modules-with-comment/build/terraform
+              repository: magic-modules-with-comment/
               branch_file: magic-modules-with-comment/original_pr_branch_name
               only_if_diff: true
               force: true
