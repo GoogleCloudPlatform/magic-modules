@@ -24,6 +24,7 @@ git checkout -b "$BRANCH_NAME"
 
 if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   DEPENDENCIES=""
+  NEWLINE=$'\n'
   # There is no existing PR - this is the first pass through the pipeline and
   # we will need to create a PR using 'hub'.
   pushd build/terraform
@@ -36,7 +37,7 @@ EOF
 
   git checkout -b "$BRANCH_NAME"
   if TF_PR=$(hub pull-request -b "$TERRAFORM_REPO:master" -F ./downstream_body); then
-    DEPENDENCIES="${DEPENDENCIES}depends: $TF_PR\n"
+    DEPENDENCIES="${DEPENDENCIES}depends: $TF_PR ${NEWLINE}"
   else
     echo "Terraform - did not generate a PR."
   fi
@@ -51,7 +52,7 @@ EOF
 
   git checkout -b "$BRANCH_NAME"
   if PUP_SQL_PR=$(hub pull-request -b "$PUPPET_SQL_REPO:master" -F ./downstream_body); then
-    DEPENDENCIES="${DEPENDENCIES}depends: $PUP_SQL_PR\n"
+    DEPENDENCIES="${DEPENDENCIES}depends: $PUP_SQL_PR ${NEWLINE}"
   else
     echo "Puppet SQL - did not generate a PR."
   fi
@@ -66,7 +67,7 @@ EOF
 
   git checkout -b "$BRANCH_NAME"
   if PUP_COMPUTE_PR=$(hub pull-request -b "$PUPPET_COMPUTE_REPO:master" -F ./downstream_body); then
-    DEPENDENCIES="${DEPENDENCIES}depends: $PUP_COMPUTE_PR\n"
+    DEPENDENCIES="${DEPENDENCIES}depends: $PUP_COMPUTE_PR ${NEWLINE}"
   else
     echo "Puppet Compute - did not generate a PR."
   fi
