@@ -2795,10 +2795,18 @@ objects:
     name: 'TargetSslProxy'
     kind: 'compute#targetSslProxy'
     base_url: projects/{{project}}/global/targetSslProxies
+    input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a TargetSslProxy resource, which is used by one or more
       global forwarding rule to route incoming SSL requests to a backend
       service.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Setting Up SSL proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/targetSslProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
@@ -2808,6 +2816,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2822,6 +2831,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       - !ruby/object:Api::Type::Enum
         name: 'proxyHeader'
         description: |
@@ -2830,18 +2841,27 @@ objects:
         values:
           - :NONE
           - :PROXY_V1
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader'
       - !ruby/object:Api::Type::ResourceRef
         name: 'service'
         resource: 'BackendService'
         imports: 'selfLink'
         description: |
           A reference to the BackendService resource.
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setBackendService'
       - !ruby/object:Api::Type::Array
         name: 'sslCertificates'
+        max_size: 1
         description: |
           A list of SslCertificate resources that are used to authenticate
           connections between users and the load balancer. Currently, exactly
           one SSL certificate must be specified.
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'sslCertificate'
           resource: 'SslCertificate'
@@ -2897,6 +2917,7 @@ objects:
     exclude: true
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'

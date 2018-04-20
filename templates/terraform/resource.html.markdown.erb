@@ -16,8 +16,7 @@
 <%
   api_name_lower = product_ns.downcase
   resource_name = Google::StringUtils.underscore(object.name)
-  properties = effective_properties(config, object.all_user_properties)
-  documentation = config["documentation"] || {}
+  properties = effective_properties(object.all_user_properties)
 -%>
 
 ---
@@ -25,7 +24,7 @@ layout: "google"
 page_title: "Google: google_<%= api_name_lower -%>_<%= resource_name -%>"
 sidebar_current: "docs-google-<%= api_name_lower -%>-<%= resource_name.gsub("_", "-") -%>"
 description: |-
-  <%= object.description.lines.first -%>
+  <%= Google::StringUtils.first_sentence(object.description) %>
 ---
 
 # google\_<%= api_name_lower -%>\_<%= resource_name.gsub("_", "\\_") %>
@@ -46,10 +45,10 @@ To get more information about <%= object.name -%>, see:
 <%   end # object...guides.empty? -%>
 <% end # object...api.nil? -%>
 
-<% if documentation&.key?("examples") -%>
+<% unless object.examples.nil? -%>
 ## Example Usage
 
-<%= documentation["examples"]  -%>
+<%= object.examples  -%>
 <% end -%>
 
 ## Argument Reference
@@ -57,17 +56,17 @@ To get more information about <%= object.name -%>, see:
 The following arguments are supported:
 
 <% properties.select(&:required).each do |prop| -%>
-<%= lines(build_property_documentation(config, prop)) -%>
+<%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
-<%= lines(build_nested_property_documentation(config, prop)) -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(config, prop)) -%>
+<%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 * `project` (Optional) The ID of the project in which the resource belongs.
@@ -75,7 +74,7 @@ The following arguments are supported:
 <% end -%>
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(config, prop)) -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 ## Attributes Reference
@@ -83,14 +82,14 @@ The following arguments are supported:
 In addition to the arguments listed above, the following computed attributes are exported:
 
 <% properties.select(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(config, prop)) -%>
+<%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 <% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
 <% properties.select(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(config, prop)) -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
 ## Timeouts

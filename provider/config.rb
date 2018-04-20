@@ -13,10 +13,8 @@
 
 require 'api/object'
 require 'compile/core'
-require 'provider/objects'
 require 'provider/resource_override'
 require 'provider/resource_overrides'
-require 'compile/core'
 
 module Provider
   # Settings for the provider
@@ -206,22 +204,19 @@ module Provider
 
     def validate
       super
-      check_optional_property :examples, Api::Resource::HashArray
-      check_optional_property :files, Provider::Config::Files
-
-      # TODO(alexstephen): Remove HashArray checking when all provider.yamls
-      # using Provider::Objects
-      @objects ||= Api::Resource::HashArray.new
-
-      check_optional_property \
-        :objects, [Provider::Objects, Api::Resource::HashArray]
-
-      check_optional_property :test_data, Provider::Config::TestData
-      check_optional_property :tests, Api::Resource::HashArray
+      check_property :examples, Api::Resource::HashArray unless @examples.nil?
+      check_property :files, Provider::Config::Files unless @files.nil?
+      check_property :objects, Api::Resource::HashArray unless @objects.nil?
       check_optional_property :overrides, Provider::ResourceOverrides
-      check_optional_property_list :style, Provider::Config::StyleException
-      check_optional_property_list :changelog, Provider::Config::Changelog
-      check_optional_property_list :functions, Provider::Config::Function
+      check_property :test_data, Provider::Config::TestData \
+        unless @test_data.nil?
+      check_property :tests, Api::Resource::HashArray unless @tests.nil?
+      check_property_list :style, Provider::Config::StyleException \
+        unless @style.nil?
+      check_property_list :changelog, Provider::Config::Changelog \
+        unless @changelog.nil?
+      check_property_list :functions, Provider::Config::Function \
+        unless @functions.nil?
     end
 
     # Provides the API object to any type that requires, e.g. for validation

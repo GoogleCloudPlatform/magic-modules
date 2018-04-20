@@ -17,13 +17,21 @@ require 'google/string_utils'
 module Api
   # Represents a property type
   class Type < Api::Object::Named
-    attr_reader :description
-    attr_reader :output # If set value will not be sent to server on sync
-    attr_reader :input # If set to true value is used only on creation
-    attr_reader :field
-    attr_reader :required
-    attr_reader :update_verb
-    attr_reader :update_url
+    # The list of properties (attr_reader) that can be overridden in
+    # <provider>.yaml.
+    module Fields
+      include Api::Object::Named::Properties
+
+      attr_reader :description
+      attr_reader :output # If set value will not be sent to server on sync
+      attr_reader :input # If set to true value is used only on creation
+      attr_reader :field
+      attr_reader :required
+      attr_reader :update_verb
+      attr_reader :update_url
+    end
+
+    include Fields
 
     attr_reader :__resource
     attr_reader :__parent # is nil for top-level properties
@@ -162,6 +170,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :max_size
 
       STRING_ARRAY_TYPE = [Api::Type::Array, Api::Type::String].freeze
       NESTED_ARRAY_TYPE = [Api::Type::Array, Api::Type::NestedObject].freeze
@@ -179,6 +188,8 @@ module Api
           || type?(@item_type)
           raise "Invalid type #{@item_type}"
         end
+
+        check_optional_property :max_size, ::Integer
       end
 
       def item_type_class

@@ -48,5 +48,13 @@ module Google
       key.to_sym unless key.nil?
     end
     # rubocop:enable Style/SafeNavigation
+
+    # Returns all the characters up until the period (.) or returns text
+    # unchanged if there is no period.
+    def self.first_sentence(text)
+      period_pos = text.index(/[\.\?!]/)
+      return text if period_pos.nil?
+      text[0, period_pos + 1]
+    end
   end
 end

@@ -14,6 +14,7 @@
 require 'provider/abstract_core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
+require 'provider/terraform/property_override'
 require 'provider/terraform/resource_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
@@ -98,43 +99,25 @@ module Provider
     end
 
     # Returns the resource properties without those ignored.
-    def effective_properties(config, properties)
-      properties.reject do |p|
-        config['ignore']&.include?(construct_property_key(p))
-      end
+    def effective_properties(properties)
+      properties.reject(&:exclude)
     end
 
     # Returns the nested properties without those ignored. An empty list is
     # returned if the property is not a NestedObject or an Array of
     # NestedObjects.
-    def effective_nested_properties(config, property)
+    def effective_nested_properties(property)
       if property.is_a?(Api::Type::NestedObject)
-        effective_properties(config, property.properties)
+        effective_properties(property.properties)
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
-        effective_properties(config, property.item_type.properties)
+        effective_properties(property.item_type.properties)
       else
         []
       end
     end
 
     private
-
-    # Constructs the key uniquely identifying a property for a given resource.
-    #
-    # The key can take one of these formats:
-    # - 'foo': Top-level property 'foo'
-    # - 'foo.bar': Property 'bar' nested under property 'foo'
-    # - 'foo.*.bar': Property 'bar' of all nested objects in list 'foo'
-    def construct_property_key(property)
-      return property.name if property.parent.nil?
-
-      if property.parent.is_a?(Api::Type::Array)
-        construct_property_key(property.parent) + '.*'
-      else
-        construct_property_key(property.parent) + '.' + property.name
-      end
-    end
 
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single

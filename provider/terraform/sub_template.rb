@@ -17,42 +17,37 @@ module Provider
   class Terraform < Provider::AbstractCore
     # Functions to compile sub-templates.
     module SubTemplate
-      def build_schema_property(config, property, object)
+      def build_schema_property(property, object)
         compile_template'templates/terraform/schema_property.erb',
                         property: property,
-                        config: config,
                         object: object
       end
 
       # Transforms a Cloud API representation of a property into a Terraform
       # schema representation.
-      def build_flatten_method(config, prefix, property)
+      def build_flatten_method(prefix, property)
         compile_template 'templates/terraform/flatten_property_method.erb',
                          prefix: prefix,
-                         property: property,
-                         config: config
+                         property: property
       end
 
       # Transforms a Terraform schema representation of a property into a
       # representation used by the Cloud API.
-      def build_expand_method(config, prefix, property)
+      def build_expand_method(prefix, property)
         compile_template 'templates/terraform/expand_property_method.erb',
                          prefix: prefix,
-                         property: property,
-                         config: config
+                         property: property
       end
 
-      def build_property_documentation(config, property)
+      def build_property_documentation(property)
         compile_template 'templates/terraform/property_documentation.erb',
-                         property: property,
-                         config: config
+                         property: property
       end
 
-      def build_nested_property_documentation(config, property)
+      def build_nested_property_documentation(property)
         compile_template(
           'templates/terraform/nested_property_documentation.erb',
-          property: property,
-          config: config
+          property: property
         )
       end
 
