@@ -238,6 +238,7 @@ module Provider
       end
     end
 
+    # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
     def default_overrides
       @overrides ||= Provider::ResourceOverrides.new
     end
