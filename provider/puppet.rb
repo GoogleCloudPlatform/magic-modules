@@ -19,6 +19,7 @@ require 'provider/core'
 require 'provider/puppet/codegen'
 require 'provider/puppet/manifest'
 require 'provider/puppet/resource_override'
+require 'provider/puppet/property_override'
 require 'provider/puppet/test_manifest'
 require 'provider/test_matrix'
 
@@ -43,6 +44,10 @@ module Provider
 
       def resource_override
         Provider::Puppet::ResourceOverride
+      end
+
+      def property_override
+        Provider::Puppet::PropertyOverride
       end
 
       def validate

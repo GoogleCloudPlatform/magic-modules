@@ -484,34 +484,47 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     puts("DEBUG: #{message}") if ENV['PUPPET_HTTP_VERBOSE']
     super(message)
   end
-
 <% if object&.handlers&.collection.nil? -%>
-<%= lines(indent(emit_link('collection', collection_url(object), true), 2)) %>
+<%=
+  lines_before(
+    lines(indent(emit_link('collection', collection_url(object), true), 2))
+  )
+-%>
 <% else # object&.handlers&.collection.nil? -%>
 <%=
-  lines(indent(emit_link('collection', object.handlers.collection, true), 2))
+  lines_before(
+    lines(indent(emit_link('collection', object.handlers.collection, true), 2))
+  )
 -%>
 <% end # object&.handlers&.collection.nil? -%>
 <% if object&.handlers&.self_link.nil? -%>
-<%= lines(indent(emit_link('self_link', self_link_url(object), true), 2), 1) -%>
+<%=
+  lines_before(
+    lines(indent(emit_link('self_link', self_link_url(object), true), 2))
+  )
+-%>
 <% else # object&.handlers&.self_link.nil? -%>
 <%=
   lines_before(
-    lines(indent(emit_link('self_link', object.handlers.self_link, true), 2), 1)
+    lines(indent(emit_link('self_link', object.handlers.self_link, true), 2))
   )
 -%>
 <% end # object&.handlers&.self_link.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
-<%= lines(indent(compile('templates/return_if_object.erb'), 2)) %>
-<% else # object&.handlers&.return_if_object.nil? -%>
-<%= lines(indent(object.handlers.return_if_object, 2), 1) -%>
-<% end # object&.handlers&.return_if_object.nil? -%>
-<%= lines(indent(compile('templates/expand_variables.erb'), 2)) %>
 <%=
-  if object.async
-    lines(indent(compile('templates/async.erb'), inside_indent), 1)
-  end
+  lines_before(lines(indent(compile('templates/return_if_object.erb'), 2)))
 -%>
+<% else # object&.handlers&.return_if_object.nil? -%>
+<%= lines_before(lines(indent(object.handlers.return_if_object, 2))) -%>
+<% end # object&.handlers&.return_if_object.nil? -%>
+<%=
+  lines_before(lines(indent(compile('templates/expand_variables.erb'), 2)))
+-%>
+<%=
+  lines_before(lines(indent(compile('templates/async.erb'), inside_indent))) \
+    if object.async
+-%>
+
 <%= lines(indent(compile('templates/provider_helpers.erb'), 2), 1) -%>
 <%= lines(indent(compile('templates/transport.erb'), 2)) -%>
 end

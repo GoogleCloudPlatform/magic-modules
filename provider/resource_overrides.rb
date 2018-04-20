@@ -25,6 +25,9 @@ module Provider
   # overrides: !ruby/object:Provider::ResourceOverrides
   #   SomeResource: !ruby/object:Provider::MyProvider::ResourceOverride
   #     description: '{{description}} A tool-specific description complement'
+  #     parameters:
+  #       someParameter: !ruby/object:Provider::MyProvider::PropertyOverride
+  #         description: 'foobar' # replaces description
   #     properties:
   #       someProperty: !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'foobar' # replaces description
@@ -33,11 +36,8 @@ module Provider
   #         description: 'baz'
   #   ...
   class ResourceOverrides < Api::Object
-    def consume_api(api)
+    def consume_config(api, config)
       @__api = api
-    end
-
-    def consume_config(config)
       @__config = config
     end
 
@@ -100,6 +100,7 @@ module Provider
         raise "The resource to override must exist #{name}" if api_object.nil?
         check_property_value 'overrides', override, Provider::ResourceOverride
         override.apply api_object
+        populate_nonoverridden_properties api_object, override
         override_properties api_object, override
       end
     end
@@ -109,11 +110,7 @@ module Provider
         check_property_value "properties['#{property_path}']",
                              property_override, Provider::PropertyOverride
         api_property = find_property api_object, property_path.split('.')
-        if api_property.nil?
-          raise "The property to override must exists #{property_path} " \
-              "in resource #{api_object.name}"
-        end
-
+        api_property ||= @__config.property_override.new
         property_override.apply api_property
       end
     end
@@ -135,8 +132,9 @@ module Provider
     end
 
     def get_properties(api_entity)
-      if api_entity.is_a?(Api::Resource) ||
-         api_entity.is_a?(Api::Type::NestedObject)
+      if api_entity.is_a?(Api::Resource)
+        api_entity.all_user_properties
+      elsif api_entity.is_a?(Api::Type::NestedObject)
         api_entity.properties
       elsif api_entity.is_a?(Api::Type::Array) &&
             api_entity.item_type.is_a?(Api::Type::NestedObject)
@@ -149,6 +147,13 @@ module Provider
         var_name = "@#{object.name}".to_sym
         instance_variable_set(var_name, @__config.resource_override.new) \
           unless instance_variables.include?(var_name)
+      end
+    end
+
+    def populate_nonoverridden_properties(api_entity, override)
+      api_entity.all_user_properties.each do |prop|
+        override.properties[prop.name] = @__config.property_override.new \
+          unless override.properties.include?(prop.name)
       end
     end
   end
