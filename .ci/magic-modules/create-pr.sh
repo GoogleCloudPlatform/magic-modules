@@ -76,7 +76,7 @@ EOF
   if [ -z "$DEPENDENCIES" ]; then
     cat << EOF > ./pr_comment 
 I am a robot that works on MagicModules PRs!
-I checked the downstream repositories, and none of them seem to have any changes.
+I checked the downstream repositories (see README.md for which ones I can write to), and none of them seem to have any changes.
 
 Once this PR is approved, you can feel free to merge it without taking any further steps.
 EOF
