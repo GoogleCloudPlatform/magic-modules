@@ -26,44 +26,45 @@ manifest: !ruby/object:Provider::Chef::Manifest
       versions: '< 0.2.0'
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  ManagedZone:
-    update: |
-      message = 'ManagedZone cannot be edited'
-      Chef::Log.fatal message
-      raise message
-  ResourceRecordSet:
-    create: |
-      change = create_change nil, updated_record, new_resource
-      change_id = change['id'].to_i
-      debug("created for transaction '#{change_id}' to complete")
-      wait_for_change_to_complete change_id, @new_resource \
-        if change['status'] == 'pending'
-    delete: |
-      change = create_change fetch, nil, @new_resource
-      change_id = change['id'].to_i
-      debug("created for transaction '#{change_id}' to complete")
-      wait_for_change_to_complete change_id, @new_resource \
-        if change['status'] == 'pending'
-    update: |
-      change = create_change fetch, updated_record, new_resource
-      change_id = change['id'].to_i
-      debug("created for transaction '#{change_id}' to complete")
-      wait_for_change_to_complete change_id, new_resource \
-        if change['status'] == 'pending'
+overrides: !ruby/object:Provider::ResourceOverrides
+  ManagedZone: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      update: |
+        message = 'ManagedZone cannot be edited'
+        Chef::Log.fatal message
+        raise message
+  ResourceRecordSet: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      create: |
+        change = create_change nil, updated_record, new_resource
+        change_id = change['id'].to_i
+        debug("created for transaction '#{change_id}' to complete")
+        wait_for_change_to_complete change_id, @new_resource \
+          if change['status'] == 'pending'
+      delete: |
+        change = create_change fetch, nil, @new_resource
+        change_id = change['id'].to_i
+        debug("created for transaction '#{change_id}' to complete")
+        wait_for_change_to_complete change_id, @new_resource \
+          if change['status'] == 'pending'
+      update: |
+        change = create_change fetch, updated_record, new_resource
+        change_id = change['id'].to_i
+        debug("created for transaction '#{change_id}' to complete")
+        wait_for_change_to_complete change_id, new_resource \
+          if change['status'] == 'pending'
     provider_helpers:
-      visible:
-        unwrap_resource: false
-        resource_to_request: false
-        return_if_object: false
-      include:
-        - 'products/dns/helpers/chef_provider_resource_set.rb.erb'
-        - 'products/dns/helpers/provider_resource_set.rb.erb'
-  Project:
-    update: |
-      message = 'Project cannot be edited'
-      Chef::Log.fatal message
-      raise message
+      - 'products/dns/helpers/chef_provider_resource_set.rb.erb'
+      - 'products/dns/helpers/provider_resource_set.rb.erb'
+    resource_to_request: false
+    return_if_object: false
+    unwrap_resource: false
+  Project: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      update: |
+        message = 'Project cannot be edited'
+        Chef::Log.fatal message
+        raise message
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
 properties:
