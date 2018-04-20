@@ -26,87 +26,89 @@ manifest: !ruby/object:Provider::Chef::Manifest
       versions: '< 0.2.0'
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
-objects: !ruby/object:Api::Resource::HashArray
-  Database:
-    # TODO(nelsonjr): Once bugs in the body are resolved remove this override.
-    return_if_object: |
-      # rubocop:disable Metrics/CyclomaticComplexity
-      def self.return_if_object(response, kind)
-        raise "Bad response: #{response}" \
-          unless response.is_a?(Net::HTTPResponse)
-        return if response.is_a?(Net::HTTPNotFound)
-        return if response.is_a?(Net::HTTPNoContent)
-        # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
-        # return_if_object once Cloud SQL bug http://b/62635365 is resolved.
-        # Currently the API returns 403 for objects that do not exist, even
-        # when the user has access to the project. This is being changed to
-        # return 404 as it is supposed to be.
-        # Once 404 is the correct response, the temporary workaround should
-        # be removed.
-        return if response.is_a?(Net::HTTPForbidden)
-        result = JSON.parse(response.body)
-        raise_if_errors result, %w[error errors], 'message'
-        raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
-        # TODO(nelsonjr): Revert this check back to standard once Cloud SQL
-        # bug http://b/62841551 is resolved.
-        # Currently the sql#operation#targetLink for create returns a
-        # sql#database while for a delete it returns a sql#instance.
-        # | raise "Incorrect result: #{result['kind']} (expecting #{kind})" \
-        # |   unless result['kind'] == kind
-        raise "Incorrect result: #{result['kind']} (expecting #{kind})" \
-          unless [kind, 'sql#instance'].include?(result['kind'])
-        result
-      end
-      # rubocop:enable Metrics/CyclomaticComplexity
+overrides: !ruby/object:Provider::ResourceOverrides
+  Database: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      # TODO(nelsonjr): Once bugs in the body are resolved remove this override.
+      return_if_object: |
+        # rubocop:disable Metrics/CyclomaticComplexity
+        def self.return_if_object(response, kind)
+          raise "Bad response: #{response}" \
+            unless response.is_a?(Net::HTTPResponse)
+          return if response.is_a?(Net::HTTPNotFound)
+          return if response.is_a?(Net::HTTPNoContent)
+          # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
+          # return_if_object once Cloud SQL bug http://b/62635365 is resolved.
+          # Currently the API returns 403 for objects that do not exist, even
+          # when the user has access to the project. This is being changed to
+          # return 404 as it is supposed to be.
+          # Once 404 is the correct response, the temporary workaround should
+          # be removed.
+          return if response.is_a?(Net::HTTPForbidden)
+          result = JSON.parse(response.body)
+          raise_if_errors result, %w[error errors], 'message'
+          raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
+          # TODO(nelsonjr): Revert this check back to standard once Cloud SQL
+          # bug http://b/62841551 is resolved.
+          # Currently the sql#operation#targetLink for create returns a
+          # sql#database while for a delete it returns a sql#instance.
+          # | raise "Incorrect result: #{result['kind']} (expecting #{kind})" \
+          # |   unless result['kind'] == kind
+          raise "Incorrect result: #{result['kind']} (expecting #{kind})" \
+            unless [kind, 'sql#instance'].include?(result['kind'])
+          result
+        end
+        # rubocop:enable Metrics/CyclomaticComplexity
 
-      def return_if_object(response, kind)
-        self.class.return_if_object(response, kind)
-      end
-  Flag:
-    flush: |
-      raise('Cloud SQL flag does not match expectations.')
-  Instance:
-    # TODO(nelsonjr): Once bugs in the body are resolved remove this override.
-    return_if_object: |
-      # rubocop:disable Metrics/CyclomaticComplexity
-      def self.return_if_object(response, kind)
-        raise "Bad response: #{response}" \
-          unless response.is_a?(Net::HTTPResponse)
-        return if response.is_a?(Net::HTTPNotFound)
-        return if response.is_a?(Net::HTTPNoContent)
-        # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
-        # return_if_object once Cloud SQL bug http://b/62635365 is resolved.
-        # Currently the API returns 403 for objects that do not exist, even
-        # when the user has access to the project. This is being changed to
-        # return 404 as it is supposed to be.
-        # Once 404 is the correct response, the temporary workaround should
-        # be removed.
-        return if response.is_a?(Net::HTTPForbidden)
-        result = JSON.parse(response.body)
-        raise_if_errors result, %w[error errors], 'message'
-        raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
-        raise "Incorrect result: #{result['kind']} (expecting #{kind})" \
-          unless result['kind'] == kind
-        result
-      end
-      # rubocop:enable Metrics/CyclomaticComplexity
+        def return_if_object(response, kind)
+          self.class.return_if_object(response, kind)
+        end
+  Flag: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      update: raise('Cloud SQL flag does not match expectations.')
+  Instance: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      # TODO(nelsonjr): Once bugs in the body are resolved remove this override.
+      return_if_object: |
+        # rubocop:disable Metrics/CyclomaticComplexity
+        def self.return_if_object(response, kind)
+          raise "Bad response: #{response}" \
+            unless response.is_a?(Net::HTTPResponse)
+          return if response.is_a?(Net::HTTPNotFound)
+          return if response.is_a?(Net::HTTPNoContent)
+          # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
+          # return_if_object once Cloud SQL bug http://b/62635365 is resolved.
+          # Currently the API returns 403 for objects that do not exist, even
+          # when the user has access to the project. This is being changed to
+          # return 404 as it is supposed to be.
+          # Once 404 is the correct response, the temporary workaround should
+          # be removed.
+          return if response.is_a?(Net::HTTPForbidden)
+          result = JSON.parse(response.body)
+          raise_if_errors result, %w[error errors], 'message'
+          raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
+          raise "Incorrect result: #{result['kind']} (expecting #{kind})" \
+            unless result['kind'] == kind
+          result
+        end
+        # rubocop:enable Metrics/CyclomaticComplexity
 
-      def return_if_object(response, kind)
-        self.class.return_if_object(response, kind)
-      end
-    resource_to_request_patch: |
-      unless @__fetched.nil?
-        # Convert to pure JSON
-        request = JSON.parse(request.to_json)
-        request['settings']['settingsVersion'] =
-          @__fetched['settings']['settingsVersion']
-      end
-  SslCert:
-    flush: |
-      raise('Cloud SQL SSL certificate mismatch.')
-  Tier:
-    flush: |
-      raise('Cloud SQL tier does not match expectations.')
+        def return_if_object(response, kind)
+          self.class.return_if_object(response, kind)
+        end
+      resource_to_request_patch: |
+        unless @__fetched.nil?
+          # Convert to pure JSON
+          request = JSON.parse(request.to_json)
+          request['settings']['settingsVersion'] =
+            @__fetched['settings']['settingsVersion']
+        end
+  SslCert: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      update: raise('Cloud SQL SSL certificate mismatch.')
+  Tier: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      update: raise('Cloud SQL tier does not match expectations.')
 examples: !ruby/object:Api::Resource::HashArray
   Database:
     - database.rb
