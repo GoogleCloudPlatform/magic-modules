@@ -17,6 +17,8 @@ require 'provider/chef/manifest'
 require 'provider/chef/property_override'
 require 'provider/chef/resource_override'
 require 'provider/chef/test_catalog'
+require 'provider/chef/resource_override'
+require 'provider/chef/property_override'
 
 module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
