@@ -361,7 +361,7 @@ module Google
   r2r_code << '}.reject { |_, v| v.nil? }'
 
   unless object&.handlers&.resource_to_request_patch.nil?
-    r2r_code << object.handlersresource_to_request_patch
+    r2r_code << object.handlers.resource_to_request_patch
     r2r_code << ''
   end # object&.handlers&.resource_to_request_patch.nil?
 
