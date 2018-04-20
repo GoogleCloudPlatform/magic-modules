@@ -20,6 +20,7 @@ require 'provider/ansible/module'
 require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
 require 'provider/ansible/resource_override'
+require 'provider/ansible/property_override'
 require 'provider/ansible/selflink'
 
 module Provider
@@ -34,6 +35,10 @@ module Provider
 
       def resource_override
         Provider::Ansible::ResourceOverride
+      end
+
+      def property_override
+        Provider::Ansible::PropertyOverride
       end
 
       def validate
