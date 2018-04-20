@@ -1,6 +1,6 @@
 ---
 # This file takes two inputs: magic-modules-branched in detached-HEAD state, and the CI repo.
-# It spits out "puppet-generated", a directory containing puppet repos on a new branch
+# It spits out "chef-generated", a directory containing chef repos on a new branch
 # (named after the HEAD commit on the PR), with the new generated code in it.
 platform: linux
 
@@ -14,10 +14,10 @@ inputs:
     - name: magic-modules-branched
 
 outputs:
-    - name: puppet-generated
+    - name: chef-generated
 
 run:
-    path: magic-modules-branched/.ci/magic-modules/generate-puppet.sh
+    path: magic-modules-branched/.ci/magic-modules/generate-chef.sh
 
 params:
   PRODUCTS: ""

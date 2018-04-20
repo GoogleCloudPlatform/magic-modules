@@ -24,4 +24,5 @@ params:
   CREDS: ""
   TERRAFORM_ENABLED: false
   PUPPET_MODULES: ""
+  CHEF_MODULES: ""
 
