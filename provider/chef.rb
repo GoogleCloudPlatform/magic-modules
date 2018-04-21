@@ -83,6 +83,8 @@ module Provider
       return "[String, ::#{prop.property_type.gsub(':Property:', ':Data:')}]" \
         if prop.is_a? Api::Type::ResourceRef
 
+      return 'Array' if prop.is_a? Api::Type::Array
+
       if prop.type == 'Enum'
         return format([
           ["equal_to: %w[#{prop.values.join(' ')}]"],
@@ -93,6 +95,12 @@ module Provider
           end)
         ].flatten(1), 0, 16)
       end
+
+      return "[Hash, ::#{prop.property_type}]" \
+        if prop.is_a? Api::Type::NameValues
+
+      return ['::', prop.property_type].join \
+        unless prop.is_a?(Api::Type::Primitive)
 
       prop.type
     end

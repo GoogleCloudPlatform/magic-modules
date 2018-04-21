@@ -88,10 +88,10 @@ gcompute_instance <%= example_resource_name('instance-test') -%> do
       source: <%= example_resource_name('instance-test-os-1') %>
     }
   ]
-  metadata (
+  metadata ({
     'startup-script-url' => 'gs://graphite-playground/bootstrap.sh',
     'cost-center' => '12345'
-  )
+  })
   network_interfaces [
     {
       network: <%= example_resource_name('mynetwork-test') %>,
