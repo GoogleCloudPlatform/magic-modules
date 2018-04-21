@@ -20,19 +20,15 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-central1-a' do
+gcompute_zone 'us-west1-a' do
   project 'google.com:graphite-playground'
   credential 'mycred'
 end
 
-<% end -%>
-gcompute_disk <%= example_resource_name('data-disk-1') -%> do
-  action :create
-  size_gb 50
-  disk_encryption_key(
-    raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
-  )
-  zone 'us-central1-a'
+<% end # name == README.md -%>
+gcompute_instance_group_manager 'test1' do
+  action :delete
+  zone 'us-west1-a'
   project 'google.com:graphite-playground'
   credential 'mycred'
 end

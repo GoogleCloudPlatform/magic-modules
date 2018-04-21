@@ -25,14 +25,34 @@ gcompute_zone 'us-central1-a' do
   credential 'mycred'
 end
 
-<% end -%>
-gcompute_disk <%= example_resource_name('data-disk-1') -%> do
+gcompute_instance_group <%= example_resource_name('my-chef-servers') -%> do
   action :create
-  size_gb 50
-  disk_encryption_key(
-    raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
-  )
   zone 'us-central1-a'
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
+
+# Google::Functions must be included at runtime to ensure that the
+# gcompute_health_check_ref function can be used in health_check blocks.
+::Chef::Resource.send(:include, Google::Functions)
+
+gcompute_backend_service <%= example_resource_name('my-app-backend') -%> do
+  action :create
+  backends [
+    { group: <%= example_resource_name('my-chef-servers') -%> }
+  ]
+  enable_cdn true
+  health_checks [
+    gcompute_health_check_ref('another-hc', 'google.com:graphite-playground')
+  ]
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
+
+<% end # name == README.md -%>
+gcompute_url_map <%= example_resource_name('my-url-map') -%> do
+  action :delete
+  default_service <%= example_resource_name('my-app-backend') %>
   project 'google.com:graphite-playground'
   credential 'mycred'
 end
