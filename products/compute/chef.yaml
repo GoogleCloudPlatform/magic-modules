@@ -97,13 +97,11 @@ examples: !ruby/object:Api::Resource::HashArray
     - firewall.rb
     - firewall~change1.rb
   ForwardingRule:
-    - delete_forwarding_rule.rb
     - forwarding_rule.rb
   GlobalAddress:
     - delete_global_address.rb
     - global_address.rb
   GlobalForwardingRule:
-    - delete_global_forwarding_rule.rb
     - global_forwarding_rule.rb
   HealthCheck:
     - delete_health_check.rb
@@ -124,7 +122,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_instance_group.rb
     - instance_group.rb
   InstanceGroupManager:
-    - delete_instance_group_manager.rb
     - instance_group_manager.rb
   InstanceTemplate:
     - delete_instance_template.rb
@@ -145,7 +142,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_route.rb
     - route.rb
   Snapshot:
-    - delete_snapshot.rb
     - snapshot.rb
   SslCertificate:
     - delete_ssl_certificate.rb
@@ -154,19 +150,14 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_subnetwork.rb
     - subnetwork.rb
   TargetHttpProxy:
-    - delete_target_http_proxy.rb
     - target_http_proxy.rb
   TargetHttpsProxy:
-    - delete_target_https_proxy.rb
     - target_https_proxy.rb
   TargetSslProxy:
-    - delete_target_ssl_proxy.rb
     - target_ssl_proxy.rb
   TargetTcpProxy:
-    - delete_target_tcp_proxy.rb
     - target_tcp_proxy.rb
   UrlMap:
-    - delete_url_map.rb
     - url_map.rb
   Zone:
     - zone.rb

@@ -25,9 +25,27 @@ gcompute_zone 'us-central1-a' do
   credential 'mycred'
 end
 
+gcompute_disk <%= example_resource_name('data-disk-1') -%> do
+  action :create
+  size_gb 50
+  disk_encryption_key(
+    raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
+  )
+  zone 'us-central1-a'
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
+
 <% end # name == README.md -%>
 gcompute_snapshot <%= example_resource_name('data-disk-snapshot-1') -%> do
-  action :delete
+  action :create
+  snapshot_encryption_key(
+    raw_key: 'VGhpcyBpcyBhbiBlbmNyeXB0ZWQgc25hcHNob3QhISE='
+  )
+  source_disk_encryption_key(
+    raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
+  )
+  source <%= example_resource_name('data-disk-1') %>
   zone 'us-central1-a'
   project 'google.com:graphite-playground'
   credential 'mycred'

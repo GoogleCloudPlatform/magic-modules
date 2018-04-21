@@ -20,9 +20,40 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
+gcompute_zone 'us-central1-a' do
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
+
+gcompute_instance_group <%= example_resource_name('my-chef-servers') -%> do
+  action :create
+  zone 'us-central1-a'
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
+
+# Google::Functions must be included at runtime to ensure that the
+# gcompute_health_check_ref function can be used in health_check blocks.
+::Chef::Resource.send(:include, Google::Functions)
+
+gcompute_backend_service <%= example_resource_name('my-tcp-backend') -%> do
+  action :create
+  backends [
+    { group: <%= example_resource_name('my-chef-servers') -%> }
+  ]
+  health_checks [
+    gcompute_health_check_ref('another-hc', 'google.com:graphite-playground')
+  ]
+  protocol 'TCP'
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
+
 <% end # name == README.md -%>
 gcompute_target_tcp_proxy <%= example_resource_name('my-tcp-proxy') -%> do
-  action :delete
+  action :create
+  proxy_header 'PROXY_V1'
+  service <%= example_resource_name('my-tcp-backend') %>
   project 'google.com:graphite-playground'
   credential 'mycred'
 end
