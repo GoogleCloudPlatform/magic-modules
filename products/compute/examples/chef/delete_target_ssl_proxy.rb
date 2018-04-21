@@ -94,7 +94,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_target_ssl_proxy <%= example_resource_name('my-ssl-proxy') -%> do
-  action :create
+  action :delete
   proxy_header 'PROXY_V1'
   service <%= example_resource_name('my-ssl-backend') %>
   ssl_certificates [

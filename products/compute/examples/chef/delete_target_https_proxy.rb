@@ -101,7 +101,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_target_https_proxy <%= example_resource_name('my-https-proxy') -%> do
-  action :create
+  action :delete
   ssl_certificates [
     <%= example_resource_name('sample-certificate') %>
   ]
