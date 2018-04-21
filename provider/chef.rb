@@ -20,7 +20,7 @@ module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
   # resources.
   class Chef < Provider::Core
-    RESERVED_WORDS = %w[updated].freeze
+    RESERVED_WORDS = %w[deprecated updated].freeze
     TEST_FOLDER = 'recipes'.freeze
 
     # Settings for the provider
