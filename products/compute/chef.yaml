@@ -96,9 +96,13 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_firewall.rb
     - firewall.rb
     - firewall~change1.rb
+  ForwardingRule:
+    - forwarding_rule.rb
   GlobalAddress:
     - delete_global_address.rb
     - global_address.rb
+  GlobalForwardingRule:
+    - global_forwarding_rule.rb
   HealthCheck:
     - delete_health_check.rb
     - health_check.rb
@@ -117,6 +121,8 @@ examples: !ruby/object:Api::Resource::HashArray
   InstanceGroup:
     - delete_instance_group.rb
     - instance_group.rb
+  InstanceGroupManager:
+    - instance_group_manager.rb
   InstanceTemplate:
     - delete_instance_template.rb
     - instance_template.rb
@@ -135,12 +141,24 @@ examples: !ruby/object:Api::Resource::HashArray
   Route:
     - delete_route.rb
     - route.rb
+  Snapshot:
+    - snapshot.rb
   SslCertificate:
     - delete_ssl_certificate.rb
     - ssl_certificate.rb
   Subnetwork:
     - delete_subnetwork.rb
     - subnetwork.rb
+  TargetHttpProxy:
+    - target_http_proxy.rb
+  TargetHttpsProxy:
+    - target_https_proxy.rb
+  TargetSslProxy:
+    - target_ssl_proxy.rb
+  TargetTcpProxy:
+    - target_tcp_proxy.rb
+  UrlMap:
+    - url_map.rb
   Zone:
     - zone.rb
 files: !ruby/object:Provider::Config::Files
@@ -449,6 +467,24 @@ functions:
     notes: |
       The credential parameter should be allocated with a
       `gauth_credential_*_for_function` call.
+  - !ruby/object:Provider::Chef::Function
+    name: 'gcompute_health_check_ref'
+    description: |
+      Builds a reference to a health check to be used in the backend service.
+    arguments:
+      - !ruby/object:Provider::Config::Function::Argument
+        name: name
+        type: Api::Type::String
+        description: 'the name of the health check'
+      - !ruby/object:Provider::Config::Function::Argument
+        name: project_name
+        type: Api::Type::String
+        description: 'the name of the project that hosts the check'
+    code: |
+      URI.join('https://www.googleapis.com/compute/v1/',
+               "projects/#{project_name}/global/healthChecks/#{name}").to_s
+    examples:
+      - "{{function:name}}('my-hc', 'my-project')"
   - !ruby/object:Provider::Chef::Function
     name: 'gcompute_image_family'
     description: |
