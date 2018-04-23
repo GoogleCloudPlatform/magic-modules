@@ -39,6 +39,12 @@ module Provider
                          property: property
       end
 
+      def build_expand_resource_ref(var_name, property)
+        compile_template 'templates/terraform/expand_resource_ref.erb',
+                         var_name: var_name,
+                         property: property
+      end
+
       def build_property_documentation(property)
         compile_template 'templates/terraform/property_documentation.erb',
                          property: property

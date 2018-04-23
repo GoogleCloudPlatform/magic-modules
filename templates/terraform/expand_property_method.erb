@@ -13,18 +13,18 @@
   # limitations under the License.
 <% end -%>
 <% if property.is_a?(Api::Type::NameValues) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) map[string]string {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
   if v == nil {
-    return map[string]string{}
+    return map[string]string{}, nil
   }
   m := make(map[string]string)
   for k, val := range v.(map[string]interface{}) {
     m[k] = val.(string)
   }
-  return m
+  return m, nil
 }
 <% elsif tf_types.include?(property.class) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
 <%
   if !effective_nested_properties(property).empty?
     nested_properties = effective_nested_properties(property)
@@ -42,15 +42,33 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) int
 
     req = append(req, transformed)
   }
-  return req
-}
+  return req, nil
   <% nested_properties.each do |prop| -%>
     <%= lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+  l := v.([]interface{})
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    f, err := <%= build_expand_resource_ref('raw.(string)', property.item_type) %>
+    if err != nil {
+      return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
+    }
+    req = append(req, f.RelativeLink())
+  }
+  return req, nil
 <% else -%>
-  return v
-}
+  <% if property.is_a?(Api::Type::ResourceRef) -%>
+  f, err := <%= build_expand_resource_ref('v.(string)', property) %>
+  if err != nil {
+    return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
+  }
+  return f.RelativeLink(), nil
+  <% else -%>
+  return v, nil
+  <% end -%>
 <% end -%>
+}
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 <% end # tf_types.include?(property.class) -%>
