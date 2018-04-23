@@ -36,6 +36,9 @@ class SOAForwardable(object):
     def fail_json(self, *args, **kwargs):
         self.module.fail_json(*args, **kwargs)
 
+    def raise_for_status(self, *args, **kwargs):
+        self.module.raise_for_status(*args, **kwargs)
+
 
 def prefetch_soa_resource(module):
     name = module.params['name'].split('.')[1:]
@@ -55,7 +58,7 @@ def prefetch_soa_resource(module):
                                     'dns#resourceRecordSetsListResponse',
                                     'rrsets')
     if not result:
-        raise ValueError("Google DNS Managed Zone %s not found" % module.params['managed_zone'])
+        raise ValueError("Google DNS Managed Zone %s not found" % module.params['managed_zone']['name'])
     return result
 
 
