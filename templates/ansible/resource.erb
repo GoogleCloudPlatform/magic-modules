@@ -290,17 +290,17 @@ def resource_to_request(module):
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
 <% custom_self_link = get_code_multiline config, 'self_link' -%>
 <% if custom_self_link.nil? -%>
-<%= lines(emit_link('self_link', self_link_url(object))) -%>
+<%= lines(emit_link('self_link', self_link_url(object), object)) -%>
 <% else # custom_self_link.nil? -%>
-<%= lines(emit_link('self_link', custom_self_link)) -%>
+<%= lines(emit_link('self_link', custom_self_link, object)) -%>
 <% end # custom_self_link.nil? -%>
 
 
 <% custom_collection = get_code_multiline config, 'collection' -%>
 <% if custom_collection.nil? -%>
-<%= lines(emit_link('collection', collection_url(object))) -%>
+<%= lines(emit_link('collection', collection_url(object), object)) -%>
 <% else # custom_collection.nil? -%>
-<%= lines(emit_link('collection', custom_collection)) -%>
+<%= lines(emit_link('collection', custom_collection, object)) -%>
 <% end # custom_collection.nil? -%>
 
 
