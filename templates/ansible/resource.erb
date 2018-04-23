@@ -258,10 +258,10 @@ def main():
 <% end # unless object.virtual -%>
 def resource_to_request(module):
 <%
-  properties_in_request = []
-  properties_in_request += object.parameters if object.parameters
-  properties_in_request += object.properties.reject(&:output)
-  properties_in_request = properties_in_request.compact
+  properties_in_request = [
+    object&.parameters&.select { |p| p.input },
+    object.properties.reject(&:output)
+  ].flatten.compact
 -%>
     request = {
 <% if object.kind? -%>
