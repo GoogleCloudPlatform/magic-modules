@@ -34,6 +34,14 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     })
   }
   return transformed
+<% elsif property.is_a?(Api::Type::Integer) -%>
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := strconv.Atoi(strVal); err == nil {
+			return intVal
+		} // let terraform core handle it if we can't convert the string to an int.
+	}
+	return v
 <% else -%>
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
