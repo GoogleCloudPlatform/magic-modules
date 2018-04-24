@@ -32,6 +32,9 @@
 	ValidateFunc: <%= property.validation.function -%>,
 	<% end # property.validation.nil?  -%>
 <% end # property.validation.nil?  -%>
+<% if property.is_a?(Api::Type::Enum) && property.validation.nil? -%>
+	ValidateFunc: validation.StringInSlice([]string{"<%= property.values.join '","' -%>"}, false),
+<% end -%>
 <% if !property.diff_suppress_func.nil? -%>
   DiffSuppressFunc: <%= property.diff_suppress_func %>,
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
