@@ -50,7 +50,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 	<%= lines(build_schema_property(prop, object)) -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -58,7 +58,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 			},
 <% end -%>
 <% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
-			"self_link": &schema.Schema{
+			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
