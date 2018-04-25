@@ -114,7 +114,6 @@ module Provider
           raise "The property to override must exists #{property_path} " \
                 "in resource #{api_object.name}"
         end
-        api_property ||= @__config.property_override.new
         property_override.apply api_property
       end
     end
