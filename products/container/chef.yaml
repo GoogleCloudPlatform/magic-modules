@@ -33,6 +33,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   NodePool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/container/helpers/provider_node_pool.rb'
+  KubeConfig: !ruby/object:Provider::Chef::ResourceOverride
+    manual: true
 examples: !ruby/object:Api::Resource::HashArray
   Cluster:
     - delete_cluster.rb
@@ -40,6 +42,8 @@ examples: !ruby/object:Api::Resource::HashArray
   NodePool:
     - delete_node_pool.rb
     - node_pool.rb
+  KubeConfig:
+    - kube_config.rb
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/chef/common~copy.yaml'), 4) %>
