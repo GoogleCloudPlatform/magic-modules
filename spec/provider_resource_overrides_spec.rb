@@ -31,17 +31,14 @@ describe Provider::ResourceOverrides do
     end
 
     context 'with overrides' do
-      let(:overrides) do
-        Provider::ResourceOverride.parse(
-          IO.read('spec/data/good-resource-overrides.yaml')
-        )
+      let(:config) do
+        Provider::Config.parse 'spec/data/good-file-config.yaml', product
       end
 
       before(:each) do
-        allow_open 'spec/data/good-resource-overrides.yaml'
+        allow_open 'spec/data/good-file-config.yaml'
 
-        overrides.consume_api(product)
-        overrides.validate
+        config.validate
       end
 
       context 'for resource' do
@@ -92,15 +89,27 @@ describe Provider::ResourceOverrides do
 
     context 'with resource with invalid property path' do
       context 'referring to missing top-level property' do
-        subject { -> { create_overrides(product, 'missing-property') } }
+        let(:config) do
+          Provider::Config.parse(
+            'spec/data/missing-property-config.yaml', product
+          )
+        end
+        before(:each) { allow_open 'spec/data/missing-property-config.yaml' }
+        subject { -> { config.validate } }
 
         it { is_expected.to raise_error StandardError, /missing-property/ }
       end
 
       context 'referring to missing nested property' do
-        subject do
-          -> { create_overrides(product, 'nested-property.missing-property') }
+        let(:config) do
+          Provider::Config.parse(
+            'spec/data/missing-nested-property-config.yaml', product
+          )
         end
+        before(:each) do
+          allow_open 'spec/data/missing-nested-property-config.yaml'
+        end
+        subject { -> { config.validate } }
 
         it do
           is_expected.to raise_error(
@@ -111,9 +120,15 @@ describe Provider::ResourceOverrides do
       end
 
       context 'referring to missing array nested property' do
-        subject do
-          -> { create_overrides(product, 'array-property.missing-property') }
+        let(:config) do
+          Provider::Config.parse(
+            'spec/data/missing-array-property-config.yaml', product
+          )
         end
+        before(:each) do
+          allow_open 'spec/data/missing-array-property-config.yaml'
+        end
+        subject { -> { config.validate } }
 
         it do
           is_expected.to raise_error(
@@ -124,9 +139,15 @@ describe Provider::ResourceOverrides do
       end
 
       context 'referring to a nested property in non-nested type' do
-        subject do
-          -> { create_overrides(product, 'property1.missing-property') }
+        let(:config) do
+          Provider::Config.parse(
+            'spec/data/bad-property-reference-config.yaml', product
+          )
         end
+        before(:each) do
+          allow_open 'spec/data/bad-property-reference-config.yaml'
+        end
+        subject { -> { config.validate } }
 
         it do
           is_expected.to raise_error(
@@ -136,23 +157,6 @@ describe Provider::ResourceOverrides do
         end
       end
     end
-  end
-
-  def create_overrides(product, property_path)
-    overrides = Google::YamlValidator.parse(
-      %(
-      !ruby/object:Provider::ResourceOverrides
-      AnotherResource: !ruby/object:Provider::Terraform::ResourceOverride
-        properties:
-          #{property_path}: !ruby/object:Provider::Terraform::PropertyOverride
-            description: foobar
-      )
-    )
-
-    overrides.consume_api(product)
-    overrides.validate
-
-    overrides
   end
 
   def allow_open(file_name)
