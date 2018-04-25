@@ -11,7 +11,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.4
+          tag: v0.1.5
 
     - name: gcs-resource
       type: docker-image
@@ -37,7 +37,7 @@ resources:
           repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
-          authorship_restriction: false
+          authorship_restriction: true
 
     - name: terraform-intermediate
       type: git-branch
