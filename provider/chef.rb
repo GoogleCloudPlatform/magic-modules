@@ -292,9 +292,19 @@ module Provider
       FileUtils.mkpath target_folder
       name = Google::StringUtils.underscore(data[:object].name)
       generate_resource_file data.clone.merge(
-        default_template: 'templates/chef/resource.erb',
+        default_template: provider_template_source(data),
         out_file: File.join(target_folder, "#{name}.rb")
       )
+    end
+
+    def provider_template_source(data)
+      if data[:object].manual
+        object_name = Google::StringUtils.underscore(data[:object].name)
+        File.join('products', data[:product_name], 'files',
+                  "provider~chef~#{object_name}.rb")
+      else
+        'templates/chef/resource.erb'
+      end
     end
 
     def generate_resource_tests(data)
