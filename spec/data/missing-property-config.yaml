@@ -1,0 +1,7 @@
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Provider::ResourceOverrides
+  AnotherResource: !ruby/object:Provider::Terraform::ResourceOverride
+    description: '{{description}} bar'
+    properties:
+      missing-property: !ruby/object:Provider::Terraform::PropertyOverride
+        description: 'foo'
