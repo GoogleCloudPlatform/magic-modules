@@ -10,7 +10,7 @@ image_resource:
         # This task requires a container with 'git', 'python', and the pip
         # package 'pygithub'.
         repository: nmckinley/python
-        tag: 'v0.0.1'
+        tag: 'v0.0.2'
 
 inputs:
     - name: magic-modules
