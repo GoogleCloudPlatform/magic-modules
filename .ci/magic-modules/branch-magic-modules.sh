@@ -21,4 +21,13 @@ git checkout -B "$BRANCH"
 # this output is no longer available.
 echo "$BRANCH" > ./branchname
 
+set +x
+# Don't show the credential in the output.
+echo "$CREDS" > ~/github_private_key
+set -x
+chmod 400 ~/github_private_key
+
+# Update to head on master on all submodules, so we avoid spurious diffs.
+ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform build/puppet/sql build/puppet/compute"
+
 cp -r ./ ../magic-modules-branched/
