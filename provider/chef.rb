@@ -14,6 +14,8 @@
 require 'provider/config'
 require 'provider/core'
 require 'provider/chef/manifest'
+require 'provider/chef/property_override'
+require 'provider/chef/resource_override'
 require 'provider/chef/test_catalog'
 
 module Provider
@@ -33,6 +35,14 @@ module Provider
 
       def provider
         Provider::Chef
+      end
+
+      def resource_override
+        Provider::Chef::ResourceOverride
+      end
+
+      def property_override
+        Provider::Chef::PropertyOverride
       end
 
       def validate
