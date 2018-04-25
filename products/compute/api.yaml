@@ -906,7 +906,8 @@ objects:
       HTTP(S) load balancing.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Reserving a Static External IP Address': 'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
+        'Reserving a Static External IP Address':
+          'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/latest/globalAddresses'
     input: true
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
