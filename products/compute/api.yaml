@@ -946,7 +946,7 @@ objects:
         name: 'ipVersion'
         description: |
           The IP Version that will be used by this address. Valid options are
-          IPV4 or IPV6.
+          IPV4 or IPV6. The default value is IPV4.
         values:
           - :IPV4
           - :IPV6
