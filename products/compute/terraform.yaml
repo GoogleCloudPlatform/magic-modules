@@ -305,7 +305,39 @@ overrides: !ruby/object:Provider::ResourceOverrides
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
   TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_target_tcp_proxy" "default" {
+        name = "test"
+        description = "test"
+        backend_service = "${google_compute_backend_service.default.self_link}"
+      }
+
+      resource "google_compute_backend_service" "default" {
+        name        = "default-backend"
+        protocol    = "TCP"
+        timeout_sec = 10
+
+        health_checks = ["${google_compute_health_check.default.self_link}"]
+      }
+
+      resource "google_compute_health_check" "default" {
+        name = "default"
+        timeout_sec        = 1
+        check_interval_sec = 1
+
+        tcp_health_check {
+          port = "443"
+        }
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: proxyId
+      service: !ruby/object:Provider::Terraform::PropertyOverride
+        name: backendService
+      proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
     exclude: false
