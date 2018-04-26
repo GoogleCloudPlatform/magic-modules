@@ -55,22 +55,26 @@ module Provider
       #     the bullet properly
       #     because of the :
       #     character
-      def bullet_line(paragraph, spaces, multiline = true, add_period = true)
-        # + 2 for "- " and a potential period at the end of the sentence.
-        # Remove arbitrary newlines created by formatting in YAML files
-        indented = indent(wrap_field(paragraph.tr("\n", ' '), spaces + 3), 2)
+      def bullet_line(paragraph, spaces, _multiline = true, add_period = true)
+        paragraph += '.' unless paragraph.end_with?('.') || !add_period
+        paragraph = paragraph.tr("\n", ' ').strip
 
-        if multiline && UNSAFE_CHARS.any? { |c| paragraph.include?(c) }
-          indented = "- |\n" + indented
-        else
-          indented[0] = '-'
+        # Paragraph placed inside array to get bullet point.
+        yaml = [paragraph].to_yaml
+        # YAML documentation header is not necessary.
+        yaml = yaml.gsub("---\n", '') if yaml.include?("---\n")
+
+        # YAML dumper isn't very smart about line lengths.
+        # If any line is over 160 characters (with indents), build the YAML
+        # block using wrap_field.
+        # Using YAML.dump output ensures that all character escaping done
+        if yaml.split("\n").any? { |line| line.length > (160 - spaces) }
+          return wrap_field(
+            yaml.tr("\n", ' ').gsub(/\s+/, ' '),
+            spaces + 3
+          ).each_with_index.map { |x, i| i.zero? ? x : indent(x, 2) }
         end
-
-        if add_period
-          indented += '.' unless indented.end_with?('.')
-        end
-
-        indented
+        yaml
       end
 
       # Builds out a full YAML block for DOCUMENTATION
