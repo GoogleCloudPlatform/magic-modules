@@ -13,7 +13,6 @@ export GOPATH="${PWD}/go"
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 
 pushd magic-modules-branched
-git submodule update --init build/terraform
 ln -s "${PWD}/build/terraform/" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
 popd
 
