@@ -203,7 +203,7 @@ jobs:
       plan:
           - get: magic-modules
             version: every
-            # trigger: true
+            trigger: true
             params:
                 submodules: [build/terraform, build/puppet/compute, build/puppet/sql]
             passed: [terraform-test, mm-generate, puppet-test]
