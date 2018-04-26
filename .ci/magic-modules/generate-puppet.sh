@@ -10,8 +10,6 @@ set -e
 IFS="," read -ra PRODUCT_ARRAY <<< "$PRODUCTS"
 for PRD in "${PRODUCT_ARRAY[@]}"; do
   pushd magic-modules-branched
-    git submodule update --init "build/puppet/$PRD"
-
     LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
     find build/puppet/"${PRD}"/ -type f -not -name '.git*' -print0 | xargs -0 rm -rf --
     bundle install
