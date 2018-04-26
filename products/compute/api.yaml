@@ -451,6 +451,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'deprecated'
         description: 'The deprecation status associated with this disk type.'
+        output: true
         properties:
           - !ruby/object:Api::Type::Time
             name: 'deleted'
@@ -2148,10 +2149,10 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
-        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'deprecated'
         description: 'The deprecation state of this resource.'
+        output: true
         properties:
           - !ruby/object:Api::Type::Time
             name: 'deleted'
