@@ -13,7 +13,7 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
     git submodule update --init "build/puppet/$PRD"
 
     LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
-    find build/puppet/"${PRD}"/ -type f -not -name '.git*' -print0 | xargs -0 rm -rf --
+    find build/puppet/"${PRD}"/ -type f -not -name '.git*' -not -name '.last_run.json' -print0 | xargs -0 rm -rf --
     bundle install
     # This prints so much logging data that it can slow or actually crash concourse.  :)
     # If you need to find out what went wrong, use 'fly intercept' to grab the container
