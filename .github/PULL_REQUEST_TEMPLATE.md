@@ -23,5 +23,6 @@ this PR's changes from the commit messages for downstream commits.
 ## [terraform]
 ## [puppet]
 ### [puppet-dns]
+### [puppet-sql]
 ### [puppet-compute]
 ## [chef]
