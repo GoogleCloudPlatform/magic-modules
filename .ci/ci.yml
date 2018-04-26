@@ -117,6 +117,7 @@ jobs:
             file: magic-modules/.ci/magic-modules/branch.yml
             params:
               GH_TOKEN: ((github-account.password))
+              CREDS: ((repo-key.private_key))
           - aggregate:
             - do:
                 # consumes: magic-modules-branched
