@@ -163,47 +163,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	<% unless object.input -%>
-
-	<% settable_properties.each do |prop| -%>
-	<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
-	if err != nil {
-		return err
-	}
-	<% end -%>
-
-	obj := map[string]interface{}{
-		<% settable_properties.each do |prop| -%>
-			"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
-		<% end -%>
-	}
-
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
-	res, err := sendRequest(config, "<%= object.update_verb -%>", url, obj)
-
-	if err != nil {
-		return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
-	}
-
-	op := &<%= api_name_lower -%>.Operation{}
-	err = Convert(res, op)
-	if err != nil {
-		return err
-	}
-
-	err = <%= api_name_lower -%>OperationWaitTime(
-		config.client<%= product_ns -%>, op, project, "Updating <%= object.name -%>",
-		int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-	if err != nil {
-		return err
-	}
-	<% else # unless object.input -%>
+	<% if object.input -%>
 	var url string
 	var res map[string]interface{}
 	op := &<%= api_name_lower -%>.Operation{}
@@ -251,6 +211,45 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% end -%>
 
 	d.Partial(false)
+	<% else # if object.input -%>
+	<% settable_properties.each do |prop| -%>
+		<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
+		if err != nil {
+		return err
+		}
+	<% end -%>
+
+	obj := map[string]interface{}{
+	<% settable_properties.each do |prop| -%>
+		"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
+	<% end -%>
+	}
+
+	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+	if err != nil {
+	return err
+	}
+
+	log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
+	res, err := sendRequest(config, "<%= object.update_verb -%>", url, obj)
+
+	if err != nil {
+	return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
+	}
+
+	op := &<%= api_name_lower -%>.Operation{}
+	err = Convert(res, op)
+	if err != nil {
+	return err
+	}
+
+	err = <%= api_name_lower -%>OperationWaitTime(
+	config.client<%= product_ns -%>, op, project, "Updating <%= object.name -%>",
+	int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+	if err != nil {
+	return err
+	}
 	<% end -%>
 
 	return resource<%= resource_name -%>Read(d, meta)
