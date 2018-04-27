@@ -2589,10 +2589,18 @@ objects:
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/global/targetHttpProxies
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     input: true
     description: |
       Represents a TargetHttpProxy resource, which is used by one or more global
       forwarding rule to route incoming HTTP requests to a URL map.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/targetHttpProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
