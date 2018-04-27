@@ -179,6 +179,8 @@ module Provider
         Google::LOGGER.info "Compiling #{source} => #{target}"
         target_file = File.join(output_folder, target)
                           .gsub('{{product_name}}', @api.prefix[1..-1])
+
+        manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
         generate_file(
           data.clone.merge(
             name: target,
@@ -186,7 +188,7 @@ module Provider
             object: {},
             config: {},
             scopes: @api.scopes,
-            manifest: @config.manifest,
+            manifest: manifest,
             tests: '',
             template: source,
             generated_files: @generated,
@@ -198,6 +200,13 @@ module Provider
             product_ns: Google::StringUtils.camelize(@api.prefix[1..-1], :upper)
           )
         )
+
+        Google::LOGGER.info "rosbo #{File.extname(target_file)}"
+
+        if File.extname(target_file) == '.go'
+
+          %x(goimports -w #{target_file})
+        end
       end
     end
     # rubocop:enable Metrics/MethodLength
