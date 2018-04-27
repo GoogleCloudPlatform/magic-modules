@@ -1,3 +1,25 @@
+{% set puppet_modules = ['compute', 'sql'] %}
+{% set terraform_enabled = true %}
+{% macro names_as_list(repo, names) -%}
+{% for name in names %}
+build/{{repo}}/{{name}} 
+{%- endfor %}
+{% endmacro -%}
+{% set puppet_submodules = names_as_list('puppet', puppet_modules).split() %}
+{% set all_submodules = puppet_submodules + ['build/terraform'] if terraform_enabled else [] %}
+{% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
+{% set puppet_test_excludes = {
+  'compute': [
+      'spec/gcompute_instance_group_manager_provider_spec.rb',
+      'spec/gcompute_instance_provider_spec.rb',
+      'spec/gcompute_instance_template_provider_spec.rb',
+      'spec/gcompute_target_https_proxy_provider_spec.rb',
+      'spec/gcompute_target_ssl_proxy_provider_spec.rb',
+      'spec/puppetlint_spec.rb']
+  }
+%}
+
+
 # These resource types are here until the PRs get merged in upstream.  :)
 resource_types:
     - name: git-branch
@@ -39,23 +61,21 @@ resources:
           access_token: ((github-account.password))
           authorship_restriction: true
 
+{% if terraform_enabled %}
     - name: terraform-intermediate
       type: git-branch
       source:
           uri: git@github.com:((github-account.username))/terraform-provider-google.git
           private_key: ((repo-key.private_key))
+{% endif %}
 
-    - name: puppet-compute-intermediate
+{% for module in puppet_modules %}
+    - name: puppet-{{module}}-intermediate
       type: git-branch
       source:
-          uri: git@github.com:((github-account.username))/puppet-google-compute.git
-          private_key: ((repo-key.private_key))
-
-    - name: puppet-sql-intermediate
-      type: git-branch
-      source:
-          uri: git@github.com:((github-account.username))/puppet-google-sql.git
-          private_key: ((repo-key.private_key))
+        uri: git@github.com:((github-account.username))/puppet-google-{{module}}.git
+        private_key: ((repo-key.private_key))
+{% endfor %}
 
     - name: terraform-head
       type: git-branch
@@ -109,8 +129,6 @@ jobs:
                 resource: magic-modules-new-prs
                 version: every
                 trigger: true
-                params:
-                    submodules: [build/terraform]
             # consumes: magic-modules (detached HEAD)
             # produces: magic-modules-branched (new branch, with submodule)
           - task: branch-magic-modules
@@ -118,7 +136,9 @@ jobs:
             params:
               GH_TOKEN: ((github-account.password))
               CREDS: ((repo-key.private_key))
+              ALL_SUBMODULES: {{' '.join(all_submodules)}}
           - aggregate:
+          {% if terraform_enabled %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: terraform-generated
@@ -131,35 +151,36 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
+          {% endif %}
+          {% if puppet_modules %}
             - do:
                 # consumes: magic-modules-branched
-                # produces: puppet-compute-generated
+                # produces: puppet-generated
               - task: generate-puppet
                 file: magic-modules-branched/.ci/magic-modules/generate-puppet.yml
                 params:
-                  PRODUCTS: compute,sql
+                  PRODUCTS: {{','.join(puppet_modules)}}
               - aggregate:
-                - put: puppet-compute-intermediate
+                {% for module in puppet_modules %}
+                - put: puppet-{{module}}-intermediate
                   params:
-                      repository: puppet-generated/compute
+                      repository: puppet-generated/{{module}}
                       branch_file: magic-modules-branched/branchname
                       only_if_diff: true
                       force: true
-                - put: puppet-sql-intermediate
-                  params:
-                      repository: puppet-generated/sql
-                      branch_file: magic-modules-branched/branchname
-                      only_if_diff: true
-                      force: true
+                {% endfor %}
+          {% endif %}
 
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
           - task: point-to-submodules
             file: magic-modules-branched/.ci/magic-modules/point-to-submodules.yml
             params:
-              # This needs to match the username for the 'terraform-intermediate' resource.
+                # This needs to match the username for the 'intermediate' resources.
                 GH_USERNAME: ((github-account.username))
                 CREDS: ((repo-key.private_key))
+                PUPPET_MODULES: {{','.join(puppet_modules)}}
+                TERRAFORM_ENABLED: {{terraform_enabled}}
 
           # Push the magic modules branch that contains the updated submodules.
           - put: magic-modules
@@ -169,6 +190,7 @@ jobs:
                 only_if_diff: true
                 force: true
 
+{% if terraform_enabled %}
     - name: terraform-test
       plan:
         - get: magic-modules
@@ -179,6 +201,7 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/task.yml
+{% endif %}
 
     - name: puppet-test
       plan:
@@ -186,18 +209,21 @@ jobs:
           version: every
           trigger: true
           params:
-              submodules: [build/puppet/sql, build/puppet/compute]
+              submodules:
+              {% for module in puppet_submodules %}
+                - {{module}}
+              {% endfor %}
           passed: [mm-generate]
         - aggregate:
-          - task: test-sql
+          {% for module in puppet_modules %}
+          - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/puppet.yml
             params:
-              PRODUCT: sql
-          - task: test-compute
-            file: magic-modules/.ci/unit-tests/puppet.yml
-            params:
-              PRODUCT: compute
-              EXCLUDE_PATTERN: spec/gcompute_instance_group_manager_provider_spec.rb,spec/gcompute_instance_provider_spec.rb,spec/gcompute_instance_template_provider_spec.rb,spec/gcompute_target_https_proxy_provider_spec.rb,spec/gcompute_target_ssl_proxy_provider_spec.rb,spec/puppetlint_spec.rb
+              PRODUCT: {{module}}
+            {%- if puppet_test_excludes.get(module) %}
+              EXCLUDE_PATTERN: {{','.join(puppet_test_excludes[module])}}
+            {%- endif %}
+          {% endfor %}
 
     - name: create-prs
       plan:
@@ -205,16 +231,19 @@ jobs:
             version: every
             trigger: true
             params:
-                submodules: [build/terraform, build/puppet/compute, build/puppet/sql]
-            passed: [terraform-test, mm-generate, puppet-test]
+                submodules: {{all_submodules_yaml_format}}
+            passed:
+              - mm-generate
+              {%- if puppet_modules %}
+              - puppet-test
+              {%- endif -%}
+              {%- if terraform_enabled %}
+              - terraform-test
+              {%- endif %}
           - get: mm-initial-pr
             resource: magic-modules-new-prs
             passed: [mm-generate]
             version: every
-          # TODO(ndmckinley): This will unconditionally attempt to create/update a PR.
-          # Before we set it to run automatically, we need to add checks to see if a PR
-          # needs to be generated.
-          #
           # This task either uses the 'hub' cli to create a PR from the generated repo,
           # or, if a PR already exists, it uses 'git branch -f' to update the branch
           # that PR is from to point at the commit generated earlier from this run
@@ -225,9 +254,13 @@ jobs:
                 GITHUB_TOKEN: ((github-account.password))
                 # This is what tells us which terraform repo to write PRs against - this
                 # is what you change if you want to test this in a non-live environment.
-                TERRAFORM_REPO: terraform-providers/terraform-provider-google
-                PUPPET_COMPUTE_REPO: GoogleCloudPlatform/puppet-google-compute
-                PUPPET_SQL_REPO: GoogleCloudPlatform/puppet-google-sql
+                {%- if terraform_enabled %}
+                TERRAFORM_REPO_USER: terraform-providers
+                {%- endif %}
+                {%- if puppet_modules %}
+                PUPPET_REPO_USER: GoogleCloudPlatform
+                PUPPET_MODULES: {{','.join(puppet_modules)}}
+                {%- endif %}
             on_failure:
               put: magic-modules-new-prs
               params:
@@ -239,6 +272,7 @@ jobs:
           # because a new PR has just been created from that branch.  The second time through
           # the pipeline (when a PR needs to be updated), this does that updating by pushing
           # the new code to the repository/branch from which a pull request is already open.
+        {% if terraform_enabled %}
           - put: terraform-intermediate
             params:
               repository: magic-modules-with-comment/build/terraform
@@ -251,18 +285,15 @@ jobs:
               # not push the update even though the commit hashes are different.
               only_if_diff: true
               force: true
-          - put: puppet-compute-intermediate
+        {% endif %}
+        {% for module in puppet_modules %}
+          - put: puppet-{{module}}-intermediate
             params:
-              repository: magic-modules-with-comment/build/puppet/compute
+              repository: magic-modules-with-comment/build/puppet/{{module}}
               branch_file: magic-modules-with-comment/original_pr_branch_name
               only_if_diff: true
               force: true
-          - put: puppet-sql-intermediate
-            params:
-              repository: magic-modules-with-comment/build/puppet/sql
-              branch_file: magic-modules-with-comment/original_pr_branch_name
-              only_if_diff: true
-              force: true
+        {% endfor %}
 
           # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
           # time through, it works the same way as the preceding push.
@@ -287,6 +318,7 @@ jobs:
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
                 CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: "{{' '.join(all_submodules)}}"
           # TODO(ndmckinley): This will work to update the magic-modules PR *if* the original PR
           # was opened from the magic-modules repository.  That's not always going to be
           # true - figure out what to do if, for instance, we can't modify the PR.
@@ -341,39 +373,10 @@ jobs:
           - task: build
             file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
 
+          {% for arch in ['darwin_amd64', 'freebsd_386', 'freebsd_amd64', 'freebsd_arm',
+          'linux_386', 'linux_amd64', 'linux_arm', 'openbsd_386', 'openbsd_amd64',
+          'solaris_amd64', 'windows_386.exe', 'windows_amd64.exe'] %}
           - put: gcp-bucket
             params:
-              file: dist/terraform-provider-google.darwin_amd64
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.freebsd_386
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.freebsd_amd64
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.freebsd_arm
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.linux_386
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.linux_amd64
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.linux_arm
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.openbsd_386
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.openbsd_amd64
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.solaris_amd64
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.windows_386.exe
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.windows_amd64.exe
+              file: dist/terraform-provider-google.{{arch}}
+          {% endfor %}
