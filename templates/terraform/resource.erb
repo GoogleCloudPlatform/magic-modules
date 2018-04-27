@@ -208,6 +208,8 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	var res map[string]interface{}
 	op := &<%= api_name_lower -%>.Operation{}
 
+	d.Partial(true)
+
 	<% settable_properties.reject { |p| p.update_url.nil? }.each do |prop| -%>
 	if d.HasChange("<%= Google::StringUtils.underscore(prop.name) -%>") {
 		<% settable_properties.each do |prop| -%>
@@ -243,8 +245,12 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 		if err != nil {
 			return err
 		}
+
+		d.SetPartial("<%= Google::StringUtils.underscore(prop.name) -%>")
 	}
 	<% end -%>
+
+	d.Partial(false)
 	<% end -%>
 
 	return resource<%= resource_name -%>Read(d, meta)
