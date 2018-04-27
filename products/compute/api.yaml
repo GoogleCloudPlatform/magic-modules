@@ -901,6 +901,9 @@ objects:
     name: 'GlobalAddress'
     kind: 'compute#address'
     base_url: projects/{{project}}/global/addresses
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a Global Address resource. Global addresses are used for
       HTTP(S) load balancing.
