@@ -901,9 +901,17 @@ objects:
     name: 'GlobalAddress'
     kind: 'compute#address'
     base_url: projects/{{project}}/global/addresses
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a Global Address resource. Global addresses are used for
       HTTP(S) load balancing.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Reserving a Static External IP Address':
+          'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/globalAddresses'
     input: true
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
@@ -938,13 +946,20 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
         required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'ipVersion'
+        description: |
+          The IP Version that will be used by this address. Valid options are
+          IPV4 or IPV6. The default value is IPV4.
+        values:
+          - :IPV4
+          - :IPV6
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
         imports: 'selfLink'
         description: |
-          A reference to the region where the regional address resides. This
-          field is not applicable to global addresses.
+          A reference to the region where the regional address resides.
         output: true
       # status is not useful for state convergence
       # users[] is not useful for state convergence
