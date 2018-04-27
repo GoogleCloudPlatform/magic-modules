@@ -170,9 +170,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
 	d.Partial(true)
 
-	<% settable_properties.reject { |p| p.update_url.nil? }.each do |prop| -%>
-	if d.HasChange("<%= Google::StringUtils.underscore(prop.name) -%>") {
-		<% settable_properties.each do |prop| -%>
+	<% properties_by_custom_update(settable_properties).each do |props| -%>
+	if <%= props.map { |prop| "d.HasChange(\"#{Google::StringUtils.underscore(prop.name)}\")" }.join ' || ' -%> {
+		<% props.each do |prop| -%>
 			<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
 			if err != nil {
 				return err
@@ -180,15 +180,15 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 		<% end -%>
 
 		obj := map[string]interface{}{
-		<% settable_properties.each do |prop| -%>
+		<% props.each do |prop| -%>
 			"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
 		<% end -%>
 		}
-		url, err = replaceVars(d, config, "<%= update_url(object, prop.update_url) -%>")
+		url, err = replaceVars(d, config, "<%= update_url(object, props[0].update_url) -%>")
 		if err != nil {
 			return err
 		}
-		res, err = sendRequest(config, "<%= prop.update_verb -%>", url, obj)
+		res, err = sendRequest(config, "<%= props[0].update_verb -%>", url, obj)
 		if err != nil {
 			return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
 		}
@@ -206,7 +206,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 			return err
 		}
 
+		<% props.each do |prop|	-%>
 		d.SetPartial("<%= Google::StringUtils.underscore(prop.name) -%>")
+		<% end -%>
 	}
 	<% end -%>
 
