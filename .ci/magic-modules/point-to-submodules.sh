@@ -4,18 +4,6 @@
 # It needs to output the same git repo, but with the code generation done and submodules updated, at 'magic-modules-submodules'.
 
 set -e
-set -x
-
-pushd magic-modules-branched
-BRANCH="$(cat ./branchname)"
-# Update this repo to track the submodules we just pushed:
-git config -f .gitmodules submodule.build/puppet/compute.branch "$BRANCH"
-git config -f .gitmodules submodule.build/puppet/compute.url "git@github.com:$GH_USERNAME/puppet-google-compute.git"
-git config -f .gitmodules submodule.build/puppet/sql.branch "$BRANCH"
-git config -f .gitmodules submodule.build/puppet/sql.url "git@github.com:$GH_USERNAME/puppet-google-sql.git"
-git config -f .gitmodules submodule.build/terraform.branch "$BRANCH"
-git config -f .gitmodules submodule.build/terraform.url "git@github.com:$GH_USERNAME/terraform-provider-google.git"
-git submodule sync build/terraform build/puppet/sql build/puppet/compute
 
 set +x
 # Don't show the credential in the output.
@@ -23,11 +11,26 @@ echo "$CREDS" > ~/github_private_key
 set -x
 chmod 400 ~/github_private_key
 
-# Download those submodules so we can add them here.
-ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform build/puppet/sql build/puppet/compute"
+pushd magic-modules-branched
+BRANCH="$(cat ./branchname)"
+# Update this repo to track the submodules we just pushed:
+IFS="," read -ra PRODUCT_ARRAY <<< "$PUPPET_MODULES"
+for PRD in "${PRODUCT_ARRAY[@]}"; do
+  git config -f .gitmodules "submodule.build/puppet/$PRD.branch" "$BRANCH"
+  git config -f .gitmodules "submodule.build/puppet/$PRD.url" "git@github.com:$GH_USERNAME/puppet-google-$PRD.git"
+  git submodule sync "build/puppet/$PRD"
+  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/puppet/$PRD"
+  git add "build/puppet/$PRD"
+done
+if [ "$TERRAFORM_ENABLED" = "true" ]; then
+  git config -f .gitmodules submodule.build/terraform.branch "$BRANCH"
+  git config -f .gitmodules submodule.build/terraform.url "git@github.com:$GH_USERNAME/terraform-provider-google.git"
+  git submodule sync build/terraform
+  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform"
+  git add build/terraform
+fi
 
 # Commit those changes so that they can be tested in the next phase.
-git add build/terraform build/puppet/compute build/puppet/sql
 git add .gitmodules
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"

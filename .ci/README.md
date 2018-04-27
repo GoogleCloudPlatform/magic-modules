@@ -55,6 +55,9 @@ fly execute -t main --config .ci/unit-tests/task.yml --input magic-modules=. --i
 # CI For MagicModules Developers
 If you develop MagicModules (code generation features), here are the things you'll want to know.
 
+## Deploying the pipeline
+The pipeline config is generated using jinja2.  You'll want `j2cli`: `pip install j2cli`.  To generate the pipeline, use `j2 .ci/ci.yml.tmpl`.  To deploy it, use `~/fly -t prod sp -c <(j2 .ci/ci.yml.tmpl) -p magic-modules`.
+
 ## Adding Tests
 You can easily add things to the test suites.  The version of the `.yml` and `.sh` files in this subdirectory which are run when you call `fly execute` are the versions at HEAD in your local copy of the repository.  If you write new tests which require some setup, you can just add them to the shell scripts which are already being executed - if the overall shell script exits with a nonzero code, the task will be marked as failing.
 
