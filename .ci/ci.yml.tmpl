@@ -129,6 +129,8 @@ jobs:
                 resource: magic-modules-new-prs
                 version: every
                 trigger: true
+                params:
+                    fetch_merge: true
             # consumes: magic-modules (detached HEAD)
             # produces: magic-modules-branched (new branch, with submodule)
           - task: branch-magic-modules
@@ -244,6 +246,8 @@ jobs:
             resource: magic-modules-new-prs
             passed: [mm-generate]
             version: every
+            params:
+              fetch_merge: true
           # This task either uses the 'hub' cli to create a PR from the generated repo,
           # or, if a PR already exists, it uses 'git branch -f' to update the branch
           # that PR is from to point at the commit generated earlier from this run
@@ -314,6 +318,8 @@ jobs:
     - name: merge-prs
       plan:
           - get: mm-approved-prs
+            params:
+              fetch_merge: true
           - task: merge-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
