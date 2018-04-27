@@ -20,3 +20,4 @@ run:
 
 params:
     CREDS: ""
+    ALL_SUBMODULES: ""

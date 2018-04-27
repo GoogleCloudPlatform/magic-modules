@@ -22,3 +22,6 @@ run:
 params:
   GH_USERNAME: ""
   CREDS: ""
+  TERRAFORM_ENABLED: false
+  PUPPET_MODULES: ""
+

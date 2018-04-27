@@ -28,6 +28,7 @@ set -x
 chmod 400 ~/github_private_key
 
 # Update to head on master on all submodules, so we avoid spurious diffs.
-ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform build/puppet/sql build/puppet/compute"
+# Note: $ALL_SUBMODULES will be re-split by the ssh-agent's "bash".
+ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init $ALL_SUBMODULES"
 
 cp -r ./ ../magic-modules-branched/

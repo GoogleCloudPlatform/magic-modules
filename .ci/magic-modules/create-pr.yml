@@ -22,4 +22,6 @@ run:
 
 params:
   GITHUB_TOKEN: ""
-  TERRAFORM_REPO: ""
+  TERRAFORM_REPO_USER: ""
+  PUPPET_REPO_USER: ""
+  PUPPET_MODULES: ""
