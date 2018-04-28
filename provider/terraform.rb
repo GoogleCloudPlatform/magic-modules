@@ -117,6 +117,17 @@ module Provider
       end
     end
 
+    # Filter the properties to keep only the ones requiring custom update
+    # method and group them by update url & verb.
+    def properties_by_custom_update(properties)
+      update_props = properties.reject do |p|
+        p.update_url.nil? || p.update_verb.nil?
+      end
+      update_props.group_by do |p|
+        { update_url: p.update_url, update_verb: p.update_verb }
+      end
+    end
+
     private
 
     # This function uses the resource.erb template to create one file
