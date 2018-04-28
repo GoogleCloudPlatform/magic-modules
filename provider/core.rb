@@ -201,10 +201,7 @@ module Provider
           )
         )
 
-        Google::LOGGER.info "rosbo #{File.extname(target_file)}"
-
         if File.extname(target_file) == '.go'
-
           %x(goimports -w #{target_file})
         end
       end
