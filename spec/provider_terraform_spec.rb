@@ -73,6 +73,29 @@ describe Provider::Terraform do
         )
       end
     end
+
+    describe '#properties_by_custom_update' do
+      let(:postUrl1) { custom_update_property('p1', 'url1', :POST) }
+      let(:otherPostUrl1) { custom_update_property('p2', 'url1', :POST) }
+      let(:postUrl2) { custom_update_property('p3', 'url2', :POST) }
+      let(:putUrl2) { custom_update_property('p4', 'url2', :PUT) }
+      let(:props) do
+        [
+          custom_update_property('no-custom-update'),
+          postUrl1, otherPostUrl1, postUrl2, putUrl2
+        ]
+      end
+      subject { provider.properties_by_custom_update(props) }
+
+      it do
+        is_expected.to eq(
+          { update_url: 'url1', update_verb: :POST } =>
+            [postUrl1, otherPostUrl1],
+          { update_url: 'url2', update_verb: :POST } => [postUrl2],
+          { update_url: 'url2', update_verb: :PUT } => [putUrl2]
+        )
+      end
+    end
   end
 
   def allow_open(file_name)
@@ -85,5 +108,15 @@ describe Provider::Terraform do
       format("--- !ruby/object:Api::Object::Named\nname: '%<name>s'",
              name: name)
     )
+  end
+
+  def custom_update_property(name, update_url = nil, update_verb = nil)
+    lines = []
+    lines.push '--- !ruby/object:Api::Type::String'
+    lines.push "name: '#{name}'"
+    lines.push "update_url: '#{update_url}'" unless update_url.nil?
+    lines.push "update_verb: :#{update_verb}" unless update_verb.nil?
+
+    Google::YamlValidator.parse(lines.join("\n"))
   end
 end
