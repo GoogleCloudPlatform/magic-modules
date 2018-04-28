@@ -88,7 +88,12 @@ describe Provider::Terraform do
       subject { provider.properties_by_custom_update(props) }
 
       it do
-        is_expected.to eq([[postUrl1, otherPostUrl1], [postUrl2], [putUrl2]])
+        is_expected.to eq(
+          { update_url: 'url1', update_verb: :POST } =>
+            [postUrl1, otherPostUrl1],
+          { update_url: 'url2', update_verb: :POST } => [postUrl2],
+          { update_url: 'url2', update_verb: :PUT } => [putUrl2]
+        )
       end
     end
   end

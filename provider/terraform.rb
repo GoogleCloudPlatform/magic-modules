@@ -123,7 +123,9 @@ module Provider
       update_props = properties.reject do |p|
         p.update_url.nil? || p.update_verb.nil?
       end
-      update_props.group_by { |p| p.update_url + p.update_verb.to_s }.values
+      update_props.group_by do |p|
+        { update_url: p.update_url, update_verb: p.update_verb }
+      end
     end
 
     private
