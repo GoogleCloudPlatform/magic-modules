@@ -246,8 +246,6 @@ jobs:
             resource: magic-modules-new-prs
             passed: [mm-generate]
             version: every
-            params:
-              fetch_merge: true
           # This task either uses the 'hub' cli to create a PR from the generated repo,
           # or, if a PR already exists, it uses 'git branch -f' to update the branch
           # that PR is from to point at the commit generated earlier from this run
