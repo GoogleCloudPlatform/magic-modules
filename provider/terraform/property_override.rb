@@ -58,7 +58,7 @@ module Provider
         # Ensure boolean values are set to false if nil
         @from_api ||= false
 
-        check_optional_property :from_api, :boolean
+        check_property :from_api, :boolean
 
         raise "'value' and 'from_api' cannot be both set for 'default'"  \
           if from_api && !value.nil?
