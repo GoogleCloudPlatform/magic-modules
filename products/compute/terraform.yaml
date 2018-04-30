@@ -401,7 +401,7 @@ files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
-    # 'compiled_file': 'templates/terraform/compiled_file'
+    'google/provider_{{product_name}}_gen.go': 'templates/terraform/provider_gen.erb'
 
 # This is for custom testing code. All of our tests follow a specific pattern
 # that sometimes needs to be deviated from. We're working towards a world where
