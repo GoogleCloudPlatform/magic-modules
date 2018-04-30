@@ -28,7 +28,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   NEWLINE=$'\n'
   # There is no existing PR - this is the first pass through the pipeline and
   # we will need to create a PR using 'hub'.
-  if [ -z "$TERRAFORM_REPO_USER" ]; then
+  if [ -n "$TERRAFORM_REPO_USER" ]; then
     pushd build/terraform
 
     git log -1 --pretty=%B > ./downstream_body
