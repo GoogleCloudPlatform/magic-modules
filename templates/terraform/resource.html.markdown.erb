@@ -12,19 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<%= lines(autogen_notice :markdown) -%>
 <%
   api_name_lower = product_ns.downcase
   resource_name = Google::StringUtils.underscore(object.name)
   properties = effective_properties(object.all_user_properties)
 -%>
-
 ---
+<%= lines(autogen_notice :yaml) -%>
 layout: "google"
 page_title: "Google: google_<%= api_name_lower -%>_<%= resource_name -%>"
 sidebar_current: "docs-google-<%= api_name_lower -%>-<%= resource_name.gsub("_", "-") -%>"
 description: |-
-  <%= Google::StringUtils.first_sentence(object.description) %>
+<%= indent(Google::StringUtils.first_sentence(object.description), 2) %>
 ---
 
 # google\_<%= api_name_lower -%>\_<%= resource_name.gsub("_", "\\_") %>
