@@ -33,7 +33,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.5
+          tag: v0.1.7
 
     - name: gcs-resource
       type: docker-image
@@ -91,6 +91,8 @@ resources:
           access_token: ((github-account.password))
           only_mergeable: true
           require_review_approval: true
+          check_dependent_prs: true
+          label: downstream-generated
 
     - name: nmckinley-pr
       type: docker-image
@@ -335,6 +337,7 @@ jobs:
             params:
                 path: mm-output
                 status: success
+                label: downstream-generated
                 merge:
                     method: squash
                     commit_msg: mm-output/commit_message
