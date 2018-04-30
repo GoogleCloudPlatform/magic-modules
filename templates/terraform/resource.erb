@@ -142,13 +142,18 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
-
 <% properties.each do |prop| -%>
-  d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"]))
+	if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
+		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+	}
 <% end -%>
-	d.Set("self_link", res["selfLink"])
+	if err := d.Set("self_link", res["selfLink"]); err != nil {
+		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+	}
 <% if object.base_url.include?("{{project}}") -%>
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+	}
 <% end -%>
 
 	return nil
