@@ -21,6 +21,7 @@ cp -r mm-approved-prs/* mm-output
 
 pushd mm-output
 git config pullrequest.id "$ID"
+git branch -f "$BRANCH"
 git checkout "$BRANCH"
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"

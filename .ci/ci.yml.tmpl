@@ -129,6 +129,8 @@ jobs:
                 resource: magic-modules-new-prs
                 version: every
                 trigger: true
+                params:
+                    fetch_merge: true
             # consumes: magic-modules (detached HEAD)
             # produces: magic-modules-branched (new branch, with submodule)
           - task: branch-magic-modules
@@ -314,6 +316,8 @@ jobs:
     - name: merge-prs
       plan:
           - get: mm-approved-prs
+            params:
+              fetch_merge: true
           - task: merge-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
