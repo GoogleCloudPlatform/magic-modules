@@ -266,6 +266,7 @@ jobs:
           version: every
           trigger: true
           params:
+              submodules:
               {% for module in chef_submodules %}
                 - {{module}}
               {% endfor %}

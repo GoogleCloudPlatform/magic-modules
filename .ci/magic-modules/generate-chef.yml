@@ -17,7 +17,8 @@ outputs:
     - name: chef-generated
 
 run:
-    path: magic-modules-branched/.ci/magic-modules/generate-chef.sh
+    path: magic-modules-branched/.ci/magic-modules/generate-puppet-chef.sh
 
 params:
   PRODUCTS: ""
+  PROVIDER: chef
