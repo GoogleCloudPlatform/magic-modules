@@ -86,17 +86,23 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 5
+        default: !ruby/object:Provider::Terraform::Default
+          value: 5
       healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 2
+        default: !ruby/object:Provider::Terraform::Default
+          value: 2
       port: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 80
+        default: !ruby/object:Provider::Terraform::Default
+          value: 80
       requestPath: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: "/"
+        default: !ruby/object:Provider::Terraform::Default
+          value: "/"
       timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 5
+        default: !ruby/object:Provider::Terraform::Default
+          value: 5
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 2
+        default: !ruby/object:Provider::Terraform::Default
+          value: 2
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     description: |
       {{description}}
@@ -120,17 +126,23 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 5
+        default: !ruby/object:Provider::Terraform::Default
+          value: 5
       healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 2
+        default: !ruby/object:Provider::Terraform::Default
+          value: 2
       port: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 443
+        default: !ruby/object:Provider::Terraform::Default
+          value: 443
       requestPath: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: "/"
+        default: !ruby/object:Provider::Terraform::Default
+          value: "/"
       timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 5
+        default: !ruby/object:Provider::Terraform::Default
+          value: 5
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: 2
+        default: !ruby/object:Provider::Terraform::Default
+          value: 2
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
@@ -283,7 +295,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
       proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: :NONE
+        default: !ruby/object:Provider::Terraform::Default
+          value: :NONE
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
   TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
