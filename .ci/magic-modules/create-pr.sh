@@ -83,7 +83,7 @@ else
   # PR, rather than create a new one.
   git branch -f "$ORIGINAL_PR_BRANCH"
 
-  if [ -z "$TERRAFORM_REPO_USER" ]; then
+  if [ -n "$TERRAFORM_REPO_USER" ]; then
     pushd build/terraform
     git branch -f "$ORIGINAL_PR_BRANCH"
     popd
