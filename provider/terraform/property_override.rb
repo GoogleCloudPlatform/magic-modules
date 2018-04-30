@@ -41,9 +41,10 @@ module Provider
       end
     end
 
-    # Default value for the property if any. These properties are mutually
-    # exclusive.
+    # Default value for the property if any.
     class Default < Api::Object
+      # the attributes below are mutually exclusive.
+
       # if specified, then this will be set as the default value in the schema
       attr_reader :value
       # if true, then we get the default value from the Google API if no value
