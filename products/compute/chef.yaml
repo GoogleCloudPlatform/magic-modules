@@ -518,6 +518,8 @@ changelog:
       - Added `gcompute_target_ssl_proxy` resource
       - Added `gcompute_target_tcp_proxy` resource
       - Added `gcompute_url_map` resource
+    fixes:
+      - Moved `deprecated_*` properties to `deprecated { ... }`
   - !ruby/object:Provider::Config::Changelog
     version: '0.1.1'
     date: 2017-10-16T18:30:00-0700
