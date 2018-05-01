@@ -2998,6 +2998,7 @@ objects:
         imports: 'selfLink'
         description: |
           The network this VPN gateway is accepting traffic for.
+        required: true
         input: true
       - !ruby/object:Api::Type::Array
         name: 'tunnels'
