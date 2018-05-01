@@ -384,6 +384,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         required: false # the provider-default value will be used if not specified
         default: !ruby/object:Provider::Terraform::Default
           from_api: true
+        state_func: 'NameFromSelfLinkStateFunc'
       forwardingRules: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
