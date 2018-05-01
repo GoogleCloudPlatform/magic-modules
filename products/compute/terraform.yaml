@@ -337,7 +337,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
       proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
-        default_value: :NONE
+        default: !ruby/object:Provider::Terraform::Default
+          value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
     exclude: false
