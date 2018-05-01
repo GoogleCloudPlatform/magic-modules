@@ -25,16 +25,11 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 overrides: !ruby/object:Provider::ResourceOverrides
-  Project: !ruby/object:Provider::Ansible::ResourceOverride
-    # TODO(alexstephen): Re-evaluate merging Project into Ansible
-    exclude: true
-  Change: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
-# TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
-objects: !ruby/object:Api::Resource::HashArray
-  ManagedZone:
+  ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
-  ResourceRecordSet:
+  ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
+    access_api_results: true
+    editable: true
     version_added: '2.6'
     imports:
       - copy
@@ -64,14 +59,17 @@ objects: !ruby/object:Api::Resource::HashArray
       return fetch_wrapped_resource(module, 'dns#resourceRecordSet',
                                     'dns#resourceRecordSetsListResponse',
                                     'rrsets')
-    access_api_results: true
     provider_helpers:
-      visible:
-        unwrap_resource: false
-        resource_to_request: false
-        return_if_object: false
-      include:
-        - 'products/dns/helpers/ansible_provider_resource_set.py.erb'
+      - 'products/dns/helpers/ansible_provider_resource_set.py.erb'
+    hidden:
+      - unwrap_resource
+      - resource_to_request
+      - return_if_object
+  Project: !ruby/object:Provider::Ansible::ResourceOverride
+    # TODO(alexstephen): Re-evaluate merging Project into Ansible
+    exclude: true
+  Change: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:

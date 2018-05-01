@@ -25,19 +25,43 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 overrides: !ruby/object:Provider::ResourceOverrides
-  Firewall: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+  BackendService: !ruby/object:Provider::Ansible::ResourceOverride
+    aliases:
+      timeoutSec:
+        - timeout_seconds
+  Disk: !ruby/object:Provider::Ansible::ResourceOverride
+    editable: false
+  HealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    aliases:
+      timeoutSec:
+        - timeout_seconds
+  HttpHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    aliases:
+      timeoutSec:
+        - timeout_seconds
+      checkIntervalSec:
+        - check_interval_seconds
+  HttpsHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    aliases:
+      timeoutSec:
+        - timeout_seconds
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
-  InstanceGroupManager: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    provider_helpers:
+      - 'products/compute/helpers/provider_instance.py'
+      - 'products/compute/helpers/instance_metadata.py'
+  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    editable: false
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    provider_helpers:
+      - 'products/compute/helpers/provider_instance.py'
+      - 'products/compute/helpers/instance_metadata.py'
+  TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
+    provider_helpers:
+      - 'products/compute/helpers/provider_target_pool.py'
+  # Not yet implemented.
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
-  TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
-  TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
+  TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
@@ -51,59 +75,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
-# TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
-objects: !ruby/object:Api::Resource::HashArray
-  Disk:
-    editable: false
-  InstanceGroup:
-    editable: false
-  HealthCheck:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-  InstanceTemplate:
-    provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_instance.py'
-        - 'products/compute/helpers/instance_metadata.py'
-  HttpHealthCheck:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-      checkIntervalSec:
-        - check_interval_seconds
-  HttpsHealthCheck:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-  TargetPool:
-    provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_target_pool.py'
-  # Not implemented yet.
-  BackendService:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-  Instance:
-    provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_instance.py'
-        - 'products/compute/helpers/instance_metadata.py'
-  Snapshot:
-    skip: true
-  # Ansible tasks must alter infrastructure.
-  # This means that virtual objects are a poor fit.
-  DiskType:
-    skip: true
-  License:
-    skip: true
-  MachineType:
-    skip: true
-  Region:
-    skip: true
-  Zone:
-    skip: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:

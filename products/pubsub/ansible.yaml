@@ -24,18 +24,16 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
-objects: !ruby/object:Api::Resource::HashArray
-  Topic:
+overrides: !ruby/object:Provider::ResourceOverrides
+  Topic: !ruby/object:Provider::Ansible::ResourceOverride
     encoder: encode_request
     provider_helpers:
-      include:
-        - 'products/pubsub/helpers/provider_topic.py'
-  Subscription:
+      - 'products/pubsub/helpers/provider_topic.py'
+  Subscription: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
     encoder: encode_request
     provider_helpers:
-      include:
-        - 'products/pubsub/helpers/provider_subscription.py'
+      - 'products/pubsub/helpers/provider_subscription.py'
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
