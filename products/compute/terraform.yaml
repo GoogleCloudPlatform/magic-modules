@@ -308,7 +308,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
-    exclude: true
+    exclude: false
     examples: |
       ```hcl
       resource "google_compute_network" "network1" {
@@ -377,19 +377,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
         next_hop_vpn_tunnel = "${google_compute_vpn_tunnel.tunnel1.self_link}"
       }
       ```
-    # TODO(rosbo): Allow overriding parameters like properties and make the
-    # region field optional in Terraform
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+        default: !ruby/object:Provider::Terraform::Default
+          from_api: true
+        state_func: 'NameFromSelfLinkStateFunc'
       forwardingRules: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
-      creationTimestamp: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      # TODO(rosbo):  network field accepts self_link or name but the self_link must be passed
-      # to the API. Support the functionality in Parse*FieldValue methods for self_link.
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Zone: !ruby/object:Provider::Terraform::ResourceOverride

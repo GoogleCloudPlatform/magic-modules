@@ -47,6 +47,9 @@
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
   DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end -%>
+<% unless property.state_func.nil? -%>
+	StateFunc: <%= property.state_func %>,
+<% end -%>
 <% if property.is_a?(Api::Type::NestedObject) -%>
   MaxItems: 1,
   Elem: &schema.Resource{
