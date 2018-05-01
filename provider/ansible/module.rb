@@ -18,15 +18,15 @@ module Provider
     module Module
       # Returns the Python dictionary representing a simple property for
       # validation.
-      def python_dict_for_property(prop, config, spaces = 0)
+      def python_dict_for_property(prop, object, spaces = 0)
         if prop.is_a?(Api::Type::Array) && \
            prop.item_type.is_a?(Api::Type::NestedObject)
-          nested_obj_dict(prop, config, prop.item_type.properties, spaces)
+          nested_obj_dict(prop, object, prop.item_type.properties, spaces)
         elsif prop.is_a? Api::Type::NestedObject
-          nested_obj_dict(prop, config, prop.properties, spaces)
+          nested_obj_dict(prop, object, prop.properties, spaces)
         else
           name = Google::StringUtils.underscore(prop.out_name)
-          "#{name}=dict(#{prop_options(prop, config, spaces).join(', ')})"
+          "#{name}=dict(#{prop_options(prop, object, spaces).join(', ')})"
         end
       end
 
@@ -34,13 +34,13 @@ module Provider
 
       # Creates a Python dictionary representing a nested object property
       # for validation.
-      def nested_obj_dict(prop, config, properties, spaces)
+      def nested_obj_dict(prop, object, properties, spaces)
         name = Google::StringUtils.underscore(prop.out_name)
-        options = prop_options(prop, config, spaces).join(', ')
+        options = prop_options(prop, object, spaces).join(', ')
         [
           "#{name}=dict(#{options}, options=dict(",
           indent_list(properties.map do |p|
-            python_dict_for_property(p, config, spaces + 4)
+            python_dict_for_property(p, object, spaces + 4)
           end, 4),
           '))'
         ]
@@ -48,15 +48,15 @@ module Provider
 
       # Returns an array of all base options for a given property.
       # rubocop:disable Metrics/AbcSize
-      def prop_options(prop, config, spaces)
+      def prop_options(prop, object, spaces)
         [
           ('required=True' if prop.required),
           "type=#{quote_string(python_type(prop))}",
           (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
             if prop.is_a? Api::Type::Array),
-          (if config['aliases']&.keys&.include?(prop.name)
-             "aliases=[#{config['aliases'][prop.name].map do |x|
+          (if object&.aliases&.keys&.include?(prop.name)
+             "aliases=[#{object.aliases[prop.name].map do |x|
                            quote_string(x)
                          end.join(', ')}]"
            end)

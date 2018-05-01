@@ -79,14 +79,14 @@ module Provider
 
       # Builds out a full YAML block for DOCUMENTATION
       # This includes the YAML for the property as well as any nested props
-      def doc_property_yaml(prop, config, spaces)
-        block = minimal_doc_block(prop, config, spaces)
+      def doc_property_yaml(prop, object, spaces)
+        block = minimal_doc_block(prop, object, spaces)
         # Ansible linter does not support nesting options this deep.
         if prop.is_a?(Api::Type::NestedObject)
-          block.concat(nested_doc(prop.properties, config, spaces))
+          block.concat(nested_doc(prop.properties, object, spaces))
         elsif prop.is_a?(Api::Type::Array) &&
               prop.item_type.is_a?(Api::Type::NestedObject)
-          block.concat(nested_doc(prop.item_type.properties, config, spaces))
+          block.concat(nested_doc(prop.item_type.properties, object, spaces))
         else
           block
         end
@@ -118,25 +118,25 @@ module Provider
         )
       end
 
-      def nested_doc(properties, config, spaces)
+      def nested_doc(properties, object, spaces)
         block = [indent('suboptions:', 4)]
         block.concat(
           properties.map do |p|
-            indent(doc_property_yaml(p, config, spaces + 4), 8)
+            indent(doc_property_yaml(p, object, spaces + 4), 8)
           end
         )
       end
 
       # Builds out the minimal YAML block for DOCUMENTATION
       # rubocop:disable Metrics/AbcSize
-      def minimal_doc_block(prop, config, spaces)
+      def minimal_doc_block(prop, object, spaces)
         [
           minimal_yaml(prop, spaces),
           indent([
             "required: #{prop.required ? 'true' : 'false'}",
             ('type: bool' if prop.is_a? Api::Type::Boolean),
-            ("aliases: [#{config['aliases'][prop.name].join(', ')}]" \
-             if config['aliases']&.keys&.include?(prop.name)),
+            ("aliases: [#{object.aliases[prop.name].join(', ')}]" \
+             if object&.aliases&.keys&.include?(prop.name)),
             (if prop.is_a? Api::Type::Enum
                [
                  'choices:',
