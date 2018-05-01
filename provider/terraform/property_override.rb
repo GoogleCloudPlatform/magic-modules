@@ -22,6 +22,7 @@ module Provider
     module OverrideFields
       attr_reader :exclude # TODO(rosbo): Consider moving this to base
       attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
+      attr_reader :state_func # Adds a StateFunc to the schema
       attr_reader :default
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
       attr_reader :validation # Adds a ValidateFunc to the schema
@@ -106,6 +107,7 @@ module Provider
         check_property :default, Provider::Terraform::Default
 
         check_optional_property :diff_suppress_func, String
+        check_optional_property :state_func, String
         check_optional_property :validation, Provider::Terraform::Validation
       end
 

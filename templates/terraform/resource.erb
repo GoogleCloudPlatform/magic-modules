@@ -119,7 +119,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 	if waitErr != nil {
 		// The resource didn't actually create
 		d.SetId("")
-		return waitErr
+		return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
 	}
 
 	return resource<%= resource_name -%>Read(d, meta)
