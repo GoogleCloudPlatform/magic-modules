@@ -41,7 +41,7 @@ options:
         choices: ['present', 'absent']
         default: 'present'
 <% object.all_user_properties.reject(&:output).each do |prop| -%>
-<%= lines(indent(doc_property_yaml(prop, config, 4), 4)) -%>
+<%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
 '''
@@ -76,11 +76,11 @@ RETURN = '''
 <%= lines(import) -%>
 import json
 <%
-  config['imports'] ||= []
-  config['imports'] << 'time' if object.async
-  config['imports'] << 're' unless virtual_selflink_rrefs(object).empty?
+  imports = object.imports || []
+  imports << 'time' if object.async
+  imports << 're' unless virtual_selflink_rrefs(object).empty?
 -%>
-<%= lines(config['imports'].sort.uniq.map { |i| "import #{i}" }) -%>
+<%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
 ################################################################################
 # Main
@@ -92,7 +92,7 @@ def main():
 
 <%
   mod_props = object.all_user_properties.reject(&:output).map do |prop|
-    python_dict_for_property(prop, config)
+    python_dict_for_property(prop, object)
   end
 -%>
     module = GcpModule(
@@ -124,6 +124,7 @@ def main():
     if not fetch:
         module.fail_json(msg="<%= object.name -%> is not valid")
 <% else # object.virtual -%>
+
     if fetch:
         if state == 'present':
             if is_different(module, fetch):
@@ -173,12 +174,11 @@ def main():
 
 <% prod_name = object.__product.prefix[1..-1] -%>
 <% unless object.virtual -%>
-<% custom_create = get_code_multiline config, 'create' -%>
 <%# TODO: kind param not always needed.
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
 -%>
 <%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
-<% if custom_create.nil? -%>
+<% if object.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   if object.create_verb.nil? || object.create_verb == :POST
@@ -201,18 +201,16 @@ def main():
 -%>
     return <%= method %>
 <% else -%>
-<%= lines(indent(custom_create, 4)) -%>
+<%= lines(indent(object.create, 4)) -%>
 <% end -%>
 
 
-<% custom_update = get_code_multiline config, 'update' -%>
-<% editable = config['editable'] -%>
 <%=
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.save_api_results?)]))
 -%>
-<% if custom_update.nil? -%>
-<%   if !false?(editable) -%>
+<% if object.update.nil? -%>
+<%   if !false?(object.editable) -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   method = method_call(
@@ -225,20 +223,19 @@ def main():
   )
 -%>
     return <%= method %>
-<%   else # !false?(editable) -%>
+<%   else # !false?(object.editable) -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
-<%   end # !false?(editable) -%>
-<% else # custom_update.nil? -%>
-<%= lines(indent(custom_update, 4)) -%>
-<% end # custom_update.nil? -%>
+<%   end # !false?(object.editable) -%>
+<% else # object.update.nil? -%>
+<%= lines(indent(object.update, 4)) -%>
+<% end # object.update.nil? -%>
 
 
-<% custom_delete = get_code_multiline config, 'delete' -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.save_api_results?)]))
 -%>
-<% if custom_delete.nil? -%>
+<% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   method = method_call(
@@ -250,9 +247,9 @@ def main():
   )
 -%>
     return <%= method %>
-<% else # if custom_delete.nil? -%>
-<%= lines(indent(custom_delete, 4)) -%>
-<% end # if custom_delete.nil? -%>
+<% else # if object.delete.nil? -%>
+<%= lines(indent(object.delete, 4)) -%>
+<% end # if object.delete.nil? -%>
 
 
 <% end # unless object.virtual -%>
@@ -272,11 +269,11 @@ def resource_to_request(module):
 <%
   encoder_name = if object.encoder?
                    object.transport.encoder
-                 else config['encoder']
-                   config['encoder']
+                 else object.encoder
+                   object.encoder
                  end
 -%>
-<% if object.encoder? || config['encoder'] -%>
+<% if object.encoder? || object.encoder -%>
     request = <%= encoder_name -%>(request, module)
 <% end -%>
     return_vals = {}
@@ -288,20 +285,18 @@ def resource_to_request(module):
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-<% custom_self_link = get_code_multiline config, 'self_link' -%>
-<% if custom_self_link.nil? -%>
+<% if object.custom_self_link.nil? -%>
 <%= lines(emit_link('self_link', self_link_url(object), object)) -%>
-<% else # custom_self_link.nil? -%>
-<%= lines(emit_link('self_link', custom_self_link, object)) -%>
-<% end # custom_self_link.nil? -%>
+<% else # object.self_link.nil? -%>
+<%= lines(emit_link('self_link', object.custom_self_link, object)) -%>
+<% end # object.self_link.nil? -%>
 
 
-<% custom_collection = get_code_multiline config, 'collection' -%>
-<% if custom_collection.nil? -%>
+<% if object.collection.nil? -%>
 <%= lines(emit_link('collection', collection_url(object), object)) -%>
-<% else # custom_collection.nil? -%>
-<%= lines(emit_link('collection', custom_collection, object)) -%>
-<% end # custom_collection.nil? -%>
+<% else # object.collection.nil? -%>
+<%= lines(emit_link('collection', object.collection, object)) -%>
+<% end # object.collection.nil? -%>
 
 
 <%=
@@ -325,11 +320,11 @@ def resource_to_request(module):
 <%
   decoder_name = if object.decoder?
                    object.transport.decoder
-                 else config['decoder']
-                   config['decoder']
+                 else object.decoder
+                   object.decoder
                  end
 -%>
-<% if object.decoder? -%>
+<% if object.decoder? || object.decoder -%>
     result = <%= decoder_name -%>(result, module)
 
 <% end -%>
@@ -349,11 +344,11 @@ def is_different(module, response):
 <%
   decoder_name = if object.decoder?
                    object.transport.decoder
-                 else config['decoder']
-                   config['decoder']
+                 else object.decoder
+                   object.decoder
                  end
 -%>
-<% if object.decoder? -%>
+<% if object.decoder? || object.decoder -%>
     request = <%= decoder_name -%>(request, module)
 <% end -%>
 
