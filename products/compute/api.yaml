@@ -2903,10 +2903,19 @@ objects:
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
     base_url: projects/{{project}}/global/targetTcpProxies
+    input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a TargetTcpProxy resource, which is used by one or more
       global forwarding rule to route incoming TCP requests to a Backend
       service.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Setting Up TCP proxy for Google Cloud Load Balancing':
+          'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/targetTcpProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
@@ -2916,6 +2925,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2930,6 +2940,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       - !ruby/object:Api::Type::Enum
         name: 'proxyHeader'
         description: |
@@ -2938,12 +2950,17 @@ objects:
         values:
           - :NONE
           - :PROXY_V1
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setProxyHeader'
       - !ruby/object:Api::Type::ResourceRef
         name: 'service'
         resource: 'BackendService'
         imports: 'selfLink'
         description: |
           A reference to the BackendService resource.
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
   - !ruby/object:Api::Resource
     name: 'TargetVpnGateway'
     exclude: true
