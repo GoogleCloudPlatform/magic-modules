@@ -30,6 +30,8 @@ ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote -
 # Word-splitting here is intentional.
 git add $ALL_SUBMODULES 
 
+# It's okay for the commit to fail if there's no changes.
+set +e
 git commit -m "Update tracked submodules -> HEAD on $(date)
 
 Tracked submodules are $ALL_SUBMODULES."
