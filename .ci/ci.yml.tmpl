@@ -312,6 +312,7 @@ jobs:
           - put: magic-modules-new-prs
             params:
                 status: success
+                label: downstream-generated
                 path: mm-initial-pr
                 comment: magic-modules-with-comment/pr_comment
 
@@ -337,7 +338,6 @@ jobs:
             params:
                 path: mm-output
                 status: success
-                label: downstream-generated
                 merge:
                     method: squash
                     commit_msg: mm-output/commit_message
