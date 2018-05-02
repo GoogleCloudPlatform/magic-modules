@@ -1025,6 +1025,7 @@ objects:
         description: |
           How often (in seconds) to send a health check. The default value is 5
           seconds.
+        default_value: 5
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -1179,6 +1180,7 @@ objects:
         description: |
           How often (in seconds) to send a health check. The default value is 5
           seconds.
+        default_value: 5
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -1215,11 +1217,13 @@ objects:
           How long (in seconds) to wait before claiming failure.
           The default value is 5 seconds.  It is invalid for timeoutSec to have
           greater value than checkIntervalSec.
+        default_value: 5
       - !ruby/object:Api::Type::Integer
         name: 'unhealthyThreshold'
         description: |
           A so-far healthy instance will be marked unhealthy after this many
           consecutive failures. The default value is 2.
+        default_value: 2
       - !ruby/object:Api::Type::Enum
         name: 'type'
         description: |
