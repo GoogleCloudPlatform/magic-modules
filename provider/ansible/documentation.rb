@@ -135,8 +135,7 @@ module Provider
           indent([
             "required: #{prop.required ? 'true' : 'false'}",
             ('type: bool' if prop.is_a? Api::Type::Boolean),
-            ("aliases: [#{object.aliases[prop.name].join(', ')}]" \
-             if object&.aliases&.keys&.include?(prop.name)),
+            ("aliases: [#{prop.aliases.join(', ')}]" if prop.aliases),
             (if prop.is_a? Api::Type::Enum
                [
                  'choices:',

@@ -266,15 +266,8 @@ def resource_to_request(module):
 <% end # if object.kind? -%>
 <%= lines(indent(request_properties(properties_in_request), 4)) -%>
     }
-<%
-  encoder_name = if object.encoder?
-                   object.transport.encoder
-                 else object.encoder
-                   object.encoder
-                 end
--%>
-<% if object.encoder? || object.encoder -%>
-    request = <%= encoder_name -%>(request, module)
+<% if object.encoder? -%>
+    request = <%= object.transport.encoder -%>(request, module)
 <% end -%>
     return_vals = {}
     for k, v in request.items():
@@ -285,18 +278,10 @@ def resource_to_request(module):
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-<% if object.custom_self_link.nil? -%>
 <%= lines(emit_link('self_link', self_link_url(object), object)) -%>
-<% else # object.self_link.nil? -%>
-<%= lines(emit_link('self_link', object.custom_self_link, object)) -%>
-<% end # object.self_link.nil? -%>
 
 
-<% if object.collection.nil? -%>
 <%= lines(emit_link('collection', collection_url(object), object)) -%>
-<% else # object.collection.nil? -%>
-<%= lines(emit_link('collection', object.collection, object)) -%>
-<% end # object.collection.nil? -%>
 
 
 <%=
@@ -317,15 +302,8 @@ def resource_to_request(module):
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
 
-<%
-  decoder_name = if object.decoder?
-                   object.transport.decoder
-                 else object.decoder
-                   object.decoder
-                 end
--%>
-<% if object.decoder? || object.decoder -%>
-    result = <%= decoder_name -%>(result, module)
+<% if object.decoder? -%>
+    result = <%= object.transport.decoder -%>(result, module)
 
 <% end -%>
     if navigate_hash(result, ['error', 'errors']):
@@ -341,15 +319,8 @@ def resource_to_request(module):
 def is_different(module, response):
     request = resource_to_request(module)
     response = response_to_hash(module, response)
-<%
-  decoder_name = if object.decoder?
-                   object.transport.decoder
-                 else object.decoder
-                   object.decoder
-                 end
--%>
-<% if object.decoder? || object.decoder -%>
-    request = <%= decoder_name -%>(request, module)
+<% if object.decoder? -%>
+    request = <%= object.transport.decoder -%>(request, module)
 <% end -%>
 
     # Remove all output-only from response.

@@ -23,8 +23,13 @@
 'test/units/module_utils/gcp/test_gcp_utils.py': 'provider/ansible/test_gcp_utils.py'
 <% unless config.nil? -%>
 <%
+  # Overrides have not been assembled yet.
+  overrides = config.overrides
+  excludes = overrides.instance_variables
+                      .select { |x| overrides.instance_variable_get(x).exclude }
+                      .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
-                    .select { |o| !o.exclude }
+                    .select { |o| !excludes.include?(o.name) }
                     .map do |object|
                       ["gcp_#{object.__product.prefix[1..-1]}",
                       Google::StringUtils.underscore(object.name)].join('_')
