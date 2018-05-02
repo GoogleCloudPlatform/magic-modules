@@ -188,8 +188,6 @@ module Provider
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
       # Config must be validated so items are properly setup for next compile
-      config.default_overrides
-      config.spread_api config, api, [], '' unless api.nil?
       config.validate
       # Compile step #2: Now that we have the target class, compile with that
       # class features

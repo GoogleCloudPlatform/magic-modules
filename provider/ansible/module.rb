@@ -55,11 +55,8 @@ module Provider
           (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
             if prop.is_a? Api::Type::Array),
-          (if object&.aliases&.keys&.include?(prop.name)
-             "aliases=[#{object.aliases[prop.name].map do |x|
-                           quote_string(x)
-                         end.join(', ')}]"
-           end)
+          ("aliases=[#{prop.aliases.map { |x| quote_string(x) }.join(', ')}]" \
+            if prop.aliases)
         ].compact
       end
       # rubocop:enable Metrics/AbcSize

@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.0'
+  version: '0.1.1'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-dns'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-dns/issues'
   summary: 'A Chef cookbook to manage Google Cloud DNS resources'
@@ -115,3 +115,10 @@ style:
       - function: self.resource_to_hash
         exceptions:
           - Metrics/MethodLength
+changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.1.1'
+    date: 2018-05-02T06:00:00-0700
+    fixes:
+      - Changed quota_* fields to a Hash. All quota_ fields must now be
+        keys in a hash named `quota`
