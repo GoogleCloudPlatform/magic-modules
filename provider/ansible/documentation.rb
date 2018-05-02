@@ -58,6 +58,7 @@ module Provider
       # rubocop:disable Metrics/AbcSize
       def bullet_line(paragraph, spaces, _multiline = true, add_period = true)
         paragraph += '.' unless paragraph.end_with?('.') || !add_period
+        paragraph = format_url(paragraph)
         paragraph = paragraph.tr("\n", ' ').strip
 
         # Paragraph placed inside array to get bullet point.
@@ -109,6 +110,16 @@ module Provider
       end
 
       private
+
+      # Find URLs and surround with U()
+      def format_url(paragraph)
+        paragraph.gsub(%r{
+          https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
+          [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
+          [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
+          [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
+        }x, 'U(\\0)')
+      end
 
       # Returns formatted nested documentation for a set of properties.
       def nested_return(properties, spaces)
