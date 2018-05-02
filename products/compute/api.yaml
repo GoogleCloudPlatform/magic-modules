@@ -2297,8 +2297,7 @@ objects:
           Currently, you can only specify the internet gateway, using a full or
           partial valid URL:
 
-          * https://www.googleapis.com/compute/v1/projects/project/
-              global/gateways/default-internet-gateway
+          * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
         input: true
