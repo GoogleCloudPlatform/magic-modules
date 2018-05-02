@@ -26,25 +26,30 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 # This is where custom code would be defined eventually.
 overrides: !ruby/object:Provider::ResourceOverrides
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
-    aliases:
-      timeoutSec:
-        - timeout_seconds
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
   HealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    aliases:
-      timeoutSec:
-        - timeout_seconds
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
   HttpHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-      checkIntervalSec:
-        - check_interval_seconds
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
+      checkIntervalSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - check_interval_seconds
   HttpsHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    aliases:
-      timeoutSec:
-        - timeout_seconds
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/provider_instance.py'
