@@ -200,6 +200,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         sensitive: true
       privateKey: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
+  SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: true # TODO: Require support for schema.TypeSet
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     exclude: true
