@@ -2828,7 +2828,8 @@ objects:
           the TargetHttpsProxy resource. If not set, the TargetHttpsProxy
           resource will not have any SSL policy configured.
         update_verb: :POST
-        update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setSslPolicy'
+        update_url:
+          'projects/{{project}}/global/targetHttpsProxies/{{name}}/setSslPolicy'
   - !ruby/object:Api::Resource
     name: 'TargetPool'
     kind: 'compute#targetPool'
