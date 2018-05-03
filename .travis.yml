@@ -1,0 +1,8 @@
+language: ruby # ruby version defined in .ruby-version will be used
+
+script:
+- bundle exec rake test:rubocop
+- bundle exec rake test:spec
+
+git:
+  submodules: false
