@@ -38,7 +38,7 @@ module Provider
         virtuals = virtual_selflink_rrefs(object).map(&:resource_ref)
                                                  .uniq
         virtuals.map do |virt|
-          if virt = virtuals.last
+          if virt == virtuals.last
             lines(selflink_function(virt))
           else
             lines(selflink_function(virt), 2)
@@ -62,7 +62,6 @@ module Provider
                     "url = r#{url}",
                     'if not re.match(url, name):',
                     # '%s' confuses Rubocop (it's Python code, not Ruby)
-                    # rubocop:disable Style/FormatStringToken
                     indent([
                       "name = #{self_link_url(resource).gsub('{name}', '%s')}",
                       '.format(**params) % name'
