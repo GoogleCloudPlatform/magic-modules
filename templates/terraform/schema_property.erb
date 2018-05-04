@@ -15,7 +15,7 @@
 <% if tf_types.include?(property.class) -%>
 "<%= Google::StringUtils.underscore(property.name) -%>": {
   Type: <%= tf_types[property.class] %>,
-<%	if property.default.from_api -%>
+<%	if property.default&.from_api -%>
 	Computed: true,
 	Optional: true,
 <% elsif property.required -%>
@@ -96,7 +96,7 @@
 <% if property.sensitive -%>
     Sensitive: true,
 <% end -%>
-<% unless property.default.value.nil? -%>
+<% unless property.default&.value.nil? -%>
     Default: <%= go_literal(property.default.value) -%>,
 <% end -%>
 },
