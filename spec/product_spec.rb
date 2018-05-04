@@ -96,7 +96,7 @@ describe Api::Product do
 
     it do
       is_expected.to raise_error(StandardError,
-                                 /must specify exactly one default/)
+                                 /must specify at most one default/)
     end
   end
 
@@ -129,7 +129,7 @@ describe Api::Product do
 
     it do
       is_expected.to raise_error(StandardError,
-                                 /must specify exactly one default/)
+                                 /must specify a default/)
     end
   end
 

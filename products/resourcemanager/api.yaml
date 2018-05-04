@@ -18,7 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: v1
     base_url: https://cloudresourcemanager.googleapis.com/v1/
-    default: true
 scopes:
   # All access is needed to create projects.
   - https://www.googleapis.com/auth/cloud-platform

@@ -45,9 +45,11 @@ module Api
 
       def validate
         super
+        @default ||= false
+
         check_property :base_url, String
         check_property :name, String
-        check_optional_property :default, [TrueClass, FalseClass]
+        check_property :default, :boolean
       end
     end
 
@@ -55,6 +57,8 @@ module Api
       @versions.each do |v|
         return v if v.default
       end
+
+      return @versions.last if @versions.length == 1
     end
 
     private
@@ -63,14 +67,17 @@ module Api
       check_property :versions, Array
       check_property_list :versions, Api::Product::Version
 
-      # Confirm that at exactly one version is the default
+      # Confirm that at most one version is the default
       defaults = 0
       @versions.each do |v|
         defaults += 1 if v.default
       end
 
-      raise "Product '#{@name}' must specify exactly one default API version" \
-        if defaults != 1
+      raise "Product '#{@name}' must specify at most one default API version" \
+        if defaults > 1
+
+      raise "Product '#{@name}' must specify a default API version" \
+        if defaults == 0 && @versions.length > 1
     end
   end
 end

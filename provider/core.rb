@@ -350,13 +350,13 @@ module Provider
     end
 
     def async_operation_url(resource)
-      build_url(resource.__product.base_url, resource.async.operation.base_url,
+      build_url(resource.__product.default_version.base_url, resource.async.operation.base_url,
                 true)
     end
 
     def collection_url(resource)
       base_url = resource.base_url.split("\n").map(&:strip).compact
-      build_url(resource.__product.base_url, base_url)
+      build_url(resource.__product.default_version.base_url, base_url)
     end
 
     def self_link_raw_url(resource)

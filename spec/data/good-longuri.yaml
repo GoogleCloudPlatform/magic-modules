@@ -17,8 +17,7 @@ prefix: myproduct
 versions:
   - !ruby/object:Api::Product::Version
     name: v123
-    base_url: http://myproduct.google.com/api/v123
-    default: true
+    base_url: http://myproduct.google.com/myapi/v123
 scopes:
   - http://scope-to-my-api/
 objects:
