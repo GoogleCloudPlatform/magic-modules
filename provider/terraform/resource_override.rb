@@ -13,6 +13,7 @@
 
 require 'provider/abstract_core'
 require 'provider/resource_override'
+require 'provider/terraform/custom_code'
 
 module Provider
   class Terraform < Provider::AbstractCore
@@ -22,6 +23,7 @@ module Provider
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
+      attr_reader :custom_code
 
       attr_reader :examples
     end
@@ -35,10 +37,12 @@ module Provider
         super
 
         @id_format ||= '{{name}}'
+        @custom_code ||= Provider::Terraform::CustomCode.new()
 
         check_property :id_format, String
 
         check_optional_property :examples, String
+        check_optional_property :custom_code, Provider::Terraform::CustomCode
       end
 
       def apply(resource)
