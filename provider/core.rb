@@ -174,6 +174,7 @@ module Provider
     end
 
     # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize
     def compile_file_list(output_folder, files, data = {})
       files.each do |target, source|
         Google::LOGGER.info "Compiling #{source} => #{target}"
@@ -201,12 +202,11 @@ module Provider
           )
         )
 
-        if File.extname(target_file) == '.go'
-          %x(goimports -w #{target_file})
-        end
+        %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
       end
     end
     # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/AbcSize
 
     def generate_objects(output_folder, types)
       @api.objects.each do |object|

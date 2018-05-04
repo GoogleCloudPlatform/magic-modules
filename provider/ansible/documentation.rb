@@ -55,6 +55,7 @@ module Provider
       #     the bullet properly
       #     because of the :
       #     character
+      # rubocop:disable Metrics/AbcSize
       def bullet_line(paragraph, spaces, _multiline = true, add_period = true)
         paragraph += '.' unless paragraph.end_with?('.') || !add_period
         paragraph = paragraph.tr("\n", ' ').strip
@@ -76,6 +77,7 @@ module Provider
         end
         yaml
       end
+      # rubocop:enable Metrics/AbcSize
 
       # Builds out a full YAML block for DOCUMENTATION
       # This includes the YAML for the property as well as any nested props
@@ -128,8 +130,7 @@ module Provider
       end
 
       # Builds out the minimal YAML block for DOCUMENTATION
-      # rubocop:disable Metrics/AbcSize
-      def minimal_doc_block(prop, object, spaces)
+      def minimal_doc_block(prop, _object, spaces)
         [
           minimal_yaml(prop, spaces),
           indent([

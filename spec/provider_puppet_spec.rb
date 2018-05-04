@@ -29,8 +29,10 @@ end
 
 describe Provider::Puppet do
   context 'one type with resourceref generated' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
 
     before do
@@ -54,14 +56,17 @@ describe Provider::Puppet do
                             imports: 'name',
                             writer: out
                           },
+                          named_prop: 'anotherresource',
                           arrays: [:string_array]
       provider.generate 'blah', []
     end
   end
 
   context 'multiple types generated' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-multi-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
 
     before do
@@ -94,8 +99,10 @@ describe Provider::Puppet do
   end
 
   context 'test template' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
 
     before do
@@ -118,6 +125,12 @@ describe Provider::Puppet do
       type_writer.expects(:write).with("property: property3 (Array)\n")
       type_writer.expects(:write).with("property: property4 (Enum)\n")
       type_writer.expects(:write).with("parameter: property5 (ResourceRef)\n")
+      type_writer.expects(:write).with(
+        "property: nested_property (NestedObject)\n"
+      )
+      type_writer.expects(:write).with(
+        "property: array_property (Array)\n"
+      )
       provider_writer = mock('File')
       provider_writer.expects(:write).with("type: myproduct_another_resource\n")
       output_expectations kind: 'myproduct', name: 'another_resource',
@@ -128,14 +141,17 @@ describe Provider::Puppet do
                             imports: 'name',
                             writer: out
                           },
+                          named_prop: 'anotherresource',
                           arrays: [:string_array]
       provider.generate 'blah', []
     end
   end
 
   context 'long collection uri' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-longuri.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-longuri-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ['URI.join(', "'http://myproduct.google.com/myapi/v123',",
@@ -145,7 +161,7 @@ describe Provider::Puppet do
 
     before do
       allow_open 'spec/data/good-longuri.yaml'
-      allow_open 'spec/data/puppet-config.yaml'
+      allow_open 'spec/data/puppet-longuri-config.yaml'
       allow_open_real_templates
       allow_open_properties
       allow_open_libraries
@@ -168,8 +184,10 @@ describe Provider::Puppet do
   end
 
   context 'multiline code format' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-multicode.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-single-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-multicode.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ["    longline-create-line1\n",
@@ -205,8 +223,10 @@ describe Provider::Puppet do
   end
 
   context 'readonly false sets all require requests' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-multicode.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-single-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-multicode.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ["require 'google/yproduct/network/delete'\n",
@@ -241,9 +261,11 @@ describe Provider::Puppet do
   end
 
   context 'readonly true sets only get require requests' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-multicode.yaml') }
     let(:product) do
       Api::Compiler.new('spec/data/good-single-readonly-file.yaml').run
+    end
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-multicode.yaml', product)
     end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:not_expected) do
@@ -278,8 +300,10 @@ describe Provider::Puppet do
   end
 
   context 'filters creation based on command line list' do
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-multi2-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:type) { 'YetAnotherResource' }
 
@@ -314,8 +338,10 @@ describe Provider::Puppet do
       product.validate
     end
 
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-export-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ['property1: resource[:property1]',
@@ -361,8 +387,10 @@ describe Provider::Puppet do
       product.validate
     end
 
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-export-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ['def exports',
@@ -407,8 +435,10 @@ describe Provider::Puppet do
       product.validate
     end
 
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ['self_link: @fetched[\'selfLink\']',
@@ -433,6 +463,7 @@ describe Provider::Puppet do
                             imports: 'name',
                             writer: out
                           },
+                          named_prop: 'anotherresource',
                           arrays: [:string_array]
 
       provider.generate 'blah', []
@@ -455,8 +486,10 @@ describe Provider::Puppet do
       product.validate
     end
 
-    let(:config) { Provider::Config.parse('spec/data/puppet-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/puppet-config.yaml', product)
+    end
     let(:provider) { Provider::Puppet.new(config, product) }
     let(:expected) do
       ['def exports',
@@ -480,6 +513,7 @@ describe Provider::Puppet do
                             imports: 'name',
                             writer: out
                           },
+                          named_prop: 'anotherresource',
                           arrays: [:string_array]
       provider.generate 'blah', []
       matched
@@ -518,6 +552,7 @@ describe Provider::Puppet do
     output_expectations_string_array data
     output_expectations_resource_ref data unless data[:resourceref].nil?
     output_expectations_network_data data
+    output_expectations_named_properties data
   end
 
   def output_expectations_network_data(data)
@@ -560,6 +595,18 @@ describe Provider::Puppet do
   end
   # rubocop:enable Metrics/AbcSize
   # rubocop:enable Metrics/MethodLength
+
+  def output_expectations_named_properties(data)
+    return unless data[:named_prop]
+    output_file \
+      ["blah/lib/google/#{data[:kind][1..-1]}",
+       "property/#{data[:named_prop]}_array_property.rb"].join('/'),
+      dummy_writer
+    output_file \
+      ["blah/lib/google/#{data[:kind][1..-1]}",
+       "property/#{data[:named_prop]}_nested_property.rb"].join('/'),
+      dummy_writer
+  end
 
   # rubocop:disable Metrics/AbcSize
   def output_expectations_libraries(data)
@@ -617,6 +664,7 @@ describe Provider::Puppet do
   def allow_open_properties
     allow_read 'templates/puppet/property/base.rb.erb'
     allow_read 'templates/puppet/property/enum.rb.erb'
+    allow_read 'templates/puppet/property/nested_object.rb.erb'
     allow_read 'templates/puppet/property/resourceref.rb.erb'
     allow_read 'templates/puppet/property/string.rb.erb'
   end

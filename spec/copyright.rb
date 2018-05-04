@@ -57,7 +57,11 @@ module Google
     def notice_present?(files)
       files.select do |f|
         mark = @copyrightable_files.reject { |c, _| (c =~ f).nil? }
-        File.readlines(f).select { |l| mark.values[0] =~ l }.empty?
+        File.readlines(f).select do |l|
+          mark.values[0] =~ l
+        rescue StandardError
+          mark.values[0] =~ l.force_encoding('UTF-8')
+        end.empty?
       end
     end
   end
