@@ -14,7 +14,10 @@
 --- !ruby/object:Api::Product
 name: Google Spanner
 prefix: gspanner
-base_url: https://spanner.googleapis.com/v1/
+versions:
+  - !ruby/object:Api::Product::Version
+    name: v1
+    base_url: https://spanner.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/spanner.admin
 objects:

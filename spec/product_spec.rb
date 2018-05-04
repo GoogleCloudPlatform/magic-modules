@@ -23,7 +23,10 @@ describe Api::Product do
     subject do
       lambda do
         product('name: "foo"',
-                'base_url: "http://foo/var/"',
+                'versions:',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: v1',
+                '    base_url: "http://foo/var/"',
                 'objects:',
                 '  - !ruby/object:Api::Resource',
                 '    kind: foo#resource',
@@ -39,10 +42,12 @@ describe Api::Product do
     it { is_expected.to raise_error(StandardError, /Missing 'prefix'/) }
   end
 
-  context 'requires base_url' do
+  context 'requires versions' do
     subject do
       lambda do
         product('name: "foo"',
+                'scopes:',
+                '  - link/to/scope',
                 'prefix: "bar"',
                 'objects:',
                 '  - !ruby/object:Api::Resource',
@@ -52,11 +57,80 @@ describe Api::Product do
                 '    name: "res1"',
                 '    properties:',
                 '      - !ruby/object:Api::Type',
-                '        name: var').validate
+                '        name: var',
+                '        description: desc').validate
       end
     end
 
-    it { is_expected.to raise_error(StandardError, /Missing 'base_url'/) }
+    it { is_expected.to raise_error(StandardError, /Missing 'versions'/) }
+  end
+
+  context 'requires at most one default version' do
+    subject do
+      lambda do
+        product('name: "foo"',
+                'scopes:',
+                '  - link/to/scope',
+                'prefix: "bar"',
+                'versions:',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: v1',
+                '    base_url: "http://foo/var/v1"',
+                '    default: true',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: beta',
+                '    base_url: "http://foo/var/beta"',
+                '    default: true',
+                'objects:',
+                '  - !ruby/object:Api::Resource',
+                '    kind: foo#resource',
+                '    base_url: myres/',
+                '    description: foo',
+                '    name: "res1"',
+                '    properties:',
+                '      - !ruby/object:Api::Type',
+                '        name: var',
+                '        description: desc').validate
+      end
+    end
+
+    it do
+      is_expected.to raise_error(StandardError,
+                                 /must specify exactly one default/)
+    end
+  end
+
+  context 'requires at least one default version' do
+    subject do
+      lambda do
+        product('name: "foo"',
+                'scopes:',
+                '  - link/to/scope',
+                'prefix: "bar"',
+                'versions:',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: v1',
+                '    base_url: "http://foo/var/v1"',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: beta',
+                '    base_url: "http://foo/var/beta"',
+                'objects:',
+                '  - !ruby/object:Api::Resource',
+                '    kind: foo#resource',
+                '    base_url: myres/',
+                '    description: foo',
+                '    name: "res1"',
+                '    properties:',
+                '      - !ruby/object:Api::Type',
+                '        name: var',
+                '        description: desc').validate
+      end
+    end
+
+    it do
+      is_expected.to raise_error(StandardError,
+                                 /must specify exactly one default/)
+    end
   end
 
   context 'requires objects' do
@@ -64,7 +138,10 @@ describe Api::Product do
       lambda do
         product('name: "foo"',
                 'prefix: "bar"',
-                'base_url: "baz"').validate
+                'versions:',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: v1',
+                '    base_url: "baz"').validate
       end
     end
     it { is_expected.to raise_error(StandardError, /Missing 'objects'/) }
@@ -75,7 +152,10 @@ describe Api::Product do
       lambda do
         product('name: "foo"',
                 'prefix: "bar"',
-                'base_url: "baz"',
+                'versions:',
+                '  - !ruby/object:Api::Product::Version',
+                '    name: v1',
+                '    base_url: "baz"',
                 'objects:',
                 '  - bah. bad object!').validate
       end
