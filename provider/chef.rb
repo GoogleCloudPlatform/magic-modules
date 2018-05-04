@@ -73,6 +73,8 @@ module Provider
 
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
     def prop_decl(prop)
       return 'kind_of: [TrueClass, FalseClass]' if prop.type == 'Boolean'
       return 'Float' if prop.type == 'Double'
@@ -108,6 +110,8 @@ module Provider
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
 
     def label_name(product)
       return product.label_override unless product.label_override.nil?

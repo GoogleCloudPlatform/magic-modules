@@ -47,8 +47,7 @@ module Provider
       end
 
       # Returns an array of all base options for a given property.
-      # rubocop:disable Metrics/AbcSize
-      def prop_options(prop, object, spaces)
+      def prop_options(prop, _object, spaces)
         [
           ('required=True' if prop.required),
           "type=#{quote_string(python_type(prop))}",

@@ -33,6 +33,7 @@ module Provider
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
 
+      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
@@ -53,6 +54,7 @@ module Provider
         check_optional_property :update, ::String
         check_optional_property :version_added, ::String
       end
+      # rubocop:enable Metrics/MethodLength
 
       private
 
