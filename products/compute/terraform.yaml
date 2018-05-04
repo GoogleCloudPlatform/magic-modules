@@ -394,7 +394,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
           value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
-    exclude: false
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/156): Re-enable code generation for this resource
+    exclude: true
     examples: |
       ```hcl
       resource "google_compute_network" "network1" {
