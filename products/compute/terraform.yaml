@@ -39,10 +39,42 @@ overrides: !ruby/object:Provider::ResourceOverrides
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      sizeGb: !ruby/object:Provider::Terraform::PropertyOverride
+        name: size
+        default: !ruby/object:Provider::Terraform::Default
+          from_api: true
+      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
+        name: image
+        diff_suppress_func: 'diskImageDiffSuppress'
+      sourceSnapshot: !ruby/object:Provider::Terraform::PropertyOverride
+        name: snapshot
+        diff_suppress_func: 'linkDiffSuppress'
+      zone: !ruby/object:Provider::Terraform::PropertyOverride
+        state_func: 'NameFromSelfLinkStateFunc'
+      type: !ruby/object:Provider::Terraform::PropertyOverride
+        state_func: 'NameFromSelfLinkStateFunc'
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        input: true
+      licenses: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func:  diskEncryptionKeyDiffSuppress
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/detach_disk.erb
+      post_import: templates/terraform/disk_import.erb
+      constants: templates/terraform/disk_constants.erb
+      encoder: templates/terraform/mutate_disk.erb
+      extra_schema_entry: templates/terraform/disk_extra_schema.erb
+      custom_flatten:
+        zone: templates/terraform/self_link_to_name.erb
+        type: templates/terraform/self_link_to_name.erb
+      custom_expand:
+        diskEncryptionKey: templates/terraform/encryption_key_expand.erb
+      decoder:
+        diskEncryptionKey: templates/terraform/encryption_key_decoder.erb
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride

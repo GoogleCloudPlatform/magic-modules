@@ -1,0 +1,3 @@
+func flatten<%= prefix -%><%= titlelize_property(prop) -%>(v interface{}) interface{} {
+  return GetResourceNameFromSelfLink(v.(string))
+}

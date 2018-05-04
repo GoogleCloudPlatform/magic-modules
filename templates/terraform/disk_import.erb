@@ -1,0 +1,19 @@
+if zone, err := getZone(d, config); err != nil || zone == "" {
+  project, err := getProject(d, config)
+  if err != nil {
+   return nil, err
+  }
+  region, err := getRegion(d, config)
+  if err != nil {
+   return nil, err
+  }
+
+  getDisk := func(zone string) (interface{}, error) {
+    return config.clientCompute.Disks.Get(project, zone, d.Id()).Do()
+  }
+  resource, err := getZonalResourceFromRegion(getDisk, region, config.clientCompute, project) 
+  if err != nil {
+    return nil, err
+  }
+  d.Set("zone", resource.(*compute.Disk).Zone)
+}
