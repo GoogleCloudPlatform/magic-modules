@@ -151,7 +151,7 @@ module Provider
         check_optional_property :custom_expand, Hash
         check_optional_property :decoder, Hash
       end
+      # rubocop:enable Metrics/MethodLength
     end
   end
 end
-
