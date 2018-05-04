@@ -11,8 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'rspec/core/rake_task'
+require 'parallel_tests'
 
 namespace 'test' do
-  RSpec::Core::RakeTask.new(:spec)
+  desc "Run RSpec code example"
+  task :spec do |_, _|
+    abort unless system('parallel_rspec spec/') # allow to chain tasks e.g. rake parallel:spec parallel:features
+  end
 end
