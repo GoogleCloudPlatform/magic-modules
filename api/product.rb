@@ -77,7 +77,7 @@ module Api
         if defaults > 1
 
       raise "Product '#{@name}' must specify a default API version" \
-        if defaults == 0 && @versions.length > 1
+        if defaults.zero? && @versions.length > 1
     end
   end
 end
