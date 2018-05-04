@@ -28,7 +28,7 @@ module Provider
       include OverrideFields
       def validate
         super
-        
+
         check_optional_property :aliases, ::Array
       end
 

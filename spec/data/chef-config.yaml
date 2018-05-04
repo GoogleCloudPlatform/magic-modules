@@ -13,9 +13,9 @@
 
 --- !ruby/object:Provider::Chef::Config
 objects: !ruby/object:Api::Resource::HashArray
-  ManagedZone:
+  ReferencedResource:
     flush: |
       raise 'DNS Managed Zone cannot be edited' if @dirty
-  ResourceRecordSet:
+  MyResource:
     template:
       provider: 'dns/templates/resource_record_set.erb'

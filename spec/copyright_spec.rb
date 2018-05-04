@@ -25,8 +25,9 @@ describe 'ensure files have copyright notice' do
                   my_tests = f.start_with?("#{my_path}/data/copyright_")
                   artifacts = f.start_with?("#{my_root}/build/")
                   presubmit = f.start_with?("#{my_root}/build/presubmit/")
+                  vendor = f.start_with?("#{my_root}/vendor/")
 
-                  !my_tests && !artifacts || presubmit
+                  !my_tests && !artifacts && !vendor && !presubmit
                 end
     checker = Google::CopyrightChecker.new(files)
     missing = checker.check_missing.collect { |f| "  - #{f}" }
