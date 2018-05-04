@@ -17,6 +17,7 @@ require 'provider/property_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
+    # Inserts custom code into terraform resources.
     class CustomCode < Api::Object
       # Collection of fields allowed in the CustomCode section for
       # Terraform.
@@ -123,7 +124,8 @@ module Provider
       # so the function header *is* part of the custom code template.
       # As with flatten, `prop` and `prefix` are available.
       attr_reader :custom_expand
-      
+
+      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
@@ -152,5 +154,4 @@ module Provider
     end
   end
 end
-
 

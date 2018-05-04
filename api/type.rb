@@ -380,7 +380,7 @@ module Api
       attr_reader :value_type
 
       def validate
-        super 
+        super
         check_property :key_type, ::String
         check_property :value_type, ::String
         raise "Invalid type #{@key_type}" unless type?(@key_type)

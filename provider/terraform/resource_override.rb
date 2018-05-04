@@ -37,7 +37,7 @@ module Provider
         super
 
         @id_format ||= '{{name}}'
-        @custom_code ||= Provider::Terraform::CustomCode.new()
+        @custom_code ||= Provider::Terraform::CustomCode.new
 
         check_property :id_format, String
 
