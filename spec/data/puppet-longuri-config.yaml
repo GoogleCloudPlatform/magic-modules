@@ -11,17 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Presubmit
-  # An class to run a app full of tests.
-  class App
-    def initialize(testers, modules)
-      @testers = testers
-      @modules = modules
-    end
-
-    # Run all tests and return the results.
-    def run
-      Hash[@modules.map { |mod| [mod, mod.run] }]
-    end
-  end
-end
+--- !ruby/object:Provider::Puppet::Config
+objects: !ruby/object:Api::Resource::HashArray
+  MyResource:
+    flush: |
+      raise 'DNS Managed Zone cannot be edited' if @dirty

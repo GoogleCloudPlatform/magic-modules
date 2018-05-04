@@ -14,8 +14,17 @@
 --- !ruby/object:Provider::Puppet::Config
 objects: !ruby/object:Api::Resource::HashArray
   MyResource:
-    create: |
-      longline-create-line1
-      longline-create-line2
-      longline-create-line3
-      longline-create-line4
+    handlers:
+      create: |
+        longline-create-line1
+        longline-create-line2
+        longline-create-line3
+        longline-create-line4
+overrides: !ruby/object:Provider::ResourceOverrides
+  MyResource: !ruby/object:Provider::Puppet::ResourceOverride
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      create: |
+        longline-create-line1
+        longline-create-line2
+        longline-create-line3
+        longline-create-line4
