@@ -26,8 +26,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <% elsif tf_types.include?(property.class) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
 <%
-  if !effective_nested_properties(property).empty?
-    nested_properties = effective_nested_properties(property)
+  if !nested_properties(property).empty?
+    nested_properties = nested_properties(property)
 -%>
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
