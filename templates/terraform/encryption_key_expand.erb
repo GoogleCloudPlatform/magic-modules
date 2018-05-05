@@ -1,18 +1,20 @@
 func expand<%= prefix -%><%= titlelize_property(prop) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
 	l := v.([]interface{})
 	req := make([]interface{}, 0, 1)
-	if len(l) == 0 {
+	if len(l) == 1 {
+		// There is a value
+		outMap := make(map[string]interface{})
+		outMap["rawKey"] = l[0].(map[string]interface{})["raw_key"]
+		req = append(req, outMap)
+  <% if prop.name == "diskEncryptionKey" -%>
+	} else {
 		// Check alternative setting? 
 		if altV, ok := d.GetOk("disk_encryption_key_raw"); ok {
 			outMap := make(map[string]interface{})
 			outMap["rawKey"] = altV
 			req = append(req, outMap)
-		}
-	} else {
-		// There is a value
-		outMap := make(map[string]interface{})
-		outMap["rawKey"] = l[0].(map[string]interface{})["raw_key"]
-		req = append(req, outMap)
+    }
+  <% end -%>
 	}
 	return req, nil
 }

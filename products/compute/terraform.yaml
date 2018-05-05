@@ -73,8 +73,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         type: templates/terraform/self_link_to_name.erb
       custom_expand:
         diskEncryptionKey: templates/terraform/encryption_key_expand.erb
+        sourceImageEncryptionKey: templates/terraform/encryption_key_expand.erb
+        sourceSnapshotEncryptionKey: templates/terraform/encryption_key_expand.erb
       decoder:
         diskEncryptionKey: templates/terraform/encryption_key_decoder.erb
+        sourceImageEncryptionKey: templates/terraform/encryption_key_decoder.erb
+        sourceSnapshotEncryptionKey: templates/terraform/encryption_key_decoder.erb
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
