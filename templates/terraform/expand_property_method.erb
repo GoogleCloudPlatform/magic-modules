@@ -36,13 +36,19 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     transformed := make(map[string]interface{})
 
     <% nested_properties.each do |prop| -%>
-      transformed["<%= prop.name -%>"] =
-      expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"])
+      transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+      if err != nil {
+        return nil, err
+      }
+      transformed["<%= prop.name -%>"] = transformed<%= titlelize_property(prop) -%>
+
     <% end -%>
 
     req = append(req, transformed)
   }
   return req, nil
+}
+
   <% nested_properties.each do |prop| -%>
     <%= lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
@@ -57,6 +63,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     req = append(req, f.RelativeLink())
   }
   return req, nil
+}
 <% else -%>
   <% if property.is_a?(Api::Type::ResourceRef) -%>
   f, err := <%= build_expand_resource_ref('v.(string)', property) %>
@@ -64,11 +71,13 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
   }
   return f.RelativeLink(), nil
+}
   <% else -%>
   return v, nil
+}
   <% end -%>
 <% end -%>
-}
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+}
 <% end # tf_types.include?(property.class) -%>
