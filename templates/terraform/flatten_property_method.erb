@@ -15,6 +15,9 @@
 <% if tf_types.include?(property.class) -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
+  if v == nil {
+    return nil
+  }
   original := v.(map[string]interface{})
   transformed := make(map[string]interface{})
   <% effective_properties(property.properties).each do |prop| -%>
