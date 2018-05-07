@@ -18,7 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: v1
     base_url: http://myproduct.google.com/api/
-    default: true
 scopes:
   - http://scope-to-my-api/
 objects:
