@@ -17,11 +17,11 @@
 package google
 
 <%
-  resource_name = product_ns + object.name
-  properties = effective_properties(object.all_user_properties)
-  settable_properties = properties.reject(&:output)
-  api_name_lower = String.new(product_ns)
-  api_name_lower[0] = api_name_lower[0].downcase
+	resource_name = product_ns + object.name
+	properties = effective_properties(object.all_user_properties)
+	settable_properties = properties.reject(&:output)
+	api_name_lower = String.new(product_ns)
+	api_name_lower[0] = api_name_lower[0].downcase
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -84,7 +84,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 	obj := map[string]interface{}{
 <% settable_properties.each do |prop| -%>
-  "<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
+	"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
 <% end -%>
 	}
 
@@ -179,14 +179,14 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% properties_by_custom_update(properties).each do |key, props| -%>
 	if <%= props.map { |prop| "d.HasChange(\"#{Google::StringUtils.underscore(prop.name)}\")" }.join ' || ' -%> {
 		<% props.each do |prop| -%>
-      <% if settable_properties.include? prop -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
+			<% if settable_properties.include? prop -%>
+				<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
 			if err != nil {
 				return err
 			}
-      <% else -%>
+			<% else -%>
 			<%= prop.api_name -%>Prop := d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")
-      <% end -%>
+			<% end -%>
 		<% end -%>
 
 		obj = map[string]interface{}{
