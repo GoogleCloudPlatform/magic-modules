@@ -14,7 +14,10 @@
 --- !ruby/object:Api::Product
 name: Google Container Engine
 prefix: gcontainer
-base_url: https://container.googleapis.com/v1/
+versions:
+  - !ruby/object:Api::Product::Version
+    name: v1
+    base_url: https://container.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
