@@ -155,8 +155,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
 <% properties.each do |prop| -%>
-  <% if object.custom_code.decoder.key? prop.name -%>
   <% resource_plus_prop = resource_name + titlelize_property(prop) -%>
+  <% if object.custom_code.decoder.key? prop.name -%>
   if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_plus_prop -%>(customDecoder<%= resource_plus_prop -%>(res["<%= prop.api_name -%>"], d, config))); err != nil {
   <% else -%>
 	if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_plus_prop -%>(res["<%= prop.api_name -%>"])); err != nil {
