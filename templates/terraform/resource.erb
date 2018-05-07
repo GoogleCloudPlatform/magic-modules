@@ -154,13 +154,14 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
+<% if object.custom_code.decoder -%>
+  res, err = <%= resource_name -%>Decoder(d, meta, res)
+  if err != nil {
+    return err
+  }
+<% end -%>
 <% properties.each do |prop| -%>
-  <% resource_plus_prop = resource_name + titlelize_property(prop) -%>
-  <% if object.custom_code.decoder.key? prop.name -%>
-  if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_plus_prop -%>(customDecoder<%= resource_plus_prop -%>(res["<%= prop.api_name -%>"], d, config))); err != nil {
-  <% else -%>
-	if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_plus_prop -%>(res["<%= prop.api_name -%>"])); err != nil {
-  <% end -%>
+  if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
 <% end -%>
@@ -336,7 +337,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
   <%= lines(compile(object.custom_code.custom_import)) -%>
 <% else -%>
 	config := meta.(*Config)
-	parseImportId([]string{<%= '"' + import_id_formats(object).map{|s| format2regex s}.join('","') + '"' -%>}, d, config)
+	parseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.join('","') -%>"}, d, config)
 
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "<%= object.id_format -%>")
@@ -351,33 +352,11 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 }
 
 <% properties.each do |prop| -%>
-  <% if object.custom_code.custom_flatten.key? prop.name -%>
-<%= lines(compile_template(object.custom_code.custom_flatten[prop.name],
-                           prefix: resource_name,
-                           prop: prop)) -%>
-  <% else -%>
-<%= lines(build_flatten_method(resource_name, prop), 1) -%>
-  <% end -%>
+<%= lines(build_flatten_method(resource_name, prop, object.custom_code), 1) -%>
 <% end -%>
 
 <% settable_properties.each do |prop| -%>
-  <% if object.custom_code.custom_expand.key? prop.name -%>
-  <%= lines(compile_template(object.custom_code.custom_expand[prop.name],
-                             prefix: resource_name,
-                             prop: prop))-%>
-  <% else -%>
-<%= lines(build_expand_method(resource_name, prop), 1) -%>
-  <% end -%>
-<% end -%>
-
-<% properties.each do |prop| -%>
-  <% if object.custom_code.decoder.key? prop.name -%>
-func customDecoder<%= resource_name -%><%= titlelize_property(prop) -%>(v interface{}, d *schema.ResourceData, config *Config) interface{} {
-    <%= lines(compile_template(object.custom_code.decoder[prop.name],
-                               prefix: resource_name,
-                               prop: prop)) -%>
-}
-  <% end -%>
+<%= lines(build_expand_method(resource_name, prop, object.custom_code), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>
@@ -389,5 +368,11 @@ func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface
 <% if object.custom_code.update_encoder-%>
 func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
   <%= lines(compile(object.custom_code.update_encoder)) -%>
+}
+<% end -%>
+
+<% if object.custom_code.decoder -%>
+func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+  <%= lines(compile(object.custom_code.decoder)) -%>
 }
 <% end -%>

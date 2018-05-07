@@ -57,13 +57,8 @@ module Provider
       attr_reader :update_encoder
       # The decoder is the opposite of the encoder - it's called
       # after the Read succeeds, rather than before Create / Update
-      # are called.  There can be many decoders - the decoder
-      # attribute is a hash from attribute name to function.  A
-      # decoder is very much like a flattener, except with access to
-      # the ResourceData and Config objects.  Like with encoders,
-      # the decoder should not include the function header or closing }.
-      # It has access to `prop` - a variable containing the property
-      # being decoded - to promote sharing of common decoders.
+      # are called.  Like with encoders, the decoder should not
+      # include the function header or closing }.
       attr_reader :decoder
 
       # =====================
@@ -108,7 +103,9 @@ module Provider
       # properties can be updated.  property_update is a hash from
       # attribute name to custom code template.  This code is placed
       # *inline* in the obj := { ... } definition - it is not a custom
-      # function, it is a custom statement.
+      # function, it is a custom statement.  Note that this cannot
+      # be used for nested properties, as they are not present in the
+      # obj := {...} statement.
       attr_reader :property_update
       # A custom flattener replaces the default flattener for an attribute.
       # It is called as part of Read.  It can return an object of any
@@ -129,7 +126,6 @@ module Provider
       def validate
         super
 
-        @decoder ||= {}
         @property_update ||= {}
         @custom_flatten ||= {}
         @custom_expand ||= {}
@@ -138,7 +134,7 @@ module Provider
         check_optional_property :resource_definition, String
         check_optional_property :encoder, String
         check_optional_property :update_encoder, String
-        check_optional_property :decoder, Hash
+        check_optional_property :decoder, String
         check_optional_property :constants, String
         check_optional_property :post_create, String
         check_optional_property :pre_update, String
