@@ -129,27 +129,26 @@ module Provider
       def validate
         super
 
+        @decoder ||= {}
+        @property_update ||= {}
         @custom_flatten ||= {}
         @custom_expand ||= {}
-        @property_schema ||= {}
-        @property_update ||= {}
-        @decoder ||= {}
 
-        check_optional_property :constants, String
         check_optional_property :extra_schema_entry, String
         check_optional_property :resource_definition, String
         check_optional_property :encoder, String
-        check_optional_property :post_create, String
         check_optional_property :update_encoder, String
+        check_optional_property :decoder, Hash
+        check_optional_property :constants, String
+        check_optional_property :post_create, String
         check_optional_property :pre_update, String
         check_optional_property :post_update, String
-        check_optional_property :property_update, Hash
         check_optional_property :pre_delete, String
         check_optional_property :custom_import, String
         check_optional_property :post_import, String
+        check_optional_property :property_update, Hash
         check_optional_property :custom_flatten, Hash
         check_optional_property :custom_expand, Hash
-        check_optional_property :decoder, Hash
       end
       # rubocop:enable Metrics/MethodLength
     end
