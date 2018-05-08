@@ -345,7 +345,7 @@ module Api
 
     # An structured object composed of other objects.
     class NestedObject < Composite
-      attr_reader :properties
+      # A custom getter is used for :properties instead of `attr_reader`
 
       def validate
         @description = 'A nested object resource' if @description.nil?
