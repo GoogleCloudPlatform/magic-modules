@@ -204,8 +204,8 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
 		obj := map[string]interface{}{
 		<% props.each do |prop| -%>
-      <% if object.custom_code.property_update.key? prop.name -%>
-        <%= prop.api_name -%>": <%= compile(object.custom_code.property_update[prop.name]) -%>
+      <% if prop.property_update -%>
+        <%= prop.api_name -%>": <%= compile(prop.property_update) -%>
       <% else -%>
 			"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
       <% end -%>

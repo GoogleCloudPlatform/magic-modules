@@ -26,6 +26,33 @@ module Provider
       attr_reader :default
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
       attr_reader :validation # Adds a ValidateFunc to the schema
+
+      # ===========
+      # Custom code
+      # ===========
+      # Property Updates are used when a resource is updateable but
+      # resource.input is true.  In this case, only individual
+      # properties can be updated.  The value of this attribute should
+      # be the path to a template which will be compiled. This code is placed
+      # *inline* in the obj := { ... } definition - it is not a custom
+      # function, it is a custom statement.  Note that this cannot
+      # be used for nested properties, as they are not present in the
+      # obj := {...} statement.
+      attr_reader :property_update
+      # A custom flattener replaces the default flattener for an attribute.
+      # It is called as part of Read.  It can return an object of any
+      # type, and may sometimes need to return an object with non-interface{}
+      # type so that the d.Set() call will succeed, so the function
+      # header *is* a part of the custom code template.  To help with
+      # creating the function header, `prop` and `prefix` are available,
+      # just as they are in the standard flattener template.
+      attr_reader :custom_flatten
+      # A custom expander replaces the default expander for an attribute.
+      # It is called as part of Create, and as part of Update if
+      # object.input is false.  It can return an object of any type,
+      # so the function header *is* part of the custom code template.
+      # As with flatten, `prop` and `prefix` are available.
+      attr_reader :custom_expand
     end
 
     # Support for schema ValidateFunc functionality.
@@ -63,6 +90,10 @@ module Provider
 
         raise "'value' and 'from_api' cannot be both set for 'default'"  \
           if from_api && !value.nil?
+
+        check_optional_property :property_update, String
+        check_optional_property :custom_flatten, String
+        check_optional_property :custom_expand, String
       end
 
       def apply(api_property)

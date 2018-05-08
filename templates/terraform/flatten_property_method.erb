@@ -12,8 +12,8 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 <% end -%>
-<% if custom_code.custom_flatten.key? property.name -%>
-<%= lines(compile_template(custom_code.custom_flatten[property.name],
+<% if property.custom_flatten -%>
+<%= lines(compile_template(property.custom_flatten,
                            prefix: resource_name,
                            property: property)) -%>
 <% else -%>
