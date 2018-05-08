@@ -20,7 +20,6 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
-      attr_reader :exclude # TODO(rosbo): Consider moving this to base
       attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
       attr_reader :state_func # Adds a StateFunc to the schema
       attr_reader :default
@@ -97,12 +96,10 @@ module Provider
         super
 
         # Ensures boolean values are set to false if nil
-        @exclude ||= false
         @sensitive ||= false
 
         @default ||= Provider::Terraform::Default.new
 
-        check_property :exclude, :boolean
         check_property :sensitive, :boolean
         check_property :default, Provider::Terraform::Default
 

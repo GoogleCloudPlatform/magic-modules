@@ -98,20 +98,14 @@ module Provider
       p
     end
 
-    # Returns the resource properties without those ignored.
-    def effective_properties(properties)
-      properties.reject(&:exclude)
-    end
-
-    # Returns the nested properties without those ignored. An empty list is
-    # returned if the property is not a NestedObject or an Array of
-    # NestedObjects.
-    def effective_nested_properties(property)
+    # Returns the nested properties. An empty list is returned if the property
+    # is not a NestedObject or an Array of NestedObjects.
+    def nested_properties(property)
       if property.is_a?(Api::Type::NestedObject)
-        effective_properties(property.properties)
+        property.properties
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
-        effective_properties(property.item_type.properties)
+        property.item_type.properties
       else
         []
       end
