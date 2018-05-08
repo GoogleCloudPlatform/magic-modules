@@ -356,8 +356,6 @@ module Api
           p.set_variable(self, :__parent)
         end
         check_property_list :properties, Api::Type
-
-        @properties = @properties.reject(&:exclude)
       end
 
       def property_class
@@ -379,6 +377,10 @@ module Api
 
       def requires
         [property_file].concat(properties.map(&:requires))
+      end
+
+      def properties
+        @properties.reject(&:exclude)
       end
     end
 
