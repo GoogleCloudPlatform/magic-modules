@@ -379,6 +379,12 @@ module Api
         [property_file].concat(properties.map(&:requires))
       end
 
+      # Returns all properties including the ones that are excluded
+      # This is used for PropertyOverride validation
+      def all_properties
+        @properties
+      end
+
       def properties
         @properties.reject(&:exclude)
       end

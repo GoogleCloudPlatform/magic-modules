@@ -137,12 +137,12 @@ module Provider
 
     def get_properties(api_entity)
       if api_entity.is_a?(Api::Resource)
-        api_entity.all_user_properties
+        api_entity.all_properties
       elsif api_entity.is_a?(Api::Type::NestedObject)
-        api_entity.properties
+        api_entity.all_properties
       elsif api_entity.is_a?(Api::Type::Array) &&
             api_entity.item_type.is_a?(Api::Type::NestedObject)
-        api_entity.item_type.properties
+        api_entity.item_type.all_properties
       end
     end
 
