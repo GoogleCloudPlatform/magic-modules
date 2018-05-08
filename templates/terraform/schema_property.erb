@@ -55,7 +55,7 @@
   MaxItems: 1,
   Elem: &schema.Resource{
     Schema: map[string]*schema.Schema{
-      <% order_properties(effective_properties(property.properties)).each do |prop| -%>
+      <% order_properties(property.properties).each do |prop| -%>
         <%= lines(build_schema_property(prop, object)) -%>
       <% end -%>
     },
@@ -67,7 +67,7 @@
   <% if property.item_type.is_a?(Api::Type::NestedObject) -%>
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
-          <% order_properties(effective_properties(property.item_type.properties)).each do |prop| -%>
+          <% order_properties(property.item_type.properties).each do |prop| -%>
             <%= lines(build_schema_property(prop, object)) -%>
           <% end -%>
         },

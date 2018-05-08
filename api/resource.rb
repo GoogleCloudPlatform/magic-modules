@@ -250,7 +250,7 @@ module Api
     # rubocop:enable Metrics/MethodLength
 
     def all_user_properties
-      (properties || []) + (parameters || [])
+      ((properties || []) + (parameters || [])).reject(&:exclude)
     end
 
     def required_properties
