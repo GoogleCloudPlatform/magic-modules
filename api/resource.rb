@@ -249,8 +249,14 @@ module Api
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
 
+    # Returns all properties and parameters including the ones that are
+    # excluded. This is used for PropertyOverride validation
+    def all_properties
+      ((properties || []) + (parameters || []))
+    end
+
     def all_user_properties
-      ((properties || []) + (parameters || [])).reject(&:exclude)
+      all_properties.reject(&:exclude)
     end
 
     def required_properties

@@ -2076,6 +2076,7 @@ objects:
         required: true
   - !ruby/object:Api::Resource
     name: 'Network'
+    exclude: true
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
     exports:
