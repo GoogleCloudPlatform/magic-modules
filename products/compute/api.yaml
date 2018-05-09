@@ -2506,6 +2506,7 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     exclude: true
     kind: 'compute#sslPolicy'
     base_url: projects/{project}/global/sslPolicies
@@ -2822,6 +2823,7 @@ objects:
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
+        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
         exclude: true
         resource: 'SslPolicy'
         imports: 'selfLink'
