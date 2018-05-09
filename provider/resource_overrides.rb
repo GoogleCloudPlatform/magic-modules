@@ -112,8 +112,8 @@ module Provider
                              property_override, Provider::PropertyOverride
         api_property = find_property api_object, property_path.split('.')
         if api_property.nil?
-          raise "The property to override must exists #{property_path} " \
-                "in resource #{api_object.name}"
+          raise "The property to override '#{property_path}' must exist in " \
+                "resource #{api_object.name}"
         end
         property_override.apply api_property
       end
@@ -158,6 +158,19 @@ module Provider
       api_entity.all_user_properties.each do |prop|
         override.properties[prop.name] = @__config.property_override.new \
           unless override.properties.include?(prop.name)
+        populate_nonoverriden_nested_properties prop.name, prop, override
+      end
+    end
+
+    def populate_nonoverriden_nested_properties(prefix, property, override)
+      nested_properties = get_properties(property)
+      return if nested_properties.nil?
+
+      nested_properties.each do |nested_prop|
+        key = "#{prefix}.#{nested_prop.name}"
+        override.properties[key] = @__config.property_override.new \
+          unless override.properties.include?(key)
+        populate_nonoverriden_nested_properties key, nested_prop, override
       end
     end
   end
