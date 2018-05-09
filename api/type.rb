@@ -286,7 +286,7 @@ module Api
         @name = @resource if @name.nil?
         @description = "A reference to #{@resource} resource"
 
-        return if @__resource.nil? || @__resource.exclude
+        return if @__resource.nil? || @__resource.exclude || @exclude
 
         check_property :resource, ::String
         check_property :imports, ::String
