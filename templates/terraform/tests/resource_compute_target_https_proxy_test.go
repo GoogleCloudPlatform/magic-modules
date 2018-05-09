@@ -156,7 +156,7 @@ resource "google_compute_target_https_proxy" "foobar" {
 	name = "httpsproxy-test-%s"
 	url_map = "${google_compute_url_map.foobar.self_link}"
 	ssl_certificates = ["${google_compute_ssl_certificate.foobar1.self_link}"]
-	ssl_policy = "${google_compute_ssl_policy.foobar.self_link}" 
+	ssl_policy = "${google_compute_ssl_policy.foobar.self_link}"
 }
 
 resource "google_compute_backend_service" "foobar" {

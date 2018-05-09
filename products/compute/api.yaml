@@ -2506,6 +2506,7 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
+    exclude: true
     kind: 'compute#sslPolicy'
     base_url: projects/{project}/global/sslPolicies
     exports:
@@ -2821,6 +2822,7 @@ objects:
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
+        exclude: true
         resource: 'SslPolicy'
         imports: 'selfLink'
         description: |
