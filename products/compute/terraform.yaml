@@ -317,6 +317,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
+      sslPolicy: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
