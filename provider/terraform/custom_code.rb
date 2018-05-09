@@ -22,6 +22,10 @@ module Provider
       # Collection of fields allowed in the CustomCode section for
       # Terraform.
 
+      # All custom code attributes are string-typed.  The string should
+      # be the name of a template file which will be compiled in the
+      # specified / described place.
+      #
       # ======================
       # schema.Resource stuff
       # ======================

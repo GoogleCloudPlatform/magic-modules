@@ -25,20 +25,18 @@ module Provider
 
       # Transforms a Cloud API representation of a property into a Terraform
       # schema representation.
-      def build_flatten_method(prefix, property, custom_code)
+      def build_flatten_method(prefix, property)
         compile_template 'templates/terraform/flatten_property_method.erb',
                          prefix: prefix,
-                         property: property,
-                         custom_code: custom_code
+                         property: property
       end
 
       # Transforms a Terraform schema representation of a property into a
       # representation used by the Cloud API.
-      def build_expand_method(prefix, property, custom_code)
+      def build_expand_method(prefix, property)
         compile_template 'templates/terraform/expand_property_method.erb',
                          prefix: prefix,
-                         property: property,
-                         custom_code: custom_code
+                         property: property
       end
 
       def build_expand_resource_ref(var_name, property)

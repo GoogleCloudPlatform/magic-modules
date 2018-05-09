@@ -204,8 +204,10 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
 		obj := map[string]interface{}{
 		<% props.each do |prop| -%>
-      <% if prop.property_update -%>
-        <%= prop.api_name -%>": <%= compile(prop.property_update) -%>
+      <% if prop.update_statement -%>
+        <%= prop.api_name -%>": <%= compile_template(prop.update_statement,
+                                                     prefix: resource_name,
+                                                     property: prop) -%>
       <% else -%>
 			"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
       <% end -%>
@@ -352,11 +354,11 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 }
 
 <% properties.each do |prop| -%>
-<%= lines(build_flatten_method(resource_name, prop, object.custom_code), 1) -%>
+<%= lines(build_flatten_method(resource_name, prop), 1) -%>
 <% end -%>
 
 <% settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop, object.custom_code), 1) -%>
+<%= lines(build_expand_method(resource_name, prop), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>
