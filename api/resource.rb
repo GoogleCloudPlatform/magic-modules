@@ -47,10 +47,10 @@ module Api
     include Properties
 
     # Parameters can be overridden via Provider::PropertyOverride
-    attr_reader :parameters
+    # A custom getter is used for :parameters instead of `attr_reader`
 
     # Properties can be overridden via Provider::PropertyOverride
-    attr_reader :properties
+    # A custom getter is used for :properties instead of `attr_reader`
 
     attr_reader :__product
 
@@ -249,14 +249,22 @@ module Api
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
 
+    def properties
+      (@properties || []).reject(&:exclude)
+    end
+
+    def parameters
+      (@parameters || []).reject(&:exclude)
+    end
+
     # Returns all properties and parameters including the ones that are
     # excluded. This is used for PropertyOverride validation
     def all_properties
-      ((properties || []) + (parameters || []))
+      ((@properties || []) + (@parameters || []))
     end
 
     def all_user_properties
-      all_properties.reject(&:exclude)
+      properties + parameters
     end
 
     def required_properties
