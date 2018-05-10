@@ -321,6 +321,38 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: false
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_target_pool" "default" {
+        name = "instance-pool"
+
+        instances = [
+          "us-central1-a/myinstance1",
+          "us-central1-b/myinstance2",
+        ]
+
+        health_checks = [
+          "${google_compute_http_health_check.default.name}",
+        ]
+      }
+
+      resource "google_compute_http_health_check" "default" {
+        name               = "default"
+        request_path       = "/"
+        check_interval_sec = 1
+        timeout_sec        = 1
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+      sessionAffinity: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :NONE
+      # TODO: Custom code needed for updating `instances` and `healthCheck`.
+      #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -481,8 +513,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-  TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
