@@ -11,15 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module Presubmit
-  # Mocked out module + factory for testing
-  class MockedModule < Presubmit::Module
-    class Factory < Presubmit::Module::Factory
-      def create
-        mock = MockedModule.new
-        mock.add_tests(@testers.map { |x| x.new(mock) })
-        mock
-      end
-    end
-  end
-end
+--- !ruby/object:Provider::Puppet::Config
+objects: !ruby/object:Api::Resource::HashArray
+  MyResource:
+    flush: |
+      raise 'DNS Managed Zone cannot be edited' if @dirty

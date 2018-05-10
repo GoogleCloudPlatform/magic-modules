@@ -10,18 +10,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Mask the fact healthChecks array is actually a single object of type
+# HttpHealthCheck.
 
-require 'rspec'
+def encode_request(request, module):
+    if 'metadata' in request:
+        if 'properties' in request['metadata']:
+            request['metadata']['properties'] = metadata_encoder(request['metadata']['properties'])
+    return request
 
-# Require all of the presubmit files.
-my_dir = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-$LOAD_PATH.unshift(my_dir)
 
-%w[lib spec].each do |subsystem|
-  Dir[File.join(my_dir, subsystem, '*.rb')].reject { |p| File.directory? p }
-                                           .each do |f|
-    puts "Auto requiring #{f}" \
-      if ENV['RSPEC_DEBUG']
-    require f
-  end
-end
+def decode_response(response, module):
+    if 'metadata' in response:
+        if 'properties' in response['metadata']:
+            response['metadata']['properties'] = metadata_encoder(response['metadata']['properties'])
+    return response

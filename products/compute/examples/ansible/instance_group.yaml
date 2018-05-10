@@ -20,7 +20,6 @@ dependencies:
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
-
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_instance_group
   code: |

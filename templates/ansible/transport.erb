@@ -36,6 +36,7 @@ def fetch_wrapped_resource(module, kind, wrap_kind, wrap_path):
         return None
 
     if result['kind'] != kind:
-        raise "Incorrect result: {0} (expected {1})".format(result['kind'], kind)
+        module.fail_json(msg="Incorrect result: {kind}".format(**result))
+
     return result
 <% end -%>

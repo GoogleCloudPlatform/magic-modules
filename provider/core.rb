@@ -174,6 +174,7 @@ module Provider
     end
 
     # rubocop:disable Metrics/MethodLength
+    # rubocop:disable Metrics/AbcSize
     def compile_file_list(output_folder, files, data = {})
       files.each do |target, source|
         Google::LOGGER.info "Compiling #{source} => #{target}"
@@ -201,12 +202,11 @@ module Provider
           )
         )
 
-        if File.extname(target_file) == '.go'
-          %x(goimports -w #{target_file})
-        end
+        %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
       end
     end
     # rubocop:enable Metrics/MethodLength
+    # rubocop:enable Metrics/AbcSize
 
     def generate_objects(output_folder, types)
       @api.objects.each do |object|
@@ -350,17 +350,19 @@ module Provider
     end
 
     def async_operation_url(resource)
-      build_url(resource.__product.base_url, resource.async.operation.base_url,
+      build_url(resource.__product.default_version.base_url,
+                resource.async.operation.base_url,
                 true)
     end
 
     def collection_url(resource)
       base_url = resource.base_url.split("\n").map(&:strip).compact
-      build_url(resource.__product.base_url, base_url)
+      build_url(resource.__product.default_version.base_url, base_url)
     end
 
     def self_link_raw_url(resource)
-      base_url = resource.__product.base_url.split("\n").map(&:strip).compact
+      base_url = resource.__product.default_version.base_url
+                         .split("\n").map(&:strip).compact
       if resource.self_link.nil?
         [base_url, [resource.base_url, '{{name}}'].join('/')]
       else

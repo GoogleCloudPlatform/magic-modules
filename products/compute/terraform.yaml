@@ -260,10 +260,65 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
   TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_target_https_proxy" "default" {
+        name             = "test-proxy"
+        description      = "a description"
+        url_map          = "${google_compute_url_map.default.self_link}"
+        ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
+      }
+
+      resource "google_compute_ssl_certificate" "default" {
+        name        = "my-certificate"
+        description = "a description"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+      }
+
+      resource "google_compute_url_map" "default" {
+        name        = "url-map"
+        description = "a description"
+
+        default_service = "${google_compute_backend_service.default.self_link}"
+
+        host_rule {
+          hosts        = ["mysite.com"]
+          path_matcher = "allpaths"
+        }
+
+        path_matcher {
+          name            = "allpaths"
+          default_service = "${google_compute_backend_service.default.self_link}"
+
+          path_rule {
+            paths   = ["/*"]
+            service = "${google_compute_backend_service.default.self_link}"
+          }
+        }
+      }
+
+      resource "google_compute_backend_service" "default" {
+        name        = "default-backend"
+        port_name   = "http"
+        protocol    = "HTTP"
+        timeout_sec = 10
+
+        health_checks = ["${google_compute_http_health_check.default.self_link}"]
+      }
+
+      resource "google_compute_http_health_check" "default" {
+        name               = "test"
+        request_path       = "/"
+        check_interval_sec = 1
+        timeout_sec        = 1
+      }
+      ```
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
+      sslPolicy: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
@@ -305,10 +360,44 @@ overrides: !ruby/object:Provider::ResourceOverrides
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
   TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_target_tcp_proxy" "default" {
+        name = "test"
+        description = "test"
+        backend_service = "${google_compute_backend_service.default.self_link}"
+      }
+
+      resource "google_compute_backend_service" "default" {
+        name        = "default-backend"
+        protocol    = "TCP"
+        timeout_sec = 10
+
+        health_checks = ["${google_compute_health_check.default.self_link}"]
+      }
+
+      resource "google_compute_health_check" "default" {
+        name = "default"
+        timeout_sec        = 1
+        check_interval_sec = 1
+
+        tcp_health_check {
+          port = "443"
+        }
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: proxyId
+      service: !ruby/object:Provider::Terraform::PropertyOverride
+        name: backendService
+      proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
-    exclude: false
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/156): Re-enable code generation for this resource
+    exclude: true
     examples: |
       ```hcl
       resource "google_compute_network" "network1" {
@@ -410,6 +499,8 @@ files: !ruby/object:Provider::Config::Files
     # Adding them here allows updating the tests as part of a MM pull request.
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
+    'google/resource_compute_target_https_proxy_test.go':
+      'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:

@@ -56,7 +56,8 @@ module Provider
         'Api::Type::NestedObject' => 'dict',
         'Api::Type::Array' => 'list',
         'Api::Type::Boolean' => 'bool',
-        'Api::Type::Integer' => 'int'
+        'Api::Type::Integer' => 'int',
+        'Api::Type::NameValues' => 'dict'
       }.freeze
 
       include Provider::Ansible::Documentation
@@ -97,14 +98,15 @@ module Provider
 
       def collection_url(resource)
         base_url = resource.base_url.split("\n").map(&:strip).compact
-        full_url = [resource.__product.base_url, base_url].flatten.join
+        full_url = [resource.__product.default_version.base_url,
+                    base_url].flatten.join
         # Double {} replaced with single {} to support Python string
         # interpolation
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       def async_operation_url(resource)
-        base_url = resource.__product.base_url
+        base_url = resource.__product.default_version.base_url
         url = [base_url, resource.async.operation.base_url].join
         "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
@@ -133,10 +135,18 @@ module Provider
       # * extra_data is a dict of extra information.
       # * extra_url will have a URL chunk to be appended after the URL.
       # rubocop:disable Metrics/MethodLength
-      def emit_link(name, url, extra_data = false)
-        params = emit_link_var_args(url, extra_data)
+      # rubocop:disable Metrics/AbcSize
+      def emit_link(name, url, object, has_extra_data = false)
+        params = emit_link_var_args(url, has_extra_data)
         extra = (' + extra_url' if url.include?('<|extra|>')) || ''
-        if extra_data
+        if rrefs_in_link(url, object)
+          url_code = "#{url}.format(**res)#{extra}"
+          [
+            "def #{name}(#{params.join(', ')}):",
+            indent("res = #{resourceref_hash_for_links(url, object)}", 4),
+            indent("return #{url_code}", 4).gsub('<|extra|>', '')
+          ].join("\n")
+        elsif has_extra_data
           [
             "def #{name}(#{params.join(', ')}):",
             indent([
@@ -159,6 +169,40 @@ module Provider
         end
       end
       # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
+
+      def rrefs_in_link(link, object)
+        props_in_link = link.scan(/{([a-z_]*)}/).flatten
+        (object.parameters || []).select do |p|
+          props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
+            p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.virtual
+        end.any?
+      end
+
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
+      def resourceref_hash_for_links(link, object)
+        props_in_link = link.scan(/{([a-z_]*)}/).flatten
+        props = props_in_link.map do |p|
+          # Select a resourceref if it exists.
+          rref = (object.parameters || []).select do |prop|
+            Google::StringUtils.underscore(prop.name) == p && \
+              prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.virtual
+          end
+          if rref.any?
+            [
+              "#{quote_string(p)}:",
+              "replace_resource_dict(module.params[#{quote_string(p)}],",
+              "#{quote_string(rref[0].imports)})"
+            ].join(' ')
+          else
+            "#{quote_string(p)}: module.params[#{quote_string(p)}]"
+          end
+        end
+        ['{', indent_list(props, 4), '}'].join("\n")
+      end
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       def emit_link_var_args(url, extra_data)
         extra_url = url.include?('<|extra|>')

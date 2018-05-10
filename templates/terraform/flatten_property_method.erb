@@ -12,12 +12,20 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 <% end -%>
+<% if property.custom_flatten -%>
+<%= lines(compile_template(property.custom_flatten,
+                           prefix: resource_name,
+                           property: property)) -%>
+<% else -%>
 <% if tf_types.include?(property.class) -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
+  if v == nil {
+    return nil
+  }
   original := v.(map[string]interface{})
   transformed := make(map[string]interface{})
-  <% effective_properties(property.properties).each do |prop| -%>
+  <% property.properties.each do |prop| -%>
     transformed["<%= Google::StringUtils.underscore(prop.name) -%>"] =
     flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name -%>"])
   <% end -%>
@@ -28,7 +36,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   for _, raw := range l {
     original := raw.(map[string]interface{})
     transformed = append(transformed, map[string]interface{}{
-    <% effective_properties(property.item_type.properties).each do |prop| -%>
+    <% property.item_type.properties.each do |prop| -%>
       "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name -%>"]),
     <% end -%>
     })
@@ -37,7 +45,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
 <% elsif property.is_a?(Api::Type::Integer) -%>
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
-		if intVal, err := strconv.Atoi(strVal); err == nil {
+		if intVal, err := strconv.ParseInt(strVal, 10, 64); err == nil {
 			return intVal
 		} // let terraform core handle it if we can't convert the string to an int.
 	}
@@ -46,11 +54,12 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
 }
-<% if !effective_nested_properties(property).empty? -%>
-  <% effective_nested_properties(property).each do |prop| -%>
+<% if !nested_properties(property).empty? -%>
+  <% nested_properties(property).each do |prop| -%>
     <%= lines(build_flatten_method(prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% end -%>
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 <% end # tf_types.include?(property.class) -%>
+<% end # custom code check -%>

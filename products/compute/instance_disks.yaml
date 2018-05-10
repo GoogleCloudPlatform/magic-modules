@@ -85,7 +85,6 @@
           parameters to create boot disks or local SSDs attached to
           the new instance.
         input: true
-        required: true
         properties:
           - !ruby/object:Api::Type::String
             name: 'diskName'

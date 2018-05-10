@@ -10,18 +10,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Mask the fact healthChecks array is actually a single object of type
+# HttpHealthCheck.
 
-module Presubmit
-  # An class to run a app full of tests.
-  class App
-    def initialize(testers, modules)
-      @testers = testers
-      @modules = modules
-    end
+def encode_request(request, module):
+    if 'metadata' in request:
+        request['metadata'] = metadata_encoder(request['metadata'])
+    return request
 
-    # Run all tests and return the results.
-    def run
-      Hash[@modules.map { |mod| [mod, mod.run] }]
-    end
-  end
-end
+
+def decode_response(response, module):
+    if 'metadata' in response:
+        response['metadata'] = metadata_decoder(response['metadata'])
+    return response

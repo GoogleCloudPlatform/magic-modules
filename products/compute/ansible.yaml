@@ -25,19 +25,126 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 overrides: !ruby/object:Provider::ResourceOverrides
-  Firewall: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+  BackendService: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
+  Disk: !ruby/object:Provider::Ansible::ResourceOverride
+    editable: false
+  ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
+        description: |
+          The IP address that this forwarding rule is serving on behalf of.
+
+          Addresses are restricted based on the forwarding rule's load balancing
+          scheme (EXTERNAL or INTERNAL) and scope (global or regional).
+
+          When the load balancing scheme is EXTERNAL, for global forwarding
+          rules, the address must be a global IP, and for regional forwarding
+          rules, the address must live in the same region as the forwarding
+          rule. If this field is empty, an ephemeral IPv4 address from the same
+          scope (global or regional) will be assigned. A regional forwarding
+          rule supports IPv4 only. A global forwarding rule supports either IPv4
+          or IPv6.
+
+          When the load balancing scheme is INTERNAL, this can only be an RFC
+          1918 IP address belonging to the network/subnet configured for the
+          forwarding rule. By default, if this field is empty, an ephemeral
+          internal IP address will be automatically allocated from the IP range
+          of the subnet or network configured for this forwarding rule.
+
+          An address can be specified either by a literal IP address or a URL
+          reference to an existing Address resource. The following examples are
+          all valid:
+
+          * 100.1.2.3
+          * https://www.googleapis.com/compute/v1/projects/project/regions/region/addresses/address
+          * projects/project/regions/region/addresses/address
+          * regions/region/addresses/address
+          * global/addresses/address
+          * address
+  GlobalForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
+        description: |
+          The IP address that this forwarding rule is serving on behalf of.
+
+          Addresses are restricted based on the forwarding rule's load balancing
+          scheme (EXTERNAL or INTERNAL) and scope (global or regional).
+
+          When the load balancing scheme is EXTERNAL, for global forwarding
+          rules, the address must be a global IP, and for regional forwarding
+          rules, the address must live in the same region as the forwarding
+          rule. If this field is empty, an ephemeral IPv4 address from the same
+          scope (global or regional) will be assigned. A regional forwarding
+          rule supports IPv4 only. A global forwarding rule supports either IPv4
+          or IPv6.
+
+          When the load balancing scheme is INTERNAL, this can only be an RFC
+          1918 IP address belonging to the network/subnet configured for the
+          forwarding rule. By default, if this field is empty, an ephemeral
+          internal IP address will be automatically allocated from the IP range
+          of the subnet or network configured for this forwarding rule.
+
+          An address can be specified either by a literal IP address or a URL
+          reference to an existing Address resource. The following examples are
+          all valid:
+
+          * 100.1.2.3
+          * https://www.googleapis.com/compute/v1/projects/project/regions/region/addresses/address
+          * projects/project/regions/region/addresses/address
+          * regions/region/addresses/address
+          * global/addresses/address
+          * address
+  HealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
+  HttpHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
+      checkIntervalSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - check_interval_seconds
+  HttpsHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
+        aliases:
+          - timeout_seconds
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
-  InstanceGroupManager: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    provider_helpers:
+      - 'products/compute/helpers/provider_instance.py'
+      - 'products/compute/helpers/instance_metadata.py'
+  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    editable: false
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    provider_helpers:
+      - 'products/compute/helpers/provider_instance.py'
+      - 'products/compute/helpers/instance_metadata.py'
+  Route: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      nextHopGateway: !ruby/object:Provider::Ansible::PropertyOverride
+        description: |
+          URL to a gateway that should handle matching packets.
+
+          Currently, you can only specify the internet gateway, using a full or
+          partial valid URL:
+
+          * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
+          * projects/project/global/gateways/default-internet-gateway
+          * global/gateways/default-internet-gateway
+  TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
+    provider_helpers:
+      - 'products/compute/helpers/provider_target_pool.py'
+  # Not yet implemented.
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
-  TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
-  TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
+  TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
@@ -51,33 +158,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
-# TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/47): Migrate objects to overrides
-objects: !ruby/object:Api::Resource::HashArray
-  Disk:
-    editable: false
-  InstanceGroup:
-    editable: false
-  HealthCheck:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-  HttpHealthCheck:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-  HttpsHealthCheck:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
-  TargetPool:
-    provider_helpers:
-      include:
-        - 'products/compute/helpers/provider_target_pool.py'
-  # Not implemented yet.
-  BackendService:
-    aliases:
-      timeoutSec:
-        - timeout_seconds
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:

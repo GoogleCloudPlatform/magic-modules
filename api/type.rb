@@ -23,6 +23,8 @@ module Api
       include Api::Object::Named::Properties
 
       attr_reader :description
+      attr_reader :exclude
+
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation
       attr_reader :field
@@ -40,7 +42,11 @@ module Api
 
     def validate
       super
+      @exclude ||= false
+
       check_property :description, ::String
+      check_property :exclude, :boolean
+
       check_optional_property :output, :boolean
       check_optional_property :field, ::String
       check_optional_property :required, :boolean
@@ -280,7 +286,7 @@ module Api
         @name = @resource if @name.nil?
         @description = "A reference to #{@resource} resource"
 
-        return if @__resource.nil? || @__resource.exclude
+        return if @__resource.nil? || @__resource.exclude || @exclude
 
         check_property :resource, ::String
         check_property :imports, ::String
@@ -339,7 +345,7 @@ module Api
 
     # An structured object composed of other objects.
     class NestedObject < Composite
-      attr_reader :properties
+      # A custom getter is used for :properties instead of `attr_reader`
 
       def validate
         @description = 'A nested object resource' if @description.nil?
@@ -372,6 +378,16 @@ module Api
       def requires
         [property_file].concat(properties.map(&:requires))
       end
+
+      # Returns all properties including the ones that are excluded
+      # This is used for PropertyOverride validation
+      def all_properties
+        @properties
+      end
+
+      def properties
+        @properties.reject(&:exclude)
+      end
     end
 
     # Represents an array of name=value pairs, and stores its items' type
@@ -380,6 +396,7 @@ module Api
       attr_reader :value_type
 
       def validate
+        super
         check_property :key_type, ::String
         check_property :value_type, ::String
         raise "Invalid type #{@key_type}" unless type?(@key_type)

@@ -28,8 +28,10 @@ end
 
 describe Provider::Chef do
   context 'one type generated' do
-    let(:config) { Provider::Config.parse('spec/data/chef-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/chef-config.yaml', product)
+    end
     let(:provider) { Provider::Chef.new(config, product) }
 
     before do
@@ -53,6 +55,7 @@ describe Provider::Chef do
                             imports: 'name',
                             writer: out
                           },
+                          named_prop: 'anotherresource',
                           arrays: [:string_array]
 
       provider.generate 'blah', []
@@ -97,6 +100,7 @@ describe Provider::Chef do
                             imports: 'name',
                             writer: out
                           },
+                          named_prop: 'anotherresource',
                           arrays: [:string_array]
 
       provider.generate 'blah', []
@@ -131,6 +135,7 @@ describe Provider::Chef do
     property_expectations(data)
     output_expectations_libraries(data)
     output_expectations_string_array data
+    output_expectations_named_properties(data)
 
     return unless data[:resourceref]
 
@@ -143,6 +148,18 @@ describe Provider::Chef do
     allow_open_real_network_data(data)
   end
   # rubocop:enable Metrics/AbcSize
+
+  def output_expectations_named_properties(data)
+    return unless data[:named_prop]
+    output_file \
+      ["blah/libraries/google/#{data[:kind][1..-1]}",
+       "property/#{data[:named_prop]}_array_property.rb"].join('/'),
+      dummy_writer
+    output_file \
+      ["blah/libraries/google/#{data[:kind][1..-1]}",
+       "property/#{data[:named_prop]}_nested_property.rb"].join('/'),
+      dummy_writer
+  end
 
   def output_expectations_string_array(data)
     return if data[:arrays].nil? || !data[:arrays].include?(:string_array)
@@ -253,6 +270,7 @@ describe Provider::Chef do
   def allow_open_properties
     allow_read 'templates/chef/property/array.rb.erb'
     allow_read 'templates/chef/property/enum.rb.erb'
+    allow_read 'templates/chef/property/nested_object.rb.erb'
     allow_read 'templates/chef/property/string.rb.erb'
     allow_read 'templates/chef/property/resourceref.rb.erb'
   end

@@ -14,6 +14,7 @@
 require 'provider/abstract_core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
+require 'provider/terraform/custom_code'
 require 'provider/terraform/property_override'
 require 'provider/terraform/resource_override'
 require 'provider/terraform/sub_template'
@@ -71,12 +72,12 @@ module Provider
 
     def collection_url(resource)
       base_url = resource.base_url.split("\n").map(&:strip).compact
-      [resource.__product.base_url, base_url].flatten.join
+      [resource.__product.default_version.base_url, base_url].flatten.join
     end
 
     def update_url(resource, url_part)
       return self_link_url(resource) if url_part.nil?
-      [resource.__product.base_url, url_part].flatten.join
+      [resource.__product.default_version.base_url, url_part].flatten.join
     end
 
     # Transforms a format string with field markers to a regex string with
@@ -98,20 +99,14 @@ module Provider
       p
     end
 
-    # Returns the resource properties without those ignored.
-    def effective_properties(properties)
-      properties.reject(&:exclude)
-    end
-
-    # Returns the nested properties without those ignored. An empty list is
-    # returned if the property is not a NestedObject or an Array of
-    # NestedObjects.
-    def effective_nested_properties(property)
+    # Returns the nested properties. An empty list is returned if the property
+    # is not a NestedObject or an Array of NestedObjects.
+    def nested_properties(property)
       if property.is_a?(Api::Type::NestedObject)
-        effective_properties(property.properties)
+        property.properties
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
-        effective_properties(property.item_type.properties)
+        property.item_type.properties
       else
         []
       end
