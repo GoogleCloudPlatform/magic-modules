@@ -12,6 +12,11 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 <% end -%>
+<% if property.custom_expand -%>
+<%= lines(compile_template(property.custom_expand,
+                           prefix: resource_name,
+                           property: property)) -%>
+<% else -%>
 <% if property.is_a?(Api::Type::NameValues) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
   if v == nil {
@@ -81,3 +86,4 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 }
 <% end # tf_types.include?(property.class) -%>
+<% end # custom_code check -%>

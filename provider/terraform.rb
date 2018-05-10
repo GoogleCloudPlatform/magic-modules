@@ -14,6 +14,7 @@
 require 'provider/abstract_core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
+require 'provider/terraform/custom_code'
 require 'provider/terraform/property_override'
 require 'provider/terraform/resource_override'
 require 'provider/terraform/sub_template'
