@@ -200,6 +200,25 @@ overrides: !ruby/object:Provider::ResourceOverrides
         sensitive: true
       privateKey: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
+  SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: false
+    examples: |
+      TODO
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      customFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      enabledFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      profile: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :COMPATIBLE
+      minTlsVersion: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :TLS_1_0
+      warnings: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     exclude: true

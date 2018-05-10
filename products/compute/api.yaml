@@ -2509,7 +2509,7 @@ objects:
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     exclude: true
     kind: 'compute#sslPolicy'
-    base_url: projects/{project}/global/sslPolicies
+    base_url: projects/{{project}}/global/sslPolicies
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2529,6 +2529,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2543,6 +2544,7 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
         required: true
         # TODO: profile, minTlsVersion, enabledFeatures, customFeatures, fingerprint, warnings, kind
       - !ruby/object:Api::Type::Enum
