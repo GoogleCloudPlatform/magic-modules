@@ -14,7 +14,7 @@
 <% end -%>
 <% if property.custom_expand -%>
 <%= lines(compile_template(property.custom_expand,
-                           prefix: resource_name,
+                           prefix: prefix,
                            property: property)) -%>
 <% else -%>
 <% if property.is_a?(Api::Type::NameValues) -%>
