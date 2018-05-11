@@ -14,11 +14,11 @@
 <% end -%>
 <% if tf_types.include?(property.class) -%>
 "<%= Google::StringUtils.underscore(property.name) -%>": {
-	<% if property.is_set -%>
-	Type: schema.TypeSet,
+  <% if property.is_set -%>
+  Type: schema.TypeSet,
   <% else -%>
   Type: <%= tf_types[property.class] %>,
-	<% end -%>
+  <% end -%>
 <%	if property.default.from_api -%>
 	Computed: true,
 	Optional: true,
@@ -90,14 +90,14 @@
         <% end -%>
       },
   <% end -%>
-	<% if property.is_set -%>
-		<% if !property.set_hash_func.nil? -%>
-			Set: <%= property.set_hash_func -%>,
-		<% elsif property.item_type.is_a?(String) -%>
-			Set: schema.HashString,
-		<% else -%>
-			// Default schema.HashSchema is used.
-		<% end -%>
+  <% if property.is_set -%>
+    <% if !property.set_hash_func.nil? -%>
+    Set: <%= property.set_hash_func -%>,
+    <% elsif property.item_type.is_a?(String) -%>
+    Set: schema.HashString,
+    <% else -%>
+    // Default schema.HashSchema is used.
+  <% end -%>
 	<% end -%>
 <% elsif property.is_a?(Api::Type::NameValues) -%>
   Elem: &schema.Schema{Type: schema.TypeString},
