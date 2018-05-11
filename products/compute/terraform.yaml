@@ -223,7 +223,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      update_encoder: 'templates/terraform/update_encoder/fingerprint.erb'
+      update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
