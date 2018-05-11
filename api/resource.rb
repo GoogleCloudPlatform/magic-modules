@@ -48,6 +48,7 @@ module Api
       attr_reader :create_verb
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
+      attr_reader :version
     end
 
     include Properties
@@ -212,6 +213,11 @@ module Api
       @identity
     end
 
+    def set_sub_vars
+      set_variables(@parameters, :__resource)
+      set_variables(@properties, :__resource)
+    end
+
     # Main data validation. As the validation code is simple, but long due to
     # the number of properties, it is okay to ignore Rubocop warnings about
     # method size and complexity.
@@ -241,11 +247,7 @@ module Api
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
-
-      check_optional_property :input, :boolean
-
-      set_variables(@parameters, :__resource)
-      set_variables(@properties, :__resource)
+      check_optional_property :version, String
 
       check_property_list :parameters, Api::Type
       check_property_list :properties, Api::Type
@@ -256,11 +258,11 @@ module Api
     # rubocop:enable Metrics/MethodLength
 
     def properties
-      (@properties || []).reject(&:exclude)
+      (@properties || []).reject(&:exclude).select { |p| p.version <= version }
     end
 
     def parameters
-      (@parameters || []).reject(&:exclude)
+      (@parameters || []).reject(&:exclude).select { |p| p.version <= version }
     end
 
     # Returns all properties and parameters including the ones that are
@@ -334,6 +336,10 @@ module Api
     def save_api_results?
       exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
         || access_api_results
+    end
+
+    def version
+      @version.nil? ? @__product.default_version : @__product.version(@version)
     end
 
     private

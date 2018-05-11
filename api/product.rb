@@ -39,9 +39,12 @@ module Api
 
     # Represents a version of the API for this product
     class Version < Api::Object
+      include Comparable
       attr_reader :base_url
       attr_reader :default
       attr_reader :name
+
+      ORDER = %w[v1 beta alpha].freeze
 
       def validate
         super
@@ -50,6 +53,13 @@ module Api
         check_property :base_url, String
         check_property :name, String
         check_property :default, :boolean
+
+        raise "API Version must be one of #{ORDER}" \
+          unless ORDER.include?(@name)
+      end
+
+      def <=>(other)
+        ORDER.index(name) <=> ORDER.index(other.name) if other.is_a?(Version)
       end
     end
 
@@ -59,6 +69,14 @@ module Api
       end
 
       return @versions.last if @versions.length == 1
+    end
+
+    def version(name)
+      @versions.each do |v|
+        return v if v.name == name
+      end
+
+      raise "API version '#{name}' does not exist for product '#{@name}"
     end
 
     private

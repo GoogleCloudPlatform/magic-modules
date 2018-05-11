@@ -72,12 +72,12 @@ module Provider
 
     def collection_url(resource)
       base_url = resource.base_url.split("\n").map(&:strip).compact
-      [resource.__product.default_version.base_url, base_url].flatten.join
+      [resource.version.base_url, base_url].flatten.join
     end
 
     def update_url(resource, url_part)
       return self_link_url(resource) if url_part.nil?
-      [resource.__product.default_version.base_url, url_part].flatten.join
+      [resource.version.base_url, url_part].flatten.join
     end
 
     # Transforms a format string with field markers to a regex string with

@@ -364,8 +364,7 @@ module Provider
     end
 
     def self_link_raw_url(resource)
-      base_url = resource.__product.default_version.base_url
-                         .split("\n").map(&:strip).compact
+      base_url = resource.version.base_url.split("\n").map(&:strip).compact
       if resource.self_link.nil?
         [base_url, [resource.base_url, '{{name}}'].join('/')]
       else

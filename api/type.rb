@@ -33,6 +33,7 @@ module Api
       attr_reader :required
       attr_reader :update_verb
       attr_reader :update_url
+      attr_reader :version
     end
 
     include Fields
@@ -48,6 +49,7 @@ module Api
 
       check_property :description, ::String
       check_property :exclude, :boolean
+      check_optional_property :version, ::String
 
       check_optional_property :output, :boolean
       check_optional_property :field, ::String
@@ -104,6 +106,11 @@ module Api
 
     def parent
       @__parent
+    end
+
+    def version
+      return @__resource.__product.version(@version) unless @version.nil?
+      @__resource.__product.default_version
     end
 
     private

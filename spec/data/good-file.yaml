@@ -18,6 +18,13 @@ versions:
   - !ruby/object:Api::Product::Version
     name: v1
     base_url: http://myproduct.google.com/api/
+    default: true
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: http://myproduct.google.com/api/beta/
+  - !ruby/object:Api::Product::Version
+    name: alpha
+    base_url: http://myproduct.google.com/api/alpha/
 scopes:
   - http://scope-to-my-api/
 objects:
@@ -86,3 +93,7 @@ objects:
             - !ruby/object:Api::Type::String
              name: 'property1'
              description: 'a nested property'
+      - !ruby/object:Api::Type::String
+        name: 'beta-property'
+        description: 'A property that exists in the beta API'
+        version: 'beta'
