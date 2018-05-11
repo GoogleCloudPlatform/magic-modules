@@ -27,9 +27,15 @@ module Api
       attr_reader :kind
       attr_reader :base_url
       attr_reader :self_link
+      # This is useful in case you need to change the query made for GET
+      # requests only.  In particular, this is often used to add
+      # query parameters.
       attr_reader :self_link_query
-      # identity: an array with items that uniquely identify the resource.
-      # default=name
+      # This is an array with items that uniquely identify the resource.
+      # This is useful in case an API returns a list result and we need
+      # to fetch the particular resource we're interested in from that
+      # list.  Otherwise, it's safe to leave empty.
+      # If empty, we assume that `name` is the identifier.
       attr_reader :identity
       attr_reader :exclude
       attr_reader :virtual
