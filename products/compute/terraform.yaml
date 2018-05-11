@@ -222,6 +222,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_features = ["TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
       }
       ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      update_encoder: 'templates/terraform/update_encoder/fingerprint.erb'
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
