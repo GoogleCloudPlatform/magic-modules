@@ -27,9 +27,9 @@ module Api
       attr_reader :kind
       attr_reader :base_url
       attr_reader :self_link
-      # This is useful in case you need to change the query made for GET
-      # requests only.  In particular, this is often used to add
-      # query parameters.
+      # This is useful in case you need to change the query made for
+      # GET/DELETE requests only.  In particular, this is often used
+      # to add query parameters.
       attr_reader :self_link_query
       # This is an array with items that uniquely identify the resource.
       # This is useful in case an API returns a list result and we need
