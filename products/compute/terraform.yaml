@@ -396,8 +396,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
-    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/156): Re-enable code generation for this resource
-    exclude: true
+    exclude: false
     examples: |
       ```hcl
       resource "google_compute_network" "network1" {
@@ -473,7 +472,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         required: false # the provider-default value will be used if not specified
         default: !ruby/object:Provider::Terraform::Default
           from_api: true
-        state_func: 'NameFromSelfLinkStateFunc'
+        custom_flatten: 'templates/terraform/custom_flatten/region_name_only.erb'
       forwardingRules: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
