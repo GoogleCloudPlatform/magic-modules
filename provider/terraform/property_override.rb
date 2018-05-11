@@ -28,7 +28,7 @@ module Provider
 
       attr_reader :is_set # Uses a Set instead of an Array
       # function to determine the unique ID of an item in the set
-      attr_reader :set_hash_func 
+      attr_reader :set_hash_func
 
       # ===========
       # Custom code
@@ -159,9 +159,9 @@ module Provider
 
         unless api_property.is_a?(Api::Type::Array)
           if @is_set
-            raise "Set can only be specified for Api::Type::Array. " \
+            raise 'Set can only be specified for Api::Type::Array. ' \
                   "Type is #{api_property.class} for property "\
-                  "'#{api_property.name}'" 
+                  "'#{api_property.name}'"
           end
         end
 
