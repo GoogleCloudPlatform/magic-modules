@@ -2510,6 +2510,7 @@ objects:
     exclude: true
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
+    update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
