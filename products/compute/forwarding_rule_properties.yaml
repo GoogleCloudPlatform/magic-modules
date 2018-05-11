@@ -20,6 +20,7 @@
   description: |
     An optional description of this resource. Provide this property when
     you create the resource.
+  input: true
 - !ruby/object:Api::Type::Integer
   name: 'id'
   description: 'The unique identifier for the resource.'
@@ -75,15 +76,6 @@
     - :AH
     - :SCTP
     - :ICMP
-- !ruby/object:Api::Type::ResourceRef
-  name: 'backendService'
-  resource: 'BackendService'
-  imports: 'selfLink'
-  description: |
-    A reference to a BackendService to receive the matched traffic.
-
-    This is used for internal load balancing.
-    (not used for external load balancing)
 - !ruby/object:Api::Type::Enum
   name: 'ipVersion'
   description: |
@@ -115,6 +107,7 @@
     characters must be a dash, lowercase letter, or digit, except the last
     character, which cannot be a dash.
   required: true
+  input: true
 - !ruby/object:Api::Type::ResourceRef
   name: 'network'
   resource: 'Network'
@@ -153,6 +146,7 @@
     * TargetVpnGateway: 500, 4500
 - !ruby/object:Api::Type::Array
   name: 'ports'
+  max_size: 5
   description: |
     This field is used along with the backend_service field for internal
     load balancing.

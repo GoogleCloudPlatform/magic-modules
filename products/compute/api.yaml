@@ -145,6 +145,33 @@ objects:
         input: true
         required: true
   - !ruby/object:Api::Resource
+    name: 'RegionBackendService'
+    exclude: true
+    kind: 'compute#regionBackendService'
+    base_url: 'projects/{{project}}/regions/{{region}}/backendServices'
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    description: |
+      A regional BackendService resource defines a group of backend virtual
+      machines within the same region and their serving capacity.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Load Balancing with regional instance groups': 'https://cloud.google.com/compute/docs/load-balancing/internal/#internal_load_balancing_with_regional_instance_groups'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          A reference to the region where the regional forwarding rule resides.
+          This field is not applicable to global forwarding rules.
+        required: true
+    properties:
+      # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200): Add support for this resource
+  - !ruby/object:Api::Resource
     name: 'BackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/global/backendServices
@@ -876,10 +903,19 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       A ForwardingRule resource. A ForwardingRule resource specifies which pool
       of target virtual machines to forward a packet to if it matches the given
       [IPAddress, IPProtocol, portRange] tuple.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Official Documentation':
+              'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
+          api: 'https://cloud.google.com/compute/docs/reference/latest/forwardingRule'
+    input: true
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
@@ -893,6 +929,15 @@ objects:
     properties:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
+        name: 'backendService'
+        resource: 'RegionBackendService'
+        imports: 'selfLink'
+        description: |
+          A reference to a regional BackendService to receive the matched traffic.
+  
+          This is used for internal load balancing.
+          (not used for external load balancing)
+      - !ruby/object:Api::Type::ResourceRef
         name: 'target'
         resource: 'TargetPool'
         imports: 'selfLink'
@@ -904,6 +949,8 @@ objects:
           must be of a type appropriate to the target object.
 
           This field is not used for internal load balancing.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'
@@ -993,6 +1040,15 @@ objects:
           A reference to the region where the regional forwarding rule resides.
           This field is not applicable to global forwarding rules.
         output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'backendService'
+        resource: 'BackendService'
+        imports: 'selfLink'
+        description: |
+          A reference to a BackendService to receive the matched traffic.
+
+          This is used for internal load balancing.
+          (not used for external load balancing)
       # TODO(nelsonjr): Create a new type, WeakResourceRef that could accept
       # various different objects, instead of one, to enable these scenarios
       # where a field can receive multiple types (ditto in other places, look
