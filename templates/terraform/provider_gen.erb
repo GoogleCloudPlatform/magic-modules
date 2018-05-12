@@ -18,6 +18,11 @@ package google
 
 import "github.com/hashicorp/terraform/helper/schema"
 
+
+<% if product_ns == 'Resourcemanager'
+		product_ns = 'ResourceManager'
+end -%>
+
 var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
 <% product.objects.reject { |r| r.exclude }.each do |object| -%>
 <% resource_name = product_ns + object.name -%>
