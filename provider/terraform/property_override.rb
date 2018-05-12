@@ -27,7 +27,9 @@ module Provider
       attr_reader :validation # Adds a ValidateFunc to the schema
 
       attr_reader :is_set # Uses a Set instead of an Array
-      # function to determine the unique ID of an item in the set
+      # Optional function to determine the unique ID of an item in the set
+      # If not specified, schema.HashString (when elements are string) or
+      # schema.HashSchema are used.
       attr_reader :set_hash_func
 
       # ===========
@@ -148,7 +150,7 @@ module Provider
         check_optional_property :diff_suppress_func, String
         check_optional_property :state_func, String
         check_optional_property :validation, Provider::Terraform::Validation
-        check_optional_property :hash_func, String
+        check_optional_property :set_hash_func, String
       end
 
       def apply(api_property)

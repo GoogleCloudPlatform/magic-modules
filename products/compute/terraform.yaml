@@ -223,6 +223,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants:  'templates/terraform/constants/ssl_policy.erb'
       resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'
       update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
     properties:
