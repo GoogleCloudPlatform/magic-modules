@@ -30,6 +30,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 }
 <% elsif tf_types.include?(property.class) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+<% if property.is_set -%>
+  v = v.(*schema.Set).List()
+<% end -%>
 <%
   if !nested_properties(property).empty?
     nested_properties = nested_properties(property)

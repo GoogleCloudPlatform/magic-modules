@@ -26,6 +26,12 @@ module Provider
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
       attr_reader :validation # Adds a ValidateFunc to the schema
 
+      attr_reader :is_set # Uses a Set instead of an Array
+      # Optional function to determine the unique ID of an item in the set
+      # If not specified, schema.HashString (when elements are string) or
+      # schema.HashSchema are used.
+      attr_reader :set_hash_func
+
       # ===========
       # Custom code
       # ===========
@@ -133,21 +139,32 @@ module Provider
 
         # Ensures boolean values are set to false if nil
         @sensitive ||= false
+        @is_set ||= false
 
         @default ||= Provider::Terraform::Default.new
 
         check_property :sensitive, :boolean
+        check_property :is_set, :boolean
         check_property :default, Provider::Terraform::Default
 
         check_optional_property :diff_suppress_func, String
         check_optional_property :state_func, String
         check_optional_property :validation, Provider::Terraform::Validation
+        check_optional_property :set_hash_func, String
       end
 
       def apply(api_property)
         unless description.nil?
           @description = format_string(:description, @description,
                                        api_property.description)
+        end
+
+        unless api_property.is_a?(Api::Type::Array)
+          if @is_set
+            raise 'Set can only be specified for Api::Type::Array. ' \
+                  "Type is #{api_property.class} for property "\
+                  "'#{api_property.name}'"
+          end
         end
 
         @default.apply(api_property)
