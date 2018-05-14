@@ -2845,6 +2845,11 @@ objects:
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
@@ -2861,6 +2866,7 @@ objects:
         name: 'backupPool'
         resource: 'TargetPool'
         imports: 'selfLink'
+        input: true
         description: |
           This field is applicable only when the containing target pool is
           serving a forwarding rule as the primary pool, and its failoverRatio
@@ -2936,6 +2942,7 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
         required: true
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
@@ -2949,6 +2956,7 @@ objects:
           - CLIENT_IP_PROTO: Connections from the same client IP with the same
             IP protocol will go to the same instance in the pool while that
             instance remains healthy.
+        input: true
         values:
           - :NONE
           - :CLIENT_IP
