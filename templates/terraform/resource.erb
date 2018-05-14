@@ -175,12 +175,6 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
-<% if object.custom_code.decoder -%>
-  res, err = <%= resource_name -%>Decoder(d, meta, res)
-  if err != nil {
-    return err
-  }
-<% end -%>
 
 <% unless object.self_link_query.nil? -%>
 	<%# This part of the template extracts the one resource we're interested in
@@ -223,6 +217,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return nil
 	}
 <% end -%>
+
+<% if object.custom_code.decoder -%>
+  res, err = resource<%= resource_name -%>Decoder(d, meta, res)
+  if err != nil {
+    return err
+  }
+<% end -%>
+
+
 
 <% properties.each do |prop| -%>
   if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {

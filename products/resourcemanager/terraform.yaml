@@ -35,10 +35,15 @@ overrides: !ruby/object:Provider::ResourceOverrides
         reason = "This project is very important to me!"
       }
       ```
-
+    properties:
+      parent: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: templates/terraform/projects_prefix.erb
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/region_name_only.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/lien_post_create.erb
       pre_delete: templates/terraform/modify_delete_url.erb
+      decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # All of these files will be copied verbatim.
