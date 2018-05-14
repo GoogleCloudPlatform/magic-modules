@@ -284,7 +284,8 @@ module Api
       def validate
         super
         @name = @resource if @name.nil?
-        @description = "A reference to #{@resource} resource"
+        @description = "A reference to #{@resource} resource" \
+          if @description.nil?
 
         return if @__resource.nil? || @__resource.exclude || @exclude
 
