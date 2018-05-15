@@ -29,17 +29,20 @@ module Provider
       #
       # Fields with default values are `project`, `region` and `zone`.
       def import_id_formats(resource)
-        underscored_base_url = resource.base_url
-                                       .gsub(/{{[[:word:]]+}}/) do |field_name|
-          Google::StringUtils.underscore(field_name)
+        if resource.import_format.empty?
+          underscored_base_url = resource.base_url
+                                         .gsub(/{{[[:word:]]+}}/) do |field_name|
+            Google::StringUtils.underscore(field_name)
+          end
+
+          # We assume that all resources have a name field
+          id_formats = [underscored_base_url + '/{{name}}']
+        else
+          id_formats = resource.import_format
         end
 
-        # TODO: Add support for custom import id
-        # We assume that all resources have a name field
-        self_link_id_format = underscored_base_url + '/{{name}}'
-
         # short id: {{project}}/{{zone}}/{{name}}
-        field_markers = self_link_id_format.scan(/{{[[:word:]]+}}/)
+        field_markers = id_formats[0].scan(/{{[[:word:]]+}}/)
         short_id_format = field_markers.join('/')
 
         # short id without fields with provider-level default: {{name}}
@@ -48,7 +51,7 @@ module Provider
         field_markers.delete('{{zone}}')
         short_id_default_format = field_markers.join('/')
 
-        [self_link_id_format, short_id_format, short_id_default_format]
+        id_formats + [short_id_format, short_id_default_format]
       end
     end
   end

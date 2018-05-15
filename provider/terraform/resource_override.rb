@@ -23,6 +23,7 @@ module Provider
       # The Terraform resource id format used when calling #setId(...).
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
+      attr_reader :import_format
       attr_reader :custom_code
 
       attr_reader :examples
@@ -37,12 +38,14 @@ module Provider
         super
 
         @id_format ||= '{{name}}'
+        @import_format ||= []
         @custom_code ||= Provider::Terraform::CustomCode.new
 
         check_property :id_format, String
 
         check_optional_property :examples, String
         check_optional_property :custom_code, Provider::Terraform::CustomCode
+        check_optional_property :import_format, Array
       end
 
       def apply(resource)
