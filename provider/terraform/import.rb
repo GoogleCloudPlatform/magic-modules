@@ -29,11 +29,10 @@ module Provider
       #
       # Fields with default values are `project`, `region` and `zone`.
       def import_id_formats(resource)
-        if resource.import_format.empty?
-          underscored_base_url = resource.base_url
-                                         .gsub(/{{[[:word:]]+}}/) do |field_name|
-            Google::StringUtils.underscore(field_name)
-          end
+        if resource.import_format.nil? || resource.import_format.empty?
+          underscored_base_url = resource.base_url.gsub(
+            /{{[[:word:]]+}}/
+          ) { |field_name| Google::StringUtils.underscore(field_name) }
 
           # We assume that all resources have a name field
           id_formats = [underscored_base_url + '/{{name}}']
@@ -46,9 +45,7 @@ module Provider
         short_id_format = field_markers.join('/')
 
         # short id without fields with provider-level default: {{name}}
-        field_markers.delete('{{project}}')
-        field_markers.delete('{{region}}')
-        field_markers.delete('{{zone}}')
+        field_markers -= ['{{project}}', '{{region}}', '{{zone}}']
         short_id_default_format = field_markers.join('/')
 
         id_formats + [short_id_format, short_id_default_format]

@@ -45,7 +45,7 @@ module Provider
 
         check_optional_property :examples, String
         check_optional_property :custom_code, Provider::Terraform::CustomCode
-        check_optional_property :import_format, Array
+        check_property :import_format, Array
       end
 
       def apply(resource)
