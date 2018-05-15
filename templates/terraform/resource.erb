@@ -21,10 +21,8 @@ package google
 <%
 	# ResourceManager APIs need to be imported from api/cloudresourcemanager, need to
 	# be namespaced as ResourceManager, and need to be upstream as gresourcemanager,
-	# which leads to a product_ns of 'Resourcemanager'.  These are terraform-specific
-	# issues, so we just handle them here in the template.  If we start seeing this
-	# issue more than just in the ResourceManager APIs, we should invent a more general
-	# solution.
+  # which leads to a product_ns of 'Resourcemanager'.
+  # TODO: fix this hack.
 	if product_ns == 'Resourcemanager'
 		product_ns = 'ResourceManager'
 	end
