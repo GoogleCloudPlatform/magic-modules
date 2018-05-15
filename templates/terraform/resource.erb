@@ -180,42 +180,10 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 	<%# This part of the template extracts the one resource we're interested in
 			from the list that gets returned.  self_link_query is a field which
 			describes a list result from a read. -%>
-	// Extract the object we're interested in from the list response.
-	itemsList_ := res["<%= object.self_link_query.items -%>"]
-	var itemsList []interface{}
-	if itemsList_ != nil {
-		itemsList = itemsList_.([]interface{})
-	}
-	listObj := make([]map[string]interface{}, len(itemsList))
-	for i, item := range itemsList {
-		listObj[i] = item.(map[string]interface{})
-	}
-	res = nil
-	for _, item := range listObj {
-	<% object.identity.each do |prop| -%>
-		<% if settable_properties.include?(prop) -%>
-		this<%= titlelize_property(prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
-		if err != nil {
-			return err
-		}
-		<% else -%>
-			this<%= titlelize_property(prop) -%> := d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")
-		<% end -%>
-		that<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name -%>"])
-		log.Printf("[DEBUG] Checking equality of %#v, %#v", that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>)
-		if !reflect.DeepEqual(that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>) {
-			continue
-		}
-	<% end -%>
-		res = item
-		break
-	}
-	if res == nil {
-		// Object isn't there any more - remove it from the state.
-		log.Printf("[DEBUG] Removing <%= resource_name -%> because it couldn't be matched.")
-		d.SetId("")
-		return nil
-	}
+    <%= compile_template('templates/terraform/self_link_query.erb',
+												 object: object,
+												 settable_properties: settable_properties,
+												 resource_name: resource_name) -%>
 <% end -%>
 
 <% if object.custom_code.decoder -%>
