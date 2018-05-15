@@ -40,9 +40,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/region_name_only.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/lien_post_create.erb
+      post_create: templates/terraform/post_create/lien.erb
       post_import: templates/terraform/post_import/lien_import.erb
-      pre_delete: templates/terraform/modify_delete_url.erb
+      pre_delete: templates/terraform/pre_delete/modify_delete_url.erb
       decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
