@@ -139,7 +139,7 @@ objects:
         name: reason 
         description: |
           Concise user-visible strings indicating why an action cannot be performed
-          on a resource. Maximum lenth of 200 characters.
+          on a resource. Maximum length of 200 characters.
         input: true
       - !ruby/object:Api::Type::String
         name: origin
