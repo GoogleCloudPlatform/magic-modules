@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	urllib "net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -105,7 +106,16 @@ func sendRequest(config *Config, method, url string, body map[string]interface{}
 		}
 	}
 
-	req, err := http.NewRequest(method, url+"?alt=json", &buf)
+	u, err := urllib.Parse(url)
+	if err != nil {
+		return nil, err
+	}
+
+	queries := u.Query()
+	queries.Add("alt", "json")
+	newUrl := u.Scheme + "://" + u.Host + u.Path + "?" + queries.Encode()
+
+	req, err := http.NewRequest(method, newUrl, &buf)
 	if err != nil {
 		return nil, err
 	}

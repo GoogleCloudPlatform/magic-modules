@@ -155,7 +155,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
 <% if object.custom_code.decoder -%>
-  res, err = <%= resource_name -%>Decoder(d, meta, res)
+  res, err = resource<%= resource_name -%>Decoder(d, meta, res)
   if err != nil {
     return err
   }
@@ -165,9 +165,11 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
 <% end -%>
+<% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
 	if err := d.Set("self_link", res["selfLink"]); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
+<% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)

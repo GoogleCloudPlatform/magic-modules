@@ -1,0 +1,13 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+	project, err := getProject(d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	region, err := getRegion(d, config)
+	if err != nil {
+		return nil, err
+	}
+
+	return fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, region, v.(string)), nil
+}
