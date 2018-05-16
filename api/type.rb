@@ -16,12 +16,14 @@ require 'google/string_utils'
 
 module Api
   # Represents a property type
+  # rubocop:disable Metrics/ClassLength
   class Type < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
       include Api::Object::Named::Properties
 
+      attr_reader :default_value
       attr_reader :description
       attr_reader :exclude
 
@@ -57,6 +59,26 @@ module Api
       check_optional_property_oneof_default \
         :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
       check_optional_property :update_url, ::String
+
+      check_default_value_property
+    end
+
+    def check_default_value_property
+      return if @default_value.nil?
+
+      case self
+      when Api::Type::String
+        clazz = ::String
+      when Api::Type::Integer
+        clazz = ::Integer
+      when Api::Type::Enum
+        clazz = ::Symbol
+      else
+        raise "Update 'check_default_value_property' method to support " \
+              "default value for type #{self.class}"
+      end
+
+      check_optional_property :default_value, clazz
     end
 
     def type
@@ -284,7 +306,8 @@ module Api
       def validate
         super
         @name = @resource if @name.nil?
-        @description = "A reference to #{@resource} resource"
+        @description = "A reference to #{@resource} resource" \
+          if @description.nil?
 
         return if @__resource.nil? || @__resource.exclude || @exclude
 
@@ -421,4 +444,5 @@ module Api
       ]
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

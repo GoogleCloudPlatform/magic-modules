@@ -1025,6 +1025,7 @@ objects:
         description: |
           How often (in seconds) to send a health check. The default value is 5
           seconds.
+        default_value: 5
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -1179,6 +1180,7 @@ objects:
         description: |
           How often (in seconds) to send a health check. The default value is 5
           seconds.
+        default_value: 5
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -1215,11 +1217,13 @@ objects:
           How long (in seconds) to wait before claiming failure.
           The default value is 5 seconds.  It is invalid for timeoutSec to have
           greater value than checkIntervalSec.
+        default_value: 5
       - !ruby/object:Api::Type::Integer
         name: 'unhealthyThreshold'
         description: |
           A so-far healthy instance will be marked unhealthy after this many
           consecutive failures. The default value is 2.
+        default_value: 2
       - !ruby/object:Api::Type::Enum
         name: 'type'
         description: |
@@ -2509,7 +2513,8 @@ objects:
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     exclude: true
     kind: 'compute#sslPolicy'
-    base_url: projects/{project}/global/sslPolicies
+    base_url: projects/{{project}}/global/sslPolicies
+    update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2529,6 +2534,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this resource.'
+        input: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2543,6 +2549,7 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
         required: true
         # TODO: profile, minTlsVersion, enabledFeatures, customFeatures, fingerprint, warnings, kind
       - !ruby/object:Api::Type::Enum
@@ -2550,9 +2557,9 @@ objects:
         description: |
           Profile specifies the set of SSL features that can be used by the
           load balancer when negotiating SSL with clients. This can be one of
-          COMPATIBLE, MODERN, RESTRICTED, or CUSTOM. If using CUSTOM, the set
-          of SSL features to enable must be specified in the customFeatures
-          field.
+          `COMPATIBLE`, `MODERN`, `RESTRICTED`, or `CUSTOM`. If using `CUSTOM`,
+          the set of SSL features to enable must be specified in the
+          `customFeatures` field.
         values:
           - :COMPATIBLE
           - :MODERN
@@ -2563,7 +2570,7 @@ objects:
         description: |
           The minimum version of SSL protocol that can be used by the clients
           to establish a connection with the load balancer. This can be one of
-          TLS_1_0, TLS_1_1, TLS_1_2.
+          `TLS_1_0`, `TLS_1_1`, `TLS_1_2`.
         values:
           - :TLS_1_0
           - :TLS_1_1
@@ -2842,6 +2849,11 @@ objects:
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
@@ -2858,6 +2870,7 @@ objects:
         name: 'backupPool'
         resource: 'TargetPool'
         imports: 'selfLink'
+        input: true
         description: |
           This field is applicable only when the containing target pool is
           serving a forwarding rule as the primary pool, and its failoverRatio
@@ -2933,6 +2946,7 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
         required: true
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
@@ -2946,6 +2960,7 @@ objects:
           - CLIENT_IP_PROTO: Connections from the same client IP with the same
             IP protocol will go to the same instance in the pool while that
             instance remains healthy.
+        input: true
         values:
           - :NONE
           - :CLIENT_IP

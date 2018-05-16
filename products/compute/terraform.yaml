@@ -200,6 +200,68 @@ overrides: !ruby/object:Provider::ResourceOverrides
         sensitive: true
       privateKey: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
+  SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: false
+    examples: |
+      ```hcl
+      resource "google_compute_ssl_policy" "prod-ssl-policy" {
+        name    = "production-ssl-policy"
+        profile = "MODERN"
+      }
+
+      resource "google_compute_ssl_policy" "nonprod-ssl-policy" {
+        name            = "nonprod-ssl-policy"
+        profile         = "MODERN"
+        min_tls_version = "TLS_1_2"
+      }
+
+      resource "google_compute_ssl_policy" "custom-ssl-policy" {
+        name            = "custom-ssl-policy"
+        min_tls_version = "TLS_1_2"
+        profile         = "CUSTOM"
+        custom_features = ["TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants:  'templates/terraform/constants/ssl_policy.erb'
+      resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'
+      update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      customFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/187) replace references automatically
+        # Overriding the whole description because original has references to
+        # other fields which are in camelCase in api.yaml.
+        description: |
+          Profile specifies the set of SSL features that can be used by the
+          load balancer when negotiating SSL with clients. This can be one of
+          `COMPATIBLE`, `MODERN`, `RESTRICTED`, or `CUSTOM`. If using `CUSTOM`,
+          the set of SSL features to enable must be specified in the
+          `customFeatures` field.
+
+          See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+          for which ciphers are available to use. **Note**: this argument
+          *must* be present when using the `CUSTOM` profile. This argument
+          *must not* be present when using any other profile.
+      enabledFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      profile: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :COMPATIBLE
+        description: |
+          {{description}}
+          See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
+          for information on what cipher suites each profile provides. If
+          `CUSTOM` is used, the `custom_features` attribute **must be set**.
+          Default is `COMPATIBLE`.
+      minTlsVersion: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :TLS_1_0
+        description : '{{description}} Default is `TLS_1_0`.'
+      warnings: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     exclude: true
@@ -321,6 +383,38 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: false
   TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_target_pool" "default" {
+        name = "instance-pool"
+
+        instances = [
+          "us-central1-a/myinstance1",
+          "us-central1-b/myinstance2",
+        ]
+
+        health_checks = [
+          "${google_compute_http_health_check.default.name}",
+        ]
+      }
+
+      resource "google_compute_http_health_check" "default" {
+        name               = "default"
+        request_path       = "/"
+        check_interval_sec = 1
+        timeout_sec        = 1
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+      sessionAffinity: !ruby/object:Provider::Terraform::PropertyOverride
+        default: !ruby/object:Provider::Terraform::Default
+          value: :NONE
+      # TODO: Custom code needed for updating `instances` and `healthCheck`.
+      #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -480,8 +574,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-  TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
