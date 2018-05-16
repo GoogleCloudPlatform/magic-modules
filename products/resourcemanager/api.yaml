@@ -115,6 +115,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: parent
         input: true
+        required: true
         description: |
           A reference to the resource this Lien is attached to.
           The server will validate the parent against those for which Liens are supported.
@@ -130,6 +131,7 @@ objects:
           e.g. ['resourcemanager.projects.delete']
         item_type: 'Api::Type::String'
         input: true
+        required: true
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -141,6 +143,7 @@ objects:
           Concise user-visible strings indicating why an action cannot be performed
           on a resource. Maximum length of 200 characters.
         input: true
+        required: true
       - !ruby/object:Api::Type::String
         name: origin
         description: |
@@ -148,6 +151,7 @@ objects:
           of the Lien, intended to be inspected programmatically. Maximum length of
           200 characters.
         input: true
+        required: true
       - !ruby/object:Api::Type::Time
         name: 'createTime'
         description: 'Time of creation'
