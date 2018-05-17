@@ -1,5 +1,11 @@
 language: ruby # ruby version defined in .ruby-version will be used
 
+before_install:
+# some ruby versions come with a broken version of rubygems, update to
+# consistent version
+- gem update --system 2.7.6
+- gem install bundler -v '>= 1.16.1'
+
 script:
 - bundle exec rake test:rubocop
 - bundle exec rake test:spec
