@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	urllib "net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -76,23 +75,23 @@ func isEmptyValue(v reflect.Value) bool {
 	return false
 }
 
-func Post(config *Config, url string, body map[string]interface{}) (map[string]interface{}, error) {
-	return sendRequest(config, "POST", url, body)
+func Post(config *Config, rawurl string, body map[string]interface{}) (map[string]interface{}, error) {
+	return sendRequest(config, "POST", raw, body)
 }
 
-func Get(config *Config, url string) (map[string]interface{}, error) {
-	return sendRequest(config, "GET", url, nil)
+func Get(config *Config, rawurl string) (map[string]interface{}, error) {
+	return sendRequest(config, "GET", rawurl, nil)
 }
 
-func Put(config *Config, url string, body map[string]interface{}) (map[string]interface{}, error) {
-	return sendRequest(config, "PUT", url, body)
+func Put(config *Config, rawurl string, body map[string]interface{}) (map[string]interface{}, error) {
+	return sendRequest(config, "PUT", rawurl, body)
 }
 
-func Delete(config *Config, url string) (map[string]interface{}, error) {
-	return sendRequest(config, "DELETE", url, nil)
+func Delete(config *Config, rawurl string) (map[string]interface{}, error) {
+	return sendRequest(config, "DELETE", rawurl, nil)
 }
 
-func sendRequest(config *Config, method, url string, body map[string]interface{}) (map[string]interface{}, error) {
+func sendRequest(config *Config, method, rawurl string, body map[string]interface{}) (map[string]interface{}, error) {
 	reqHeaders := make(http.Header)
 	reqHeaders.Set("User-Agent", config.userAgent)
 	reqHeaders.Set("Content-Type", "application/json")
@@ -106,16 +105,15 @@ func sendRequest(config *Config, method, url string, body map[string]interface{}
 		}
 	}
 
-	u, err := urllib.Parse(url)
+	u, err := urllib.Parse(rawurl)
 	if err != nil {
 		return nil, err
 	}
+	q := u.Query()
+	q.Set("alt", "json")
+	u.RawQuery = q.Encode()
 
-	queries := u.Query()
-	queries.Add("alt", "json")
-	newUrl := u.Scheme + "://" + u.Host + u.Path + "?" + queries.Encode()
-
-	req, err := http.NewRequest(method, newUrl, &buf)
+	req, err := http.NewRequest(method, u.String(), &buf)
 	if err != nil {
 		return nil, err
 	}

@@ -19,8 +19,7 @@ versions:
     name: beta
     base_url: https://redis.googleapis.com/v1beta1/
 scopes:
-   # TODO this is fake and made up but MM requires it
-  - https://www.googleapis.com/auth/redis
+  - https://www.googleapis.com/auth/cloud-platform
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
@@ -30,7 +29,12 @@ objects:
     self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
     description: |
       A Google Cloud Redis instance.
-    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/memorystore/docs/redis/'
+      api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/'
+    input: true # TODO(danawillow): support for updates
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::String # TODO: resourceref?
@@ -120,8 +124,12 @@ objects:
           network.
       - !ruby/object:Api::Type::Enum
         name: tier
-        description: The service tier of the instance. #TODO describe values
+        description: |
+          The service tier of the instance. Must be one of these values:
+
+          - BASIC: standalone instance
+          - STANDARD_HA: highly available primary/replica instances
         values:
           - :BASIC
           - :STANDARD_HA
-        required: true
+        default_value: :BASIC
