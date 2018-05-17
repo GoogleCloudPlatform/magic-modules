@@ -48,7 +48,7 @@ module Provider
         field_markers -= ['{{project}}', '{{region}}', '{{zone}}']
         short_id_default_format = field_markers.join('/')
 
-        id_formats + [short_id_format, short_id_default_format]
+        (id_formats + [short_id_format, short_id_default_format]).uniq
       end
     end
   end

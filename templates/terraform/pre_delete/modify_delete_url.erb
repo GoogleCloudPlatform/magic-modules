@@ -1,0 +1,4 @@
+url, err = replaceVars(d, config, "<%= object.__product.default_version.base_url -%><%=object.base_url-%>/{{name}}")
+if err != nil {
+	return err
+}
