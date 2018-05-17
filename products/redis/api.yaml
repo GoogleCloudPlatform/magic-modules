@@ -35,7 +35,11 @@ objects:
           'https://cloud.google.com/memorystore/docs/redis/'
       api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/'
     input: true # TODO(danawillow): support for updates
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+<%=
+  # Cloud Redis takes a fair bit of time to provision, try six minutes.
+  indent(compile_file({timeouts: { insert_sec: 6 * 60 }},
+                      'templates/regional_async.yaml.erb'), 4)
+%>
     parameters:
       - !ruby/object:Api::Type::String # TODO: resourceref?
         name: 'region'

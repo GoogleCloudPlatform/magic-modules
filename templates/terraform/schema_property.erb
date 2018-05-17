@@ -109,8 +109,8 @@
 <% if property.sensitive -%>
     Sensitive: true,
 <% end -%>
-<% unless property.default.value.nil? -%>
-    Default: <%= go_literal(property.default.value) -%>,
+<% unless property.default_value.nil? -%>
+    Default: <%= go_literal(property.default_value) -%>,
 <% end -%>
 },
 <% else -%>

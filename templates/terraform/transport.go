@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -76,7 +77,7 @@ func isEmptyValue(v reflect.Value) bool {
 }
 
 func Post(config *Config, rawurl string, body map[string]interface{}) (map[string]interface{}, error) {
-	return sendRequest(config, "POST", raw, body)
+	return sendRequest(config, "POST", rawurl, body)
 }
 
 func Get(config *Config, rawurl string) (map[string]interface{}, error) {
@@ -105,7 +106,7 @@ func sendRequest(config *Config, method, rawurl string, body map[string]interfac
 		}
 	}
 
-	u, err := urllib.Parse(rawurl)
+	u, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
 	}
