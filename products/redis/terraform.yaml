@@ -15,6 +15,7 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{region}}/instances/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: 'templates/terraform/decoders/redis_instance.erb'
     properties:

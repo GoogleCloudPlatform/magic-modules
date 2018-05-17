@@ -29,35 +29,26 @@ module Provider
       #
       # Fields with default values are `project`, `region` and `zone`.
       def import_id_formats(resource)
-        self_link_id_format = self_link_id_format(resource)
+        if resource.import_format.nil? || resource.import_format.empty?
+          underscored_base_url = resource.base_url.gsub(
+            /{{[[:word:]]+}}/
+          ) { |field_name| Google::StringUtils.underscore(field_name) }
 
-        # TODO: Add support for custom import id
+          # We assume that all resources have a name field
+          id_formats = [underscored_base_url + '/{{name}}']
+        else
+          id_formats = resource.import_format
+        end
 
         # short id: {{project}}/{{zone}}/{{name}}
-        field_markers = self_link_id_format.scan(/{{[[:word:]]+}}/)
+        field_markers = id_formats[0].scan(/{{[[:word:]]+}}/)
         short_id_format = field_markers.join('/')
 
         # short id without fields with provider-level default: {{name}}
-        field_markers.delete('{{project}}')
-        field_markers.delete('{{region}}')
-        field_markers.delete('{{zone}}')
+        field_markers -= ['{{project}}', '{{region}}', '{{zone}}']
         short_id_default_format = field_markers.join('/')
 
-        [self_link_id_format, short_id_format, short_id_default_format]
-      end
-
-      private
-
-      def self_link_id_format(resource)
-        self_link_url_parts = self_link_raw_url(resource)[1]
-        self_link_url = if self_link_url_parts.is_a? Array
-                          self_link_url_parts.flatten.join
-                        else
-                          self_link_url_parts
-                        end
-        self_link_url.gsub(/{{[[:word:]]+}}/) do |field_name|
-          Google::StringUtils.underscore(field_name)
-        end
+        id_formats + [short_id_format, short_id_default_format]
       end
     end
   end
