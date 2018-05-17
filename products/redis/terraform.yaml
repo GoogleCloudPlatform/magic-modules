@@ -20,6 +20,40 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: 'templates/terraform/decoders/redis_instance.erb'
       encoder: 'templates/terraform/encoders/redis_instance.erb'
+    examples: |
+      ### Basic Usage
+      ```hcl
+      resource "google_redis_instance" "test" {
+        name           = "%s"
+        memory_size_gb = 1
+      }
+      ```
+
+      ### Full Usage
+      ```hcl
+      resource "google_compute_network" "test" {
+        name = "%s"
+      }
+
+      resource "google_redis_instance" "test" {
+        name           = "%s"
+        tier           = "STANDARD_HA"
+        memory_size_gb = 1
+
+        region                  = "us-central1"
+        location_id             = "us-central1-a"
+        alternative_location_id = "us-central1-f"
+
+        redis_version     = "REDIS_3_2"
+        display_name      = "Terraform Test Instance"
+        reserved_ip_range = "192.168.0.0/29"
+
+        labels {
+          my_key    = "my_val"
+          other_key = "other_val"
+        }
+      }
+      ```
     properties:
       authorizedNetwork: !ruby/object:Provider::Terraform::PropertyOverride
         default: !ruby/object:Provider::Terraform::Default
