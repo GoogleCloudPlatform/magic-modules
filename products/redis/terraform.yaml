@@ -56,24 +56,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
       ```
     properties:
       authorizedNetwork: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          from_api: true
+        default_from_api: true
       locationId: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          from_api: true
+        default_from_api: true
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/redis_instance_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       redisVersion: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          from_api: true
+        default_from_api: true
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
-        default: !ruby/object:Provider::Terraform::Default
-          from_api: true
+        default_from_api: true
       reservedIpRange: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          from_api: true
+        default_from_api: true
 
 # This is for a list of example files.
 examples: !ruby/object:Api::Resource::HashArray
