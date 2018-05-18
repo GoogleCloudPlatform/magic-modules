@@ -18,6 +18,6 @@ if __name__ == '__main__':
       pr = repo.get_pull(int(pull[1]))
       print 'Checking %s to see if it should be downloaded.' % (pr,)
       if pr.is_merged():
-        download_location = os.path.join(pull[0], pull[1] + '.patch')
+        download_location = os.path.join(patches, pull[0], pull[1] + '.patch')
         os.makedirs(os.path.dirname(download_location))
         urllib.urlretrieve(pr.patch_url, download_location)
