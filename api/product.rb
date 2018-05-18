@@ -76,7 +76,7 @@ module Api
         return v if v.name == name
       end
 
-      raise "API version '#{name}' does not exist for product '#{@name}"
+      raise "API version '#{name}' does not exist for product '#{@name}'"
     end
 
     private

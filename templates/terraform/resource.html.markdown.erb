@@ -15,7 +15,8 @@
 <%
   api_name_lower = product_ns.downcase
   resource_name = Google::StringUtils.underscore(object.name)
-  properties = object.all_user_properties
+  version = object.version(version)
+  properties = object.all_user_properties(version)
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>

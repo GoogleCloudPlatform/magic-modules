@@ -62,8 +62,8 @@ module Provider
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def generate(output_folder, types)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, version)
+      generate_objects(output_folder, types, version)
       generate_client_functions(output_folder) unless @config.functions.nil?
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
@@ -208,24 +208,24 @@ module Provider
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize
 
-    def generate_objects(output_folder, types)
+    def generate_objects(output_folder, types, version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
         else
-          generate_object object, output_folder
+          generate_object object, output_folder, version
         end
       end
     end
 
-    def generate_object(object, output_folder)
-      data = build_object_data(object, output_folder)
+    def generate_object(object, output_folder, version)
+      data = build_object_data(object, output_folder, version)
 
       generate_resource data
       generate_resource_tests data
-      generate_properties data, object.all_user_properties
+      generate_properties data, object.all_user_properties(object.version(version))
       generate_network_datas data, object
     end
 
@@ -283,7 +283,7 @@ module Provider
       )
     end
 
-    def build_object_data(object, output_folder)
+    def build_object_data(object, output_folder, version)
       {
         name: object.out_name,
         object: object,
@@ -292,7 +292,8 @@ module Provider
         tests: (@config.tests || {}).select { |o, _v| o == object.name }
                                     .fetch(object.name, {}),
         output_folder: output_folder,
-        product_name: object.__product.prefix[1..-1]
+        product_name: object.__product.prefix[1..-1],
+        version: version
       }
     end
 
@@ -363,8 +364,8 @@ module Provider
       build_url(resource.__product.default_version.base_url, base_url)
     end
 
-    def self_link_raw_url(resource)
-      base_url = resource.version.base_url.split("\n").map(&:strip).compact
+    def self_link_raw_url(resource, version)
+      base_url = version.base_url.split("\n").map(&:strip).compact
       if resource.self_link.nil?
         [base_url, [resource.base_url, '{{name}}'].join('/')]
       else

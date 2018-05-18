@@ -48,7 +48,7 @@ module Api
       attr_reader :create_verb
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
-      attr_reader :version
+      attr_reader :min_version # Minimum API version this resource is in
     end
 
     include Properties
@@ -247,7 +247,7 @@ module Api
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
-      check_optional_property :version, String
+      check_optional_property :min_version, String
 
       check_property_list :parameters, Api::Type
       check_property_list :properties, Api::Type
@@ -257,12 +257,14 @@ module Api
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
 
-    def properties
-      (@properties || []).reject(&:exclude).select { |p| p.version <= version }
+    def properties(version)
+      version ||= @__product.default_version
+      (@properties || []).reject(&:exclude).select { |p| p.min_version <= version }
     end
 
-    def parameters
-      (@parameters || []).reject(&:exclude).select { |p| p.version <= version }
+    def parameters(version)
+      version ||= @__product.default_version
+      (@parameters || []).reject(&:exclude).select { |p| p.min_version <= version }
     end
 
     # Returns all properties and parameters including the ones that are
@@ -271,22 +273,22 @@ module Api
       ((@properties || []) + (@parameters || []))
     end
 
-    def all_user_properties
-      properties + parameters
+    def all_user_properties(version)
+      properties(version) + parameters(version)
     end
 
-    def required_properties
-      all_user_properties.select(&:required)
+    def required_properties(version)
+      all_user_properties(version).select(&:required)
     end
 
-    def exported_properties
+    def exported_properties(version)
       return [] if @exports.nil?
       from_api = @exports.select { |e| e.is_a?(Api::Type::FetchedExternal) }
                          .each { |e| e.resource = self }
       prop_names = @exports - from_api
-      all_user_properties.select { |p| prop_names.include?(p.name) }
-                         .concat(from_api)
-                         .sort_by(&:name)
+      all_user_properties(version).select { |p| prop_names.include?(p.name) }
+                                  .concat(from_api)
+                                  .sort_by(&:name)
     end
 
     # TODO(alexstephen): Update test_constants to use this function.
@@ -301,19 +303,19 @@ module Api
       end.flatten
     end
 
-    def check_identity
+    def check_identity(version)
       check_property :identity, Array
 
       # Ensures we have all properties defined
       @identity.each do |i|
         raise "Missing property/parameter for identity #{i}" \
-          if all_user_properties.select { |p| p.name == i }.empty?
+          if all_user_properties(version).select { |p| p.name == i }.empty?
       end
     end
 
     # Returns all resourcerefs at any depth
-    def all_resourcerefs
-      resourcerefs_for_properties(all_user_properties, self)
+    def all_resourcerefs(version)
+      resourcerefs_for_properties(all_user_properties(version), self)
     end
 
     def kind?
@@ -338,8 +340,20 @@ module Api
         || access_api_results
     end
 
-    def version
-      @version.nil? ? @__product.default_version : @__product.version(@version)
+    def min_version
+      if @min_version.nil?
+        @__product.default_version
+      else
+        @__product.version(@min_version)
+      end
+    end
+
+    def version(v)
+      if v.nil?
+        @__product.default_version
+      else
+        @__product.version(v)
+      end
     end
 
     private
@@ -352,7 +366,7 @@ module Api
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def resourcerefs_for_properties(props, original_obj)
+    def resourcerefs_for_properties(props, original_obj, version)
       rrefs = []
       props.each do |p|
         # We need to recurse on ResourceRefs to get all levels
@@ -366,7 +380,7 @@ module Api
           next if p.resource_ref == p.__resource
           rrefs << p
           rrefs.concat(resourcerefs_for_properties(p.resource_ref
-                                                    .required_properties,
+                                                    .required_properties(version),
                                                    original_obj))
         elsif p.is_a? Api::Type::NestedObject
           rrefs.concat(resourcerefs_for_properties(p.properties, original_obj))
@@ -377,7 +391,7 @@ module Api
           elsif p.item_type.is_a? Api::Type::ResourceRef
             rrefs << p.item_type
             rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
-                                                      .required_properties,
+                                                      .required_properties(version),
                                                      original_obj))
           end
         end

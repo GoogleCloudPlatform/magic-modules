@@ -20,7 +20,8 @@ package google
 
 <%
 	resource_name = product_ns + object.name
-	properties = object.all_user_properties
+	version = object.version(version)
+	properties = object.all_user_properties(version)
 	settable_properties = properties.reject(&:output)
 	api_name_lower = String.new(product_ns)
 	api_name_lower[0] = api_name_lower[0].downcase
@@ -104,7 +105,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
   }
   <% end -%>
 
-	url, err := replaceVars(d, config, "<%= collection_url(object) -%>")
+	url, err := replaceVars(d, config, "<%= collection_url(object, version) -%>")
 	if err != nil {
 		return err
 	}
@@ -157,7 +158,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   }
   <% end -%>
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+	url, err := replaceVars(d, config, "<%= self_link_url(object, version) -%>")
 	if err != nil {
 		return err
 	}
@@ -248,7 +249,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
       <% end -%>
 		<% end -%>
 		}
-		url, err = replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
+		url, err = replaceVars(d, config, "<%= update_url(object, key[:update_url], version) -%>")
 		if err != nil {
 			return err
 		}
@@ -300,7 +301,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% elsif object.custom_code.encoder -%>
 	obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
 	<% end -%>
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+	url, err := replaceVars(d, config, "<%= self_link_url(object, version) -%>")
 	if err != nil {
 	return err
 	}
@@ -345,7 +346,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
   }
   <% end -%>
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+	url, err := replaceVars(d, config, "<%= self_link_url(object, version) -%>")
 	if err != nil {
 		return err
 	}

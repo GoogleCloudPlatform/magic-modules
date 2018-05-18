@@ -33,7 +33,7 @@ module Api
       attr_reader :required
       attr_reader :update_verb
       attr_reader :update_url
-      attr_reader :version
+      attr_reader :min_version
     end
 
     include Fields
@@ -49,7 +49,7 @@ module Api
 
       check_property :description, ::String
       check_property :exclude, :boolean
-      check_optional_property :version, ::String
+      check_optional_property :min_version, ::String
 
       check_optional_property :output, :boolean
       check_optional_property :field, ::String
@@ -108,9 +108,12 @@ module Api
       @__parent
     end
 
-    def version
-      return @__resource.__product.version(@version) unless @version.nil?
-      @__resource.__product.default_version
+    def min_version
+      if @min_version.nil?
+        @__resource.min_version
+      else
+        @__resource.__product.version(@min_version)
+      end
     end
 
     private
@@ -367,7 +370,7 @@ module Api
       end
 
       def check_resource_ref_property_exists
-        exported_props = resource_ref.exported_properties
+        exported_props = resource_ref.exported_properties(min_version)
         raise "'#{@imports}' does not exist on '#{@resource}'" \
           if exported_props.none? { |p| p.name == @imports }
       end

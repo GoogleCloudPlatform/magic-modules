@@ -87,40 +87,6 @@ describe Provider::ResourceOverrides do
       end
     end
 
-    context 'with version override' do
-      context 'with beta override and beta property' do
-        let(:config) do
-          Provider::Config.parse(
-            'spec/data/good-file-config-beta-override.yaml', product
-          )
-        end
-        before(:each) do
-          allow_open 'spec/data/good-file-config-beta-override.yaml'
-          config.validate
-        end
-        subject do
-          product.objects.find { |o| o.name == 'AnotherResource' }
-        end
-        it { is_expected.to contain_property_with_name 'beta-property' }
-      end
-
-      context 'with alpha override and beta property' do
-        let(:config) do
-          Provider::Config.parse(
-            'spec/data/good-file-config-alpha-override.yaml', product
-          )
-        end
-        before(:each) do
-          allow_open 'spec/data/good-file-config-alpha-override.yaml'
-          config.validate
-        end
-        subject do
-          product.objects.find { |o| o.name == 'AnotherResource' }
-        end
-        it { is_expected.to contain_property_with_name 'beta-property' }
-      end
-    end
-
     context 'with resource with invalid property path' do
       context 'referring to missing top-level property' do
         let(:config) do
