@@ -91,23 +91,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 5
+        default_value: 5
       healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 2
+        default_value: 2
       port: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 80
+        default_value: 80
       requestPath: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: "/"
+        default_value: "/"
       timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 5
+        default_value: 5
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 2
+        default_value: 2
   HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     description: |
       {{description}}
@@ -131,23 +125,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 5
+        default_value: 5
       healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 2
+        default_value: 2
       port: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 443
+        default_value: 443
       requestPath: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: "/"
+        default_value: "/"
       timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 5
+        default_value: 5
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: 2
+        default_value: 2
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Image: !ruby/object:Provider::Terraform::ResourceOverride
@@ -248,8 +236,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       enabledFeatures: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true
       profile: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: :COMPATIBLE
+        default_value: :COMPATIBLE
         description: |
           {{description}}
           See the [official documentation](https://cloud.google.com/compute/docs/load-balancing/ssl-policies#profilefeaturesupport)
@@ -257,8 +244,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           `CUSTOM` is used, the `custom_features` attribute **must be set**.
           Default is `COMPATIBLE`.
       minTlsVersion: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: :TLS_1_0
+        default_value: :TLS_1_0
         description : '{{description}} Default is `TLS_1_0`.'
       warnings: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -411,8 +397,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false # the provider-default value will be used if not specified
       sessionAffinity: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: :NONE
+        default_value: :NONE
       # TODO: Custom code needed for updating `instances` and `healthCheck`.
       #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
@@ -449,8 +434,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
       proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: :NONE
+        default_value: :NONE
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
   TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
@@ -486,8 +470,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       service: !ruby/object:Provider::Terraform::PropertyOverride
         name: backendService
       proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
-        default: !ruby/object:Provider::Terraform::Default
-          value: :NONE
+        default_value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
     exclude: false
@@ -564,8 +547,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: true
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false # the provider-default value will be used if not specified
-        default: !ruby/object:Provider::Terraform::Default
-          from_api: true
+        default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       forwardingRules: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
