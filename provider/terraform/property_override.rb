@@ -87,6 +87,7 @@ module Provider
     class PropertyOverride < Provider::PropertyOverride
       include OverrideFields
 
+      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
@@ -108,9 +109,10 @@ module Provider
         check_optional_property :custom_flatten, String
         check_optional_property :custom_expand, String
 
-        raise "'default_value' and 'default_from_api' cannot be both set for 'default'"  \
+        raise "'default_value' and 'default_from_api' cannot be both set"  \
           if default_from_api && !default_value.nil?
       end
+      # rubocop:enable Metrics/MethodLength
 
       def apply(api_property)
         unless description.nil?
