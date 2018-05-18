@@ -22,7 +22,6 @@ module Provider
     module OverrideFields
       attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
       attr_reader :state_func # Adds a StateFunc to the schema
-      attr_reader :default
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
       attr_reader :validation # Adds a ValidateFunc to the schema
 
@@ -31,6 +30,11 @@ module Provider
       # If not specified, schema.HashString (when elements are string) or
       # schema.HashSchema are used.
       attr_reader :set_hash_func
+
+      # if true, then we get the default value from the Google API if no value
+      # is set in the terraform configuration for this field.
+      # It translates to setting the field to Computed & Optional in the schema.
+      attr_reader :default_from_api
 
       # ===========
       # Custom code
@@ -79,79 +83,36 @@ module Provider
       end
     end
 
-    # Default value for the property if any.
-    class Default < Api::Object
-      # the attributes below are mutually exclusive.
-
-      # if specified, then this will be set as the default value in the schema
-      attr_reader :value
-      # if true, then we get the default value from the Google API if no value
-      # is set in the terraform configuration for this field.
-      # It translates to setting the field to Computed & Optional in the schema.
-      attr_reader :from_api
-
-      def validate
-        super
-
-        # Ensure boolean values are set to false if nil
-        @from_api ||= false
-
-        check_property :from_api, :boolean
-
-        raise "'value' and 'from_api' cannot be both set for 'default'"  \
-          if from_api && !value.nil?
-
-        check_optional_property :update_statement, String
-        check_optional_property :custom_flatten, String
-        check_optional_property :custom_expand, String
-      end
-
-      def apply(api_property)
-        # This can't be done in validate because we don't have access to the
-        # api.yaml property yet.
-        check_default_value_property api_property
-      end
-
-      def check_default_value_property(api_property)
-        return if @default_value.nil?
-
-        if api_property.is_a?(Api::Type::String)
-          clazz = String
-        elsif api_property.is_a?(Api::Type::Integer)
-          clazz = Integer
-        elsif api_property.is_a?(Api::Type::Enum)
-          clazz = Symbol
-        else
-          raise "Update 'check_default_value_property' method to support " \
-                "default value for type #{api_property.class}"
-        end
-
-        check_optional_property :value, clazz
-      end
-    end
-
     # Terraform-specific overrides to api.yaml.
     class PropertyOverride < Provider::PropertyOverride
       include OverrideFields
 
+      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
         # Ensures boolean values are set to false if nil
         @sensitive ||= false
         @is_set ||= false
-
-        @default ||= Provider::Terraform::Default.new
+        @default_from_api ||= false
 
         check_property :sensitive, :boolean
         check_property :is_set, :boolean
-        check_property :default, Provider::Terraform::Default
+        check_property :default_from_api, :boolean
 
         check_optional_property :diff_suppress_func, String
         check_optional_property :state_func, String
         check_optional_property :validation, Provider::Terraform::Validation
         check_optional_property :set_hash_func, String
+
+        check_optional_property :update_statement, String
+        check_optional_property :custom_flatten, String
+        check_optional_property :custom_expand, String
+
+        raise "'default_value' and 'default_from_api' cannot be both set"  \
+          if default_from_api && !default_value.nil?
       end
+      # rubocop:enable Metrics/MethodLength
 
       def apply(api_property)
         unless description.nil?
@@ -166,8 +127,6 @@ module Provider
                   "'#{api_property.name}'"
           end
         end
-
-        @default.apply(api_property)
 
         super
       end
