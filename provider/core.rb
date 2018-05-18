@@ -225,7 +225,9 @@ module Provider
 
       generate_resource data
       generate_resource_tests data
-      generate_properties data, object.all_user_properties(object.version(version))
+      generate_properties(
+        data, object.all_user_properties(object.version(version))
+      )
       generate_network_datas data, object
     end
 

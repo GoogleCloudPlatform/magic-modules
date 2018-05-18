@@ -156,7 +156,8 @@ module Provider
     end
 
     def populate_nonoverridden_properties(api_entity, override)
-      api_entity.all_user_properties(api_entity.version(@__version)).each do |prop|
+      api_entity.all_user_properties(api_entity.version(@__version))
+                .each do |prop|
         override.properties[prop.name] = @__config.property_override.new \
           unless override.properties.include?(prop.name)
         populate_nonoverriden_nested_properties prop.name, prop, override

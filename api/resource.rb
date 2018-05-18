@@ -259,12 +259,14 @@ module Api
 
     def properties(version)
       version ||= @__product.default_version
-      (@properties || []).reject(&:exclude).select { |p| p.min_version <= version }
+      (@properties || []).reject(&:exclude)
+                         .select { |p| p.min_version <= version }
     end
 
     def parameters(version)
       version ||= @__product.default_version
-      (@parameters || []).reject(&:exclude).select { |p| p.min_version <= version }
+      (@parameters || []).reject(&:exclude)
+                         .select { |p| p.min_version <= version }
     end
 
     # Returns all properties and parameters including the ones that are
@@ -341,11 +343,7 @@ module Api
     end
 
     def min_version
-      if @min_version.nil?
-        @__product.default_version
-      else
-        @__product.version(@min_version)
-      end
+      version(@min_version)
     end
 
     def version(v)
@@ -379,9 +377,10 @@ module Api
           next if p.resource_ref == original_obj
           next if p.resource_ref == p.__resource
           rrefs << p
-          rrefs.concat(resourcerefs_for_properties(p.resource_ref
-                                                    .required_properties(version),
-                                                   original_obj))
+          rrefs.concat(resourcerefs_for_properties(
+                         p.resource_ref.required_properties(version),
+                         original_obj
+          ))
         elsif p.is_a? Api::Type::NestedObject
           rrefs.concat(resourcerefs_for_properties(p.properties, original_obj))
         elsif p.is_a? Api::Type::Array
@@ -390,9 +389,11 @@ module Api
                                                      original_obj))
           elsif p.item_type.is_a? Api::Type::ResourceRef
             rrefs << p.item_type
-            rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
-                                                      .required_properties(version),
-                                                     original_obj))
+            rrefs.concat(resourcerefs_for_properties(
+                           p.item_type.resource_ref
+                                      .required_properties(version),
+                           original_obj
+            ))
           end
         end
       end
