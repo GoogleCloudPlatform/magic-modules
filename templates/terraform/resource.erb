@@ -19,13 +19,6 @@ package google
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants %>
 
 <%
-	# ResourceManager APIs need to be imported from api/cloudresourcemanager, need to
-	# be namespaced as ResourceManager, and need to be upstream as gresourcemanager,
-  # which leads to a product_ns of 'Resourcemanager'.
-  # TODO: fix this hack.
-	if product_ns == 'Resourcemanager'
-		product_ns = 'ResourceManager'
-	end
 	resource_name = product_ns + object.name
 	properties = object.all_user_properties
 	settable_properties = properties.reject(&:output)
