@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Google Cloud Resource Manager
-prefix: gresourcemanager
+prefix: gresource_manager
 versions:
   - !ruby/object:Api::Product::Version
     name: v1
