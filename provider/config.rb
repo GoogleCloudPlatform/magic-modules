@@ -194,7 +194,7 @@ module Provider
       end
     end
 
-    def self.parse(cfg_file, api = nil, version)
+    def self.parse(cfg_file, api = nil, version = nil)
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
       config = Google::YamlValidator.parse(source)

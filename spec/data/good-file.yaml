@@ -96,4 +96,4 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'beta-property'
         description: 'A property that exists in the beta API'
-        version: 'beta'
+        min_version: 'beta'

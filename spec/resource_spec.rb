@@ -24,9 +24,26 @@ describe Api::Resource do
       product.objects.find { |o| o.name == 'AnotherResource' }
     end
 
-    it do
-      is_expected.not_to contain_property_with_name 'beta-property'
-      is_expected.to contain_property_with_name 'property1'
+    context 'v1' do
+      it do
+        is_expected.not_to(
+          contain_property_with_name('beta-property', subject.version('v1'))
+        )
+        is_expected.to(
+          contain_property_with_name('property1', subject.version('v1'))
+        )
+      end
+    end
+
+    context 'beta' do
+      it do
+        is_expected.to(
+          contain_property_with_name('beta-property', subject.version('beta'))
+        )
+        is_expected.to(
+          contain_property_with_name('property1', subject.version('beta'))
+        )
+      end
     end
   end
 
@@ -41,14 +58,15 @@ describe Api::Resource do
   end
 end
 
-RSpec::Matchers.define :contain_property_with_name do |expected|
+RSpec::Matchers.define :contain_property_with_name do |expected, version|
   match do |actual|
-    actual.properties.find { |p| p.name == expected }
+    actual.properties(version).find { |p| p.name == expected }
   end
   failure_message do |actual|
-    "expected #{actual.properties.map(&:name)} to contain #{expected}"
+    "expected #{actual.properties(version).map(&:name)} to contain #{expected}"
   end
   failure_message_when_negated do |actual|
-    "expected #{actual.properties.map(&:name)} not to contain #{expected}"
+    "expected #{actual.properties(version).map(&:name)}" \
+    "not to contain #{expected}"
   end
 end
