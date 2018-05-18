@@ -250,7 +250,7 @@ describe Api::Type::ResourceRef do
     before { product.validate }
 
     subject do
-      product.objects.collect { |o| o.parameters(product.default_version) }
+      product.objects.collect(&:parameters)
              .flatten
              .select { |p| p.class <= Api::Type::ResourceRef }
     end

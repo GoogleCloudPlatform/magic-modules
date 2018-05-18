@@ -370,7 +370,7 @@ module Api
       end
 
       def check_resource_ref_property_exists
-        exported_props = resource_ref.exported_properties(min_version)
+        exported_props = resource_ref.exported_properties
         raise "'#{@imports}' does not exist on '#{@resource}'" \
           if exported_props.none? { |p| p.name == @imports }
       end

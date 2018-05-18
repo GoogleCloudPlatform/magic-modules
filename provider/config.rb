@@ -194,7 +194,7 @@ module Provider
       end
     end
 
-    def self.parse(cfg_file, api = nil, version = nil)
+    def self.parse(cfg_file, api = nil)
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
       config = Google::YamlValidator.parse(source)
@@ -207,7 +207,7 @@ module Provider
       source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
       config.default_overrides
-      config.spread_api config, api, version, [], '' unless api.nil?
+      config.spread_api config, api, [], '' unless api.nil?
       config.validate
       config
     end
@@ -239,15 +239,15 @@ module Provider
     # Provides the API object to any type that requires, e.g. for validation
     # purposes, such as Api::Resource::HashArray which enforces that the keys
     # are necessarily objects defined in the API.
-    def spread_api(object, api, version, visited, indent)
+    def spread_api(object, api, visited, indent)
       object.instance_variables.each do |var|
         var_value = object.instance_variable_get(var)
         next if visited.include?(var_value)
         visited << var_value
         var_value.consume_api api if var_value.respond_to?(:consume_api)
-        var_value.consume_config api, self, version \
+        var_value.consume_config api, self \
           if var_value.respond_to?(:consume_config)
-        spread_api(var_value, api, version, visited, indent)
+        spread_api(var_value, api, visited, indent)
       end
     end
 

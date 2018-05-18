@@ -37,10 +37,9 @@ module Provider
   #   ...
   # rubocop:disable Metrics/ClassLength
   class ResourceOverrides < Api::Object
-    def consume_config(api, config, version)
+    def consume_config(api, config)
       @__api = api
       @__config = config
-      @__version = version
     end
 
     def validate
@@ -156,8 +155,7 @@ module Provider
     end
 
     def populate_nonoverridden_properties(api_entity, override)
-      api_entity.all_user_properties(api_entity.version(@__version))
-                .each do |prop|
+      api_entity.all_user_properties.each do |prop|
         override.properties[prop.name] = @__config.property_override.new \
           unless override.properties.include?(prop.name)
         populate_nonoverriden_nested_properties prop.name, prop, override

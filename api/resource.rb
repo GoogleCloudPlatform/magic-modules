@@ -257,16 +257,18 @@ module Api
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
 
-    def properties(version)
-      version ||= @__product.default_version
+    def properties
       (@properties || []).reject(&:exclude)
-                         .select { |p| p.min_version <= version }
     end
 
-    def parameters(version)
-      version ||= @__product.default_version
+    def parameters
       (@parameters || []).reject(&:exclude)
-                         .select { |p| p.min_version <= version }
+    end
+
+    def remove_user_properties_not_in_version!(version)
+      version ||= min_version
+      @properties&.keep_if { |p| p.min_version <= version }
+      @parameters&.keep_if { |p| p.min_version <= version }
     end
 
     # Returns all properties and parameters including the ones that are
@@ -275,22 +277,22 @@ module Api
       ((@properties || []) + (@parameters || []))
     end
 
-    def all_user_properties(version)
-      properties(version) + parameters(version)
+    def all_user_properties
+      properties + parameters
     end
 
-    def required_properties(version)
-      all_user_properties(version).select(&:required)
+    def required_properties
+      all_user_properties.select(&:required)
     end
 
-    def exported_properties(version)
+    def exported_properties
       return [] if @exports.nil?
       from_api = @exports.select { |e| e.is_a?(Api::Type::FetchedExternal) }
                          .each { |e| e.resource = self }
       prop_names = @exports - from_api
-      all_user_properties(version).select { |p| prop_names.include?(p.name) }
-                                  .concat(from_api)
-                                  .sort_by(&:name)
+      all_user_properties.select { |p| prop_names.include?(p.name) }
+                         .concat(from_api)
+                         .sort_by(&:name)
     end
 
     # TODO(alexstephen): Update test_constants to use this function.
@@ -305,19 +307,19 @@ module Api
       end.flatten
     end
 
-    def check_identity(version)
+    def check_identity
       check_property :identity, Array
 
       # Ensures we have all properties defined
       @identity.each do |i|
         raise "Missing property/parameter for identity #{i}" \
-          if all_user_properties(version).select { |p| p.name == i }.empty?
+          if all_user_properties.select { |p| p.name == i }.empty?
       end
     end
 
     # Returns all resourcerefs at any depth
-    def all_resourcerefs(version)
-      resourcerefs_for_properties(all_user_properties(version), self)
+    def all_resourcerefs
+      resourcerefs_for_properties(all_user_properties, self)
     end
 
     def kind?
@@ -364,7 +366,7 @@ module Api
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def resourcerefs_for_properties(props, original_obj, version)
+    def resourcerefs_for_properties(props, original_obj)
       rrefs = []
       props.each do |p|
         # We need to recurse on ResourceRefs to get all levels
@@ -377,9 +379,9 @@ module Api
           next if p.resource_ref == original_obj
           next if p.resource_ref == p.__resource
           rrefs << p
-          rrefs.concat(resourcerefs_for_properties(
-                         p.resource_ref.required_properties(version),
-                         original_obj
+          rrefs.concat(resourcerefs_for_properties(p.resource_ref
+                                                    .required_properties,
+                                                   original_obj
           ))
         elsif p.is_a? Api::Type::NestedObject
           rrefs.concat(resourcerefs_for_properties(p.properties, original_obj))
@@ -389,10 +391,9 @@ module Api
                                                      original_obj))
           elsif p.item_type.is_a? Api::Type::ResourceRef
             rrefs << p.item_type
-            rrefs.concat(resourcerefs_for_properties(
-                           p.item_type.resource_ref
-                                      .required_properties(version),
-                           original_obj
+            rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
+                                                      .required_properties,
+                                                     original_obj
             ))
           end
         end

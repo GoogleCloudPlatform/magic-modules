@@ -45,7 +45,6 @@ describe Provider::ResourceOverrides do
         let(:resource) do
           product.objects.find { |o| o.name == 'AnotherResource' }
         end
-        let(:version) { resource.version('v1') }
 
         context 'overrides resource description' do
           subject { resource.description }
@@ -54,15 +53,14 @@ describe Provider::ResourceOverrides do
 
         context 'overrides property description' do
           subject do
-            resource.properties(version)
-                    .find { |p| p.name == 'property1' }.description
+            resource.properties.find { |p| p.name == 'property1' }.description
           end
           it { is_expected.to eq 'foo' }
         end
 
         context 'overrides nested property description' do
           subject do
-            property = resource.properties(version).find do |p|
+            property = resource.properties.find do |p|
               p.name == 'nested-property'
             end
 
@@ -76,7 +74,7 @@ describe Provider::ResourceOverrides do
 
         context 'overrides array of nested property description' do
           subject do
-            property = resource.properties(version).find do |p|
+            property = resource.properties.find do |p|
               p.name == 'array-property'
             end
             nested_property = property.item_type.properties.find do |p|

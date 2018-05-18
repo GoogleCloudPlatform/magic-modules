@@ -26,6 +26,7 @@ describe Api::Resource do
 
     context 'v1' do
       it do
+        subject.remove_user_properties_not_in_version!(subject.version('v1'))
         is_expected.not_to(
           contain_property_with_name('beta-property', subject.version('v1'))
         )
@@ -37,6 +38,7 @@ describe Api::Resource do
 
     context 'beta' do
       it do
+        subject.remove_user_properties_not_in_version!(subject.version('beta'))
         is_expected.to(
           contain_property_with_name('beta-property', subject.version('beta'))
         )
@@ -58,15 +60,14 @@ describe Api::Resource do
   end
 end
 
-RSpec::Matchers.define :contain_property_with_name do |expected, version|
+RSpec::Matchers.define :contain_property_with_name do |expected|
   match do |actual|
-    actual.properties(version).find { |p| p.name == expected }
+    actual.properties.find { |p| p.name == expected }
   end
   failure_message do |actual|
-    "expected #{actual.properties(version).map(&:name)} to contain #{expected}"
+    "expected #{actual.properties.map(&:name)} to contain #{expected}"
   end
   failure_message_when_negated do |actual|
-    "expected #{actual.properties(version).map(&:name)}" \
-    "not to contain #{expected}"
+    "expected #{actual.properties.map(&:name)} not to contain #{expected}"
   end
 end

@@ -84,8 +84,8 @@ api = Api::Compiler.new(File.join(catalog, 'api.yaml')).run
 api.validate
 pp api if ENV['COMPILER_DEBUG']
 
-config = Provider::Config.parse(File.join(catalog, provider), api, version)
+config = Provider::Config.parse(File.join(catalog, provider), api)
 pp config if ENV['COMPILER_DEBUG']
 
-provider = config.provider.new(config, api)
-provider.generate output, types_to_generate, version
+provider = config.provider.new(config, api, version)
+provider.generate output, types_to_generate
