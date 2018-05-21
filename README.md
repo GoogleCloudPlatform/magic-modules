@@ -125,6 +125,7 @@ For example, to compile Google Compute Engine for Puppet, you invoke:
 And the generated code should be written to `build/puppet/compute`
 
 ### Compiling all modules
+
 The Rakefile can be used to compile all of the modules at once. The following
 rake command can be used to compile all modules for all providers or just
 a single provider.
@@ -186,9 +187,13 @@ tests further.
 
 ## Creating or updating a module
 
+Please refer to [Governance][governance] for concepts and guidelines on how to
+develop Magic Modules code.
+
 Please refer to [Developer Guide][developer] for details on how to create a new
 product or update an existing one.
 
 
+[governance]: GOVERNANCE.md
 [developer]: DEVELOPER.md
 [philosophy]: docs/philosophy.md
