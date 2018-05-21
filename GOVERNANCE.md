@@ -6,10 +6,10 @@ documented) reason.
 
 ## Table of Contents
 
-- [Folder Locations & Usage]
-- [Code Style]
-- [Ruby Best Practices & Style Guide]
-- [Testing]
+- [Folder Locations & Usage](#folder-locations--usage)
+- [Code Style](#code-style)
+- [Ruby Best Practices & Style Guide](#ruby-best-practices--style-guide)
+- [Testing](#testing)
 
 
 ## Folder Locations & Usage
