@@ -10,6 +10,7 @@ documented) reason.
 - [Code Style](#code-style)
 - [Ruby Best Practices & Style Guide](#ruby-best-practices--style-guide)
 - [Testing](#testing)
+- [Exceptions](#exceptions)
 
 
 ## Folder Locations & Usage
