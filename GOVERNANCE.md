@@ -44,18 +44,19 @@ folder and all its children, if applicable.
 
 Definitions:
 
-  - _Provider Independent_: No provider specific code, files or especializations
-    are allowed in this section
-  - _Product Independent_: No product specific code, files or especializations
-    are allowed in this section
+  - _Provider Independent_: Provider specific code, files or especializations
+    **must not** be placed in this area
+  - _Product Independent_: Product specific code, files or especializations
+    **must not** be placed in this area
 
 
 ## Code Style
 
-  - All Ruby code should strictly abide by Rubocop standards.
+  - All Ruby code **must** strictly abide by Rubocop standards.
     _Specializations to `.rubocop.yml` should be avoided at all costs._
-  - All rspec code should strictly abive by [rspec standards][rspec-style-guide]
-  - Line Lengths
+  - All rspec code **must** strictly abive by
+    [rspec standards][rspec-style-guide]
+  - Line Lengths **must** be:
       * Ruby: 80 chars
       * YAML:
           - Magic Modules YAML: 80 chars
@@ -359,6 +360,16 @@ can be used in such cases.
     **all** providers.
 
 Refer to [CONTRIBUTING][contrib] for details on how to test your changes.
+
+
+## Exceptions
+
+Any _permanent_ exceptions to these rules **must** be thoroughly documented in
+the code. If a longer discussion is required and becomes beyond the code where
+it lives an issue **must** be created and referenced for context.
+
+For any _temporary_ exceptions a tracking issue **must** be filed and added as a
+"TODO" in the code for future fixing.
 
 
 [contrib]: CONTRIBUTING.md
