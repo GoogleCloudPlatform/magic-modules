@@ -36,7 +36,7 @@ module Provider
     # product.prefix, which is in the format 'g<nameofproduct>', e.g.
     # gcompute or gresourcemanager.  This is munged in many places.
     # Some examples:
-    #   - prefix[1:-1] ('compute' / 'resourcemanager') for the 
+    #   - prefix[1:-1] ('compute' / 'resourcemanager') for the
     #     directory to fetch chef / puppet examples.
     #   - camelCase(prefix[1:-1]) for resource namespaces.
     #   - TitleCase(prefix[1:-1]) for resource names in terraform.

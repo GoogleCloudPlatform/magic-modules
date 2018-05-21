@@ -298,8 +298,12 @@ module Provider
     end
 
     def generate_resource_file(data)
-      product_ns = @config.name.nil? ? Google::StringUtils.camelize(
-        data[:object].__product.prefix[1..-1], :upper) : @config.name
+      product_ns = if @config.name.nil?
+                     Google::StringUtils.camelize(data[:object].__product
+                       .prefix[1..-1], :upper)
+                   else
+                     @config.name
+                   end
       generate_file(data.clone.merge(
         # Override with provider specific template for this object, if needed
         template: Google::HashUtils.navigate(data[:config], ['template',
