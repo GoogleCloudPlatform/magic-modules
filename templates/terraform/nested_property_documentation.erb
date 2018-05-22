@@ -4,9 +4,9 @@
 -%>
 The `<%= Google::StringUtils.underscore(property.name) -%>` block <%= if property.output then "contains" else "supports" end -%>:
 <% nested_properties.each do |prop| -%>
-<%= build_property_documentation(prop) -%>
+<%= build_property_documentation(prop) %>
 <% end -%>
 <% nested_properties.each do |prop| -%>
-  <%= build_nested_property_documentation(prop) -%>
+  <%= build_nested_property_documentation(prop) %>
 <% end -%>
 <% end -%>

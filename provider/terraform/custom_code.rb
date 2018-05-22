@@ -17,6 +17,19 @@ require 'provider/property_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
+    class Docs < Api::Object
+      attr_reader :required_properties
+      attr_reader :optional_properties
+      attr_reader :attributes
+
+      def validate
+        super
+        check_optional_property :required_properties, String
+        check_optional_property :optional_properties, String
+        check_optional_property :attributes, String
+      end
+    end
+
     # Inserts custom code into terraform resources.
     class CustomCode < Api::Object
       # Collection of fields allowed in the CustomCode section for

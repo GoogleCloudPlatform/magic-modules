@@ -25,6 +25,7 @@ module Provider
       attr_reader :id_format
       attr_reader :import_format
       attr_reader :custom_code
+      attr_reader :docs
 
       attr_reader :examples
     end
@@ -40,11 +41,13 @@ module Provider
         @id_format ||= '{{name}}'
         @import_format ||= []
         @custom_code ||= Provider::Terraform::CustomCode.new
+        @docs ||= Provider::Terraform::Docs.new
 
         check_property :id_format, String
 
         check_optional_property :examples, String
         check_optional_property :custom_code, Provider::Terraform::CustomCode
+        check_optional_property :docs, Provider::Terraform::Docs
         check_property :import_format, Array
       end
 

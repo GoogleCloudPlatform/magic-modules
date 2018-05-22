@@ -62,6 +62,9 @@ The following arguments are supported:
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
+<%- unless object.docs.required_properties.nil? -%>
+<%= lines(object.docs.required_properties) -%>
+<% end -%>
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
@@ -76,6 +79,9 @@ The following arguments are supported:
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
+<%- unless object.docs.optional_properties.nil? -%>
+<%= lines(object.docs.optional_properties) -%>
+<% end -%>
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -91,6 +97,9 @@ In addition to the arguments listed above, the following computed attributes are
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
+<%- unless object.docs.attributes.nil? -%>
+<%= lines(object.docs.attributes) -%>
+<% end -%>
 ## Timeouts
 
 This resource provides the following

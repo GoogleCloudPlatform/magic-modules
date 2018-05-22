@@ -63,18 +63,29 @@ overrides: !ruby/object:Provider::ResourceOverrides
         update_statement: templates/terraform/update_statement/use_label_fingerprint.erb
       diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func:  diskEncryptionKeyDiffSuppress
-        custom_expand: templates/terraform/encryption_key_expand.erb
+        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
       sourceImageEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: templates/terraform/encryption_key_expand.erb
+        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
       sourceSnapshotEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: templates/terraform/encryption_key_expand.erb
+        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_delete: templates/terraform/detach_disk.erb
-      post_import: templates/terraform/disk_import.erb
-      constants: templates/terraform/disk_constants.erb
-      encoder: templates/terraform/mutate_disk.erb
-      extra_schema_entry: templates/terraform/disk_extra_schema.erb
-      decoder: templates/terraform/disk_decoder.erb
+      pre_delete: templates/terraform/pre_delete/detach_disk.erb
+      post_import: templates/terraform/post_import/disk.erb
+      constants: templates/terraform/constants/disk.erb
+      encoder: templates/terraform/encoders/disk.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
+      decoder: templates/terraform/decoders/disk.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * (Deprecated) `disk_encryption_key_raw`:  This is an alias for
+          `disk_encryption_key.raw_key`.  It is deprecated to enhance
+          consistency with `source_image_encryption_key` and
+          `source_snapshot_encryption_key`.
+      attributes: |
+        * (Deprecated) `disk_encryption_key_sha256`: This is an alias for
+          `disk_encryption_key.sha256`.  It is deprecated to enhance
+          consistency with `source_image_encryption_key` and
+          `source_snapshot_encryption_key`.
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
