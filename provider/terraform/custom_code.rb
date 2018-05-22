@@ -17,7 +17,17 @@ require 'provider/property_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
+    # Inserts custom strings into terraform resource docs.
     class Docs < Api::Object
+      # All these values should be strings, which will be inserted
+      # directly into the terraform resource documentation.  The
+      # strings should _not_ be the names of template files
+      # (This should be reconsidered if we find ourselves repeating
+      # any string more than ones), but rather the actual text
+      # (including markdown) which needs to be injected into the
+      # template.
+      # The text will be injected at the bottom of the specified
+      # section.
       attr_reader :required_properties
       attr_reader :optional_properties
       attr_reader :attributes
