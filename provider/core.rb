@@ -381,9 +381,21 @@ module Provider
       else
         vars = quote_string(obj_url[0])
         vars_parts = obj_url[0].split('/')
+        # What's going on here?  :)  Here we have an API-defined string
+        # (the self-link format), which we are doggedly trying to fit
+        # into 72 characters or less (80 - the 8 of indentation).  A
+        # very small number of our self links won't fit in 72 characters,
+        # especially those with long type names.  Here, we're trying to
+        # format it into a list of arguments, so the string needs to end
+        # with a comma.
         format([
+                 # Option 1: 'foo/bar',
                  [[vars, ','].join],
-                 # vars is too big to fit, split in half
+                 # Option 2: [
+                 #             'foo',
+                 #             'bar
+                 #           ].join('/'),
+                 ['['] +
                  vars_parts.each_slice((vars_parts.size / 2.0).round).to_a
                  .map.with_index do |p, i|
                    # Use implicit string joining for the first line.

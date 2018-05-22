@@ -499,6 +499,8 @@ examples: !ruby/object:Api::Resource::HashArray
   Instance:
     - delete_instance.pp
     - instance.pp
+  InterconnectAttachment:
+    - interconnect_attachment.pp
   # License -- useful?
   License:
     - license.pp

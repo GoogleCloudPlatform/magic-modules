@@ -419,6 +419,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   InstanceTemplate: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  InterconnectAttachment: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_interconnect_attachment" "default" {
+        name         = "test-interconnect"
+        interconnect = "https://googleapis.com/compute/v1/projects/.../global/interconnects/..."
+        router       = "https://googleapis.com/compute/v1/projects/.../regions/.../routers/..."
+      }
+      ```
   License: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Provider::Terraform::ResourceOverride
