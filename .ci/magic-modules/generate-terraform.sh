@@ -25,6 +25,7 @@ LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 bundle install
 bundle exec compiler -p products/compute -e terraform -o "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google/"
 bundle exec compiler -p products/resourcemanager -e terraform -o "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google/"
+bundle exec compiler -p products/redis -e terraform -o "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google/"
 
 # This command can crash - if that happens, the script should not fail.
 set +e
