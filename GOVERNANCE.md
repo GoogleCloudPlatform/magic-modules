@@ -14,6 +14,7 @@ be followed **as much as possible**.
 
 - [Folder Locations & Usage](#folder-locations--usage)
 - [Code Style](#code-style)
+- [Templates](#templates)
 - [Testing](#testing)
 - [Exceptions](#exceptions)
 - [Ruby Best Practices & Style Guide](#ruby-best-practices--style-guide)
@@ -70,6 +71,24 @@ Definitions:
           - Product specific YAML: 80 chars
           - Provider specific YAML: up to provider standards
       * Markdown: 80 chars
+
+
+## Templates
+
+Template embedded code **should** be as simple as possible. Avoid complicated
+logic in the templates because:
+
+  1. It is harder to read and maintain
+  2. It cannot be easily unit tested
+
+It is best to only use simple iterators and provider specific functions.  If you
+have a complicated logic (e.g. 'build a map between URL and properties') it is
+best to put this functionality in the `provider/<provider>.rb` class.  All
+methods in the provider class are directly available to the template (e.g. the
+`indent()` function).
+
+If the function is useful for all providers then consider adding it to the
+global (core) provider namespace.
 
 
 ## Testing
