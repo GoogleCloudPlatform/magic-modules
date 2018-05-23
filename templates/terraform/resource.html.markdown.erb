@@ -91,16 +91,18 @@ In addition to the arguments listed above, the following computed attributes are
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
+<% unless object.async.nil? -%>
 ## Timeouts
 
 This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is 4 minutes.
+- `create` - Default is <%= object.async.operation.timeouts.insert_sec / 60 -%> minutes.
 <% if updatable?(object, properties) -%>
-- `update` - Default is 4 minutes.
+- `update` - Default is <%= object.async.operation.timeouts.update_sec / 60 -%> minutes.
 <% end -%>
-- `delete` - Default is 4 minutes.
+- `delete` - Default is <%= object.async.operation.timeouts.delete_sec / 60 -%> minutes.
+<% end -%>
 
 ## Import
 

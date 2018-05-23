@@ -191,11 +191,11 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
 <% end -%>
-	<% if has_self_link -%>
+<% if has_self_link -%>
 	if err := d.Set("self_link", res["selfLink"]); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
-	<% end -%>
+<% end -%>
 <% if has_project -%>
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
