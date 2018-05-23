@@ -43,6 +43,10 @@ To get more information about <%= object.name -%>, see:
 <%     end # object...guides.each -%>
 <%   end # object...guides.empty? -%>
 <% end # object...api.nil? -%>
+<%- unless object.docs.warning.nil? -%>
+
+~> **Warning:** <%= object.docs.warning -%>
+<%- end -%>
 
 <% unless object.examples.nil? -%>
 ## Example Usage

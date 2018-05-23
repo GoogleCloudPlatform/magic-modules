@@ -28,12 +28,14 @@ module Provider
       # template.
       # The text will be injected at the bottom of the specified
       # section.
+      attr_reader :warning
       attr_reader :required_properties
       attr_reader :optional_properties
       attr_reader :attributes
 
       def validate
         super
+        check_optional_property :warning, String
         check_optional_property :required_properties, String
         check_optional_property :optional_properties, String
         check_optional_property :attributes, String
