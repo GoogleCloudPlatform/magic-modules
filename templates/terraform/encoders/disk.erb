@@ -2,18 +2,18 @@ config := meta.(*Config)
 
 project, err := getProject(d, config)
 if err != nil {
-  return nil, err
+ 	return nil, err
 }
 
 // Get the zone
 z, err := getZone(d, config)
 if err != nil {
-  return nil, err
+ 	return nil, err
 }
 
 zone, err := config.clientCompute.Zones.Get(project, z).Do()
 if err != nil {
-  return nil, err
+ 	return nil, err
 }
 
 if v, ok := d.GetOk("image"); ok {
@@ -39,6 +39,25 @@ if v, ok := d.GetOk("type"); ok {
 	}
 
 	obj["type"] = diskType.SelfLink
+}
+
+if v, ok := d.GetOk("snapshot"); ok {
+		snapshotName := v.(string)
+		match, _ := regexp.MatchString("^https://www.googleapis.com/compute", snapshotName)
+		if match {
+			obj["sourceSnapshot"] = snapshotName
+		} else {
+			log.Printf("[DEBUG] Loading snapshot: %s", snapshotName)
+			snapshotData, err := config.clientCompute.Snapshots.Get(
+				project, snapshotName).Do()
+
+			if err != nil {
+				return nil, fmt.Errorf(
+					"Error loading snapshot '%s': %s",
+					snapshotName, err)
+			}
+			obj["sourceSnapshot"] = snapshotData.SelfLink
+		}
 }
 
 return obj, nil

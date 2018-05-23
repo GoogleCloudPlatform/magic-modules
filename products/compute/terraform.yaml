@@ -55,6 +55,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/region_name_only.erb'
       type: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/region_name_only.erb'
+        default_value: 'pd-standard'
       name: !ruby/object:Provider::Terraform::PropertyOverride
         input: true
       licenses: !ruby/object:Provider::Terraform::PropertyOverride
@@ -75,6 +76,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       encoder: templates/terraform/encoders/disk.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
       decoder: templates/terraform/decoders/disk.erb
+      resource_definition: templates/terraform/resource_definition/disk.erb
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
         * (Deprecated) `disk_encryption_key_raw`:  This is an alias for

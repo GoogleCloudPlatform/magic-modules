@@ -17,10 +17,6 @@ if v, ok := res["sourceImageEncryptionKey"]; ok {
   // The raw key won't be returned, so we need to use the original.
   transformed["raw_key"] = d.Get("source_image_encryption_key.0.raw_key")
   transformed["sha256"] = original["sha256"]
-  if v, ok := d.GetOk("disk_encryption_key_raw"); ok {
-    transformed["raw_key"] = v
-  }
-  d.Set("disk_encryption_key_sha256", original["sha256"])
   res["sourceImageEncryptionKey"] = transformed
 }
 
@@ -28,12 +24,8 @@ if v, ok := res["sourceSnapshotEncryptionKey"]; ok {
   original := v.(map[string]interface{})
   transformed := make(map[string]interface{})
   // The raw key won't be returned, so we need to use the original.
-  transformed["raw_key"] = d.Get("sourceSnapshotEncrptionKey.0.raw_key")
+  transformed["raw_key"] = d.Get("source_snapshot_encryption_key.0.raw_key")
   transformed["sha256"] = original["sha256"]
-  if v, ok := d.GetOk("disk_encryption_key_raw"); ok {
-    transformed["raw_key"] = v
-  }
-  d.Set("disk_encryption_key_sha256", original["sha256"])
   res["sourceSnapshotEncryptionKey"] = transformed
 }
 

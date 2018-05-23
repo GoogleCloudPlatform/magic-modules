@@ -699,6 +699,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       # 'options' fields is internal use only. do not expose.
       # | - !ruby/object:Api::Type::String
       # |   name: 'options'
