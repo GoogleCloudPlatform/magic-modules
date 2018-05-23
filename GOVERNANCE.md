@@ -1,16 +1,22 @@
-# Magic Modules Governance ("Golden Rules")
+# Magic Modules Governance (a.k.a. "Golden Rules")
 
 This document specified the basic principles behind the Magic Modules and its
 "golden rules" that _shall not be infringed_ without a very strong (and
 documented) reason.
 
+In this doc the term _'must'_ means something that **have to** be followed at
+all times (aside some specific exceptions detailed in the
+[Exceptions](#exceptions) section), and _'should'_ means something that have to
+be followed **as much as possible**.
+
+
 ## Table of Contents
 
 - [Folder Locations & Usage](#folder-locations--usage)
 - [Code Style](#code-style)
-- [Ruby Best Practices & Style Guide](#ruby-best-practices--style-guide)
 - [Testing](#testing)
 - [Exceptions](#exceptions)
+- [Ruby Best Practices & Style Guide](#ruby-best-practices--style-guide)
 
 
 ## Folder Locations & Usage
@@ -41,7 +47,7 @@ In the list above folders without `...` means the folder only. `...` represents
 folder and all its children, if applicable.
 
 > Corollary: To completely remove (or add) a product to Magic Modules, removing
-> (or adding) the `products/<product>/...` folder should be all it takes.
+> (or adding) the `products/<product>/...` folder is all it takes.
 
 Definitions:
 
@@ -54,7 +60,7 @@ Definitions:
 ## Code Style
 
   - All Ruby code **must** strictly abide by Rubocop standards.
-    _Specializations to `.rubocop.yml` should be avoided at all costs._
+    _Specializations to `.rubocop.yml` **should** be avoided at all costs._
   - All rspec code **must** strictly abive by
     [rspec standards][rspec-style-guide]
   - Line Lengths **must** be:
@@ -65,9 +71,44 @@ Definitions:
           - Provider specific YAML: up to provider standards
       * Markdown: 80 chars
 
+
+## Testing
+
+  - All changes **must** be tested for:
+      * Unit tests
+      * Code style compliance
+  - Changes to _Provider Independent_ code **must** be tested against **all**
+    providers
+  - Changes to _Product Indepedent_ code **must** be tested against **all**
+    products
+  - Changes to core Magic Modules features (which are both _Product_ and
+    _Provider_ independent) **must** be tested against *all* products **and**
+    **all** providers.
+  - Code coverage **must** always stay >80% and **should** be >90%
+
+Refer to [CONTRIBUTING][contrib] for details on how to test your changes.
+
+
+## Exceptions
+
+Any _permanent_ exceptions to these rules **must** be thoroughly documented in
+the code. If a longer discussion is required and becomes beyond the code where
+it lives an issue **must** be created and referenced for context.
+
+For any _temporary_ exceptions a tracking issue **must** be filed and added as a
+"TODO" in the code for future fixing.
+
+
 ## Ruby Best Practices & Style Guide
 
-### Inlined Ruby code should follow the [Ruby style guide][ruby-style-guide]
+To make the code easier to be maintained Magic Modules strives to have a
+consistent style guide and general rules outside regular Ruby style guides.
+These rules **must** be followed.
+
+### Inlined Ruby code to follow the Ruby style guide
+
+Ruby code **must** observe the rules in the
+[Ruby style guide][ruby-style-guide]. They help build better Ruby code.
 
 ### Keep ERB template code < 80 characters
 
@@ -77,7 +118,7 @@ example Go does not have a maximum line limit and it is up to the writer to
 break at will (usually following some project wide guidelines set by
 themselves). So to keep the best of both worlds:
 
-*   All inline Ruby code should fit <80 characters
+*   All inline Ruby code **must** fit <80 characters
 *   Generated code (and its non-inline Ruby text) is up to the writer's
     discretion
 
@@ -345,32 +386,6 @@ phases.
 
 Ruby's [Enumerable][ruby-enumerable] interface contains a list of methods that
 can be used in such cases.
-
-
-## Testing
-
-  - All changes should be tested for:
-      * Unit tests
-      * Code style compliance
-  - Changes to _Provider Independent_ code should be tested against **all**
-    providers
-  - Changes to _Product Indepedent_ code should be tested against **all**
-    products
-  - Changes to core Magic Modules features (which are both _Product_ and
-    _Provider_ independent) should be tested against *all* products **and**
-    **all** providers.
-
-Refer to [CONTRIBUTING][contrib] for details on how to test your changes.
-
-
-## Exceptions
-
-Any _permanent_ exceptions to these rules **must** be thoroughly documented in
-the code. If a longer discussion is required and becomes beyond the code where
-it lives an issue **must** be created and referenced for context.
-
-For any _temporary_ exceptions a tracking issue **must** be filed and added as a
-"TODO" in the code for future fixing.
 
 
 [contrib]: CONTRIBUTING.md
