@@ -8,6 +8,12 @@ folder. For example all the sources for the Google Compute Engine are inside the
 When compiling a product you specify the path to the products folder with the
 `-p` parameter.
 
+Please refer to these documents for general guidelines on how to write Magic
+Modules code:
+
+  - [GOVERNANCE][governance]
+  - [Template SDK][template-sdk]
+
 
 ## Anatomy of a Product
 
@@ -195,3 +201,5 @@ The following exports are allowed:
 
 [puppet-yaml]: docs/puppet.yaml.md
 [chef-yaml]: docs/chef.yaml.md
+[governance]: GOVERNANCE.md
+[template-sdk]: TEMPLATE_SDK.md
