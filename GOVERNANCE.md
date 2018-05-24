@@ -39,6 +39,18 @@ here.
     **all** providers.
   - Code coverage **must** always stay >80% and **should** be >90%
 
+
+### Object References & Self Links
+
+Resource URL and other self link constructs **must not** be exposed to
+customers. Use resource reference properties instead.
+
+For the cases where a URL is unavoidable, provide a function that constructs the
+URL based on the required properties of the resource being referenced. For
+example to build an image family source disk a function similar to this is to be
+provided: `gcompute_address_self_link(name, region, project)`.
+
+
 Refer to [CONTRIBUTING][contrib] for details on how to test your changes.
 
 
