@@ -4,10 +4,12 @@ This document specified the basic principles behind the Magic Modules and its
 "golden rules" that _shall not be infringed_ without a very strong (and
 documented) reason.
 
-In this doc the term _'must'_ means something that **have to** be followed at
-all times (aside some specific exceptions detailed in the
-[Exceptions](#exceptions) section), and _'should'_ means something that have to
-be followed **as much as possible**.
+In this doc the terms:
+
+  - **must**: means something that _have to be followed at all times_<br/>
+    (aside some specific exceptions detailed in the [Exceptions](#exceptions)
+    section)
+  - **should**: means something that have to be followed _as much as possible_.
 
 Please refer to the top-level [README][readme] and [Philosophy][phylosophy]
 before reading this guide.  All code-reviews of Magic Modules (regardless of
