@@ -21,6 +21,7 @@ here.
 - [Folder Locations & Usage](#folder-locations--usage)
 - [Code Style](#code-style)
 - [Templates](#templates)
+- [Code Reviews](#code-reviews)
 - [Exceptions](#exceptions)
 - [Ruby Best Practices & Style Guide](#ruby-best-practices--style-guide)
 
@@ -122,6 +123,22 @@ methods in the provider class are directly available to the template (e.g. the
 
 If the function is useful for all providers then consider adding it to the
 global (core) provider namespace.
+
+
+## Code Reviews
+
+All code changes **must** be reviewed by at least 1 other developer, following
+these guidelines:
+
+  - _Product changes_: change **must** be reviewed by a developer responsible
+    (or very familiar) with the product being changed
+  - _Provider changes_: changes **must** be reviewed by a developer responsible
+    (or very familiar) with the provider being changed
+  - _Core changes_: changes **must** be reviewed by a member of Magic Module's
+    core team
+
+A developer may be a member of 2+ groups and as long that every changed group
+has a developer that satisfies above it is okay to proceed.
 
 
 ## Exceptions
