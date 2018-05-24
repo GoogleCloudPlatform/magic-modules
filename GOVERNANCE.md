@@ -1,6 +1,6 @@
 # Magic Modules Governance (a.k.a. "Golden Rules")
 
-This document specified the basic principles behind the Magic Modules and its
+This document specifies the basic principles behind the Magic Modules and its
 "golden rules" that _shall not be infringed_ without a very strong (and
 documented) reason.
 
@@ -9,7 +9,7 @@ In this doc the terms:
   - **must**: means something that _have to be followed at all times_
   - **should**: means something that have to be followed _as much as possible_
 
-Please refer to the top-level [README][readme] and [Philosophy][phylosophy]
+Please refer to the top-level [README][readme] and [Philosophy][philosophy]
 before reading this guide.  All code-reviews of Magic Modules (regardless of
 changes to core, providers, or products) must follow the guidelines outlined
 here.
@@ -32,7 +32,7 @@ here.
       * Code style compliance
   - Changes to _Provider Independent_ code **must** be tested against **all**
     providers
-  - Changes to _Product Indepedent_ code **must** be tested against **all**
+  - Changes to _Product Independent_ code **must** be tested against **all**
     products
   - Changes to core Magic Modules features (which are both _Product_ and
     _Provider_ independent) **must** be tested against *all* products **and**
@@ -58,9 +58,9 @@ Definitions:
   - Folders:
     * Folders suffixed with `...` means folder and its children.
     * Folders without `...` represents the folder only.
-  - _Provider Independent_: Provider specific code, files or especializations
+  - _Provider Independent_: Provider specific code, files or specializations
     **must not** be placed in this area
-  - _Product Independent_: Product specific code, files or especializations
+  - _Product Independent_: Product specific code, files or specializations
     **must not** be placed in this area
 
 ### Folders
@@ -95,9 +95,9 @@ Definitions:
 
   - All Ruby code **must** strictly abide by Rubocop standards.
     _Specializations to `.rubocop.yml` **should** be avoided at all costs._
-  - All rspec code **must** strictly abive by
+  - All RSpec code **must** strictly abide by
     [rspec standards][rspec-style-guide]
-  - Line Lengths **must** be:
+  - Line Length **must** be:
       * Ruby: 80 chars
       * YAML:
           - Magic Modules YAML: 80 chars
@@ -191,7 +191,7 @@ return.
 
 ### Do not `.join("\n")`. Use [`lines()`](#lines) instead.
 
-To keep spotting where `\n` are added it cumbersome and error prone. Use
+To keep spotting where `\n` are added is cumbersome and error prone. Use
 [`lines`](#lines) function to ensure that your array is properly formatted.
 
 ### Prefer `-%>` (does not add `\n`) to `%>`.
@@ -427,7 +427,7 @@ can be used in such cases.
 
 
 [readme]: README.md
-[phylosophy]: docs/philosophy.md
+[philosophy]: docs/philosophy.md
 [contrib]: CONTRIBUTING.md
 [rspec-style-guide]: http://betterspecs.org
 [ruby-style-guide]: https://github.com/bbatsov/ruby-style-guide 
