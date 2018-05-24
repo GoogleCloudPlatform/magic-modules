@@ -164,6 +164,12 @@ Use `rspec` to test Magic Module changes:
 
     bundle exec rspec
 
+## Linting Magic Modules templates
+
+Use `erb-lint` to check Magic Modules templates:
+
+    bundle exec erblint **/*.erb
+
 
 ## Testing the generated code
 

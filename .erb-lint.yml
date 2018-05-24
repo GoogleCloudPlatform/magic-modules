@@ -1,0 +1,74 @@
+---
+linters:
+  # Ensures that all <% tags have a closing tag.
+  SelfClosingTag:
+    enabled: true
+  # Ensures that all ending tags use the -%> notion.
+  RightTrim:
+    enabled: true
+    enforced_style: '-'
+  # Trailing whitespace in ERB templates
+  TrailingWhitespace:
+    enabled: true
+  # Ensure that
+  # ```
+  # <%
+  #  code
+  # -%>
+  # ```
+  # notion is followed
+  # Note: This will not check for proper code indentation.
+  ClosingErbTagIndent:
+    enabled: true
+  # Ensure there's a newline at the end of the file.
+  FinalNewline:
+    enabled: true
+  # Run Rubocop on code in tags
+  Rubocop:
+    enabled: true
+    rubocop_config:
+      inherit_from:
+        - .rubocop.yml
+      # erb-lint guidelines recommended turning these cops off.
+      # They don't apply to ERB tags.
+      Layout/InitialIndentation:
+        Enabled: false
+      Layout/TrailingBlankLines:
+        Enabled: false
+      Layout/TrailingWhitespace:
+        Enabled: false
+      Naming/FileName:
+        Enabled: false
+      Style/FrozenStringLiteralComment:
+        Enabled: false
+      Metrics/LineLength:
+        Enabled: false
+      Lint/UselessAssignment:
+        Enabled: false
+      Rails/OutputSafety:
+        Enabled: false
+  # ---------------------------------------
+  # Turning off unnecessary default linters
+  # ---------------------------------------
+  # Terraform uses tabs.
+  SpaceIndentation:
+    enabled: false
+  # Our formatting for nesting if/else statements involves having multiple
+  # spaces after <% tags, which this cop does not like.
+  SpaceAroundErbTag:
+    enabled: false
+  # We have double newlines all over the place because we're writing code,
+  # not HTML
+  ExtraNewline:
+    enabled: false
+  # We don't write any Javascript
+  AllowedScriptType:
+    enabled: false
+  NoJavascriptTagHelper:
+    enabled: false
+  # These cops seems to confuse lines in our template with Ruby code.
+  # Best to ignore.
+  ParserErrors:
+    enabled: false
+  SpaceInHtmlTag:
+    enabled: false
