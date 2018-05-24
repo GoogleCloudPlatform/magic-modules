@@ -51,9 +51,6 @@ example to build an image family source disk a function similar to this is to be
 provided: `gcompute_address_self_link(name, region, project)`.
 
 
-Refer to [CONTRIBUTING][contrib] for details on how to test your changes.
-
-
 ## Folder Locations & Usage
 
 Definitions:
