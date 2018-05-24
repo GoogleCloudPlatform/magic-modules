@@ -6,10 +6,8 @@ documented) reason.
 
 In this doc the terms:
 
-  - **must**: means something that _have to be followed at all times_<br/>
-    (aside some specific exceptions detailed in the [Exceptions](#exceptions)
-    section)
-  - **should**: means something that have to be followed _as much as possible_.
+  - **must**: means something that _have to be followed at all times_
+  - **should**: means something that have to be followed _as much as possible_
 
 Please refer to the top-level [README][readme] and [Philosophy][phylosophy]
 before reading this guide.  All code-reviews of Magic Modules (regardless of
