@@ -26,3 +26,4 @@ this PR's changes from the commit messages for downstream commits.
 ### [puppet-sql]
 ### [puppet-compute]
 ## [chef]
+## [ansible]
