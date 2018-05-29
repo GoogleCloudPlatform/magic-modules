@@ -7,7 +7,11 @@ build/{{repo}}/{{name}}
 {%- endfor %}
 {% endmacro -%}
 {% set puppet_submodules = names_as_list('puppet', puppet_modules).split() %}
-{% set all_submodules = puppet_submodules + (['build/terraform'] if terraform_enabled else []) + (['build/ansible'] if ansible_enabled else []) %}
+{%
+  set all_submodules = puppet_submodules +
+     (['build/terraform'] if terraform_enabled else []) +
+     (['build/ansible'] if ansible_enabled else [])
+%}
 {% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
 {% set puppet_test_excludes = {
   'compute': [
