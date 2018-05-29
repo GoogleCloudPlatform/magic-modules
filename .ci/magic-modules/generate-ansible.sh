@@ -9,7 +9,10 @@ set -e
 pushd magic-modules-branched
 LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 bundle install
-bundle exec compiler -p products/compute -e ansible -o "build/ansible/"
+for i in $(find products/ -name 'ansible.yaml' -printf '%h\n');
+do
+  bundle exec compiler -p $i -e ansible -o "build/ansible/"
+done
 
 # This command can crash - if that happens, the script should not fail.
 set +e
