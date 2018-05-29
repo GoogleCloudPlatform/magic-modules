@@ -175,7 +175,7 @@ Platform  | Tool    | Test command
 Puppet    | rspec   | bundle exec rspec
 Chef      | rspec   | bundle exec rspec
 Terraform | go test | make test, make testacc
-Ansible   | various | [instructions](https://docs.ansible.com/ansible/2.3/dev_guide/testing.html)
+Ansible   | various | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
 
 
 For Terraform, copy the generated code into the main Terraform repo and run the
