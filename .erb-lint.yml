@@ -51,6 +51,7 @@ linters:
   # Turning off unnecessary default linters
   # ---------------------------------------
   # Terraform uses tabs.
+  # TODO: #218: Identify if Terraform should use tabs in the future.
   SpaceIndentation:
     enabled: false
   # Our formatting for nesting if/else statements involves having multiple
