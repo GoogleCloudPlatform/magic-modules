@@ -67,7 +67,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_global_forwarding_rule <%= example_resource_name('test1') -%> do
-  action :create
+  action :delete
   ip_address gcompute_global_address_ref(
     <%= example_resource_name('my-app-lb-address') -%>,
     'google.com:graphite-playground'

@@ -42,7 +42,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_forwarding_rule <%= example_resource_name('fwd-rule-test') -%> do
-  action :create
+  action :delete
   ip_address gcompute_address_ref(
     <%= example_resource_name('some-address') -%>,
     'us-west1', 'google.com:graphite-playground'
