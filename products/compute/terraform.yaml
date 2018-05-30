@@ -54,7 +54,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         description: |
           {{description}}* snapshot
       zone: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/region_name_only.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       image: !ruby/object:Provider::Terraform::PropertyOverride
         description: |
           The image from which to initialize this disk. This can be
@@ -67,7 +67,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
           These images can be referred by family name here.
       type: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/region_name_only.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         default_value: 'pd-standard'
       name: !ruby/object:Provider::Terraform::PropertyOverride
         input: true
