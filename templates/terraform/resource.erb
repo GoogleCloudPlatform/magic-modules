@@ -19,13 +19,6 @@ package google
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants %>
 
 <%
-	# ResourceManager APIs need to be imported from api/cloudresourcemanager, need to
-	# be namespaced as ResourceManager, and need to be upstream as gresourcemanager,
-  # which leads to a product_ns of 'Resourcemanager'.
-  # TODO: fix this hack.
-	if product_ns == 'Resourcemanager'
-		product_ns = 'ResourceManager'
-	end
 	resource_name = product_ns + object.name
 	properties = object.all_user_properties
 	settable_properties = properties.reject(&:output)
@@ -198,11 +191,11 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
 <% end -%>
-	<% if has_self_link -%>
+<% if has_self_link -%>
 	if err := d.Set("self_link", res["selfLink"]); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
-	<% end -%>
+<% end -%>
 <% if has_project -%>
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
