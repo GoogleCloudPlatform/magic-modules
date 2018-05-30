@@ -287,6 +287,9 @@ def resource_to_request(module):
   lines(method_decl('return_if_object', ['module', 'response',
                                          ('kind' if object.kind?)]))
 -%>
+<% if object.return_if_object -%>
+<%= lines(indent(object.return_if_object, 4)) -%>
+<% else # if object.return_if_object -%>
     # If not found, return nothing.
     if response.status_code == 404:
         return None
@@ -300,6 +303,7 @@ def resource_to_request(module):
         result = response.json()
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
+<% end # if object.return_if_object -%>
 
 <% if object.decoder? -%>
     result = <%= object.transport.decoder -%>(result, module)

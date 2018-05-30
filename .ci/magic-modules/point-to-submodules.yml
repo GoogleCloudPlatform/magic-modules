@@ -23,6 +23,7 @@ params:
   GH_USERNAME: ""
   CREDS: ""
   TERRAFORM_ENABLED: false
+  ANSIBLE_ENABLED: false
   PUPPET_MODULES: ""
   CHEF_MODULES: ""
 

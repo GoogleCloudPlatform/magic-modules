@@ -3050,7 +3050,20 @@ objects:
           name: 'sslCertificate'
           resource: 'SslCertificate'
           imports: 'selfLink'
-          description: 'The SSL certificates used by this TargetHttpsProxy'
+          description: 'The SSL certificates used by this TargetSslProxy'
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'sslPolicy'
+        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
+        exclude: true
+        resource: 'SslPolicy'
+        imports: 'selfLink'
+        description: |
+          A reference to the SslPolicy resource that will be associated with
+          the TargetSslProxy resource. If not set, the TargetSslProxy
+          resource will not have any SSL policy configured.
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/targetSslProxies/{{name}}/setSslPolicy'
   - !ruby/object:Api::Resource
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
