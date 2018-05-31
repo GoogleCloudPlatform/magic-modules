@@ -38,7 +38,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_snapshot <%= example_resource_name('data-disk-snapshot-1') -%> do
-  action :create
+  action :delete
   snapshot_encryption_key(
     raw_key: 'VGhpcyBpcyBhbiBlbmNyeXB0ZWQgc25hcHNob3QhISE='
   )

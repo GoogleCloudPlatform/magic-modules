@@ -51,7 +51,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_target_tcp_proxy <%= example_resource_name('my-tcp-proxy') -%> do
-  action :create
+  action :delete
   proxy_header 'PROXY_V1'
   service <%= example_resource_name('my-tcp-backend') %>
   project 'google.com:graphite-playground'

@@ -58,7 +58,7 @@ end
 
 <% end # name == README.md -%>
 gcompute_target_http_proxy <%= example_resource_name('my-http-proxy') -%> do
-  action :create
+  action :delete
   url_map <%= example_resource_name('my-url-map') %>
   project 'google.com:graphite-playground'
   credential 'mycred'
