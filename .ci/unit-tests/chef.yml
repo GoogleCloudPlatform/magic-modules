@@ -10,5 +10,6 @@ run:
   path: magic-modules/.ci/unit-tests/puppet-chef.sh
 params:
   PRODUCT: ""
-  PROVIDER: puppet
+  PROVIDER: chef
   EXCLUDE_PATTERN: ""
+  SPEC_DIR: spec
