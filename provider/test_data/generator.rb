@@ -68,7 +68,6 @@ module Provider
 
       private
 
-      # rubocop:disable Metrics/MethodLength
       def values
         {
           Api::Type::Boolean => method(:boolean_value),

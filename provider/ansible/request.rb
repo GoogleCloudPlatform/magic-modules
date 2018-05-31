@@ -87,7 +87,6 @@ module Provider
         ].join(' ')
       end
 
-      # rubocop:disable Metrics/MethodLength
       def response_output(prop, hash_name, module_name)
         # If input true, treat like request, but use module names.
         return request_output(prop, "#{module_name}.params", module_name) \

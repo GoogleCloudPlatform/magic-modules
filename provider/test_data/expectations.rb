@@ -170,7 +170,6 @@ module Provider
       # rubocop:enable Metrics/PerceivedComplexity
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/ParameterLists
       # Given an expectation (i.e. "expect_network_get_success"),
       # returns that expectation with all necessary parameters.

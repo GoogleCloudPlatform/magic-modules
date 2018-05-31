@@ -22,7 +22,6 @@ module Provider
       end
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       #
       # Returns a hash representing the data expected in a POST call to GCP
       # Used for unit tests
@@ -63,7 +62,6 @@ module Provider
       private
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       def expect_hash(prop, name_prop, has_name, seed = 0)
@@ -95,7 +93,6 @@ module Provider
       # rubocop:enable Metrics/AbcSize
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def expect_array_hash(prop, seed = 0)
         if prop.item_type.class <= Api::Type::NestedObject
           [
