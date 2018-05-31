@@ -22,14 +22,17 @@ end
 
 describe Provider::Terraform do
   context 'good file product' do
-    let(:config) { Provider::Config.parse('spec/data/terraform-config.yaml') }
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config) do
+      Provider::Config.parse('spec/data/terraform-config.yaml', product)
+    end
     let(:provider) { Provider::Terraform.new(config, product) }
 
     before do
       allow_open 'spec/data/good-file.yaml'
       allow_open 'spec/data/terraform-config.yaml'
       product.validate
+      config.validate
     end
 
     describe '#format2regex' do

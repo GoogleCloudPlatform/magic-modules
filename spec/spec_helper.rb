@@ -62,4 +62,4 @@ end
 
 require 'pp'
 
-Google::LOGGER.info 'Runing tests'
+Google::LOGGER.info 'Running tests'
