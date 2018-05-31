@@ -229,7 +229,6 @@ module Provider
       generate_network_datas data, object
     end
 
-    # rubocop:disable Metrics/MethodLength
     # Generates all 6 network data files for a object.
     # This includes all combinations of seeds [0-2] and title == / != name
     # Each data file is a YAML file with all properties possible on an object.

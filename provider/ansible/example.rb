@@ -177,7 +177,6 @@ module Provider
 
       private
 
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/CyclomaticComplexity
       def build_task(state, hash, object, noop = false)
         verb = verbs[state.to_sym]

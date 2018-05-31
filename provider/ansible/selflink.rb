@@ -46,7 +46,6 @@ module Provider
         end
       end
 
-      # rubocop:disable Metrics/MethodLength
       def selflink_function(resource)
         url = self_link_url(resource).gsub('{project}', '.*')
                                      .gsub('{name}', '[a-z1-9\-]*')

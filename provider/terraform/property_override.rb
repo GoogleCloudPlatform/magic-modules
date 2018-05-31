@@ -86,8 +86,6 @@ module Provider
     # Terraform-specific overrides to api.yaml.
     class PropertyOverride < Provider::PropertyOverride
       include OverrideFields
-
-      # rubocop:disable Metrics/MethodLength
       def validate
         super
 

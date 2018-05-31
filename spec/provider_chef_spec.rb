@@ -172,7 +172,6 @@ describe Provider::Chef do
   end
 
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def output_expectations_libraries(data)
     dw = dummy_writer
     output_file \

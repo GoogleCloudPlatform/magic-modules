@@ -345,7 +345,6 @@ module Api
     #                     avoid self-referencing objects.
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/MethodLength
     # rubocop:disable Metrics/PerceivedComplexity
     def resourcerefs_for_properties(props, original_obj)
       rrefs = []

@@ -519,7 +519,6 @@ module Provider
       )
     end
 
-    # rubocop:disable Metrics/MethodLength
     def generate_bolt_tasks_code(task, output_folder)
       style = task.style
       template = File.join('templates', 'puppet', case style

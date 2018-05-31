@@ -179,7 +179,6 @@ module Provider
         end.any?
       end
 
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def resourceref_hash_for_links(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
