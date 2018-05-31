@@ -142,7 +142,6 @@ module Provider
 
       # Builds out the minimal YAML block for DOCUMENTATION
       # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
       def minimal_doc_block(prop, _object, spaces)
         required = prop.required && !prop.default_value ? 'true' : 'false'
         [

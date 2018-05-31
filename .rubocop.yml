@@ -29,7 +29,7 @@ Metrics/ModuleLength:
     - 'compile/core.rb'
 
 Metrics/MethodLength:
-  Max: 15
+  Max: 25
 
 Security/Eval:
   Exclude:

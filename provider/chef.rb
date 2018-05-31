@@ -72,7 +72,6 @@ module Provider
     end
 
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     def prop_decl(prop)
@@ -125,7 +124,6 @@ module Provider
     # Returns a list of all resource types being tested
     # ChefSpec requires this list to include all ResourceRefs
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def step_into_list(object, indent, start_indent)
       steps = [object.out_name].concat(object.all_resourcerefs
                                              .map(&:resource_ref)
@@ -162,7 +160,6 @@ module Provider
       )
     end
 
-    # rubocop:disable Metrics/MethodLength
     def emit_coerce(product_ns, class_name, spaces_used = 0)
       type = "::Google::#{product_ns}::Property::#{class_name}"
       lines(format([
@@ -355,7 +352,6 @@ module Provider
     #                '/' (ex. first_level/second_level) or an array denoted
     #                by [] (ex. array_of_nested_props[])
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def build_nested_object(prop, current_path)
       object_lines = []
       prop.properties.each do |nested_prop|

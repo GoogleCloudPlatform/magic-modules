@@ -49,7 +49,6 @@ module Provider
         @provider = provider
       end
 
-      # rubocop:disable Metrics/MethodLength
       def generate(object, _, kind, seed, extra)
         props = object.all_user_properties
         name = Google::StringUtils.underscore(object.name)
@@ -121,7 +120,6 @@ module Provider
       end
 
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def handlers
         {
           Api::Type::Boolean => ->(v) { v },

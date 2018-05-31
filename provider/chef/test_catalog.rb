@@ -120,7 +120,6 @@ module Provider
     end
 
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def handlers
       {
         Api::Type::Boolean => ->(v) { v ? 'true' : 'false' },

@@ -64,7 +64,6 @@ module Provider
 
       # Returns a formatted string represented the choices of an enum
       # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def choices_enum(prop, spaces)
         name = Google::StringUtils.underscore(prop.out_name)
         type = "type=#{quote_string(python_type(prop))}"

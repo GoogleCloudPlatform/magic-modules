@@ -112,8 +112,6 @@ module Net
                 send_request start trace unlock].include?(m)
         next
       end
-
-      # rubocop:disable Metrics/MethodLength
       define_method(m) do |*args|
         request_allowed = true
 

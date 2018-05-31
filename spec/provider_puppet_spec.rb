@@ -568,7 +568,6 @@ describe Provider::Puppet do
   end
 
   # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
   def output_expectations_resource_ref(data)
     rref_name = "#{data[:kind]}_#{data[:resourceref][:name]}"
     rref_file = [data[:resourceref][:name].tr('_', ''),

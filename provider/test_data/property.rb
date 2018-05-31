@@ -27,7 +27,6 @@ module Provider
       #   it { is_expected.to have_attributes({prop.name}: #{expected value}) }
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/ParameterLists
       # rubocop:disable Metrics/PerceivedComplexity
       def property(prop, index, comparator, value, start_indent = 0,

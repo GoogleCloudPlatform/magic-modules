@@ -61,7 +61,6 @@ module Provider
 
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/PerceivedComplexity
       # prop_name_method is a method that returns the proper name of the object
       # rref_value: If true, return the value being exported by the ref'd block
@@ -88,12 +87,11 @@ module Provider
           raise "Unknown property type: #{prop.class}"
         end
       end
+
       # rubocop:enable Metrics/AbcSize
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/PerceivedComplexity
-
-      # rubocop:disable Metrics/MethodLength
       # prop_name_method should be a valid method on a Api::Type::*
       # Typically, this will be "out_name" or "field_name"
       def emit_manifest_array(type, prop, seed, ctx, prop_name_method)
@@ -148,7 +146,6 @@ module Provider
 
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/PerceivedComplexity
       def select_properties(props, kind, extra)
         name_props = props.select { |p| p.name == 'name' }

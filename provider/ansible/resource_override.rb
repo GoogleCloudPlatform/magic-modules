@@ -33,8 +33,6 @@ module Provider
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
-
-      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
