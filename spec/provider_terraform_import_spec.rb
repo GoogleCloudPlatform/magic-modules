@@ -24,7 +24,9 @@ end
 describe Provider::Terraform do
   context 'static' do
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
-    let(:config) { Provider::Config.parse('spec/data/terraform-config.yaml', product) }
+    let(:config) do
+      Provider::Config.parse('spec/data/terraform-config.yaml', product)
+    end
     let(:provider) { Provider::Terraform.new(config, product) }
 
     before do

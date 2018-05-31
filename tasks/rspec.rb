@@ -14,8 +14,8 @@
 require 'parallel_tests'
 
 namespace 'test' do
-  desc "Run RSpec code example"
+  desc 'Run RSpec code example'
   task :spec do |_, _|
-    abort unless system('parallel_rspec spec/') # allow to chain tasks e.g. rake parallel:spec parallel:features
+    abort unless system('parallel_rspec spec/')
   end
 end
