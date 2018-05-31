@@ -5,6 +5,7 @@ gem 'rake'
 
 group :test do
   gem 'mocha'
+  gem 'parallel_tests'
   gem 'rspec'
   gem 'rubocop'
   gem 'simplecov'
