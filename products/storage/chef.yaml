@@ -36,6 +36,10 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_bucket.rb
   BucketAccessControl:
     - bucket_access_control.rb
+  ObjectAccessControl:
+    - object_access_control.rb
+  DefaultObjectACL:
+    - default_object_acl.rb
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/chef/common~copy.yaml'), 4) %>
