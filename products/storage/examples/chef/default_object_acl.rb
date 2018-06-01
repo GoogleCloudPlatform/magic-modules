@@ -12,29 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<% bucket_name = 'puppet-storage-module-test' -%>
 <% unless name == "README.md" -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :puppet) -%>
+<%= lines(autogen_notice :chef) -%>
 
-<%= compile 'templates/puppet/examples~credential.pp.erb' -%>
+<%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gstorage_bucket { <%= example_resource_name(bucket_name) -%>:
-  ensure     => present,
-  project    => 'google.com:graphite-playground',
-  credential => 'mycred',
-}
+gstorage_bucket <%= example_resource_name('storage-module-test') -%> do
+  action :create
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end
 
 <% else # name == README.md -%>
-# Default Object ACLs require a bucket. Please ensure its existence with
+# Default Object ACL requires a bucket. Please ensure its existence with
 # the gstorage_bucket { ... } resource
 <% end # name == README.md -%>
 <% res_name = 'user-nelsona@google.com' -%>
-gstorage_default_object_acl { <%= example_resource_name(res_name) -%>:
-  bucket     => <%= example_resource_name(bucket_name) -%>,
-  entity     => 'user-nelsona@google.com',
-  role       => 'READER',
-  project    => 'google.com:graphite-playground',
-  credential => 'mycred',
-}
+gstorage_default_object_acl <%= example_resource_name(res_name) -%> do
+  action :create
+  bucket <%= example_resource_name('storage-module-test') %>
+  entity 'user-nelsona@google.com'
+  role 'WRITER'
+  project 'google.com:graphite-playground'
+  credential 'mycred'
+end

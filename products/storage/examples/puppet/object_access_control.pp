@@ -27,8 +27,8 @@ gstorage_bucket { <%= example_resource_name(bucket_name) -%>:
 }
 
 <% else # name == README.md -%>
-# Bucket Access Control requires a bucket. Please ensure its existence with
-# the gstorage_bucket { ... } resource
+# Object Access Control requires a bucket. Please ensure its existence with
+# the gstorage_bucket { ... } resource.  The object does not have to exist.
 <% end # name == README.md -%>
 <% res_name = 'user-nelsona@google.com' -%>
 gstorage_object_access_control { <%= example_resource_name(res_name) -%>:
