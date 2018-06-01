@@ -16,7 +16,7 @@
 
 package google
 
-<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants %>
+<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
 	resource_name = product_ns + object.name
