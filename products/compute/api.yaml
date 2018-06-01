@@ -545,6 +545,11 @@ objects:
 
       Add a persistent disk to your instance when you need reliable and
       affordable storage with consistent performance characteristics.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Adding a persistent disk':
+          'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/disks'
 <%=
   # Larger disk were timing out at creation. Bumping up to 5 minutes.
   # https://github.com/terraform-providers/terraform-provider-google/issues/703
@@ -699,6 +704,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       # 'options' fields is internal use only. do not expose.
       # | - !ruby/object:Api::Type::String
       # |   name: 'options'

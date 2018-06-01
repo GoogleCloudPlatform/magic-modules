@@ -16,7 +16,7 @@
 
 package google
 
-<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants %>
+<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
 	resource_name = product_ns + object.name
@@ -240,7 +240,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 		obj = map[string]interface{}{
 		<% props.each do |prop| -%>
       <% if prop.update_statement -%>
-        <%= prop.api_name -%>": <%= compile_template(prop.update_statement,
+        "<%= prop.api_name -%>": <%= compile_template(prop.update_statement,
                                                      prefix: resource_name,
                                                      property: prop) -%>
       <% else -%>
