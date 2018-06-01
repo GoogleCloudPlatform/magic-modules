@@ -59,6 +59,7 @@
 - !ruby/object:Api::Type::String
   name: 'object'
   description: 'The name of the object, if applied to an object.'
+  required: <%= object_required %>
 - !ruby/object:Api::Type::NestedObject
   name: 'projectTeam'
   description: 'The project team associated with the entity'

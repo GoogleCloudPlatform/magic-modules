@@ -81,6 +81,10 @@ objects:
         name: 'defaultObjectAcl'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
+<%# This template takes an argument which defines whethwe the 'object' attribute is required. -%>
+<%# It is not required when this template is used for a Default Object ACL, but it is -%>
+<%# required when it is used for a standard object ACL. -%>
+<% object_required = false -%>
 <%= indent(compile('products/storage/object_access_control.yaml'), 12) %>
         description: |
           Default access controls to apply to new objects when no ACL is
@@ -332,6 +336,7 @@ objects:
       For more information, see Access Control, with the caveat that this API
       uses READER and OWNER instead of READ and FULL_CONTROL.
     properties:
+<% object_required = true -%>
 <%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
   - !ruby/object:Api::Resource
     name: 'DefaultObjectACL'
@@ -352,6 +357,7 @@ objects:
       For more information, see Access Control, with the caveat that this API
       uses READER and OWNER instead of READ and FULL_CONTROL.
     properties:
+<% object_required = false -%>
 <%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
 
   
