@@ -254,13 +254,12 @@ module Compile
     end
 
     def autogen_notice(lang)
-      lang = :ruby if lang == :test
-      $file_expectations[:autogen] = true
+      @file_expectations[:autogen] = true
       comment_block(compile('templates/autogen_notice.erb').split("\n"), lang)
     end
 
     def autogen_exception
-      $file_expectations[:autogen] = true
+      @file_expectations[:autogen] = true
     end
 
     def comment_block(text, lang)

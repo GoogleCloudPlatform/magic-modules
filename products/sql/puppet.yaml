@@ -284,8 +284,8 @@ files: !ruby/object:Provider::Config::Files
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
     lib/google/sql/api/gsql_instance.rb:
-      products/sql/helpers/api_gsql_instance.rb
-    lib/google/sql/api/gsql_user.rb: products/sql/helpers/api_gsql_user.rb
+      products/sql/helpers/api_gsql_instance.erb
+    lib/google/sql/api/gsql_user.rb: products/sql/helpers/api_gsql_user.erb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>

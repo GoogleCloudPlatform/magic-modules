@@ -553,9 +553,9 @@ files: !ruby/object:Provider::Config::Files
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
     lib/google/compute/api/gcompute_disk.rb:
-      products/compute/helpers/api_gcompute_disk.rb
+      products/compute/helpers/api_gcompute_disk.erb
     lib/google/compute/api/gcompute_instance.rb:
-      products/compute/helpers/api_gcompute_instance.rb
+      products/compute/helpers/api_gcompute_instance.erb
     lib/puppet/functions/gcompute_task_load_params.rb:
       templates/puppet/bolt~task_load_params.rb.erb
     lib/puppet/functions/gcompute_task_validate_param.rb:

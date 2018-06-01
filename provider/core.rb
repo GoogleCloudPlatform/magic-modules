@@ -607,14 +607,12 @@ module Provider
       end
     end
 
-    def enforce_file_expectations(filename, &block)
-      $file_expectations = {
+    def enforce_file_expectations(filename)
+      @file_expectations = {
         autogen: false
       }
-      block.call
-      unless $file_expectations[:autogen]
-        raise "#{filename} missing autogen"
-      end
+      yield
+      raise "#{filename} missing autogen" unless @file_expectations[:autogen]
     end
 
     # Write the output to a file. We write one line at a time so tests can
