@@ -26,9 +26,7 @@ describe Provider::Terraform do
     let(:config) do
       Provider::Config.parse('spec/data/terraform-config.yaml', product)
     end
-    let(:provider) do
-      Provider::Terraform.new(config, product, product.version('v1'))
-    end
+    let(:provider) { Provider::Terraform.new(config, product) }
     let(:resource) { product.objects[0] }
 
     before do
@@ -65,21 +63,22 @@ describe Provider::Terraform do
     end
 
     describe '#collection_url' do
-      subject { provider.collection_url(resource, resource.version('v1')) }
+      subject { provider.collection_url(resource) }
       it do
         is_expected.to eq 'http://myproduct.google.com/api/referencedresource'
       end
     end
 
     describe '#collection_url beta' do
-      subject { provider.collection_url(resource, resource.version('beta')) }
+      subject { provider.collection_url(resource) }
       it do
+        product.version = 'beta'
         is_expected.to eq 'http://myproduct.google.com/api/beta/referencedresource'
       end
     end
 
     describe '#self_link_url' do
-      subject { provider.self_link_url(resource, resource.version('v1')) }
+      subject { provider.self_link_url(resource) }
       it do
         is_expected.to eq(
           'http://myproduct.google.com/api/referencedresource/{{name}}'
@@ -88,8 +87,9 @@ describe Provider::Terraform do
     end
 
     describe '#self_link_url beta' do
-      subject { provider.self_link_url(resource, resource.version('beta')) }
+      subject { provider.self_link_url(resource) }
       it do
+        product.version = 'beta'
         is_expected.to eq(
           'http://myproduct.google.com/api/beta/referencedresource/{{name}}'
         )

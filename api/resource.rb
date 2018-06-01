@@ -213,11 +213,6 @@ module Api
       @identity
     end
 
-    def set_sub_vars
-      set_variables(@parameters, :__resource)
-      set_variables(@properties, :__resource)
-    end
-
     # Main data validation. As the validation code is simple, but long due to
     # the number of properties, it is okay to ignore Rubocop warnings about
     # method size and complexity.
@@ -248,6 +243,9 @@ module Api
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
       check_optional_property :min_version, String
+
+      set_variables(@parameters, :__resource)
+      set_variables(@properties, :__resource)
 
       check_property_list :parameters, Api::Type
       check_property_list :properties, Api::Type
@@ -345,14 +343,10 @@ module Api
     end
 
     def min_version
-      version(@min_version)
-    end
-
-    def version(v)
-      if v.nil?
+      if @min_version.nil?
         @__product.default_version
       else
-        @__product.version(v)
+        @__product.version_obj(@min_version)
       end
     end
 
@@ -381,8 +375,7 @@ module Api
           rrefs << p
           rrefs.concat(resourcerefs_for_properties(p.resource_ref
                                                     .required_properties,
-                                                   original_obj
-          ))
+                                                   original_obj))
         elsif p.is_a? Api::Type::NestedObject
           rrefs.concat(resourcerefs_for_properties(p.properties, original_obj))
         elsif p.is_a? Api::Type::Array
@@ -393,8 +386,7 @@ module Api
             rrefs << p.item_type
             rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
                                                       .required_properties,
-                                                     original_obj
-            ))
+                                                     original_obj))
           end
         end
       end

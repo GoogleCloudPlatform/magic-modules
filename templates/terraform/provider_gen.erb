@@ -24,7 +24,7 @@ import "github.com/hashicorp/terraform/helper/schema"
 end -%>
 
 var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
-<% product.objects.reject { |r| r.exclude || r.version(version) < r.min_version }.each do |object| -%>
+<% product.objects.reject { |r| r.exclude || version < r.min_version }.each do |object| -%>
 <% resource_name = product_ns + object.name -%>
 	"google_<%= Google::StringUtils.underscore(resource_name) -%>": resource<%= resource_name -%>(),
 <% end -%>

@@ -111,9 +111,6 @@ module Google
       else
         Google::LOGGER.info \
           "Checking next level for #{object_display_name}: #{name}"
-        # Set sub variables on all objects first in case they are needed
-        # for validation of other objects (such as when using ResourceRefs)
-        obj_list.each { |o| o.set_sub_vars if o.respond_to?(:set_sub_vars) }
         obj_list.each { |o| check_property_value "#{name}:item", o, type }
       end
     end

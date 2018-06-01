@@ -112,7 +112,7 @@ module Api
       if @min_version.nil?
         @__resource.min_version
       else
-        @__resource.__product.version(@min_version)
+        @__resource.__product.version_obj(@min_version)
       end
     end
 

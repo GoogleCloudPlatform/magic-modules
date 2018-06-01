@@ -42,10 +42,9 @@ module Provider
 
     attr_reader :test_data
 
-    def initialize(config, api, version=nil)
+    def initialize(config, api)
       @config = config
       @api = api
-      @version = version
       @property = Provider::TestData::Property.new(self)
       @constants = Provider::TestData::Constants.new(self)
       @data_gen = Provider::TestData::Generator.new
@@ -98,7 +97,9 @@ module Provider
     end
 
     def compile_files(output_folder)
-      compile_file_list(output_folder, @config.files.compile, version: @version)
+      compile_file_list(
+        output_folder, @config.files.compile, version: @api.version
+      )
     end
 
     def compile_examples(output_folder)
@@ -218,7 +219,7 @@ module Provider
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && object.version(@version) < object.min_version
+        elsif types.empty? && @api.version < object.min_version
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
           generate_object object, output_folder
@@ -230,7 +231,7 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
 
     def generate_object(object, output_folder)
-      object.remove_user_properties_not_in_version!(@version)
+      object.remove_user_properties_not_in_version!(@api.version)
       data = build_object_data(object, output_folder)
 
       generate_resource data
@@ -303,7 +304,7 @@ module Provider
                                     .fetch(object.name, {}),
         output_folder: output_folder,
         product_name: object.__product.prefix[1..-1],
-        version: @version
+        version: @api.version
       }
     end
 
@@ -364,18 +365,18 @@ module Provider
     end
 
     def async_operation_url(resource)
-      build_url(resource.__product.default_version.base_url,
+      build_url(resource.__product.base_url,
                 resource.async.operation.base_url,
                 true)
     end
 
     def collection_url(resource)
       base_url = resource.base_url.split("\n").map(&:strip).compact
-      build_url(resource.__product.default_version.base_url, base_url)
+      build_url(resource.__product.base_url, base_url)
     end
 
-    def self_link_raw_url(resource, version)
-      base_url = version.base_url.split("\n").map(&:strip).compact
+    def self_link_raw_url(resource)
+      base_url = resource.__product.base_url.split("\n").map(&:strip).compact
       if resource.self_link.nil?
         [base_url, [resource.base_url, '{{name}}'].join('/')]
       else

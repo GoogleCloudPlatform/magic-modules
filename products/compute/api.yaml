@@ -2730,6 +2730,7 @@ objects:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
     input: true
+    min_version: beta
     description: |
       Represents a TargetHttpProxy resource, which is used by one or more global
       forwarding rule to route incoming HTTP requests to a URL map.
@@ -2828,6 +2829,7 @@ objects:
           resource: 'SslCertificate'
           imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
+        min_version: beta
       - !ruby/object:Api::Type::ResourceRef
         name: 'urlMap'
         resource: 'UrlMap'

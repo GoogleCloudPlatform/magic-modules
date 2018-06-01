@@ -27,9 +27,7 @@ describe Provider::Terraform do
     let(:config) do
       Provider::Config.parse('spec/data/terraform-config.yaml', product)
     end
-    let(:provider) do
-      Provider::Terraform.new(config, product, product.version('v1'))
-    end
+    let(:provider) { Provider::Terraform.new(config, product) }
 
     before do
       allow_open 'spec/data/good-file.yaml'

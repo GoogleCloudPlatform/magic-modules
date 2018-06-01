@@ -22,6 +22,7 @@ module Api
     attr_reader :prefix
     attr_reader :scopes
     attr_reader :versions
+    attr_reader :version
 
     include Compile::Core
 
@@ -71,12 +72,29 @@ module Api
       return @versions.last if @versions.length == 1
     end
 
-    def version(name)
+    # def version
+    #   @version.nil? ? default_version : @version
+    # end
+
+    def base_url
+      v = @version.nil? ? default_version : @version
+      v.base_url
+    end
+
+    def version_obj(name)
       @versions.each do |v|
         return v if v.name == name
       end
 
       raise "API version '#{name}' does not exist for product '#{@name}'"
+    end
+
+    def version=(v)
+      @version = if v.nil?
+                   default_version
+                 else
+                   version_obj(v)
+                 end
     end
 
     private

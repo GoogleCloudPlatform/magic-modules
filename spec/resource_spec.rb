@@ -26,25 +26,19 @@ describe Api::Resource do
 
     context 'v1' do
       it do
-        subject.remove_user_properties_not_in_version!(subject.version('v1'))
-        is_expected.not_to(
-          contain_property_with_name('beta-property', subject.version('v1'))
-        )
-        is_expected.to(
-          contain_property_with_name('property1', subject.version('v1'))
-        )
+        version = product.version_obj('v1')
+        subject.remove_user_properties_not_in_version!(version)
+        is_expected.not_to(contain_property_with_name('beta-property', version))
+        is_expected.to(contain_property_with_name('property1', version))
       end
     end
 
     context 'beta' do
       it do
-        subject.remove_user_properties_not_in_version!(subject.version('beta'))
-        is_expected.to(
-          contain_property_with_name('beta-property', subject.version('beta'))
-        )
-        is_expected.to(
-          contain_property_with_name('property1', subject.version('beta'))
-        )
+        version = product.version_obj('beta')
+        subject.remove_user_properties_not_in_version!(version)
+        is_expected.to(contain_property_with_name('beta-property', version))
+        is_expected.to(contain_property_with_name('property1', version))
       end
     end
   end
