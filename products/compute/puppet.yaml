@@ -556,7 +556,6 @@ files: !ruby/object:Provider::Config::Files
       products/compute/helpers/api_gcompute_disk.rb
     lib/google/compute/api/gcompute_instance.rb:
       products/compute/helpers/api_gcompute_instance.rb
-    lib/google/object_store.rb: google/object_store.rb
     lib/puppet/functions/gcompute_task_load_params.rb:
       templates/puppet/bolt~task_load_params.rb.erb
     lib/puppet/functions/gcompute_task_validate_param.rb:
