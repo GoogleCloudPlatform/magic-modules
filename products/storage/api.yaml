@@ -77,16 +77,19 @@ objects:
                 The list of HTTP headers other than the simple response headers
                 to give permission for the user-agent to share across domains.
               item_type: Api::Type::String
-      # TODO(nelsonjr): Implement default object ACL. To be implemented when
-      # ObjectAccessControl is implemented.
-      #- !ruby/object:Api::Type::Array
-      #  name: 'defaultObjectAcl'
-      #  item_type: Api::Type::NestedObject
-      #  description: |
-      #    Default access controls to apply to new objects when no ACL is
-      #    provided.
-      #  input: true
-      #  properties:
+      - !ruby/object:Api::Type::Array
+        name: 'defaultObjectAcl'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+<%# This template takes an argument which defines whethwe the 'object' attribute is required. -%>
+<%# It is not required when this template is used for a Default Object ACL, but it is -%>
+<%# required when it is used for a standard object ACL. -%>
+<% object_required = false -%>
+<%= indent(compile('products/storage/object_access_control.yaml'), 12) %>
+        description: |
+          Default access controls to apply to new objects when no ACL is
+          provided.
+        input: true
       # | 'etag' is not applicable for state convergene.
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -314,7 +317,47 @@ objects:
       READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
     properties:
 <%= indent(compile('products/storage/bucket_access_control.yaml'), 6) %>
-  # | - !ruby/object:Api::Resource
-  # |   name: 'ObjectAccessControl'
-  # TODO(nelsonjr): Update Bucket defaultObjectAcl once ObjectAccessControl is
-  # implemented
+  - !ruby/object:Api::Resource
+    name: 'ObjectAccessControl'
+    kind: 'storage#objectAccessControl'
+    base_url: b/{{bucket}}/o/{{object}}/acl
+    self_link: b/{{bucket}}/o/{{object}}/acl/{{entity}}
+    description: |
+      The ObjectAccessControls resources represent the Access Control Lists
+      (ACLs) for objects within Google Cloud Storage. ACLs let you specify
+      who has access to your data and to what extent.
+
+      There are two roles that can be assigned to an entity:
+
+      READERs can get an object, though the acl property will not be revealed.
+      OWNERs are READERs, and they can get the acl property, update an object,
+      and call all objectAccessControls methods on the object. The owner of an
+      object is always an OWNER.
+      For more information, see Access Control, with the caveat that this API
+      uses READER and OWNER instead of READ and FULL_CONTROL.
+    properties:
+<% object_required = true -%>
+<%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
+  - !ruby/object:Api::Resource
+    name: 'DefaultObjectACL'
+    kind: 'storage#objectAccessControl'
+    base_url: b/{{bucket}}/defaultObjectAcl
+    self_link: b/{{bucket}}/defaultObjectAcl/{{entity}}
+    description: |
+      The ObjectAccessControls resources represent the Access Control Lists
+      (ACLs) for objects within Google Cloud Storage. ACLs let you specify
+      who has access to your data and to what extent.
+
+      There are two roles that can be assigned to an entity:
+
+      READERs can get an object, though the acl property will not be revealed.
+      OWNERs are READERs, and they can get the acl property, update an object,
+      and call all objectAccessControls methods on the object. The owner of an
+      object is always an OWNER.
+      For more information, see Access Control, with the caveat that this API
+      uses READER and OWNER instead of READ and FULL_CONTROL.
+    properties:
+<% object_required = false -%>
+<%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
+
+  
