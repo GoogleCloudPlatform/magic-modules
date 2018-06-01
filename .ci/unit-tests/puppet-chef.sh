@@ -7,5 +7,5 @@ if [ -n "$SPEC_DIR" ]; then
   cd "$SPEC_DIR"
 fi
 bundle install
-bundle exec rspec --exclude_pattern "$EXCLUDE_PATTERN"
+DISABLE_COVERAGE=true bundle exec rspec --exclude_pattern "$EXCLUDE_PATTERN"
 popd
