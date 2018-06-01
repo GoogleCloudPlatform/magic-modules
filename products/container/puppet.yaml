@@ -116,7 +116,6 @@ files: !ruby/object:Provider::Config::Files
   compile:
     lib/google/container/api/gcontainer_node_pool.rb:
       products/container/helpers/api_gcontainer_node_pool.rb
-    lib/google/object_store.rb: google/object_store.rb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 style:

@@ -97,7 +97,6 @@ files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
   compile:
-    lib/google/object_store.rb: google/object_store.rb
     lib/google/storage/api/gstorage_object.rb:
       products/storage/helpers/api_gstorage_object.rb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>

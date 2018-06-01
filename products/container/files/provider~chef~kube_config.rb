@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<%= lines(autogen_notice :ruby) -%>
+
 # Add our google/ lib
 $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 

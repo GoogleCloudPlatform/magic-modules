@@ -283,7 +283,6 @@ files: !ruby/object:Provider::Config::Files
     # Client-side functions require 'google/authorization'
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
-    lib/google/object_store.rb: google/object_store.rb
     lib/google/sql/api/gsql_instance.rb:
       products/sql/helpers/api_gsql_instance.rb
     lib/google/sql/api/gsql_user.rb: products/sql/helpers/api_gsql_user.rb

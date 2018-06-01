@@ -154,7 +154,6 @@ files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
   compile:
-    lib/google/object_store.rb: google/object_store.rb
     lib/google/pubsub/api/gpubsub_topic.rb:
       products/pubsub/helpers/api_gpubsub_topic.rb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
