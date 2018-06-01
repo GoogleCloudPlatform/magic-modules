@@ -14,6 +14,7 @@
 <% end -%>
 #!/opt/puppetlabs/puppet/bin/ruby
 <%= compile 'templates/license.erb' -%>
+<%= lines(autogen_notice :ruby) -%>
 
 <%=
   lines(wrap_field(task.description_display, 0).split("\n")
