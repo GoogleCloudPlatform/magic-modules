@@ -89,6 +89,10 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_bucket.pp
   BucketAccessControl:
     - bucket_access_control.pp
+  DefaultObjectACL:
+    - default_object_acl.pp
+  ObjectAccessControl:
+    - object_access_control.pp
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
