@@ -379,46 +379,47 @@ jobs:
           # because a new PR has just been created from that branch.  The second time through
           # the pipeline (when a PR needs to be updated), this does that updating by pushing
           # the new code to the repository/branch from which a pull request is already open.
-        {% if terraform_enabled %}
-          - put: terraform-intermediate
-            params:
-              repository: magic-modules-with-comment/build/terraform
-              branch_file: magic-modules-with-comment/original_pr_branch_name
-              # Every time a change runs through this pipeline, it will generate a commit with
-              # a different hash - the hash includes timestamps.  Therefore, even if there's no
-              # code diff, this push will update terraform's pending PR on every update to the
-              # magic-modules PR.  With this 'only_if_diff' feature, if the change to the
-              # magic-modules PR does not require an update to the terraform PR, this will
-              # not push the update even though the commit hashes are different.
-              only_if_diff: true
-              force: true
-        {% endif %}
-        {% if ansible_enabled %}
-          - put: ansible-intermediate
-            params:
-              repository: magic-modules-with-comment/build/ansible
-              branch_file: magic-modules-with-comment/original_pr_branch_name
-              # See comment on terraform-intermediate
-              only_if_diff: true
-              force: true
-        {% endif %}
-        {% for module in puppet_modules %}
-          - put: puppet-{{module}}-intermediate
-            params:
-              repository: magic-modules-with-comment/build/puppet/{{module}}
-              branch_file: magic-modules-with-comment/original_pr_branch_name
-              only_if_diff: true
-              force: true
-        {% endfor %}
+          - aggregate:
+          {% if terraform_enabled %}
+            - put: terraform-intermediate
+              params:
+                repository: magic-modules-with-comment/build/terraform
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                # Every time a change runs through this pipeline, it will generate a commit with
+                # a different hash - the hash includes timestamps.  Therefore, even if there's no
+                # code diff, this push will update terraform's pending PR on every update to the
+                # magic-modules PR.  With this 'only_if_diff' feature, if the change to the
+                # magic-modules PR does not require an update to the terraform PR, this will
+                # not push the update even though the commit hashes are different.
+                only_if_diff: true
+                force: true
+          {% endif %}
+          {% if ansible_enabled %}
+            - put: ansible-intermediate
+              params:
+                repository: magic-modules-with-comment/build/ansible
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                # See comment on terraform-intermediate
+                only_if_diff: true
+                force: true
+          {% endif %}
+          {% for module in puppet_modules %}
+            - put: puppet-{{module}}-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/{{module}}
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          {% endfor %}
 
-        {% for module in puppet_modules %}
-          - put: chef-{{module}}-intermediate
-            params:
-              repository: magic-modules-with-comment/build/chef/{{module}}
-              branch_file: magic-modules-with-comment/original_pr_branch_name
-              only_if_diff: true
-              force: true
-        {% endfor %}
+          {% for module in puppet_modules %}
+            - put: chef-{{module}}-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/{{module}}
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          {% endfor %}
 
           # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
           # time through, it works the same way as the preceding push.
