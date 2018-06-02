@@ -152,6 +152,8 @@ GEM
       wmi-lite (~> 1.0)
     os (0.9.6)
     parallel (1.12.1)
+    parallel_tests (2.21.3)
+      parallel
     parser (2.5.1.0)
       ast (~> 2.4.0)
     plist (3.4.0)
@@ -235,6 +237,7 @@ DEPENDENCIES
   foodcritic
   google-api-client (= 0.10.1)
   googleauth
+  parallel_tests
   rake (~> 10.0)
   rspec
   rspec-mocks
