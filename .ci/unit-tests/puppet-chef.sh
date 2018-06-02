@@ -8,5 +8,10 @@ if [ -n "$SPEC_DIR" ]; then
 fi
 bundle install
 
-DISABLE_COVERAGE=true bundle exec parallel_rspec -o '--exclude_pattern "$EXCLUDE_PATTERN"' spec/
+# parallel_rspec doesn't support --exclude_pattern
+test_files=(spec/**/*_spec.rb)
+IFS="," read -ra excluded <<< "$EXCLUDE_PATTERN"
+filtered=$(echo ${test_files[@]} ${excluded[@]} | tr " " "\n" | sort | uniq -u | tr "\n" " ")
+
+DISABLE_COVERAGE=true bundle exec parallel_rspec ${filtered[@]}
 popd
