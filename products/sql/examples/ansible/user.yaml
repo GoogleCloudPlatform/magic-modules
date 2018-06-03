@@ -30,7 +30,8 @@ dependencies:
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_sql_user
   code: |
-    name: <%= ctx[:name] %>
+    # Can't use Ansible random name because it's too long
+    name: 'test-user'
     host: '10.1.2.3'
     password: 'secret-password'
     instance: "{{ instance }}"

@@ -289,10 +289,10 @@ def resource_to_request(module):
                              urf_code, file_relative), 1), 1) -%>
 
 def unwrap_resource(result, module):
-    query_predicate = unwrap_resource_filter(resource)
+    query_predicate = unwrap_resource_filter(module)
     matched_items = []
     for item in result:
-        if all(item[k] == query_predicate[k] for query_predicate.keys()):
+        if all(item[k] == query_predicate[k] for k in query_predicate.keys()):
             matched_items.append(item)
     if len(matched_items) > 1:
         module.fail_json(msg="More than 1 result found: %s" % matched_items)
