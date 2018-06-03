@@ -274,7 +274,34 @@ def resource_to_request(module):
             return_vals[k] = v
 
     return return_vals
+<% unless false?(object.unwrap_resource) -%>
+<%
+  urf_code = [
+    'return {',
+    indent_list(
+      Hash[object.identity.map { |i| [i, "module.params[#{quote_string(i.out_name)}]"] }]
+        .map { |k, v| "#{quote_string(k.out_name)}: #{v}" }, 4
+    ),
+    '}'
+  ]
+-%>
+<%= lines_before(lines(emit_method('unwrap_resource_filter', %w[module],
+                             urf_code, file_relative), 1), 1) -%>
 
+def unwrap_resource(result, module):
+    query_predicate = unwrap_resource_filter(resource)
+    matched_items = []
+    for item in result:
+        if all(item[k] == query_predicate[k] for query_predicate.keys()):
+            matched_items.append(item)
+    if len(matched_items) > 1:
+        module.fail_json(msg="More than 1 result found: %s" % matched_items)
+
+    if matched_items:
+        return matched_items[0]
+    else:
+        return None
+<% end -%>
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
 <%= lines(emit_link('self_link', self_link_url(object), object)) -%>
