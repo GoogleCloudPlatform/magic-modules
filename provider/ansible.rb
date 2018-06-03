@@ -171,10 +171,10 @@ module Provider
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/AbcSize
 
-      def emit_method(name, args, code, file_name, opts = {})
+      def emit_method(name, args, code, _file_name, _opts = {})
         [
           method_decl(name, args),
-          indent(code, 4),
+          indent(code, 4)
         ].compact.join("\n")
       end
 
