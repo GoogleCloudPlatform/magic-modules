@@ -327,7 +327,6 @@ def unwrap_resource(result, module):
         result = response.json()
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-<% end # if object.return_if_object -%>
 
 <% if object.decoder? -%>
     result = <%= object.transport.decoder -%>(result, module)
@@ -341,6 +340,7 @@ def unwrap_resource(result, module):
 <% end # object.kind? -%>
 
     return result
+<% end # if object.return_if_object -%>
 
 
 def is_different(module, response):
