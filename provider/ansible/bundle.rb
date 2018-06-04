@@ -42,7 +42,7 @@ module Provider
       end
     end
 
-    def generate(output_folder, _types)
+    def generate(output_folder, _types, _version_name)
       compile_files(output_folder)
     end
 
