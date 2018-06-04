@@ -27,18 +27,18 @@ describe Api::Resource do
     context 'v1' do
       it do
         version = product.version_obj('v1')
-        subject.remove_user_properties_not_in_version!(version)
-        is_expected.not_to(contain_property_with_name('beta-property', version))
-        is_expected.to(contain_property_with_name('property1', version))
+        subject.exclude_if_not_in_version(version)
+        is_expected.not_to(contain_property_with_name('beta-property'))
+        is_expected.to(contain_property_with_name('property1'))
       end
     end
 
     context 'beta' do
       it do
         version = product.version_obj('beta')
-        subject.remove_user_properties_not_in_version!(version)
-        is_expected.to(contain_property_with_name('beta-property', version))
-        is_expected.to(contain_property_with_name('property1', version))
+        subject.exclude_if_not_in_version(version)
+        is_expected.to(contain_property_with_name('beta-property'))
+        is_expected.to(contain_property_with_name('property1'))
       end
     end
   end

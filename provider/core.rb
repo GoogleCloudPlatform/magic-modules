@@ -62,8 +62,9 @@ module Provider
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def generate(output_folder, types)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, version_name)
+      version = @api.version_obj_or_default(version_name)
+      generate_objects(output_folder, types, version)
       generate_client_functions(output_folder) unless @config.functions.nil?
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
@@ -97,9 +98,7 @@ module Provider
     end
 
     def compile_files(output_folder)
-      compile_file_list(
-        output_folder, @config.files.compile, version: @api.version
-      )
+      compile_file_list(output_folder, @config.files.compile)
     end
 
     def compile_examples(output_folder)
@@ -210,29 +209,27 @@ module Provider
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize
 
-    # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def generate_objects(output_folder, types)
+    def generate_objects(output_folder, types, version)
+      @api.set_properties_based_on_version(version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && @api.version < object.min_version
+        elsif types.empty? && object.exclude_if_not_in_version(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
-          generate_object object, output_folder
+          generate_object object, output_folder, version
         end
       end
     end
-    # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/CyclomaticComplexity
     # rubocop:enable Metrics/PerceivedComplexity
 
-    def generate_object(object, output_folder)
-      object.remove_user_properties_not_in_version!(@api.version)
-      data = build_object_data(object, output_folder)
+    def generate_object(object, output_folder, version)
+      data = build_object_data(object, output_folder, version)
 
       generate_resource data
       generate_resource_tests data
@@ -294,7 +291,7 @@ module Provider
       )
     end
 
-    def build_object_data(object, output_folder)
+    def build_object_data(object, output_folder, version)
       {
         name: object.out_name,
         object: object,
@@ -304,7 +301,7 @@ module Provider
                                     .fetch(object.name, {}),
         output_folder: output_folder,
         product_name: object.__product.prefix[1..-1],
-        version: @api.version
+        version: version
       }
     end
 

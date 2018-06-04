@@ -173,10 +173,10 @@ module Provider
       end
     end
 
-    def generate(output_folder, types)
+    def generate(output_folder, types, version)
       generate_client_functions output_folder unless @config.functions.nil?
       generate_bolt_tasks output_folder unless @config.bolt_tasks.nil?
-      super(output_folder, types)
+      super(output_folder, types, version)
     end
 
     def compile_examples(output_folder)

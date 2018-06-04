@@ -22,7 +22,7 @@ module Api
     attr_reader :prefix
     attr_reader :scopes
     attr_reader :versions
-    attr_reader :version
+    attr_reader :base_url
 
     include Compile::Core
 
@@ -72,15 +72,6 @@ module Api
       return @versions.last if @versions.length == 1
     end
 
-    # def version
-    #   @version.nil? ? default_version : @version
-    # end
-
-    def base_url
-      v = @version.nil? ? default_version : @version
-      v.base_url
-    end
-
     def version_obj(name)
       @versions.each do |v|
         return v if v.name == name
@@ -89,13 +80,16 @@ module Api
       raise "API version '#{name}' does not exist for product '#{@name}'"
     end
 
-    def version=(v)
-      @version = if v.nil?
-                   default_version
-                 else
-                   version_obj(v)
-                 end
+    def version_obj_or_default(name)
+      name.nil? ? default_version : version_obj(name)
     end
+
+    # Not a conventional setter, so ignore rubocop's warning
+    # rubocop:disable Naming/AccessorMethodName
+    def set_properties_based_on_version(version)
+      @base_url = version.base_url
+    end
+    # rubocop:enable Naming/AccessorMethodName
 
     private
 

@@ -116,6 +116,10 @@ module Api
       end
     end
 
+    def exclude_if_not_in_version(version)
+      @exclude ||= version < min_version
+    end
+
     private
 
     # Shrinks a long composite type name into something that can barely be

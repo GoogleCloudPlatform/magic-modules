@@ -65,6 +65,8 @@ describe Provider::Terraform do
     describe '#collection_url' do
       subject { provider.collection_url(resource) }
       it do
+        version = product.version_obj_or_default(nil)
+        product.set_properties_based_on_version(version)
         is_expected.to eq 'http://myproduct.google.com/api/referencedresource'
       end
     end
@@ -72,7 +74,8 @@ describe Provider::Terraform do
     describe '#collection_url beta' do
       subject { provider.collection_url(resource) }
       it do
-        product.version = 'beta'
+        version = product.version_obj_or_default('beta')
+        product.set_properties_based_on_version(version)
         is_expected.to eq 'http://myproduct.google.com/api/beta/referencedresource'
       end
     end
@@ -80,6 +83,8 @@ describe Provider::Terraform do
     describe '#self_link_url' do
       subject { provider.self_link_url(resource) }
       it do
+        version = product.version_obj_or_default(nil)
+        product.set_properties_based_on_version(version)
         is_expected.to eq(
           'http://myproduct.google.com/api/referencedresource/{{name}}'
         )
@@ -89,7 +94,8 @@ describe Provider::Terraform do
     describe '#self_link_url beta' do
       subject { provider.self_link_url(resource) }
       it do
-        product.version = 'beta'
+        version = product.version_obj_or_default('beta')
+        product.set_properties_based_on_version(version)
         is_expected.to eq(
           'http://myproduct.google.com/api/beta/referencedresource/{{name}}'
         )

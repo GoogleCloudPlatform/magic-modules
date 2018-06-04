@@ -263,10 +263,12 @@ module Api
       (@parameters || []).reject(&:exclude)
     end
 
-    def remove_user_properties_not_in_version!(version)
-      version ||= min_version
-      @properties&.keep_if { |p| p.min_version <= version }
-      @parameters&.keep_if { |p| p.min_version <= version }
+    def exclude_if_not_in_version(version)
+      @exclude ||= version < min_version
+      @properties&.each { |p| p.exclude_if_not_in_version(version) }
+      @parameters&.each { |p| p.exclude_if_not_in_version(version) }
+
+      @exclude
     end
 
     # Returns all properties and parameters including the ones that are
@@ -297,7 +299,7 @@ module Api
     # Returns all of the properties that are a part of the self_link or
     # collection URLs
     def uri_properties
-      [@base_url, @__product.default_version.base_url].map do |url|
+      [@base_url, @__product.base_url].map do |url|
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')
