@@ -251,6 +251,8 @@ module Api
       check_property_list :properties, Api::Type
 
       check_identity unless @identity.nil?
+
+      check_url
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
@@ -291,12 +293,12 @@ module Api
     # Returns all of the properties that are a part of the self_link or
     # collection URLs
     def uri_properties
-      [@base_url, @__product.default_version.base_url].map do |url|
+      [@base_url, @__product.default_version.base_url].compact.map do |url|
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')
         parts.map { |pt| all_user_properties.select { |p| p.name == pt }[0] }
-      end.flatten
+      end.flatten.compact
     end
 
     def check_identity
@@ -306,6 +308,17 @@ module Api
       @identity.each do |i|
         raise "Missing property/parameter for identity #{i}" \
           if all_user_properties.select { |p| p.name == i }.empty?
+      end
+    end
+
+    def check_url
+      ignored_props = ['project', 'name']
+      props = uri_properties.select { |x| !ignored_props.include? x.name }
+      unless props.map { |x| parameters.include? x }.all?
+        forgotten = props.select { |x| !parameters.include? x }
+                                  .map { |x| x.name }
+        res = all_user_properties[0].__resource.name
+        raise "#{forgotten} not listed as parameters, but in URL in #{res}"
       end
     end
 
