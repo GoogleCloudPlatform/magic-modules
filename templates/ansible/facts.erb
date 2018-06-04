@@ -1,0 +1,41 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2017 Google
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+<%= lines(autogen_notice :python) -%>
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+################################################################################
+# Documentation
+################################################################################
+
+<%
+  metadata_version = quote_string(@config.manifest.get('metadata_version',
+                                                       config))
+  supported_by = quote_string(@config.manifest.get('supported_by', config))
+-%>
+ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
+                    'status': <%= @config.manifest.get('status', config) -%>,
+                    'supported_by': <%= supported_by -%>}
+
+DOCUMENTATION = '''
+---
+module: <%= module_name(object) %>_facts
+description:
+  - Gather facts for GCP <%= object.name %>
+short_description: Gather facts for GCP <%= object.name  %>
+version_added: <%= lines(@config.manifest.get('version_added', config)) -%>
+author: <%= lines(@config.manifest.get('author', config)) -%>
+requirements:
+<% @config.manifest.get('requirements', config).each do |line| -%>
+<%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
+<% end -%>
+options:
+<% object.parameters.each do |prop| -%>
+<%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
+<% end -%>
+extends_documentation_fragment: gcp
+'''
