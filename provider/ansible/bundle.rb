@@ -42,7 +42,11 @@ module Provider
       end
     end
 
-    def generate(output_folder, _types, _version_name)
+    def generate(output_folder, _types, version_name)
+      products.each_key do |product|
+        version = product.version_obj_or_default(version_name)
+        product.set_properties_based_on_version(version)
+      end
       compile_files(output_folder)
     end
 
