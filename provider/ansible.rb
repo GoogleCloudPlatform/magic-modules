@@ -274,6 +274,7 @@ module Provider
       end
 
       def generate_facts_module(data)
+        return if data[:object].facts_exclude
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = "#{module_name(data[:object])}_facts"

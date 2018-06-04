@@ -39,3 +39,90 @@ options:
 <% end -%>
 extends_documentation_fragment: gcp
 '''
+
+################################################################################
+# Imports
+################################################################################
+from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest
+
+################################################################################
+# Main
+################################################################################
+def main():
+<%
+  mod_props = object.parameters.map do |prop|
+    python_dict_for_property(prop, object)
+  end
+-%>
+    module = GcpModule(
+        argument_spec=dict(
+            state=dict(default='present', choices=['present', 'absent'], type='str'),
+<%= lines(indent_list(mod_props, 12)) -%>
+        )
+    )
+
+    items = fetch_list(module, collection(module.params), query_options(module.params['filters']))
+    return_value = {
+      'items': items['items']
+    }
+    module.exit_json(**return_value)
+
+
+<%= lines(emit_link('collection', collection_url(object), object)) -%>
+
+def fetch_list(module, link, query):
+<% prod_name = object.__product.prefix[1..-1] -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    response = auth.get(link, params={ 'filter': query })
+    return return_if_object(module, response)
+
+
+def query_options(filters):
+    '''
+        :param config_data: contents of the inventory config file
+        :return A fully built query string
+    '''
+    if not filters:
+        return ''
+ 
+    if len(filters) == 1:
+        return filters[0]
+    else:
+        queries = []
+        for f in filters:
+            # For multiple queries, all queries should have ()
+            if f[0] != '(' and f[-1] != ')':
+                queries.append("(%s)" % ''.join(f))
+            else:
+                queries.append(f)
+ 
+        return ' '.join(queries)
+
+
+<%=
+  lines(method_decl('return_if_object', ['module', 'response']))
+-%>
+    # If not found, return nothing.
+    if response.status_code == 404:
+        return None
+
+    # If no content, return nothing.
+    if response.status_code == 204:
+        return None
+
+    try:
+        module.raise_for_status(response)
+        result = response.json()
+    except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
+        module.fail_json(msg="Invalid JSON response with error: %s" % inst)
+
+    if navigate_hash(result, ['error', 'errors']):
+        module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
+<% if object.kind? -%>
+    if result['kind'] != kind:
+        module.fail_json(msg="Incorrect result: {kind}".format(**result))
+<% end # object.kind? -%>
+
+    return result
+if __name__ == "__main__"
+    main()
