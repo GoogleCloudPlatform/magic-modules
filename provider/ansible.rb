@@ -117,7 +117,7 @@ module Provider
          Google::StringUtils.underscore(object.name)].join('_')
       end
 
-      def build_object_data(object, output_folder)
+      def build_object_data(object, output_folder, version)
         # Method is overriden to add Ansible example objects to the data object.
         data = super
 
