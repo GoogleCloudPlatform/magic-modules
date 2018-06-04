@@ -285,8 +285,10 @@ def resource_to_request(module):
     '}'
   ]
 -%>
-<%= lines_before(lines(emit_method('unwrap_resource_filter', %w[module],
-                             urf_code, file_relative), 1), 1) -%>
+<%=
+  lines_before(lines(emit_method('unwrap_resource_filter', %w[module],
+                                 urf_code, file_relative), 1), 1)
+-%>
 
 def unwrap_resource(result, module):
     query_predicate = unwrap_resource_filter(module)

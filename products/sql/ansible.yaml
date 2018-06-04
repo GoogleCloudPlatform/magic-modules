@@ -28,80 +28,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     access_api_results: true
     return_if_object: |
-      # If not found, return nothing.
-      if response.status_code == 404:
-          return None
-
-      # If no content, return nothing.
-      if response.status_code == 204:
-          return None
-
-      # SQL only: return on 403 if not exist
-      if response.status_code == 403:
-          return None
-
-      try:
-          result = response.json()
-      except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
-          module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-
-      if navigate_hash(result, ['error', 'errors']):
-          module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-      if result['kind'] != kind:
-          module.fail_json(msg="Incorrect result: {kind}".format(**result))
-
-      return result
+<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
   Database: !ruby/object:Provider::Ansible::ResourceOverride
     return_if_object: |
-      # If not found, return nothing.
-      if response.status_code == 404:
-          return None
-
-      # If no content, return nothing.
-      if response.status_code == 204:
-          return None
-
-      # SQL only: return on 403 if not exist
-      if response.status_code == 403:
-          return None
-
-      try:
-          result = response.json()
-      except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
-          module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-
-      if navigate_hash(result, ['error', 'errors']):
-          module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-      if result['kind'] not in [kind, 'sql#instance']:
-          module.fail_json(msg="Incorrect result: {kind}".format(**result))
-
-      return result
+<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
   User: !ruby/object:Provider::Ansible::ResourceOverride
     unwrap_resource: true
     return_if_object: |
-      # If not found, return nothing.
-      if response.status_code == 404:
-          return None
-
-      # If no content, return nothing.
-      if response.status_code == 204:
-          return None
-
-      # SQL only: return on 403 if not exist
-      if response.status_code == 403:
-          return None
-
-      try:
-          result = response.json()
-      except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
-          module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-
-      if navigate_hash(result, ['error', 'errors']):
-          module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-      if result['kind'] not in [kind, 'sql#instance']:
-          module.fail_json(msg="Incorrect result: {kind}".format(**result))
-
-      return result
+<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
   # Objects not implmented yet.
   Tier: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
