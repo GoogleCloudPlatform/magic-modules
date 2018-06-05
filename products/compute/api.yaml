@@ -893,10 +893,19 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       A ForwardingRule resource. A ForwardingRule resource specifies which pool
       of target virtual machines to forward a packet to if it matches the given
       [IPAddress, IPProtocol, portRange] tuple.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/forwardingRule'
+    input: true
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
@@ -921,6 +930,9 @@ objects:
           must be of a type appropriate to the target object.
 
           This field is not used for internal load balancing.
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'
