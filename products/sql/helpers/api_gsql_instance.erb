@@ -11,40 +11,43 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/compute/network/post'
+<%= lines(autogen_notice :ruby) -%>
+
+require 'google/sql/network/post'
 
 module Google
-  module Compute
+  module Sql
     module Api
-      # A helper class to provide access to (some) Google Compute Engine API.
+      # A helper class to provide access to (some) Google Cloud SQL API.
       class Instance
-        def initialize(name, zone, project, cred)
+        def initialize(name, project, cred)
           @name = name
-          @zone = zone
           @project = project
           @cred = cred
         end
 
         # TODO(nelsonjr): Make this function wait for the operation to complete
-        def reset
-          reset_request = ::Google::Compute::Network::Post.new(
-            gcompute_instance_reset, @cred, 'application/json', {}.to_json
+        def clone(target)
+          clone_request = ::Google::Sql::Network::Post.new(
+            gsql_instance_clone, @cred, 'application/json', {
+              cloneContext: { kind: 'sql#cloneContext',
+                              destinationInstanceName: target }
+            }.to_json
           )
-          response = JSON.parse(reset_request.send.body)
+          response = JSON.parse(clone_request.send.body)
           raise Puppet::Error, response['error']['errors'][0]['message'] \
              if response['error']
         end
 
         private
 
-        def gcompute_instance_reset
+        def gsql_instance_clone
           URI.parse(
             format(
               '%<self_link>s/%<method>s',
-              self_link: Puppet::Type.type(:gcompute_instance).provider(:google)
-                                     .self_link(name: @name, zone: @zone,
-                                                project: @project),
-              method: 'reset'
+              self_link: Puppet::Type.type(:gsql_instance).provider(:google)
+                                     .self_link(name: @name, project: @project),
+              method: 'clone'
             )
           )
         end

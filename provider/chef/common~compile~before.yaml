@@ -18,7 +18,6 @@
 '.rubocop.yml': 'templates/chef/dot~rubocop~root.yml'
 'Berksfile': 'templates/chef/Berksfile.erb'
 'Gemfile': 'templates/chef/Gemfile.erb'
-'LICENSE': 'templates/LICENSE'
 'README.md': 'templates/chef/README.md.erb'
 'chefignore': 'templates/chef/chefignore.erb'
 'libraries/__init__.rb': 'templates/chef/init_library_path.rb.erb'
