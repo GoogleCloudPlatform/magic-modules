@@ -14,6 +14,10 @@ for i in $(find products/ -name 'ansible.yaml' -printf '%h\n');
 do
   bundle exec compiler -p $i -e ansible -o "build/ansible/"
 done
+for i in $(find products/ -name 'ansible_facts.yaml' -printf '%h\n');
+do
+  bundle exec compiler -p $i -e ansible_facts -o "build/ansible/"
+done
 
 # This command can crash - if that happens, the script should not fail.
 set +e
