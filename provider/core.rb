@@ -601,8 +601,18 @@ module Provider
     end
 
     def generate_file_write(ctx, data)
-      Google::LOGGER.info "Generating #{data[:name]} #{data[:type]}"
-      write_file data[:out_file], compile_file(ctx, data[:template])
+      enforce_file_expectations data[:out_file] do
+        Google::LOGGER.info "Generating #{data[:name]} #{data[:type]}"
+        write_file data[:out_file], compile_file(ctx, data[:template])
+      end
+    end
+
+    def enforce_file_expectations(filename)
+      @file_expectations = {
+        autogen: false
+      }
+      yield
+      raise "#{filename} missing autogen" unless @file_expectations[:autogen]
     end
 
     # Write the output to a file. We write one line at a time so tests can

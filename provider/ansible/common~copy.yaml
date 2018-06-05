@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2018 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,14 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-<%= lines(autogen_notice :ruby) -%>
-
----
-name: projects/test project#0 data/instances/title0
-config: test name#0 data
-displayName: test display_name#0 data
-labels:
-  test labels#1 data: test labels#1 data
-  test labels#2 data: 6131251034
-nodeCount: 2502187088
-project: "test project#0 data"
+'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
+'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
+'lib/ansible/utils/module_docs_fragments/gcp.py':
+  'provider/ansible/gcp_doc_frag.py'
+'test/integration/cloud-config-gcp.yml.template':
+  'provider/ansible/test_template.yaml'
+'test/runner/lib/cloud/gcp.py': 'provider/ansible/gcp_integration_runner.py'
+'test/units/module_utils/gcp/test_gcp_utils.py': 'provider/ansible/test_gcp_utils.py'

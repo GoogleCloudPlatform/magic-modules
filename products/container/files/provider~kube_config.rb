@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<%= lines(autogen_notice :ruby) -%>
+
 require 'google/container/network/get'
 require 'google/container/property/boolean'
 require 'google/container/property/cluster_name'
