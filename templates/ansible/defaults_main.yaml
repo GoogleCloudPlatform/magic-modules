@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<%= autogen_exception -%>
+<% autogen_exception -%>
 ---
 # defaults file
 resource_name: '{{resource_prefix}}'
