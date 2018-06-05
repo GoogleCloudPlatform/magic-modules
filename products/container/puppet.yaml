@@ -112,7 +112,7 @@ examples: !ruby/object:Api::Resource::HashArray
     - kube_config.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
     lib/google/container/api/gcontainer_node_pool.rb:
       products/container/helpers/api_gcontainer_node_pool.erb
