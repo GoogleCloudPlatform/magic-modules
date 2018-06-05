@@ -26,6 +26,7 @@ module Provider
       attr_reader :imports
       attr_reader :provider_helpers
       attr_reader :return_if_object
+      attr_reader :unwrap_resource
       attr_reader :update
       attr_reader :version_added
     end
@@ -41,6 +42,7 @@ module Provider
         default_value_property :editable, true
         default_value_property :imports, []
         default_value_property :provider_helpers, []
+        default_value_property :unwrap_resource, false
 
         check_property :access_api_results, :boolean
         check_optional_property :collection, ::String
@@ -52,6 +54,7 @@ module Provider
         check_property :provider_helpers, ::Array
         check_optional_property :return_if_object, ::String
         check_optional_property :update, ::String
+        check_optional_property :unwrap_resource, :boolean
         check_optional_property :version_added, ::String
       end
       # rubocop:enable Metrics/MethodLength

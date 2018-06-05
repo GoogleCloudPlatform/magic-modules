@@ -171,6 +171,13 @@ module Provider
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/AbcSize
 
+      def emit_method(name, args, code, _file_name, _opts = {})
+        [
+          method_decl(name, args),
+          indent(code, 4)
+        ].compact.join("\n")
+      end
+
       def rrefs_in_link(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         (object.parameters || []).select do |p|
