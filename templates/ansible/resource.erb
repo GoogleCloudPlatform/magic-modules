@@ -274,15 +274,41 @@ def resource_to_request(module):
             return_vals[k] = v
 
     return return_vals
+<% unless false?(object.unwrap_resource) -%>
+<%
+  urf_code = [
+    'return {',
+    indent_list(
+      Hash[object.identity.map { |i| [i, "module.params[#{quote_string(i.out_name)}]"] }]
+        .map { |k, v| "#{quote_string(k.out_name)}: #{v}" }, 4
+    ),
+    '}'
+  ]
+-%>
+<%=
+  lines_before(lines(emit_method('unwrap_resource_filter', %w[module],
+                                 urf_code, file_relative), 1), 1)
+-%>
+
+def unwrap_resource(result, module):
+    query_predicate = unwrap_resource_filter(module)
+    matched_items = []
+    for item in result:
+        if all(item[k] == query_predicate[k] for k in query_predicate.keys()):
+            matched_items.append(item)
+    if len(matched_items) > 1:
+        module.fail_json(msg="More than 1 result found: %s" % matched_items)
+
+    if matched_items:
+        return matched_items[0]
+    else:
+        return None
+<% end -%>
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-<%= lines(emit_link('self_link', self_link_url(object), object)) -%>
-
-
-<%= lines(emit_link('collection', collection_url(object), object)) -%>
-
-
+<%= lines(emit_link('self_link', self_link_url(object), object), 2) -%>
+<%= lines(emit_link('collection', collection_url(object), object), 2) -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response',
                                          ('kind' if object.kind?)]))
@@ -303,7 +329,6 @@ def resource_to_request(module):
         result = response.json()
     except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
         module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-<% end # if object.return_if_object -%>
 
 <% if object.decoder? -%>
     result = <%= object.transport.decoder -%>(result, module)
@@ -317,6 +342,7 @@ def resource_to_request(module):
 <% end # object.kind? -%>
 
     return result
+<% end # if object.return_if_object -%>
 
 
 def is_different(module, response):
