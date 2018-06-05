@@ -26,6 +26,7 @@ require 'provider/ansible/selflink'
 module Provider
   module Ansible
     module Facts
+      # Handles Configuration for Ansible Facts
       class Config < Provider::Config
         attr_reader :manifest
 
@@ -47,10 +48,13 @@ module Provider
         end
       end
 
+      # Provider code for Ansible Facts.
+      # Has full access to all functions from regular Ansible provider
       class Core < Provider::Ansible::Core
         def list_kind(object)
-          "#{object.kind}List" 
+          "#{object.kind}List"
         end
+
         private
 
         def generate_resource(data)
