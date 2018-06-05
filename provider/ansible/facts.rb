@@ -48,6 +48,9 @@ module Provider
       end
 
       class Core < Provider::Ansible::Core
+        def list_kind(object)
+          "#{object.kind}List" 
+        end
         private
 
         def generate_resource(data)

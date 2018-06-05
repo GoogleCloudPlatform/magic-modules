@@ -57,11 +57,12 @@ def main():
     module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
+            filters=dict(type='list', elements='str'),
 <%= lines(indent_list(mod_props, 12)) -%>
         )
     )
 
-    items = fetch_list(module, collection(module.params), query_options(module.params['filters']))
+    items = fetch_list(module, collection(module), query_options(module.params['filters']))
     return_value = {
       'items': items['items']
     }
@@ -73,7 +74,7 @@ def main():
 def fetch_list(module, link, query):
 <% prod_name = object.__product.prefix[1..-1] -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    response = auth.get(link, params={ 'filter': query })
+    response = auth.get(link, params={'filter': query})
     return return_if_object(module, response)
 
 
@@ -84,7 +85,7 @@ def query_options(filters):
     '''
     if not filters:
         return ''
- 
+
     if len(filters) == 1:
         return filters[0]
     else:
@@ -95,7 +96,7 @@ def query_options(filters):
                 queries.append("(%s)" % ''.join(f))
             else:
                 queries.append(f)
- 
+
         return ' '.join(queries)
 
 
@@ -119,10 +120,10 @@ def query_options(filters):
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
 <% if object.kind? -%>
-    if result['kind'] != kind:
+    if result['kind'] != <%= quote_string(list_kind(object)) %>:
         module.fail_json(msg="Incorrect result: {kind}".format(**result))
 <% end # object.kind? -%>
 
     return result
-if __name__ == "__main__"
+if __name__ == "__main__":
     main()
