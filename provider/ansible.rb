@@ -270,21 +270,7 @@ module Provider
           out_file: File.join(target_folder,
                               "lib/ansible/modules/cloud/google/#{name}.py")
         )
-        generate_facts_module data
       end
-
-      def generate_facts_module(data)
-        return if data[:object].facts_exclude
-        target_folder = data[:output_folder]
-        FileUtils.mkpath target_folder
-        name = "#{module_name(data[:object])}_facts"
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/ansible/facts.erb',
-          out_file: File.join(target_folder,
-                              "lib/ansible/modules/cloud/google/#{name}.py")
-        )
-      end
-
 
       def example_defaults(data)
         obj_name = Google::StringUtils.underscore(data[:object].name)

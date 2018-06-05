@@ -117,7 +117,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         aliases:
           - timeout_seconds
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
-    facts_exclude: false
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
