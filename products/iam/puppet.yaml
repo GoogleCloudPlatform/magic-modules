@@ -111,11 +111,10 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_service_account_key.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
     # Client-side functions require 'google/authorization'
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
-    lib/google/object_store.rb: google/object_store.rb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>

@@ -14,6 +14,7 @@
 <% end -%>
 #!/bin/bash
 <%= compile 'templates/license.erb' -%>
+<%= lines(autogen_notice :ruby) -%>
 
 declare -r puppet='/opt/puppetlabs/bin/puppet'
 declare -r ruby='/opt/puppetlabs/puppet/bin/ruby'

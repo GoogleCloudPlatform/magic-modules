@@ -548,15 +548,14 @@ examples: !ruby/object:Api::Resource::HashArray
     - zone.pp
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(include('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
     # Client-side functions require 'google/authorization'
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:
     lib/google/compute/api/gcompute_disk.rb:
-      products/compute/helpers/api_gcompute_disk.rb
+      products/compute/helpers/api_gcompute_disk.erb
     lib/google/compute/api/gcompute_instance.rb:
-      products/compute/helpers/api_gcompute_instance.rb
-    lib/google/object_store.rb: google/object_store.rb
+      products/compute/helpers/api_gcompute_instance.erb
     lib/puppet/functions/gcompute_task_load_params.rb:
       templates/puppet/bolt~task_load_params.rb.erb
     lib/puppet/functions/gcompute_task_validate_param.rb:
