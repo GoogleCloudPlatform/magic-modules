@@ -20,6 +20,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: 'templates/terraform/decoders/redis_instance.erb'
       encoder: 'templates/terraform/encoders/redis_instance.erb'
+      pre_update: 'templates/terraform/pre_update/redis_instance.erb'
     examples: |
       ### Basic Usage
       ```hcl

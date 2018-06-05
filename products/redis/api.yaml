@@ -27,6 +27,7 @@ objects:
     base_url: |
       projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
+    update_verb: :PATCH
     description: |
       A Google Cloud Redis instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -34,7 +35,6 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/memorystore/docs/redis/'
       api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/'
-    input: true # TODO(danawillow): support for updates
 <%=
   # Cloud Redis takes a fair bit of time to provision, try six minutes.
   indent(compile_file({timeouts: { insert_sec: 6 * 60 }},
@@ -46,6 +46,7 @@ objects:
         description: |
           The name of the Redis region of the instance.
         required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: alternativeLocationId
@@ -54,12 +55,14 @@ objects:
           against zonal failures by provisioning it across two zones.
           If provided, it must be a different zone from the one provided in
           [locationId].
+        input: true
       - !ruby/object:Api::Type::String
         name: authorizedNetwork
         description: |
           The full name of the Google Compute Engine network to which the
           instance is connected. If left unspecified, the default network
           will be used.
+        input: true
       - !ruby/object:Api::Type::Time
         name: createTime
         description: |
@@ -75,6 +78,7 @@ objects:
           instances, this can be either [locationId] or [alternativeLocationId]
           and can change after a failover event.
         output: true
+        input: true
       - !ruby/object:Api::Type::String
         name: displayName
         description: |
@@ -98,11 +102,13 @@ objects:
           instances will be created across two zones for protection against
           zonal failures. If [alternativeLocationId] is also provided, it must
           be different from [locationId].
+        input: true
       - !ruby/object:Api::Type::String
         name: name
         description: |
           The ID of the instance or a fully qualified identifier for the instance. 
         required: true
+        input: true
       - !ruby/object:Api::Type::Integer
         name: memorySizeGb
         description: Redis memory size in GiB.
@@ -118,6 +124,7 @@ objects:
           version will be used. Updating the version will perform an
           upgrade/downgrade to the new version. Currently, the supported values
           are REDIS_3_2 for Redis 3.2.
+        input: true
       - !ruby/object:Api::Type::String
         name: reservedIpRange
         description: |
@@ -126,6 +133,7 @@ objects:
           block, for example, 10.0.0.0/29 or 192.168.0.0/29. Ranges must be
           unique and non-overlapping with existing subnets in an authorized
           network.
+        input: true
       - !ruby/object:Api::Type::Enum
         name: tier
         description: |
@@ -137,3 +145,4 @@ objects:
           - :BASIC
           - :STANDARD_HA
         default_value: :BASIC
+        input: true
