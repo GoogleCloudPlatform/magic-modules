@@ -214,6 +214,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  RegionBackendService: !ruby/object:Provider::Terraform::ResourceOverride
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200) Release
+    exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride

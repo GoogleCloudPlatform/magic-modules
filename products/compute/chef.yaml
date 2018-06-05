@@ -66,6 +66,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         message = 'Region cannot be edited'
         Chef::Log.fatal message
         raise message
+  RegionBackendService: !ruby/object:Provider::Terraform::ResourceOverride
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200) Release
+    exclude: true
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/provider_target_pool.rb'

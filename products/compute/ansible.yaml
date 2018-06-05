@@ -126,6 +126,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/provider_instance.py'
       - 'products/compute/helpers/instance_metadata.py'
+  RegionBackendService: !ruby/object:Provider::Terraform::ResourceOverride
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200) Release
+    exclude: true
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       nextHopGateway: !ruby/object:Provider::Ansible::PropertyOverride

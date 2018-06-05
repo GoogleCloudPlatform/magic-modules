@@ -81,6 +81,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         handle_auto_to_custom_change
     provider_helpers:
       - 'products/compute/helpers/provider_network.rb'
+  RegionBackendService: !ruby/object:Provider::Terraform::ResourceOverride
+    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200) Release
+    exclude: true
   Snapshot: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       create: |
