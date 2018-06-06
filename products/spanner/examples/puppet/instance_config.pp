@@ -7,6 +7,6 @@
 
 <% end # name == README.md -%>
 gspanner_instance_config { 'regional-us-central1':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

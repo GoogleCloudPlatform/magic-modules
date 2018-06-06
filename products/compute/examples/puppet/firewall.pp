@@ -37,6 +37,6 @@ gcompute_firewall { <%= example_resource_name('test-fw-allow-ssh') -%>:
   source_tags => [
     'test-ssh-clients',
   ],
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }

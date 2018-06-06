@@ -29,7 +29,7 @@ giam_service_account { 'myaccount':
   name         =>
     <%= account -%>,
   display_name => 'My Puppet test key',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -40,6 +40,6 @@ giam_service_account_key { 'test-name':
   path             => '/home/nelsona/test.json',
   key_algorithm    => 'KEY_ALG_RSA_2048',
   private_key_type => 'TYPE_GOOGLE_CREDENTIALS_FILE',
-  project          => 'google.com:graphite-playground',
+  project          => $project, # e.g. 'my-test-project'
   credential       => 'mycred',
 }

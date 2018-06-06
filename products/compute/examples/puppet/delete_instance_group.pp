@@ -20,7 +20,7 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -28,6 +28,6 @@ gcompute_zone { 'us-central1-a':
 gcompute_instance_group { <%= example_resource_name('my-puppet-masters') -%>:
   ensure     => absent,
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

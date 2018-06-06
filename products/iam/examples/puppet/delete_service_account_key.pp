@@ -29,7 +29,7 @@ giam_service_account { 'myaccount':
   name         =>
     <%= account -%>,
   display_name => 'My Puppet test key',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -47,6 +47,6 @@ giam_service_account_key { 'mykey':
   ensure           => absent,
   key_id           => $key_id,
   service_account  => 'myaccount',
-  project          => 'google.com:graphite-playground',
+  project          => $project, # e.g. 'my-test-project'
   credential       => 'mycred',
 }

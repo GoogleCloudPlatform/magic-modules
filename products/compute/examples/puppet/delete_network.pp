@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_network { <%= example_resource_name('mynetwork-${network_id}') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

@@ -27,6 +27,6 @@ gcompute_network { <%= example_resource_name('mynetwork-${network_id}') -%>:
   # | auto_create_subnetworks => false,
   ipv4_range   => '192.168.0.0/16',
   gateway_ipv4 => '192.168.0.1',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }

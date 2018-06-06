@@ -20,12 +20,12 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_machine_type { 'n1-standard-1':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   zone       => 'us-central1-a',
   credential => 'mycred',
 }
@@ -37,13 +37,13 @@ gcompute_machine_type { 'n1-standard-1':
 # |   zone         => 'us-central1-a',
 # |   source_image =>
 # |     gcompute_image_family('ubuntu-1604-lts', 'ubuntu-os-cloud'),
-# |   project      => 'google.com:graphite-playground',
+# |   project      => $project, # e.g. 'my-test-project'
 # |   credential   => 'mycred',
 # | }
 
 gcompute_network { <%= example_resource_name('mynetwork-test') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -90,6 +90,6 @@ gcompute_instance_template { <%= example_resource_name('instance-template') -%>:
       }
     ]
   },
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

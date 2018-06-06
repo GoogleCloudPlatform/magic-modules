@@ -22,7 +22,7 @@
 
 gstorage_bucket { <%= example_resource_name(bucket_name) -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -35,6 +35,6 @@ gstorage_default_object_acl { <%= example_resource_name(res_name) -%>:
   bucket     => <%= example_resource_name(bucket_name) -%>,
   entity     => 'user-nelsona@google.com',
   role       => 'READER',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

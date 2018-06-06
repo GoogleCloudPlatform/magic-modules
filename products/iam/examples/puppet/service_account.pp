@@ -28,6 +28,6 @@
 giam_service_account { <%= account -%>:
   ensure       => present,
   display_name => 'My Puppet test key',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }

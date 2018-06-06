@@ -35,7 +35,7 @@ gcontainer_cluster { "mycluster-${cluster_id}":
     disk_size_gb => 500,             # ... and a lot of disk space
   },
   zone               => 'us-central1-a',
-  project            => 'google.com:graphite-playground',
+  project            => $project, # e.g. 'my-test-project'
   credential         => 'mycred',
 }
 
@@ -54,7 +54,7 @@ gcontainer_kube_config { '/home/nelsona/.kube/config':
   context    => "gke-mycluster-${cluster_id}",
   cluster    => "mycluster-${cluster_id}",
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -64,6 +64,6 @@ gcontainer_kube_config { '/home/nelsona/.puppetlabs/etc/puppet/kubernetes.conf':
   ensure     => present,
   cluster    => "mycluster-${cluster_id}",
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

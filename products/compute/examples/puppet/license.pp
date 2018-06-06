@@ -21,6 +21,6 @@
 
 <% end # name == README.md -%>
 gcompute_license { <%= example_resource_name('test-license') -%>:
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
