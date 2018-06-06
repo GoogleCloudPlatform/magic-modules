@@ -141,10 +141,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/provider_target_pool.py'
+  TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: false
   # Not yet implemented.
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
-  TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
