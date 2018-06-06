@@ -21,7 +21,7 @@
 
 gcompute_region { <%= example_resource_name('some-region') -%>:
   name       => 'us-west1',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -32,6 +32,6 @@ gcompute_region { <%= example_resource_name('some-region') -%>:
 gcompute_subnetwork { <%= example_resource_name('servers') -%>:
   ensure     => absent,
   region     => <%= example_resource_name('some-region') -%>,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

@@ -36,6 +36,6 @@ gcontainer_cluster { <%= example_resource_name('mycluster-${cluster_id}') -%>:
     disk_size_gb => 500,             # ... and a lot of disk space
   },
   zone               => 'us-central1-a',
-  project            => 'google.com:graphite-playground',
+  project            => $project, # e.g. 'my-test-project'
   credential         => 'mycred',
 }

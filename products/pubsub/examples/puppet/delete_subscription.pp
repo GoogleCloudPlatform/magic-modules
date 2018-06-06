@@ -21,7 +21,7 @@
 
 gpubsub_topic { <%= example_resource_name('conversation-1') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -29,6 +29,6 @@ gpubsub_topic { <%= example_resource_name('conversation-1') -%>:
 gpubsub_subscription { <%= example_resource_name('subscription-1') -%>:
   ensure     => absent,
   topic      => 'conversation-1',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

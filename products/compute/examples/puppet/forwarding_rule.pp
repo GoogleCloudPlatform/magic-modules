@@ -21,21 +21,21 @@
 
 gcompute_region { <%= example_resource_name('some-region') -%>:
   name       => 'us-west1',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_address { <%= example_resource_name('some-address') -%>:
   ensure     => present,
   region     => <%= example_resource_name('some-region') -%>,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_target_pool { <%= example_resource_name('target-pool') -%>:
   ensure     => present,
   region     => <%= example_resource_name('some-region') -%>,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -50,6 +50,6 @@ gcompute_forwarding_rule { <%= example_resource_name('test1') -%>:
   port_range  => '80',
   target      => <%= example_resource_name('target-pool') -%>,
   region      => <%= example_resource_name('some-region') -%>,
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }

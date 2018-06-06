@@ -54,6 +54,6 @@ gsql_instance { <%= example_resource_name(instance_name) -%>:
     tier             => 'db-custom-2-8192'
   },
   region           => 'us-central1',
-  project          => 'google.com:graphite-playground',
+  project          => $project, # e.g. 'my-test-project'
   credential       => 'mycred',
 }

@@ -37,7 +37,7 @@
 gcompute_ssl_certificate { <%= example_resource_name('sample-certificate') -%>:
   ensure      => present,
   description => 'A certificate for test purposes only.',
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
   certificate => '-----BEGIN CERTIFICATE-----
 MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG

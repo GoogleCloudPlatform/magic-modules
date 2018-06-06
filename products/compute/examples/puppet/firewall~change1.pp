@@ -36,6 +36,6 @@ gcompute_firewall { 'test-firewall-allow-ssh':
       ],
     },
   ],
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

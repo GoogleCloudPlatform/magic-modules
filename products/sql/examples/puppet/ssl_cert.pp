@@ -41,7 +41,7 @@ if !defined('$sql_instance_suffix') {
 
 gsql_instance { <%= example_resource_name(instance_name) -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -53,6 +53,6 @@ gsql_ssl_cert { <%= example_resource_name('server-certificate') -%>:
   common_name        => 'CN=www.mydb.com,O=Acme',
   sha1_fingerprint   => '8fc295bf77a002db5182e04d92c48258cbc1117a',
   instance           => <%= example_resource_name(instance_name) -%>,
-  project            => 'google.com:graphite-playground',
+  project            => $project, # e.g. 'my-test-project'
   credential         => 'mycred',
 }

@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_image { <%= example_resource_name('test-image') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred'
 }

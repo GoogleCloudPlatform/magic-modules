@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_firewall { <%= example_resource_name('test-fw-allow-ssh') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

@@ -25,7 +25,7 @@ gdns_managed_zone { <%= example_resource_name('some-managed-zone') -%>:
   name        => 'testzone-4-com',
   dns_name    => 'testzone-4.com.',
   description => 'Test Example Zone',
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }
 
@@ -40,7 +40,7 @@ gdns_resource_record_set { <%= example_resource_name(res_name) -%>:
     '40.5.6.7',
     '80.9.10.11'
   ],
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -50,7 +50,7 @@ gdns_resource_record_set { <%= example_resource_name(res_name) -%>:
   managed_zone => <%= example_resource_name('some-managed-zone') -%>,
   type         => 'CNAME',
   target       => 'www.testzone-4.com.',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -59,6 +59,6 @@ gdns_resource_record_set { <%= example_resource_name(res_name) -%>:
   ensure       => absent,
   managed_zone => <%= example_resource_name('some-managed-zone') -%>,
   type         => 'A',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }

@@ -31,6 +31,6 @@ gcompute_health_check { <%= example_resource_name('my-app-tcp-hc') -%>:
   healthy_threshold   => 10,
   timeout_sec         => 2,
   unhealthy_threshold => 5,
-  project             => 'google.com:graphite-playground',
+  project             => $project, # e.g. 'my-test-project'
   credential          => 'mycred',
 }

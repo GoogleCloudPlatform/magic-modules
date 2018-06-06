@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gpubsub_topic { <%= example_resource_name('conversation-1') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

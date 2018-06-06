@@ -20,7 +20,7 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -30,7 +30,7 @@ gcompute_disk { <%= example_resource_name('instance-test-os-1') -%>:
   source_image =>
     'projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts',
   zone         => 'us-central1-a',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -41,12 +41,12 @@ gcompute_disk { <%= example_resource_name('instance-test-os-1') -%>:
 #      network to ensure the traffic can reach your machine
 gcompute_network { <%= example_resource_name('default') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_region { 'us-central1':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -55,7 +55,7 @@ gcompute_region { 'us-central1':
 # 'n1-standard-1' defined below.
 gcompute_machine_type { 'n1-standard-1':
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -63,7 +63,7 @@ gcompute_machine_type { 'n1-standard-1':
 # exist it will allocate an ephemeral one.
 gcompute_address { <%= example_resource_name('instance-test-ip') -%>:
   region     => 'us-central1',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -109,6 +109,6 @@ gcompute_instance { <%= example_resource_name('instance-test') -%>:
     }
   ],
   zone               => 'us-central1-a',
-  project            => 'google.com:graphite-playground',
+  project            => $project, # e.g. 'my-test-project'
   credential         => 'mycred',
 }

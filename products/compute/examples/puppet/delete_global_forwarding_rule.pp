@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_global_forwarding_rule { <%= example_resource_name('test1') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

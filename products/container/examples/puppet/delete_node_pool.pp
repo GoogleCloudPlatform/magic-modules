@@ -27,7 +27,7 @@ if $cluster_id == undef {
 gcontainer_cluster { <%= example_resource_name(cluster_name) -%>:
   ensure     => present,
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -36,6 +36,6 @@ gcontainer_node_pool { <%= example_resource_name('web-servers') -%>:
   ensure     => absent,
   cluster    => <%= example_resource_name(cluster_name) -%>,
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

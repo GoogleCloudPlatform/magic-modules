@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_target_https_proxy { <%= example_resource_name('my-https-proxy') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
