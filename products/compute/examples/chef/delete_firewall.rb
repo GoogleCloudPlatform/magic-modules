@@ -23,6 +23,6 @@
 <% end -%>
 gcompute_firewall <%= example_resource_name('test-fw-allow-ssh') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

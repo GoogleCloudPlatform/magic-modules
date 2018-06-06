@@ -30,7 +30,7 @@
 gcompute_instance_group <%= example_resource_name('my-masters') -%> do
   action :create
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -38,6 +38,6 @@ end
 <% res_name = 'my-app-backend' -%>
 gcompute_backend_service <%= example_resource_name(res_name) -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -20,7 +20,7 @@
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 gpubsub_topic 'conversation-1' do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -32,6 +32,6 @@ gpubsub_subscription 'subscription-1' do
     push_endpoint: 'https://myapp.graphite.cloudnativeapp.com/webhook/sub1'
   )
   ack_deadline_seconds 300
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -23,6 +23,6 @@
 <% end -%>
 gcompute_health_check <%= example_resource_name('app-health-check') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

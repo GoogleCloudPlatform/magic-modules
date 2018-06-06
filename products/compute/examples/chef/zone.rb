@@ -23,6 +23,6 @@
 <% end -%>
 gcompute_zone 'us-west1-a' do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

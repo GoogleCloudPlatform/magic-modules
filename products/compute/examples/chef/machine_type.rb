@@ -22,7 +22,7 @@
 
 gcompute_zone 'us-west1-a' do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -30,6 +30,6 @@ end
 gcompute_machine_type 'n1-standard-1' do
   action :create
   zone 'us-west1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

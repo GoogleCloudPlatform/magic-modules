@@ -25,6 +25,6 @@
 # manifest.
 gstorage_bucket <%= example_resource_name('storage-module-test') -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -21,7 +21,7 @@
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
 gcompute_zone 'us-west1-a' do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -29,6 +29,6 @@ end
 gcompute_instance_group_manager 'test1' do
   action :delete
   zone 'us-west1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

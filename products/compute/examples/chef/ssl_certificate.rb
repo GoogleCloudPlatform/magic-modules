@@ -62,6 +62,6 @@ gcompute_ssl_certificate <%= example_resource_name('my-site-ssl-cert') -%> do
        PRIVATE_KEY
        .split("\n").map(&:strip).join("\n")
   )
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

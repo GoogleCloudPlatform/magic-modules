@@ -19,7 +19,7 @@ gdns_managed_zone 'testzone-3-com' do
   dns_name 'test.somewild-example.com.'
   description 'Test Example Zone'
   credential 'mycred'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
 end
 
 gdns_resource_record_set 'www.testzone-4.com.' do
@@ -32,6 +32,6 @@ gdns_resource_record_set 'www.testzone-4.com.' do
     '40.5.6.7',
     '80.9.10.11'
   ]
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

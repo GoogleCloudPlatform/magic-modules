@@ -30,7 +30,7 @@ raise "Missing parameter 'network_id'. Please read docs at #{__FILE__}" \
 # |   auto_create_subnetworks true
 # |   ipv4_range '192.168.0.0/16'
 # |   gateway_ipv4 '192.168.0.1'
-# |   project 'google.com:graphite-playground'
+# |   project ENV['PROJECT'] # ex: 'my-test-project'
 # |   credential 'mycred'
 # | end
 
@@ -45,6 +45,6 @@ puts 'Creating network with automatically assigned subnetworks'
 gcompute_network <%= example_resource_name(res_name) -%> do
   action :create
   auto_create_subnetworks true
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
