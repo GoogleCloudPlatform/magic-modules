@@ -58,7 +58,7 @@ describe Provider::Chef do
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
 
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
     end
   end
 
@@ -103,7 +103,7 @@ describe Provider::Chef do
                           named_prop: 'anotherresource',
                           arrays: [:string_array]
 
-      provider.generate 'blah', []
+      provider.generate 'blah', [], nil
       matched
     end
 

@@ -15,9 +15,12 @@ either a `Api::Product` or a descendant of it.
 -   `@api.name`: The full name of the product: `Google Compute Engine`
 -   `@api.prefix`: The prefix to uniquely identify the types: `gcompute`
 -   `@api.base_url`: The base URL for the service API endpoint:
-    `https://www.googleapis.com/compute/v1/`
+    `https://www.googleapis.com/compute/v1/`. This should not be set in the
+    API definition file, but rather by the generator.
 -   `@api.scopes` (list): The list of permission scopes available for the
     service: `https://www.googleapis.com/auth/compute`
+-   `@api.versions` (list of `Api::Product::Version`): The API versions that
+    can be called for this product.
 
 ### `object` (`Api::Resource`)
 
