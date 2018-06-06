@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_snapshot { <%= example_resource_name('data-disk-snapshot-1') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

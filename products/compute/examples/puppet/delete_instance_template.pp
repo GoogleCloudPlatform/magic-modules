@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_instance_template { <%= example_resource_name('instance-template') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

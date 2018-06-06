@@ -20,14 +20,14 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_instance_group { <%= example_resource_name('my-puppet-masters') -%>:
   ensure     => present,
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -40,7 +40,7 @@ gcompute_backend_service { <%= example_resource_name('my-ssl-backend') -%>:
     gcompute_health_check_ref('another-hc', 'google.com:graphite-playground'),
   ],
   protocol      => 'SSL',
-  project       => 'google.com:graphite-playground',
+  project       => $project, # e.g. 'my-test-project'
   credential    => 'mycred',
 }
 
@@ -61,7 +61,7 @@ gcompute_backend_service { <%= example_resource_name('my-ssl-backend') -%>:
 gcompute_ssl_certificate { <%= example_resource_name('sample-certificate') -%>:
   ensure      => present,
   description => 'A certificate for test purposes only.',
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
   certificate => '-----BEGIN CERTIFICATE-----
 MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG
@@ -95,6 +95,6 @@ gcompute_target_ssl_proxy { <%= example_resource_name('my-ssl-proxy') -%>:
   ssl_certificates => [
     <%= example_resource_name('sample-certificate') -%>,
   ],
-  project          => 'google.com:graphite-playground',
+  project          => $project, # e.g. 'my-test-project'
   credential       => 'mycred',
 }

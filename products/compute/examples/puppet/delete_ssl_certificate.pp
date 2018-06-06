@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_ssl_certificate { <%= example_resource_name('sample-certificate') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

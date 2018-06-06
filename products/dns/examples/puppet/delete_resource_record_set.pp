@@ -27,7 +27,7 @@ gdns_managed_zone { <%= example_resource_name('testzone-4-com') -%>:
   name        => 'testzone-4-com',
   dns_name    => 'testzone-4.com.',
   description => 'Test Example Zone',
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }
 
@@ -35,7 +35,7 @@ gdns_resource_record_set { <%= example_resource_name('www.testzone-4.com.') -%>:
   ensure       => absent,
   managed_zone => <%= example_resource_name('testzone-4-com') -%>,
   type         => 'A',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -44,7 +44,7 @@ gdns_resource_record_set { <%= example_resource_name(res_name) -%>:
   ensure       => absent,
   managed_zone => <%= example_resource_name('testzone-4-com') -%>,
   type         => 'CNAME',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }
 
@@ -54,6 +54,6 @@ gdns_resource_record_set { <%= example_resource_name(res_name) -%>:
   ensure       => absent,
   managed_zone => <%= example_resource_name('testzone-4-com') -%>,
   type         => 'A',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }

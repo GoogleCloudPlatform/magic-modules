@@ -27,6 +27,6 @@
 -%>
 giam_service_account { <%= account -%>:
   ensure       => absent,
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }

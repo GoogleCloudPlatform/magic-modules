@@ -34,6 +34,6 @@ gcompute_backend_bucket { <%= example_resource_name('be-bucket-connection') -%>:
   bucket_name => <%= example_resource_name('backend-bucket-test') -%>,
   description => 'A BackendBucket to connect LNB w/ Storage Bucket',
   enable_cdn  => true,
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }

@@ -41,7 +41,7 @@ if !defined('$sql_instance_suffix') {
 
 gsql_instance { <%= example_resource_name(instance_name) -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -51,6 +51,6 @@ gsql_instance { <%= example_resource_name(instance_name) -%>:
 gsql_database { <%= example_resource_name('webstore') -%>:
   ensure     => absent,
   instance   => <%= example_resource_name(instance_name) -%>,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

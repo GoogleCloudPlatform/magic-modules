@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gstorage_bucket { <%= example_resource_name('puppet-storage-module-test') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

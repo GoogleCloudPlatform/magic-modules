@@ -65,7 +65,8 @@ to install all of the dependent gems for the GCP modules.
 ```
   # Project name is hardcoded. You probably aren't using our default project.
   sed -i 's/google.com:graphite-playground/your-project/g' path/to/example
-  FACTER_cred_path=<path to service account> puppet apply <path to example>
+  FACTER_cred_path=<path to service account> FACTER_project=<project name>
+    puppet apply <path to example>
 ```
 All environment variables have to be passed in with the `FACTER_` prefix.
 You may have to change project names on examples.

@@ -25,27 +25,27 @@
 # Ensures the managed zone is not in the project.
 gdns_managed_zone { <%= example_resource_name('test-example-zone') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 # Ensures the managed zone is not in the project.
 gdns_managed_zone { <%= example_resource_name('testzone-2-com') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 # Ensures the managed zone is not in the project.
 gdns_managed_zone { <%= example_resource_name('id-for-testzone-3-com') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 <% end # name == README.md -%>
 gdns_managed_zone { <%= example_resource_name('testzone-4-com') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
