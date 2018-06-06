@@ -29,7 +29,7 @@ gdns_managed_zone <%= example_resource_name('testzone-4-com') -%> do
   action :create
   dns_name 'testzone-4.com.'
   description 'Test Example Zone'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -44,7 +44,7 @@ gdns_resource_record_set <%= example_resource_name('www.testzone-4.com.') -%> do
     '40.5.6.7',
     '80.9.10.11'
   ]
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -54,6 +54,6 @@ gdns_resource_record_set <%= example_resource_name(res_name) -%> do
   managed_zone <%= example_resource_name('testzone-4-com') %>
   type 'CNAME'
   target ['www.testzone-4.com.']
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

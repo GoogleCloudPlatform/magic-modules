@@ -25,7 +25,7 @@ gdns_resource_record_set <%= example_resource_name('www.testzone-4.com.') -%> do
   action :delete
   managed_zone <%= example_resource_name('testzone-4-com') %>
   type 'A'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -34,14 +34,14 @@ gdns_resource_record_set <%= example_resource_name(res_name) -%> do
   action :delete
   managed_zone <%= example_resource_name('testzone-4-com') %>
   type 'CNAME'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 <% unless name == 'README.md' -%>
 
 gdns_managed_zone <%= example_resource_name('testzone-4-com') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 <% end -%>

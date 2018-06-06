@@ -24,13 +24,13 @@
 gcompute_region <%= example_resource_name('some-region') -%> do
   action :create
   r_label 'us-west1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_address <%= example_resource_name('test1') -%> do
   action :create
   region <%= example_resource_name('some-region') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

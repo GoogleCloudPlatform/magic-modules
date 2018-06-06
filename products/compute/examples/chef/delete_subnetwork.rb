@@ -23,7 +23,7 @@
 gcompute_region <%= example_resource_name('some-region') -%> do
   action :create
   r_label 'us-west1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -34,6 +34,6 @@ end
 gcompute_subnetwork <%= example_resource_name('servers') -%> do
   action :delete
   region <%= example_resource_name('some-region') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

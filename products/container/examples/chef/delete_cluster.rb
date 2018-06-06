@@ -27,6 +27,6 @@ raise "Missing parameter 'cluster_id'. Please read docs at #{__FILE__}" \
 gcontainer_cluster <%= example_resource_name(res_name) -%> do
   action :delete
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

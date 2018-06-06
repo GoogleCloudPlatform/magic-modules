@@ -27,12 +27,12 @@
 <% else # name == README.md -%>
 gcompute_network <%= example_resource_name('my-network') -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_zone 'us-central1-a' do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -40,6 +40,6 @@ end
 gcompute_instance_group <%= example_resource_name('my-masters') -%> do
   action :delete
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

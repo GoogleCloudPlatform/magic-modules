@@ -23,6 +23,6 @@
 <% end -%>
 gcompute_ssl_certificate <%= example_resource_name('my-site-ssl-cert') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

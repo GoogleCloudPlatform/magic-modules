@@ -22,6 +22,6 @@
 
 <% end -%>
 gcompute_license <%= example_resource_name('test-license') -%> do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

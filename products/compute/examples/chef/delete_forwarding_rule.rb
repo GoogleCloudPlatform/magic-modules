@@ -22,21 +22,21 @@
 
 gcompute_region <%= example_resource_name('some-region') -%> do
   name 'us-west1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_address <%= example_resource_name('some-address') -%> do
   action :create
   region <%= example_resource_name('some-region') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_target_pool <%= example_resource_name('target-pool') -%> do
   action :create
   region <%= example_resource_name('some-region') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -45,12 +45,12 @@ gcompute_forwarding_rule <%= example_resource_name('fwd-rule-test') -%> do
   action :delete
   ip_address gcompute_address_ref(
     <%= example_resource_name('some-address') -%>,
-    'us-west1', 'google.com:graphite-playground'
+    'us-west1', ENV['PROJECT'] # ex: 'my-test-project'
   )
   ip_protocol 'TCP'
   port_range '80'
   target <%= example_resource_name('target-pool') %>
   region <%= example_resource_name('some-region') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

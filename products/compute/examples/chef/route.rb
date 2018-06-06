@@ -28,14 +28,14 @@
 <% else # name == README.md -%>
 gcompute_network <%= example_resource_name('my-network') -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_region <%= example_resource_name('some-region') -%> do
   action :create
   r_label 'us-west1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -46,6 +46,6 @@ gcompute_route <%= example_resource_name('corp-route') -%> do
   next_hop_gateway 'global/gateways/default-internet-gateway'
   tags %w[backends databases] # %w[] best for single words. use ['.'] w/ spaces
   network <%= example_resource_name('my-network') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

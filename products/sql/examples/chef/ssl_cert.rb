@@ -27,7 +27,7 @@ raise ['For this example to run you need to define a env. variable named',
 
 gsql_instance <%= example_resource_name(res_name) -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -39,6 +39,6 @@ gsql_ssl_cert <%= example_resource_name('server-certificate') -%> do
   common_name 'CN=www.mydb.com,O=Acme'
   sha1_fingerprint '8fc295bf77a002db5182e04d92c48258cbc1117a'
   instance <%= example_resource_name(res_name) %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

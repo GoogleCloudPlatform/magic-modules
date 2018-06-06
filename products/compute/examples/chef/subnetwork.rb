@@ -29,14 +29,14 @@
 gcompute_network <%= example_resource_name('mynetwork-subnetwork') -%> do
   action :create
   auto_create_subnetworks false
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_region <%= example_resource_name('some-region') -%> do
   action :create
   r_label 'us-west1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -46,6 +46,6 @@ gcompute_subnetwork <%= example_resource_name('servers') -%> do
   ip_cidr_range '172.16.0.0/16'
   network <%= example_resource_name('mynetwork-subnetwork') %>
   region <%= example_resource_name('some-region') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

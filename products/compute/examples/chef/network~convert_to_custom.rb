@@ -35,6 +35,6 @@ puts 'Converting network to Custom'
 gcompute_network <%= example_resource_name(res_name) -%> do
   action :create
   auto_create_subnetworks false
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
