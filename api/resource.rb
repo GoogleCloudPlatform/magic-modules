@@ -48,6 +48,7 @@ module Api
       attr_reader :create_verb
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
+      attr_reader :min_version # Minimum API version this resource is in
     end
 
     include Properties
@@ -241,8 +242,7 @@ module Api
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
-
-      check_optional_property :input, :boolean
+      check_optional_property :min_version, String
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
@@ -261,6 +261,14 @@ module Api
 
     def parameters
       (@parameters || []).reject(&:exclude)
+    end
+
+    def exclude_if_not_in_version(version)
+      @exclude ||= version < min_version
+      @properties&.each { |p| p.exclude_if_not_in_version(version) }
+      @parameters&.each { |p| p.exclude_if_not_in_version(version) }
+
+      @exclude
     end
 
     # Returns all properties and parameters including the ones that are
@@ -291,7 +299,7 @@ module Api
     # Returns all of the properties that are a part of the self_link or
     # collection URLs
     def uri_properties
-      [@base_url, @__product.default_version.base_url].map do |url|
+      [@base_url, @__product.base_url].map do |url|
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')
@@ -334,6 +342,14 @@ module Api
     def save_api_results?
       exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
         || access_api_results
+    end
+
+    def min_version
+      if @min_version.nil?
+        @__product.default_version
+      else
+        @__product.version_obj(@min_version)
+      end
     end
 
     private

@@ -62,8 +62,9 @@ module Provider
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def generate(output_folder, types)
-      generate_objects(output_folder, types)
+    def generate(output_folder, types, version_name)
+      version = @api.version_obj_or_default(version_name)
+      generate_objects(output_folder, types, version)
       generate_client_functions(output_folder) unless @config.functions.nil?
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
@@ -208,20 +209,27 @@ module Provider
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize
 
-    def generate_objects(output_folder, types)
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
+    def generate_objects(output_folder, types, version)
+      @api.set_properties_based_on_version(version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
+        elsif types.empty? && object.exclude_if_not_in_version(version)
+          Google::LOGGER.info "Excluding #{object.name} per API version"
         else
-          generate_object object, output_folder
+          generate_object object, output_folder, version
         end
       end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
 
-    def generate_object(object, output_folder)
-      data = build_object_data(object, output_folder)
+    def generate_object(object, output_folder, version)
+      data = build_object_data(object, output_folder, version)
 
       generate_resource data
       generate_resource_tests data
@@ -283,7 +291,7 @@ module Provider
       )
     end
 
-    def build_object_data(object, output_folder)
+    def build_object_data(object, output_folder, version)
       {
         name: object.out_name,
         object: object,
@@ -292,7 +300,8 @@ module Provider
         tests: (@config.tests || {}).select { |o, _v| o == object.name }
                                     .fetch(object.name, {}),
         output_folder: output_folder,
-        product_name: object.__product.prefix[1..-1]
+        product_name: object.__product.prefix[1..-1],
+        version: version
       }
     end
 
@@ -353,19 +362,18 @@ module Provider
     end
 
     def async_operation_url(resource)
-      build_url(resource.__product.default_version.base_url,
+      build_url(resource.__product.base_url,
                 resource.async.operation.base_url,
                 true)
     end
 
     def collection_url(resource)
       base_url = resource.base_url.split("\n").map(&:strip).compact
-      build_url(resource.__product.default_version.base_url, base_url)
+      build_url(resource.__product.base_url, base_url)
     end
 
     def self_link_raw_url(resource)
-      base_url = resource.__product.default_version.base_url
-                         .split("\n").map(&:strip).compact
+      base_url = resource.__product.base_url.split("\n").map(&:strip).compact
       if resource.self_link.nil?
         [base_url, [resource.base_url, '{{name}}'].join('/')]
       else

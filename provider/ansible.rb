@@ -98,15 +98,14 @@ module Provider
 
       def collection_url(resource)
         base_url = resource.base_url.split("\n").map(&:strip).compact
-        full_url = [resource.__product.default_version.base_url,
-                    base_url].flatten.join
+        full_url = [resource.__product.base_url, base_url].flatten.join
         # Double {} replaced with single {} to support Python string
         # interpolation
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       def async_operation_url(resource)
-        base_url = resource.__product.default_version.base_url
+        base_url = resource.__product.base_url
         url = [base_url, resource.async.operation.base_url].join
         "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
@@ -118,7 +117,7 @@ module Provider
          Google::StringUtils.underscore(object.name)].join('_')
       end
 
-      def build_object_data(object, output_folder)
+      def build_object_data(object, output_folder, version)
         # Method is overriden to add Ansible example objects to the data object.
         data = super
 

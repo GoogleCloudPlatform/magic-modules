@@ -33,6 +33,7 @@ module Api
       attr_reader :required
       attr_reader :update_verb
       attr_reader :update_url
+      attr_reader :min_version
     end
 
     include Fields
@@ -48,6 +49,7 @@ module Api
 
       check_property :description, ::String
       check_property :exclude, :boolean
+      check_optional_property :min_version, ::String
 
       check_optional_property :output, :boolean
       check_optional_property :field, ::String
@@ -104,6 +106,18 @@ module Api
 
     def parent
       @__parent
+    end
+
+    def min_version
+      if @min_version.nil?
+        @__resource.min_version
+      else
+        @__resource.__product.version_obj(@min_version)
+      end
+    end
+
+    def exclude_if_not_in_version(version)
+      @exclude ||= version < min_version
     end
 
     private

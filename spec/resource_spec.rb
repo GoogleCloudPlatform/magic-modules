@@ -14,7 +14,36 @@
 require 'spec_helper'
 require 'api/object'
 
-RSpec.describe Api::Object do
+describe Api::Resource do
+  context 'uses the correct API version' do
+    let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+    before { product.validate }
+
+    subject do
+      product.objects.find { |o| o.name == 'AnotherResource' }
+    end
+
+    context 'v1' do
+      it do
+        version = product.version_obj('v1')
+        subject.exclude_if_not_in_version(version)
+        is_expected.not_to(contain_property_with_name('beta-property'))
+        is_expected.to(contain_property_with_name('property1'))
+      end
+    end
+
+    context 'beta' do
+      it do
+        version = product.version_obj('beta')
+        subject.exclude_if_not_in_version(version)
+        is_expected.to(contain_property_with_name('beta-property'))
+        is_expected.to(contain_property_with_name('property1'))
+      end
+    end
+  end
+
+  # TODO: Fill in these tests or get rid of them completely
   it 'uses product base_url if missing' do
   end
 
@@ -22,5 +51,17 @@ RSpec.describe Api::Object do
   end
 
   it 'combines base_url with product if relative' do
+  end
+end
+
+RSpec::Matchers.define :contain_property_with_name do |expected|
+  match do |actual|
+    actual.properties.find { |p| p.name == expected }
+  end
+  failure_message do |actual|
+    "expected #{actual.properties.map(&:name)} to contain #{expected}"
+  end
+  failure_message_when_negated do |actual|
+    "expected #{actual.properties.map(&:name)} not to contain #{expected}"
   end
 end
