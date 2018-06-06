@@ -24,6 +24,6 @@
 <% res_name = example_resource_name('instance-template-test') -%>
 gcompute_instance_template <%= res_name -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

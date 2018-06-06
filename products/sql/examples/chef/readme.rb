@@ -23,7 +23,7 @@
 
 gsql_instance  <%= example_resource_name(res_name) -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -31,6 +31,6 @@ gsql_database <%= example_resource_name('webstore') -%> do
   action :create
   charset 'utf8'
   instance <%= example_resource_name(res_name) %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

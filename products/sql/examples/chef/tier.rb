@@ -22,6 +22,6 @@
 <% end -%>
 gsql_tier <%= example_resource_name('D0') -%> do
   ram 134217728 # we'll confirm that tier has enough RAM for us
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

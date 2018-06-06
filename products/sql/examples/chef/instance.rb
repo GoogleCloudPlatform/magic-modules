@@ -48,6 +48,6 @@ gsql_instance <%= example_resource_name(res_name) -%> do
     }
   })
   region 'us-central1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

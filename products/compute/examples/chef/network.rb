@@ -24,6 +24,6 @@
 gcompute_network <%= example_resource_name('mynetwork') -%> do
   action :create
   auto_create_subnetworks true
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

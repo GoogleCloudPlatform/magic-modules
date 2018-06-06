@@ -36,6 +36,6 @@ raise ['For this example to run you need to define a env. variable named',
 gsql_instance <%= example_resource_name(res_name) -%> do
   action :delete
   region 'us-central1'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

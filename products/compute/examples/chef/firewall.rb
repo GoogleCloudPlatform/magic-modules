@@ -33,6 +33,6 @@ gcompute_firewall <%= example_resource_name('test-fw-allow-ssh') -%> do
     'test-ssh-server',
     'staging-ssh-server'
   ]
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

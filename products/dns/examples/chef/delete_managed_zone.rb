@@ -24,5 +24,5 @@
 gdns_managed_zone <%= example_resource_name('testzone-3-com') -%> do
   action :delete
   credential 'mycred'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
 end

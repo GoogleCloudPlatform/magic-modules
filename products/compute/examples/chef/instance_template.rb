@@ -22,14 +22,14 @@
 
 gcompute_zone 'us-west1-a' do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_machine_type 'n1-standard-1' do
   action :create
   zone 'us-west1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -39,7 +39,7 @@ end
 #  action :create
 #  zone 'us-west1-a'
 #  source_image 'projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts'
-#  project 'google.com:graphite-playground'
+#  project ENV['PROJECT'] # ex: 'my-test-project'
 #  credential 'mycred'
 #end
 
@@ -49,7 +49,7 @@ end
 
 gcompute_network <%= example_resource_name('mynetwork-test') -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -95,6 +95,6 @@ gcompute_instance_template <%= res_name -%> do
       }
     ]
   )
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

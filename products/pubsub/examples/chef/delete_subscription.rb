@@ -21,7 +21,7 @@
 
 gpubsub_topic <%= example_resource_name('conversation-1') -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -29,6 +29,6 @@ end
 gpubsub_subscription <%= example_resource_name('subscription-1') -%> do
   action :delete
   topic <%= example_resource_name('conversation-1') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

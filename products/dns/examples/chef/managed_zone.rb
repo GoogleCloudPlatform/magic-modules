@@ -44,6 +44,6 @@ gdns_managed_zone <%= example_resource_name('testzone-3-com') -%> do
   # ]
   # creation_time '2016-12-02T04:59:24.333Z'
 
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
