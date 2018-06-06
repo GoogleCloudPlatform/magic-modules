@@ -125,11 +125,33 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_forwarding_rule" "default" {
+        name       = "website-forwarding-rule"
+        target     = "${google_compute_target_pool.default.self_link}"
+        port_range = "80"
+      }
+      ```
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       portRange: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'portRangeDiffSuppress'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      IPAddress: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      IPProtocol: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'caseDiffSuppress'
+        default_from_api: true
+      loadBalancingScheme: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: :EXTERNAL
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api:
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
