@@ -76,6 +76,11 @@
     - :SCTP
     - :ICMP
 - !ruby/object:Api::Type::ResourceRef
+  # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200)
+  # After adding the RegionBackendService resource, move this field out
+  # of the common fields for forwarding rules. This field should refer
+  # to a RegionBackendService for a ForwardingRule and to a BackendService
+  # for a GlobalForwardingRule.
   name: 'backendService'
   resource: 'BackendService'
   imports: 'selfLink'
@@ -153,6 +158,7 @@
     * TargetVpnGateway: 500, 4500
 - !ruby/object:Api::Type::Array
   name: 'ports'
+  max_size: 5
   description: |
     This field is used along with the backend_service field for internal
     load balancing.
