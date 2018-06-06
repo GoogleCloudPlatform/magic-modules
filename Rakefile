@@ -15,15 +15,39 @@ $LOAD_PATH.unshift File.dirname(__FILE__)
 Dir.chdir(File.dirname(__FILE__))
 
 # Load all tasks from tasks/
-Dir[File.join('tasks', '*.rb')].reject { |p| File.directory? p }
-                               .each do |f|
-  require f
+require 'parallel_tests'
+require 'rubocop/rake_task'
+require 'tasks/common'
+
+@task = MMRakeTasks.new
+
+###############################################################################
+# Tasks
+###############################################################################
+@task.add_task('compile') { |prov, mod| compile_module(prov, mod) }
+
+namespace 'test' do
+  desc 'Run RSpec code example'
+  task :spec do |_, _|
+    abort unless system('parallel_rspec spec/')
+  end
+
+  RuboCop::RakeTask.new
 end
 
-# Find all tasks under the test namespace
-# Ignore those with multiple levels like rubocop:auto_correct
-tests = Rake.application.tasks.select do |task|
-  /^test:[a-z]*$/ =~ task.name
-end.map(&:name)
+###############################################################################
+# Helpers
+###############################################################################
+def compile_module(provider, mod)
+  folder = PROVIDER_FOLDERS[provider.to_sym] % mod
+  flag = "COMPILER_#{folder.gsub('build/', '').tr('/', '_').upcase}_OUTPUT"
+  output = ENV[flag] || (PROVIDER_FOLDERS[provider.to_sym] % mod)
+  run_command(
+    "bundle exec compiler -p products/#{mod} -e #{provider} -o #{output}"
+  )
+end
 
-multitask 'test' => tests
+def test_module(provider, mod)
+  output = PROVIDER_FOLDERS[provider.to_sym] % mod
+  %x(cd #{output} && #{TEST_RUNNER[provider]})
+end
