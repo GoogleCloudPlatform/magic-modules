@@ -60,7 +60,8 @@ module Api
       end
 
       def <=>(other)
-        ORDER.index(name) <=> ORDER.index(other.name) if other.is_a?(Version)
+        raise "#{other} is not a version" unless other.is_a? Version
+        ORDER.index(name) <=> ORDER.index(other.name)
       end
     end
 
