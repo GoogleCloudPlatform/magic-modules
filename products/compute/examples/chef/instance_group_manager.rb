@@ -21,19 +21,19 @@
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
 gcompute_zone 'us-west1-a' do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_machine_type 'n1-standard-1' do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   zone 'us-west1-a'
   credential 'mycred'
 end
 
 gcompute_network 'mynetwork-test' do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -69,7 +69,7 @@ gcompute_instance_template 'instance-template' do
       }
     ]
   )
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -80,6 +80,6 @@ gcompute_instance_group_manager 'test1' do
   instance_template 'instance-template'
   target_size 3
   zone 'us-west1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

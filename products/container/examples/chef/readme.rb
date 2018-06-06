@@ -24,7 +24,7 @@
 gcontainer_cluster 'test-cluster' do
   action :create
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -33,6 +33,6 @@ gcontainer_node_pool 'web-servers' do
   initial_node_count 4
   cluster 'test-cluster'
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

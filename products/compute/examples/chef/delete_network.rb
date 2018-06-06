@@ -27,6 +27,6 @@ raise "Missing parameter 'network_id'. Please read docs at #{__FILE__}" \
 <% res_name = 'mynetwork-#{ENV[\'network_id\']}' -%>
 gcompute_network <%= example_resource_name(res_name) -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -21,7 +21,7 @@
 
 gstorage_bucket <%= example_resource_name('storage-module-test') -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -35,6 +35,6 @@ gstorage_bucket_access_control <%= example_resource_name(res_name) -%> do
   bucket <%= example_resource_name('storage-module-test') %>
   entity 'user-nelsona@google.com'
   role 'WRITER'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

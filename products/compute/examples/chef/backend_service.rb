@@ -30,7 +30,7 @@
 gcompute_instance_group <%= example_resource_name('my-masters') -%> do
   action :create
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -42,8 +42,8 @@ gcompute_backend_service <%= example_resource_name('my-app-backend') -%> do
   ]
   enable_cdn true
   health_checks [
-    gcompute_health_check_ref('another-hc', 'google.com:graphite-playground')
+    gcompute_health_check_ref('another-hc', ENV['PROJECT'] # ex: 'my-test-project')
   ]
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

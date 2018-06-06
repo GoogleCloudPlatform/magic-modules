@@ -23,6 +23,6 @@
 <% end -%>
 gcompute_backend_bucket <%= example_resource_name('be-bucket-connection') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

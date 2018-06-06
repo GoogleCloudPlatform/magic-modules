@@ -21,14 +21,14 @@
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
 gcompute_zone 'us-central1-a' do
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
 gcompute_disk <%= example_resource_name('data-disk-1') -%> do
   action :create
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -38,6 +38,6 @@ end
 gcompute_image <%= example_resource_name('test-image') -%> do
   action :delete
   source_disk <%= example_resource_name('data-disk-1') %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

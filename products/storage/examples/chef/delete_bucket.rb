@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gstorage_bucket <%= example_resource_name('storage-module-test') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

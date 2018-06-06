@@ -27,7 +27,7 @@ raise ['For this example to run you need to define a env. variable named',
 
 gsql_instance <%= example_resource_name(res_name) -%> do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -39,6 +39,6 @@ gsql_user 'john.doe' do
   password 'secret-password'
   host '10.1.2.3'
   instance <%= example_resource_name(res_name) %>
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

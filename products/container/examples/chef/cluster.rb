@@ -36,6 +36,6 @@ gcontainer_cluster <%= example_resource_name(res_name) -%> do
     disk_size_gb: 500              # ... and a lot of disk space
   )
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -35,7 +35,7 @@ gcontainer_cluster <%= quote_string(res_name) -%> do
     disk_size_gb: 500              # ... and a lot of disk space
   )
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
 
@@ -49,6 +49,6 @@ gcontainer_kubeconfig '/home/alexstephen/.kube/config' do
   context "gke-mycluster-#{ENV['cluster_id']}"
   cluster "mycluster-#{ENV['cluster_id']}"
   zone 'us-central1-a'
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

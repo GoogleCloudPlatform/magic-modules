@@ -23,6 +23,6 @@
 
 gstorage_bucket 'storage-bucket' do
   action :create
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

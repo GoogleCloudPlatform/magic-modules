@@ -23,6 +23,6 @@
 <% end -%>
 gcompute_global_address <%= example_resource_name('my-app-lb') -%> do
   action :delete
-  project 'google.com:graphite-playground'
+  project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
