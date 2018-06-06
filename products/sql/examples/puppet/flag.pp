@@ -23,6 +23,6 @@
 gsql_flag { <%= example_resource_name('group_concat_max_len') -%>:
   min_value  => 4,
   max_value  => 4294967295,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

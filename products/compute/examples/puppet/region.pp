@@ -21,6 +21,6 @@
 
 <% end # name == README.md -%>
 gcompute_region { 'us-west1':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

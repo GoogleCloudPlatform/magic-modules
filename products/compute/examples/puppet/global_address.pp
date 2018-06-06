@@ -22,6 +22,6 @@
 <% end # name == README.md -%>
 gcompute_global_address { <%= example_resource_name('my-app-lb-address') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

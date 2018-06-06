@@ -36,6 +36,6 @@ gstorage_bucket { <%= example_resource_name('puppet-storage-module-test') -%>:
       role   => 'OWNER',
     },
   ],
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

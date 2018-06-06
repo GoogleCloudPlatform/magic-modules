@@ -20,7 +20,7 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -32,6 +32,6 @@ gcompute_disk { <%= example_resource_name('data-disk-1') -%>:
     raw_key => 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0=',
   },
   zone                => 'us-central1-a',
-  project             => 'google.com:graphite-playground',
+  project             => $project, # e.g. 'my-test-project'
   credential          => 'mycred',
 }

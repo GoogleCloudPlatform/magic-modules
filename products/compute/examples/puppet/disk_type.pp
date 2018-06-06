@@ -20,7 +20,7 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -29,6 +29,6 @@ gcompute_disk_type { 'pd-standard':
   default_disk_size_gb => 500,
   deprecated_deleted   => undef, # undef = not deprecated
   zone                 => 'us-central1-a',
-  project              => 'google.com:graphite-playground',
+  project              => $project, # e.g. 'my-test-project'
   credential           => 'mycred',
 }

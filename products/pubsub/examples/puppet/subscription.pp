@@ -21,7 +21,7 @@
 
 gpubsub_topic { <%= example_resource_name('conversation-1') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -33,6 +33,6 @@ gpubsub_subscription { <%= example_resource_name('subscription-1') -%>:
     push_endpoint => 'https://myapp.graphite.cloudnativeapp.com/webhook/sub1',
   },
   ack_deadline_seconds => 300,
-  project              => 'google.com:graphite-playground',
+  project              => $project, # e.g. 'my-test-project'
   credential           => 'mycred',
 }

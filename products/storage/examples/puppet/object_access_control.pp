@@ -22,7 +22,7 @@
 
 gstorage_bucket { <%= example_resource_name(bucket_name) -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -36,6 +36,6 @@ gstorage_object_access_control { <%= example_resource_name(res_name) -%>:
   object     => 'acl-controlled-file.txt'
   entity     => 'user-nelsona@google.com',
   role       => 'WRITER',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

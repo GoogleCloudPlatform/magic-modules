@@ -47,14 +47,14 @@ gdns_managed_zone { <%= example_resource_name('test-example-zone') -%>:
   # ],
   # creation_time => '2016-12-02T04:59:24.333Z',
 
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }
 
 # Ensures a managed zone exists and has the correct values.
 gdns_managed_zone { <%= example_resource_name('testzone-2-com') -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -66,6 +66,6 @@ gdns_managed_zone { <%= example_resource_name(res_name) -%>:
   name        => 'testzone-3-com',
   dns_name    => 'test.somewild-example.com.',
   description => 'Test Example Zone',
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }

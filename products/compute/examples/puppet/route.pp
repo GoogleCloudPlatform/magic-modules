@@ -26,7 +26,7 @@
 <% else # name == README.md -%>
 gcompute_network { <%= example_resource_name('my-network') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -37,6 +37,6 @@ gcompute_route { <%= example_resource_name('corp-route') -%>:
   next_hop_gateway => 'global/gateways/default-internet-gateway',
   network          => <%= example_resource_name('my-network') -%>,
   tags             => ['backends', 'databases'],
-  project          => 'google.com:graphite-playground',
+  project          => $project, # e.g. 'my-test-project'
   credential       => 'mycred',
 }

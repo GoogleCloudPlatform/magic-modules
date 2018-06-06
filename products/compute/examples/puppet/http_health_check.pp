@@ -26,6 +26,6 @@ gcompute_http_health_check { <%= example_resource_name('my-app-http-hc') -%>:
   port                => 8080,
   timeout_sec         => 2,
   unhealthy_threshold => 5,
-  project             => 'google.com:graphite-playground',
+  project             => $project, # e.g. 'my-test-project'
   credential          => 'mycred',
 }

@@ -6,7 +6,7 @@
 <%= compile 'templates/puppet/examples~credential.pp.erb' -%>
 
 gspanner_instance_config { 'regional-us-central1':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -20,6 +20,6 @@ gspanner_instance { <%= example_resource_name('my-spanner') -%>:
     },
   ],
   config       => 'regional-us-central1',
-  project      => 'google.com:graphite-playground',
+  project      => $project, # e.g. 'my-test-project'
   credential   => 'mycred',
 }

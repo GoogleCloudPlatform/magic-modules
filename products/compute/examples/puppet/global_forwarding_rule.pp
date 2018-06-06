@@ -21,19 +21,19 @@
 
 gcompute_global_address { <%= example_resource_name('my-app-lb-address') -%>:
   ensure     => present,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_zone { 'us-central1-a':
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
 gcompute_instance_group { <%= example_resource_name('my-puppet-masters') -%>:
   ensure     => present,
   zone       => 'us-central1-a',
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -46,21 +46,21 @@ gcompute_backend_service { <%= example_resource_name('my-app-backend') -%>:
   health_checks => [
     gcompute_health_check_ref('another-hc', 'google.com:graphite-playground'),
   ],
-  project       => 'google.com:graphite-playground',
+  project       => $project, # e.g. 'my-test-project'
   credential    => 'mycred',
 }
 
 gcompute_url_map { <%= example_resource_name('my-url-map') -%>:
   ensure          => present,
   default_service => <%= example_resource_name('my-app-backend') -%>,
-  project         => 'google.com:graphite-playground',
+  project         => $project, # e.g. 'my-test-project'
   credential      => 'mycred',
 }
 
 gcompute_target_http_proxy { <%= example_resource_name('my-http-proxy') -%>:
   ensure     => present,
   url_map    => <%= example_resource_name('my-url-map') -%>,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
 
@@ -77,6 +77,6 @@ gcompute_global_forwarding_rule { <%= example_resource_name('test1') -%>:
     <%= example_resource_name('my-http-proxy') -%>,
     'google.com:graphite-playground'
   ),
-  project     => 'google.com:graphite-playground',
+  project     => $project, # e.g. 'my-test-project'
   credential  => 'mycred',
 }

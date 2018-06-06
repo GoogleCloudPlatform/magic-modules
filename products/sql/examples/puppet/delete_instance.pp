@@ -40,6 +40,6 @@ if !defined('$sql_instance_suffix') {
 <% instance_name = 'sql-test-${sql_instance_suffix}' -%>
 gsql_instance { <%= example_resource_name(instance_name) -%>:
   ensure     => absent,
-  project    => 'google.com:graphite-playground',
+  project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }
