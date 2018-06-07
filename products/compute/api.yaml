@@ -2540,7 +2540,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
-    exclude: true
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
     update_verb: :PATCH
@@ -3147,7 +3146,6 @@ objects:
         update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setBackendService'
   - !ruby/object:Api::Resource
     name: 'TargetVpnGateway'
-    exclude: true
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
     input: true
