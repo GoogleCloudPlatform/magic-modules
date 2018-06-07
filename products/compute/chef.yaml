@@ -69,6 +69,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/provider_target_pool.rb'
+  # Not yet implemented.
+  SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetVpnGateway: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
 examples: !ruby/object:Api::Resource::HashArray
   Address:
     - address.rb
