@@ -9,8 +9,14 @@ fi
 bundle install
 
 # parallel_rspec doesn't support --exclude_pattern
-IFS="," read -ra excluded <<< "$EXCLUDE_PATTERN"
-filtered=$(find spec/ -name '*_spec.rb' $(printf "! -wholename %s " ${excluded[@]}))
+if [ -z "$EXCLUDE_PATTERN" ]; then
+    echo "No EXCLUDE_PATTERN"
+    filtered=$(find spec/ -name '*_spec.rb')
+else
+    echo "Excluding $EXCLUDE_PATTERN"
+    IFS="," read -ra excluded <<< "$EXCLUDE_PATTERN"
+    filtered=$(find spec/ -name '*_spec.rb' $(printf "! -wholename %s " ${excluded[@]}))
+fi
 
 DISABLE_COVERAGE=true bundle exec parallel_rspec ${filtered[@]}
 popd
