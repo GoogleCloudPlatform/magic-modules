@@ -53,7 +53,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                       .join('/')
         )
     provider_helpers:
-      - 'products/spanner/helpers/database_helpers.rb.erb'
+      - 'products/spanner/helpers/ruby/database_helpers.rb.erb'
   Instance: !ruby/object:Provider::Puppet::ResourceOverride
     custom_create_resource: true
     custom_update_resource: true
@@ -77,7 +77,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                       .join('/')
         )
     provider_helpers:
-      - 'products/spanner/helpers/instance_helpers.rb.erb'
+      - 'products/spanner/helpers/ruby/instance_helpers.rb.erb'
   InstanceConfig: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       collection: |
@@ -99,7 +99,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                       .join('/')
         )
     provider_helpers:
-      - 'products/spanner/helpers/instance_config_helpers.rb.erb'
+      - 'products/spanner/helpers/ruby/instance_config_helpers.rb.erb'
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/spanner/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray

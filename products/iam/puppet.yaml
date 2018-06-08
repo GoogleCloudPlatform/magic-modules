@@ -33,7 +33,7 @@ manifest: !ruby/object:Provider::Puppet::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   ServiceAccount: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/iam/helpers/provider_service_account.rb'
+      - 'products/iam/helpers/ruby/provider_service_account.rb'
   ServiceAccountKey: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       create: |
@@ -99,7 +99,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           raise "'path' parameter should be an absolute path." \
             unless (Pathname.new value).absolute?
     provider_helpers:
-      - 'products/iam/helpers/provider_service_account_key.rb.erb'
+      - 'products/iam/helpers/ruby/provider_service_account_key.rb.erb'
     requires:
       - base64
 examples: !ruby/object:Api::Resource::HashArray

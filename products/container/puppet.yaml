@@ -34,10 +34,10 @@ manifest: !ruby/object:Provider::Puppet::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   Cluster: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_cluster.rb'
+      - 'products/container/helpers/ruby/provider_cluster.rb'
   NodePool: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_node_pool.rb'
+      - 'products/container/helpers/ruby/provider_node_pool.rb'
   KubeConfig: !ruby/object:Provider::Puppet::ResourceOverride
     manual: true
 bolt_tasks:
@@ -115,7 +115,7 @@ files: !ruby/object:Provider::Config::Files
 <%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
     lib/google/container/api/gcontainer_node_pool.rb:
-      products/container/helpers/api_gcontainer_node_pool.erb
+      products/container/helpers/puppet/bolt/api_gcontainer_node_pool.erb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 style:

@@ -62,7 +62,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         request[:name] = ['projects', @resource[:project], 'subscriptions',
                           @resource[:name]].join('/')
     provider_helpers:
-      - 'products/pubsub/helpers/provider_subscription.rb'
+      - 'products/pubsub/helpers/ruby/provider_subscription.rb'
   Topic: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
       resource_to_request_patch: |
@@ -90,7 +90,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                     .join('/')
         )
     provider_helpers:
-      - 'products/pubsub/helpers/provider_topic.rb'
+      - 'products/pubsub/helpers/ruby/provider_topic.rb'
 examples: !ruby/object:Api::Resource::HashArray
   Subscription:
     - subscription.pp
@@ -155,7 +155,7 @@ files: !ruby/object:Provider::Config::Files
 <%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
     lib/google/pubsub/api/gpubsub_topic.rb:
-      products/pubsub/helpers/api_gpubsub_topic.erb
+      products/pubsub/helpers/puppet/bolt/api_gpubsub_topic.erb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>

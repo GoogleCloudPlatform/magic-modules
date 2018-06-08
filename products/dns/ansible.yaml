@@ -60,7 +60,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                                     'dns#resourceRecordSetsListResponse',
                                     'rrsets')
     provider_helpers:
-      - 'products/dns/helpers/ansible_provider_resource_set.py.erb'
+      - 'products/dns/helpers/ansible/provider_resource_set.py.erb'
     hidden:
       - unwrap_resource
       - resource_to_request
