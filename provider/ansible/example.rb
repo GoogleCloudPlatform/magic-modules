@@ -144,6 +144,7 @@ module Provider
       end
     end
 
+    # Grpc gcloud commands seem to follow a similar pattern
     class GrpcFailureCondition < FailureCondition
       attr_reader :single
       attr_reader :plural
@@ -155,7 +156,7 @@ module Provider
         @name ||= '{{ resource_name }}'
         @error = [
           "#{single.capitalize} not found:",
-          "projects/{{ gcp_project }}/#{plural}/#{@name}",
+          "projects/{{ gcp_project }}/#{plural}/#{@name}"
         ].join(' ')
         super
       end
