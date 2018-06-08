@@ -187,13 +187,18 @@ def main():
   else
     raise "Ansible does not support create_verb #{object.create_verb}"
   end
+  create_request = if object.custom_create_resource
+                   'resource_to_create'
+                   else
+                     'resource_to_request'
+                   end
 -%>
 <%
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth#{create_verb}",
-                 ['link', 'resource_to_request(module)']),
+                 ['link', "#{create_request}(module)"]),
      ('kind' if !object.async && object.kind?)
    ]
   )
@@ -208,6 +213,13 @@ def main():
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.save_api_results?)]))
 -%>
+<%
+  update_request = if object.custom_update_resource
+                   'resource_to_update'
+                   else
+                     'resource_to_request'
+                   end
+-%>
 <% if object.update.nil? -%>
 <%   if !false?(object.editable) -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
@@ -218,7 +230,7 @@ def main():
     [
      'module',
      method_call("auth.#{update_verb}",
-                 ['link', 'resource_to_request(module)']),
+                 ['link', "#{update_request}(module)"]),
      ('kind' if !object.async && object.kind?)
    ]
   )
