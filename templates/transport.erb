@@ -32,13 +32,13 @@ end
 def fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)
 <%=
   lines(format(
-    [
-      'self.class.fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)',
-      [
-        'self.class.fetch_wrapped_resource(resource, kind, wrap_kind,',
-        indent('wrap_path)', 34) # 34 = align with ( previous line
-      ]
-    ], 2, inside_indent
+          [
+            'self.class.fetch_wrapped_resource(resource, kind, wrap_kind, wrap_path)',
+            [
+              'self.class.fetch_wrapped_resource(resource, kind, wrap_kind,',
+              indent('wrap_path)', 34) # 34 = align with ( previous line
+            ]
+          ], 2, inside_indent
   ))
 -%>
 end

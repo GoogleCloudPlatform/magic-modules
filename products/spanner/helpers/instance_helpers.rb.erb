@@ -18,7 +18,7 @@ def resource_to_update
     "projects/#{resource[:project]}/instanceConfigs/#{resource[:config]}"
   {
     'instance' => instance,
-<% fields = object.properties.select { |p| !p.output }.map(&:name) -%>
+<% fields = object.properties.reject(&:output).map(&:name) -%>
     'fieldMask' => %w[<%= fields.join(' ') -%>].join(',')
   }.to_json
 end

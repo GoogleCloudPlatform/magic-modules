@@ -34,7 +34,6 @@
                                               name ? :name : :title,
                                               ensure: 'present')
 
-
   # Creates the expect_network_* statements required for this test.
   # This includes the expect statements for all referenced resources.
   expectations = [
@@ -58,7 +57,7 @@
   references_self_type = false
   collector.each do |obj|
     references_self_type = true if obj.parent && \
-      obj.parent.__resource == obj.object
+                                   obj.parent.__resource == obj.object
   end
 -%>
 <% if !cust_before.nil? -%>
@@ -88,12 +87,12 @@
               subject do
 <%=
   lines(format([
-          ["catalog.resource('#{res_name}').provider"],
-          [
-            "catalog.resource('#{res_name}')",
-            "       .provider"
-          ]
-        ], 16))
+                 ["catalog.resource('#{res_name}').provider"],
+                 [
+                   "catalog.resource('#{res_name}')",
+                   '       .provider'
+                 ]
+               ], 16))
 -%>
               end
 
@@ -114,7 +113,7 @@
 <%=    lines(indent(@property.property(prop, index,
                                        @data_gen.comparator(prop),
                                        @data_gen.value(prop.class, prop, index),
-                                        inside_indent),
+                                       inside_indent),
                     inside_indent)) -%>
 <%   end # if !name-%>
 <% end # if references_self_type -%>

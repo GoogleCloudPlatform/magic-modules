@@ -54,7 +54,7 @@ For complete details of the authentication cookbook, visit the
 
 ## Resources
 
-<% objects = product.objects.select { |o| !o.exclude } -%>
+<% objects = product.objects.reject(&:exclude) -%>
 <% objects.each do |object| -%>
 * [`<%= object.out_name -%>`](#<%= object.out_name -%>) -
 <%= lines(indent(wrap_field(object.description, 6), 2)) -%>
@@ -92,8 +92,8 @@ If the resource already exists Chef will attempt to delete it.", 0)) -%>
 
 #### Properties
 
-<% # TODO(nelsonjr): Add suffixes "(read only)" "(output only") etc
-   # on all providers -%>
+<%# TODO(nelsonjr): Add suffixes "(read only)" "(output only") etc
+# on all providers -%>
 <%   object.all_user_properties.each do |property| -%>
 * `<%= property.out_name -%>` -
 <%
@@ -110,8 +110,7 @@ If the resource already exists Chef will attempt to delete it.", 0)) -%>
 <%= build_nested_object(property.item_type, "#{property.out_name}[]").join -%>
 <% elsif property.is_a? Api::Type::Array and \
   property.item_type.is_a? Api::Type::Array
-   raise "Array of arrays. Not supported."
--%>
+   raise "Array of arrays. Not supported." -%>
 <% end # property.is_a? Api::Type::NestedObject -%>
 <%   end # object.all_user_properties.-%>
 #### Label

@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :puppet) -%>
+<%= lines(autogen_notice(:puppet)) -%>
 
 <%=
   lines(fn.requires.sort.map { |r| "require '#{r}'" }, 1) \
@@ -34,8 +34,8 @@ Puppet::Functions.create_function(:<%= fn.name -%>) do
 <% end # fn.arguments.each -%>
   end
 
-  def <%= fn.name -%>(<%= fn.arguments.map { |a| a.name }.join(', ') -%>)
+  def <%= fn.name -%>(<%= fn.arguments.map(&:name).join(', ') -%>)
 <%= lines(indent(fn.code, 4)) -%>
   end
-<%= lines(lines_before(indent(fn.helpers,2))) unless fn.helpers.nil? -%>
+<%= lines(lines_before(indent(fn.helpers, 2))) unless fn.helpers.nil? -%>
 end

@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 <%
   inside_indent = 2
@@ -25,9 +25,7 @@
   requires << 'google/hash_utils'
   requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'get')
   requires << 'puppet'
-  unless object.exports.nil?
-    requires << 'google/object_store'
-  end
+  requires << 'google/object_store' unless object.exports.nil?
   unless object.readonly
     requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'delete')
     requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'post')
@@ -69,46 +67,49 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%   if object.self_link_query.nil? -%>
 <%=
   lines(format(
-    [
-      ('fetch = fetch_resource(resource, self_link(resource))' \
-       unless object.kind?),
-      ['fetch = fetch_resource(resource, self_link(resource),',
-       "'#{object.kind}')"].join(' '),
-      [
-        'fetch = fetch_resource(resource, self_link(resource),',
-        indent("'#{object.kind}')", 23) # 23 = align previous until (
-      ]
-    ].compact, 6
+          [
+            ('fetch = fetch_resource(resource, self_link(resource))' \
+             unless object.kind?),
+            ['fetch = fetch_resource(resource, self_link(resource),',
+             "'#{object.kind}')"].join(' '),
+            [
+              'fetch = fetch_resource(resource, self_link(resource),',
+              indent("'#{object.kind}')", 23) # 23 = align previous until (
+            ]
+          ].compact, 6
   ))
 -%>
 <%   else # object.self_link_query.nil? -%>
 <%
-  self_link_kind = !object.self_link_query.kind.nil? ? \
-  "'#{object.self_link_query.kind}'," : ''
+  self_link_kind = if !object.self_link_query.kind.nil?
+                     "'#{object.self_link_query.kind}',"
+                   else
+                     ''
+                   end
 
   obj_kind = object.kind? ? "'#{object.kind}'," : ''
 -%>
 <%=
   lines(format(
-    [
-      ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
-       "#{self_link_kind}",
-       "'#{object.self_link_query.items}')"].join(' '),
-      [
-        ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
-         "#{self_link_kind}"].join(' '),
-        indent([
-          "'#{object.self_link_query.items}')"
-        ], 31) # 31 = align with ( previous line
-      ],
-      [
-        "fetch = fetch_wrapped_resource(resource, #{obj_kind}",
-        indent([
-          "#{self_link_kind}",
-          "'#{object.self_link_query.items}')"
-        ], 31) # 31 = align with ( previous line
-      ]
-    ], 6
+          [
+            ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
+             self_link_kind.to_s,
+             "'#{object.self_link_query.items}')"].join(' '),
+            [
+              ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
+               self_link_kind.to_s].join(' '),
+              indent([
+                       "'#{object.self_link_query.items}')"
+                     ], 31) # 31 = align with ( previous line
+            ],
+            [
+              "fetch = fetch_wrapped_resource(resource, #{obj_kind}",
+              indent([
+                       self_link_kind.to_s,
+                       "'#{object.self_link_query.items}')"
+                     ], 31) # 31 = align with ( previous line
+            ]
+          ], 6
   ))
 -%>
 <%   end # object.self_link_query.nil? -%>
@@ -135,37 +136,37 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       if api_name.include?('.')
         fetch_tree = api_name.split('.').join(' ')
         format([
-          [
-            "#{name}: #{type}.api_munge(",
-            indent("Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])", 2),
-            ')'
-          ],
-          [
-            "#{name}: \\",
-            "#{type}.api_munge(",
-            indent("Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])", 2),
-            ')'
-          ]
-        ], 0, 7)
+                 [
+                   "#{name}: #{type}.api_munge(",
+                   indent("Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])", 2),
+                   ')'
+                 ],
+                 [
+                   "#{name}: \\",
+                   "#{type}.api_munge(",
+                   indent("Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])", 2),
+                   ')'
+                 ]
+               ], 0, 7)
       else
         format([
-          ["#{name}: #{type}.api_munge(fetch['#{prop.field_name}'])"],
-          [
-            "#{name}:",
-            indent("#{type}.api_munge(fetch['#{prop.field_name}'])", 2)
-          ],
-          [
-            "#{name}: #{type}.api_munge(",
-            indent("fetch['#{prop.field_name}']", 2),
-            ')',
-          ],
-          [
-            "#{name}:",
-            indent(["#{type}.api_munge(",
-                    indent("fetch['#{prop.field_name}']", 2),
-                    ')'], 2)
-          ]
-        ], 0, 7) # 6 spaces = indent, 1 space = trailing comma (it's a list)
+                 ["#{name}: #{type}.api_munge(fetch['#{prop.field_name}'])"],
+                 [
+                   "#{name}:",
+                   indent("#{type}.api_munge(fetch['#{prop.field_name}'])", 2)
+                 ],
+                 [
+                   "#{name}: #{type}.api_munge(",
+                   indent("fetch['#{prop.field_name}']", 2),
+                   ')'
+                 ],
+                 [
+                   "#{name}:",
+                   indent(["#{type}.api_munge(",
+                           indent("fetch['#{prop.field_name}']", 2),
+                           ')'], 2)
+                 ]
+               ], 0, 7) # 6 spaces = indent, 1 space = trailing comma (it's a list)
       end
     end
   assigns.concat(input_only.map do |prop|
@@ -192,7 +193,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   f2h_code = [
     '{',
     indent_list(assigns, 2),
-    '}.reject { |_, v| v.nil? }',
+    '}.reject { |_, v| v.nil? }'
   ]
 -%>
 <% custom_present = get_code_multiline config, 'present' -%>
@@ -218,14 +219,14 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   end
 
 <%
-  # TODO(nelsonjr): Investigate if we can have a timeout to wait for operations
-  # that we did not start to complete. For example if you start a firewall
-  # change via Developer Console and attempt to apply the manifest you get:
-  #
-  # Error: /Stage[main]/Main/Gcompute_firewall[test-firewall-allow-ssh]: Could
-  # not evaluate: Operation failed: The resource
-  # 'projects/google.com:graphite-playground/global/firewalls/....'
-  # is not ready
+# TODO(nelsonjr): Investigate if we can have a timeout to wait for operations
+# that we did not start to complete. For example if you start a firewall
+# change via Developer Console and attempt to apply the manifest you get:
+#
+# Error: /Stage[main]/Main/Gcompute_firewall[test-firewall-allow-ssh]: Could
+# not evaluate: Operation failed: The resource
+# 'projects/google.com:graphite-playground/global/firewalls/....'
+# is not ready
 -%>
   def create
     debug('create')
@@ -245,11 +246,11 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 -%>
 <%=
   lines(indent_list(["create_req = #{request_new}(#{body_new}"].concat(
-    indent([
-      'fetch_auth(@resource)',
-      "'application/json'",
-      "#{custom_resource ? 'resource_to_create' : 'resource_to_request'})"
-    ], request_new.length + 14).split("\n") # 14 = 'create_req = ' + '('
+                      indent([
+                               'fetch_auth(@resource)',
+                               "'application/json'",
+                               "#{custom_resource ? 'resource_to_create' : 'resource_to_request'})"
+                             ], request_new.length + 14).split("\n") # 14 = 'create_req = ' + '('
   ), 4))
 -%>
 <% fetch_assign = object.save_api_results? ? '@fetched = ' : '' -%>
@@ -272,9 +273,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
 <%=
   lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
-    indent([
-      'fetch_auth(@resource))'
-    ], dele_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
+                      indent([
+                               'fetch_auth(@resource))'
+                             ], dele_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
   ), 4))
 -%>
 <% kind_param = object.kind? ? ", '#{object.kind}'" : '' -%>
@@ -292,7 +293,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% end -%>
   def flush
     debug('flush')
-<% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
+<%# TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
 <%
@@ -310,11 +311,11 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 -%>
 <%=
   lines(indent_list(["update_req = #{put_new}(self_link(@resource)"].concat(
-    indent([
-      'fetch_auth(@resource)',
-      "'application/json'",
-      "#{custom_resource ? 'resource_to_update' : 'resource_to_request'})"
-    ], put_new.length + 14).split("\n") # 14 = 'update_req = ' + '('
+                      indent([
+                               'fetch_auth(@resource)',
+                               "'application/json'",
+                               "#{custom_resource ? 'resource_to_update' : 'resource_to_request'})"
+                             ], put_new.length + 14).split("\n") # 14 = 'update_req = ' + '('
   ), 4))
 -%>
 <%   if object.async -%>
@@ -355,7 +356,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   private
 <%
   all_props = object.all_user_properties
-  has_boolean = !all_props.select{ |o| o.is_a?(Api::Type::Boolean) }.empty?
+  has_boolean = !all_props.select { |o| o.is_a?(Api::Type::Boolean) }.empty?
 -%>
 <% if has_boolean -%>
 
@@ -373,22 +374,22 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%
   all_properties = object.all_user_properties
   has_project_property = \
-     !object.all_user_properties.select { |o| o.name == 'project' }.empty?
+    !object.all_user_properties.select { |o| o.name == 'project' }.empty?
   project_arg = has_project_property ? [] : ['project: resource[:project]']
   r2h_code = [
     '{',
     indent_list(project_arg.concat([
-      'name: resource[:name]',
-      ("kind: '#{object.kind}'" if object.kind?)
-    ]).concat(all_properties.select { |p| p.name != 'name' }.map do |prop|
-      format([
-        ["#{prop.out_name}: resource[:#{prop.out_name}]"],
-        [
-          "#{prop.out_name}:",
-          indent("resource[:#{prop.out_name}]", 2)
-        ]
-      ], 0, 4)
-    end).compact, 2),
+                                     'name: resource[:name]',
+                                     ("kind: '#{object.kind}'" if object.kind?)
+                                   ]).concat(all_properties.reject { |p| p.name == 'name' }.map do |prop|
+                                               format([
+                                                        ["#{prop.out_name}: resource[:#{prop.out_name}]"],
+                                                        [
+                                                          "#{prop.out_name}:",
+                                                          indent("resource[:#{prop.out_name}]", 2)
+                                                        ]
+                                                      ], 0, 4)
+                                             end).compact, 2),
     '}.reject { |_, v| v.nil? }'
   ]
 -%>
@@ -402,14 +403,14 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   prop_code = []
   prop_code << "kind: '#{object.kind}'" if object.kind?
   prop_code.concat(
-    object.properties.select { |p| !p.output }
+    object.properties.reject(&:output)
                      .map do |prop|
                        "#{prop.field_name}: @resource[:#{prop.out_name}]"
                      end
   )
   prop_code.concat(
     (object.parameters || [])
-      .select { |p| p.input }
+      .select(&:input)
       .map do |prop|
         "#{prop.field_name}: @resource[:#{prop.out_name}]"
       end

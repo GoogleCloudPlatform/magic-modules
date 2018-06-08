@@ -202,7 +202,7 @@ func diskEncryptionKeyDiffSuppress(k, old, new string, d *schema.ResourceData) b
       return d.Get("disk_encryption_key_raw").(string) != ""
     } else if new == "1" && old == "0" {
       // This will be handled by diffing the 'raw_key' attribute.
-      return true 
+      return true
     }
   } else if strings.HasSuffix(k, "raw_key") {
     disk_key := d.Get("disk_encryption_key_raw").(string)

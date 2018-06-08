@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2017 Google
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-<%= lines(autogen_notice :python) -%>
+<%= lines(autogen_notice(:python)) -%>
 
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
@@ -139,11 +139,11 @@ class Gcp<%= object.name -%>(object):
 <%
     default = get_code_multiline config, 'default'
     if default.nil?
-      if object.exports[0].is_a? String
-        default = object.exports[0]
-      else
-        default = Google::StringUtils.underscore(object.exports[0].name)
-      end
+      default = if object.exports[0].is_a? String
+                  object.exports[0]
+                else
+                  Google::StringUtils.underscore(object.exports[0].name)
+                end
     end
 -%>
         if 'return' in self.module.params:

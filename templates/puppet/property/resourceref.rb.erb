@@ -16,7 +16,7 @@
 <%#           imports - name of property being fetched -%>
 <%= compile('templates/license.erb') -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 <%
   requires = []
@@ -82,13 +82,14 @@ module Google
 <% out_name = property.resource_ref.out_name -%>
 <%=
   lines(format(
-    [
-      ["Google::ObjectStore.instance[:#{out_name}].each do |entry|"],
-      [
-        "Google::ObjectStore.instance[:#{out_name}]",
-        '                   .each do |entry|'
-      ],
-    ], 10))
+          [
+            ["Google::ObjectStore.instance[:#{out_name}].each do |entry|"],
+            [
+              "Google::ObjectStore.instance[:#{out_name}]",
+              '                   .each do |entry|'
+            ]
+          ], 10
+  ))
 -%>
             return entry.exports[:<%= imports -%>] if entry.title == @title
           end

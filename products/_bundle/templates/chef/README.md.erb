@@ -49,7 +49,7 @@ The `google/cloud` cookbook installs the following cookbooks automatically:
   lines(indent(
           product_details.map { |p| p[:name] }
                          .map { |p| "- [#{p}](##{p.downcase.tr(' ', '-')})" }, 2
-       ))
+  ))
 -%>
   - [Google Authentication](#google-authentication)
 

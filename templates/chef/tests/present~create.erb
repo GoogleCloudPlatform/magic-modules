@@ -39,7 +39,7 @@
   references_self_type = false
   collector.each do |obj|
     references_self_type = true if obj.parent && \
-      obj.parent.__resource == obj.object
+                                   obj.parent.__resource == obj.object
   end
   resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
 -%>
@@ -95,14 +95,14 @@ subject do
 -%>
 <%=
   format([
-    [find_lines[0] + " #{find_lines[1]}"],
-    [find_lines[0], indent(find_lines[1], 24)]
-  ], 2, (test_matrix.level + 1) * 2)
+           [find_lines[0] + " #{find_lines[1]}"],
+           [find_lines[0], indent(find_lines[1], 24)]
+         ], 2, (test_matrix.level + 1) * 2)
 %>
 end
 
-<% # TODO(alexstephen): Temporarily disblae tests where object has reference
-   # to its own type -%>
+<%# TODO(alexstephen): Temporarily disblae tests where object has reference
+# to its own type -%>
 <% if references_self_type -%>
 it 'should run test correctly', broken: true do
   pending('Implement tests where object references its own type')
@@ -113,8 +113,8 @@ it 'should run test correctly' do
                              'title0')
 end
 <%
-object.all_user_properties.select { |p| !p.output }
-                          .each do |p|
+object.all_user_properties.reject(&:output)
+      .each do |p|
 -%>
 <%
   value = @data_gen.value(p.class, p, 0)
@@ -123,9 +123,9 @@ object.all_user_properties.select { |p| !p.output }
 -%>
 <%=
   lines(indent(@property.property(p, 0, @data_gen.comparator(p),
-                                   value,
-                                   (test_matrix.level + 1) * 2,
-                                   name_override), 0))
+                                  value,
+                                  (test_matrix.level + 1) * 2,
+                                  name_override), 0))
 %>
 <% end # all_user_props.each -%>
 <% end # references_self_type -%>

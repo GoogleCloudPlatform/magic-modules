@@ -14,14 +14,12 @@
 <% end -%>
 <%= compile('templates/license.erb') -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 <%
   requires = generate_requires(object.all_user_properties)
   requires << 'puppet'
-  unless object.exports.nil?
-    requires << 'google/object_store'
-  end
+  requires << 'google/object_store' unless object.exports.nil?
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -47,14 +45,14 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
 <% if param.required -%>
 <%=
   lines(format(
-    [
-      ["raise \"\#{ref} required property '#{param.out_name}' is missing\"",
-       'if reference.nil?'].join(' '),
-      [
-        "raise \"\#{ref} required property '#{param.out_name}' is missing\" \\",
-        indent('if reference.nil?', 2)
-      ]
-    ], 4
+          [
+            ["raise \"\#{ref} required property '#{param.out_name}' is missing\"",
+             'if reference.nil?'].join(' '),
+            [
+              "raise \"\#{ref} required property '#{param.out_name}' is missing\" \\",
+              indent('if reference.nil?', 2)
+            ]
+          ], 4
   ))
 -%>
     reference.autorequires
@@ -110,17 +108,20 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
   format([
     ["newparam(:#{p.out_name}", namevar,
      "parent: #{p.property_type}) do"].compact.join(', '),
-    (indent_list([
-       "newparam(:#{p.out_name}, #{namevar}",
-       # + 12 = newparam(: + ,
-       indent("parent: #{p.property_type}) do", p.out_name.length + 12)
-     ], 0) unless namevar.nil?),
+    (unless namevar.nil?
+       indent_list([
+                     "newparam(:#{p.out_name}, #{namevar}",
+                     # + 12 = newparam(: + ,
+                     indent("parent: #{p.property_type}) do", p.out_name.length + 12)
+                   ], 0)
+     end),
     indent_list([
       "newparam(:#{p.out_name}",
       (indent(namevar, 9) unless namevar.nil?),
       indent("parent: #{p.property_type}) do", 9)
-    ].compact, 0),
-  ].compact, 2) %>
+    ].compact, 0)
+  ].compact, 2)
+%>
 <%= format_description(p, 4, 'desc') %>
 <%= property_body(p) -%>
 <% unless p.validation.nil? -%>
@@ -132,20 +133,19 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
 <% end -%>
 <% end -%>
 <% object.properties.each do |p|
-      Google::LOGGER.info "Generating #{object.name}.#{p.name}: #{p.type}"
--%>
+      Google::LOGGER.info "Generating #{object.name}.#{p.name}: #{p.type}" -%>
 
 <%=
-  new_property_len = 'newproperty('.length
+  new_property_len = 'newperty('.length
   format([
-    ["newproperty(:#{p.out_name}, parent: #{p.property_type}) do"],
-    [
-      "newproperty(:#{p.out_name},",
-      indent("parent: #{p.property_type}) do", new_property_len)
-    ],
-  ], 2)
+           ["newproperty(:#{p.out_name}, parent: #{p.property_type}) do"],
+           [
+             "newproperty(:#{p.out_name},",
+             indent("parent: #{p.property_type}) do", new_property_len)
+           ]
+         ], 2)
 %>
-<%= format_description(p, 4, 'desc', p.output ? "(output only)" : "") %>
+<%= format_description(p, 4, 'desc', p.output ? '(output only)' : '') %>
 <%= property_body(p) -%>
   end
 <% end -%>

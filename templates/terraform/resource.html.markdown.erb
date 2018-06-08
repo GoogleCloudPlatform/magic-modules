@@ -18,15 +18,15 @@
   properties = object.all_user_properties
 -%>
 ---
-<%= lines(autogen_notice :yaml) -%>
+<%= lines(autogen_notice(:yaml)) -%>
 layout: "google"
 page_title: "Google: google_<%= api_name_lower -%>_<%= resource_name -%>"
-sidebar_current: "docs-google-<%= api_name_lower -%>-<%= resource_name.gsub("_", "-") -%>"
+sidebar_current: "docs-google-<%= api_name_lower -%>-<%= resource_name.tr('_', '-') -%>"
 description: |-
 <%= indent(Google::StringUtils.first_sentence(object.description), 2) %>
 ---
 
-# google\_<%= api_name_lower -%>\_<%= resource_name.gsub("_", "\\_") %>
+# google\_<%= api_name_lower -%>\_<%= resource_name.gsub('_', '\\_') %>
 
 <%= lines(object.description) -%>
 

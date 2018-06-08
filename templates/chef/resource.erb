@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 # Add our google/ lib
 $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
@@ -40,10 +40,11 @@ module Google
   module <%= @api.prefix.upcase %>
     # A provider to manage <%= @api.name -%> resources.
 <%= lines(indent(
-      emit_rubocop(binding, :class,
-                   ['Google', @api.prefix.upcase, object.name].join('::'),
-                   :disabled),
-      4)) -%>
+            emit_rubocop(binding, :class,
+                         ['Google', @api.prefix.upcase, object.name].join('::'),
+                         :disabled),
+            4
+    )) -%>
     class <%= object.name -%> < Chef::Resource
       resource_name :<%= object.out_name %>
 
@@ -59,12 +60,12 @@ module Google
 <% if prop_decl(prop) == "Array" -%>
 <%=
   lines(format([
-    ["# #{property_out_name(prop)} is Array of #{prop.property_type}"],
-    [
-     "# #{property_out_name(prop)} is Array of",
-     "# #{prop.property_type}"
-    ]
-  ], 6))
+                 ["# #{property_out_name(prop)} is Array of #{prop.property_type}"],
+                 [
+                   "# #{property_out_name(prop)} is Array of",
+                   "# #{prop.property_type}"
+                 ]
+               ], 6))
 -%>
 <% end -%>
 <%=
@@ -77,8 +78,8 @@ module Google
                  ],
                  # Prop name on first line, all others on second line
                  [
-                   "#{prop_name}",
-                   ["#{indent(prop_decl(prop), 9)}",
+                   prop_name.to_s,
+                   [indent(prop_decl(prop), 9).to_s,
                     "coerce: ::#{prop.property_type}.coerce",
                     prop_attrs].flatten.join(', ')
                  ],
@@ -97,7 +98,7 @@ module Google
                    "#{prop_name},",
                    "#{indent(prop_decl(prop), 9)},",
                    indent("coerce: ::#{prop.property_type}.coerce,", 9),
-                   "#{indent(prop_attrs.join(', '), 9)}"
+                   indent(prop_attrs.join(', '), 9).to_s
                  ],
                  # Prop name on first line, prop types on second line
                  # Coercion two-liner on third + fourth lines
@@ -105,10 +106,10 @@ module Google
                  [
                    "#{prop_name},",
                    "#{indent(prop_decl(prop), 9)},",
-                   indent("coerce: \\", 9),
+                   indent('coerce: \\', 9),
                    indent("::#{prop.property_type}.coerce,", 11),
-                   "#{indent(prop_attrs.join(', '), 9)}"
-                 ],
+                   indent(prop_attrs.join(', '), 9).to_s
+                 ]
                ], 6))
 -%>
 <% end -%>
@@ -138,12 +139,12 @@ module Google
         if fetch.nil?
 <%=
   lines(format([
-    ["converge_by \"Creating #{object.out_name}[\#{new_resource.name}]\" do"],
-    [
-      "converge_by ['Creating #{object.out_name}',",
-      indent('"[#{new_resource.name}]"].join do', 13)
-    ]
-  ], 10, 0))
+                 ["converge_by \"Creating #{object.out_name}[\#{new_resource.name}]\" do"],
+                 [
+                   "converge_by ['Creating #{object.out_name}',",
+                   indent('"[#{new_resource.name}]"].join do', 13)
+                 ]
+               ], 10, 0))
 -%>
             # TODO(nelsonjr): Show a list of variables to create
             # TODO(nelsonjr): Determine how to print green like update converge
@@ -206,23 +207,23 @@ module Google
           [
             "@current_resource.#{name} =",
             indent([
-              "#{type}.api_parse(",
-              indent("::Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])",
-                     2),
-              ')'
-            ], 2)
+                     "#{type}.api_parse(",
+                     indent("::Google::HashUtils.navigate(fetch, %w[#{fetch_tree}])",
+                            2),
+                     ')'
+                   ], 2)
           ],
           [
             "@current_resource.#{name} =",
             indent([
-              "#{type}.api_parse(",
-              indent([
-                '::Google::HashUtils.navigate(',
-                indent("fetch, %w[#{fetch_tree}]", 2),
-                ')'
-              ], 2),
-              ')'
-            ], 2)
+                     "#{type}.api_parse(",
+                     indent([
+                              '::Google::HashUtils.navigate(',
+                              indent("fetch, %w[#{fetch_tree}]", 2),
+                              ')'
+                            ], 2),
+                     ')'
+                   ], 2)
           ]
         ], 0, 12
       )
@@ -230,8 +231,8 @@ module Google
       assignment = format(
         [
           [
-           "@current_resource.#{name} =",
-           "#{type}.api_parse(fetch['#{field_name}'])"
+            "@current_resource.#{name} =",
+            "#{type}.api_parse(fetch['#{field_name}'])"
           ].join(' '),
           [
             "@current_resource.#{name} =",
@@ -240,10 +241,10 @@ module Google
           [
             "@current_resource.#{name} =",
             indent([
-              "#{type}.api_parse(",
-              indent("fetch['#{field_name}']", 2),
-              ')'
-            ], 2)
+                     "#{type}.api_parse(",
+                     indent("fetch['#{field_name}']", 2),
+                     ')'
+                   ], 2)
           ]
         ], 0, 12
       )
@@ -281,12 +282,12 @@ module Google
         unless fetch.nil?
 <%=
   lines(format([
-    ["converge_by \"Deleting #{object.out_name}[\#{new_resource.name}]\" do"],
-    [
-      "converge_by ['Deleting #{object.out_name}',",
-      indent('"[#{new_resource.name}]"].join do', 13)
-    ]
-  ], 10, 0))
+                 ["converge_by \"Deleting #{object.out_name}[\#{new_resource.name}]\" do"],
+                 [
+                   "converge_by ['Deleting #{object.out_name}',",
+                   indent('"[#{new_resource.name}]"].join do', 13)
+                 ]
+               ], 10, 0))
 -%>
 <% if object&.handlers&.delete.nil? -%>
             delete_req = ::Google::<%= product_ns -%>::Network::Delete.new(
@@ -331,29 +332,28 @@ module Google
 <%
   prop_code = []
   prop_code << "kind: '#{object.kind}'" if object.kind?
-  prop_code.concat(object.properties.reject { |p| p.output }
+  prop_code.concat(object.properties.reject(&:output)
                                     .map do |prop|
-    override_name = property_out_name(prop)
-    override_name = label_name(object) if override_name == 'name'
-    format([
-      ["#{prop.field_name}: new_resource.#{override_name}"],
-      ["#{prop.field_name}:",
-       indent("new_resource.#{override_name}", 2)],
-    ], 0, 12)
-  end)
+                     override_name = property_out_name(prop)
+                     override_name = label_name(object) if override_name == 'name'
+                     format([
+                              ["#{prop.field_name}: new_resource.#{override_name}"],
+                              ["#{prop.field_name}:",
+                               indent("new_resource.#{override_name}", 2)]
+                            ], 0, 12)
+                   end)
 
   prop_code.concat((object.parameters || [])
-           .select { |p| p.input }
+           .select(&:input)
            .map do |prop|
              override_name = property_out_name(prop)
              override_name = label_name(object) if override_name == 'name'
              format([
-               ["#{prop.field_name}: new_resource.#{override_name}"],
-               ["#{prop.field_name}:",
-                indent("new_resource.#{override_name}", 2)],
-             ], 0, 12)
-           end
-  )
+                      ["#{prop.field_name}: new_resource.#{override_name}"],
+                      ["#{prop.field_name}:",
+                       indent("new_resource.#{override_name}", 2)]
+                    ], 0, 12)
+           end)
 
   r2r_code = []
   r2r_code << 'request = {'
@@ -371,7 +371,7 @@ module Google
   end
 
   r2r_code << 'request.to_json'
-  -%>
+-%>
 <%=
   lines(indent(emit_method('resource_to_request', [], r2r_code, file_relative),
                8), 1)
@@ -406,15 +406,16 @@ module Google
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
 <% if object&.handlers&.update.nil? -%>
 <%   put_new = "::Google::#{product_ns}::Network::Put.new" -%>
-<%= lines(indent("update_req =", 12)) -%>
+<%= lines(indent('update_req =', 12)) -%>
 <%=
   lines(indent_list([
-    "#{put_new}(self_link(@new_resource)"].concat(
+    "#{put_new}(self_link(@new_resource)"
+  ].concat(
     indent([
-      'fetch_auth(@new_resource)',
-      "'application/json'",
-      'resource_to_request)'
-    ], put_new.length + 1).split("\n")
+             'fetch_auth(@new_resource)',
+             "'application/json'",
+             'resource_to_request)'
+           ], put_new.length + 1).split("\n")
   ), 14))
 -%>
 <%   if object.async -%>
@@ -438,10 +439,10 @@ module Google
 <%
   all_properties = object.all_user_properties
   has_project_property = \
-     !object.all_user_properties.select { |o| o.name == 'project' }.empty?
+    !object.all_user_properties.select { |o| o.name == 'project' }.empty?
   project_arg = has_project_property ? [] : ['project: resource.project']
   has_name = !object.all_user_properties.select { |o| o.name == 'name' }.empty?
-  name_prop = "name: resource.name"
+  name_prop = 'name: resource.name'
   name_prop = "name: resource.#{label_name(object)}" if has_name
   r2h_code = [
     '{',
@@ -452,12 +453,12 @@ module Google
       ].compact
     ).concat(all_properties.reject { |p| p.name == 'name' }.map do |prop|
       format([
-        ["#{prop.out_name}: resource.#{property_out_name(prop)}"],
-        [
-          "#{prop.out_name}:",
-          indent("resource.#{property_out_name(prop)}", 2)
-        ]
-      ], 0, 12)
+               ["#{prop.out_name}: resource.#{property_out_name(prop)}"],
+               [
+                 "#{prop.out_name}:",
+                 indent("resource.#{property_out_name(prop)}", 2)
+               ]
+             ], 0, 12)
     end), 2),
     '}.reject { |_, v| v.nil? }'
   ]
@@ -566,7 +567,7 @@ module Google
 <% else # object&.handlers&.collection.nil? -%>
 <%=
   lines(indent(emit_link('collection', object.handlers.collection, true), 8))
- %>
+%>
 <% end # object&.handlers&.collection.nil? -%>
 <% if object&.handlers&.self_link.nil? -%>
 <%= lines(indent(emit_link('self_link', self_link_url(object), true), 8), 1) -%>
@@ -591,9 +592,10 @@ module Google
       end
     end
 <%= lines(indent(
-      emit_rubocop(binding, :class,
-                   ['Google', @api.prefix.upcase, object.name].join('::'),
-                   :enabled),
-      4)) -%>
+            emit_rubocop(binding, :class,
+                         ['Google', @api.prefix.upcase, object.name].join('::'),
+                         :enabled),
+            4
+    )) -%>
   end
 end

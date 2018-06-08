@@ -41,8 +41,8 @@
 <% end # property.validation.nil?  -%>
 <% if property.is_a?(Api::Type::Enum) && property.validation.nil? -%>
 <%
-	enum_values = property.values
-	enum_values.push "" unless property.required
+  enum_values = property.values
+  enum_values.push '' unless property.required
 -%>
 	ValidateFunc: validation.StringInSlice([]string{"<%= enum_values.join '","' -%>"}, false),
 <% end -%>

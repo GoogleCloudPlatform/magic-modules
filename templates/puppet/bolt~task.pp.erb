@@ -14,7 +14,7 @@
 <% end -%>
 #!/bin/bash
 <%= compile 'templates/license.erb' -%>
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 declare -r puppet='/opt/puppetlabs/bin/puppet'
 declare -r ruby='/opt/puppetlabs/puppet/bin/ruby'
@@ -83,7 +83,8 @@ $puppet apply ${puppet_args} 1>${run_log} 2>&1 <<EOF
             "\\$#{f_name} = #{@api.prefix}_task_validate_param(",
             indent(
               ['\\$params', quote_string(arg.name),
-               quote_string(arg.default.code.to_s.strip)].join(', '), 2),
+               quote_string(arg.default.code.to_s.strip)].join(', '), 2
+            ),
             ')'
           ].compact
         ]
@@ -103,9 +104,9 @@ $puppet apply ${puppet_args} 1>${run_log} 2>&1 <<EOF
                unless arg.comment.nil?),
             "\\$#{f_name} = #{@api.prefix}_task_validate_param(",
             indent([
-                     "\\$params", quote_string(arg.name),
-                     quote_string(Provider::Puppet::BOLT_UNDEF_MAGIC)
-                   ].join(', '), 2),
+              '\\$params', quote_string(arg.name),
+              quote_string(Provider::Puppet::BOLT_UNDEF_MAGIC)
+            ].join(', '), 2),
             ')'
           ].compact
         ]

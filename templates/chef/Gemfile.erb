@@ -14,14 +14,14 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :gemfile) -%>
+<%= lines(autogen_notice(:gemfile)) -%>
 
 source 'https://rubygems.org'
 
 group :test do
 <%
-  # TODO(alexstephen + Chef): Investigate how to remove the two google gems
-  # from all cookbooks except google-gauth
+# TODO(alexstephen + Chef): Investigate how to remove the two google gems
+# from all cookbooks except google-gauth
 -%>
   gem 'chef'
   gem 'chefspec', '~> 6.2.0'

@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 require 'google/<%= prop_ns_dir -%>/property/base'
 
@@ -26,11 +26,11 @@ module Google
       class Array < Google::<%= product_ns -%>::Property::Base
 <%=
   lines(format([
-                ["# Sets #{full_name} to match all elements, not any."],
-                [
-                  "# Sets #{full_name} to match all elements, not",
-                  '# any.'
-                ]
+                 ["# Sets #{full_name} to match all elements, not any."],
+                 [
+                   "# Sets #{full_name} to match all elements, not",
+                   '# any.'
+                 ]
                ], 8))
 -%>
         def self.match_all_array

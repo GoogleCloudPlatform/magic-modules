@@ -29,33 +29,33 @@ def wait_for_operation(response, resource)
 <% if object.self_link_query.nil? -%>
 <%=
   lines(format(
-    [
-      [
-        'fetch_resource(',
-        indent([
-          'resource,',
-          'URI.parse(::Google::HashUtils.navigate(wait_for_completion(status,',
-          indent(['op_result,',
-                  'resource),'], 59), # 59 = align with last ( previous line
-          # 39 = align with ( previous line
-          indent("#{res_path}))#{',' if object.kind?}", 39),
-          ("'#{object.kind}'" if object.kind?)
-        ].compact, 2),
-        ')'
-      ],
-      [
-        'wait_done = wait_for_completion(status, op_result, resource)',
-        'fetch_resource(',
-        indent([
-          'resource,',
-          'URI.parse(::Google::HashUtils.navigate(wait_done,',
-          # 39 = align with ( previous line
-          indent("#{res_path}))#{',' if object.kind?}", 39),
-          ("'#{object.kind}'" if object.kind?)
-        ].compact, 2),
-        ')'
-      ]
-    ], 2, inside_indent
+          [
+            [
+              'fetch_resource(',
+              indent([
+                'resource,',
+                'URI.parse(::Google::HashUtils.navigate(wait_for_completion(status,',
+                indent(['op_result,',
+                        'resource),'], 59), # 59 = align with last ( previous line
+                # 39 = align with ( previous line
+                indent("#{res_path}))#{',' if object.kind?}", 39),
+                ("'#{object.kind}'" if object.kind?)
+              ].compact, 2),
+              ')'
+            ],
+            [
+              'wait_done = wait_for_completion(status, op_result, resource)',
+              'fetch_resource(',
+              indent([
+                'resource,',
+                'URI.parse(::Google::HashUtils.navigate(wait_done,',
+                # 39 = align with ( previous line
+                indent("#{res_path}))#{',' if object.kind?}", 39),
+                ("'#{object.kind}'" if object.kind?)
+              ].compact, 2),
+              ')'
+            ]
+          ], 2, inside_indent
   ))
 -%>
 <% else # object.self_link_query.nil? -%>
@@ -63,29 +63,29 @@ def wait_for_operation(response, resource)
 <% obj_kind = object.kind? ? "'#{object.kind}'," : '' -%>
 <%=
   lines(format(
-    [
-      [
-        "fetch_wrapped_resource(resource, #{obj_kind}",
-        ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?),
-        "'#{object.self_link_query.items}')"
-      ].join(' '),
-      [
-        [
-         "fetch_wrapped_resource(resource, #{obj_kind}",
-         ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?)
-        ].join(' '),
-        indent([
-          "'#{object.self_link_query.items}')"
-        ], 23) # 23 = align with ( previous line
-      ],
-      [
-        "fetch_wrapped_resource(resource, #{obj_kind}",
-        indent([
-          "'#{object.self_link_query.kind}',",
-          "'#{object.self_link_query.items}')"
-        ], 23) # 31 = align with ( previous line
-      ]
-    ], 2, inside_indent
+          [
+            [
+              "fetch_wrapped_resource(resource, #{obj_kind}",
+              ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?),
+              "'#{object.self_link_query.items}')"
+            ].join(' '),
+            [
+              [
+                "fetch_wrapped_resource(resource, #{obj_kind}",
+                ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?)
+              ].join(' '),
+              indent([
+                       "'#{object.self_link_query.items}')"
+                     ], 23) # 23 = align with ( previous line
+            ],
+            [
+              "fetch_wrapped_resource(resource, #{obj_kind}",
+              indent([
+                       "'#{object.self_link_query.kind}',",
+                       "'#{object.self_link_query.items}')"
+                     ], 23) # 31 = align with ( previous line
+            ]
+          ], 2, inside_indent
   ))
 -%>
 <% end # object.self_link_query.nil? -%>
@@ -100,7 +100,7 @@ def wait_for_completion(status, op_result, resource)
 <%   err_path = Google::HashUtils.path2navigate(object.async.error.path) -%>
 <%   err_msg = object.async.error.message -%>
     raise_if_errors op_result, <%= err_path -%>, '<%= err_msg -%>'
-    sleep <%= sprintf('%.1f', object.async.operation.wait_ms / 1000.0) %>
+    sleep <%= format('%.1f', object.async.operation.wait_ms / 1000.0) %>
 <%   allowed_states = object.async.status.allowed -%>
     raise "Invalid result '#{status}' on <%= object.out_name -%>." \
       unless %w[<%= allowed_states.join(' ') -%>].include?(status)

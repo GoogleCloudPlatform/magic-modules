@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 require 'time'
 
@@ -25,8 +25,8 @@ module Google
       class Time < ::Time
 <%# TODO(alexstephen): Add a .to_resource method to replace .to_s -%>
 <%
-  # Overriden .to_s ensures that value coercison does not need to be placed
-  # within the providers. Providers do not have to worry about the time formats
+# Overriden .to_s ensures that value coercison does not need to be placed
+# within the providers. Providers do not have to worry about the time formats
 -%>
         def to_s
           # All GCP APIs expect timestamps in the ISO-8601 / RFC3339 format

@@ -12,19 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go)) -%>
 
 package google
 
 import "github.com/hashicorp/terraform/helper/schema"
 
 
-<% if product_ns == 'Resourcemanager'
-		product_ns = 'ResourceManager'
-end -%>
+<% product_ns = 'ResourceManager' if product_ns == 'Resourcemanager' -%>
 
 var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
-<% product.objects.reject { |r| r.exclude }.each do |object| -%>
+<% product.objects.reject(&:exclude).each do |object| -%>
 <% resource_name = product_ns + object.name -%>
 	"google_<%= Google::StringUtils.underscore(resource_name) -%>": resource<%= resource_name -%>(),
 <% end -%>

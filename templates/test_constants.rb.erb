@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 <%
 def data_to_constant(name, data)
@@ -38,14 +38,14 @@ end
     source = info[:source]
     if source.size == 1
       [
-        "# Constants for: #{source.first.map { |s| s.to_s }.join('.')}",
+        "# Constants for: #{source.first.map(&:to_s).join('.')}",
         data_to_constant(name, info[:data])
       ]
     else # source.size == 1
       [
         '# Constants for the following objects:',
         source.map do |ss|
-          t = ss.map { |s| s.to_s }.join('.')
+          t = ss.map(&:to_s).join('.')
           "\# - #{t}"
         end,
         data_to_constant(name, info[:data])
@@ -56,11 +56,11 @@ end
 module GoogleTests
 <%= lines(indent(emit_rubocop(binding, :module,
                               %w[GoogleTests Constants].join('::'), :disabled),
-          2)) -%>
+                 2)) -%>
   module Constants
 <%= lines(indent(var_map.map { |v| lines(v) }.join("\n"), 4)) -%>
   end
 <%= lines(indent(emit_rubocop(binding, :module,
                               %w[GoogleTests Constants].join('::'), :enabled),
-          2)) -%>
+                 2)) -%>
 end

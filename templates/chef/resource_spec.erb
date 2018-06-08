@@ -14,7 +14,7 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :chef) -%>
+<%= lines(autogen_notice(:chef)) -%>
 
 require 'spec_helper'
 
@@ -40,104 +40,102 @@ require 'spec_helper'
 # TODO(alexstephen): Add tests for manage
 # TODO(alexstephen): Add tests for modify
 <%
-if object.virtual
-  test_matrix = Provider::TestMatrix.new(template, object, self,
-    exists: {
-      changes: [ # read-only object mistmatch
-        [:no_name, :fail],
-        [:has_name, :fail]
-      ],
-      no_change: [
-        [:no_name, :pass],
-        [:has_name, :pass]
-      ],
-    },
-    missing: [
-      [:no_name, :fail],
-      [:has_name, :fail]
-    ]
-  )
-else
-  test_matrix = Provider::TestMatrix.new(template, object, self,
-    present: {
-      exists: {
-        changes: { # converge
-          no_name: [:pass, :fail],
-          has_name: [:pass, :fail]
-        },
-        no_change: { # no action
-          no_name: [:pass, :fail],
-          has_name: [:pass, :fail]
-        }
-      },
-      missing: { # create
-        # changes == ignore
-        no_name: [:pass, :fail],
-        has_name: [:pass, :fail]
-      }
-    },
-    absent: {
-      exists: { # delete
-        # changes == ignore
-        no_name: [:pass, :fail],
-        has_name: [:pass, :fail]
-      },
-      missing: { # no action
-        # changes == ignore
-        no_name: [:pass, :fail],
-        has_name: [:pass, :fail]
-      }
-    }
-  )
-end
+test_matrix = if object.virtual
+                Provider::TestMatrix.new(template, object, self,
+                                         exists: {
+                                           changes: [ # read-only object mistmatch
+                                             %i[no_name fail],
+                                             %i[has_name fail]
+                                           ],
+                                           no_change: [
+                                             %i[no_name pass],
+                                             %i[has_name pass]
+                                           ]
+                                         },
+                                         missing: [
+                                           %i[no_name fail],
+                                           %i[has_name fail]
+                                         ])
+              else
+                Provider::TestMatrix.new(template, object, self,
+                                         present: {
+                                           exists: {
+                                             changes: { # converge
+                                               no_name: %i[pass fail],
+                                               has_name: %i[pass fail]
+                                             },
+                                             no_change: { # no action
+                                               no_name: %i[pass fail],
+                                               has_name: %i[pass fail]
+                                             }
+                                           },
+                                           missing: { # create
+                                             # changes == ignore
+                                             no_name: %i[pass fail],
+                                             has_name: %i[pass fail]
+                                           }
+                                         },
+                                         absent: {
+                                           exists: { # delete
+                                             # changes == ignore
+                                             no_name: %i[pass fail],
+                                             has_name: %i[pass fail]
+                                           },
+                                           missing: { # no action
+                                             # changes == ignore
+                                             no_name: %i[pass fail],
+                                             has_name: %i[pass fail]
+                                           }
+                                         })
+              end
 
 prop_data = Provider::TestData::Expectations.new(self, @data_gen)
 catalogger = Provider::ChefTestCatalogFormatter.new self
 -%>
 context '<%= object.out_name -%>' do
 <% if object.virtual -%>
-<% # Object does NOT provides 'ensure' parameter -%>
+<%# Object does NOT provides 'ensure' parameter -%>
 <%= test_matrix.push(:ignore, :exists) -%>
 <%= test_matrix.push(:ignore, :exists, :no_change) -%>
-<%= test_matrix.push(:ignore, :exists, :no_change, [:no_name, :pass]) -%>
+<%= test_matrix.push(:ignore, :exists, :no_change, %i[no_name pass]) -%>
         # TODO(alexstephen): Implement new test format.
-<%= test_matrix.pop(:ignore, :exists, :no_change, [:no_name, :pass]) -%>
+<%= test_matrix.pop(:ignore, :exists, :no_change, %i[no_name pass]) -%>
 
-<%= test_matrix.push(:ignore, :exists, :no_change, [:has_name, :pass]) -%>
+<%= test_matrix.push(:ignore, :exists, :no_change, %i[has_name pass]) -%>
         # TODO(alexstephen): Implement new test format.
-<%= test_matrix.pop(:ignore, :exists, :no_change, [:has_name, :pass]) -%>
+<%= test_matrix.pop(:ignore, :exists, :no_change, %i[has_name pass]) -%>
 <%= test_matrix.pop(:ignore, :exists, :no_change) -%>
 
 <%= test_matrix.push(:ignore, :exists, :changes) -%>
-<%= test_matrix.push(:ignore, :exists, :changes, [:no_name, :fail]) -%>
+<%= test_matrix.push(:ignore, :exists, :changes, %i[no_name fail]) -%>
         # TODO(alexstephen): Implement new test format.
         subject { -> { raise '[placeholder] This should fail.' } }
         it { is_expected.to raise_error(RuntimeError, /placeholder/) }
-<%= test_matrix.pop(:ignore, :exists, :changes, [:no_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :exists, :changes, %i[no_name fail]) -%>
 
-<%= test_matrix.push(:ignore, :exists, :changes, [:has_name, :fail]) -%>
+<%= test_matrix.push(:ignore, :exists, :changes, %i[has_name fail]) -%>
         # TODO(alexstephen): Implement new test format.
         subject { -> { raise '[placeholder] This should fail.' } }
         it { is_expected.to raise_error(RuntimeError, /placeholder/) }
-<%= test_matrix.pop(:ignore, :exists, :changes, [:has_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :exists, :changes, %i[has_name fail]) -%>
 <%= test_matrix.pop(:ignore, :exists, :changes) -%>
 <%= test_matrix.pop(:ignore, :exists) -%>
 
 <%= test_matrix.push(:ignore, :missing) -%>
-<%= test_matrix.push(:ignore, :missing, :ignore, [:no_name, :fail]) -%>
+<%= test_matrix.push(:ignore, :missing, :ignore, %i[no_name fail]) -%>
       # TODO(alexstephen): Implement new test format.
       subject { -> { raise '[placeholder] This should fail.' } }
       it { is_expected.to raise_error(RuntimeError, /placeholder/) }
-<%= test_matrix.pop(:ignore, :missing, :ignore, [:no_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :missing, :ignore, %i[no_name fail]) -%>
 
-<%= test_matrix.push(:ignore, :missing, :ignore, [:has_name, :fail]) -%>
+<%= test_matrix.push(:ignore, :missing, :ignore, %i[has_name fail]) -%>
       # TODO(alexstephen): Implement new test format.
       subject { -> { raise '[placeholder] This should fail.' } }
       it { is_expected.to raise_error(RuntimeError, /placeholder/) }
-<%= test_matrix.pop(:ignore, :missing, :ignore, [:has_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :missing, :ignore, %i[has_name fail]) -%>
 <%= test_matrix.pop(:ignore, :missing) -%>
 <% else -%>
-<% # Object that provides 'ensure' parameter -%>
+<%# Object that provides 'ensure' parameter -%>
 <%= test_matrix.push(:present) -%>
 <%= test_matrix.push(:present, :exists) -%>
 <%= test_matrix.push(:present, :exists, :no_change) -%>
@@ -370,9 +368,9 @@ context '<%= object.out_name -%>' do
     end
 <%=
   lines(indent(format([
-    ["recipe_path = \"google-#{object.__product.prefix.downcase}",
-     "::\#{recipe_name}\""].join
-  ]), 4))
+                        ["recipe_path = \"google-#{object.__product.prefix.downcase}",
+                         "::\#{recipe_name}\""].join
+                      ]), 4))
 -%>
     begin
       yield recipe_path

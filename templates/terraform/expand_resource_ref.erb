@@ -1,5 +1,5 @@
 <%
-	resource_type = property.resource_ref.base_url.split('/').last
+  resource_type = property.resource_ref.base_url.split('/').last
 -%>
 <% if property.resource_ref.base_url.include?('{{region}}') -%>
 parseRegionalFieldValue("<%= resource_type -%>", <%= var_name -%>, "project", "region", "zone", d, config, true)

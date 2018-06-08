@@ -18,7 +18,7 @@ if zone, err := getZone(d, config); err != nil || zone == "" {
   getDisk := func(zone string) (interface{}, error) {
     return config.clientCompute.Disks.Get(project, zone, d.Id()).Do()
   }
-  resource, err := getZonalResourceFromRegion(getDisk, region, config.clientCompute, project) 
+  resource, err := getZonalResourceFromRegion(getDisk, region, config.clientCompute, project)
   if err != nil {
     return nil, err
   }

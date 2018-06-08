@@ -24,8 +24,7 @@
   # This graph, including the current object, will be stored in a
   # TestObjects instance.
   collector = Dependencies::DependencyGraph.new(@data_gen)
-  collector.add(object, 0, (name ? :name : :title), {ensure: 'absent'})
-
+  collector.add(object, 0, (name ? :name : :title), ensure: 'absent')
 
   # Generate the Puppet manifest using the graph of objects above.
   # This manifest will be ordered by dependencies.
@@ -41,7 +40,6 @@
                                                 exists: false,
                                                 has_name: name
                                               }, collector)
-
 
   resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
   res_name = "#{object.out_name.capitalize}[title0]"

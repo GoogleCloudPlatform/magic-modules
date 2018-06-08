@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2017 Google
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-<%= lines(autogen_notice :python) -%>
+<%= lines(autogen_notice(:python)) -%>
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -109,8 +109,7 @@ def main():
 <% if object.self_link_query.nil? -%>
 <%
   method = method_call('fetch_resource', ['module', 'self_link(module)',
-                                          ('kind' if object.kind?),
-                                         ])
+                                          ('kind' if object.kind?)])
 -%>
     fetch = <%= method %>
 <% else # object.self_link_query.nil? -%>
@@ -129,20 +128,20 @@ def main():
             if is_different(module, fetch):
 <%
   method = method_call('update', [
-                                   'module', 'self_link(module)',
-                                   ('kind' if object.kind?),
-                                   ('fetch' if object.save_api_results?)
-                                 ])
+                         'module', 'self_link(module)',
+                         ('kind' if object.kind?),
+                         ('fetch' if object.save_api_results?)
+                       ])
 -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
                 changed = True
         else:
 <%
   method = method_call('delete', [
-                                   'module', 'self_link(module)',
-                                   ('kind' if object.kind?),
-                                   ('fetch' if object.save_api_results?)
-                                 ])
+                         'module', 'self_link(module)',
+                         ('kind' if object.kind?),
+                         ('fetch' if object.save_api_results?)
+                       ])
 -%>
 <%= lines(indent(method, 12)) -%>
             fetch = {}
@@ -174,8 +173,7 @@ def main():
 <% prod_name = object.__product.prefix[1..-1] -%>
 <% unless object.virtual -%>
 <%# TODO: kind param not always needed.
-  # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
--%>
+  # https://github.com/GoogleCloudPlatform/magic-modules/issues/45 -%>
 <%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
 <% if object.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
@@ -194,8 +192,7 @@ def main():
     ['module',
      method_call("auth#{create_verb}",
                  ['link', 'resource_to_request(module)']),
-     ('kind' if !object.async && object.kind?)
-   ]
+     ('kind' if !object.async && object.kind?)]
   )
 -%>
     return <%= method %>
@@ -216,11 +213,11 @@ def main():
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     [
-     'module',
-     method_call("auth.#{update_verb}",
-                 ['link', 'resource_to_request(module)']),
-     ('kind' if !object.async && object.kind?)
-   ]
+      'module',
+      method_call("auth.#{update_verb}",
+                  ['link', 'resource_to_request(module)']),
+      ('kind' if !object.async && object.kind?)
+    ]
   )
 -%>
     return <%= method %>
@@ -242,9 +239,8 @@ def main():
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
-     method_call("auth.delete", ['link']),
-     ('kind' if !object.async && object.kind?)
-   ]
+     method_call('auth.delete', ['link']),
+     ('kind' if !object.async && object.kind?)]
   )
 -%>
     return <%= method %>

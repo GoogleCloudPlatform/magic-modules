@@ -12,20 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<%= lines(autogen_notice :go) -%>
+<%= lines(autogen_notice(:go)) -%>
 
 package google
 
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
-	resource_name = product_ns + object.name
-	properties = object.all_user_properties
-	settable_properties = properties.reject(&:output)
-	api_name_lower = String.new(product_ns)
-	api_name_lower[0] = api_name_lower[0].downcase
-	has_project = object.base_url.include?("{{project}}")
-	has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
+  resource_name = product_ns + object.name
+  properties = object.all_user_properties
+  settable_properties = properties.reject(&:output)
+  api_name_lower = String.new(product_ns)
+  api_name_lower[0] = api_name_lower[0].downcase
+  has_project = object.base_url.include?('{{project}}')
+  has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink) }
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -172,9 +172,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 			from the list that gets returned.  self_link_query is a field which
 			describes a list result from a read. -%>
     <%= compile_template('templates/terraform/self_link_query.erb',
-												 object: object,
-												 settable_properties: settable_properties,
-												 resource_name: resource_name) -%>
+                         object: object,
+                         settable_properties: settable_properties,
+                         resource_name: resource_name) -%>
 <% end -%>
 
 <% if object.custom_code.decoder -%>
@@ -241,8 +241,8 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 		<% props.each do |prop| -%>
       <% if prop.update_statement -%>
         "<%= prop.api_name -%>": <%= compile_template(prop.update_statement,
-                                                     prefix: resource_name,
-                                                     property: prop) -%>
+                                                      prefix: resource_name,
+                                                      property: prop) -%>
       <% else -%>
 			"<%= prop.api_name -%>": <%= prop.api_name -%>Prop,
       <% end -%>
@@ -382,7 +382,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
   <%= lines(compile(object.custom_code.custom_import)) -%>
 <% else -%>
 	config := meta.(*Config)
-	parseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.join('","') -%>"}, d, config)
+	parseImportId([]string{"<%= import_id_formats(object).map { |s| format2regex s }.join('","') -%>"}, d, config)
 
 	// Replace import id for the resource id
 	id, err := replaceVars(d, config, "<%= object.id_format -%>")

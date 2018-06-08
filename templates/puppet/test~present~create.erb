@@ -30,7 +30,6 @@
                                               name ? :name : :title,
                                               ensure: 'present')
 
-
   # Creates the expect_network_* statements required for this test.
   # This includes the expect statements for all referenced resources.
   expect_data = @create_data.create_expect_data(config_path + %w[result],
@@ -51,7 +50,7 @@
   references_self_type = false
   collector.each do |obj|
     references_self_type = true if obj.parent && \
-      obj.parent.__resource == obj.object
+                                   obj.parent.__resource == obj.object
   end
 
   resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
@@ -69,21 +68,21 @@
 <%=
   res_name = "#{object.out_name.capitalize}[title0]"
   lines(format([
-    [").catalog.resource('#{res_name}').provider.ensure"],
-    [
-      ").catalog.resource('#{res_name}').provider",
-      indent('.ensure', 2)
-    ],
-    [
-      ").catalog.resource('#{res_name}')",
-      indent('.provider.ensure', 2)
-    ],
-  ], inside_indent))
+                 [").catalog.resource('#{res_name}').provider.ensure"],
+                 [
+                   ").catalog.resource('#{res_name}').provider",
+                   indent('.ensure', 2)
+                 ],
+                 [
+                   ").catalog.resource('#{res_name}')",
+                   indent('.provider.ensure', 2)
+                 ]
+               ], inside_indent))
 -%>
           end
 
-<% # TODO(nelsonjr): Temporarily disable the tests where an object has a
-   # reference to its own type -%>
+<%# TODO(nelsonjr): Temporarily disable the tests where an object has a
+# reference to its own type -%>
 <% if references_self_type -%>
           it 'was expected to be present', broken: true do
             pending('Implement tests where object references its own type.')

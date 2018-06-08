@@ -22,7 +22,7 @@
                                                 path: config_path + %w[before],
                                                 exists: true,
                                                 has_name: has_name
-                                               }, collector)
+                                              }, collector)
 
   resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
 -%>
@@ -80,9 +80,9 @@ subject do
 -%>
 <%=
   format([
-    [find_lines[0] + " #{find_lines[1]}"],
-    [find_lines[0], indent(find_lines[1], 24)]
-  ], 2, (test_matrix.level + 1) * 2)
+           [find_lines[0] + " #{find_lines[1]}"],
+           [find_lines[0], indent(find_lines[1], 24)]
+         ], 2, (test_matrix.level + 1) * 2)
 %>
 end
 

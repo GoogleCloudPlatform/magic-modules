@@ -30,10 +30,10 @@
         [
           "@#{prop.out_name} =",
           indent([
-            "#{parser}(",
-            indent("args['#{source}']", 2),
-            ')'
-          ], 2)
+                   "#{parser}(",
+                   indent("args['#{source}']", 2),
+                   ')'
+                 ], 2)
         ]
       ], 0, 10
     )
@@ -41,7 +41,7 @@
 -%>
 <%= compile('templates/license.erb') -%>
 
-<%= lines(autogen_notice :ruby) -%>
+<%= lines(autogen_notice(:ruby)) -%>
 
 <%
   requires = []
@@ -54,18 +54,19 @@ module Google
   module <%= product_ns %>
     module Data
 <%= lines(indent(
-      emit_rubocop(binding, :class,
-                   ['Google', product_ns, 'Data', class_name].join('::'),
-                   :disabled),
-      6)) -%>
+            emit_rubocop(binding, :class,
+                         ['Google', product_ns, 'Data', class_name].join('::'),
+                         :disabled),
+            6
+    )) -%>
 <%=
   lines(format([
-    ["# A class to manage data for #{field} for #{obj_name}."],
-    [
-      "# A class to manage data for #{field} for",
-      "# #{obj_name}."
-    ]
-  ], 6))
+                 ["# A class to manage data for #{field} for #{obj_name}."],
+                 [
+                   "# A class to manage data for #{field} for",
+                   "# #{obj_name}."
+                 ]
+               ], 6))
 -%>
       class <%= class_name %>
         include Comparable
@@ -87,14 +88,14 @@ module Google
           [
             "#{prop.out_name}: ['[',",
             indent([
-              "#{prop.out_name}.map(&:to_json).join(', '),",
-              "']'].join(' ')"
-            ], prop.out_name.length + 3), # 3 = ": ["
+                     "#{prop.out_name}.map(&:to_json).join(', '),",
+                     "']'].join(' ')"
+                   ], prop.out_name.length + 3), # 3 = ": ["
           ]
         elsif prop.item_type.is_a?(::String)
           "#{prop.out_name}: #{prop.out_name}"
         else
-          raise "Unknown array type"
+          raise 'Unknown array type'
         end
       else
         "#{prop.out_name}: #{prop.out_name}"
@@ -148,11 +149,10 @@ module Google
                                       .join(', '),
                                     ['{',
                                      indent_list([
-                                       "self: #{prop.out_name}",
-                                       "other: other.#{prop.out_name}"
-                                     ], 2),
-                                     '}'
-                                    ]
+                                                   "self: #{prop.out_name}",
+                                                   "other: other.#{prop.out_name}"
+                                                 ], 2),
+                                     '}']
                                   ], 0, 12
                                 )
                               end, 2)
@@ -192,12 +192,12 @@ module Google
     module Property
 <%=
   lines(format([
-    ["# A class to manage input to #{field} for #{obj_name}."],
-    [
-      "# A class to manage input to #{field} for",
-      "# #{obj_name}."
-    ]
-  ], 6))
+                 ["# A class to manage input to #{field} for #{obj_name}."],
+                 [
+                   "# A class to manage input to #{field} for",
+                   "# #{obj_name}."
+                 ]
+               ], 6))
 -%>
       class <%= class_name %> < Google::<%= product_ns %>::Property::Base
         # Used for parsing Puppet catalog

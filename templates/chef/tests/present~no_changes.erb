@@ -9,7 +9,7 @@
   cust_before = get_code_multiline(tests, config_path)
 
   def expt(id, has_name, object, space_used, prop_data)
-    line = "expect_network_get_success"
+    line = 'expect_network_get_success'
     prop_data.create_expectation(line, has_name, object, space_used, [], id)
   end
 
@@ -50,7 +50,7 @@
   references_self_type = false
   collector.each do |obj|
     references_self_type = true if obj.parent && \
-      obj.parent.__resource == obj.object
+                                   obj.parent.__resource == obj.object
   end
 
   resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
@@ -122,17 +122,17 @@ context '<%= object.out_name -%>[title<%= index -%>]' do
 -%>
 <%=
   lines(format([
-          [find_lines.join(' ')],
-          [
-           find_lines[0],
-           indent(find_lines[1], 23)
-          ]
-        ], 4, (test_matrix.level + 2) * 2))
+                 [find_lines.join(' ')],
+                 [
+                   find_lines[0],
+                   indent(find_lines[1], 23)
+                 ]
+               ], 4, (test_matrix.level + 2) * 2))
 -%>
   end
 <%
-object.all_user_properties.select { |p| !p.output }
-                          .each do |p|
+object.all_user_properties.reject(&:output)
+      .each do |p|
 -%>
 <%
   value = @data_gen.value(p.class, p, index)
@@ -142,9 +142,9 @@ object.all_user_properties.select { |p| !p.output }
 
 <%=
   lines(indent(@property.property(p, index, @data_gen.comparator(p),
-                                   value,
-                                   (test_matrix.level + 2) * 2,
-                                   name_override), 2))
+                                  value,
+                                  (test_matrix.level + 2) * 2,
+                                  name_override), 2))
 -%>
 <% end # all_user_props.each -%>
 <% end # references_self_type -%>

@@ -41,8 +41,8 @@
 
       if nested_prop.is_a? Api::Type::NestedObject
         object_lines.concat(build_nested_object(nested_prop, next_path))
-      elsif nested_prop.is_a? Api::Type::Array and
-        nested_prop.item_type.is_a? Api::Type::NestedObject
+      elsif nested_prop.is_a?(Api::Type::Array) &&
+            nested_prop.item_type.is_a?(Api::Type::NestedObject)
         object_lines.concat(build_nested_object(nested_prop.item_type,
                                                 "#{next_path}[]"))
       end
@@ -112,7 +112,7 @@ required gems.
 
 ### Examples
 
-<% objects = product.objects.select { |o| !o.exclude } -%>
+<% objects = product.objects.reject(&:exclude) -%>
 <% objects.each do |object| -%>
 #### `<%= object.out_name -%>`
 
@@ -182,8 +182,7 @@ change by asserting it in the manifest.
 <%= build_nested_object(property.item_type, "#{property.out_name}[]").join -%>
 <% elsif property.is_a? Api::Type::Array and \
   property.item_type.is_a? Api::Type::Array
-   raise "Array of arrays. Not supported."
--%>
+   raise "Array of arrays. Not supported." -%>
 <% end # property.is_a? Api::Type::NestedObject -%>
 <%   end # object.all_user_properties.each -%>
 
@@ -201,8 +200,7 @@ change by asserting it in the manifest.
 <%= build_nested_object(property.item_type, "#{property.out_name}[]").join -%>
 <% elsif property.is_a? Api::Type::Array and \
   property.item_type.is_a? Api::Type::Array
-   raise "Array of arrays. Not supported."
--%>
+   raise "Array of arrays. Not supported." -%>
 <% end # property.is_a? Api::Type::NestedObject -%>
 <%     end # output_only.each -%>
 <%   end # output_only.empty? -%>

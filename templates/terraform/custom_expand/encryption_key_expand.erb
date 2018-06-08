@@ -8,7 +8,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 		req = append(req, outMap)
   <% if property.name == "diskEncryptionKey" -%>
 	} else {
-		// Check alternative setting? 
+		// Check alternative setting?
 		if altV, ok := d.GetOk("disk_encryption_key_raw"); ok && altV != "" {
 			outMap := make(map[string]interface{})
 			outMap["rawKey"] = altV

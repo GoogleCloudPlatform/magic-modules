@@ -28,29 +28,29 @@ def wait_for_operation(module, response):
 <%=
   obj_kind = quote_string(object.kind)
   lines(format(
-    [
-      [
-        "return fetch_wrapped_resource(module, #{obj_kind},",
-        ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?),
-        "'#{object.self_link_query.items}')"
-      ].join(' '),
-      [
-        [
-         "return fetch_wrapped_resource(resource, #{obj_kind},",
-         ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?)
-        ].join(' '),
-        indent([
-          "'#{object.self_link_query.items}')"
-        ], 23) # 23 = align with ( previous line
-      ],
-      [
-        "return fetch_wrapped_resource(resource, #{obj_kind},",
-        indent([
-          "'#{object.self_link_query.kind}',",
-          "'#{object.self_link_query.items}')"
-        ], 23) # 31 = align with ( previous line
-      ]
-    ], 4
+          [
+            [
+              "return fetch_wrapped_resource(module, #{obj_kind},",
+              ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?),
+              "'#{object.self_link_query.items}')"
+            ].join(' '),
+            [
+              [
+                "return fetch_wrapped_resource(resource, #{obj_kind},",
+                ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?)
+              ].join(' '),
+              indent([
+                       "'#{object.self_link_query.items}')"
+                     ], 23) # 23 = align with ( previous line
+            ],
+            [
+              "return fetch_wrapped_resource(resource, #{obj_kind},",
+              indent([
+                       "'#{object.self_link_query.kind}',",
+                       "'#{object.self_link_query.items}')"
+                     ], 23) # 31 = align with ( previous line
+            ]
+          ], 4
   ))
 -%>
 <% end # object.self_link_query.nil? -%>
@@ -67,7 +67,7 @@ def wait_for_completion(status, op_result, module):
     op_uri = async_op_url(module, {'op_id': op_id})
     while status != '<%= object.async.status.complete -%>':
         raise_if_errors(op_result, <%= err_path -%>, '<%= err_msg -%>')
-        time.sleep(<%= sprintf('%.1f', object.async.operation.wait_ms / 1000.0) %>)
+        time.sleep(<%= format('%.1f', object.async.operation.wait_ms / 1000.0) %>)
         if status not in [<%= allowed_states.join(', ') -%>]:
             module.fail_json(msg="Invalid result %s" % status)
 <% if object.kind? -%>
