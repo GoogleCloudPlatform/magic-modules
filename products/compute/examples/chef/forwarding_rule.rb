@@ -21,7 +21,7 @@
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
 gcompute_region <%= example_resource_name('some-region') -%> do
-  name 'us-west1'
+  r_label 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
