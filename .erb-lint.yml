@@ -29,6 +29,19 @@ linters:
     rubocop_config:
       inherit_from:
         - .rubocop.yml
+      # We don't want `rubocop:disable` statements in erb templates.
+      Metrics/AbcSize:
+        Max: 100
+      Metrics/BlockLength:
+        Max: 100
+      Metrics/MethodLength:
+        Max: 100
+      # We use comments in `end` lines to help navigate templates.
+      Style/CommentedKeyword:
+        Enabled: false
+      # Rubocop confuses some generated code with poorly interpolated strings
+      Lint/InterpolationCheck:
+        Enabled: false
       # erb-lint guidelines recommended turning these cops off.
       # They don't apply to ERB tags.
       Layout/InitialIndentation:
