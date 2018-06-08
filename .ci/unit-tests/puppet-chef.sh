@@ -3,9 +3,6 @@ set -e
 set -x
 
 pushd "magic-modules/build/$PROVIDER/$PRODUCT"
-if [ -n "$SPEC_DIR" ]; then
-  cd "$SPEC_DIR"
-fi
 bundle install
 
 # parallel_rspec doesn't support --exclude_pattern
