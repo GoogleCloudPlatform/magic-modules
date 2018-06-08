@@ -42,6 +42,10 @@ linters:
       # Rubocop confuses some generated code with poorly interpolated strings
       Lint/InterpolationCheck:
         Enabled: false
+      # Length of static objects makes it easier to determine
+      # why some constants are calculated
+      Performance/FixedSize:
+        Enabled: false
       # erb-lint guidelines recommended turning these cops off.
       # They don't apply to ERB tags.
       Layout/InitialIndentation:
