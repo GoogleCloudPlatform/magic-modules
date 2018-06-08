@@ -36,6 +36,7 @@ module Provider
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
+      # rubocop:disable Metrics/AbcSize
       def validate
         super
 
@@ -64,6 +65,7 @@ module Provider
         check_optional_property :version_added, ::String
       end
       # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       private
 
