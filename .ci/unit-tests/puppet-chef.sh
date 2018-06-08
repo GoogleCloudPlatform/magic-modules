@@ -11,6 +11,7 @@ bundle install
 # parallel_rspec doesn't support --exclude_pattern
 if [ -z "$EXCLUDE_PATTERN" ]; then
     echo "No EXCLUDE_PATTERN"
+    ls spec/
     DISABLE_COVERAGE=true bundle exec parallel_rspec spec/
 else
     echo "Excluding $EXCLUDE_PATTERN"
