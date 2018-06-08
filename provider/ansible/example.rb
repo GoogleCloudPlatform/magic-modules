@@ -144,6 +144,23 @@ module Provider
       end
     end
 
+    class GrpcFailureCondition < FailureCondition
+      attr_reader :single
+      attr_reader :plural
+
+      def validate
+        check_optional_property :single, ::String
+        check_optional_property :plural, ::String
+
+        @name ||= '{{ resource_name }}'
+        @error = [
+          "#{single.capitalize} not found:",
+          "projects/{{ gcp_project }}/#{plural}/#{@name}",
+        ].join(' ')
+        super
+      end
+    end
+
     # Class responsible for holding a single Ansible task. This task may create
     # a GCP resource or create a dependent GCP resource.
     class Task < Api::Object
