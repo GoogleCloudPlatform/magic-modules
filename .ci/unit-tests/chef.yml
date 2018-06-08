@@ -12,4 +12,3 @@ params:
   PRODUCT: ""
   PROVIDER: chef
   EXCLUDE_PATTERN: ""
-  SPEC_DIR: spec
