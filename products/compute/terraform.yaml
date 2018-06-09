@@ -56,8 +56,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
+        description: |
+          The Region in which the created address should reside.
+          If it is not provided, the provider region is used.
       subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      attributes: |
+          * `address`: The IP of the created resource.
   BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
