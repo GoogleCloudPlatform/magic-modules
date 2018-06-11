@@ -45,7 +45,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       address: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
       addressType: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/compute_address_type.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       name: !ruby/object:Provider::Terraform::PropertyOverride

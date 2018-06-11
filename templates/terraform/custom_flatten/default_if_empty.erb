@@ -14,7 +14,7 @@
 <% end -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
 	if v == nil || v.(string) == "" {
-		return "EXTERNAL"
+		return <%= go_literal(property.default_value) -%>
 	}
 	return v
 }
