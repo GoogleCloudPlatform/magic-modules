@@ -118,14 +118,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
           - timeout_seconds
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_instance.py'
-      - 'products/compute/helpers/instance_metadata.py'
+      - 'products/compute/helpers/python/provider_instance.py'
+      - 'products/compute/helpers/python/instance_metadata.py'
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_instance.py'
-      - 'products/compute/helpers/instance_metadata.py'
+      - 'products/compute/helpers/python/provider_instance.py'
+      - 'products/compute/helpers/python/instance_metadata.py'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       nextHopGateway: !ruby/object:Provider::Ansible::PropertyOverride
@@ -142,7 +142,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: false
   TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_target_pool.py'
+      - 'products/compute/helpers/python/provider_target_pool.py'
   TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
   # Not yet implemented.

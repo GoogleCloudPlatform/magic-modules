@@ -57,8 +57,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         # DNS service already did server-side filtering of resource.
         lambda { |resource| true }
     provider_helpers:
-      - 'products/dns/helpers/puppet_provider_resource_set.rb.erb'
-      - 'products/dns/helpers/provider_resource_set.rb.erb'
+      - 'products/dns/helpers/puppet/provider_resource_set.rb.erb'
+      - 'products/dns/helpers/ruby/provider_resource_set.rb.erb'
     resource_to_request: false
     return_if_object: false
     unwrap_resource: false

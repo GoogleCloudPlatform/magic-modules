@@ -37,7 +37,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         Chef::Log.fatal message
         raise message
     provider_helpers:
-      - 'products/compute/helpers/provider_disk_type.rb'
+      - 'products/compute/helpers/ruby/provider_disk_type.rb'
   Disk: !ruby/object:Provider::Chef::ResourceOverride
     handlers: !ruby/object:Provider::Chef::Handlers
       update: |
@@ -59,7 +59,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         Chef::Log.fatal message
         raise message
     provider_helpers:
-      - 'products/compute/helpers/provider_network.rb'
+      - 'products/compute/helpers/ruby/provider_network.rb'
   Region: !ruby/object:Provider::Chef::ResourceOverride
     handlers: !ruby/object:Provider::Chef::Handlers
       update: |
@@ -68,7 +68,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         raise message
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
-      - 'products/compute/helpers/provider_target_pool.rb'
+      - 'products/compute/helpers/ruby/provider_target_pool.rb'
   # Not yet implemented.
   SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
