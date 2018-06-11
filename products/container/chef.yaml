@@ -29,10 +29,10 @@ manifest: !ruby/object:Provider::Chef::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   Cluster: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_cluster.rb'
+      - 'products/container/helpers/ruby/provider_cluster.rb'
   NodePool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
-      - 'products/container/helpers/provider_node_pool.rb'
+      - 'products/container/helpers/ruby/provider_node_pool.rb'
   KubeConfig: !ruby/object:Provider::Chef::ResourceOverride
     manual: true
 examples: !ruby/object:Api::Resource::HashArray

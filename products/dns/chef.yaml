@@ -54,8 +54,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         wait_for_change_to_complete change_id, new_resource \
           if change['status'] == 'pending'
     provider_helpers:
-      - 'products/dns/helpers/chef_provider_resource_set.rb.erb'
-      - 'products/dns/helpers/provider_resource_set.rb.erb'
+      - 'products/dns/helpers/chef/provider_resource_set.rb.erb'
+      - 'products/dns/helpers/ruby/provider_resource_set.rb.erb'
     resource_to_request: false
     return_if_object: false
     unwrap_resource: false

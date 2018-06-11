@@ -1064,4 +1064,4 @@ Snapshot:
   expectations:
     custom:
       create: true
-  expectation_helpers: 'products/compute/helpers/expect_snapshot.rb.erb'
+  expectation_helpers: 'products/compute/helpers/ruby/expect_snapshot.rb.erb'

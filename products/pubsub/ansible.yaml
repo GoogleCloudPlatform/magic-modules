@@ -30,14 +30,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
       encoder: encode_request
       decoder: decode_request
     provider_helpers:
-      - 'products/pubsub/helpers/provider_topic.py'
+      - 'products/pubsub/helpers/python/provider_topic.py'
   Subscription: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
     provider_helpers:
-      - 'products/pubsub/helpers/provider_subscription.py'
+      - 'products/pubsub/helpers/python/provider_subscription.py'
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:

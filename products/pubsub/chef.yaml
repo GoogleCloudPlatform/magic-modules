@@ -59,7 +59,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         request[:name] = ['projects', new_resource.project, 'subscriptions',
                           new_resource.s_label].join('/')
     provider_helpers:
-      - 'products/pubsub/helpers/provider_subscription.rb'
+      - 'products/pubsub/helpers/ruby/provider_subscription.rb'
   Topic: !ruby/object:Provider::Chef::ResourceOverride
     handlers: !ruby/object:Provider::Chef::Handlers
       resource_to_request_patch: |
@@ -87,7 +87,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
                     .join('/')
         )
     provider_helpers:
-      - 'products/pubsub/helpers/provider_topic.rb'
+      - 'products/pubsub/helpers/ruby/provider_topic.rb'
 examples: !ruby/object:Api::Resource::HashArray
   Subscription:
     - subscription.rb
