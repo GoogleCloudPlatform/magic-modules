@@ -56,6 +56,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         description: |
           The Region in which the created address should reside.
           If it is not provided, the provider region is used.
