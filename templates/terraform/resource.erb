@@ -192,7 +192,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 	}
 <% end -%>
 <% if has_self_link -%>
-	if err := d.Set("self_link", res["selfLink"]); err != nil {
+	if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
 <% end -%>
