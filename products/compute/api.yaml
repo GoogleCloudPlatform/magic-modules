@@ -2336,6 +2336,11 @@ objects:
           The destination range of outgoing packets that this route applies to.
           Only IPv4 is supported.
       - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property
+          when you create the resource.
+      - !ruby/object:Api::Type::String
         name: 'name'
         description: |
           Name of the resource. Provided by the client when the resource is

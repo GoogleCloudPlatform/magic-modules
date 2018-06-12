@@ -327,7 +327,44 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_network" "default" {
+        name = "compute-network"
+      }
+
+      resource "google_compute_subnetwork" "default" {
+        name          = "compute-subnetwork"
+        ip_cidr_range = "10.0.0.0/16"
+        network       = "${google_compute_network.default.self_link}"
+        region        = "us-central1"
+      }
+
+      resource "google_compute_route" "default" {
+        name        = "network-route"
+        dest_range  = "15.0.0.0/24"
+        network     = "${google_compute_network.foobar.name}"
+        next_hop_ip = "10.0.1.5"
+        priority    = 100
+      }
+      ```
+    properties:
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      priority: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: 1000
+      nextHopGateway: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/route_gateway.erb
+      nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: templates/terraform/custom_expand/route_instance.erb
+      tags: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/set_to_list.erb
+        is_set: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/route.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
