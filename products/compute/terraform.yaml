@@ -365,6 +365,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/route.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+          * `next_hop_instance_zone` - (Required when `next_hop_instance` is specified)
+             The zone of the instance specified in `next_hop_instance`.
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
