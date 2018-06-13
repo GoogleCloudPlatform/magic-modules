@@ -40,6 +40,10 @@ module Provider
           id_formats = resource.import_format
         end
 
+        unless resource.id_format.nil? && resource.id_format.empty?
+          id_formats << resource.id_format
+        end
+
         # short id: {{project}}/{{zone}}/{{name}}
         field_markers = id_formats[0].scan(/{{[[:word:]]+}}/)
         short_id_format = field_markers.join('/')
