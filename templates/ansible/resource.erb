@@ -130,8 +130,7 @@ def main():
 <%
   method = method_call('update', [
                                    'module', 'self_link(module)',
-                                   ('kind' if object.kind?),
-                                   ('fetch' if object.save_api_results?)
+                                   ('kind' if object.kind?)
                                  ])
 -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
@@ -140,8 +139,7 @@ def main():
 <%
   method = method_call('delete', [
                                    'module', 'self_link(module)',
-                                   ('kind' if object.kind?),
-                                   ('fetch' if object.save_api_results?)
+                                   ('kind' if object.kind?)
                                  ])
 -%>
 <%= lines(indent(method, 12)) -%>
@@ -205,8 +203,7 @@ def main():
 
 
 <%=
-  lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
-                               ('fetch' if object.save_api_results?)]))
+  lines(method_decl('update', ['module', 'link', ('kind' if object.kind?)]))
 -%>
 <% if object.update.nil? -%>
 <%   if !false?(object.editable) -%>
@@ -233,8 +230,7 @@ def main():
 
 
 <%=
-  lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
-                               ('fetch' if object.save_api_results?)]))
+  lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?)]))
 -%>
 <% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
