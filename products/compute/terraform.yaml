@@ -359,14 +359,30 @@ overrides: !ruby/object:Provider::ResourceOverrides
       nextHopGateway: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
+        # Description here is overridden because puppet won't compile if you ask
+        # it to include docs greater than 80 characters.
         description: |
-          {{description}}
+          URL to a gateway that should handle matching packets.
+
+          Currently, you can only specify the internet gateway, using a full or
+          partial valid URL:
+
+          * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
+          * projects/project/global/gateways/default-internet-gateway
+          * global/gateways/default-internet-gateway
           You can also provide the string 'default-internet-gateway'.
       nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_instance.erb
+        # Description here is overridden because puppet won't compile if you ask
+        # it to include docs greater than 80 characters.
         description: |
-          {{description}}
+          URL to an instance that should handle matching packets.
+          You can specify this as a full or partial URL. For example:
+
+          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/instances/instance
+          * projects/project/zones/zone/instances/instance
+          * zones/zone/instances/instance
           You can also provide just the instance name, with the zone in
           `next_hop_instance_zone`.
       tags: !ruby/object:Provider::Terraform::PropertyOverride
