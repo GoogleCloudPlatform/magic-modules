@@ -14,18 +14,18 @@
 # TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
-name: Google Cloud <%= results['title'] %>
-prefix: g<%= results['title'].split[0].downcase %>
+name: Google Cloud <%= ctx[:results]['title'] %>
+prefix: g<%= ctx[:results]['title'].split[0].downcase %>
 versions:
   - !ruby/object:Api::Product::Version
-    name: <%= results['version'] %>
-    base_url: <%= results['baseUrl'] %>
+    name: <%= ctx[:results]['version'] %>
+    base_url: <%= ctx[:results]['baseUrl'] %>
 scopes:
-  <% results['auth']['oauth2']['scopes'].each do |scope| -%>
+  <% ctx[:results]['auth']['oauth2']['scopes'].each do |scope| -%>
     - <%= scope[0] %>
   <% end -%>
 objects:
-<% results['schemas'].each do |object| -%>
+<% ctx[:results]['schemas'].each do |object| -%>
 <%
   object_name = object[0]
   obj = object[1]
