@@ -2306,6 +2306,7 @@ objects:
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
+    input: true
     description: |
       Represents a Route resource.
 
@@ -2335,6 +2336,7 @@ objects:
         description: |
           The destination range of outgoing packets that this route applies to.
           Only IPv4 is supported.
+        required: true
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -2350,12 +2352,14 @@ objects:
           the first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
         imports: 'selfLink'
         description: 'The network that this route applies to.'
         input: true
+        required: true
       - !ruby/object:Api::Type::Integer
         name: 'priority'
         description: |
