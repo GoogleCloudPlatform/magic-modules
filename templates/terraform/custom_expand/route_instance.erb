@@ -6,12 +6,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 		if err != nil {
 				return nil, err
 		}
-		project, err := getProject(d, config)
-		if err != nil {
-				// Can't happen - we wouldn't make it this far if there wasn't a project.
-				return nil, err
-		}
-		nextInstance, err := config.clientCompute.Instances.Get(project, val.Zone, val.Name).Do()
+		nextInstance, err := config.clientCompute.Instances.Get(val.Project, val.Zone, val.Name).Do()
 		if err != nil {
 				return nil, err
 		}

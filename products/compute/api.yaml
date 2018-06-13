@@ -2307,6 +2307,9 @@ objects:
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
     input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a Route resource.
 
@@ -2327,8 +2330,13 @@ objects:
       Engine-operated gateway. Packets that do not match any route in the
       sending virtual machine's routing table will be dropped.
 
-      A Routes resources must have exactly one specification of either
+      A Route resource must have exactly one specification of either
       nextHopGateway, nextHopInstance, nextHopIp, or nextHopVpnTunnel.
+
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -2385,8 +2393,7 @@ objects:
           Currently, you can only specify the internet gateway, using a full or
           partial valid URL:
 
-          * https://www.googleapis.com/compute/v1/projects/project/
-                global/gateways/default-internet-gateway
+          * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
         input: true
@@ -2397,8 +2404,7 @@ objects:
           URL to an instance that should handle matching packets.
           You can specify this as a full or partial URL. For example:
 
-          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/
-              instances/instance
+          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/instances/instance
           * projects/project/zones/zone/instances/instance
           * zones/zone/instances/instance
         input: true
@@ -2413,6 +2419,13 @@ objects:
         description: |
           URL to a VpnTunnel that should handle matching packets.
         input: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'nextHopNetwork'
+        resource: 'Network'
+        imports: 'selfLink'
+        input: true
+        description: |
+          URL to a Network that should handle matching packets.
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'

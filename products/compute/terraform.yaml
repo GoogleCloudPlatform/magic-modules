@@ -349,6 +349,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
       network: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       priority: !ruby/object:Provider::Terraform::PropertyOverride
@@ -356,9 +359,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
       nextHopGateway: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
+        description: |
+          {{description}}
+          You can also provide the string 'default-internet-gateway'.
       nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_instance.erb
+        description: |
+          {{description}}
+          You can also provide just the instance name, with the zone in
+          `next_hop_instance_zone`.
       tags: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/set_to_list.erb
         is_set: true
@@ -367,8 +377,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
       extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
-          * `next_hop_instance_zone` - (Required when `next_hop_instance` is specified)
-             The zone of the instance specified in `next_hop_instance`.
+          * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
+            specified)  The zone of the instance specified in
+            `next_hop_instance`.  Omit if `next_hop_instance` is specified as
+            a URL.
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
