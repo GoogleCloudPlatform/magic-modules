@@ -48,10 +48,17 @@ module Provider
 
       # Returns an array of all base options for a given property.
       # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/AbcSize
       def prop_options(prop, _object, spaces)
+        default = if prop.default_value && prop.is_a?(Api::Type::Integer)
+                    prop.default_value
+                  else
+                    quote_string(prop.default_value.to_s)
+                  end
         [
           ('required=True' if prop.required && !prop.default_value),
-          ("default=#{prop.default_value}" if prop.default_value),
+          ("default=#{default}" if prop.default_value),
           "type=#{quote_string(python_type(prop))}",
           (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
@@ -61,6 +68,8 @@ module Provider
         ].compact
       end
       # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/AbcSize
 
       # Returns a formatted string represented the choices of an enum
       # rubocop:disable Metrics/AbcSize
