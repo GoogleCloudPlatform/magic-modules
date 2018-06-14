@@ -2306,6 +2306,10 @@ objects:
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
+    input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Represents a Route resource.
 
@@ -2326,8 +2330,13 @@ objects:
       Engine-operated gateway. Packets that do not match any route in the
       sending virtual machine's routing table will be dropped.
 
-      A Routes resources must have exactly one specification of either
+      A Route resource must have exactly one specification of either
       nextHopGateway, nextHopInstance, nextHopIp, or nextHopVpnTunnel.
+
+    references: !ruby/object:Api::Resource::ReferenceLinks
+          guides:
+            'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
+          api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -2335,6 +2344,12 @@ objects:
         description: |
           The destination range of outgoing packets that this route applies to.
           Only IPv4 is supported.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property
+          when you create the resource.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2345,12 +2360,14 @@ objects:
           the first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
         imports: 'selfLink'
         description: 'The network that this route applies to.'
         input: true
+        required: true
       - !ruby/object:Api::Type::Integer
         name: 'priority'
         description: |
@@ -2377,7 +2394,7 @@ objects:
           partial valid URL:
 
           * https://www.googleapis.com/compute/v1/projects/project/
-                global/gateways/default-internet-gateway
+          global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
         input: true
@@ -2389,7 +2406,7 @@ objects:
           You can specify this as a full or partial URL. For example:
 
           * https://www.googleapis.com/compute/v1/projects/project/zones/zone/
-              instances/instance
+          instances/instance
           * projects/project/zones/zone/instances/instance
           * zones/zone/instances/instance
         input: true
@@ -2404,6 +2421,11 @@ objects:
         description: |
           URL to a VpnTunnel that should handle matching packets.
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'nextHopNetwork'
+        output: true
+        description: |
+          URL to a Network that should handle matching packets.
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'

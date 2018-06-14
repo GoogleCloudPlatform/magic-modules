@@ -1,0 +1,10 @@
+if v, ok := res["nextHopInstance"]; ok {
+		val, err := parseZonalFieldValue("instances", v.(string), "project", "next_hop_instance_zone", d, meta.(*Config), true)
+		if err != nil {
+				return nil, err
+		}
+		d.Set("next_hop_instance_zone", val.Zone)
+		res["nextHopInstance"] = val.RelativeLink()
+}
+
+return res, nil

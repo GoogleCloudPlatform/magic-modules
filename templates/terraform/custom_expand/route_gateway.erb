@@ -1,0 +1,11 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+		if v == "default-internet-gateway" {
+				project, err := getProject(d, config)
+				if err != nil {
+						return nil, err
+				}
+				return fmt.Sprintf("projects/%s/global/gateways/default-internet-gateway", project), nil
+		} else {
+				return v, nil
+		}
+}
