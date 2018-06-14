@@ -2421,11 +2421,9 @@ objects:
         description: |
           URL to a VpnTunnel that should handle matching packets.
         input: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'nextHopNetwork'
-        resource: 'Network'
-        imports: 'selfLink'
-        input: true
+        output: true
         description: |
           URL to a Network that should handle matching packets.
   - !ruby/object:Api::Resource
