@@ -25,6 +25,10 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
+  ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
