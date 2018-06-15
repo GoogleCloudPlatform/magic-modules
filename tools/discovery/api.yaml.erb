@@ -31,10 +31,6 @@ objects:
       <%= object.schema['description'] %>
     properties:
 <% object.properties.each do |prop| -%>
-      - !ruby/object:Api::Type::<%= prop.type %>
-        name: <%= prop.name %>
-        description: <%= prop.description %>
-        required: <%= prop.required %>
-        output: <%= prop.output %>
+<%= lines(indent(compile_file({ prop: prop }, 'property.yaml.erb'), 6)) -%>
 <% end -%>
 <% end -%>
