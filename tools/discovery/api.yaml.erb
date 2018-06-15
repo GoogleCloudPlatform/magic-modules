@@ -30,19 +30,11 @@ objects:
     description: |
       <%= object.schema['description'] %>
     properties:
-<% (object.schema['properties'] || []).each do |prop| -%>
-<%
-  prop_name = prop[0]
-  prop_obj = prop[1]
--%>
-      - !ruby/object:Api::Type::<%= (prop_obj['type'] || '').capitalize %>
-        name: <%= prop_name %>
-        description: <%= prop_obj['description'] %>
-<% if (prop_obj['description'] || '').include? '[Required]' -%>
-        required: true
-<% end -%>
-<% if (prop_obj['description'] || '').include? "Output-only" %>
-        output: true
-<% end -%>
+<% object.properties.each do |prop| -%>
+      - !ruby/object:Api::Type::<%= prop.type %>
+        name: <%= prop.name %>
+        description: <%= prop.description %>
+        required: <%= prop.required %>
+        output: <%= prop.output %>
 <% end -%>
 <% end -%>

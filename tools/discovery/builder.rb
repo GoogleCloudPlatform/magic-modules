@@ -6,13 +6,48 @@ require 'compile/core'
 
 include Compile::Core
 
+class Property
+  attr_reader :name
+  def initialize(name, attributes)
+    @name = name
+    @attributes = attributes
+  end
+
+  def type
+    @attributes['type'].capitalize
+    rescue
+      "Not yet Implemented"  
+  end
+
+  def description
+    @attributes['description']
+  end
+
+  def required
+    return 'true' if description.include? '[Required]'
+    'false'
+  rescue
+    'none'
+  end
+
+  def output
+    return 'true' if description.match /Output.only/
+    'false'
+  rescue
+    'none'
+  end
+end
+
 class Resource
   attr_accessor :schema
+  attr_reader :properties
 
   def initialize(name, resource, schema)
     @name = name
     @resource = resource
     @schema = schema
+
+    build_properties
   end
 
   def name
@@ -23,6 +58,14 @@ class Resource
       @resource['methods']['list']['path']
     rescue
       @resource['methods']['get']['path']
+  end
+
+  private
+
+  def build_properties
+    @properties = @schema['properties'].map do |arr|
+      Property.new(arr[0], arr[1])
+    end
   end
 end
 
