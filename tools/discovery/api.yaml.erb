@@ -25,18 +25,14 @@ scopes:
     - <%= scope[0] %>
   <% end -%>
 objects:
-<% ctx[:results]['schemas'].each do |object| -%>
-<%
-  object_name = object[0]
-  obj = object[1]
--%>
+<% ctx[:resources].each do |object| -%>
   - !ruby/object:Api::Resource
-    name: '<%= object_name %>'
-    base_url: projects/{{project}}/serviceAccounts
+    name: '<%= object.name %>'
+    base_url: <%= object.base_url %>
     description: |
-      <%= obj['description'] %>
+      <%= object.schema['description'] %>
     properties:
-<% (obj['properties'] || []).each do |prop| -%>
+<% (object.schema['properties'] || []).each do |prop| -%>
 <%
   prop_name = prop[0]
   prop_obj = prop[1]
