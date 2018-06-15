@@ -51,7 +51,8 @@ module Provider
         Api::Type::ResourceRef => 'schema.TypeString',
         Api::Type::NestedObject => 'schema.TypeList',
         Api::Type::Array => 'schema.TypeList',
-        Api::Type::NameValues => 'schema.TypeMap'
+        Api::Type::NameValues => 'schema.TypeMap',
+        Api::Type::Fingerprint => 'schema.TypeString'
       }
     end
 
