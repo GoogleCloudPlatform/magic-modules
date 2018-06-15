@@ -700,6 +700,13 @@ objects:
           used.
         output: true
     properties:
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
+        update_verb: :POST
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'

@@ -29,6 +29,4 @@ if v, ok := res["sourceSnapshotEncryptionKey"]; ok {
   res["sourceSnapshotEncryptionKey"] = transformed
 }
 
-d.Set("label_fingerprint", res["labelFingerprint"])
-
 return res, nil

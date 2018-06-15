@@ -192,6 +192,18 @@ module Api
       NAME = Api::Type::String.new('name')
     end
 
+    # Represents a fingerprint.  A fingerprint is an output-only
+    # field used for optimistic locking during updates.
+    class Fingerprint < String
+      def validate
+        super
+        @output = true if @output.nil?
+        # TODO(ndmckinley): This doesn't work in puppet, chef, or ansible.
+        # Consequently we exclude it by default and override it in Terraform.
+        @exclude ||= true
+      end
+    end
+
     # Represents a timestamp
     class Time < Primitive
     end
