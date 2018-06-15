@@ -479,6 +479,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        input: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb
       resource_definition: templates/terraform/resource_definition/subnetwork.erb

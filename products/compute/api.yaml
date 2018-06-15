@@ -2787,6 +2787,7 @@ objects:
           means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
@@ -2795,6 +2796,7 @@ objects:
           The network this subnet belongs to.
           Only networks that are in the distributed mode can have subnetworks.
         input: true
+        required: true
       - !ruby/object:Api::Type::Boolean
         name: 'enableFlowLogs'
         description: |
@@ -2831,6 +2833,7 @@ objects:
                 must be unique within the subnetwork.
             - !ruby/object:Api::Type::String
               name: 'ipCidrRange'
+              required: true
               description: |
                 The range of IP addresses belonging to this subnetwork secondary
                 range. Provide this property when you create the subnetwork.
