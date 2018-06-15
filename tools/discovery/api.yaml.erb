@@ -27,7 +27,7 @@ scopes:
 objects:
 <% ctx[:resources].each do |object| -%>
   - !ruby/object:Api::Resource
-    name: '<%= object.name %>'
+    name: '<%= object.name.capitalize %>'
     base_url: <%= object.base_url %>
     description: |
       <%= object.schema['description'] %>
@@ -43,7 +43,7 @@ objects:
 <% if (prop_obj['description'] || '').include? '[Required]' -%>
         required: true
 <% end -%>
-<% if (prop_obj['description'] || '').include? 'Output-only' %>
+<% if (prop_obj['description'] || '').include? "Output-only" %>
         output: true
 <% end -%>
 <% end -%>
