@@ -26,22 +26,41 @@ class Resource
   end
 end
 
-class Resources
-  # @resources contains the methods.
-  # @schemas contains the object model.
-  def initialize(resources, schemas)
-    @resources = resources
-    @schemas = schemas
+class Product
+  attr_reader :resources
+
+  def initialize(results)
+    @json = results
+
+    build_resources
   end
 
+  def title
+    @json['title']
+  end
+
+  def base_url
+    @json['baseUrl']
+  end
+
+  def version
+    @json['version']
+  end
+
+  def scope
+    @json['auth']['oauth2']['scopes'].keys[0]
+  end
+
+  private
+
   # Get all resources that have methods (are GCP resources)
-  def resources
-    @resources.map do |key, value|
-      if @schemas[value['methods']['get']['response']['$ref']]
+  def build_resources
+    @resources = @json['resources'].map do |key, value|
+      if @json['schemas'][value['methods']['get']['response']['$ref']]
         Resource.new(
           key,
           value,
-          @schemas[value['methods']['get']['response']['$ref']]
+          @json['schemas'][value['methods']['get']['response']['$ref']]
         )
       end
     end
@@ -53,6 +72,5 @@ uri = URI(DISCOVERY_URL)
 response = Net::HTTP.get(uri)
 results = JSON.parse(response)
 
-res = Resources.new(results['resources'], results['schemas']).resources
-File.write('output.yaml', lines(compile_file({ results: results,
-                                               resources: res }, 'api.yaml.erb')))
+res = Product.new(results)
+File.write('output.yaml', lines(compile_file({product: res}, 'api.yaml.erb')))
