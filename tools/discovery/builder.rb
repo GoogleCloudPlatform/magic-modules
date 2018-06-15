@@ -8,12 +8,14 @@ include Compile::Core
 
 class Property
   attr_reader :name
-  def initialize(name, attributes)
+  def initialize(name, attributes, json)
     @name = name
     @attributes = attributes
+    @json = json
   end
 
   def type
+    return 'NestedObject' if @attributes["$ref"]
     @attributes['type'].capitalize
     rescue
       "Not yet Implemented"  
@@ -36,16 +38,24 @@ class Property
   rescue
     'none'
   end
+
+  def properties
+    # Get ref
+    @json['schemas'][@attributes['$ref']]['properties'].map do |arr|
+      Property.new(arr[0], arr[1], @json)
+    end
+  end
 end
 
 class Resource
   attr_accessor :schema
   attr_reader :properties
 
-  def initialize(name, resource, schema)
+  def initialize(name, resource, schema, json)
     @name = name
     @resource = resource
     @schema = schema
+    @json = json
 
     build_properties
   end
@@ -64,7 +74,7 @@ class Resource
 
   def build_properties
     @properties = @schema['properties'].map do |arr|
-      Property.new(arr[0], arr[1])
+      Property.new(arr[0], arr[1], @json)
     end
   end
 end
@@ -103,7 +113,8 @@ class Product
         Resource.new(
           key,
           value,
-          @json['schemas'][value['methods']['get']['response']['$ref']]
+          @json['schemas'][value['methods']['get']['response']['$ref']],
+          @json
         )
       end
     end

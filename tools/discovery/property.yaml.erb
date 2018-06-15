@@ -3,3 +3,9 @@
   description: <%= ctx[:prop].description %>
   required: <%= ctx[:prop].required %>
   output: <%= ctx[:prop].output %>
+<% if ctx[:prop].type == 'NestedObject' -%>
+  properties:
+<% ctx[:prop].properties.each do |nest_prop| -%>
+<%= lines(indent(compile_file({ prop: nest_prop }, 'property.yaml.erb'), 2)) -%>
+<% end -%>
+<% end -%>
