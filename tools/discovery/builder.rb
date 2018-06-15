@@ -4,8 +4,12 @@ require 'json'
 require 'erb'
 require 'compile/core'
 
+# rubocop:disable Style/MixinUsage
 include Compile::Core
+# rubocop:enable Style/MixinUsage
 
+
+# Represents a property on a resource
 class Property
   attr_reader :name
   def initialize(name, attributes, json)
@@ -15,10 +19,10 @@ class Property
   end
 
   def type
-    return 'NestedObject' if @attributes["$ref"]
+    return 'NestedObject' if @attributes['$ref']
     @attributes['type'].capitalize
-    rescue
-      "Not yet Implemented"  
+  rescue StandardError
+    'Not yet Implemented'
   end
 
   def description
@@ -28,14 +32,14 @@ class Property
   def required
     return 'true' if description.include? '[Required]'
     'false'
-  rescue
+  rescue StandardError
     'none'
   end
 
   def output
-    return 'true' if description.match /[Oo]utput.[Oo]nly/
+    return 'true' if description.match?(/[Oo]utput.[Oo]nly/)
     'false'
-  rescue
+  rescue StandardError
     'none'
   end
 
@@ -47,6 +51,7 @@ class Property
   end
 end
 
+# Resprents a GCP resource
 class Resource
   attr_accessor :schema
   attr_reader :properties
@@ -60,14 +65,12 @@ class Resource
     build_properties
   end
 
-  def name
-    @name
-  end
+  attr_reader :name
 
   def base_url
-      @resource['methods']['list']['path']
-    rescue
-      @resource['methods']['get']['path']
+    @resource['methods']['list']['path']
+  rescue StandardError
+    @resource['methods']['get']['path']
   end
 
   def virtual
@@ -84,6 +87,7 @@ class Resource
   end
 end
 
+# Represents a GCP product (a collection of products)
 class Product
   attr_reader :resources
 
@@ -114,22 +118,21 @@ class Product
   # Get all resources that have methods (are GCP resources)
   def build_resources
     @resources = @json['resources'].map do |key, value|
-      if @json['schemas'][value['methods']['get']['response']['$ref']]
-        Resource.new(
-          key,
-          value,
-          @json['schemas'][value['methods']['get']['response']['$ref']],
-          @json
-        )
-      end
+      next unless @json['schemas'][value['methods']['get']['response']['$ref']]
+      Resource.new(
+        key,
+        value,
+        @json['schemas'][value['methods']['get']['response']['$ref']],
+        @json
+      )
     end
   end
 end
 
-DISCOVERY_URL = 'https://www.googleapis.com/discovery/v1/apis/compute/v1/rest'
+DISCOVERY_URL = 'https://www.googleapis.com/discovery/v1/apis/compute/v1/rest'.freeze
 uri = URI(DISCOVERY_URL)
 response = Net::HTTP.get(uri)
 results = JSON.parse(response)
 
 res = Product.new(results)
-File.write('output.yaml', lines(compile_file({product: res}, 'api.yaml.erb')))
+File.write('output.yaml', lines(compile_file({ product: res }, 'api.yaml.erb')))
