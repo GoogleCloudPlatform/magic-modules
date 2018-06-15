@@ -33,7 +33,7 @@ class Property
   end
 
   def output
-    return 'true' if description.match /Output.only/
+    return 'true' if description.match /[Oo]utput.[Oo]nly/
     'false'
   rescue
     'none'
