@@ -2773,7 +2773,6 @@ objects:
           Provide this property when you create the subnetwork. For example,
           10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
           non-overlapping within a network. Only IPv4 is supported.
-        input: true
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
