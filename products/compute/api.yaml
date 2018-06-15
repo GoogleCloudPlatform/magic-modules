@@ -2825,6 +2825,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::String
               name: 'rangeName'
+              required: true
               description: |
                 The name associated with this subnetwork secondary range, used
                 when adding an alias IP range to a VM instance. The name must
