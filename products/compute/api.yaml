@@ -2801,13 +2801,13 @@ objects:
         description: |
           Whether to enable flow logging for this subnetwork.
         min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         description: |
-          Fingerprint of this resource. A hash of the contents stored in this
-          object. This field is used in optimistic locking. This field will
-          be ignored when inserting a Subnetwork. An up-to-date fingerprint
-          must be provided in order to update the Subnetwork.
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
         min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
@@ -2851,8 +2851,7 @@ objects:
         resource: 'Region'
         imports: 'name'
         description: |
-          URL of the region where the regional address resides.
-          This field is not applicable to global addresses.
+          URL of the GCP region for this subnetwork.
         required: true
         input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
