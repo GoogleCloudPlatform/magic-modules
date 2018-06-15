@@ -70,6 +70,11 @@ class Resource
       @resource['methods']['get']['path']
   end
 
+  def virtual
+    return 'true' if @resource['methods']['insert'].nil?
+    'false'
+  end
+
   private
 
   def build_properties
