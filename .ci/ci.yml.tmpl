@@ -274,6 +274,8 @@ jobs:
           params:
               submodules: [build/ansible]
           passed: [mm-generate]
+        - task: test
+          file: magic-modules/.ci/unit-tests/ansible.yml
 {% endif %}
     - name: puppet-test
       plan:
