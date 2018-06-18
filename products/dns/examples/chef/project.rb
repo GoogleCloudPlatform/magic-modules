@@ -28,7 +28,7 @@
 #
 # This important to ensure that your project quotas are set properly and avoid
 # discrepancies from it to fail in production.
-gdns_project <%= example_resource_name(ENV['PROJECT'] # ex: 'my-test-project') -%> do
+gdns_project <%= example_resource_name('google.com:graphite-playground') -%> do
   quota_managed_zones 10_000
   quota_total_rrdata_size_per_change 100_000
   project ENV['PROJECT'] # ex: 'my-test-project'
