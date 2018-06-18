@@ -228,8 +228,12 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 			<% if settable_properties.include? prop -%>
 				<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
 			if err != nil {
-				return err
-			} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) || d.HasChange("<%= Google::StringUtils.underscore(prop.name) -%>") {
+			return err
+			<% unless prop.send_empty_value -%>
+			} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+			<% else -%>
+			} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+			<% end -%>
 			<% if prop.update_statement -%>
 					obj["<%= prop.api_name -%>"] = <%= compile_template(prop.update_statement,
 																															prefix: resource_name,
