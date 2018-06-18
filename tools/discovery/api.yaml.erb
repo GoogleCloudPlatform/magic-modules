@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO(nelsonjr): Make all Zone and Region resource ref
-
 --- !ruby/object:Api::Product
 name: Google Cloud <%= ctx[:product].title %>
 prefix: g<%= ctx[:product].title.split[0].downcase %>
@@ -27,7 +25,9 @@ objects:
   - !ruby/object:Api::Resource
     name: '<%= object.name.capitalize %>'
     base_url: <%= object.base_url %>
-    virtual: <%= object.virtual %>
+<% if object.virtual -%>
+    virtual: true
+<% end -%>
     description: |
       <%= object.schema['description'] %>
     properties:
