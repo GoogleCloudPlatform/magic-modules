@@ -8,7 +8,6 @@ require 'compile/core'
 include Compile::Core
 # rubocop:enable Style/MixinUsage
 
-
 # Represents a property on a resource
 class Property
   attr_reader :name
@@ -120,6 +119,7 @@ class Product
   # NestedObjects
   # We need to build Resource objects from all objects that exist in resources
   # and exist in schemas (otherwise, we'll have a bunch of NestedObjects...)
+  # rubocop:disable Metrics/AbcSize
   def build_resources
     @resources = @json['resources'].map do |key, value|
       method = if value['methods']['get']
@@ -138,4 +138,5 @@ class Product
       )
     end
   end
+  # rubocop:enable Metrics/AbcSize
 end

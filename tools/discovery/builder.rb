@@ -15,10 +15,10 @@ options = {
 }
 
 OptionParser.new do |parser|
-  parser.on('-u', '--url URL', "The discovery URL being parsed") do |v|
+  parser.on('-u', '--url URL', 'The discovery URL being parsed') do |v|
     options[:url] = v
   end
-  parser.on('-o', '--output FILE', "Output file location") do |v|
+  parser.on('-o', '--output FILE', 'Output file location') do |v|
     options[:output] = v
   end
 end.parse!
@@ -30,4 +30,5 @@ response = Net::HTTP.get(uri)
 results = JSON.parse(response)
 
 res = Product.new(results)
-File.write(options[:output], lines(compile_file({ product: res }, 'api.yaml.erb')))
+File.write(options[:output],
+           lines(compile_file({ product: res }, 'api.yaml.erb')))
