@@ -131,4 +131,4 @@ ResourceRecordSet:
     custom:
       create: true
       delete: true
-  expectation_helpers: 'products/dns/helpers/expect_resource_set.rb.erb'
+  expectation_helpers: 'products/dns/helpers/ruby/expect_resource_set.rb.erb'
