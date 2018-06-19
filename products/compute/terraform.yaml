@@ -174,7 +174,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
     examples: |
       ```hcl
       resource "google_compute_forwarding_rule" "default" {
