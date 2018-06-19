@@ -469,13 +469,51 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: true
   Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
-    exclude: true
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      secondaryIpRanges: !ruby/object:Provider::Terraform::PropertyOverride
+        name: secondaryIpRange
+      secondaryIpRanges.rangeName: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      secondaryIpRanges.ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateIpCidrRange'
+      fingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        input: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/subnetwork.erb
+      resource_definition: templates/terraform/resource_definition/subnetwork.erb
+    examples: |
+      ```hcl
+        resource "google_compute_network" "custom-test" {
+          name                    = "test-network"
+          auto_create_subnetworks = false
+        }
+
+        resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
+          name          = "test-subnetwork"
+          ip_cidr_range = "10.2.0.0/16"
+          region        = "us-central1"
+          network       = "${google_compute_network.custom-test.self_link}"
+          secondary_ip_range {
+            range_name    = "tf-test-secondary-range-update1"
+            ip_cidr_range = "192.168.10.0/24"
+          }
+        }
+      ```
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl

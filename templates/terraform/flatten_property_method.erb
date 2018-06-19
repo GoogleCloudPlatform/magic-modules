@@ -31,6 +31,9 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   <% end -%>
   return []interface{}{transformed}
 <% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
+  if v == nil {
+    return v
+  }
   l := v.([]interface{})
   transformed := make([]interface{}, 0, len(l))
   for _, raw := range l {

@@ -2709,6 +2709,7 @@ objects:
     name: 'Subnetwork'
     kind: 'compute#subnetwork'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2755,15 +2756,12 @@ objects:
           An optional description of this resource. Provide this property when
           you create the resource. This field can be set only at resource
           creation time.
-      # TODO(nelsonjr): Update 'gatewayAddress' input:true vs. output:true
-      # depending on the resolution of http://b/63113897.
       - !ruby/object:Api::Type::String
         name: 'gatewayAddress'
         description: |
           The gateway address for default routes to reach destination addresses
-          outside this subnetwork. This field can be set only at resource
-          creation time.
-        input: true
+          outside this subnetwork.
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2775,7 +2773,9 @@ objects:
           Provide this property when you create the subnetwork. For example,
           10.0.0.0/8 or 192.168.0.0/16. Ranges must be unique and
           non-overlapping within a network. Only IPv4 is supported.
-        input: true
+        required: true
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/expandIpCidrRange'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2786,6 +2786,7 @@ objects:
           means the first character must be a lowercase letter, and all
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
+        required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
@@ -2794,20 +2795,74 @@ objects:
           The network this subnet belongs to.
           Only networks that are in the distributed mode can have subnetworks.
         input: true
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableFlowLogs'
+        description: |
+          Whether to enable flow logging for this subnetwork.
+        min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        send_empty_value: true
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
+        min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+      - !ruby/object:Api::Type::Array
+        name: 'secondaryIpRanges'
+        description: |
+          An array of configurations for secondary IP ranges for VM instances
+          contained in this subnetwork. The primary IP of such VM must belong
+          to the primary ipCidrRange of the subnetwork. The alias IPs may belong
+          to either primary or secondary ranges.
+        min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'rangeName'
+              required: true
+              description: |
+                The name associated with this subnetwork secondary range, used
+                when adding an alias IP range to a VM instance. The name must
+                be 1-63 characters long, and comply with RFC1035. The name
+                must be unique within the subnetwork.
+            - !ruby/object:Api::Type::String
+              name: 'ipCidrRange'
+              required: true
+              description: |
+                The range of IP addresses belonging to this subnetwork secondary
+                range. Provide this property when you create the subnetwork.
+                Ranges must be unique and non-overlapping with all primary and
+                secondary IP ranges within a network. Only IPv4 is supported.
       - !ruby/object:Api::Type::Boolean
         name: 'privateIpGoogleAccess'
         description: |
           Whether the VMs in this subnet can access Google services without
           assigned external IP addresses.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
         imports: 'name'
         description: |
-          URL of the region where the regional address resides.
-          This field is not applicable to global addresses.
+          URL of the GCP region for this subnetwork.
         required: true
         input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Private Google Access':
+          'https://cloud.google.com/vpc/docs/configure-private-google-access'
+        'Cloud Networking':
+          'https://cloud.google.com/vpc/docs/using-vpc'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
+
   - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
