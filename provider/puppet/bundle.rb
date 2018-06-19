@@ -20,7 +20,7 @@ module Provider
   # A provider to generate the "bundle" module.
   class PuppetBundle < Provider::Core
     # A manifest for the "bundle" module
-    class Manifest < Puppet::Manifest
+    class Manifest < Provider::Puppet::Manifest
       attr_reader :releases
 
       def validate
@@ -40,11 +40,10 @@ module Provider
 
       def validate
         check_property :manifest, Provider::PuppetBundle::Manifest
-        super
       end
     end
 
-    def generate(output_folder, _types)
+    def generate(output_folder, _types, _version_name)
       # Let's build all the dependencies off of the products we found on our
       # path and has the corresponding provider.yaml file
       generate_requirements
