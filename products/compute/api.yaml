@@ -989,6 +989,17 @@ objects:
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: 'networkTier'
+        description: |
+          The networking tier used for configuring this address. This field can
+          take the following values: PREMIUM or STANDARD. If this field is not
+          specified, it is assumed to be PREMIUM.
+        values:
+          - :PREMIUM
+          - :STANDARD
+        min_version: beta
+        input: true
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'

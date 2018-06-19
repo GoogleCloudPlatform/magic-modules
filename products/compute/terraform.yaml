@@ -208,6 +208,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       backendService: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+      networkTier: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      target: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+      ports: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
