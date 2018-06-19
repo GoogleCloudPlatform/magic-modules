@@ -18,17 +18,113 @@ PROVIDER_FOLDERS = {
   terraform: 'build/terraform'
 }.freeze
 
-# Give a list of all providers served by MM
-def provider_list
-  PROVIDER_FOLDERS.keys
+# Represents a list of tasks where each task acts upon all modules.
+class MMRakeTasks
+  def add_task(name, &block)
+    task_layout(name, &block)
+  end
+
+  private
+
+  def provider_list
+    PROVIDER_FOLDERS.keys
+  end
+
+  # Given a prefix, return all tasks under that prefix.
+  def all_tasks_for_prefix(prefix)
+    provider_list.map do |x|
+      all_tasks_for_provider_and_prefix(x, prefix)
+    end
+  end
+
+  # Given a provider and prefix give all tasks for that provider + prefix
+  def all_tasks_for_provider_and_prefix(prov, prefix = '')
+    modules_for_provider(prov).map { |x| "#{prefix}:#{prov}:#{x}" }
+  end
+
+  def modules_for_provider(provider)
+    products = File.join(File.dirname(__FILE__), '..', 'products')
+    files = Dir.glob("#{products}/**/#{provider}.yaml")
+    files.map do |file|
+      match = file.match(%r{^.*products\/([_a-z]*)\/.*yaml.*})
+      match&.captures&.at(0)
+    end.compact
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Style/EvalWithLocation
+  def task_layout(name, &block)
+    @self_before_instance_eval = eval 'self', block.binding
+    instance_eval do
+      # Compiling Tasks
+      desc "#{name.capitalize} all modules"
+      task :compile do
+        run_multiple_tasks(all_tasks_for_prefix(name).flatten)
+      end
+
+      namespace :compile do
+        provider_list.each do |provider|
+          # Each provider should default to compiling everything.
+          desc "Compile all modules for #{provider.capitalize}"
+          task provider.to_sym do
+            run_multiple_tasks(
+              all_tasks_for_provider_and_prefix(provider, name)
+            )
+          end
+
+          namespace provider.to_sym do
+            modules_for_provider(provider).each do |mod|
+              # Each module should have its own task for compiling.
+              desc [
+                "#{name.capitalize} the #{mod} module for",
+                provider.capitalize
+              ].join(' ')
+              task mod.to_sym do
+                yield(provider, mod)
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Style/EvalWithLocation
+
+  # rubocop:disable Style/MethodMissing
+  def method_missing(method, *args, &block)
+    @self_before_instance_eval.send method, *args, &block
+  end
+  # rubocop:enable Style/MethodMissing
 end
 
-# Give a list of all products served by a provider
-def modules_for_provider(provider)
-  products = File.join(File.dirname(__FILE__), '..', 'products')
-  files = Dir.glob("#{products}/**/#{provider}.yaml")
-  files.map do |file|
-    match = file.match(%r{^.*products\/([_a-z]*)\/.*yaml.*})
-    match&.captures&.at(0)
-  end.compact
+# Run multiple tasks in parallel and report back failures.
+def run_multiple_tasks(tasks)
+  @failures = []
+  tasks.map do |task|
+    Thread.new do
+      Rake::Task[task].invoke
+    rescue StandardError
+      @failures << task
+    end
+  end.map(&:join)
+  if @failures.empty?
+    puts 'Success!'
+  else
+    puts '##################################'
+    puts '#          FAILURES              #'
+    puts '##################################'
+    puts @failures.join("\n").to_s
+  end
 end
+
+# rubocop:disable Style/CommandLiteral
+# rubocop:disable Style/SpecialGlobalVars
+def run_command(command)
+  `#{command}`
+  raise 'Failed' if $?.exitstatus != 0
+end
+# rubocop:enable Style/CommandLiteral
+# rubocop:enable Style/SpecialGlobalVars
