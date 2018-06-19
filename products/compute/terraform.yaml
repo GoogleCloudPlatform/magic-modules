@@ -215,6 +215,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       ports: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true
         custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl

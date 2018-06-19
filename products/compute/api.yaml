@@ -989,6 +989,14 @@ objects:
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         min_version: beta
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
+        update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
