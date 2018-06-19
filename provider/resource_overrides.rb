@@ -107,7 +107,13 @@ module Provider
     end
 
     def override_properties(api_object, override)
-      override.properties.each do |property_path, property_override|
+      # We apply property overrides in reverse order of level of nesting.
+      # This helps us avoid a problem where we change the name of a property
+      # before we have applied the overrides to its child properties (and
+      # therefore can no longer find the child property, since the
+      # parent name has changed)
+      sorted_props = override.properties.sort_by { |path, _| -path.count('.') }
+      sorted_props.each do |property_path, property_override|
         check_property_value "properties['#{property_path}']",
                              property_override, Provider::PropertyOverride
         api_property = find_property api_object, property_path.split('.')
