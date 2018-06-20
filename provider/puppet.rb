@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'google/ruby_utils'
 require 'google/hash_utils'
 require 'google/string_utils'
 require 'provider/config'
@@ -31,6 +32,7 @@ module Provider
     BOLT_UNDEF_MAGIC = '<-undef->'.freeze
 
     include Provider::Puppet::Codegen
+    include Google::RubyUtils
 
     # Settings for the provider
     class Config < Provider::Config
@@ -204,10 +206,15 @@ module Provider
     end
 
     def property_body(property)
-      prop_generator = property_map.select { |type, _| property.class <= type }
-      raise "Unknown property type: #{property}" if prop_generator.empty?
-      body = prop_generator.values[0].call(property)
-      "#{body}\n" unless body.nil?
+      lines(
+        indent([
+          (['newvalue(:true)', 'newvalue(:false)'] \
+           if property.is_a? Api::Type::Boolean),
+          (generate_enum_body(property) if property.is_a? Api::Type::Enum),
+          ("defaultto #{ruby_literal(property.default_value)}" \
+         if property.default_value)
+        ].compact.flatten, 4)
+      )
     end
 
     def format_description(object, spaces, container, suffix = '')
@@ -439,27 +446,8 @@ module Provider
       }
     end
 
-    def property_map
-      {
-        Api::Type::Array => ->(_) {},
-        Api::Type::Boolean => method(:generate_boolean_body),
-        Api::Type::Double => ->(_) {},
-        Api::Type::Enum => method(:generate_enum_body),
-        Api::Type::Integer => ->(_) {},
-        Api::Type::NameValues => ->(_) {},
-        Api::Type::NestedObject => ->(_) {},
-        Api::Type::ResourceRef => ->(_) {},
-        Api::Type::String => ->(_) {},
-        Api::Type::Time => ->(_) {}
-      }
-    end
-
-    def generate_boolean_body(_property)
-      indent(['newvalue(:true)', 'newvalue(:false)'], 4)
-    end
-
     def generate_enum_body(property)
-      indent(property.values.collect do |value|
+      property.values.collect do |value|
         if value.is_a?(Symbol)
           "newvalue(:#{value})"
         elsif value.is_a?(String)
@@ -467,7 +455,7 @@ module Provider
         else
           "#{value.class}newvalue(#{value})"
         end
-      end, 4)
+      end
     end
 
     def google_lib_basic(file, product_ns)
