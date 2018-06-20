@@ -29,6 +29,11 @@ manifest: !ruby/object:Provider::Puppet::Manifest
       versions: '>= 0.2.0 < 0.3.0'
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
+overrides: !ruby/object:Provider::ResourceOverrides
+  DefaultObjectACL: !ruby/object:Provider::Puppet::ResourceOverride
+    properties:
+      bucket: !ruby/object:Provider::Puppet::PropertyOverride
+        input: true
 bolt_tasks:
   - !ruby/object:Provider::Puppet::BoltTask
     name: 'upload'
