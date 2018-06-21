@@ -103,8 +103,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Region cannot be edited' if @dirty
   # Not yet implemented.
-  TargetVpnGateway: !ruby/object:Provider::Puppet::ResourceOverride
-    exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
 functions:
@@ -543,11 +541,13 @@ examples: !ruby/object:Api::Resource::HashArray
   TargetSslProxy:
     - delete_target_ssl_proxy.pp
     - target_ssl_proxy.pp
-  # TargetVpnGateway
+  TargetVpnGateway:
+    - target_vpn_gateway.pp
   UrlMap:
     - delete_url_map.pp
     - url_map.pp
-  # VpnTunnel
+  VpnTunnel:
+    - vpn_tunnel.pp
   # ZoneOperation -- not useful for state convergence
   Zone:
     - zone.pp

@@ -72,8 +72,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   # Not yet implemented.
   SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
-  TargetVpnGateway: !ruby/object:Provider::Chef::ResourceOverride
-    exclude: true
 examples: !ruby/object:Api::Resource::HashArray
   Address:
     - address.rb
@@ -162,9 +160,13 @@ examples: !ruby/object:Api::Resource::HashArray
   TargetTcpProxy:
     - delete_target_tcp_proxy.rb
     - target_tcp_proxy.rb
+  TargetVpnGateway:
+    - target_vpn_gateway.rb
   UrlMap:
     - delete_url_map.rb
     - url_map.rb
+  VpnTunnel:
+    - vpn_tunnel.rb
   Zone:
     - zone.rb
 files: !ruby/object:Provider::Config::Files
