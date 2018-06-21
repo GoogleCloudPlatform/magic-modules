@@ -3545,7 +3545,7 @@ objects:
         resource: 'Region'
         imports: 'selfLink'
         description: 'The region where the tunnel is located.'
-        output: true
+        required: true
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -3586,11 +3586,13 @@ objects:
         name: 'peerIp'
         description: |
           IP address of the peer VPN gateway. Only IPv4 is supported.
+        required: true
       - !ruby/object:Api::Type::String
         name: 'sharedSecret'
         description: |
           Shared secret used to set the secure session between the Cloud VPN
           gateway and the peer VPN gateway.
+        required: true
       - !ruby/object:Api::Type::String
         name: 'sharedSecretHash'
         description: |

@@ -911,6 +911,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       targetVpnGateway: !ruby/object:Provider::Terraform::PropertyOverride
         resource: 'VpnGateway'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/vpn_tunnel.erb
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
 # This is for a list of example files.
