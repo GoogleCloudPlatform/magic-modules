@@ -97,15 +97,18 @@ module Dependencies
       # % 3 because only 3 different network test data files per Resource
       @graph.add_ref(prop, seed % 3)
 
+      # Because this is testing, we're always going to use the first
+      # ResourceRef in a list of ResourceRefs.
+
       # Recurse through referenced object for more resourcerefs
       # Don't recurse on resourceref of same type.
-      return if prop.resource_ref == prop.__resource
+      return if prop.resources[0].resource_ref == prop.resources[0].__resource
 
       # When building resourcerefs in manifests/catalogs, we use the
       # smallest set of properties possible. When looking recursively, we
       # should only look through this smallest set of properties. Otherwise,
       # recursive resource refs may be created that do not get referenced.
-      collect_refs(prop.resource_ref.required_properties,
+      collect_refs(prop.resources[0].resource_ref.required_properties,
                    :name, seed, {})
     end
 

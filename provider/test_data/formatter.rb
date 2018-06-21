@@ -121,7 +121,7 @@ module Provider
 
       # Returns the title of the block being referenced
       def emit_resource(prop, seed, _ctx)
-        name = Google::StringUtils.underscore(prop.resource_ref.name)
+        name = Google::StringUtils.underscore(prop.resources[0].resource_ref.name)
         "resource(#{name},#{seed % MAX_ARRAY_SIZE})"
       end
 

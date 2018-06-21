@@ -154,7 +154,8 @@ module Provider
       end
 
       def resource_value(prop, seed)
-        name = Google::StringUtils.underscore(prop.resource_ref.name)
+        # Always use the first in the list for testing purposes.
+        name = Google::StringUtils.underscore(prop.resources[0].resource_ref.name)
         "'resource(#{name},#{seed})'"
       end
 
