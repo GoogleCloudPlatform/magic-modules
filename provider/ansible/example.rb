@@ -125,22 +125,23 @@ module Provider
         verb = verbs[state.to_sym]
         number = state == 'present' ? 1 : 0
         module_name = ["gcp_#{object.__product.prefix[1..-1]}",
-         Google::StringUtils.underscore(object.name), 'facts'].join('_')
+                       Google::StringUtils.underscore(object.name),
+                       'facts'].join('_')
         [
           "- name: verify that #{obj_name} was #{verb}",
           indent([
             "#{module_name}:",
             indent([
-              'filters:',
-              '   - name = "{{ resource_name }}"',
-              @parameters.map { |k, v| "#{k}: #{v}" },
-              'project: "{{ gcp_project }}"',
-              'auth_kind: "{{ gcp_cred_kind }}"',
-              'service_account_file: "{{ gcp_cred_file }}"',
-              'scopes:',
-              "  - #{object.__product.scopes[0]}",
-            ], 4),
-            "register: results"
+                     'filters:',
+                     '   - name = "{{ resource_name }}"',
+                     @parameters.map { |k, v| "#{k}: #{v}" },
+                     'project: "{{ gcp_project }}"',
+                     'auth_kind: "{{ gcp_cred_kind }}"',
+                     'service_account_file: "{{ gcp_cred_file }}"',
+                     'scopes:',
+                     "  - #{object.__product.scopes[0]}"
+                   ], 4),
+            'register: results'
           ].flatten.compact, 2),
 
           '- name: verify that command succeeded',
@@ -161,7 +162,6 @@ module Provider
         }
       end
     end
-
 
     # A gcloud command failing is not enough to verify that a resource does not
     # exist
