@@ -328,8 +328,13 @@ module Api
       attr_reader :resources
 
       def validate
+        super
+        @name = @resource if @name.nil?
+        @description = "A reference to #{@resource} resource" \
+          if @description.nil?
+
         @resources = @resources.map do |hash|
-          IndividualResourceRef.new(hash['resource'], hash['imports'])
+          IndividualResourceRef.new(hash)
         end
 
         @resources.each do |p|
@@ -339,6 +344,15 @@ module Api
 
         @resources.each { |res| res.validate }
       end
+
+      def out_type
+        if resources.length > 1
+          "multi_#{@resources[0].resource_ref.out_name}"
+        else
+          @resources[0].resource_ref.out_name
+        end
+      end
+
     end
 
     # An structured object composed of other objects.
@@ -427,23 +441,15 @@ module Api
       attr_reader :resource
       attr_reader :imports
 
-      def initialize(resource, imports)
-        raise "No resource given" unless resource
-        raise "No imports given" unless imports
-        @resource = resource
-        @imports = imports
-      end
-
-      def out_type
-        resource_ref.out_name
+      def initialize(hash)
+        raise "No resource given" unless hash['resource']
+        raise "No imports given" unless hash['imports']
+        hash.each do |key, value|
+          instance_variable_set("@#{key}", value)
+        end
       end
 
       def validate
-        super
-        @name = @resource if @name.nil?
-        @description = "A reference to #{@resource} resource" \
-          if @description.nil?
-
         return if @__resource.nil? || @__resource.exclude || @exclude
 
         check_property :resource, ::String
