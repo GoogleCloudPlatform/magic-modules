@@ -40,7 +40,7 @@
              required: true
            - !ruby/object:Api::Type::ResourceRef
              name: 'natIP'
-              resources:
+             resources:
                - resource: 'Address'
                  imports: 'address'
              description: |
