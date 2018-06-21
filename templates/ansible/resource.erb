@@ -101,6 +101,9 @@ def main():
         )
     )
 
+    if not module.params['scopes']:
+        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
+
     state = module.params['state']
 <% if object.kind? -%>
     kind = <%= lines(quote_string(object.kind)) -%>
