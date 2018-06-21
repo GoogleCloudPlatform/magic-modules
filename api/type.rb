@@ -325,75 +325,19 @@ module Api
 
     # Represents a reference to another resource
     class ResourceRef < Type
-      ALLOWED_WITHOUT_PROPERTY = [SelfLink::EXPORT_KEY].freeze
-
-      attr_reader :resource
-      attr_reader :imports
-
-      def out_type
-        resource_ref.out_name
-      end
+      attr_reader :resources
 
       def validate
-        super
-        @name = @resource if @name.nil?
-        @description = "A reference to #{@resource} resource" \
-          if @description.nil?
+        @resources = @resources.map do |hash|
+          IndividualResourceRef.new(hash['resource'], hash['imports'])
+        end
 
-        return if @__resource.nil? || @__resource.exclude || @exclude
+        @resources.each do |p|
+          p.set_variable(@__resource, :__resource)
+          p.set_variable(self, :__parent)
+        end
 
-        check_property :resource, ::String
-        check_property :imports, ::String
-        check_resource_ref_exists
-        check_resource_ref_property_exists
-      end
-
-      def property
-        props = resource_ref.exported_properties
-                            .select { |prop| prop.name == @imports }
-        return props.first unless props.empty?
-        raise "#{@imports} does not exist on #{@resource}" if props.empty?
-      end
-
-      def resource_ref
-        product = @__resource.__product
-        resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Unknown item type '#{@resource}'" if resources.empty?
-        resources[0]
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@resource, @imports, 'Ref']
-        shrink_type_name(type)
-      end
-
-      def property_type
-        property_class.join('::')
-      end
-
-      def property_file
-        File.join('google', @__resource.__product.prefix[1..-1], 'property',
-                  "#{resource}_#{@imports}").downcase
-      end
-
-      def requires
-        [property_file]
-      end
-
-      private
-
-      def check_resource_ref_exists
-        product = @__resource.__product
-        resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Missing '#{@resource}'" \
-          if resources.empty? || resources[0].exclude
-      end
-
-      def check_resource_ref_property_exists
-        exported_props = resource_ref.exported_properties
-        raise "'#{@imports}' does not exist on '#{@resource}'" \
-          if exported_props.none? { |p| p.name == @imports }
+        @resources.each { |res| res.validate }
       end
     end
 
@@ -474,6 +418,89 @@ module Api
         'Property'
       ]
     end
+
+    private
+
+    class IndividualResourceRef < Type
+      ALLOWED_WITHOUT_PROPERTY = [SelfLink::EXPORT_KEY].freeze
+
+      attr_reader :resource
+      attr_reader :imports
+
+      def initialize(resource, imports)
+        raise "No resource given" unless resource
+        raise "No imports given" unless imports
+        @resource = resource
+        @imports = imports
+      end
+
+      def out_type
+        resource_ref.out_name
+      end
+
+      def validate
+        super
+        @name = @resource if @name.nil?
+        @description = "A reference to #{@resource} resource" \
+          if @description.nil?
+
+        return if @__resource.nil? || @__resource.exclude || @exclude
+
+        check_property :resource, ::String
+        check_property :imports, ::String
+        check_resource_ref_exists
+        check_resource_ref_property_exists
+      end
+
+      def property
+        props = resource_ref.exported_properties
+                            .select { |prop| prop.name == @imports }
+        return props.first unless props.empty?
+        raise "#{@imports} does not exist on #{@resource}" if props.empty?
+      end
+
+      def resource_ref
+        product = @__resource.__product
+        resources = product.objects.select { |obj| obj.name == @resource }
+        raise "Unknown item type '#{@resource}'" if resources.empty?
+        resources[0]
+      end
+
+      def property_class
+        type = property_ns_prefix
+        type << [@resource, @imports, 'Ref']
+        shrink_type_name(type)
+      end
+
+      def property_type
+        property_class.join('::')
+      end
+
+      def property_file
+        File.join('google', @__resource.__product.prefix[1..-1], 'property',
+                  "#{resource}_#{@imports}").downcase
+      end
+
+      def requires
+        [property_file]
+      end
+
+      private
+
+      def check_resource_ref_exists
+        product = @__resource.__product
+        resources = product.objects.select { |obj| obj.name == @resource }
+        raise "Missing '#{@resource}'" \
+          if resources.empty? || resources[0].exclude
+      end
+
+      def check_resource_ref_property_exists
+        exported_props = resource_ref.exported_properties
+        raise "'#{@imports}' does not exist on '#{@resource}'" \
+          if exported_props.none? { |p| p.name == @imports }
+      end
+    end
+
   end
   # rubocop:enable Metrics/ClassLength
 end
