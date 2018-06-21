@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
 require 'provider/chef/manifest'
@@ -24,6 +25,8 @@ module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
   # resources.
   class Chef < Provider::Core
+    include Google::RubyUtils
+
     RESERVED_WORDS = %w[deprecated updated].freeze
     TEST_FOLDER = 'recipes'.freeze
 
