@@ -53,6 +53,7 @@ module Google
     prop_name = "property :#{label_name(object)}" if prop.out_name == 'name'
     prop_attrs = [
       ('name_property: true' if prop.out_name == 'name'),
+      ("default: #{ruby_literal(prop.default_value)}" if prop.default_value),
       'desired_state: true'
     ].compact
 -%>
