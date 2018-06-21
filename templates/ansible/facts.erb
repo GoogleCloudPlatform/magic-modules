@@ -63,8 +63,12 @@ def main():
     )
 
     items = fetch_list(module, collection(module), query_options(module.params['filters']))
+    if items.get('items'):
+        items = items.get('items')  
+    else:
+        items = []
     return_value = {
-      'items': items['items']
+      'items': items
     }
     module.exit_json(**return_value)
 
