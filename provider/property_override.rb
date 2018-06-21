@@ -19,6 +19,10 @@ module Provider
   # TODO(rosbo): Shared common logic with ResourceOverride via a base class.
   class PropertyOverride < Api::Object
     include Api::Type::Fields
+    # To allow overrides for type-specific fields, include those type's
+    # fields with an 'include' directive here.
+    include Api::Type::NameValues::Fields
+    include Api::Type::ResourceRef::Fields
 
     # Apply this override to property inheriting from Api::Type
     def apply(api_property)
@@ -62,15 +66,15 @@ module Provider
     # Returns all modules that contain overridable properties.
     def our_override_modules
       self.class.included_modules.select do |mod|
-        mod == Api::Type::Fields \
+        [Api::Type::Fields,
+         Api::Type::NameValues::Fields,
+         Api::Type::ResourceRef::Fields].include?(mod) \
           || mod.name.split(':').last == 'OverrideFields'
       end
     end
 
     # Ensures that Api::Type includes a module.
     def require_module(clazz)
-      raise "Api::Type did not include required #{clazz} module" \
-        unless Api::Type.included_modules.include?(clazz)
       raise "#{self.class} did not include required #{clazz} module" \
         unless self.class.included_modules.include?(clazz)
     end
