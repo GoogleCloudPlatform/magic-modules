@@ -66,8 +66,9 @@ objects:
           segment of the name must be between 6 and 30 characters in length.
       - !ruby/object:Api::Type::ResourceRef
         name: 'config'
-        resource: 'InstanceConfig'
-        imports: 'name'
+        resources:
+          - resource: 'InstanceConfig'
+            imports: 'name'
         description: 'A reference to the instance configuration.'
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -120,8 +121,9 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
-        resource: 'Instance'
-        imports: 'name'
+        resources:
+          - resource: 'Instance'
+            imports: 'name'
         description: 'The instance to create the database on.'
         required: true
     properties:

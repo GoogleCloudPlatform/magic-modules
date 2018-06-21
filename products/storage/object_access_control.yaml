@@ -13,8 +13,9 @@
 
 - !ruby/object:Api::Type::ResourceRef
   name: 'bucket'
-  resource: 'Bucket'
-  imports: 'name'
+  resources:
+    - resource: 'Bucket'
+      imports: 'name'
   description: 'The name of the bucket.'
   required: true
 - !ruby/object:Api::Type::String

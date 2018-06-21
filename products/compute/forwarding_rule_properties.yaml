@@ -82,8 +82,9 @@
   # to a RegionBackendService for a ForwardingRule and to a BackendService
   # for a GlobalForwardingRule.
   name: 'backendService'
-  resource: 'BackendService'
-  imports: 'selfLink'
+  resources:
+    - resource: 'BackendService'
+      imports: 'selfLink'
   description: |
     A reference to a BackendService to receive the matched traffic.
 
@@ -122,8 +123,9 @@
   required: true
 - !ruby/object:Api::Type::ResourceRef
   name: 'network'
-  resource: 'Network'
-  imports: 'selfLink'
+  resources:
+    - resource: 'Network'
+      imports: 'selfLink'
   description: |
     For internal load balancing, this field identifies the network that
     the load balanced IP should belong to for this Forwarding Rule. If
@@ -172,8 +174,9 @@
   item_type: Api::Type::String
 - !ruby/object:Api::Type::ResourceRef
   name: 'subnetwork'
-  resource: 'Subnetwork'
-  imports: 'selfLink'
+  resources:
+    - resource: 'Subnetwork'
+      imports: 'selfLink'
   description: |
     A reference to a subnetwork.
 

@@ -336,8 +336,9 @@ objects:
         description: |
           The name of the Cloud SQL instance. This does not include the project
           ID.
-        resource: 'Instance'
-        imports: 'name'
+        resources:
+          - resource: 'Instance'
+            imports: 'name'
         required: true
     properties:
       - !ruby/object:Api::Type::String
@@ -373,8 +374,9 @@ objects:
         description: |
           The name of the Cloud SQL instance. This does not include the project
           ID.
-        resource: 'Instance'
-        imports: 'name'
+        resources:
+          - resource: 'Instance'
+            imports: 'name'
         required: true
       - !ruby/object:Api::Type::String
         name: 'password'
@@ -414,8 +416,9 @@ objects:
         description: |
           The name of the Cloud SQL instance. This does not include the project
           ID.
-        resource: 'Instance'
-        imports: 'name'
+        resources:
+          - resource: 'Instance'
+            imports: 'name'
         required: true
       - !ruby/object:Api::Type::String
         name: 'sha1Fingerprint'

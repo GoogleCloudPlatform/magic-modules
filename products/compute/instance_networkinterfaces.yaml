@@ -40,8 +40,9 @@
              required: true
            - !ruby/object:Api::Type::ResourceRef
              name: 'natIP'
-             resource: 'Address'
-             imports: 'address'
+              resources:
+               - resource: 'Address'
+                 imports: 'address'
              description: |
                Specifies the title of a gcompute_address.
                An external IP address associated with this instance.
@@ -92,8 +93,9 @@
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
-        resource: 'Network'
-        imports: 'selfLink'
+        resources:
+          - resource: 'Network'
+            imports: 'selfLink'
         description: |
           Specifies the title of an existing gcompute_network.  When creating
           an instance, if neither the network nor the subnetwork is specified,
@@ -109,8 +111,9 @@
           system.
       - !ruby/object:Api::Type::ResourceRef
         name: 'subnetwork'
-        resource: 'Subnetwork'
-        imports: 'selfLink'
+        resources:
+          - resource: 'Subnetwork'
+            imports: 'selfLink'
         description: |
           Reference to a gcompute_subnetwork resource.
           If the network resource is in legacy mode, do not

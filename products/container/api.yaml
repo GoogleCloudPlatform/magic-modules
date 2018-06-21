@@ -288,8 +288,9 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'
-        resource: 'Cluster'
-        imports: 'name'
+        resources:
+          - resource: 'Cluster'
+            imports: 'name'
         description: 'The cluster this node pool belongs to.'
         required: true
       - !ruby/object:Api::Type::String
@@ -387,8 +388,9 @@ objects:
         required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'
-        resource: 'Cluster'
-        imports: 'name'
+        resources:
+          - resource: 'Cluster'
+            imports: 'name'
         description: 'A reference to Cluster resource'
         required: true
       # TODO(nelsonjr): Make 'zone' a ResourceRef once cross-module references

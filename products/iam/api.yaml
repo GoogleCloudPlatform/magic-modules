@@ -68,8 +68,9 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: serviceAccount
         description: The name of the serviceAccount.
-        resource: ServiceAccount
-        imports: name
+        resources:
+          - resource: ServiceAccount
+            imports: name
       # A non-API property to allow writing results to a specific output file.
       - !ruby/object:Api::Type::String
         name: path

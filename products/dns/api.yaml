@@ -159,8 +159,9 @@ objects:
           Identifies the managed zone addressed by this request.
           Can be the managed zone name or id.
         required: true
-        resource: 'ManagedZone'
-        imports: 'name'
+        resources:
+          - resource: 'ManagedZone'
+            imports: 'name'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

@@ -50,8 +50,9 @@ objects:
         description: 'Name of the subscription.'
       - !ruby/object:Api::Type::ResourceRef
         name: 'topic'
-        resource: 'Topic'
-        imports: 'name'
+        resources:
+          - resource: 'Topic'
+            imports: 'name'
         description: |
           A reference to a Topic resource.
       - !ruby/object:Api::Type::NestedObject
