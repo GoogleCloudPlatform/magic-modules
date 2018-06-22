@@ -91,7 +91,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 	if err != nil {
 		return err
 	<% unless prop.send_empty_value -%>
-	} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+	} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 	<% else -%>
 	} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 	<% end -%>
