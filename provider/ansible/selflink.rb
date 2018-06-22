@@ -28,14 +28,16 @@ module Provider
     module SelfLink
       # Returns all rrefs that are virtual and require selflinks.
       def virtual_selflink_rrefs(object)
-        object.all_resourcerefs
-              .select { |prop| prop.resource_ref.virtual }
-              .select { |prop| prop.imports == 'selfLink' }
+        resourcerefs_for_properties(object.all_user_properties,
+                                    object,
+                                    virtual: 'only')
+        .select { |prop| prop.resources.first.imports == 'selfLink' }
       end
 
       # Build out functions that will check + create selflinks.
       def selflink_functions(object)
-        virtuals = virtual_selflink_rrefs(object).map(&:resource_ref)
+        virtuals = virtual_selflink_rrefs(object).map { |x| x.resources.first }
+                                                 .map(&:resource_ref)
                                                  .uniq
         virtuals.map do |virt|
           if virt == virtuals.last
