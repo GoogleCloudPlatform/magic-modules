@@ -13,10 +13,14 @@
 # limitations under the License.
 <% end -%>
 <%# Requires: none -%>
-<% object.all_resourcerefs.each do |ref| -%>
 <%
-  prop_ref = ref.resource_ref
-  ref_underscore_name = Google::StringUtils.underscore(ref.resource)
+  test_resourcerefs_for_properties(object.all_user_properties,
+                                   object).each do |ref|
+-%>
+<%
+  prop_ref = ref.resources.first.resource_ref
+  ref_underscore_name = Google::StringUtils.underscore(ref.resources
+                                                          .first.resource)
 -%>
 def expand_variables_<%= ref_underscore_name -%>(template, data, ext_dat = {})
 <% prefix = object.__product.prefix.upcase -%>

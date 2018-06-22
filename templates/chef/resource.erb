@@ -428,13 +428,6 @@ module Google
 <% end # object&.handlers&.update.nil? -%>
           end
         end
-<% unless object.all_resourcerefs.empty? -%>
-
-        def self.fetch_export(resource, type, id, property)
-          return if id.nil?
-          resource.resources("#{type}[#{id}]").exports[property]
-        end
-<% end # object.exports.nil? -%>
 
 <%
   all_properties = object.all_user_properties

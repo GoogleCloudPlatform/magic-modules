@@ -20,12 +20,14 @@ require 'provider/chef/resource_override'
 require 'provider/chef/test_catalog'
 require 'provider/chef/resource_override'
 require 'provider/chef/property_override'
+require 'provider/test_data/utils'
 
 module Provider
   # Code generator for Chef Cookbooks that manage Google Cloud Platform
   # resources.
   class Chef < Provider::Core
     include Google::RubyUtils
+    include Provider::TestData::TestUtils
 
     RESERVED_WORDS = %w[deprecated updated].freeze
     TEST_FOLDER = 'recipes'.freeze
@@ -128,9 +130,10 @@ module Provider
     # ChefSpec requires this list to include all ResourceRefs
     # rubocop:disable Metrics/AbcSize
     def step_into_list(object, indent, start_indent)
-      steps = [object.out_name].concat(object.all_resourcerefs
-                                             .map(&:resource_ref)
-                                             .map(&:out_name).reverse).uniq
+      props = test_resourcerefs_for_properties(object.all_user_properties,
+                                               object)
+      refs = props.map { |x| x.resources.first.resource_ref }
+      steps = [object.out_name].concat(refs.map(&:out_name).reverse).uniq
 
       return indent("step_into: '#{steps[0]}',", indent) if steps.length == 1
 
