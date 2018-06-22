@@ -83,7 +83,10 @@ module Google
           options = {
 <%=
   indent_list(
-    property.resources.map { |x| ":#{x.resource_ref.out_name}: #{x.imports}" },
+    property.resources.map do |x|
+      imports = Google::StringUtils.underscore(x.imports)
+      "#{x.resource_ref.out_name}: #{imports}"
+    end,
     2
   )
 -%>
@@ -96,7 +99,7 @@ module Google
 <% else -%>
 <%
   out_name = property.resources.first.resource_ref.out_name
-  imports = property.resources.first.imports
+  imports = Google::StringUtils.underscore(property.resources.first.imports)
 -%>
 <%=
   lines(format(
@@ -114,6 +117,7 @@ module Google
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
         end
       end
+
       # A class to manage a JSON blob from GCP API
       # Will immediately return value from JSON blob without changes
 <%=

@@ -84,9 +84,9 @@ module Provider
         list = p.resources.first(p.resources.first - 1).map do |x|
           x.resource_ref.out_name
         end.join(' ,')
-        "reference to #{list} and #{p.resources.last.resource_ref.out_name}"
+        "reference to #{list} or #{p.resources.last.resource_ref.out_name}"
       else
-        "reference to #{p.resources.first.resource_ref.out_name}"
+        "reference to a #{p.resources.first.resource_ref.out_name}"
       end
     end
 
