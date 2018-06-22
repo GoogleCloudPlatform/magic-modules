@@ -136,7 +136,7 @@ module Provider
             "#{quote_string(prop.resources.first.imports)})"
           ].join
         elsif prop.is_a?(Api::Type::ResourceRef) && \
-              prop.resources.first.resource_ref.virtual && prop.resources.first.resource_ref.imports == 'selfLink'
+              prop.resources.first.resource_ref.virtual && prop.resources.first.imports == 'selfLink'
           func_name = Google::StringUtils.underscore("#{prop.name}_selflink")
           [
             "#{func_name}(#{hash_name}.get(#{quote_string(prop.out_name)}),",

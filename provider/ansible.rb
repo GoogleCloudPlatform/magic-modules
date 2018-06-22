@@ -335,9 +335,9 @@ module Provider
             # We want to avoid a circular reference
             # This reference may be the
             # next reference or have some number of refs in between it.
-            next if p.resources[0].resource_ref == original_obj
-            next if p.resources[0].resource_ref == p.resources[0].__resource
-            if p.resources[0].resource_ref.virtual
+            next if p.resources.first.resource_ref == original_obj
+            next if p.resources.first.resource_ref == p.resources.first.__resource
+            if p.resources.first.resource_ref.virtual
               next if kwargs[:virtual] == 'exclude'
             else
               next if kwargs[:virtual] == 'only'
@@ -345,19 +345,22 @@ module Provider
             rrefs << p
             rrefs.concat(resourcerefs_for_properties(
                            p.resources[0].resource_ref.required_properties,
-                           original_obj
+                           original_obj,
+                           virtual: kwargs[:virtual]
             ))
           elsif p.is_a? Api::Type::NestedObject
             rrefs.concat(resourcerefs_for_properties(p.properties,
-                                                          original_obj))
+                                                          original_obj,
+                                                          virtual: kwargs[:virtual]))
           elsif p.is_a? Api::Type::Array
             if p.item_type.is_a? Api::Type::NestedObject
               rrefs.concat(resourcerefs_for_properties(
                              p.item_type.properties,
-                             original_obj
+                             original_obj,
+                             virtual: kwargs[:virtual]
               ))
             elsif p.item_type.is_a? Api::Type::ResourceRef
-              if p.item_type.resources[0].resource_ref.virtual
+              if p.item_type.resources.first.resource_ref.virtual
                 next if kwargs[:virtual] == 'exclude'
               else
                 next if kwargs[:virtual] == 'only'
@@ -366,7 +369,8 @@ module Provider
               rrefs.concat(resourcerefs_for_properties(
                              p.item_type.resources[0].resource_ref
                                                      .required_properties,
-                             original_obj
+                             original_obj,
+                             virtual: kwargs[:virtual]
               ))
             end
           end
