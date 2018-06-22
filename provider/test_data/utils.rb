@@ -26,6 +26,8 @@ module Provider
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/BlockLength
       def test_resourcerefs_for_properties(props, original_obj)
         rrefs = []
         props.each do |p|
@@ -34,25 +36,31 @@ module Provider
           # infinite loop.
           if p.is_a? Api::Type::ResourceRef
             # We want to avoid a circular reference
-            # This reference may be the next reference or have some number of refs
-            # in between it.
+            # This reference may be the
+            # next reference or have some number of refs in between it.
             next if p.resources[0].resource_ref == original_obj
             next if p.resources[0].resource_ref == p.resources[0].__resource
             rrefs << p
-            rrefs.concat(test_resourcerefs_for_properties(p.resources[0].resource_ref
-                                                      .required_properties,
-                                                     original_obj))
+            rrefs.concat(test_resourcerefs_for_properties(
+                           p.resources[0].resource_ref.required_properties,
+                           original_obj
+            ))
           elsif p.is_a? Api::Type::NestedObject
-            rrefs.concat(test_resourcerefs_for_properties(p.properties, original_obj))
+            rrefs.concat(test_resourcerefs_for_properties(p.properties,
+                                                          original_obj))
           elsif p.is_a? Api::Type::Array
             if p.item_type.is_a? Api::Type::NestedObject
-              rrefs.concat(test_resourcerefs_for_properties(p.item_type.properties,
-                                                       original_obj))
+              rrefs.concat(test_resourcerefs_for_properties(
+                             p.item_type.properties,
+                             original_obj
+              ))
             elsif p.item_type.is_a? Api::Type::ResourceRef
               rrefs << p.item_type
-              rrefs.concat(test_resourcerefs_for_properties(p.item_type.resources[0].resource_ref
-                                                        .required_properties,
-                                                       original_obj))
+              rrefs.concat(test_resourcerefs_for_properties(
+                             p.item_type.resources[0].resource_ref
+                                                     .required_properties,
+                             original_obj
+              ))
             end
           end
         end
@@ -62,13 +70,15 @@ module Provider
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/BlockLength
 
       def variable_type(object, var)
         return Api::Type::String::PROJECT if var == :project
         return Api::Type::String::NAME if var == :name
         v = object.all_user_properties
-                  .select { |p| p.out_name.to_sym == var || p.name.to_sym == var }
-                  .first
+                  .select do |p|
+          p.out_name.to_sym == var || p.name.to_sym == var
+        end.first
         return v.resources.first.property if v.is_a?(Api::Type::ResourceRef)
         v
       end

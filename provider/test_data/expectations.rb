@@ -62,7 +62,9 @@ module Provider
             # We need to verify that only resourcerefs directly belonging to
             # this object are inserted into the expectation.
             next unless ref.is_a? Api::Type::ResourceRef
-            name = Google::StringUtils.underscore(ref.resources[0].resource_ref.name)
+            name = Google::StringUtils.underscore(
+              ref.resources[0].resource_ref.name
+            )
             value = @data_gen.value(ref.resources[0].property.class,
                                     ref.resources[0].property, 0)
             { name => value }
@@ -172,6 +174,7 @@ module Provider
 
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/ParameterLists
+      # rubocop:disable Metrics/MethodLength
       # Given an expectation (i.e. "expect_network_get_success"),
       # returns that expectation with all necessary parameters.
       #
@@ -193,7 +196,8 @@ module Provider
           # We need to verify that only resourcerefs directly belonging to this
           # object are inserted into the expectation.
           next unless ref.is_a? Api::Type::ResourceRef
-          name = Google::StringUtils.underscore(ref.resources[0].resource_ref.name)
+          name = Google::StringUtils.underscore(ref.resources[0]
+                                                   .resource_ref.name)
           value = @data_gen.value(ref.resources[0].property.class,
                                   ref.resources[0].property, id - 1)
           { name => value }

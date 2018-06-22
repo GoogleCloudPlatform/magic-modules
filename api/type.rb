@@ -342,7 +342,7 @@ module Api
           p.set_variable(self, :__parent)
         end
 
-        @resources.each { |res| res.validate }
+        @resources.each(&:validate)
       end
 
       def out_type
@@ -376,7 +376,6 @@ module Api
       def requires
         [property_file]
       end
-
     end
 
     # An structured object composed of other objects.
@@ -457,8 +456,8 @@ module Api
       ]
     end
 
-    private
-
+    # Responsible for handling the logic involved with a single ResourceRef.
+    # A ResourceRef is made up of one-or-more of these Individual ResourceRefs.
     class IndividualResourceRef < Type
       ALLOWED_WITHOUT_PROPERTY = [SelfLink::EXPORT_KEY].freeze
 
@@ -466,8 +465,8 @@ module Api
       attr_reader :imports
 
       def initialize(hash)
-        raise "No resource given" unless hash['resource']
-        raise "No imports given" unless hash['imports']
+        raise 'No resource given' unless hash['resource']
+        raise 'No imports given' unless hash['imports']
         hash.each do |key, value|
           instance_variable_set("@#{key}", value)
         end
@@ -511,7 +510,6 @@ module Api
           if exported_props.none? { |p| p.name == @imports }
       end
     end
-
   end
   # rubocop:enable Metrics/ClassLength
 end

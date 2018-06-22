@@ -79,6 +79,7 @@ module Provider
       }.freeze
     end
 
+    # rubocop:disable Metrics/AbcSize
     def emit_resourceref(p)
       if p.resources.length > 1
         list = p.resources.first(p.resources.size - 1).map do |x|
@@ -89,6 +90,7 @@ module Provider
         "reference to a #{p.resources.first.resource_ref.out_name}"
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     def emit_enum(p)
       return 'Enum' if p.values.empty?

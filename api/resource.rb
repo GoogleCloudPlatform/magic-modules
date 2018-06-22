@@ -351,9 +351,6 @@ module Api
         @__product.version_obj(@min_version)
       end
     end
-
-    private
-
   end
   # rubocop:enable Metrics/ClassLength
 end

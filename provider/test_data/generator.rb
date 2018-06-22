@@ -155,7 +155,9 @@ module Provider
 
       def resource_value(prop, seed)
         # Always use the first in the list for testing purposes.
-        name = Google::StringUtils.underscore(prop.resources[0].resource_ref.name)
+        name = Google::StringUtils.underscore(
+          prop.resources[0].resource_ref.name
+        )
         "'resource(#{name},#{seed})'"
       end
 
@@ -193,7 +195,9 @@ module Provider
             if hash[:exported_values]
               # Return the exported value.
               imports = prop.item_type.resources.first.imports.downcase
-              resource = Google::StringUtils.underscore(prop.item_type.resources.first.resource)
+              resource = Google::StringUtils.underscore(
+                prop.item_type.resources.first.resource
+              )
               "#{imports}(resource(#{resource},#{index}))"
             else
               resource_value(prop.item_type, index)
