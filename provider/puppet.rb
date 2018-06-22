@@ -23,6 +23,7 @@ require 'provider/puppet/resource_override'
 require 'provider/puppet/property_override'
 require 'provider/puppet/test_manifest'
 require 'provider/test_matrix'
+require 'provider/test_data/utils'
 
 module Provider
   # A code generator for Puppet modules
@@ -33,6 +34,7 @@ module Provider
 
     include Provider::Puppet::Codegen
     include Google::RubyUtils
+    include Provider::TestData::TestUtils
 
     # Settings for the provider
     class Config < Provider::Config

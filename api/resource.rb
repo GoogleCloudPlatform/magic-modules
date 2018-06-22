@@ -322,11 +322,6 @@ module Api
       end
     end
 
-    # Returns all resourcerefs at any depth
-    def all_resourcerefs
-      resourcerefs_for_properties(all_user_properties, self)
-    end
-
     def kind?
       !@kind.nil?
     end
@@ -359,51 +354,6 @@ module Api
 
     private
 
-    # Given an array of properties, return all ResourceRefs contained within
-    # Requires:
-    #   props- a list of props
-    #   original_object - the original object containing props. This is to
-    #                     avoid self-referencing objects.
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
-    def resourcerefs_for_properties(props, original_obj)
-      rrefs = []
-      props.each do |p|
-        # We need to recurse on ResourceRefs to get all levels
-        # We do not want to recurse on resourcerefs of type self to avoid
-        # infinite loop.
-        if p.is_a? Api::Type::ResourceRef
-          # We want to avoid a circular reference
-          # This reference may be the next reference or have some number of refs
-          # in between it.
-          next if p.resource_ref == original_obj
-          next if p.resource_ref == p.__resource
-          rrefs << p
-          rrefs.concat(resourcerefs_for_properties(p.resource_ref
-                                                    .required_properties,
-                                                   original_obj))
-        elsif p.is_a? Api::Type::NestedObject
-          rrefs.concat(resourcerefs_for_properties(p.properties, original_obj))
-        elsif p.is_a? Api::Type::Array
-          if p.item_type.is_a? Api::Type::NestedObject
-            rrefs.concat(resourcerefs_for_properties(p.item_type.properties,
-                                                     original_obj))
-          elsif p.item_type.is_a? Api::Type::ResourceRef
-            rrefs << p.item_type
-            rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
-                                                      .required_properties,
-                                                     original_obj))
-          end
-        end
-      end
-      rrefs.uniq
-    end
-
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/MethodLength
-    # rubocop:enable Metrics/PerceivedComplexity
   end
   # rubocop:enable Metrics/ClassLength
 end

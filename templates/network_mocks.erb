@@ -97,13 +97,16 @@ def expect_network_create(id, expected_body, data = {})
 <% end # object.kind? -%>
 <% end -%>
 
-<% unless object.all_resourcerefs.empty? -%>
+<%
+  unless test_resourcerefs_for_properties(object.all_user_properties,
+                                          object).empty?
+-%>
   # Remove refs that are also part of the body
   expected_body = Hash[expected_body.map do |k, v|
     [k.is_a?(Symbol) ? k.id2name : k, v]
   end]
 
-<% end # all_resourcerefs.empty? -%>
+<% end # test_resourcerefs_for_properties.empty? -%>
 <% if object.encoder? -%>
   # Encode the object to conform with the API
 <% encoder = object.transport.encoder -%>

@@ -14,10 +14,13 @@
 <% end -%>
 <%# Emits network mocks specifically designed for each resourceref -%>
 <%# Requires: none -%>
-<% object.all_resourcerefs.each do |ref| -%>
 <%
-  prop_ref = ref.resource_ref
-  ref_underscore_name = Google::StringUtils.underscore(ref.resource)
+  test_resourcerefs_for_properties(object.all_user_properties,
+                                     object).each do |ref|
+-%>
+<%
+  prop_ref = ref.resources[0].resource_ref
+  ref_underscore_name = Google::StringUtils.underscore(ref.resources[0].resource)
   ref_index ||= 0
   ref_name = "resource(#{ref_underscore_name},#{ref_index})"
 -%>

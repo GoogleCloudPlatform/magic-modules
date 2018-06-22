@@ -125,8 +125,11 @@ module Provider
     end
 
     def generate_resourceref_object(data, prop)
-      resource = Google::StringUtils.underscore(prop.resource_ref.name)
-      imports = Google::StringUtils.underscore(prop.imports)
+      # Tracker will use first resourceref.
+      # This generated file may be responsible for multiple resourcerefs
+      # though.
+      resource = Google::StringUtils.underscore(prop.resources[0].resource_ref.name)
+      imports = Google::StringUtils.underscore(prop.resources[0].imports)
       return if resourceref_tracker.key?([resource, imports])
       resourceref_tracker[[resource, imports]] = false
 
