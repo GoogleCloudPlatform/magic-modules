@@ -81,7 +81,7 @@ module Provider
 
     def emit_resourceref(p)
       if p.resources.length > 1
-        list = p.resources.first(p.resources.first - 1).map do |x|
+        list = p.resources.first(p.resources.size - 1).map do |x|
           x.resource_ref.out_name
         end.join(' ,')
         "reference to #{list} or #{p.resources.last.resource_ref.out_name}"

@@ -85,9 +85,9 @@ module Google
   indent_list(
     property.resources.map do |x|
       imports = Google::StringUtils.underscore(x.imports)
-      "#{x.resource_ref.out_name}: #{imports}"
+      "#{x.resource_ref.out_name}: #{quote_string(imports)}"
     end,
-    2
+    12
   )
 -%>
           }
