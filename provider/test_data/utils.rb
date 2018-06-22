@@ -62,6 +62,16 @@ module Provider
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/PerceivedComplexity
+
+      def variable_type(object, var)
+        return Api::Type::String::PROJECT if var == :project
+        return Api::Type::String::NAME if var == :name
+        v = object.all_user_properties
+                  .select { |p| p.out_name.to_sym == var || p.name.to_sym == var }
+                  .first
+        return v.resources.first.property if v.is_a?(Api::Type::ResourceRef)
+        v
+      end
     end
   end
 end
