@@ -75,8 +75,9 @@ module Provider
       def python_type(prop)
         prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
+        # We're assuming that all ResourceRefs in the list act the same.
         if prop.is_a? Api::Type::ResourceRef
-          return 'str' if prop.resource_ref.virtual
+          return 'str' if prop.resources.first.resource_ref.virtual
           return 'dict'
         end
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
@@ -181,7 +182,7 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         (object.parameters || []).select do |p|
           props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
-            p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.virtual
+            p.is_a?(Api::Type::ResourceRef) && !p.resources.first.resource_ref.virtual
         end.any?
       end
 
@@ -219,8 +220,13 @@ module Provider
 
       # Returns a list of all first-level ResourceRefs that are not virtual
       def nonvirtual_rrefs(object)
-        object.all_resourcerefs
-              .reject { |prop| prop.resource_ref.virtual }
+        resourcerefs_for_properties(object.all_user_properties,
+                                    object, virtual: 'exclude')
+      end
+
+      def virtual_rrefs(object)
+        resourcerefs_for_properties(object.all_user_properties,
+                                    object, virtual: 'only')
       end
 
       # Converts a path in the form a/b/c/d into ['a', 'b', 'c', 'd']
@@ -313,6 +319,65 @@ module Provider
       def emit_nested_object(data) end
 
       def emit_resourceref_object(data) end
+
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/BlockLength
+      def resourcerefs_for_properties(props, original_obj, **kwargs)
+        rrefs = []
+        props.each do |p|
+          # We need to recurse on ResourceRefs to get all levels
+          # We do not want to recurse on resourcerefs of type self to avoid
+          # infinite loop.
+          if p.is_a? Api::Type::ResourceRef
+            # We want to avoid a circular reference
+            # This reference may be the
+            # next reference or have some number of refs in between it.
+            next if p.resources[0].resource_ref == original_obj
+            next if p.resources[0].resource_ref == p.resources[0].__resource
+            if p.resources[0].resource_ref.virtual
+              next if kwargs[:virtual] == 'exclude'
+            else
+              next if kwargs[:virtual] == 'only'
+            end
+            rrefs << p
+            rrefs.concat(resourcerefs_for_properties(
+                           p.resources[0].resource_ref.required_properties,
+                           original_obj
+            ))
+          elsif p.is_a? Api::Type::NestedObject
+            rrefs.concat(resourcerefs_for_properties(p.properties,
+                                                          original_obj))
+          elsif p.is_a? Api::Type::Array
+            if p.item_type.is_a? Api::Type::NestedObject
+              rrefs.concat(resourcerefs_for_properties(
+                             p.item_type.properties,
+                             original_obj
+              ))
+            elsif p.item_type.is_a? Api::Type::ResourceRef
+              if p.item_type.resources[0].resource_ref.virtual
+                next if kwargs[:virtual] == 'exclude'
+              else
+                next if kwargs[:virtual] == 'only'
+              end
+              rrefs << p.item_type
+              rrefs.concat(resourcerefs_for_properties(
+                             p.item_type.resources[0].resource_ref
+                                                     .required_properties,
+                             original_obj
+              ))
+            end
+          end
+        end
+        rrefs.uniq
+      end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/BlockLength
     end
     # rubocop:enable Metrics/ClassLength
   end
