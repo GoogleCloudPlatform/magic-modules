@@ -79,7 +79,25 @@ module Google
         end
 
         def resource
-<% out_name = property.resource_ref.out_name -%>
+<% if property.resources.length > 1 -%>
+          options = {
+<%=
+  indent_list(
+    property.resources.map { |x| ":#{x.resource_ref.out_name}: #{x.imports}" },
+    2
+  )
+-%>
+          }
+          options.each do |resource, imports|
+            Google::ObjectStore.instance[key].each do |entry|
+              return entry.exports[imports] if entry.title == @title
+            end
+          end
+<% else -%>
+<%
+  out_name = property.resources.first.resource_ref.out_name
+  imports = property.resources.first.imports
+-%>
 <%=
   lines(format(
     [
@@ -92,10 +110,10 @@ module Google
 -%>
             return entry.exports[:<%= imports -%>] if entry.title == @title
           end
+<% end # property.resources.length > 1 -%>
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
         end
       end
-
       # A class to manage a JSON blob from GCP API
       # Will immediately return value from JSON blob without changes
 <%=

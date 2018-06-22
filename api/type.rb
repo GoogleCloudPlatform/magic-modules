@@ -353,6 +353,36 @@ module Api
         end
       end
 
+      def property_class
+        if @resources.length > 1
+          type = property_ns_prefix
+          type << ['Multi', @resources[0].resource, 'Ref']
+          shrink_type_name(type)
+        else
+          # Create name based on the single resourceref.
+          type = property_ns_prefix
+          type << [@resources[0].resource, @resources[0].imports, 'Ref']
+          shrink_type_name(type)
+        end
+      end
+
+      def property_type
+        property_class.join('::')
+      end
+
+      def property_file
+        # Property file names are based on one of the resource_refs.
+        # As a convention, we'll stick to the first.
+        resource = @resources[0].resource
+        imports = @resources[0].imports
+        File.join('google', @__resource.__product.prefix[1..-1], 'property',
+                  "#{resource}_#{imports}").downcase
+      end
+
+      def requires
+        [property_file]
+      end
+
     end
 
     # An structured object composed of other objects.
@@ -470,25 +500,6 @@ module Api
         resources = product.objects.select { |obj| obj.name == @resource }
         raise "Unknown item type '#{@resource}'" if resources.empty?
         resources[0]
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@resource, @imports, 'Ref']
-        shrink_type_name(type)
-      end
-
-      def property_type
-        property_class.join('::')
-      end
-
-      def property_file
-        File.join('google', @__resource.__product.prefix[1..-1], 'property',
-                  "#{resource}_#{@imports}").downcase
-      end
-
-      def requires
-        [property_file]
       end
 
       private
