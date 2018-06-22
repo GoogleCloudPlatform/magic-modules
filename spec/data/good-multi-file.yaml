@@ -50,10 +50,11 @@ objects:
     description: 'blah blah'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
-        resource: 'ReferencedResource'
         name: 'property5'
-        imports: 'name'
         description: 'hey, this is property number 5!'
+        resources:
+          - resource: 'ReferencedResource'
+            imports: 'name'
     properties:
       - !ruby/object:Api::Type::String
         name: 'property1'

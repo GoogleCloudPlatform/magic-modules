@@ -27,10 +27,11 @@ objects:
     description: 'blah blah'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
-        resource: 'resource'
         name: 'property5'
-        imports: 'name'
         description: 'an explanation whats this about'
+        resources:
+          - resource: 'resource'
+            imports: 'name'
     properties:
       - !ruby/object:Api::Type::String
         name: 'property1'

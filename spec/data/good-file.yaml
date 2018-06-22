@@ -52,9 +52,10 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'property5'
-        resource: 'ReferencedResource'
-        imports: 'name'
         description: 'an explanation whats this about'
+        resources:
+          - resource: 'ReferencedResource'
+            imports: 'name'
     properties:
       - !ruby/object:Api::Type::String
         name: 'property1'

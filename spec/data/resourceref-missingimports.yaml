@@ -36,10 +36,11 @@ objects:
     description: 'blah blah'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
-        resource: 'ReferencedResource'
         name: 'property5'
-        imports: 'missing'
         description: 'an explanation whats this about'
+        resources:
+          - resource: 'ReferencedResource'
+            imports: 'missing'
     properties:
       - !ruby/object:Api::Type::String
         name: 'property1'
