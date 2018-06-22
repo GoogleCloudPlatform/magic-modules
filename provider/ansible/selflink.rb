@@ -31,7 +31,7 @@ module Provider
         resourcerefs_for_properties(object.all_user_properties,
                                     object,
                                     virtual: 'only')
-        .select { |prop| prop.resources.first.imports == 'selfLink' }
+          .select { |prop| prop.resources.first.imports == 'selfLink' }
       end
 
       # Build out functions that will check + create selflinks.

@@ -182,7 +182,8 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         (object.parameters || []).select do |p|
           props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
-            p.is_a?(Api::Type::ResourceRef) && !p.resources.first.resource_ref.virtual
+            p.is_a?(Api::Type::ResourceRef) && \
+            !p.resources.first.resource_ref.virtual
         end.any?
       end
 
@@ -336,12 +337,12 @@ module Provider
             # This reference may be the
             # next reference or have some number of refs in between it.
             next if p.resources.first.resource_ref == original_obj
-            next if p.resources.first.resource_ref == p.resources.first.__resource
-            if p.resources.first.resource_ref.virtual
-              next if kwargs[:virtual] == 'exclude'
-            else
-              next if kwargs[:virtual] == 'only'
-            end
+            next if p.resources.first.resource_ref == p.resources[0].__resource
+            next if p.resources.first.resource_ref.virtual && \
+                    kwargs[:virtual] == 'exclude'
+            next if !p.resources.first.resource_ref.virtual && \
+                    kwargs[:virtual] == 'only'
+
             rrefs << p
             rrefs.concat(resourcerefs_for_properties(
                            p.resources[0].resource_ref.required_properties,
@@ -350,8 +351,8 @@ module Provider
             ))
           elsif p.is_a? Api::Type::NestedObject
             rrefs.concat(resourcerefs_for_properties(p.properties,
-                                                          original_obj,
-                                                          virtual: kwargs[:virtual]))
+                                                     original_obj,
+                                                     virtual: kwargs[:virtual]))
           elsif p.is_a? Api::Type::Array
             if p.item_type.is_a? Api::Type::NestedObject
               rrefs.concat(resourcerefs_for_properties(
@@ -360,11 +361,10 @@ module Provider
                              virtual: kwargs[:virtual]
               ))
             elsif p.item_type.is_a? Api::Type::ResourceRef
-              if p.item_type.resources.first.resource_ref.virtual
-                next if kwargs[:virtual] == 'exclude'
-              else
-                next if kwargs[:virtual] == 'only'
-              end
+              next if p.item_type.resources.first.resource_ref.virtual && \
+                      kwargs[:virtual] == 'exclude'
+              next if !p.item_type.resources.first.resource_ref.virtual && \
+                      kwargs[:virtual] == 'only'
               rrefs << p.item_type
               rrefs.concat(resourcerefs_for_properties(
                              p.item_type.resources[0].resource_ref

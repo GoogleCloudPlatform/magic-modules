@@ -88,6 +88,7 @@ module Provider
         "reference to a #{p.resources.first.resource_ref.out_name}"
       end
     end
+
     # rubocop:enable Metrics/AbcSize
     #
     def emit_enum(p)
