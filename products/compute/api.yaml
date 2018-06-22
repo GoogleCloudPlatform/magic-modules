@@ -429,7 +429,16 @@ objects:
 
            For internal load balancing, a URL to a HealthCheck resource must be
            specified instead.
-        item_type: Api::Type::String
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'healthCheck'
+          description: 'The HealthCheck used by the ForwardingRule'
+          resources:
+            - resource: 'HttpHealthCheck'
+              imports: 'selfLink'
+            - resource: 'HttpsHealthCheck'
+              imports: 'selfLink'
+            - resource: 'HealthCheck'
+              imports: 'selfLink'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -1343,6 +1352,9 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description:
       An HealthCheck resource. This resource defines a template for how
       individual virtual machines should be checked for health, via one of the
