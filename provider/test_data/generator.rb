@@ -192,8 +192,8 @@ module Provider
           (0..size - 1).map do |index|
             if hash[:exported_values]
               # Return the exported value.
-              imports = prop.item_type.imports.downcase
-              resource = Google::StringUtils.underscore(prop.item_type.resource)
+              imports = prop.item_type.resources.first.imports.downcase
+              resource = Google::StringUtils.underscore(prop.item_type.resources.first.resource)
               "#{imports}(resource(#{resource},#{index}))"
             else
               resource_value(prop.item_type, index)

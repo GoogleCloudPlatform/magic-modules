@@ -399,7 +399,7 @@ module Provider
       v = object.all_user_properties
                 .select { |p| p.out_name.to_sym == var || p.name.to_sym == var }
                 .first
-      return v.property if v.is_a?(Api::Type::ResourceRef)
+      return v.resources.first.property if v.is_a?(Api::Type::ResourceRef)
       v
     end
 

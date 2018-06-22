@@ -75,9 +75,19 @@ module Provider
         Api::Type::NestedObject => ->(v) { emit_nested(v) },
         Api::Type::Enum => ->(v) { emit_enum(v) },
         Api::Type::Array => ->(v) { emit_array(v) },
-        Api::Type::ResourceRef =>
-          ->(v) { "reference to #{v.resource_ref.out_name}" }
+        Api::Type::ResourceRef => ->(v) { emit_resourceref(v) }
       }.freeze
+    end
+
+    def emit_resourceref(p)
+      if p.resources.length > 1
+        list = p.resources.first(p.resources.first - 1).map do |x|
+          x.resource_ref.out_name
+        end.join(' ,')
+        "reference to #{list} and #{p.resources.last.resource_ref.out_name}"
+      else
+        "reference to #{p.resources.first.resource_ref.out_name}"
+      end
     end
 
     def emit_enum(p)
@@ -99,7 +109,7 @@ module Provider
       item = if p.item_type.is_a? Api::Type::NestedObject
                emit_nested(p.item_type)
              elsif p.item_type.is_a? Api::Type::ResourceRef
-               "reference to a #{p.item_type.resource_ref.out_name}"
+               emit_resourceref(p.item_type)
              else
                p.item_type.split('::').last.downcase
              end

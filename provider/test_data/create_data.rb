@@ -119,8 +119,8 @@ module Provider
 
       def expect_array_item_rref(item, seed = 0)
         size = @data_gen.object_size(item, seed, true)
-        imports = Google::StringUtils.underscore(item.item_type.imports)
-        resource = Google::StringUtils.underscore(item.item_type.resource)
+        imports = Google::StringUtils.underscore(item.item_type.resources.first.imports)
+        resource = Google::StringUtils.underscore(item.item_type.resources.first.resource)
         @provider.indent_list(
           (0..size - 1).map do |index|
             "'#{imports.tr('_', '')}(resource(#{resource},#{index}))'"
@@ -152,8 +152,8 @@ module Provider
                    # ResourceRef block, not a value within that block.
                    [
                      "'#{prop.field_name}' =>",
-                     value(prop.property.class,
-                           prop.property, (seed + index - 1) % MAX_ARRAY_SIZE)
+                     value(prop.resources.first.property.class,
+                           prop.resources.first.property, (seed + index - 1) % MAX_ARRAY_SIZE)
                    ].join(' ')
                  elsif prop.is_a? Api::Type::Array
                    expect_array_hash(prop, (seed + index - 1))
