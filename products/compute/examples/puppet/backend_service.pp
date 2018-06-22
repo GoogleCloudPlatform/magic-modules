@@ -38,6 +38,21 @@ gcompute_instance_group { <%= example_resource_name('my-puppet-masters') -%>:
   credential => 'mycred',
 }
 
+gcompute_health_check { <%= example_resource_name('example-hc') -%>:
+  ensure              => present,
+  type                => 'TCP',
+  tcp_health_check    => {
+    port_name => 'service-health',
+    request   => 'ping',
+    response  => 'pong',
+  },
+  healthy_threshold   => 10,
+  timeout_sec         => 2,
+  unhealthy_threshold => 5,
+  project             => $project, # e.g. 'my-test-project'
+  credential          => 'mycred',
+}
+
 <% end # name == README.md -%>
 gcompute_backend_service { <%= example_resource_name('my-app-backend') -%>:
   ensure        => present,
@@ -46,7 +61,7 @@ gcompute_backend_service { <%= example_resource_name('my-app-backend') -%>:
   ],
   enable_cdn    => true,
   health_checks => [
-    gcompute_health_check_ref('another-hc', 'google.com:graphite-playground'),
+    'example-hc'
   ],
   project       => $project, # e.g. 'my-test-project'
   credential    => 'mycred',

@@ -85,14 +85,14 @@ module Google
   indent_list(
     property.resources.map do |x|
       imports = Google::StringUtils.underscore(x.imports)
-      "#{x.resource_ref.out_name}: #{quote_string(imports)}"
+      "#{x.resource_ref.out_name}: :#{(imports)}"
     end,
     12
   )
 -%>
           }
           options.each do |resource, imports|
-            Google::ObjectStore.instance[key].each do |entry|
+            Google::ObjectStore.instance[resource].each do |entry|
               return entry.exports[imports] if entry.title == @title
             end
           end

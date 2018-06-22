@@ -354,16 +354,10 @@ module Api
       end
 
       def property_class
-        if @resources.length > 1
-          type = property_ns_prefix
-          type << ['Multi', @resources[0].resource, 'Ref']
-          shrink_type_name(type)
-        else
-          # Create name based on the single resourceref.
-          type = property_ns_prefix
-          type << [@resources[0].resource, @resources[0].imports, 'Ref']
-          shrink_type_name(type)
-        end
+        # Create name based on the single resourceref.
+        type = property_ns_prefix
+        type << [@resources[0].resource, @resources[0].imports, 'Ref']
+        shrink_type_name(type)
       end
 
       def property_type
