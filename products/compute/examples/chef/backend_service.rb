@@ -35,6 +35,18 @@ gcompute_instance_group <%= example_resource_name('my-masters') -%> do
 end
 
 <% end # name == README.md -%>
+
+gcompute_http_health_check <%= example_resource_name('app-health-check') -%> do
+  action :create
+  hhc_label <%= example_resource_name('my-app-http-hc') %>
+  healthy_threshold 10
+  port 8080
+  timeout_sec 2
+  unhealthy_threshold 5
+  project ENV['PROJECT'] # ex: 'my-test-project'
+  credential 'mycred'
+end
+
 gcompute_backend_service <%= example_resource_name('my-app-backend') -%> do
   action :create
   backends [
@@ -42,7 +54,7 @@ gcompute_backend_service <%= example_resource_name('my-app-backend') -%> do
   ]
   enable_cdn true
   health_checks [
-    gcompute_health_check_ref('another-hc', ENV['PROJECT'] # ex: 'my-test-project')
+    <%= example_resource_name('app-health-check') %>
   ]
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
