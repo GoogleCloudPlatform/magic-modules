@@ -27,7 +27,7 @@ manage VMs in Compute Engine, databases in Cloud SQL, Google Kubernetes Engine
 clusters, and so on.
 
 But given the breadth of products available in Google Cloud Platform, creating
-modules by hand is quickly becomes inefficient and costly. It would involve too
+modules by hand quickly becomes inefficient and costly. It would involve too
 much redundant engineering work and create too much code for a team to maintain.
 There is also the issue of explosion of modules, if you consider for
 comprehensive coverage: <code>
