@@ -65,6 +65,70 @@ overrides: !ruby/object:Provider::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address`: The IP of the created resource.
+  Autoscaler: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{zone}}/{{name}}"
+    examples: |
+      ```hcl
+      resource "google_compute_instance_template" "foobar" {
+        name           = "foobar"
+        machine_type   = "n1-standard-1"
+        can_ip_forward = false
+
+        tags = ["foo", "bar"]
+
+        disk {
+          source_image = "debian-cloud/debian-8"
+        }
+
+        network_interface {
+          network = "default"
+        }
+
+        metadata {
+          foo = "bar"
+        }
+
+        service_account {
+          scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+        }
+      }
+
+      resource "google_compute_target_pool" "foobar" {
+        name = "foobar"
+      }
+
+      resource "google_compute_instance_group_manager" "foobar" {
+        name = "foobar"
+        zone = "us-central1-f"
+
+        instance_template  = "${google_compute_instance_template.foobar.self_link}"
+        target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
+        base_instance_name = "foobar"
+      }
+
+      resource "google_compute_autoscaler" "foobar" {
+        name   = "scaler"
+        zone   = "us-central1-f"
+        target = "${google_compute_instance_group_manager.foobar.self_link}"
+
+        autoscaling_policy = {
+          max_replicas    = 5
+          min_replicas    = 1
+          cooldown_period = 60
+
+          cpu_utilization {
+            target = 0.5
+          }
+        }
+      }
+      ```
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
+      target: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
+      zone: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
   BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -325,6 +389,68 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
+    examples: |
+      ```hcl
+      resource "google_compute_instance_template" "foobar" {
+        name           = "foobar"
+        machine_type   = "n1-standard-1"
+        can_ip_forward = false
+
+        tags = ["foo", "bar"]
+
+        disk {
+          source_image = "debian-cloud/debian-8"
+        }
+
+        network_interface {
+          network = "default"
+        }
+
+        metadata {
+          foo = "bar"
+        }
+
+        service_account {
+          scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+        }
+      }
+
+      resource "google_compute_target_pool" "foobar" {
+        name = "foobar"
+      }
+
+      resource "google_compute_region_instance_group_manager" "foobar" {
+        name   = "foobar"
+        region = "us-central1"
+
+        instance_template  = "${google_compute_instance_template.foobar.self_link}"
+        target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
+        base_instance_name = "foobar"
+      }
+
+      resource "google_compute_region_autoscaler" "foobar" {
+        name   = "scaler"
+        region = "us-central1"
+        target = "${google_compute_region_instance_group_manager.foobar.self_link}"
+
+        autoscaling_policy = {
+          max_replicas    = 5
+          min_replicas    = 1
+          cooldown_period = 60
+
+          cpu_utilization {
+            target = 0.5
+          }
+        }
+      }
+      ```
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl

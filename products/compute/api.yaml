@@ -131,6 +131,42 @@ objects:
         item_type: Api::Type::String
         output: true
   - !ruby/object:Api::Resource
+    name: 'Autoscaler'
+    kind: 'compute#autoscaler'
+    base_url: projects/{{project}}/zones/{{zone}}/autoscalers
+    update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: selfLink
+    description: |
+      Represents an Autoscaler resource.
+
+      Autoscalers allow you to automatically scale virtual machine instances in
+      managed instance groups according to an autoscaling policy that you
+      define.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers'
+<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Zone'
+        imports: 'name'
+        description: |
+          URL of the zone where the instance group resides.
+        required: true
+    properties:
+<%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'target'
+        resource: 'InstanceGroupManager'
+        imports: 'selfLink'
+        description: |
+          URL of the managed instance group that this autoscaler will scale.
+        required: true
+  - !ruby/object:Api::Resource
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
@@ -1867,6 +1903,9 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: |
       Creates a managed instance group using the information that you specify in
       the request. After the group is created, it schedules an action to create
@@ -2309,6 +2348,43 @@ objects:
         description: 'List of zones within the region'
         item_type: Api::Type::String
         output: true
+  - !ruby/object:Api::Resource
+    name: 'RegionAutoscaler'
+    kind: 'compute#autoscaler'
+    base_url: projects/{{project}}/regions/{{region}}/autoscalers
+    update_url: projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: selfLink
+    description: |
+      Represents an Autoscaler resource.
+
+      Autoscalers allow you to automatically scale virtual machine instances in
+      managed instance groups according to an autoscaling policy that you
+      define.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionAutoscalers'
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          URL of the region where the instance group resides.
+        required: true
+    properties:
+<%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::String
+        name: 'target'
+        # TODO(#303): resourceref once RegionIGM exists
+        # resource: 'RegionInstanceGroupManager'
+        # imports: 'selfLink'
+        description: |
+          URL of the managed instance group that this autoscaler will scale.
+        required: true
   - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'

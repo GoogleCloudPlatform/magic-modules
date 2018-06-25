@@ -26,6 +26,7 @@ module Api
       attr_reader :description
       attr_reader :kind
       attr_reader :base_url
+      attr_reader :update_url
       attr_reader :self_link
       # This is useful in case you need to change the query made for
       # GET/DELETE requests only.  In particular, this is often used
@@ -223,6 +224,7 @@ module Api
       super
       check_optional_property :async, Api::Async
       check_optional_property :base_url, String
+      check_optional_property :update_url, String
       check_property :description, String
       check_optional_property :exclude, :boolean
       check_optional_property :kind, String
