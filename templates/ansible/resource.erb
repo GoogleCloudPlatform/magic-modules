@@ -191,7 +191,7 @@ def main():
     raise "Ansible does not support create_verb #{object.create_verb}"
   end
   create_request = if object.custom_create_resource
-                   'resource_to_create'
+                     'resource_to_create'
                    else
                      'resource_to_request'
                    end
