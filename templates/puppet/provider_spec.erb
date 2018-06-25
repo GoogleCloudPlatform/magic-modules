@@ -348,7 +348,11 @@ manifester = Provider::PuppetTestManifestFormatter.new self
 -%>
 <% unless has_nested -%>
 
+<% if object.broken_exports -%>
+  context '#exports', broken: true do
+<% else object.broken_exports -%>
   context '#exports' do
+<% end -%>
     context 'exports all properties' do
       let(:resource1) { create_type 1 }
       before do
