@@ -194,13 +194,14 @@ module Provider
           # Select a resourceref if it exists.
           rref = (object.parameters || []).select do |prop|
             Google::StringUtils.underscore(prop.name) == p && \
-              prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.virtual
+              prop.is_a?(Api::Type::ResourceRef) && !prop.resources.first
+                                                         .resource_ref.virtual
           end
           if rref.any?
             [
               "#{quote_string(p)}:",
               "replace_resource_dict(module.params[#{quote_string(p)}],",
-              "#{quote_string(rref[0].imports)})"
+              "#{quote_string(rref[0].resources.first.imports)})"
             ].join(' ')
           else
             "#{quote_string(p)}: module.params[#{quote_string(p)}]"
