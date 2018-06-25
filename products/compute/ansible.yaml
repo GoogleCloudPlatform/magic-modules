@@ -158,6 +158,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 examples: !ruby/object:Api::Resource::HashArray

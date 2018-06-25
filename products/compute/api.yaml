@@ -3337,7 +3337,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
-        imports: 'selfLink'
+        imports: 'name'
         description: |
           The region this gateway should sit in.
         required: true
@@ -3543,7 +3543,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
-        imports: 'selfLink'
+        imports: 'name'
         description: 'The region where the tunnel is located.'
         required: true
     properties:
