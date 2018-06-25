@@ -103,7 +103,9 @@ class Gcp<%= object.name -%>(object):
     def __init__(self, options):
         self.module = GcpModule(options)
 
+<% if object.kind -%>
         self.kind = <%= quote_string(object.kind) %>
+<% end -%>
         self.link = <%= self_link_url(object) %>.format(**self.module.params)
 
     def _fetch_resource(self):
