@@ -334,79 +334,10 @@ manifester = Provider::PuppetTestManifestFormatter.new self
                                                  %w[flush cases]), 6))) -%>
     end
   end
-<% unless object.exports.nil? -%>
-<%
-  # Nested Object properties do not work properly with exports tests.
-  # TODO(alexstephen): Custom types will fix this.
-  fetched = object.exported_properties.map do |p|
-    if p.is_a? Api::Type::FetchedExternal
-      object.all_user_properties.select { |j| j.name == p.name }[0]
-    end
-  end
-
-  has_nested = !fetched.select { |p| p.is_a? Api::Type::NestedObject }.empty?
--%>
-<% unless has_nested -%>
-
-  context '#exports' do
-    context 'exports all properties' do
-      let(:resource1) { create_type 1 }
-      before do
-<% # If the object has mandatory resource references, e.g. a network require a
-   # region to exist, then we need to populate cache with a resource so the
-   # object under test can find and retrieve relevant information, e.g. the
-   # dependent resource selfLink.
-   object.all_user_properties.select(&:required)
-         .select { |p| p.is_a?(Api::Type::ResourceRef) }.each do |ref| -%>
-<% ref_underscore_name = Google::StringUtils.underscore(ref.resource) -%>
-<%= lines(indent("prefetch_#{ref_underscore_name}", 8)) -%>
-<% end # object.all_user_properties....ResourceRef -%>
-        expect_network_get_success 1
-        described_class.prefetch(title0: resource1)
-      end
-
-      subject { resource1.exports }
-
-      let(:expected_results) do
-        {
-<%
-    export_values = object.exported_properties.map do |p|
-                      "#{p.out_name}: '#{@data_gen.value(p.class, p, 0)}'"
-                    end
--%>
-<%= indent_list(export_values, 10) %>
-        }
-      end
-      it { is_expected.to eq(expected_results) }
-    end
-  end
-<% end # unless has_nested -%>
-<% end -%>
 
   private
 
 <%= lines(indent(compile('templates/network_mocks.erb'), 2), 1) -%>
-<% object.all_resourcerefs.each do |ref| -%>
-<% unless object.exports.nil? || !ref.required -%>
-<%
-  prop_ref = ref.resource_ref
-  ref_underscore_name = Google::StringUtils.underscore(ref.resource)
--%>
-  # Creates and prefetch type so exports can be resolved without network access.
-  def prefetch_<%= ref_underscore_name %>
-    expect_network_get_success_<%= ref_underscore_name %> 1
-
-    resource = Puppet::Type.type(:<%= prop_ref.out_name -%>).new(
-      project: 'test project#0 data',
-      name: 'test name#0 data'
-    )
-
-    Puppet::Type.type(:<%= prop_ref.out_name -%>).provider(:google)
-                .prefetch(resource: resource)
-  end
-
-<% end # object.exports.nil? -%>
-<% end # object.all_resourcerefs -%>
 <%=
   lines(indent(compile('templates/puppet/resourceref_expandvars.erb'), 2), 1)
 -%>
