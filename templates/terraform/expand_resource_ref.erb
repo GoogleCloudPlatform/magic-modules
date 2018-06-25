@@ -1,9 +1,20 @@
 <%
-	resource_type = property.resource_ref.base_url.split('/').last
+  types = %w[{{region}} {{zone}}]
+  types.each do |type|
+    if property.resources.map { |res| res.resource_ref.base_url.include?(type) }
+                        .uniq
+                        .length != 1
+      raise 'This resource will require a custom expander'
+    end
+  end
 -%>
-<% if property.resource_ref.base_url.include?('{{region}}') -%>
+<%
+  resource_ref = property.resources.first.resource_ref
+	resource_type = resource_ref.base_url.split('/').last
+-%>
+<% if resource_ref.base_url.include?('{{region}}') -%>
 parseRegionalFieldValue("<%= resource_type -%>", <%= var_name -%>, "project", "region", "zone", d, config, true)
-<% elsif property.resource_ref.base_url.include?('{{zone}}') -%>
+<% elsif resource_ref.base_url.include?('{{zone}}') -%>
 parseZonalFieldValue("<%= resource_type -%>", <%= var_name -%>, "project", "zone", d, config, true)
 <% else -%>
 parseGlobalFieldValue("<%= resource_type -%>", <%= var_name -%>, "project", d, config, true)
