@@ -1,0 +1,36 @@
+if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+    // Labels cannot be set in a create.  We'll have to set them here.
+    err = resource<%= resource_name -%>Read(d, meta)
+    if err != nil {
+        return err
+    }
+
+    obj := make(map[string]interface{})
+    labelsProp, err := expandComputeForwardingRuleLabels(v, d, config)
+    obj["labels"] = labelsProp
+    labelFingerprintProp := d.Get("label_fingerprint")
+    obj["labelFingerprint"] = labelFingerprintProp
+
+    url, err = replaceVars(d, config, "https://www.googleapis.com/compute/beta/projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels")
+    if err != nil {
+        return err
+    }
+    res, err = sendRequest(config, "POST", url, obj)
+    if err != nil {
+        return fmt.Errorf("Error adding labels to ForwardingRule %q: %s", d.Id(), err)
+    }
+
+    err = Convert(res, op)
+    if err != nil {
+        return err
+    }
+
+    err = computeOperationWaitTime(
+        config.clientCompute, op, project, "Updating ForwardingRule",
+        int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+    if err != nil {
+        return err
+    }
+
+}
