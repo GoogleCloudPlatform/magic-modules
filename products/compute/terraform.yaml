@@ -216,6 +216,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
       labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: false
+      serviceLabel: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
