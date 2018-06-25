@@ -105,6 +105,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   # Not yet implemented.
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
+  VpnTunnel: !ruby/object:Provider::Puppet::ResourceOverride
+    broken_exports: true
 functions:
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_address_ip'
