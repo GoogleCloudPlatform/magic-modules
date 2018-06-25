@@ -182,6 +182,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         port_range = "80"
       }
       ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/forwarding_rule.erb
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
