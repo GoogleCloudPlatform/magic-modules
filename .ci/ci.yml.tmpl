@@ -61,6 +61,13 @@ resources:
           uri: git@github.com:GoogleCloudPlatform/magic-modules.git
           private_key: ((repo-key.private_key))
 
+    - name: magic-modules-external-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+
     - name: magic-modules-new-prs
       type: github-pull-request
       source:
@@ -148,6 +155,16 @@ resources:
         location: America/Los_Angeles
 
 jobs:
+    - name: authorize-single-rev
+      plan:
+          - get: magic-modules-external-prs
+            version: every
+            trigger: false
+          - put: magic-modules-new-prs
+            params:
+                status: pending
+                path: magic-modules-external-prs
+
     - name: mm-generate
       plan:
           - aggregate:
