@@ -957,8 +957,12 @@ files: !ruby/object:Provider::Config::Files
     # Adding them here allows updating the tests as part of a MM pull request.
     'google/resource_compute_address_test.go':
       'templates/terraform/tests/resource_compute_address_test.go'
+    'google/resource_compute_autoscaler_test.go':
+      'templates/terraform/tests/resource_compute_autoscaler_test.go'
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
+    'google/resource_compute_region_autoscaler_test.go':
+      'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
     'google/resource_compute_target_https_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
     'google/resource_compute_target_ssl_proxy_test.go':
