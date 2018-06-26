@@ -11,7 +11,8 @@ def decode_response(response, module):
     response['name'] = response['name'].split('/')[-1]
     return response
 
+
 def encode_request(request, module):
-    request['create_statement'] = "CREATE DATABASE `{}`".format(module.params['name']) 
+    request['create_statement'] = "CREATE DATABASE `{0}`".format(module.params['name'])
     del request['name']
     return request
