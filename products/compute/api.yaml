@@ -157,6 +157,7 @@ objects:
         description: |
           URL of the zone where the instance group resides.
         required: true
+        input: true
     properties:
 <%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
@@ -2375,6 +2376,7 @@ objects:
         description: |
           URL of the region where the instance group resides.
         required: true
+        input: true
     properties:
 <%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::String
