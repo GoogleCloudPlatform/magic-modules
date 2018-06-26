@@ -13,9 +13,6 @@
 	# limitations under the License.
 <% end -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
-<% url_name = String.new(prefix)
-   url_name[0] = url_name[0].downcase
--%>
   if v == nil || v.(string) == "" {
     return "", nil
   } else if strings.HasPrefix(v.(string), "https://") {
@@ -28,14 +25,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
       return nil, err
     }
     return url + v.(string), nil
-  } else if strings.HasPrefix(v.(string), "<%= url_name -%>") {
-    url, err := replaceVars(d, config, "https://www.googleapis.com/compute/v1/projects/{{project}}/regions/{{region}}/")
-    if err != nil {
-      return nil, err
-    }
-    return url + v.(string), nil
   }
-  url, err := replaceVars(d, config, "https://www.googleapis.com/compute/v1/projects/{{project}}/regions/{{region}}/<%= url_name -%>/")
+  url, err := replaceVars(d, config, "https://www.googleapis.com/compute/v1/projects/{{project}}/regions/{{region}}/")
   if err != nil {
     return nil, err
   }
