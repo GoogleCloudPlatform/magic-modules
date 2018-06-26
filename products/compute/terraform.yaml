@@ -911,6 +911,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       targetVpnGateway: !ruby/object:Provider::Terraform::PropertyOverride
         resource: 'VpnGateway'
+      peerIp: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validatePeerAddr'
+      sharedSecret: !ruby/object:Provider::Terraform::PropertyOverride
+        sensitive: true
+      localTrafficSelector: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      remoteTrafficSelector: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      detailedStatus: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/vpn_tunnel.erb
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
