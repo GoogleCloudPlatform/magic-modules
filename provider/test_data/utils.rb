@@ -39,10 +39,12 @@ module Provider
             # This reference may be the
             # next reference or have some number of refs in between it.
             next if p.resource_refs.first.resource_ref == original_obj
-            next if p.resource_refs.first.resource_ref == p.resource_refs.first.__resource
+            next if p.resource_refs.first.resource_ref == p.resource_refs
+                                                           .first.__resource
             rrefs << p
             rrefs.concat(test_resourcerefs_for_properties(
-                           p.resource_refs.first.resource_ref.required_properties,
+                           p.resource_refs.first
+                                          .resource_ref.required_properties,
                            original_obj
             ))
           elsif p.is_a? Api::Type::NestedObject

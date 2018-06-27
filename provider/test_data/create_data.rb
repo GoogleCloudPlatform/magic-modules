@@ -79,8 +79,10 @@ module Provider
           # All ResourceRefs should expect the fetched value
           # Without this, the JSON call will be expecting the title of the
           # ResourceRef block, not a value within that block.
-          ["'#{prop.field_name}'", '=>', value(prop.resource_refs.first.property.class,
-                                               prop.resource_refs.first.property,
+          ["'#{prop.field_name}'", '=>', value(prop.resource_refs
+                                                   .first.property.class,
+                                               prop.resource_refs
+                                                   .first.property,
                                                seed)].join(' ')
         else
           ["'#{prop.field_name}'", '=>', value(prop.class, prop,

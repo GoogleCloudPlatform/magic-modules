@@ -36,10 +36,10 @@ module Provider
 
       # Build out functions that will check + create selflinks.
       def selflink_functions(object)
-        virtuals = virtual_selflink_rrefs(object).map { |x| x.resource_refs.first }
-                                                 .map(&:resource_ref)
-                                                 .uniq
-        virtuals.map do |virt|
+        virts = virtual_selflink_rrefs(object).map { |x| x.resource_refs.first }
+                                              .map(&:resource_ref)
+                                              .uniq
+        virts.map do |virt|
           if virt == virtuals.last
             lines(selflink_function(virt))
           else
