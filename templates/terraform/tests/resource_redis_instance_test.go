@@ -129,6 +129,11 @@ resource "google_redis_instance" "test" {
 		my_key    = "my_val"
 		other_key = "other_val"
 	}
+
+	redisConfigs {
+		maxmemory_policy       = "allkeys-lru"
+		notify_keyspace_events = "KEA"
+	}
 }`, name)
 }
 
@@ -142,6 +147,11 @@ resource "google_redis_instance" "test" {
 	labels {
 		my_key    = "my_val"
 		other_key = "new_val"
+	}
+
+	redisConfigs {
+		maxmemory_policy       = "noeviction"
+		notify_keyspace_events = ""
 	}
 }`, name)
 }
@@ -170,6 +180,11 @@ resource "google_redis_instance" "test" {
 	labels {
 		my_key    = "my_val"
 		other_key = "other_val"
+	}
+
+	redisConfigs {
+		maxmemory_policy       = "allkeys-lru"
+		notify_keyspace_events = "KEA"
 	}
 }`, network, name)
 }
