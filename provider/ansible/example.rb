@@ -144,6 +144,17 @@ module Provider
       end
     end
 
+    # A PERMISSION_DENIED is returned if the service account does not exist.
+    class IamServiceAccountFailureCondition < FailureCondition
+      def validate
+        @error = [
+          'PERMISSION_DENIED: Permission iam.serviceAccounts.get',
+          'is required to perform this operation on service account'
+        ].join(' ')
+        super
+      end
+    end
+
     # Class responsible for holding a single Ansible task. This task may create
     # a GCP resource or create a dependent GCP resource.
     class Task < Api::Object
