@@ -112,6 +112,16 @@ We are now ready to compile a module!
 
 ## Compiling modules
 
+### Prerequisites
+
+Each module has its own set of prerequisites for successful compilation. It is
+advisable to read the documentation within a particular module's project
+repository before attempting compilation to ensure prerequisites are installed.
+A list of each module's repository URL can be retrieved via the following
+command:
+
+	git config --file .gitmodules --get-regexp url
+
 ### Compiling a single module
 
 Compiling a module is as easy as:
