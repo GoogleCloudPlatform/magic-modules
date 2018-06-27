@@ -26,6 +26,9 @@ module Api
       attr_reader :description
       attr_reader :kind
       attr_reader :base_url
+      # URL to use for updating the resource. If not specified, the self link
+      # will be used. This currently can only be used with Terraform resources.
+      # TODO(#302): Add support for the other providers.
       attr_reader :update_url
       attr_reader :self_link
       # This is useful in case you need to change the query made for
