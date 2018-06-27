@@ -3,7 +3,7 @@
 There are various processors out there that ingest a manifest and produce a
 client library. You can get client libraries for Java, Ruby, .NET, etc. However,
 for deployment tools a library is not enough. _These tools do not care about an
-abstraction layer because they are not a scripting languages_.
+abstraction layer because they are not scripting languages_.
 
 ## Convergence To Desired State
 
