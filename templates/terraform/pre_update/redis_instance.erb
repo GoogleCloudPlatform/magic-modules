@@ -8,7 +8,7 @@ if d.HasChange("labels") {
 if d.HasChange("memory_size_gb") {
 	updateMask = append(updateMask, "memorySizeGb")
 }
-if d.HasChange("redisConfigs") {
+if d.HasChange("redis_configs") {
 	updateMask = append(updateMask, "redisConfigs")
 }
 // updateMask is a URL parameter but not present in the schema, so replaceVars
