@@ -328,6 +328,11 @@ module Provider
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/BlockLength
+      # Recurse through a list of properties and return a list of all
+      # ResourceRefs contained within that list. This can be at any depth
+      # because of Arrays and NestedObjects.  :virtual keyword can indicate if
+      # you want to `exclude` virtual properties or `only` have those
+      # properties returned. 
       def resourcerefs_for_properties(props, original_obj, **kwargs)
         rrefs = []
         props.each do |p|
