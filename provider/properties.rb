@@ -125,8 +125,8 @@ module Provider
     end
 
     def generate_resourceref_object(data, prop)
-      # We do one file per resourceref.
-      # Tracker is responsible for making sure duplicates do not occur.
+      # One file is created per ResourceRef object.
+      #
       resource = Google::StringUtils.underscore(
         prop.resources.first.resource_ref.name
       )
@@ -145,8 +145,7 @@ module Provider
     end
 
     def generate_resourceref_array(data, prop)
-      # We do one file per resourceref.
-      # Tracker is responsible for making sure duplicates do not occur.
+      # One file is created per ResourceRef object.
       resource = Google::StringUtils.underscore(
         prop.resources.first.resource_ref.name
       )

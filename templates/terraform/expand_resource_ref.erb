@@ -4,7 +4,8 @@
     if property.resources.map { |res| res.resource_ref.base_url.include?(type) }
                         .uniq
                         .length != 1
-      raise 'This resource will require a custom expander'
+        raise ['This resource mixes region and zonal types.',
+               'It will require a custom expander'].join(' ')
     end
   end
 -%>

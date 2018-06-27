@@ -75,7 +75,8 @@ module Provider
       def python_type(prop)
         prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
-        # We're assuming that all ResourceRefs in the list act the same.
+        # We're assuming that all resources in the ResourceRef are either
+        # all virtual or all not virtual.
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resources.first.resource_ref.virtual
           return 'dict'
@@ -332,7 +333,7 @@ module Provider
         props.each do |p|
           # We need to recurse on ResourceRefs to get all levels
           # We do not want to recurse on resourcerefs of type self to avoid
-          # infinite loop.
+          # an infinite loop.
           if p.is_a? Api::Type::ResourceRef
             # We want to avoid a circular reference
             # This reference may be the

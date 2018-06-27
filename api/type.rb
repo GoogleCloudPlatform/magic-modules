@@ -337,6 +337,9 @@ module Api
           IndividualResourceRef.new(hash)
         end
 
+        # __resource used for validation.
+        # In pattern of NestedObject, setting each IndividualResourceRef's
+        # parent to the ResourceRef.
         @resources.each do |p|
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
@@ -354,9 +357,9 @@ module Api
       end
 
       def property_class
-        # Create name based on the single resourceref.
+        # Create name based on the first resourceref.
         type = property_ns_prefix
-        type << [@resources[0].resource, @resources[0].imports, 'Ref']
+        type << [@resources.first.resource, @resources.first.imports, 'Ref']
         shrink_type_name(type)
       end
 

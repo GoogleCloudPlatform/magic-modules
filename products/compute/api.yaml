@@ -431,7 +431,7 @@ objects:
            specified instead.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'healthCheck'
-          description: 'The HealthCheck used by the ForwardingRule'
+          description: 'The HealthCheck used by the BackendService'
           resources:
             - resource: 'HttpHealthCheck'
               imports: 'selfLink'
