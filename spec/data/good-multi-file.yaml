@@ -52,7 +52,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: 'property5'
         description: 'hey, this is property number 5!'
-        resources:
+        resource_refs:
           - resource: 'ReferencedResource'
             imports: 'name'
     properties:

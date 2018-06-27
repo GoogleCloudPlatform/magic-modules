@@ -29,7 +29,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: 'property5'
         description: 'an explanation whats this about'
-        resources:
+        resource_refs:
           - resource: 'resource'
             imports: 'name'
     properties:
