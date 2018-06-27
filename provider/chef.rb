@@ -132,7 +132,7 @@ module Provider
     def step_into_list(object, indent, start_indent)
       props = test_resourcerefs_for_properties(object.all_user_properties,
                                                object)
-      refs = props.map { |x| x.resources.first.resource_ref }
+      refs = props.map { |x| x.resource_refs.first.resource_ref }
       steps = [object.out_name].concat(refs.map(&:out_name).reverse).uniq
 
       return indent("step_into: '#{steps[0]}',", indent) if steps.length == 1

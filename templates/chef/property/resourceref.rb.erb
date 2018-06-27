@@ -80,11 +80,11 @@ module Google
         end
 
         def resource
-<% if property.resources.length > 1 -%>
+<% if property.resource_refs.length > 1 -%>
          options = {
 <%=
   indent_list(
-    property.resources.map do |x|
+    property.resource_refs.map do |x|
       imports = Google::StringUtils.underscore(x.imports)
       "#{x.resource_ref.out_name}: :#{imports}"
     end,
@@ -98,7 +98,7 @@ module Google
             end
           end
 <%
-  list = property.resources.map { |x| x.resource_ref.out_name }
+  list = property.resource_refs.map { |x| x.resource_ref.out_name }
   list = "one of #{list.join(', ')}"
 -%>
           raise ArgumentError, "<%= list -%>[#{@title}] required"
@@ -106,9 +106,9 @@ module Google
           Chef.run_context.resource_collection.each do |entry|
             return entry.exports[:<%= imports -%>] if entry.name == @title
           end
-<% out_name = property.resources.first.resource_ref.out_name -%>
+<% out_name = property.resource_refs.first.resource_ref.out_name -%>
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
-<% end # property.resources.length -%>
+<% end # property.resource_refs.length -%>
         end
       end
 

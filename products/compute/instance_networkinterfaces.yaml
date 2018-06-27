@@ -40,7 +40,7 @@
              required: true
            - !ruby/object:Api::Type::ResourceRef
              name: 'natIP'
-             resources:
+             resource_refs:
                - resource: 'Address'
                  imports: 'address'
              description: |
@@ -93,7 +93,7 @@
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
-        resources:
+        resource_refs:
           - resource: 'Network'
             imports: 'selfLink'
         description: |
@@ -111,7 +111,7 @@
           system.
       - !ruby/object:Api::Type::ResourceRef
         name: 'subnetwork'
-        resources:
+        resource_refs:
           - resource: 'Subnetwork'
             imports: 'selfLink'
         description: |

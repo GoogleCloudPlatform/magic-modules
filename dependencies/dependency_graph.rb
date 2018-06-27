@@ -102,13 +102,13 @@ module Dependencies
 
       # Recurse through referenced object for more resourcerefs
       # Don't recurse on resourceref of same type.
-      return if prop.resources[0].resource_ref == prop.resources[0].__resource
+      return if prop.resource_refs.first.resource_ref == prop.resource_refs.first.__resource
 
       # When building resourcerefs in manifests/catalogs, we use the
       # smallest set of properties possible. When looking recursively, we
       # should only look through this smallest set of properties. Otherwise,
       # recursive resource refs may be created that do not get referenced.
-      collect_refs(prop.resources[0].resource_ref.required_properties,
+      collect_refs(prop.resource_refs.first.resource_ref.required_properties,
                    :name, seed, {})
     end
 

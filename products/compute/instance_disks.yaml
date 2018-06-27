@@ -101,7 +101,7 @@
               Reference to a gcompute_disk_type resource.
               Specifies the disk type to use to create the instance.
               If not specified, the default is pd-standard.
-            resources:
+            resource_refs:
               - resource: 'DiskType'
                 imports: 'selfLink'
           - !ruby/object:Api::Type::String
@@ -164,7 +164,7 @@
 <% if type == 'InstanceTemplate' -%>
       - !ruby/object:Api::Type::ResourceRef
         name: 'source'
-        resources:
+        resource_refs:
           - resource: 'Disk'
             imports: 'name'
         description: |
@@ -180,7 +180,7 @@
 <% elsif type == 'Instance' -%>
       - !ruby/object:Api::Type::ResourceRef
         name: 'source'
-        resources:
+        resource_refs:
           - resource: 'Disk'
             imports: 'selfLink'
         description: |

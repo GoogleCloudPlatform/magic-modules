@@ -79,11 +79,11 @@ module Google
         end
 
         def resource
-<% if property.resources.length > 1 -%>
+<% if property.resource_refs.length > 1 -%>
           options = {
 <%=
   lines(indent_list(
-    property.resources.map do |x|
+    property.resource_refs.map do |x|
       imports = Google::StringUtils.underscore(x.imports)
       "#{x.resource_ref.out_name}: :#{(imports)}"
     end,
@@ -97,14 +97,14 @@ module Google
             end
           end
 <%
-  list = property.resources.map { |x| x.resource_ref.out_name }
+  list = property.resource_refs.map { |x| x.resource_ref.out_name }
   list = "one of #{list.join(', ')}"
 -%>
           raise ArgumentError, "<%= list -%>[#{@title}] required"
 <% else -%>
 <%
-  out_name = property.resources.first.resource_ref.out_name
-  imports = Google::StringUtils.underscore(property.resources.first.imports)
+  out_name = property.resource_refs.first.resource_ref.out_name
+  imports = Google::StringUtils.underscore(property.resource_refs.first.imports)
 -%>
 <%=
   lines(format(
@@ -119,7 +119,7 @@ module Google
             return entry.exports[:<%= imports -%>] if entry.title == @title
           end
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
-<% end # property.resources.length > 1 -%>
+<% end # property.resource_refs.length > 1 -%>
         end
       end
 

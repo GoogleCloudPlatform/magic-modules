@@ -63,10 +63,10 @@ module Provider
             # this object are inserted into the expectation.
             next unless ref.is_a? Api::Type::ResourceRef
             name = Google::StringUtils.underscore(
-              ref.resources[0].resource_ref.name
+              ref.resource_refs.first.resource_ref.name
             )
-            value = @data_gen.value(ref.resources[0].property.class,
-                                    ref.resources[0].property, 0)
+            value = @data_gen.value(ref.resource_refs.first.property.class,
+                                    ref.resource_refs.first.property, 0)
             { name => value }
           end
 
@@ -196,10 +196,10 @@ module Provider
           # We need to verify that only resourcerefs directly belonging to this
           # object are inserted into the expectation.
           next unless ref.is_a? Api::Type::ResourceRef
-          name = Google::StringUtils.underscore(ref.resources[0]
+          name = Google::StringUtils.underscore(ref.resource_refs.first
                                                    .resource_ref.name)
-          value = @data_gen.value(ref.resources[0].property.class,
-                                  ref.resources[0].property, id - 1)
+          value = @data_gen.value(ref.resource_refs.first.property.class,
+                                  ref.resource_refs.first.property, id - 1)
           { name => value }
         end
 

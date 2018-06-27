@@ -82,7 +82,7 @@
   # to a RegionBackendService for a ForwardingRule and to a BackendService
   # for a GlobalForwardingRule.
   name: 'backendService'
-  resources:
+  resource_refs:
     - resource: 'BackendService'
       imports: 'selfLink'
   description: |
@@ -123,7 +123,7 @@
   required: true
 - !ruby/object:Api::Type::ResourceRef
   name: 'network'
-  resources:
+  resource_refs:
     - resource: 'Network'
       imports: 'selfLink'
   description: |
@@ -174,7 +174,7 @@
   item_type: Api::Type::String
 - !ruby/object:Api::Type::ResourceRef
   name: 'subnetwork'
-  resources:
+  resource_refs:
     - resource: 'Subnetwork'
       imports: 'selfLink'
   description: |

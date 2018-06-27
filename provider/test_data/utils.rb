@@ -38,11 +38,11 @@ module Provider
             # We want to avoid a circular reference
             # This reference may be the
             # next reference or have some number of refs in between it.
-            next if p.resources[0].resource_ref == original_obj
-            next if p.resources[0].resource_ref == p.resources[0].__resource
+            next if p.resource_refs.first.resource_ref == original_obj
+            next if p.resource_refs.first.resource_ref == p.resource_refs.first.__resource
             rrefs << p
             rrefs.concat(test_resourcerefs_for_properties(
-                           p.resources[0].resource_ref.required_properties,
+                           p.resource_refs.first.resource_ref.required_properties,
                            original_obj
             ))
           elsif p.is_a? Api::Type::NestedObject
@@ -57,7 +57,7 @@ module Provider
             elsif p.item_type.is_a? Api::Type::ResourceRef
               rrefs << p.item_type
               rrefs.concat(test_resourcerefs_for_properties(
-                             p.item_type.resources[0].resource_ref
+                             p.item_type.resource_refs.first.resource_ref
                                                      .required_properties,
                              original_obj
               ))
@@ -79,7 +79,7 @@ module Provider
                   .select do |p|
           p.out_name.to_sym == var || p.name.to_sym == var
         end.first
-        return v.resources.first.property if v.is_a?(Api::Type::ResourceRef)
+        return v.resource_refs.first.property if v.is_a?(Api::Type::ResourceRef)
         v
       end
     end

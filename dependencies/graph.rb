@@ -32,7 +32,7 @@ module Dependencies
 
       # Since this is testing, we're always going to use the first reference.
       # It doesn't matter which we choose, but we have to choose one.
-      reference = prop.resources[0]
+      reference = prop.resource_refs.first
       # Add each item to its proper node.
 
       referenced_by = reference.__resource.name

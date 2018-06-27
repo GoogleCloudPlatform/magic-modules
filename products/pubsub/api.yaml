@@ -50,7 +50,7 @@ objects:
         description: 'Name of the subscription.'
       - !ruby/object:Api::Type::ResourceRef
         name: 'topic'
-        resources:
+        resource_refs:
           - resource: 'Topic'
             imports: 'name'
         description: |

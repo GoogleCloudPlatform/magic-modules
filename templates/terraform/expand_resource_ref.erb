@@ -1,16 +1,16 @@
 <%
   types = %w[{{region}} {{zone}}]
   types.each do |type|
-    if property.resources.map { |res| res.resource_ref.base_url.include?(type) }
-                        .uniq
-                        .length != 1
+    if property.resource_refs.map { |res| res.resource_ref.base_url.include?(type) }
+                             .uniq
+                             .length != 1
         raise ['This resource mixes region and zonal types.',
                'It will require a custom expander'].join(' ')
     end
   end
 -%>
 <%
-  resource_ref = property.resources.first.resource_ref
+  resource_ref = property.resource_refs.first.resource_ref
 	resource_type = resource_ref.base_url.split('/').last
 -%>
 <% if resource_ref.base_url.include?('{{region}}') -%>

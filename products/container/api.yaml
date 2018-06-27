@@ -288,7 +288,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'
-        resources:
+        resource_refs:
           - resource: 'Cluster'
             imports: 'name'
         description: 'The cluster this node pool belongs to.'
@@ -388,7 +388,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'
-        resources:
+        resource_refs:
           - resource: 'Cluster'
             imports: 'name'
         description: 'A reference to Cluster resource'

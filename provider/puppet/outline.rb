@@ -81,13 +81,13 @@ module Provider
 
     # rubocop:disable Metrics/AbcSize
     def emit_resourceref(p)
-      if p.resources.length > 1
-        list = p.resources.first(p.resources.size - 1).map do |x|
+      if p.resource_refs.length > 1
+        list = p.resource_refs.first(p.resource_refs.size - 1).map do |x|
           x.resource_ref.out_name
         end.join(' ,')
-        "reference to #{list} or #{p.resources.last.resource_ref.out_name}"
+        "reference to #{list} or #{p.resource_refs.last.resource_ref.out_name}"
       else
-        "reference to a #{p.resources.first.resource_ref.out_name}"
+        "reference to a #{p.resource_refs.first.resource_ref.out_name}"
       end
     end
     # rubocop:enable Metrics/AbcSize

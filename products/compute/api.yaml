@@ -60,7 +60,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'name'
         description: |
@@ -119,7 +119,7 @@ objects:
       # mean?
       - !ruby/object:Api::Type::ResourceRef
         name: 'subnetwork'
-        resources:
+        resource_refs:
           - resource: 'Subnetwork'
             imports: 'selfLink'
         description: |
@@ -282,7 +282,7 @@ objects:
                 Provide this property when you create the resource.
             - !ruby/object:Api::Type::ResourceRef
               name: 'group'
-              resources:
+              resource_refs:
                 - resource: 'InstanceGroup'
                   imports: 'selfLink'
               description: |
@@ -432,7 +432,7 @@ objects:
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'healthCheck'
           description: 'The HealthCheck used by the BackendService'
-          resources:
+          resource_refs:
             - resource: 'HttpHealthCheck'
               imports: 'selfLink'
             - resource: 'HttpsHealthCheck'
@@ -480,7 +480,7 @@ objects:
           - :SSL
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'selfLink'
         description: |
@@ -531,7 +531,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'A reference to the zone where the disk type resides.'
@@ -649,7 +649,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'A reference to the zone where the disk resides.'
@@ -1008,7 +1008,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'name'
         description: |
@@ -1019,7 +1019,7 @@ objects:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
         name: 'target'
-        resources:
+        resource_refs:
           - resource: 'TargetPool'
             imports: 'selfLink'
         description: |
@@ -1144,7 +1144,7 @@ objects:
           - :IPV6
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'selfLink'
         description: |
@@ -1169,7 +1169,7 @@ objects:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'name'
         description: |
@@ -1522,7 +1522,7 @@ objects:
               Reference to a gcompute_machine_type resource.
             # InstanceTemplates take a name. Instances take a self-link
             required: true
-            resources:
+            resource_refs:
               - resource: 'MachineType'
                 imports: 'name'
 <%= indent(compile('products/compute/instance_metadata.yaml'), 10) %>
@@ -1756,7 +1756,7 @@ objects:
           Refers to a gcompute_disk object
           You must provide either this property or the
           rawDisk.source property but not both to create an image.
-        resources:
+        resource_refs:
           - resource: 'Disk'
             imports: 'selfLink'
       - !ruby/object:Api::Type::NestedObject
@@ -1816,7 +1816,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'A reference to the zone where the machine resides.'
@@ -1857,7 +1857,7 @@ objects:
 <%= indent(compile('products/compute/instance_metadata.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
         name: 'machineType'
-        resources:
+        resource_refs:
           - resource: 'MachineType'
             imports: 'selfLink'
         description: 'A reference to a machine type which defines VM kind.'
@@ -1911,7 +1911,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'A reference to the zone where the instance group resides.'
@@ -1962,14 +1962,14 @@ objects:
                 The port number, which can be a value between 1 and 65535.
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
-        resources:
+        resource_refs:
           - resource: 'Network'
             imports: 'selfLink'
         description: |
           The network to which all instances in the instance group belong.
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'selfLink'
         description: |
@@ -1977,7 +1977,7 @@ objects:
           (for regional resources).
       - !ruby/object:Api::Type::ResourceRef
         name: 'subnetwork'
-        resources:
+        resource_refs:
           - resource: 'Subnetwork'
             imports: 'selfLink'
         description: |
@@ -2002,7 +2002,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'The zone the managed instance group resides.'
@@ -2104,14 +2104,14 @@ objects:
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'instanceGroup'
-        resources:
+        resource_refs:
           - resource: 'InstanceGroup'
             imports: 'selfLink'
         description: 'The instance group being managed'
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'instanceTemplate'
-        resources:
+        resource_refs:
           - resource: 'InstanceTemplate'
             imports: 'selfLink'
         description: |
@@ -2145,7 +2145,7 @@ objects:
                 The port number, which can be a value between 1 and 65535.
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'selfLink'
         description: |
@@ -2161,7 +2161,7 @@ objects:
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'targetPool'
           description: 'The targetPool to receive managed instances.'
-          resources:
+          resource_refs:
             - resource: 'TargetPool'
               imports: 'selfLink'
       - !ruby/object:Api::Type::Integer
@@ -2276,7 +2276,7 @@ objects:
         description: 'Name of the resource.'
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'The zone the machine type is defined.'
@@ -2536,7 +2536,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
-        resources:
+        resource_refs:
           - resource: 'Network'
             imports: 'selfLink'
         description: 'The network that this route applies to.'
@@ -2627,14 +2627,14 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'source'
-        resources:
+        resource_refs:
           - resource: 'Disk'
             imports: 'name'
         description: 'A reference to the disk used to create this snapshot.'
         input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
-        resources:
+        resource_refs:
           - resource: 'Zone'
             imports: 'name'
         description: 'A reference to the zone where the disk is hosted.'
@@ -2722,7 +2722,7 @@ objects:
           snapshot using a customer-supplied encryption key.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'license'
-          resources:
+          resource_refs:
             - resource: 'License'
               imports: 'selfLink'
           description: 'A reference to a license associated with this snapshot'
@@ -2959,7 +2959,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
-        resources:
+        resource_refs:
           - resource: 'Network'
             imports: 'selfLink'
         description: |
@@ -3020,7 +3020,7 @@ objects:
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'name'
         description: |
@@ -3077,7 +3077,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'urlMap'
-        resources:
+        resource_refs:
           - resource: 'UrlMap'
             imports: 'selfLink'
         description: |
@@ -3139,13 +3139,13 @@ objects:
           'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'sslCertificate'
-          resources:
+          resource_refs:
             - resource: 'SslCertificate'
               imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
       - !ruby/object:Api::Type::ResourceRef
         name: 'urlMap'
-        resources:
+        resource_refs:
           - resource: 'UrlMap'
             imports: 'selfLink'
         description: |
@@ -3158,7 +3158,7 @@ objects:
         name: 'sslPolicy'
         # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
         exclude: true
-        resources:
+        resource_refs:
           - resource: 'SslPolicy'
             imports: 'selfLink'
         description: |
@@ -3188,7 +3188,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'name'
         description: 'The region where the target pool resides.'
@@ -3196,7 +3196,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::ResourceRef
         name: 'backupPool'
-        resources:
+        resource_refs:
           - resource: 'TargetPool'
             imports: 'selfLink'
         input: true
@@ -3242,7 +3242,7 @@ objects:
           instance is healthy.
       - !ruby/object:Api::Type::ResourceRef
         name: 'healthCheck'
-        resources:
+        resource_refs:
           - resource: 'HttpHealthCheck'
             imports: 'selfLink'
         description: |
@@ -3264,7 +3264,7 @@ objects:
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'instance'
           description: 'The instance being served by this pool.'
-          resources:
+          resource_refs:
             - resource: 'Instance'
               imports: 'selfLink'
       - !ruby/object:Api::Type::String
@@ -3350,7 +3350,7 @@ objects:
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader'
       - !ruby/object:Api::Type::ResourceRef
         name: 'service'
-        resources:
+        resource_refs:
           - resource: 'BackendService'
             imports: 'selfLink'
         description: |
@@ -3370,7 +3370,7 @@ objects:
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'sslCertificate'
-          resources:
+          resource_refs:
             - resource: 'SslCertificate'
               imports: 'selfLink'
           description: 'The SSL certificates used by this TargetSslProxy'
@@ -3378,7 +3378,7 @@ objects:
         name: 'sslPolicy'
         # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
         exclude: true
-        resources:
+        resource_refs:
           - resource: 'SslPolicy'
             imports: 'selfLink'
         description: |
@@ -3443,7 +3443,7 @@ objects:
         update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setProxyHeader'
       - !ruby/object:Api::Type::ResourceRef
         name: 'service'
-        resources:
+        resource_refs:
           - resource: 'BackendService'
             imports: 'selfLink'
         description: |
@@ -3468,7 +3468,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'selfLink'
         description: |
@@ -3501,7 +3501,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
-        resources:
+        resource_refs:
           - resource: 'Network'
             imports: 'selfLink'
         description: |
@@ -3522,7 +3522,7 @@ objects:
           gateway.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'forwardingRule'
-          resources:
+          resource_refs:
             - resource: 'ForwardingRule'
               imports: 'selfLink'
           description: |
@@ -3547,7 +3547,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'defaultService'
-        resources:
+        resource_refs:
           - resource: 'BackendService'
             imports: 'selfLink'
         description:
@@ -3603,7 +3603,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
-              resources:
+              resource_refs:
                 - resource: 'BackendService'
                   imports: 'selfLink'
               description: |
@@ -3633,7 +3633,7 @@ objects:
                     item_type: Api::Type::String
                   - !ruby/object:Api::Type::ResourceRef
                     name: 'service'
-                    resources:
+                    resource_refs:
                       - resource: 'BackendService'
                         imports: 'selfLink'
                     description: |
@@ -3657,7 +3657,7 @@ objects:
               description: 'Path portion of the URL.'
             - !ruby/object:Api::Type::ResourceRef
               name: 'service'
-              resources:
+              resource_refs:
                 - resource: 'BackendService'
                   imports: 'selfLink'
               description:
@@ -3741,7 +3741,7 @@ objects:
         description: 'Name of the resource.'
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
-        resources:
+        resource_refs:
           - resource: 'Region'
             imports: 'selfLink'
         description: 'The region where the zone is located.'

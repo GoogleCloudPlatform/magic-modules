@@ -18,8 +18,8 @@
                                    object).each do |ref|
 -%>
 <%
-  prop_ref = ref.resources.first.resource_ref
-  ref_underscore_name = Google::StringUtils.underscore(ref.resources
+  prop_ref = ref.resource_refs.first.resource_ref
+  ref_underscore_name = Google::StringUtils.underscore(ref.resource_refs
                                                           .first.resource)
 -%>
 def expand_variables_<%= ref_underscore_name -%>(template, data, ext_dat = {})

@@ -79,8 +79,8 @@ module Provider
           # All ResourceRefs should expect the fetched value
           # Without this, the JSON call will be expecting the title of the
           # ResourceRef block, not a value within that block.
-          ["'#{prop.field_name}'", '=>', value(prop.resources[0].property.class,
-                                               prop.resources[0].property,
+          ["'#{prop.field_name}'", '=>', value(prop.resource_refs.first.property.class,
+                                               prop.resource_refs.first.property,
                                                seed)].join(' ')
         else
           ["'#{prop.field_name}'", '=>', value(prop.class, prop,
@@ -120,10 +120,10 @@ module Provider
       def expect_array_item_rref(item, seed = 0)
         size = @data_gen.object_size(item, seed, true)
         imports = Google::StringUtils.underscore(
-          item.item_type.resources.first.imports
+          item.item_type.resource_refs.first.imports
         )
         resource = Google::StringUtils.underscore(
-          item.item_type.resources.first.resource
+          item.item_type.resource_refs.first.resource
         )
         @provider.indent_list(
           (0..size - 1).map do |index|
@@ -156,8 +156,8 @@ module Provider
                    # ResourceRef block, not a value within that block.
                    [
                      "'#{prop.field_name}' =>",
-                     value(prop.resources.first.property.class,
-                           prop.resources.first.property,
+                     value(prop.resource_refs.first.property.class,
+                           prop.resource_refs.first.property,
                            (seed + index - 1) % MAX_ARRAY_SIZE)
                    ].join(' ')
                  elsif prop.is_a? Api::Type::Array

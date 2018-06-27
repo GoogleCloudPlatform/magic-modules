@@ -325,7 +325,7 @@ module Api
 
     # Represents a reference to another resource
     class ResourceRef < Type
-      attr_reader :resources
+      attr_reader :resource_refs
 
       def validate
         super
@@ -333,33 +333,34 @@ module Api
         @description = "A reference to #{@resource} resource" \
           if @description.nil?
 
-        @resources = @resources.map do |hash|
+        @resource_refs = @resource_refs.map do |hash|
           IndividualResourceRef.new(hash)
         end
 
         # __resource used for validation.
         # In pattern of NestedObject, setting each IndividualResourceRef's
         # parent to the ResourceRef.
-        @resources.each do |p|
+        @resource_refs.each do |p|
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
         end
 
-        @resources.each(&:validate)
+        @resource_refs.each(&:validate)
       end
 
       def out_type
-        if resources.length > 1
-          "multi_#{@resources[0].resource_ref.out_name}"
+        if @resource_refs.length > 1
+          "multi_#{@resource_refs.first.resource_ref.out_name}"
         else
-          @resources[0].resource_ref.out_name
+          @resource_refs.first.resource_ref.out_name
         end
       end
 
       def property_class
         # Create name based on the first resourceref.
         type = property_ns_prefix
-        type << [@resources.first.resource, @resources.first.imports, 'Ref']
+        type << [@resource_refs.first.resource,
+                 @resource_refs.first.imports, 'Ref']
         shrink_type_name(type)
       end
 
@@ -370,8 +371,8 @@ module Api
       def property_file
         # Property file names are based on one of the resource_refs.
         # As a convention, we'll stick to the first.
-        resource = @resources[0].resource
-        imports = @resources[0].imports
+        resource = @resource_refs.first.resource
+        imports = @resource_refs.first.imports
         File.join('google', @__resource.__product.prefix[1..-1], 'property',
                   "#{resource}_#{imports}").downcase
       end
@@ -495,7 +496,7 @@ module Api
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
         raise "Unknown item type '#{@resource}'" if resources.empty?
-        resources[0]
+        resources.first
       end
 
       private
@@ -504,7 +505,7 @@ module Api
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
         raise "Missing '#{@resource}'" \
-          if resources.empty? || resources[0].exclude
+          if resources.empty? || resources.first.exclude
       end
 
       def check_resource_ref_property_exists

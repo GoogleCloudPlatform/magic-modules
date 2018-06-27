@@ -78,7 +78,7 @@ module Provider
         # We're assuming that all resources in the ResourceRef are either
         # all virtual or all not virtual.
         if prop.is_a? Api::Type::ResourceRef
-          return 'str' if prop.resources.first.resource_ref.virtual
+          return 'str' if prop.resource_refs.first.resource_ref.virtual
           return 'dict'
         end
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
@@ -184,7 +184,7 @@ module Provider
         (object.parameters || []).select do |p|
           props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
             p.is_a?(Api::Type::ResourceRef) && \
-            !p.resources.first.resource_ref.virtual
+            !p.resource_refs.first.resource_ref.virtual
         end.any?
       end
 
@@ -195,14 +195,14 @@ module Provider
           # Select a resourceref if it exists.
           rref = (object.parameters || []).select do |prop|
             Google::StringUtils.underscore(prop.name) == p && \
-              prop.is_a?(Api::Type::ResourceRef) && !prop.resources.first
+              prop.is_a?(Api::Type::ResourceRef) && !prop.resource_refs.first
                                                          .resource_ref.virtual
           end
           if rref.any?
             [
               "#{quote_string(p)}:",
               "replace_resource_dict(module.params[#{quote_string(p)}],",
-              "#{quote_string(rref[0].resources.first.imports)})"
+              "#{quote_string(rref[0].resource_refs.first.imports)})"
             ].join(' ')
           else
             "#{quote_string(p)}: module.params[#{quote_string(p)}]"
@@ -338,16 +338,17 @@ module Provider
             # We want to avoid a circular reference
             # This reference may be the
             # next reference or have some number of refs in between it.
-            next if p.resources.first.resource_ref == original_obj
-            next if p.resources.first.resource_ref == p.resources[0].__resource
-            next if p.resources.first.resource_ref.virtual && \
+            next if p.resource_refs.first.resource_ref == original_obj
+            next if p.resource_refs.first.resource_ref == p.resource_refs
+                                                           .first.__resource
+            next if p.resource_refs.first.resource_ref.virtual && \
                     kwargs[:virtual] == 'exclude'
-            next if !p.resources.first.resource_ref.virtual && \
+            next if !p.resource_refs.first.resource_ref.virtual && \
                     kwargs[:virtual] == 'only'
 
             rrefs << p
             rrefs.concat(resourcerefs_for_properties(
-                           p.resources[0].resource_ref.required_properties,
+                           p.resource_refs.first.resource_ref.required_properties,
                            original_obj,
                            virtual: kwargs[:virtual]
             ))
@@ -363,13 +364,13 @@ module Provider
                              virtual: kwargs[:virtual]
               ))
             elsif p.item_type.is_a? Api::Type::ResourceRef
-              next if p.item_type.resources.first.resource_ref.virtual && \
+              next if p.item_type.resource_refs.first.resource_ref.virtual && \
                       kwargs[:virtual] == 'exclude'
-              next if !p.item_type.resources.first.resource_ref.virtual && \
+              next if !p.item_type.resource_refs.first.resource_ref.virtual && \
                       kwargs[:virtual] == 'only'
               rrefs << p.item_type
               rrefs.concat(resourcerefs_for_properties(
-                             p.item_type.resources[0].resource_ref
+                             p.item_type.resource_refs.first.resource_ref
                                                      .required_properties,
                              original_obj,
                              virtual: kwargs[:virtual]

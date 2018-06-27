@@ -122,15 +122,15 @@ module Provider
       # Returns the title of the block being referenced
       def emit_resource(prop, seed, _ctx)
         name = Google::StringUtils.underscore(
-          prop.resources.first.resource_ref.name
+          prop.resource_refs.first.resource_ref.name
         )
         "resource(#{name},#{seed % MAX_ARRAY_SIZE})"
       end
 
       # Returns the value being exported by a ResourceRef
       def emit_resource_value(prop, seed, _ctx)
-        @datagen.value(prop.resources.first.property.class,
-                       prop.resources.first.property,
+        @datagen.value(prop.resource_refs.first.property.class,
+                       prop.resource_refs.first.property,
                        seed % MAX_ARRAY_SIZE)
       end
 
