@@ -23,6 +23,9 @@ module Provider
       attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
       attr_reader :state_func # Adds a StateFunc to the schema
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
+      # Does not set this value to the returned API value.  Useful for fields
+      # like secrets where the returned API value is not helpful.
+      attr_reader :ignore_read
       attr_reader :validation # Adds a ValidateFunc to the schema
 
       attr_reader :is_set # Uses a Set instead of an Array

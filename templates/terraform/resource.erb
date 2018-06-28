@@ -188,7 +188,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 
 
-<% properties.each do |prop| -%>
+<% properties.reject(&:ignore_read).each do |prop| -%>
   if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
