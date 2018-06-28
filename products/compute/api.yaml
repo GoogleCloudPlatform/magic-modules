@@ -152,20 +152,22 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers'
 <%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
-        resource: 'Zone'
-        imports: 'name'
+        resource_refs:
+          - resource: 'Zone'
+            imports: 'name'
         description: |
           URL of the zone where the instance group resides.
         required: true
         input: true
     properties:
 <%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'target'
-        resource: 'InstanceGroupManager'
-        imports: 'selfLink'
+        resource_refs:
+          - resource: 'InstanceGroupManager'
+            imports: 'selfLink'
         description: |
           URL of the managed instance group that this autoscaler will scale.
         required: true
@@ -2457,10 +2459,11 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionAutoscalers'
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
-        resource: 'Region'
-        imports: 'name'
+        resource_refs:
+          - resource: 'Region'
+            imports: 'name'
         description: |
           URL of the region where the instance group resides.
         required: true
