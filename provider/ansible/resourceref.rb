@@ -23,8 +23,8 @@ module Provider
     # on Ansible.
     # This includes finding the proper nested resourcerefs and building out
     # set_value_for_resource function calls in the Ansible modules.
-    module ResourceRef
-      # Builds out a list of statements that handle ResourceRef creation
+    module ResourceRefs
+      # Builds out a list of statements that handle ResourceRefs creation
       def resourceref_handlers(object)
         rrefs = nonvirtual_rrefs(object)
         return unless rrefs.any?

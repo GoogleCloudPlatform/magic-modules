@@ -56,7 +56,7 @@ module Provider
     # Others (nested objects) ensure that all Hashes contain proper values +
     # types for its nested properties.
     #
-    # ResourceRef properties help ensure that links between different objects
+    # ResourceRefs properties help ensure that links between different objects
     # (Addresses + Instances for example) work properly, are abstracted away,
     # and don't require the user to have a large knowledge base of how GCP
     # works.

@@ -161,7 +161,7 @@ functions:
       The credential parameter should be allocated with a
       `gauth_credential_*_for_function` call.
   # TODO(nelsonjr): Deprecate this function once ForwardingRule can take
-  # multiple resources for IPAddress so we can make it a ResourceRef.
+  # multiple resources for IPAddress so we can make it a ResourceRefs.
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_address_ref'
     description: |
@@ -189,8 +189,8 @@ functions:
       This function is useful for when a reference to a resource that have
       multiple facts, such as `gcompute_forwarding_rule { ip_address }`
   # TODO(nelsonjr): Deprecate this function once GlobalForwardingRule can take
-  # multiple resources for IPAddress so we can make it a ResourceRef (or a new
-  # type that can mimic a ResourceRef to host an IP Address).
+  # multiple resources for IPAddress so we can make it a ResourceRefs (or a new
+  # type that can mimic a ResourceRefs to host an IP Address).
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_global_address_ref'
     description: |

@@ -34,7 +34,7 @@ module Provider
           # We need to recurse on ResourceRefs to get all levels
           # We do not want to recurse on resourcerefs of type self to avoid
           # infinite loop.
-          if p.is_a? Api::Type::ResourceRef
+          if p.is_a? Api::Type::ResourceRefs
             # We want to avoid a circular reference
             # This reference may be the
             # next reference or have some number of refs in between it.
@@ -56,7 +56,7 @@ module Provider
                              p.item_type.properties,
                              original_obj
               ))
-            elsif p.item_type.is_a? Api::Type::ResourceRef
+            elsif p.item_type.is_a? Api::Type::ResourceRefs
               rrefs << p.item_type
               rrefs.concat(test_resourcerefs_for_properties(
                              p.item_type.resource_refs.first.resource_ref
@@ -81,7 +81,8 @@ module Provider
                   .select do |p|
           p.out_name.to_sym == var || p.name.to_sym == var
         end.first
-        return v.resource_refs.first.property if v.is_a?(Api::Type::ResourceRef)
+        return v.resource_refs.first.property \
+          if v.is_a?(Api::Type::ResourceRefs)
         v
       end
     end

@@ -65,7 +65,7 @@ objects:
     description: |
       A service account in the Identity and Access Management API.
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: serviceAccount
         description: The name of the serviceAccount.
         resource_refs:

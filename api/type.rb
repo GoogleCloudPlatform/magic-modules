@@ -223,7 +223,7 @@ module Api
     end
 
     # Forwarding declaration to allow defining Array::RREF_ARRAY_TYPE
-    class ResourceRef < Type
+    class ResourceRefs < Type
     end
 
     # Represents an array, and stores its items' type
@@ -233,17 +233,18 @@ module Api
 
       STRING_ARRAY_TYPE = [Api::Type::Array, Api::Type::String].freeze
       NESTED_ARRAY_TYPE = [Api::Type::Array, Api::Type::NestedObject].freeze
-      RREF_ARRAY_TYPE = [Api::Type::Array, Api::Type::ResourceRef].freeze
+      RREF_ARRAY_TYPE = [Api::Type::Array, Api::Type::ResourceRefs].freeze
 
       def validate
         super
-        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
+        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRefs)
           @item_type.set_variable(@name, :__name)
           @item_type.set_variable(@__resource, :__resource)
           @item_type.set_variable(self, :__parent)
         end
-        check_property :item_type, [::String, NestedObject, ResourceRef]
-        unless @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef) \
+        check_property :item_type, [::String, NestedObject, ResourceRefs]
+        unless @item_type.is_a?(NestedObject) \
+          || @item_type.is_a?(ResourceRefs) \
           || type?(@item_type)
           raise "Invalid type #{@item_type}"
         end
@@ -253,12 +254,12 @@ module Api
 
       def item_type_class
         return Api::Type::NestedObject if @item_type.is_a? NestedObject
-        return Api::Type::ResourceRef if @item_type.is_a? ResourceRef
+        return Api::Type::ResourceRefs if @item_type.is_a? ResourceRefs
         get_type("Api::Type::#{@item_type}")
       end
 
       def property_class
-        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
+        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRefs)
           type = @item_type.property_class
         else
           type = property_ns_prefix
@@ -282,7 +283,7 @@ module Api
 
       # Returns the file that implements this property
       def requires
-        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
+        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRefs)
           return @item_type.requires
         end
         [property_file]
@@ -324,7 +325,7 @@ module Api
     end
 
     # Represents a reference to another resource
-    class ResourceRef < Type
+    class ResourceRefs < Type
       attr_reader :resource_refs
 
       def validate
@@ -334,12 +335,12 @@ module Api
           if @description.nil?
 
         @resource_refs = @resource_refs.map do |hash|
-          IndividualResourceRef.new(hash)
+          ResourceRef.new(hash)
         end
 
         # __resource used for validation.
-        # In pattern of NestedObject, setting each IndividualResourceRef's
-        # parent to the ResourceRef.
+        # In pattern of NestedObject, setting each ResourceRef's
+        # parent to the ResourceRefs.
         @resource_refs.each do |p|
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
@@ -460,9 +461,9 @@ module Api
       ]
     end
 
-    # Responsible for handling the logic involved with a single ResourceRef.
-    # A ResourceRef is made up of one-or-more of these Individual ResourceRefs.
-    class IndividualResourceRef < Type
+    # Responsible for handling the logic involved with a single ResourceRefs.
+    # A ResourceRefs is made up of one-or-more of these Individual ResourceRefs.
+    class ResourceRef < Type
       ALLOWED_WITHOUT_PROPERTY = [SelfLink::EXPORT_KEY].freeze
 
       attr_reader :resource

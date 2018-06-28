@@ -132,7 +132,7 @@ module Provider
           Api::Type::Time => ->(v) { v.iso8601 },
           Api::Type::Array => ->(v) { v },
           Api::Type::NestedObject => ->(v) { v },
-          Api::Type::ResourceRef => ->(v) { v },
+          Api::Type::ResourceRefs => ->(v) { v },
           Api::Type::Array::STRING_ARRAY_TYPE =>
             ->(v) { v.map { |e| e } },
           Api::Type::Array::RREF_ARRAY_TYPE =>

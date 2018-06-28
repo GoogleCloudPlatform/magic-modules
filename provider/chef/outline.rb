@@ -73,7 +73,7 @@ module Provider
         Api::Type::NestedObject => ->(v) { emit_nested(v) },
         Api::Type::Enum => ->(v) { emit_enum(v) },
         Api::Type::Array => ->(v) { emit_array(v) },
-        Api::Type::ResourceRef => ->(v) { emit_resourceref(v) }
+        Api::Type::ResourceRefs => ->(v) { emit_resourceref(v) }
       }.freeze
     end
 
@@ -109,7 +109,7 @@ module Provider
     def emit_array(p)
       item = if p.item_type.is_a? Api::Type::NestedObject
                emit_nested(p.item_type)
-             elsif p.item_type.is_a? Api::Type::ResourceRef
+             elsif p.item_type.is_a? Api::Type::ResourceRefs
                emit_resourceref(p.item_type)
              else
                p.item_type.split('::').last.downcase

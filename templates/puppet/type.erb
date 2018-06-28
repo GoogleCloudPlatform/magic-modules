@@ -38,7 +38,7 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
 <%
   unless object.parameters.nil?
     object.parameters.each do |param|
-      if param.class <= Api::Type::ResourceRef
+      if param.class <= Api::Type::ResourceRefs
         Google::LOGGER.info \
           "Generating autorequire #{object.name}.#{param.name}: #{param.type}"
 -%>

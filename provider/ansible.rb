@@ -75,9 +75,9 @@ module Provider
       def python_type(prop)
         prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
-        # We're assuming that all resources in the ResourceRef are either
+        # We're assuming that all resources in the ResourceRefs are either
         # all virtual or all not virtual.
-        if prop.is_a? Api::Type::ResourceRef
+        if prop.is_a? Api::Type::ResourceRefs
           return 'str' if prop.resource_refs.first.resource_ref.virtual
           return 'dict'
         end
@@ -183,7 +183,7 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         (object.parameters || []).select do |p|
           props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
-            p.is_a?(Api::Type::ResourceRef) && \
+            p.is_a?(Api::Type::ResourceRefs) && \
             !p.resource_refs.first.resource_ref.virtual
         end.any?
       end
@@ -195,8 +195,8 @@ module Provider
           # Select a resourceref if it exists.
           rref = (object.parameters || []).select do |prop|
             Google::StringUtils.underscore(prop.name) == p && \
-              prop.is_a?(Api::Type::ResourceRef) && !prop.resource_refs.first
-                                                         .resource_ref.virtual
+              prop.is_a?(Api::Type::ResourceRefs) && !prop.resource_refs.first
+                                                          .resource_ref.virtual
           end
           if rref.any?
             [
@@ -329,17 +329,17 @@ module Provider
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/BlockLength
       # Recurse through a list of properties and return a list of all
-      # ResourceRefs contained within that list. This can be at any depth
-      # because of Arrays and NestedObjects.  :virtual keyword can indicate if
-      # you want to `exclude` virtual properties or `only` have those
-      # properties returned.
+      # Api::Type::ResourceRefs contained within that list. This can be at any
+      # depth because of Arrays and NestedObjects.  :virtual keyword can
+      # indicate if you want to `exclude` virtual properties or `only` have
+      # those properties returned.
       def resourcerefs_for_properties(props, original_obj, **kwargs)
         rrefs = []
         props.each do |p|
           # We need to recurse on ResourceRefs to get all levels
           # We do not want to recurse on resourcerefs of type self to avoid
           # an infinite loop.
-          if p.is_a? Api::Type::ResourceRef
+          if p.is_a? Api::Type::ResourceRefs
             # We want to avoid a circular reference
             # This reference may be the
             # next reference or have some number of refs in between it.
@@ -369,7 +369,7 @@ module Provider
                              original_obj,
                              virtual: kwargs[:virtual]
               ))
-            elsif p.item_type.is_a? Api::Type::ResourceRef
+            elsif p.item_type.is_a? Api::Type::ResourceRefs
               next if p.item_type.resource_refs.first.resource_ref.virtual && \
                       kwargs[:virtual] == 'exclude'
               next if !p.item_type.resource_refs.first.resource_ref.virtual && \

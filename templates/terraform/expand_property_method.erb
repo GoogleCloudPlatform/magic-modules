@@ -60,7 +60,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   <% nested_properties.each do |prop| -%>
     <%= lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
   <% end -%>
-<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRefs) -%>
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
@@ -73,7 +73,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   return req, nil
 }
 <% else -%>
-  <% if property.is_a?(Api::Type::ResourceRef) -%>
+  <% if property.is_a?(Api::Type::ResourceRefs) -%>
   f, err := <%= build_expand_resource_ref('v.(string)', property) %>
   if err != nil {
     return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)

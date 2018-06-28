@@ -75,7 +75,7 @@
     - :AH
     - :SCTP
     - :ICMP
-- !ruby/object:Api::Type::ResourceRef
+- !ruby/object:Api::Type::ResourceRefs
   # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200)
   # After adding the RegionBackendService resource, move this field out
   # of the common fields for forwarding rules. This field should refer
@@ -121,7 +121,7 @@
     characters must be a dash, lowercase letter, or digit, except the last
     character, which cannot be a dash.
   required: true
-- !ruby/object:Api::Type::ResourceRef
+- !ruby/object:Api::Type::ResourceRefs
   name: 'network'
   resource_refs:
     - resource: 'Network'
@@ -172,7 +172,7 @@
 
     You may specify a maximum of up to 5 ports.
   item_type: Api::Type::String
-- !ruby/object:Api::Type::ResourceRef
+- !ruby/object:Api::Type::ResourceRefs
   name: 'subnetwork'
   resource_refs:
     - resource: 'Subnetwork'

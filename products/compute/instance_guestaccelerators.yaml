@@ -23,7 +23,7 @@
         description: |
           The number of the guest accelerator cards exposed to this
           instance.
-      # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+      # TODO(alexstephen): Change to ResourceRefs once AcceleratorType is
       # created.
       - !ruby/object:Api::Type::String
         name: 'acceleratorType'

@@ -24,11 +24,11 @@ module Dependencies
       @start = object.name
     end
 
-    # Adds an object to the graph. This object is represented by a ResourceRef
+    # Adds an object to the graph. This object is represented by a ResourceRefs
     # property
     def add_ref(prop, seed)
-      raise 'Only ResourceRef may be inserted' unless \
-        prop.is_a? Api::Type::ResourceRef
+      raise 'Only ResourceRefs may be inserted' unless \
+        prop.is_a? Api::Type::ResourceRefs
 
       # Since this is testing, we're always going to use the first reference.
       # It doesn't matter which we choose, but we have to choose one.

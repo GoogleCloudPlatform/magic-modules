@@ -58,7 +58,7 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/beta/addresses'
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -117,7 +117,7 @@ objects:
         min_version: beta
       # TODO(alexstephen): Add in status with exclude attribute. What does this
       # mean?
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'subnetwork'
         resource_refs:
           - resource: 'Subnetwork'
@@ -280,7 +280,7 @@ objects:
               description: |
                 An optional description of this resource.
                 Provide this property when you create the resource.
-            - !ruby/object:Api::Type::ResourceRef
+            - !ruby/object:Api::Type::ResourceRefs
               name: 'group'
               resource_refs:
                 - resource: 'InstanceGroup'
@@ -429,7 +429,7 @@ objects:
 
            For internal load balancing, a URL to a HealthCheck resource must be
            specified instead.
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'healthCheck'
           description: 'The HealthCheck used by the BackendService'
           resource_refs:
@@ -478,7 +478,7 @@ objects:
           - :HTTPS
           - :TCP
           - :SSL
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -529,7 +529,7 @@ objects:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -647,7 +647,7 @@ objects:
                       'templates/zonal_async.yaml.erb'), 4)
 %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -938,7 +938,7 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
-      # TODO(nelsonjr): Convert this to a ResourceRef.
+      # TODO(nelsonjr): Convert this to a ResourceRefs.
       - !ruby/object:Api::Type::String
         name: 'network'
         description: |
@@ -1006,7 +1006,7 @@ objects:
     input: true
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -1017,7 +1017,7 @@ objects:
         required: true
     properties:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'target'
         resource_refs:
           - resource: 'TargetPool'
@@ -1142,7 +1142,7 @@ objects:
         values:
           - :IPV4
           - :IPV6
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -1167,7 +1167,7 @@ objects:
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -1176,7 +1176,7 @@ objects:
           A reference to the region where the regional forwarding rule resides.
           This field is not applicable to global forwarding rules.
         output: true
-      # TODO(nelsonjr): Create a new type, WeakResourceRef that could accept
+      # TODO(nelsonjr): Create a new type, WeakResourceRefs that could accept
       # various different objects, instead of one, to enable these scenarios
       # where a field can receive multiple types (ditto in other places, look
       # for "mysterious" Api::Type::String based objects)
@@ -1516,7 +1516,7 @@ objects:
 <%= indent(compile('products/compute/instance_disks.yaml'), 10) %>
           # This machineType seems to be the shortname.
           # This is because machineType selfLinks are zone specific.
-          - !ruby/object:Api::Type::ResourceRef
+          - !ruby/object:Api::Type::ResourceRefs
             name: 'machineType'
             description: |
               Reference to a gcompute_machine_type resource.
@@ -1709,7 +1709,7 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
-        # TODO(alexstephen): Change to ResourceRef with array support
+        # TODO(alexstephen): Change to ResourceRefs with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         description: Any applicable license URI.
@@ -1750,7 +1750,7 @@ objects:
               The full Google Cloud Storage URL where disk storage is stored
               You must provide either this property or the sourceDisk property
               but not both.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'sourceDisk'
         description: |
           Refers to a gcompute_disk object
@@ -1814,7 +1814,7 @@ objects:
       encoder: encode_request
       decoder: decode_response
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -1855,7 +1855,7 @@ objects:
           request to modify or update metadata. You must always provide an
           up-to-date fingerprint hash in order to update or change metadata.
 <%= indent(compile('products/compute/instance_metadata.yaml'), 6) %>
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'machineType'
         resource_refs:
           - resource: 'MachineType'
@@ -1909,7 +1909,7 @@ objects:
       and add instances to an instance group manually.
 <%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -1960,14 +1960,14 @@ objects:
               name: 'port'
               description: |
                 The port number, which can be a value between 1 and 65535.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'network'
         resource_refs:
           - resource: 'Network'
             imports: 'selfLink'
         description: |
           The network to which all instances in the instance group belong.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -1975,7 +1975,7 @@ objects:
         description: |
           The region where the instance group is located
           (for regional resources).
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'subnetwork'
         resource_refs:
           - resource: 'Subnetwork'
@@ -2000,7 +2000,7 @@ objects:
       A managed instance group can have up to 1000 VM instances per group.
 <%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -2102,14 +2102,14 @@ objects:
         name: 'id'
         description: 'A unique identifier for this resource'
         output: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'instanceGroup'
         resource_refs:
           - resource: 'InstanceGroup'
             imports: 'selfLink'
         description: 'The instance group being managed'
         output: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'instanceTemplate'
         resource_refs:
           - resource: 'InstanceTemplate'
@@ -2143,7 +2143,7 @@ objects:
               name: 'port'
               description:
                 The port number, which can be a value between 1 and 65535.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -2158,7 +2158,7 @@ objects:
           TargetPool resources to which instances in the instanceGroup field are
           added. The target pools automatically apply to all of the instances in
           the managed instance group.
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'targetPool'
           description: 'The targetPool to receive managed instances.'
           resource_refs:
@@ -2274,7 +2274,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the resource.'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -2340,7 +2340,7 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
       - !ruby/object:Api::Type::Array
-        # TODO: Change subnetworks to ResourceRef
+        # TODO: Change subnetworks to ResourceRefs
         name: 'subnetworks'
         description: |
           Server-defined fully-qualified URLs for all subnetworks in this
@@ -2534,7 +2534,7 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the
           last character, which cannot be a dash.
         required: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'network'
         resource_refs:
           - resource: 'Network'
@@ -2558,7 +2558,7 @@ objects:
         description: 'A list of instance tags to which this route applies.'
         item_type: Api::Type::String
         input: true
-      # TODO(nelsonjr): Make this a ResourceRef when Gateway is submitted.
+      # TODO(nelsonjr): Make this a ResourceRefs when Gateway is submitted.
       - !ruby/object:Api::Type::String
         name: 'nextHopGateway'
         description: |
@@ -2572,7 +2572,7 @@ objects:
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
         input: true
-      # TODO(nelsonjr): Make this a ResourceRef when Instance is submitted.
+      # TODO(nelsonjr): Make this a ResourceRefs when Instance is submitted.
       - !ruby/object:Api::Type::String
         name: 'nextHopInstance'
         description: |
@@ -2589,7 +2589,7 @@ objects:
         description: |
           Network IP address of an instance that should handle matching packets.
         input: true
-      # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
+      # TODO(nelsonjr): Make this a ResourceRefs when VpnTunnel is submitted.
       - !ruby/object:Api::Type::String
         name: 'nextHopVpnTunnel'
         description: |
@@ -2625,14 +2625,14 @@ objects:
     # zonal operation for the create action.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'source'
         resource_refs:
           - resource: 'Disk'
             imports: 'name'
         description: 'A reference to the disk used to create this snapshot.'
         input: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'zone'
         resource_refs:
           - resource: 'Zone'
@@ -2720,7 +2720,7 @@ objects:
           can be because the original image had licenses attached (such as a
           Windows image).  snapshotEncryptionKey nested object Encrypts the
           snapshot using a customer-supplied encryption key.
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'license'
           resource_refs:
             - resource: 'License'
@@ -2957,7 +2957,7 @@ objects:
           following characters must be a dash, lowercase letter, or digit,
           except the last character, which cannot be a dash.
         required: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'network'
         resource_refs:
           - resource: 'Network'
@@ -3018,7 +3018,7 @@ objects:
           assigned external IP addresses.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -3075,7 +3075,7 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
         required: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'urlMap'
         resource_refs:
           - resource: 'UrlMap'
@@ -3137,13 +3137,13 @@ objects:
         update_verb: :POST
         update_url:
           'projects/{{project}}/targetHttpsProxies/{{name}}/setSslCertificates'
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'sslCertificate'
           resource_refs:
             - resource: 'SslCertificate'
               imports: 'selfLink'
           description: 'The SSL certificates used by this TargetHttpsProxy'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'urlMap'
         resource_refs:
           - resource: 'UrlMap'
@@ -3154,7 +3154,7 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/targetHttpsProxies/{{name}}/setUrlMap'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'sslPolicy'
         # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
         exclude: true
@@ -3186,7 +3186,7 @@ objects:
       decoder: decode_request
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -3194,7 +3194,7 @@ objects:
         description: 'The region where the target pool resides.'
         required: true
     properties:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'backupPool'
         resource_refs:
           - resource: 'TargetPool'
@@ -3240,7 +3240,7 @@ objects:
           primary pool in the "force" mode, where traffic will be spread to the
           healthy instances with the best effort, or to all instances when no
           instance is healthy.
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'healthCheck'
         resource_refs:
           - resource: 'HttpHealthCheck'
@@ -3261,7 +3261,7 @@ objects:
           A list of virtual machine instances serving this pool.
 
           They must live in zones contained in the same region as this pool.
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'instance'
           description: 'The instance being served by this pool.'
           resource_refs:
@@ -3348,7 +3348,7 @@ objects:
           - :PROXY_V1
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setProxyHeader'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'service'
         resource_refs:
           - resource: 'BackendService'
@@ -3368,13 +3368,13 @@ objects:
         required: true
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetSslProxies/{{name}}/setSslCertificates'
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'sslCertificate'
           resource_refs:
             - resource: 'SslCertificate'
               imports: 'selfLink'
           description: 'The SSL certificates used by this TargetSslProxy'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'sslPolicy'
         # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
         exclude: true
@@ -3441,7 +3441,7 @@ objects:
           - :PROXY_V1
         update_verb: :POST
         update_url: 'projects/{{project}}/global/targetTcpProxies/{{name}}/setProxyHeader'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'service'
         resource_refs:
           - resource: 'BackendService'
@@ -3466,7 +3466,7 @@ objects:
       api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'
@@ -3499,7 +3499,7 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'network'
         resource_refs:
           - resource: 'Network'
@@ -3512,7 +3512,7 @@ objects:
         name: 'tunnels'
         description: |
           A list of references to VpnTunnel resources associated to this VPN gateway.
-        # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
+        # TODO(nelsonjr): Make this a ResourceRefs when VpnTunnel is submitted.
         item_type: Api::Type::String
         output: true
       - !ruby/object:Api::Type::Array
@@ -3520,7 +3520,7 @@ objects:
         description: |
           A list of references to the ForwardingRule resources associated to this VPN
           gateway.
-        item_type: !ruby/object:Api::Type::ResourceRef
+        item_type: !ruby/object:Api::Type::ResourceRefs
           name: 'forwardingRule'
           resource_refs:
             - resource: 'ForwardingRule'
@@ -3545,7 +3545,7 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'defaultService'
         resource_refs:
           - resource: 'BackendService'
@@ -3601,7 +3601,7 @@ objects:
         description: 'The list of named PathMatchers to use against the URL.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-            - !ruby/object:Api::Type::ResourceRef
+            - !ruby/object:Api::Type::ResourceRefs
               name: 'defaultService'
               resource_refs:
                 - resource: 'BackendService'
@@ -3631,7 +3631,7 @@ objects:
                       any text after the first ? or #, and those chars are not
                       allowed here.
                     item_type: Api::Type::String
-                  - !ruby/object:Api::Type::ResourceRef
+                  - !ruby/object:Api::Type::ResourceRefs
                     name: 'service'
                     resource_refs:
                       - resource: 'BackendService'
@@ -3655,7 +3655,7 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'path'
               description: 'Path portion of the URL.'
-            - !ruby/object:Api::Type::ResourceRef
+            - !ruby/object:Api::Type::ResourceRefs
               name: 'service'
               resource_refs:
                 - resource: 'BackendService'
@@ -3739,7 +3739,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the resource.'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'region'
         resource_refs:
           - resource: 'Region'

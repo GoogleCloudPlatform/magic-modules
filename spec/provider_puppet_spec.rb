@@ -124,7 +124,7 @@ describe Provider::Puppet do
       type_writer.expects(:write).with("property: property2 (String)\n")
       type_writer.expects(:write).with("property: property3 (Array)\n")
       type_writer.expects(:write).with("property: property4 (Enum)\n")
-      type_writer.expects(:write).with("parameter: property5 (ResourceRef)\n")
+      type_writer.expects(:write).with("parameter: property5 (ResourceRefs)\n")
       type_writer.expects(:write).with(
         "property: nested_property (NestedObject)\n"
       )

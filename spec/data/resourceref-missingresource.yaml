@@ -26,7 +26,7 @@ objects:
     base_url: 'anotherResource'
     description: 'blah blah'
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'property5'
         description: 'an explanation whats this about'
         resource_refs:

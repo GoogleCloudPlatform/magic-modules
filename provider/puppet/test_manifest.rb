@@ -60,7 +60,7 @@ module Provider
     end
 
     # Generates a resource block for a resource ref.
-    # Requires the ResourceRef and an index.
+    # Requires the ResourceRefs and an index.
     def generate_ref(ref, index)
       ref_name = Google::StringUtils.underscore(ref.name)
       generate_object(ref, "resource(#{ref_name},#{index})", :resource,
@@ -116,7 +116,7 @@ module Provider
         Api::Type::Time => ->(v) { quote_string(v.iso8601) },
         Api::Type::Array => ->(v) { format_values('[', v, ']') },
         Api::Type::NestedObject => ->(v) { format_values('{', v, '}') },
-        Api::Type::ResourceRef => ->(v) { quote_string(v) },
+        Api::Type::ResourceRefs => ->(v) { quote_string(v) },
         Api::Type::Array::STRING_ARRAY_TYPE =>
           ->(v) { ['[', v.map { |e| quote_string(e) }.join(', '), ']'].join },
         Api::Type::Array::RREF_ARRAY_TYPE =>

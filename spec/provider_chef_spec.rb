@@ -139,7 +139,7 @@ describe Provider::Chef do
 
     return unless data[:resourceref]
 
-    # ResourceRef
+    # ResourceRefs
     output_file "blah/resources/#{data[:resourceref][:name]}.rb",
                 data[:resourceref][:writer]
     output_file "blah/spec/#{data[:resourceref][:name]}_spec.rb",

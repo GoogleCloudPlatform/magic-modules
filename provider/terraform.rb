@@ -48,7 +48,7 @@ module Provider
         'Api::Type::String' => 'schema.TypeString',
         Api::Type::Time => 'schema.TypeString',
         Api::Type::Enum => 'schema.TypeString',
-        Api::Type::ResourceRef => 'schema.TypeString',
+        Api::Type::ResourceRefs => 'schema.TypeString',
         Api::Type::NestedObject => 'schema.TypeList',
         Api::Type::Array => 'schema.TypeList',
         Api::Type::NameValues => 'schema.TypeMap',

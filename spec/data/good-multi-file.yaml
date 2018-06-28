@@ -49,7 +49,7 @@ objects:
     base_url: some/path/to/anotherresources
     description: 'blah blah'
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'property5'
         description: 'hey, this is property number 5!'
         resource_refs:

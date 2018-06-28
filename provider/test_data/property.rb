@@ -34,7 +34,7 @@ module Provider
         Google::LOGGER.info \
           "Generating test #{prop.out_name}[#{index}] #{comparator} #{value}"
 
-        if prop.class <= Api::Type::ResourceRef
+        if prop.class <= Api::Type::ResourceRefs
           resourceref_property(prop, value, name_override)
         elsif prop.class <= Api::Type::NameValues
           namevalues_property(prop, value, name_override)

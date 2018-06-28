@@ -62,7 +62,7 @@ module Dependencies
         emit_manifest_array(prop, seed)
       elsif prop.is_a?(Api::Type::NestedObject)
         emit_nested(prop, seed)
-      elsif prop.is_a?(Api::Type::ResourceRef)
+      elsif prop.is_a?(Api::Type::ResourceRefs)
         emit_resource(prop, seed)
       end
     end
@@ -80,7 +80,7 @@ module Dependencies
           collect_refs(prop.item_type.properties, :title, seed + index - 1,
                        ensure: 'present')
         end
-      elsif prop.item_type.is_a?(Api::Type::ResourceRef)
+      elsif prop.item_type.is_a?(Api::Type::ResourceRefs)
         size = @datagen.object_size(prop, seed, true)
         (1..size).each do |index|
           emit_resource(prop.item_type, (seed + index - 1) % 3)
@@ -98,7 +98,7 @@ module Dependencies
       @graph.add_ref(prop, seed % 3)
 
       # Because this is testing, we're always going to use the first
-      # ResourceRef in a list of ResourceRefs.
+      # ResourceRefs in a ResourceRefs.
 
       # Recurse through referenced object for more resourcerefs
       # Don't recurse on resourceref of same type.

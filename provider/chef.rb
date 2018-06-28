@@ -89,7 +89,7 @@ module Provider
         if prop.is_a? Api::Type::NestedObject
 
       return "[String, ::#{prop.property_type.gsub(':Property:', ':Data:')}]" \
-        if prop.is_a? Api::Type::ResourceRef
+        if prop.is_a? Api::Type::ResourceRefs
 
       return 'Array' if prop.is_a? Api::Type::Array
 

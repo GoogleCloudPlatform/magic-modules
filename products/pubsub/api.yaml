@@ -48,7 +48,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the subscription.'
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'topic'
         resource_refs:
           - resource: 'Topic'

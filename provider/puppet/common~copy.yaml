@@ -17,7 +17,7 @@
 <% unless config.nil? -%>
 <%
 has_rrefs = api.objects.any? do |obj|
-  obj.all_user_properties.any? { |prop| prop.is_a?(Api::Type::ResourceRef) }
+  obj.all_user_properties.any? { |prop| prop.is_a?(Api::Type::ResourceRefs) }
 end
 -%>
 <% if has_rrefs -%>

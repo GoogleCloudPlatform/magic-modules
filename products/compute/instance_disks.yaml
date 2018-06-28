@@ -95,7 +95,7 @@
             name: 'diskSizeGb'
             description: Specifies the size of the disk in base-2 GB.
           # diskStorageType - deprecated
-          - !ruby/object:Api::Type::ResourceRef
+          - !ruby/object:Api::Type::ResourceRefs
             name: 'diskType'
             description: |
               Reference to a gcompute_disk_type resource.
@@ -162,7 +162,7 @@
           - :READ_ONLY
       # This is the name, not selfLink of a disk.
 <% if type == 'InstanceTemplate' -%>
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'source'
         resource_refs:
           - resource: 'Disk'
@@ -178,7 +178,7 @@
           Note that for InstanceTemplate, specify the disk name, not
           the URL for the disk.
 <% elsif type == 'Instance' -%>
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'source'
         resource_refs:
           - resource: 'Disk'

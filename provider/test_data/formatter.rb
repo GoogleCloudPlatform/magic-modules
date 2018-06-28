@@ -39,7 +39,7 @@ module Provider
       end
 
       # Generates a resource block for a resource ref.
-      # Requires the ResourceRef and an index.
+      # Requires the ResourceRefs and an index.
       def generate_ref(_ref, _index)
         raise 'Implement generate_ref to output a formatted block'
       end
@@ -75,7 +75,7 @@ module Provider
           emit_manifest_array(type, prop, seed, ctx, prop_name_method)
         elsif prop.is_a?(Api::Type::NestedObject)
           [name, formatter(type, emit_nested(prop, seed, ctx))]
-        elsif prop.is_a?(Api::Type::ResourceRef)
+        elsif prop.is_a?(Api::Type::ResourceRefs)
           if rref_value
             [name, formatter(type, emit_resource_value(prop, seed, ctx))]
           else
@@ -127,7 +127,7 @@ module Provider
         "resource(#{name},#{seed % MAX_ARRAY_SIZE})"
       end
 
-      # Returns the value being exported by a ResourceRef
+      # Returns the value being exported by a ResourceRefs
       def emit_resource_value(prop, seed, _ctx)
         @datagen.value(prop.resource_refs.first.property.class,
                        prop.resource_refs.first.property,

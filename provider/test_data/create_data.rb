@@ -75,10 +75,10 @@ module Provider
              prop.properties.map { |p| expect_hash(p, [], false, seed) }, 2
            ),
            '}'].join("\n")
-        elsif prop.is_a? Api::Type::ResourceRef
+        elsif prop.is_a? Api::Type::ResourceRefs
           # All ResourceRefs should expect the fetched value
           # Without this, the JSON call will be expecting the title of the
-          # ResourceRef block, not a value within that block.
+          # ResourceRefs block, not a value within that block.
           ["'#{prop.field_name}'", '=>', value(prop.resource_refs
                                                    .first.property.class,
                                                prop.resource_refs
@@ -102,13 +102,13 @@ module Provider
             expect_array_item_hash(prop, seed),
             ']'
           ]
-        elsif prop.item_type.class <= Api::Type::ResourceRef
+        elsif prop.item_type.class <= Api::Type::ResourceRefs
           [
             ["'#{prop.field_name}'", '=>', '['].join(' '),
             expect_array_item_rref(prop, seed),
             ']'
           ]
-        elsif prop.is_a? Api::Type::ResourceRef
+        elsif prop.is_a? Api::Type::ResourceRefs
           "'#{prop.field_name}' => #{value(prop.property.class,
                                            prop.property, seed)}"
         else
@@ -152,10 +152,10 @@ module Provider
                       end, 2
                     ),
                     '}'].join("\n")
-                 elsif prop.is_a? Api::Type::ResourceRef
+                 elsif prop.is_a? Api::Type::ResourceRefs
                    # All ResourceRefs should expect the fetched value
                    # Without the JSON call will be expecting the title of the
-                   # ResourceRef block, not a value within that block.
+                   # ResourceRefs block, not a value within that block.
                    [
                      "'#{prop.field_name}' =>",
                      value(prop.resource_refs.first.property.class,

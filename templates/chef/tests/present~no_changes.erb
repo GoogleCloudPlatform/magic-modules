@@ -41,7 +41,7 @@
                                               (test_matrix.level + 2) * 2)
   ].flatten.compact.uniq
 
-  # TODO(nelsonjr): Fix test when object references itself as a ResourceRef,
+  # TODO(nelsonjr): Fix test when object references itself as a ResourceRefs,
   # e.g. a bucket ACL points back to a bucket as a resource ref. When generating
   # the references the code it oblivious to that fact and attempt to have
   # various objects created to satisfy the dependency. That leads to collision

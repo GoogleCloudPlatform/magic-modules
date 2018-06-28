@@ -90,7 +90,7 @@ Optional fields:
 
 Example:
 
-    - !ruby/object:Api::Type::ResourceRef
+    - !ruby/object:Api::Type::ResourceRefs
       name: 'region'
       resource: 'Region'
       imports: 'name'
@@ -161,12 +161,13 @@ Currently MM supports the following types:
 -  Api::Type::NameValues
 -  `Api::Type::NestedObject`: A composite field, composed of inner fields. This
    is used for structures that are nested.
--  <a id="resource-ref"></a>`Api::Type::ResourceRef`: A reference to another object described in the
+-  `<a id="resource-ref"></a>Api::Type::ResourceRefs`: A reference to another object described in the
    product. This is used to create strong relationship binding between the
    objects, where the generated code will make sure the object depended upon
-   exists. A `ResourceRef` also specifies which property from the dependent
+   exists. A `ResourceRefs` also specifies which property from the dependent
    object we are interested to fetch, by specifying the `resource` and `imports`
-   fields.
+   fields. A ResourceRefs takes in a list of resource/import pairs, which can
+   be used to create a one-to-many relationship.
 -  `Api::Type::String`: A string field.
 -  `Api::Type::Time`: An RFC 3339 representation of a time stamp.
 

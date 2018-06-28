@@ -202,7 +202,7 @@ describe Api::Type::Enum do
   end
 end
 
-describe Api::Type::ResourceRef do
+describe Api::Type::ResourceRefs do
   context 'requires valid resource' do
     let(:spec_location) do
       File.join(File.dirname(__FILE__), 'data',
@@ -252,7 +252,7 @@ describe Api::Type::ResourceRef do
     subject do
       product.objects.collect(&:parameters)
              .flatten
-             .select { |p| p.class <= Api::Type::ResourceRef }
+             .select { |p| p.class <= Api::Type::ResourceRefs }
     end
 
     it { is_expected.to have_attributes(length: 1) }

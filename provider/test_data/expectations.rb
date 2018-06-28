@@ -61,7 +61,7 @@ module Provider
           rref_list = object.uri_properties.map do |ref|
             # We need to verify that only resourcerefs directly belonging to
             # this object are inserted into the expectation.
-            next unless ref.is_a? Api::Type::ResourceRef
+            next unless ref.is_a? Api::Type::ResourceRefs
             name = Google::StringUtils.underscore(
               ref.resource_refs.first.resource_ref.name
             )
@@ -134,7 +134,7 @@ module Provider
 
           if test[:exists]
             has_rrefs = !object.uri_properties
-                               .select { |p| p.is_a? Api::Type::ResourceRef }
+                               .select { |p| p.is_a? Api::Type::ResourceRefs }
                                .empty?
             # Delete specifies name as a parameter, not as part of data
             params = []
@@ -195,7 +195,7 @@ module Provider
         rref_list = object.uri_properties.map do |ref|
           # We need to verify that only resourcerefs directly belonging to this
           # object are inserted into the expectation.
-          next unless ref.is_a? Api::Type::ResourceRef
+          next unless ref.is_a? Api::Type::ResourceRefs
           name = Google::StringUtils.underscore(ref.resource_refs.first
                                                    .resource_ref.name)
           value = @data_gen.value(ref.resource_refs.first.property.class,

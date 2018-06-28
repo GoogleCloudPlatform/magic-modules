@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO(nelsonjr): Make this a ResourceRef pointing to the Compute
+# TODO(nelsonjr): Make this a ResourceRefs pointing to the Compute
 # resources (external to this product)
-# | - !ruby/object:Api::Type::ResourceRef
+# | - !ruby/object:Api::Type::ResourceRefs
 # |   name: 'machineType'
 # |   product: 'Compute'
 # |   resource: 'MachineType'

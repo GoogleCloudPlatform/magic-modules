@@ -81,9 +81,9 @@ objects:
         description: |
           The authentication information for accessing the master endpoint.
         properties:
-          # TODO(nelsonjr): Make this a ResourceRef pointing to the Compute
+          # TODO(nelsonjr): Make this a ResourceRefs pointing to the Compute
           # resources (external to this product)
-          # | - !ruby/object:Api::Type::ResourceRef
+          # | - !ruby/object:Api::Type::ResourceRefs
           # |   name: 'machineType'
           # |   product: 'Compute'
           # |   resource: 'MachineType'
@@ -143,7 +143,7 @@ objects:
         values:
           - 'monitoring.googleapis.com'
           - 'none'
-      # TODO(nelsonjr): This is a ResourceRef but on a resource on another
+      # TODO(nelsonjr): This is a ResourceRefs but on a resource on another
       # product (Compute). Figure out how to represent/implement this. For now
       # making it a string.
       - !ruby/object:Api::Type::String
@@ -192,7 +192,7 @@ objects:
                   the cluster. When enabled, it ensures that a Heapster pod is
                   running in the cluster, which is also used by the Cloud
                   Monitoring service.
-      # TODO(nelsonjr): This is a ResourceRef but on a resource on another
+      # TODO(nelsonjr): This is a ResourceRefs but on a resource on another
       # product (Compute). Figure out how to represent/implement this. For now
       # making it a string.
       - !ruby/object:Api::Type::String
@@ -286,7 +286,7 @@ objects:
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'cluster'
         resource_refs:
           - resource: 'Cluster'
@@ -386,14 +386,14 @@ objects:
         name: 'name'
         description: 'The config file kubectl settings will be written to.'
         required: true
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::ResourceRefs
         name: 'cluster'
         resource_refs:
           - resource: 'Cluster'
             imports: 'name'
         description: 'A reference to Cluster resource'
         required: true
-      # TODO(nelsonjr): Make 'zone' a ResourceRef once cross-module references
+      # TODO(nelsonjr): Make 'zone' a ResourceRefs once cross-module references
       # are possible.
       - !ruby/object:Api::Type::String
         name: 'zone'

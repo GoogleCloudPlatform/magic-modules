@@ -66,7 +66,7 @@ module Provider
 
       prop_map \
         << properties.select { |p| p.is_a?(Api::Type::Array) }
-                     .select { |p| p.item_type.is_a?(Api::Type::ResourceRef) }
+                     .select { |p| p.item_type.is_a?(Api::Type::ResourceRefs) }
                      .map { |p| generate_resourceref_array(data, p.item_type) }
 
       prop_map
@@ -120,12 +120,12 @@ module Provider
     end
 
     def generate_resourceref_properties(data, properties)
-      properties.select { |p| p.is_a?(Api::Type::ResourceRef) }
+      properties.select { |p| p.is_a?(Api::Type::ResourceRefs) }
                 .map { |p| generate_resourceref_object(data, p) }
     end
 
     def generate_resourceref_object(data, prop)
-      # One file is created per ResourceRef object.
+      # One file is created per ResourceRefs object.
       #
       resource = Google::StringUtils.underscore(
         prop.resource_refs.first.resource_ref.name
@@ -145,7 +145,7 @@ module Provider
     end
 
     def generate_resourceref_array(data, prop)
-      # One file is created per ResourceRef object.
+      # One file is created per ResourceRefs object.
       resource = Google::StringUtils.underscore(
         prop.resource_refs.first.resource_ref.name
       )
