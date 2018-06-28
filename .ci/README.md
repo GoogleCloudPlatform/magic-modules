@@ -143,5 +143,10 @@ Git's error messages can be obtuse!  If you see something about how the `git pus
 ## The Magician failed while running on my submitted PR
 If Concourse notices the Magician's pushes to your PR before it notices that the Magician has merged your PR, it might try to generate again - this is always safe, don't worry.  :)
 
+## I submitted some generated PRs, but not all of them, and I need to make a change.
+This is the most common issue and the solution isn't complicated.  If you delete all the `depends: ...` lines from the Magician's comments, the Magician will think that it is starting over from scratch.  It'll push to the `codegen-pr-##` branch, instead of the `codegen-sha-######` branches, and it'll try to open PRs from those branches.  If you want a clean experience, you can close your existing PRs (just hit 'Close' at the bottom of the PR, don't merge them) and The Magician will do the right thing.
+
+If you want to leave those PRs open for some reason (preserve comments, because an external partner is watching them, etc), no problem, the magician will still do the right thing, it'll just update the PRs in the `mm-generate` step (*before* the tests) rather than in `create-prs` (*after* the tests) - your PR will still get updated even if the generated code fails tests.
+
 ## Other: Consult your local Magician Expert
 Remind them to update this page.
