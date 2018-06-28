@@ -322,7 +322,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% elsif object.custom_code.encoder -%>
 	obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
 	<% end -%>
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+	url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
 	if err != nil {
 	return err
 	}

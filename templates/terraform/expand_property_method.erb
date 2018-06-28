@@ -48,7 +48,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
       if err != nil {
         return nil, err
       }
-      transformed["<%= prop.name -%>"] = transformed<%= titlelize_property(prop) -%>
+      transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 
     <% end -%>
 
