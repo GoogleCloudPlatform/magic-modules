@@ -13,6 +13,9 @@
 	# limitations under the License.
 <% end -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+	if v == nil || v.(string) == "" {
+		return "", nil
+	}
     router := v.(string)
 	if !strings.HasPrefix(router, "https://www.googleapis.com/compute/") {
 		// Router value provided is just the name, lookup the router SelfLink
