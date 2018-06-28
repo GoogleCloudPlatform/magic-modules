@@ -146,6 +146,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
   # Not yet implemented.
+  Autoscaler: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   # Ansible tasks must alter infrastructure.

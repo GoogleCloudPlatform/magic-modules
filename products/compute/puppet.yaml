@@ -103,6 +103,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Region cannot be edited' if @dirty
   # Not yet implemented.
+  Autoscaler: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Provider::Puppet::ResourceOverride
