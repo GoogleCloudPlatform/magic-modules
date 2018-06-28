@@ -40,7 +40,7 @@ module Provider
                                               .map(&:resource_ref)
                                               .uniq
         virts.map do |virt|
-          if virt == virtuals.last
+          if virt == virts.last
             lines(selflink_function(virt))
           else
             lines(selflink_function(virt), 1)
