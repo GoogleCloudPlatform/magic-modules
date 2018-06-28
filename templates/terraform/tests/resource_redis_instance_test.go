@@ -131,8 +131,8 @@ resource "google_redis_instance" "test" {
 	}
 
 	redis_configs {
-		maxmemory_policy       = "allkeys-lru"
-		notify_keyspace_events = "KEA"
+		maxmemory-policy       = "allkeys-lru"
+		notify-keyspace-events = "KEA"
 	}
 }`, name)
 }
@@ -150,8 +150,8 @@ resource "google_redis_instance" "test" {
 	}
 
 	redis_configs {
-		maxmemory_policy       = "noeviction"
-		notify_keyspace_events = ""
+		maxmemory-policy       = "noeviction"
+		notify-keyspace-events = ""
 	}
 }`, name)
 }
@@ -183,8 +183,8 @@ resource "google_redis_instance" "test" {
 	}
 
 	redis_configs {
-		maxmemory_policy       = "allkeys-lru"
-		notify_keyspace_events = "KEA"
+		maxmemory-policy       = "allkeys-lru"
+		notify-keyspace-events = "KEA"
 	}
 }`, network, name)
 }
