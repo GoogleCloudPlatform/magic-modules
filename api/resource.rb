@@ -306,7 +306,7 @@ module Api
     # Returns all of the properties that are a part of the self_link or
     # collection URLs
     def uri_properties
-      [@base_url, @__product.default_version.base_url].compact.map do |url|
+      [@base_url, @__product.base_url].compact.map do |url|
         parts = url.scan(/\{\{(.*?)\}\}/).flatten
         parts << 'name'
         parts.delete('project')

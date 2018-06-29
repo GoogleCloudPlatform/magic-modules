@@ -2990,14 +2990,6 @@ objects:
           assigned external IP addresses.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'name'
-        description: |
-          URL of the GCP region for this subnetwork.
-        required: true
-        input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Private Google Access':
