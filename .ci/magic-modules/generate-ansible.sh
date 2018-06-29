@@ -31,8 +31,9 @@ git add -A
 # Set the "author" to the commit's real author.
 git commit -m "$ANSIBLE_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
-popd
 
+apply_patches patches/terraform-providers/terraform-provider-google "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR"
+popd
 popd
 
 git clone magic-modules-branched/build/ansible ./ansible-generated

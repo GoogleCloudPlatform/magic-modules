@@ -36,7 +36,7 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
       # Set the "author" to the commit's real author.
       git commit -m "$COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
       git checkout -B "$(cat ../../../branchname)"
-      apply_patches "patch/GoogleCloudPlatform/puppet-google-$PRD" "$PUPPET_COMMIT_MSG" "$LAST_COMMIT_AUTHOR"
+      apply_patches "patches/GoogleCloudPlatform/$PROVIDER-google-$PRD" "$PUPPET_COMMIT_MSG" "$LAST_COMMIT_AUTHOR"
     popd
   popd
   git clone "magic-modules-branched/build/$PROVIDER/$PRD" "$PROVIDER-generated/$PRD"
