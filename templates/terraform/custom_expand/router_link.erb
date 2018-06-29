@@ -16,25 +16,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 	if v == nil || v.(string) == "" {
 		return "", nil
 	}
-    router := v.(string)
-	if !strings.HasPrefix(router, "https://www.googleapis.com/compute/") {
-		// Router value provided is just the name, lookup the router SelfLink
-        project, err := getProject(d, config)
-        if err != nil {
-            return nil, err
-        }
-        region, err := getRegion(d, config)
-        if err != nil {
-            return nil, err
-        }
-		routerData, err := config.clientCompute.Routers.Get(
-			project, region, router).Do()
-		if err != nil {
-			return nil, fmt.Errorf("Error reading router: %s", err)
-		}
-		router = routerData.SelfLink
-	}
-
-	return router, nil
-
+    f, err := parseRegionalFieldValue("routers", v.(string), "project", "region", "zone", d, config, true)
+    if err != nil {
+        return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
+    }
+    return "https://www.googleapis.com/compute/v1/" + f.RelativeLink(), nil
 }
