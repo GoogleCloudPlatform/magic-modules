@@ -1034,6 +1034,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
         next_hop_vpn_tunnel = "${google_compute_vpn_tunnel.tunnel1.self_link}"
       }
       ```
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the shared secret will be stored in the raw
+        state as plain-text.
+        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     properties:
       targetVpnGateway: !ruby/object:Provider::Terraform::PropertyOverride
         resource: 'VpnGateway'
