@@ -7,6 +7,7 @@
 set -x
 set -e
 source "$(dirname "$0")/helpers.sh"
+PATCH_DIR="$(pwd)/patches"
 
 IFS="," read -ra PRODUCT_ARRAY <<< "$PRODUCTS"
 for PRD in "${PRODUCT_ARRAY[@]}"; do
@@ -36,7 +37,7 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
       # Set the "author" to the commit's real author.
       git commit -m "$COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
       git checkout -B "$(cat ../../../branchname)"
-      apply_patches "patches/GoogleCloudPlatform/$PROVIDER-google-$PRD" "$COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
+      apply_patches "$PATCH_DIR/GoogleCloudPlatform/$PROVIDER-google-$PRD" "$COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
     popd
   popd
   git clone "magic-modules-branched/build/$PROVIDER/$PRD" "$PROVIDER-generated/$PRD"

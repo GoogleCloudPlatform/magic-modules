@@ -6,7 +6,7 @@
 set -x
 set -e
 source "$(dirname "$0")/helpers.sh"
-
+PATCH_DIR="$(pwd)/patches"
 pushd magic-modules-branched
 LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 bundle install
@@ -33,7 +33,7 @@ git add -A
 git commit -m "$ANSIBLE_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches patches/terraform-providers/terraform-provider-google "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "devel"
+apply_patches "$PATCH_DIR/modular-magician/ansible" "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "devel"
 popd
 popd
 

@@ -6,6 +6,7 @@
 set -x
 set -e
 source "$(dirname "$0")/helpers.sh"
+PATCH_DIR="$(pwd)/patches"
 
 # Create $GOPATH structure - in order to successfully run Terraform codegen, we need to run
 # it with a correctly-set-up $GOPATH.  It calls out to `goimports`, which means that
@@ -49,7 +50,7 @@ git add -A
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches patches/terraform-providers/terraform-provider-google "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
+apply_patches "$PATCH_DIR/terraform-providers/terraform-provider-google" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
 
 popd
 popd
