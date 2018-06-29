@@ -30,12 +30,13 @@ module Api
       super
       set_variables @objects, :__product
       check_property :objects, Array
-      check_property_list :objects, Api::Resource
       check_property :prefix, String
       check_property :scopes, ::Array
       check_property_list :scopes, String
 
       check_versions
+
+      check_property_list :objects, Api::Resource
     end
 
     # Represents a version of the API for this product

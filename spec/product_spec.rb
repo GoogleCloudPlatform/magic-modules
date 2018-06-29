@@ -156,6 +156,8 @@ describe Api::Product do
                 '  - !ruby/object:Api::Product::Version',
                 '    name: v1',
                 '    base_url: "baz"',
+                'scopes:',
+                '  - test_scope',
                 'objects:',
                 '  - bah. bad object!').validate
       end

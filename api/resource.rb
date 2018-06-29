@@ -325,6 +325,7 @@ module Api
     end
 
     def check_url
+      return unless @__product
       ignored_props = %w[project name]
       uri_names = uri_properties.reject { |x| ignored_props.include? x.name }
                                 .map(&:name)
