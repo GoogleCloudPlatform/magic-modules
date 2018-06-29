@@ -5,6 +5,7 @@
 
 set -x
 set -e
+source "$(dirname "$0")/helpers.sh"
 
 pushd magic-modules-branched
 LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
@@ -32,7 +33,7 @@ git add -A
 git commit -m "$ANSIBLE_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches patches/terraform-providers/terraform-provider-google "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR"
+apply_patches patches/terraform-providers/terraform-provider-google "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR"
 popd
 popd
 
