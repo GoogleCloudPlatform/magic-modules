@@ -315,6 +315,13 @@ objects:
       and call all BucketAccessControls methods on the bucket.  For more
       information, see Access Control, with the caveat that this API uses
       READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'bucket'
+        resource: 'Bucket'
+        imports: 'name'
+        description: 'The name of the bucket.'
+        required: true
     properties:
 <%= indent(compile('products/storage/bucket_access_control.yaml'), 6) %>
   - !ruby/object:Api::Resource
@@ -335,8 +342,18 @@ objects:
       object is always an OWNER.
       For more information, see Access Control, with the caveat that this API
       uses READER and OWNER instead of READ and FULL_CONTROL.
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'bucket'
+        resource: 'Bucket'
+        imports: 'name'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'object'
+        description: 'The name of the object, if applied to an object.'
+        required: true
     properties:
-<% object_required = true -%>
 <%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
   - !ruby/object:Api::Resource
     name: 'DefaultObjectACL'
@@ -356,8 +373,16 @@ objects:
       object is always an OWNER.
       For more information, see Access Control, with the caveat that this API
       uses READER and OWNER instead of READ and FULL_CONTROL.
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'bucket'
+        resource: 'Bucket'
+        imports: 'name'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'object'
+        description: 'The name of the object, if applied to an object.'
+        required: false
     properties:
-<% object_required = false -%>
 <%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
-
-  

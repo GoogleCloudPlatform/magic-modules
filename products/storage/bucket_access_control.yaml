@@ -11,12 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-- !ruby/object:Api::Type::ResourceRef
-  name: 'bucket'
-  resource: 'Bucket'
-  imports: 'name'
-  description: 'The name of the bucket.'
-  required: true
 - !ruby/object:Api::Type::String
   name: 'domain'
   description: 'The domain associated with the entity.'
