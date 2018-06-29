@@ -33,7 +33,7 @@ git add -A
 git commit -m "$ANSIBLE_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches patches/terraform-providers/terraform-provider-google "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR"
+apply_patches patches/terraform-providers/terraform-provider-google "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "devel"
 popd
 popd
 
