@@ -175,18 +175,23 @@ jobs:
                 fetch_merge: true
             # consumes: magic-modules (because that's where the code is)
             # products: patches
-          - task: get-merged-patches
-            file: magic-modules/.ci/magic-modules/get-merged-patches.yml
-            params:
-              GH_TOKEN: ((github-account.password))
-            # consumes: magic-modules (detached HEAD)
-            # produces: magic-modules-branched (new branch, with submodule)
-          - task: branch-magic-modules
-            file: magic-modules/.ci/magic-modules/branch.yml
-            params:
-              GH_TOKEN: ((github-account.password))
-              CREDS: ((repo-key.private_key))
-              ALL_SUBMODULES: {{' '.join(all_submodules)}}
+          - aggregate:
+            - task: get-merged-patches
+              file: magic-modules/.ci/magic-modules/get-merged-patches.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+              # consumes: magic-modules (detached HEAD)
+              # produces: magic-modules-branched (new branch, with submodule)
+            - task: branch-magic-modules
+              file: magic-modules/.ci/magic-modules/branch.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: {{' '.join(all_submodules)}}
+            - put: magic-modules-new-prs
+              params:
+                status: pending
+                path: magic-modules
           - aggregate:
           {% if terraform_enabled %}
             - do:
@@ -253,6 +258,11 @@ jobs:
                       force: true
                 {% endfor %}
           {% endif %}
+            on_failure:
+              put: magic-modules-new-prs
+              params:
+                status: failed
+                path: magic-modules
 
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
@@ -286,6 +296,14 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/task.yml
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failed
+                  path: magic-modules-new-prs
 {% endif %}
 {% if ansible_enabled %}
     - name: ansible-test
@@ -298,6 +316,14 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/ansible.yml
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failed
+                  path: magic-modules-new-prs
 {% endif %}
     - name: puppet-test
       plan:
@@ -320,6 +346,14 @@ jobs:
               EXCLUDE_PATTERN: {{','.join(puppet_test_excludes[module])}}
             {%- endif %}
           {% endfor %}
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failed
+                  path: magic-modules-new-prs
 
     - name: chef-test
       plan:
@@ -342,6 +376,14 @@ jobs:
               EXCLUDE_PATTERN: {{','.join(chef_test_excludes[module])}}
             {%- endif %}
           {% endfor %}
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failed
+                  path: magic-modules-new-prs
 
     - name: create-prs
       plan:
