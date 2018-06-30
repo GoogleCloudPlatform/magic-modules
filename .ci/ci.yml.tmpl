@@ -41,7 +41,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.7
+          tag: v0.1.10
 
     - name: gcs-resource
       type: docker-image
@@ -172,7 +172,7 @@ jobs:
             version: every
             trigger: true
             params:
-                fetch_merge: true
+              fetch_merge: true
             # consumes: magic-modules (because that's where the code is)
             # products: patches
           - aggregate:
