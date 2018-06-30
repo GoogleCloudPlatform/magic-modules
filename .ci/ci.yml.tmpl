@@ -262,6 +262,7 @@ jobs:
               put: magic-modules-new-prs
               params:
                 status: failed
+                context: code-generation
                 path: magic-modules
 
             # consumes: magic-modules-branched
@@ -303,6 +304,7 @@ jobs:
               - put: magic-modules-new-prs
                 params:
                   status: failed
+                  context: terraform-tests
                   path: magic-modules-new-prs
 {% endif %}
 {% if ansible_enabled %}
@@ -323,6 +325,7 @@ jobs:
               - put: magic-modules-new-prs
                 params:
                   status: failed
+                  context: ansible-tests
                   path: magic-modules-new-prs
 {% endif %}
     - name: puppet-test
@@ -353,6 +356,7 @@ jobs:
               - put: magic-modules-new-prs
                 params:
                   status: failed
+                  context: puppet-tests
                   path: magic-modules-new-prs
 
     - name: chef-test
@@ -383,6 +387,7 @@ jobs:
               - put: magic-modules-new-prs
                 params:
                   status: failed
+                  context: chef-tests
                   path: magic-modules-new-prs
 
     - name: create-prs
@@ -438,6 +443,7 @@ jobs:
               put: magic-modules-new-prs
               params:
                   status: failure
+                  context: pr-creation
                   path: mm-initial-pr
           # This will be a no-op the first time through the pipeline.  This pushes the updated
           # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
