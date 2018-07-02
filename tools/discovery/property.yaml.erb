@@ -1,0 +1,15 @@
+- !ruby/object:Api::Type::<%= ctx[:prop].type %>
+  name: <%= ctx[:prop].name %>
+  description: <%= ctx[:prop].description %>
+<% if ctx[:prop].required -%>
+  required: true
+<% end -%>
+<% if ctx[:prop].output -%>
+  output: true
+<% end -%>
+<% if ctx[:prop].type == 'NestedObject' -%>
+  properties:
+<% ctx[:prop].properties.each do |nest_prop| -%>
+<%= lines(indent(compile_file({ prop: nest_prop }, 'property.yaml.erb'), 2)) -%>
+<% end -%>
+<% end -%>
