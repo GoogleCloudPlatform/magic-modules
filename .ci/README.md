@@ -95,3 +95,58 @@ The merge job sets the submodules back to tracking their downstream repositories
 `magic-modules` PR #1 is created.  `downstream-repo-a` PR #7 and `downstream-repo-b` PR #8 are created from that PR.  `magic-modules` PR #2 is created.  `downstream-repo-a` PR #9 is created from that PR.  PR #7 is merged, then PR #9.  Since all of PR #2's downstream PRs are merged, PR #2 is merged, and it includes the changes from PR #1.  PR #8 is finally merged, and so PR #1 is ready to be merged.
 
 When merging PR #1, if we update `downstream-repo-a` to the merge commit for PR #7, we will go backwards, erasing PR #2.  If we update to `master`, we will definitely include both the changes of both PR #1 and PR #2.
+
+-------
+
+# Troubleshooting The Magician
+
+Sometimes, the Magician won't do what you expect!  When that happens, try some of these things.
+
+## My PR didn't get a Magician run!
+There are several possible reasons.  Does your PR have a merge conflict?  Is it written by someone who is a collaborator / contributor / member of the `magic-modules` repo?
+
+### Check the `magic-modules-new-prs` resource.
+Find your PR number and commit hash, and click on that version to get a detail view.
+#### It didn't work!
+If you don't see your PR number and commit hash, verify the following things:
+- The PR is mergeable.
+  - If not, fix the merge conflicts.
+- The author of the PR has the `member`, `contributor`, or `collaborator` badge on the PR page.
+  - If not, **manually verify that the PR is appropriate to run through the magician**, and then run the `authorize-single-rev` task on the PR number and hash.
+
+### Find the number of the `mm-generate` command that was run.
+It should be prominent in the detail view.
+#### It didn't work!
+Press the 'power' button on the PRs above it and click the '+' button in `mm-generate` - it's very rare, but sometimes Concourse falls behind and drops some things it ought to do.  It's also plausible that Concourse was briefly paused for maintenance and more PRs stacked up on top of yours, which prevented Concourse from ever reaching it.  In any event, it should continue now.  If you *ever* have to do this, tell a Magician maintainer - this is one of those things that we could build alarms for.
+
+### Open `mm-generate` and find your run.
+It should be green and list a bunch of tasks that were performed to generate your downstream repos.
+
+#### It didn't work!
+If the run isn't listed there, probably it's the case that it's still pending (grey) or there's been a global Magician reboot - find a Magician maintainer to solve the mystery.  If the run is listed there but it's red, the error message should help you out.  If you're having trouble figuring out what's gone wrong (e.g. it's a puppet / chef build and the error message is swallowed by Concourse), try `fly -t prod hijack magic-modules/mm-generate`.  You may have to configure Fly first - see up the page for help on that.
+
+### Find the `magic-modules` output hash.
+It should be at the bottom of the page, after `point-to-submodules`.
+
+#### It didn't work!
+Something has gone strangely and you should find a Magician maintainer.  Make them update this page.  :)
+
+### Open the `magic-modules` resource from the main page.
+Find your version and click on it to get a detail view.  Confirm that the unit tests have run and are green.
+
+#### It didn't work!
+If the unit tests didn't run, see above for what happens if `mm-generate` didn't run.  If they didn't *pass* ... :)
+
+## There was a confusing git error message
+Git's error messages can be obtuse!  If you see something about how the `git push` failed, because a rev cannot be pushed if it already exists, you probably have accidentally triggered two Magician runs at the same time - two force pushes which try to push to the same rev at the same time will conflict with each other.  If you see something about how the `git clone` failed because an object is unadvertised, you probably have done a `push` / `amend` / `push -f` sequence.  Both these errors can be ignored if the pipeline is progressing.  If the pipeline has stopped progressing, try to run the failing step again with the '+' button.
+
+## The Magician failed while running on my submitted PR
+If Concourse notices the Magician's pushes to your PR before it notices that the Magician has merged your PR, it might try to generate again - this is always safe, don't worry.  :)
+
+## I submitted some generated PRs, but not all of them, and I need to make a change.
+This is the most common issue and the solution isn't complicated.  If you delete all the `depends: ...` lines from the Magician's comments, the Magician will think that it is starting over from scratch.  It'll push to the `codegen-pr-##` branch, instead of the `codegen-sha-######` branches, and it'll try to open PRs from those branches.  If you want a clean experience, you can close your existing PRs (just hit 'Close' at the bottom of the PR, don't merge them) and The Magician will do the right thing.
+
+If you want to leave those PRs open for some reason (preserve comments, because an external partner is watching them, etc), no problem, the magician will still do the right thing, it'll just update the PRs in the `mm-generate` step (*before* the tests) rather than in `create-prs` (*after* the tests) - your PR will still get updated even if the generated code fails tests.
+
+## Other: Consult your local Magician Expert
+Remind them to update this page.
