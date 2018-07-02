@@ -27,6 +27,10 @@ module Provider
       attr_reader :custom_code
       attr_reader :docs
 
+      # Lock name for a mutex to prevent concurrent API calls for a given
+      # resource.
+      attr_reader :mutex
+
       attr_reader :examples
     end
 
