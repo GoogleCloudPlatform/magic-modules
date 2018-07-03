@@ -43,13 +43,13 @@ class ReferenceableObject
   end
 end
 
-Puppet::Functions.create_function(:gcompute_external_resource) do
-  dispatch :gcompute_external_resource do
+Puppet::Functions.create_function(:gcp_declare) do
+  dispatch :gcp_declare do
     param 'String', :type
     param 'Hash', :attributes
   end
 
-  def gcompute_external_resource(type, attributes)
+  def gcp_declare(type, attributes)
     attributes['title'] = attributes['name'] unless attributes['name'].nil?
     sym_attrs = {}
     attributes.each { |k, v| sym_attrs[k.to_sym] = v }
