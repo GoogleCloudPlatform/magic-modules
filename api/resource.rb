@@ -256,6 +256,8 @@ module Api
       check_property_list :properties, Api::Type
 
       check_identity unless @identity.nil?
+
+      @parameters&.each { |para| para.instance_variable_set(:@required, true) }
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
