@@ -25,3 +25,4 @@
 'spec/puppetlint_spec.rb': 'templates/puppet/puppetlint_spec.rb.erb'
 'spec/spec_helper.rb': 'templates/puppet/spec_helper.rb.erb'
 'spec/test_constants.rb': 'templates/test_constants.rb.erb'
+'lib/puppet/functions/gcp_declare.rb': 'templates/puppet/add_object.rb'
