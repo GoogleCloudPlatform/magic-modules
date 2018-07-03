@@ -26,8 +26,16 @@ class ReferenceableObject
     @attrs = attrs
   end
 
-  def method_missing(method_name, *arguments, &block)
-    @attrs[method_name]
+  def method_missing(method_name, *_args, &_blk)
+    if @attrs.key? method_name
+      @attrs[method_name]
+    else
+      super
+    end
+  end
+
+  def respond_to_missing?(method_name, _pvt = false)
+    @attrs.key?(method_name) || super
   end
 
   def exports
@@ -45,6 +53,7 @@ Puppet::Functions.create_function(:gcompute_external_resource) do
     attributes['title'] = attributes['name'] unless attributes['name'].nil?
     sym_attrs = {}
     attributes.each { |k, v| sym_attrs[k.to_sym] = v }
-    Google::ObjectStore.instance.add(type.to_sym, ReferenceableObject.new(sym_attrs))
+    Google::ObjectStore.instance.add(type.to_sym,
+                                     ReferenceableObject.new(sym_attrs))
   end
 end
