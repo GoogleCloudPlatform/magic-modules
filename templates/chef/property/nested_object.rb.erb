@@ -81,9 +81,9 @@ module Google
       6)) -%>
 <%=
   lines(format([
-    ["# A class to manage data for #{field} for #{obj_name}."],
+    ["# A class to manage data for #{api_name} for #{obj_name}."],
     [
-      "# A class to manage data for #{field} for",
+      "# A class to manage data for #{api_name} for",
       "# #{obj_name}."
     ]
   ], 6))
@@ -101,7 +101,7 @@ module Google
   prop_to_json = []
   prop_to_s = []
   nested_properties.each do |prop|
-    prop_to_json << "'#{prop.field_name}' => #{prop.out_name}"
+    prop_to_json << "'#{prop.api_name}' => #{prop.out_name}"
     prop_to_s <<
       if prop.is_a?(Api::Type::Array)
         if prop.item_type.is_a?(Api::Type::NestedObject)
@@ -192,7 +192,7 @@ module Google
 <%
   init_code = []
   init_code.concat(nested_properties.map do |prop|
-                     emit_parse_assignment(prop, 'api_parse', prop.field_name)
+                     emit_parse_assignment(prop, 'api_parse', prop.api_name)
                    end)
 -%>
 <%= lines(indent(emit_method('initialize', %w[args], init_code, file_relative,
@@ -219,9 +219,9 @@ module Google
     module Property
 <%=
   lines(format([
-    ["# A class to manage input to #{field} for #{obj_name}."],
+    ["# A class to manage input to #{api_name} for #{obj_name}."],
     [
-      "# A class to manage input to #{field} for",
+      "# A class to manage input to #{api_name} for",
       "# #{obj_name}."
     ]
   ], 6))

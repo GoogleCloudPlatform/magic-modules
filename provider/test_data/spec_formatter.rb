@@ -76,7 +76,7 @@ module Provider
 
       def emit_manifest_block(props, seed, extra, ctx)
         props.map do |p|
-          emit_manifest_assign(p, seed, ctx, p.method(:field_name), true)
+          emit_manifest_assign(p, seed, ctx, p.method(:api_name), true)
         end
              .to_h
              .merge(extra.map { |k, v| [k.id2name, v] }.to_h)
@@ -88,7 +88,7 @@ module Provider
       # Nested Object style hash.
       def emit_fake_nested_block(props, seed, extra, ctx)
         unnested = props.map do |p|
-          emit_manifest_assign(p, seed, ctx, p.method(:field_name), true)
+          emit_manifest_assign(p, seed, ctx, p.method(:api_name), true)
         end
                         .to_h
                         .merge(extra.map { |k, v| [k.id2name, v] }.to_h)

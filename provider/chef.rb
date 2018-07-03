@@ -276,7 +276,7 @@ module Provider
 
     def emit_nested_object_overrides(data)
       data.clone.merge(
-        field_name: Google::StringUtils.camelize(data[:field], :upper),
+        api_name: Google::StringUtils.camelize(data[:api_name], :upper),
         object_type: Google::StringUtils.camelize(data[:obj_name], :upper),
         product_ns: Google::StringUtils.camelize(data[:product_name], :upper),
         class_name: if data[:emit_array]

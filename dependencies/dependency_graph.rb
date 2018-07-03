@@ -72,7 +72,7 @@ module Dependencies
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/PerceivedComplexity
     # prop_name_method should be a valid method on a Api::Type::*
-    # Typically, this will be "out_name" or "field_name"
+    # Typically, this will be "out_name" or "api_name"
     def emit_manifest_array(prop, seed)
       if prop.item_type.is_a?(Api::Type::NestedObject)
         size = @datagen.object_size(prop, seed, true)
