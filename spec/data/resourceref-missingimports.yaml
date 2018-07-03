@@ -14,7 +14,6 @@
 --- !ruby/object:Api::Product
 name: My Product
 prefix: myproduct
-base_url: http://myproduct.google.com/api
 versions:
   - !ruby/object:Api::Product::Version
     name: v1

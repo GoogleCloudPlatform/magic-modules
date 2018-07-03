@@ -257,7 +257,7 @@ module Api
 
       check_identity unless @identity.nil?
 
-      check_url
+      verify_url_parts_are_parameters
     end
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
@@ -324,7 +324,8 @@ module Api
       end
     end
 
-    def check_url
+    # Verify that all parameters listed in URL are listed as parameters
+    def verify_url_parts_are_parameters
       return unless @__product
       ignored_props = %w[project name]
       uri_names = uri_properties.reject { |x| ignored_props.include? x.name }

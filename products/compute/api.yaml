@@ -2155,7 +2155,7 @@ objects:
         name: 'zone'
         resource: 'Zone'
         imports: 'name'
-        description: 'The zone the machine type is defined.'
+        description: 'The zone where the machine type is defined'
         required: true
     properties:
       - !ruby/object:Api::Type::Time
@@ -2884,8 +2884,7 @@ objects:
         resource: 'Region'
         imports: 'name'
         description: |
-          URL of the region where the regional address resides.
-          This field is not applicable to global addresses.
+          URL of the region where the subnetwork resides
         required: true
         input: true
     properties:
