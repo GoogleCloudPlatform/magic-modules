@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 require 'puppet_forge'
 require 'json'
 
 config = JSON.parse(STDIN.read)
-raise 'You need to define `module_name`' unless config['source'].key? 'module_name'
-raise 'Surprised by lack of ARGV[0]' if ARGV[0].nil?
-release_slug = "#{config['source']['module_name']}-#{config['version']['release']}"
+unless config['source'].key? 'module_name'
+  raise 'You need to define `module_name`'
+end
+raise 'Surprised by lack of directory.' if ARGV.empty?
+
+release_slug = "#{config['source']['module_name']}-" \
+    "#{config['version']['release']}"
 release = PuppetForge::Release.find(release_slug)
 release_tarball = release_slug + '.tar.gz'
 release.download(Pathname(release_tarball))

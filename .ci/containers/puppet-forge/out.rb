@@ -17,8 +17,13 @@ require 'puppet_blacksmith'
 require 'json'
 
 config = JSON.parse(STDIN.read)
-raise 'You need to define `module_name`' unless config['source'].key? 'module_name'
-release = PuppetForge::Module.find(config['source']['module_name']).releases.first.version
+unless config['source'].key? 'module_name'
+  raise 'You need to define `module_name`'
+end
+raise 'This is being called without an output directory.' if ARGV.empty?
+
+module_name = config['source']['module_name']
+release = PuppetForge::Module.find(module_name).releases.first.version
 major, minor, patch = release.split('.')
 
 if major.nil? || minor.nil? || patch.nil?
@@ -32,18 +37,21 @@ else
   minor += 1
 end
 
-metadata = JSON.parse(File.open(File.join(ARGV[0], 'metadata.json')).read)
-unless metadata['name'] == config['source']['module_name']
-  raise "Cowardly refusing to push #{metadata['name']} to #{config['source']['module_name']}"
+output_folder = ARGV[0]
+metadata = JSON.parse(File.open(File.join(output_folder, 'metadata.json')).read)
+unless metadata['name'] == module_name
+  raise "Cowardly refusing to push #{metadata['name']} to #{module_name}"
 end
 metadata['version'] = "#{major}.#{minor}.#{patch}"
-File.write(File.join(ARGV[0], 'metadata.json'), JSON.dump(metadata))
+File.write(File.join(output_folder, 'metadata.json'), JSON.dump(metadata))
 
-Dir.chdir(ARGV[0]) { %x(puppet module build) }
+Dir.chdir(output_folder) { %x(puppet module build) }
 
-Blacksmith::Forge.initialize(config['source']['username'], config['source']['password'])
+Blacksmith::Forge.initialize(config['source']['username'],
+                             config['source']['password'])
 Blacksmith::Forge.push!(metadata['name'].split('-').last,
-                        File.join(ARGV[0],
+                        File.join(output_folder,
                                   'pkg',
-                                  "#{metadata['name']}-#{metadata['version']}.tar.gz"))
+                                  "#{metadata['name']}-#{metadata['version']}" \
+                                  '.tar.gz'))
 puts JSON.dump('version' => { 'release' => metadata['version'] })
