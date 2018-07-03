@@ -89,7 +89,7 @@ module Provider
       prop_map << emit_nested_object(
         data.clone.merge(
           emit_array: false,
-          field: Google::StringUtils.underscore(prop.name),
+          api_name: Google::StringUtils.underscore(prop.name),
           property: prop,
           nested_properties: prop.properties,
           obj_name: Google::StringUtils.underscore(data[:object].name)
@@ -107,7 +107,7 @@ module Provider
       prop_map << emit_nested_object(
         data.clone.merge(
           emit_array: true,
-          field: Google::StringUtils.underscore(prop.name),
+          api_name: Google::StringUtils.underscore(prop.name),
           property: prop,
           nested_properties: prop.item_type.properties,
           obj_name: Google::StringUtils.underscore(data[:object].name)

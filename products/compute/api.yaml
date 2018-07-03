@@ -887,7 +887,7 @@ objects:
                 required when creating a firewall rule. This value can either be
                 one of the following well known protocol strings (tcp, udp,
                 icmp, esp, ah, sctp), or the IP protocol number.
-              field: 'IPProtocol'
+              api_name: 'IPProtocol'
               required: true
             - !ruby/object:Api::Type::Array
               item_type: Api::Type::String
@@ -2282,7 +2282,7 @@ objects:
           A gateway address for default routing to other networks. This value is
           read only and is selected by the Google Compute Engine, typically as
           the first usable address in the IPv4Range.
-        field: 'gatewayIPv4'
+        api_name: 'gatewayIPv4'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2293,7 +2293,7 @@ objects:
           The range of internal addresses that are legal on this network. This
           range is a CIDR specification, for example: 192.168.0.0/16. Provided
           by the client when the network is created.
-        field: 'IPv4Range'
+        api_name: 'IPv4Range'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |

@@ -149,20 +149,20 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
         ], 0, 7)
       else
         format([
-          ["#{name}: #{type}.api_munge(fetch['#{prop.field_name}'])"],
+          ["#{name}: #{type}.api_munge(fetch['#{prop.api_name}'])"],
           [
             "#{name}:",
-            indent("#{type}.api_munge(fetch['#{prop.field_name}'])", 2)
+            indent("#{type}.api_munge(fetch['#{prop.api_name}'])", 2)
           ],
           [
             "#{name}: #{type}.api_munge(",
-            indent("fetch['#{prop.field_name}']", 2),
+            indent("fetch['#{prop.api_name}']", 2),
             ')',
           ],
           [
             "#{name}:",
             indent(["#{type}.api_munge(",
-                    indent("fetch['#{prop.field_name}']", 2),
+                    indent("fetch['#{prop.api_name}']", 2),
                     ')'], 2)
           ]
         ], 0, 7) # 6 spaces = indent, 1 space = trailing comma (it's a list)
@@ -342,7 +342,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     '{',
     indent_list(object.exported_properties.map do |p|
       if p.is_a?(Api::Type::FetchedExternal)
-        "#{p.out_name}: @fetched['#{p.field_name}']"
+        "#{p.out_name}: @fetched['#{p.api_name}']"
       else
         "#{p.out_name}: resource[:#{p.out_name}]"
       end
@@ -404,14 +404,14 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   prop_code.concat(
     object.properties.select { |p| !p.output }
                      .map do |prop|
-                       "#{prop.field_name}: @resource[:#{prop.out_name}]"
+                       "#{prop.api_name}: @resource[:#{prop.out_name}]"
                      end
   )
   prop_code.concat(
     (object.parameters || [])
       .select { |p| p.input }
       .map do |prop|
-        "#{prop.field_name}: @resource[:#{prop.out_name}]"
+        "#{prop.api_name}: @resource[:#{prop.out_name}]"
       end
   )
 

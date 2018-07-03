@@ -136,7 +136,7 @@ objects:
                   properties:
                     - !ruby/object:Api::Type::Integer
                       name: 'ageDays'
-                      field: 'age'
+                      api_name: 'age'
                       description: |
                         Age of an object (in days). This condition is satisfied
                         when an object reaches the specified age.
