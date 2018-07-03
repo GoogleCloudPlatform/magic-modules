@@ -1432,6 +1432,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
+    input: true
     base_url: projects/{{project}}/global/instanceTemplates
     exports:
       - !ruby/object:Api::Type::SelfLink
