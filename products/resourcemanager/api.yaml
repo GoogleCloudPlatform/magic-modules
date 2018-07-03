@@ -32,7 +32,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'
-        field: 'projectId'
+        api_name: 'projectId'
         description: |
           The unique, user-assigned ID of the Project. It must be 6 to 30
           lowercase letters, digits, or hyphens. It must start with a letter.
@@ -42,7 +42,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'number'
-        field: 'projectNumber'
+        api_name: 'projectNumber'
         description: Number uniquely identifying the project.
         output: true
       - !ruby/object:Api::Type::Enum

@@ -55,7 +55,7 @@ module Provider
                                           1)
 
           extra_props = []
-          extra_props << "#{name_prop[0].field_name}: 'title0'" \
+          extra_props << "#{name_prop[0].api_name}: 'title0'" \
             unless test[:has_name] || name_prop.empty?
 
           rref_list = object.uri_properties.map do |ref|

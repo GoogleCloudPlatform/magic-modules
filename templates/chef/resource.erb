@@ -192,11 +192,9 @@ module Google
   fetch_code = object.properties.reject(&:input).map do |prop|
     name = property_out_name(prop)
     name = label_name(object) if prop.out_name == 'name'
-    api_name = prop.name
     type = "::#{prop.property_type}"
-    field_name = prop.field || prop.name
-    if api_name.include?('.')
-      fetch_tree = api_name.split('.').join(' ')
+    if prop.api_name.include?('.')
+      fetch_tree = prop.api_name.split('.').join(' ')
       assignment = format(
         [
           [
@@ -232,17 +230,17 @@ module Google
         [
           [
            "@current_resource.#{name} =",
-           "#{type}.api_parse(fetch['#{field_name}'])"
+           "#{type}.api_parse(fetch['#{prop.api_name}'])"
           ].join(' '),
           [
             "@current_resource.#{name} =",
-            indent("#{type}.api_parse(fetch['#{field_name}'])", 2)
+            indent("#{type}.api_parse(fetch['#{prop.api_name}'])", 2)
           ],
           [
             "@current_resource.#{name} =",
             indent([
               "#{type}.api_parse(",
-              indent("fetch['#{field_name}']", 2),
+              indent("fetch['#{prop.api_name}']", 2),
               ')'
             ], 2)
           ]
@@ -316,7 +314,7 @@ module Google
       exp_name = p.out_name
       exp_name = label_name(object) if p.name == 'name'
       if p.is_a?(Api::Type::FetchedExternal)
-        "#{p.out_name}: __fetched['#{p.field_name}']"
+        "#{p.out_name}: __fetched['#{p.api_name}']"
       else
         "#{p.out_name}: #{exp_name}"
       end
@@ -337,8 +335,8 @@ module Google
     override_name = property_out_name(prop)
     override_name = label_name(object) if override_name == 'name'
     format([
-      ["#{prop.field_name}: new_resource.#{override_name}"],
-      ["#{prop.field_name}:",
+      ["#{prop.api_name}: new_resource.#{override_name}"],
+      ["#{prop.api_name}:",
        indent("new_resource.#{override_name}", 2)],
     ], 0, 12)
   end)
@@ -349,8 +347,8 @@ module Google
              override_name = property_out_name(prop)
              override_name = label_name(object) if override_name == 'name'
              format([
-               ["#{prop.field_name}: new_resource.#{override_name}"],
-               ["#{prop.field_name}:",
+               ["#{prop.api_name}: new_resource.#{override_name}"],
+               ["#{prop.api_name}:",
                 indent("new_resource.#{override_name}", 2)],
              ], 0, 12)
            end
