@@ -87,7 +87,7 @@ module Google
           [
             "#{prop.out_name}: ['[',",
             indent([
-              "#{prop.out_name}.map(&:to_json).join(', '),",
+              "(#{prop.out_name} || []).map(&:to_json).join(', '),",
               "']'].join(' ')"
             ], prop.out_name.length + 3), # 3 = ": ["
           ]

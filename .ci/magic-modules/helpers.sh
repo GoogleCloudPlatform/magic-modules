@@ -7,7 +7,7 @@ function apply_patches {
   shopt -s nullglob
   for patch in "$1"/*; do
     # This is going to apply the patch as at least 1 commit, possibly more.
-    git am --signoff "$patch"
+    git am --3way --signoff "$patch"
   done
   shopt -u nullglob
   # Now, collapse the patch commits into one.
