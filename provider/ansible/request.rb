@@ -75,14 +75,14 @@ module Provider
 
       def request_property(prop, hash_name, module_name)
         [
-          "#{unicode_string(prop.field_name)}:",
+          "#{unicode_string(prop.api_name)}:",
           request_output(prop, hash_name, module_name).to_s
         ].join(' ')
       end
 
       def response_property(prop, hash_name, module_name)
         [
-          "#{unicode_string(prop.field_name)}:",
+          "#{unicode_string(prop.api_name)}:",
           response_output(prop, hash_name, module_name).to_s
         ].join(' ')
       end

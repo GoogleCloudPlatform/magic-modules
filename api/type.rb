@@ -29,7 +29,6 @@ module Api
 
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation
-      attr_reader :field
       attr_reader :required
       attr_reader :update_verb
       attr_reader :update_url
@@ -57,7 +56,6 @@ module Api
       check_optional_property :min_version, ::String
 
       check_optional_property :output, :boolean
-      check_optional_property :field, ::String
       check_optional_property :required, :boolean
 
       raise 'Property cannot be output and required at the same time.' \
@@ -103,10 +101,6 @@ module Api
         'property',
         type
       ).downcase
-    end
-
-    def field_name
-      @field || @name
     end
 
     def parent
@@ -302,6 +296,10 @@ module Api
     # Properties that are fetched externally
     class FetchedExternal < Type
       attr_writer :resource
+
+      def api_name
+        name
+      end
     end
 
     # Represents a 'selfLink' property, which returns the URI of the resource.
@@ -316,10 +314,6 @@ module Api
 
       def out_name
         Google::StringUtils.underscore(EXPORT_KEY)
-      end
-
-      def field_name
-        name
       end
     end
 
