@@ -569,6 +569,8 @@ files: !ruby/object:Provider::Config::Files
       templates/puppet/bolt~task_load_params.rb.erb
     lib/puppet/functions/gcompute_task_validate_param.rb:
       templates/puppet/bolt~task_validate_param.rb.erb
+    lib/puppet/functions/gcompute_external_resource.rb:
+      templates/puppet/add_object.rb
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>
