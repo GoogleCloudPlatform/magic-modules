@@ -287,15 +287,15 @@ to remind you where they belong improves readability
 
     <% objects.each do |obj| -%>
     ...
-    <%   if obj.virtual -%>
+    <%   if obj.readonly -%>
     ...
     ... many lines later
     ...
-    <%   elsif !obj.virtual && obj.broken -%>
+    <%   elsif !obj.readonly && obj.broken -%>
     ...
     ... many lines later
     ...
-    <%   end # if obj.virtual -%>
+    <%   end # if obj.readonly -%>
     ...
     ... many lines later
     ...
@@ -311,14 +311,14 @@ the example below it is easier to note the if is inside the `each` and there are
 
     <% objects.each do |obj| -%>
     ...
-    <%   if obj.virtual -%>
+    <%   if obj.readonly -%>
     ...
     <%     if obj.input -%>
     ...
     ... many lines later
     ...
     <%     end # if obj.input -%>
-    <%   end # if obj.virtual -%>
+    <%   end # if obj.readonly -%>
     ...
     ... many lines later
     ...
@@ -328,14 +328,14 @@ the example below it is easier to note the if is inside the `each` and there are
 
     <% objects.each do |obj| -%>
     ...
-    <% if obj.virtual -%>
+    <% if obj.readonly -%>
     ...
     <% if obj.input -%>
     ...
     ... many lines later
     ...
     <% end # if obj.input -%>
-    <% end # if obj.virtual -%>
+    <% end # if obj.readonly -%>
     ...
     ... many lines later
     ...
@@ -417,8 +417,8 @@ phases.
 **Good**
 
     <%=
-      # List all virtual properties that are not nested objects alphabetically
-      lines(object.all_properties.select(&:virtual)
+      # List all readonly properties that are not nested objects alphabetically
+      lines(object.all_properties.select(&:readonly)
                                  .reject { |p| p.is_a?(Api::Type::NestedObject) }
                                  .sort
                                  .map { |p| "- #{p.out_name}" })
@@ -427,12 +427,12 @@ phases.
 **Bad**
 
     <%
-      # List all virtual properties that are not nested objects alphabetically
+      # List all readonly properties that are not nested objects alphabetically
       my_properties = []
       object.all_proerties.each do |p|
-        if p.virtual && !p.is_a?(Api::Type::NestedObject)
+        if p.readonly && !p.is_a?(Api::Type::NestedObject)
           my_properties << p
-        end # p.virtual
+        end # p.readonly
       end # object...each
     %>
     <% my_properties.sort.each do |p| -%>

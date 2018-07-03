@@ -26,7 +26,7 @@ module Provider
     module ResourceRef
       # Builds out a list of statements that handle ResourceRef creation
       def resourceref_handlers(object)
-        rrefs = nonvirtual_rrefs(object)
+        rrefs = nonreadonly_rrefs(object)
         return unless rrefs.any?
         comments = [
           '# Converts data from:',

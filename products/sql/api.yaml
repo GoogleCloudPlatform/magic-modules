@@ -400,7 +400,7 @@ objects:
     self_link: |
       projects/{{project}}/instances/{{instance}}/sslCerts/
       {{sha1_fingerprint}}
-    virtual: true # we're not enforcing state as it is all server-side driven.
+    readonly: true # we're not enforcing state as it is all server-side driven.
     description: |
       Represents an SSL certificate created for a Cloud SQL instance. To use the
       SSL certificate you must have the SSL Client Certificate and the
@@ -451,7 +451,7 @@ objects:
     self_link_query: !ruby/object:Api::Resource::ResponseList
       kind: 'sql#flagsList'
       items: 'items'
-    virtual: true
+    readonly: true
     properties:
       - !ruby/object:Api::Type::Array
         name: 'allowedStringValues'
@@ -506,7 +506,7 @@ objects:
       items: 'items'
     identity:
       - tier
-    virtual: true
+    readonly: true
     parameters:
       - !ruby/object:Api::Type::String
         name: 'tier'

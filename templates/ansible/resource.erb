@@ -70,14 +70,14 @@ RETURN = '''
 <%
   import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
   import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
-  import += ', replace_resource_dict' if nonvirtual_rrefs(object)
+  import += ', replace_resource_dict' if nonreadonly_rrefs(object)
 -%>
 <%= lines(import) -%>
 import json
 <%
   imports = object.imports || []
   imports << 'time' if object.async
-  imports << 're' unless virtual_selflink_rrefs(object).empty?
+  imports << 're' unless readonly_selflink_rrefs(object).empty?
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
@@ -122,10 +122,10 @@ def main():
                                    '<%= object.self_link_query.items -%>')
 <% end # object.self_link_query.nil? -%>
     changed = False
-<% if object.virtual -%>
+<% if object.readonly -%>
     if not fetch:
         module.fail_json(msg="<%= object.name -%> is not valid")
-<% else # object.virtual -%>
+<% else # object.readonly -%>
 
     if fetch:
         if state == 'present':
@@ -169,13 +169,13 @@ def main():
             fetch = {}
 
     fetch.update({'changed': changed})
-<% end # object.virtual -%>
+<% end # object.readonly -%>
 
     module.exit_json(**fetch)
 
 
 <% prod_name = object.__product.prefix[1..-1] -%>
-<% unless object.virtual -%>
+<% unless object.readonly -%>
 <%# TODO: kind param not always needed.
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
 -%>
@@ -268,7 +268,7 @@ def main():
 <% end # if object.delete.nil? -%>
 
 
-<% end # unless object.virtual -%>
+<% end # unless object.readonly -%>
 def resource_to_request(module):
 <%
   properties_in_request = [

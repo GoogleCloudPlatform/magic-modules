@@ -20,25 +20,25 @@ require 'provider/ansible/manifest'
 module Provider
   module Ansible
     # Responsible for building out all logic for checking + assembling selflinks
-    # on Ansible virtual properties.
+    # on Ansible readonly properties.
     #
-    # Some virtual properties (regions, zones) will probably be entered as
+    # Some readonly properties (regions, zones) will probably be entered as
     # names by users (that's most intuitive). If a self-link is required,
     # the module should assemble that itself.
     module SelfLink
-      # Returns all rrefs that are virtual and require selflinks.
-      def virtual_selflink_rrefs(object)
+      # Returns all rrefs that are readonly and require selflinks.
+      def readonly_selflink_rrefs(object)
         object.all_resourcerefs
-              .select { |prop| prop.resource_ref.virtual }
+              .select { |prop| prop.resource_ref.readonly }
               .select { |prop| prop.imports == 'selfLink' }
       end
 
       # Build out functions that will check + create selflinks.
       def selflink_functions(object)
-        virtuals = virtual_selflink_rrefs(object).map(&:resource_ref)
-                                                 .uniq
-        virtuals.map do |virt|
-          if virt == virtuals.last
+        readonlys = readonly_selflink_rrefs(object).map(&:resource_ref)
+                                                   .uniq
+        readonlys.map do |virt|
+          if virt == readonlys.last
             lines(selflink_function(virt))
           else
             lines(selflink_function(virt), 1)
