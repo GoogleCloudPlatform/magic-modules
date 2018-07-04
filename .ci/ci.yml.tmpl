@@ -297,6 +297,7 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/task.yml
+          timeout: 30m
           on_failure:
               do:
               - get: magic-modules-new-prs
@@ -318,6 +319,7 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/ansible.yml
+          timeout: 30m
           on_failure:
               do:
               - get: magic-modules-new-prs
@@ -343,6 +345,7 @@ jobs:
           {% for module in puppet_modules %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
             params:
               PRODUCT: {{module}}
             {%- if puppet_test_excludes.get(module) %}
@@ -374,6 +377,7 @@ jobs:
           {% for module in chef_modules %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
             params:
               PRODUCT: {{module}}
             {%- if chef_test_excludes.get(module) %}
