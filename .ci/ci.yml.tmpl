@@ -261,7 +261,7 @@ jobs:
             on_failure:
               put: magic-modules-new-prs
               params:
-                status: failed
+                status: failure
                 context: code-generation
                 path: magic-modules
 
@@ -303,7 +303,7 @@ jobs:
                 passed: [mm-generate]
               - put: magic-modules-new-prs
                 params:
-                  status: failed
+                  status: failure
                   context: terraform-tests
                   path: magic-modules-new-prs
 {% endif %}
@@ -324,7 +324,7 @@ jobs:
                 passed: [mm-generate]
               - put: magic-modules-new-prs
                 params:
-                  status: failed
+                  status: failure
                   context: ansible-tests
                   path: magic-modules-new-prs
 {% endif %}
@@ -355,7 +355,7 @@ jobs:
                 passed: [mm-generate]
               - put: magic-modules-new-prs
                 params:
-                  status: failed
+                  status: failure
                   context: puppet-tests
                   path: magic-modules-new-prs
 
@@ -386,7 +386,7 @@ jobs:
                 passed: [mm-generate]
               - put: magic-modules-new-prs
                 params:
-                  status: failed
+                  status: failure
                   context: chef-tests
                   path: magic-modules-new-prs
 
