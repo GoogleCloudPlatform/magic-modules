@@ -51,7 +51,7 @@ To get more information about <%= object.name -%>, see:
 <% unless object.examples.nil? -%>
 ## Example Usage
 
-<%= object.examples  -%>
+<%= object.examples -%>
 <% end -%>
 
 ## Argument Reference
@@ -61,14 +61,13 @@ The following arguments are supported:
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-
 <%- unless object.docs.required_properties.nil? -%>
-<%= lines(object.docs.required_properties) -%>
+<%= object.docs.required_properties -%>
 <% end -%>
+
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
@@ -82,10 +81,10 @@ The following arguments are supported:
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-
 <%- unless object.docs.optional_properties.nil? -%>
-<%= lines(object.docs.optional_properties) -%>
+<%= object.docs.optional_properties -%>
 <% end -%>
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -102,7 +101,7 @@ In addition to the arguments listed above, the following computed attributes are
 <% end -%>
 
 <%- unless object.docs.attributes.nil? -%>
-<%= lines(object.docs.attributes) -%>
+<%= object.docs.attributes -%>
 <% end -%>
 <% unless object.async.nil? -%>
 ## Timeouts
