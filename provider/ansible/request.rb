@@ -128,7 +128,7 @@ module Provider
             "#{hash_name}.get(#{quote_string(prop.out_name)}, [])",
             ", #{module_name}).to_request()"
           ].join
-        elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.virtual
+        elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
           prop_name = Google::StringUtils.underscore(prop.name)
           [
             "replace_resource_dict(#{hash_name}",
@@ -136,7 +136,7 @@ module Provider
             "#{quote_string(prop.imports)})"
           ].join
         elsif prop.is_a?(Api::Type::ResourceRef) && \
-              prop.resource_ref.virtual && prop.imports == 'selfLink'
+              prop.resource_ref.readonly && prop.imports == 'selfLink'
           func = "#{Google::StringUtils.underscore(prop.resource)}_selflink"
           [
             "#{func}(#{hash_name}.get(#{quote_string(prop.out_name)}),",
@@ -144,7 +144,7 @@ module Provider
           ].join(' ')
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::ResourceRef) && \
-              !prop.item_type.resource_ref.virtual
+              !prop.item_type.resource_ref.readonly
           prop_name = Google::StringUtils.underscore(prop.name)
           [
             "replace_resource_dict(#{hash_name}",

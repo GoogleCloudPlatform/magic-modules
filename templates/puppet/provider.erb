@@ -211,7 +211,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
                            f2h_code, file_relative), 2), 1)
 -%>
 <%= lines(get_code_multiline(config, 'constructor')) -%>
-<% unless object.virtual -%>
+<% unless object.readonly -%>
   def exists?
     debug("exists? #{@property_hash[:ensure] == :present}")
     @property_hash[:ensure] == :present

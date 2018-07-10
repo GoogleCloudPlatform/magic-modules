@@ -28,13 +28,13 @@ options:
     default: null
     choices:
 <%
-  # Looking for virtual objects that export for ResourceRefs
-  virtuals = products.map { |product, _| product.objects }
+  # Looking for readonly objects that export for ResourceRefs
+  readonlys = products.map { |product, _| product.objects }
                      .flatten
-                     .select(&:virtual)
+                     .select(&:readonly)
                      .reject { |obj| obj.exports.nil? }
 -%>
-<% virtuals.each do |virt| -%>
+<% readonlys.each do |virt| -%>
       - <%= Google::StringUtils.underscore(virt.name) %>
 <% end -%>
   return:
@@ -95,7 +95,7 @@ class GcpModule(object):
         raise AnsibleError(kwargs['msg'])
 
 
-<% virtuals.each do |object| -%>
+<% readonlys.each do |object| -%>
 <%
     prod_name = object.__product.prefix[1..-1]
 -%>
@@ -153,14 +153,14 @@ class Gcp<%= object.name -%>(object):
         return response[<%= quote_string(default) -%>]
 
 
-<% end # virtuals.each -%>
+<% end # readonlys.each -%>
 class LookupModule(LookupBase):
     def run(self, terms, variables, **kwargs):
 
         self.set_options(var_options=variables, direct=kwargs)
 <%
   opts_code = []
-  virtuals.each do |object|
+  readonlys.each do |object|
     name = Google::StringUtils.underscore(object.name)
     opts_code << "#{quote_string(name)}: Gcp#{object.name}"
   end

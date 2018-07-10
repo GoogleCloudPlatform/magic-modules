@@ -87,7 +87,7 @@ module Puppet
     # rubocop:enable Metrics/MethodLength
   end
 
-  # A template for a test that follows the virtual test workflow:
+  # A template for a test that follows the readonly test workflow:
   #
   #   @pre
   #   - run

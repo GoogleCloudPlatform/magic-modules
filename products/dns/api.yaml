@@ -85,7 +85,7 @@ objects:
       A project resource. The project is a top level container for resources
       including Cloud DNS ManagedZones.
     base_url: 'projects'
-    virtual: true
+    readonly: true
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'number'

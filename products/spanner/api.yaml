@@ -30,7 +30,7 @@ objects:
     exports:
       - !ruby/object:Api::Type::FetchedExternal
         name: name
-    virtual: true
+    readonly: true
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_response
