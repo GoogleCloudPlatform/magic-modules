@@ -95,7 +95,8 @@ module Provider
       def verbs
         {
           present: 'created',
-          absent: 'deleted'
+          absent: 'deleted',
+          facts: 'verify'
         }
       end
     end
@@ -274,8 +275,8 @@ module Provider
                      compile_string(hash, @code),
                      'scopes:',
                      indent(lines(scopes), 2),
-                     "state: #{state}"
-                   ], 4),
+                     ("state: #{state}" if state != 'facts')
+                   ].compact, 4),
             ("register: #{@register}" unless @register.nil?)
           ].compact, 2)
         ]
@@ -297,12 +298,14 @@ module Provider
     # examples.
     class Example < Api::Object
       attr_reader :task
+      attr_reader :facts
       attr_reader :verifier
       attr_reader :dependencies
 
       def validate
         super
         check_property :task, Task
+        check_optional_property :facts, Task
         check_optional_property :verifier, [Verifier, FactsVerifier]
         check_optional_property_list :dependencies, Task
       end

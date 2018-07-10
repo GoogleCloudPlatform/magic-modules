@@ -46,6 +46,18 @@ options:
 extends_documentation_fragment: gcp
 '''
 
+<% if example and example.facts -%>
+EXAMPLES = '''
+<%= lines(example.facts.build_example('facts', object)) -%>
+'''
+<% end -%>
+
+RETURN = '''
+<% object.all_user_properties.each do |prop| -%>
+<%= lines(indent(return_property_yaml(prop, 4), 4)) -%>
+<% end -%>
+'''
+
 ################################################################################
 # Imports
 ################################################################################
@@ -69,6 +81,9 @@ def main():
 <%= lines(indent_list(mod_props, 12)) -%>
         )
     )
+
+    if 'scopes' not in module.params:
+        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
 
     items = fetch_list(module, collection(module), query_options(module.params['filters']))
     if items.get('items'):
