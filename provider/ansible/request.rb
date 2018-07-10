@@ -137,7 +137,7 @@ module Provider
           ].join
         elsif prop.is_a?(Api::Type::ResourceRef) && \
               prop.resource_ref.readonly && prop.imports == 'selfLink'
-          func = Google::StringUtils.underscore("#{prop.name}_selflink")
+          func = "#{Google::StringUtils.underscore(prop.resource)}_selflink"
           [
             "#{func}(#{hash_name}.get(#{quote_string(prop.out_name)}),",
             "#{module_name}.params)"
