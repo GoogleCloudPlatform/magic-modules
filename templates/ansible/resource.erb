@@ -43,6 +43,15 @@ options:
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
+<% if object.references -%>
+notes:
+<% if object.references.api -%>
+    - "API Reference: U(<%= object.references.api -%>)"
+<% end -%>
+<% object.references.guides.each do |guide, link| -%>
+    - "<%= guide -%>: U(<%= link -%>)"
+<% end # object.references -%>
+<% end # if object.references -%>
 '''
 
 <% if example -%>
