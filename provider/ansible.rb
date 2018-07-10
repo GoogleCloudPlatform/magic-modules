@@ -76,7 +76,7 @@ module Provider
         prop = Module.const_get(prop).new('') unless prop.is_a?(Api::Type)
         # All ResourceRefs are dicts with properties.
         if prop.is_a? Api::Type::ResourceRef
-          return 'str' if prop.resource_ref.virtual
+          return 'str' if prop.resource_ref.readonly
           return 'dict'
         end
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
@@ -181,7 +181,7 @@ module Provider
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         (object.parameters || []).select do |p|
           props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
-            p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.virtual
+            p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
       end
 
@@ -192,7 +192,7 @@ module Provider
           # Select a resourceref if it exists.
           rref = (object.parameters || []).select do |prop|
             Google::StringUtils.underscore(prop.name) == p && \
-              prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.virtual
+              prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
           end
           if rref.any?
             [
@@ -217,10 +217,10 @@ module Provider
         ].compact
       end
 
-      # Returns a list of all first-level ResourceRefs that are not virtual
-      def nonvirtual_rrefs(object)
+      # Returns a list of all first-level ResourceRefs that are not readonly
+      def nonreadonly_rrefs(object)
         object.all_resourcerefs
-              .reject { |prop| prop.resource_ref.virtual }
+              .reject { |prop| prop.resource_ref.readonly }
       end
 
       # Converts a path in the form a/b/c/d into ['a', 'b', 'c', 'd']

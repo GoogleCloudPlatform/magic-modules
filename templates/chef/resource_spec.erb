@@ -40,7 +40,7 @@ require 'spec_helper'
 # TODO(alexstephen): Add tests for manage
 # TODO(alexstephen): Add tests for modify
 <%
-if object.virtual
+if object.readonly
   test_matrix = Provider::TestMatrix.new(template, object, self,
     exists: {
       changes: [ # read-only object mistmatch
@@ -95,7 +95,7 @@ prop_data = Provider::TestData::Expectations.new(self, @data_gen)
 catalogger = Provider::ChefTestCatalogFormatter.new self
 -%>
 context '<%= object.out_name -%>' do
-<% if object.virtual -%>
+<% if object.readonly -%>
 <% # Object does NOT provides 'ensure' parameter -%>
 <%= test_matrix.push(:ignore, :exists) -%>
 <%= test_matrix.push(:ignore, :exists, :no_change) -%>

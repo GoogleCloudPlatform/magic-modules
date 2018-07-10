@@ -68,7 +68,7 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
     end
   end
 -%>
-<% unless object.virtual -%>
+<% unless object.readonly -%>
   ensurable
 
 <% end -%>

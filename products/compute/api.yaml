@@ -511,7 +511,7 @@ objects:
     # triggered for create. Implement support for read only objects, and delete
     # the virtual tag
     # | readonly: true
-    virtual: true
+    readonly: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1516,7 +1516,7 @@ objects:
     name: 'License'
     kind: 'compute#license'
     base_url: /projects/{{project}}/global/licenses
-    virtual: true
+    readonly: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2145,7 +2145,7 @@ objects:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
-    virtual: true
+    readonly: true
     description: |
       Represents a MachineType resource. Machine types determine the virtualized
       hardware specifications of your virtual machine instances, such as the
@@ -2334,7 +2334,7 @@ objects:
       - name
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
-    virtual: true
+    readonly: true
     description: |
       Represents a Region resource. A region is a specific geographical
       location where you can run your resources. Each region has one or more
@@ -3628,7 +3628,7 @@ objects:
       - name
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
-    virtual: true
+    readonly: true
     description: 'Represents a Zone resource.'
     properties:
       - !ruby/object:Api::Type::Time
