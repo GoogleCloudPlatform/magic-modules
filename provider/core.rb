@@ -343,7 +343,10 @@ module Provider
                  [[vars, ','].join],
                  # vars is too big to fit, split in half
                  vars_parts.each_slice((vars_parts.size / 2.0).round).to_a
-                   .map { |p| quote_string(p.join('/')) + ',' }
+                 .map.with_index do |p, i|
+                   # Use implicit string joining for the first line.
+                   quote_string(p.join('/')) + (i.zero? ? ' \\' : ',')
+                 end
                ], 0, 8)
       end
     end
