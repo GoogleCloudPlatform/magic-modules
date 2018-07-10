@@ -16,9 +16,9 @@ name: Google Cloud BigQuery
 prefix: gbigquery
 versions:
   - !ruby/object:Api::Product::Version
-    name: v2
+    name: v1
     base_url: https://www.googleapis.com/bigquery/v2/
-    default: 
+    default: true
 scopes:
   - https://www.googleapis.com/auth/bigquery
 objects:
@@ -140,5 +140,3 @@ objects:
           The geographic location where the dataset should reside. Possible
           values include EU and US. The default value is US.
         default_value: US
-
-
