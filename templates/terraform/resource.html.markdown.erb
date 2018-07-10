@@ -12,6 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
+<%# NOTE NOTE NOTE
+    The newlines in this file are *load bearing*.  This file outputs
+    Markdown, which is extremely sensitive to newlines.  You have got
+    to have a newline after every attribute and property, because
+    otherwise MD will think the next element is part of the previous
+    property's bullet point.  You cannot have any double newlines in the
+    middle of a property or attribute, because MD will think that the
+    empty line ends the bullet point and the indentation will be off.
+    You must have a newline before and after all --- document indicators,
+    and you must have a newline before and after all - - - hlines.
+    You cannot have more than one blank line between properties.
+    The --- document indicator must be the first line of the file.
+    As long as you only use `build_property_documentation`, it all works
+    fine - but when you need to add custom docs (notes, etc), you need
+    to remember these things.
+
+    Know also that the `lines` function in heavy use in MagicModules will
+    strip exactly one trailing newline - unless that's what you've designed
+    your docstring for, it's easier to insert newlines where you need them
+    manually.  That's why, in this file, we use `lines` on anything which
+    is generated from a ruby function, but skip it on anything that is
+    directly inserted from YAML.
+-%>
 <%
   api_name_lower = product_ns.downcase
   resource_name = Google::StringUtils.underscore(object.name)
@@ -50,10 +73,9 @@ To get more information about <%= object.name -%>, see:
 
 <% unless object.examples.nil? -%>
 ## Example Usage
+<%= "\n" + object.examples -%>
 
-<%= object.examples  -%>
 <% end -%>
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -61,14 +83,13 @@ The following arguments are supported:
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-
 <%- unless object.docs.required_properties.nil? -%>
-<%= lines(object.docs.required_properties) -%>
+<%= "\n" + object.docs.required_properties -%>
 <% end -%>
+
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
@@ -82,10 +103,10 @@ The following arguments are supported:
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-
 <%- unless object.docs.optional_properties.nil? -%>
-<%= lines(object.docs.optional_properties) -%>
+<%= "\n" + object.docs.optional_properties -%>
 <% end -%>
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -100,10 +121,10 @@ In addition to the arguments listed above, the following computed attributes are
 <% properties.select(&:output).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-
 <%- unless object.docs.attributes.nil? -%>
-<%= lines(object.docs.attributes) -%>
+<%= "\n" + object.docs.attributes -%>
 <% end -%>
+
 <% unless object.async.nil? -%>
 ## Timeouts
 
