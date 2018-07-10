@@ -260,6 +260,7 @@ module Provider
       private
 
       # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
       def build_task(state, hash, object, noop = false)
         verb = verbs[state.to_sym]
 
@@ -272,17 +273,17 @@ module Provider
           indent([
             "#{@name}:",
             indent([
-                     compile_string(hash, @code),
-                     'scopes:',
-                     indent(lines(scopes), 2),
-                     ("state: #{state}" if state != 'facts')
-                   ].compact, 4),
+              compile_string(hash, @code),
+              'scopes:',
+              indent(lines(scopes), 2),
+              ("state: #{state}" if state != 'facts')
+            ].compact, 4),
             ("register: #{@register}" unless @register.nil?)
           ].compact, 2)
         ]
       end
-      # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures[0]

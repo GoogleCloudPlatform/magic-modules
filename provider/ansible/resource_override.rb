@@ -39,6 +39,7 @@ module Provider
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
       # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
