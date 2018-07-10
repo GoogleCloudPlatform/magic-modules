@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<%# NOTE NOTE NOTE NOTE NOTE NOTE
+<%# NOTE NOTE NOTE
     The newlines in this file are *load bearing*.  This file outputs
     Markdown, which is extremely sensitive to newlines.  You have got
     to have a newline after every attribute and property, because
@@ -27,6 +27,13 @@
     As long as you only use `build_property_documentation`, it all works
     fine - but when you need to add custom docs (notes, etc), you need
     to remember these things.
+
+    Know also that the `lines` function in heavy use in MagicModules will
+    strip exactly one trailing newline - unless that's what you've designed
+    your docstring for, it's easier to insert newlines where you need them
+    manually.  That's why, in this file, we use `lines` on anything which
+    is generated from a ruby function, but skip it on anything that is
+    directly inserted from YAML.
 -%>
 <%
   api_name_lower = product_ns.downcase
