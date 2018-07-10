@@ -58,6 +58,7 @@ module Provider
         private
 
         def generate_resource(data)
+          return unless data[:object].generate_facts
           target_folder = data[:output_folder]
           FileUtils.mkpath target_folder
           name = "#{module_name(data[:object])}_facts"
