@@ -34,6 +34,12 @@ requirements:
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
 options:
+    filters:
+       description:
+           A list of filter value pairs. Available filters are listed here
+           U(<%= object.filter_url -%>).
+           Each additional filter in the list will act be added as an AND condition
+           (filter1 and filter2)
 <% object.parameters.each do |prop| -%>
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
@@ -44,10 +50,13 @@ extends_documentation_fragment: gcp
 # Imports
 ################################################################################
 from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest
+import json
 
 ################################################################################
 # Main
 ################################################################################
+
+
 def main():
 <%
   mod_props = object.parameters.map do |prop|
@@ -56,7 +65,6 @@ def main():
 -%>
     module = GcpModule(
         argument_spec=dict(
-            state=dict(default='present', choices=['present', 'absent'], type='str'),
             filters=dict(type='list', elements='str'),
 <%= lines(indent_list(mod_props, 12)) -%>
         )
@@ -64,16 +72,17 @@ def main():
 
     items = fetch_list(module, collection(module), query_options(module.params['filters']))
     if items.get('items'):
-        items = items.get('items')  
+        items = items.get('items')
     else:
         items = []
     return_value = {
-      'items': items
+        'items': items
     }
     module.exit_json(**return_value)
 
 
 <%= lines(emit_link('collection', collection_url(object), object)) -%>
+
 
 def fetch_list(module, link, query):
 <% prod_name = object.__product.prefix[1..-1] -%>

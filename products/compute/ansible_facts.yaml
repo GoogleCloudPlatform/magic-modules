@@ -26,6 +26,7 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     generate_facts: true
+    filter_url: https://cloud.google.com/compute/docs/reference/rest/v1/instances/list
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
