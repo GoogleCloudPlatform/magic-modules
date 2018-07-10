@@ -47,8 +47,8 @@ module Provider
         credential: "'cred#{seed}'"
       }.merge(extra)
 
-      # Puppet does not like when virtual resources have an ensure property
-      extra.delete(:ensure) if object.virtual
+      # Puppet does not like when readonly resources have an ensure property
+      extra.delete(:ensure) if object.readonly
 
       [
         "#{object.out_name} { '#{title}':",
