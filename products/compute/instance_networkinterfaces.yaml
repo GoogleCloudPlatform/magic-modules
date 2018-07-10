@@ -50,7 +50,6 @@
                from a shared ephemeral IP address pool. If you specify a
                static external IP address, it must live in the same
                region as the zone of the instance.
-             required: true
            - !ruby/object:Api::Type::Enum
              name: 'type'
              description: |
