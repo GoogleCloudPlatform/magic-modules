@@ -49,6 +49,10 @@ resource_types:
         repository: frodenas/gcs-resource
 
 resources:
+    - name: job-ordering
+      type: time
+      source: {interval: 72h}  # Irrelevant - this is a workaround for concourse GH #736.
+
     - name: magic-modules
       type: git-branch
       source:
@@ -284,6 +288,7 @@ jobs:
                 repository: magic-modules-submodules
                 branch_file: magic-modules-branched/branchname
                 force: true
+          - put: job-ordering
 
 {% if terraform_enabled %}
     - name: terraform-test
@@ -293,6 +298,10 @@ jobs:
           trigger: true
           params:
               submodules: [build/terraform]
+          passed: [mm-generate]
+        - get: job-ordering
+          version: every
+          trigger: true
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/task.yml
@@ -306,6 +315,7 @@ jobs:
                   status: failure
                   context: terraform-tests
                   path: magic-modules-new-prs
+        - put: job-ordering
 {% endif %}
 {% if ansible_enabled %}
     - name: ansible-test
@@ -315,6 +325,10 @@ jobs:
           trigger: true
           params:
               submodules: [build/ansible]
+          passed: [mm-generate]
+        - get: job-ordering
+          version: every
+          trigger: true
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/ansible.yml
@@ -328,6 +342,7 @@ jobs:
                   status: failure
                   context: ansible-tests
                   path: magic-modules-new-prs
+        - put: job-ordering
 {% endif %}
     - name: puppet-test
       plan:
@@ -339,6 +354,10 @@ jobs:
               {% for module in puppet_submodules %}
                 - {{module}}
               {% endfor %}
+          passed: [mm-generate]
+        - get: job-ordering
+          version: every
+          trigger: true
           passed: [mm-generate]
         - aggregate:
           {% for module in puppet_modules %}
@@ -360,6 +379,7 @@ jobs:
                   status: failure
                   context: puppet-tests
                   path: magic-modules-new-prs
+        - put: job-ordering
 
     - name: chef-test
       plan:
@@ -371,6 +391,10 @@ jobs:
               {% for module in chef_submodules %}
                 - {{module}}
               {% endfor %}
+          passed: [mm-generate]
+        - get: job-ordering
+          version: every
+          trigger: true
           passed: [mm-generate]
         - aggregate:
           {% for module in chef_modules %}
@@ -392,6 +416,7 @@ jobs:
                   status: failure
                   context: chef-tests
                   path: magic-modules-new-prs
+        - put: job-ordering
 
     - name: create-prs
       plan:
@@ -414,6 +439,24 @@ jobs:
               {%- if ansible_enabled %}
               - ansible-test
               {%- endif %}
+          - get: job-ordering
+            version: every
+            trigger: true
+            passed:
+              - mm-generate
+              {%- if chef_modules %}
+              - chef-test
+              {%- endif -%}
+              {%- if puppet_modules %}
+              - puppet-test
+              {%- endif -%}
+              {%- if terraform_enabled %}
+              - terraform-test
+              {%- endif %}
+              {%- if ansible_enabled %}
+              - ansible-test
+              {%- endif %}
+
           - get: mm-initial-pr
             resource: magic-modules-new-prs
             passed: [mm-generate]
