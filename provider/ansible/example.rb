@@ -103,13 +103,8 @@ module Provider
 
     # Holds all information necessary to run a facts module and verify the
     # creation / deletion of a resource.
-    #
-    # command         - The gcloud command being run
-    # failed_name     - The name of the resource being created
-    #                   (defaults to {{resource_name}})
-    #                   Used for verifying deletion.
-    # failed_verifier - A custom Jinja2 verifier to test if gcloud
-    #                   command post-deletion worked as intended.
+    # Takes in a set of parameters, which are used as properties on the facts
+    # module.
     class FactsVerifier < Api::Object
       include Compile::Core
 
