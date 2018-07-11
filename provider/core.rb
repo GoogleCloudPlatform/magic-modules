@@ -533,22 +533,12 @@ module Provider
                                                          options, avail_columns)
         return alt_output if alt_fit
       end
-      fail_and_log_format_error output, options, avail_columns \
-        unless options[:quiet]
-    end
 
-    def fail_and_log_format_error(output, options, avail_columns)
-      Google::LOGGER.info [
-        ["No code option fits in #{avail_columns} columns",
-         "w/ #{options[:start_indent]} left indent:"].join(' '),
-        format_sources(output.split("\n"), options[:start_indent],
-                       options[:max_columns]),
-        (unless options[:on_misfit].nil?
-           format_sources(alt_output.split("\n"), options[:start_indent],
-                          options[:max_columns])
-         end)
-      ].compact.join("\n")
-      raise ArgumentError, "No code fits in #{avail_columns}"
+      return indent([
+        "# rubocop:disable Metrics/LineLength",
+        sources.last,
+        "# rubocop:enable Metrics/LineLength"
+      ], options[:indent])
     end
 
     def format_fits?(output, start_indent,
