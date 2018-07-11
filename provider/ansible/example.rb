@@ -79,9 +79,11 @@ module Provider
 
       private
 
+      # rubocop:disable Lint/UnusedMethodArgument
       def build_task(state, hash, object, noop = false)
         compile 'templates/ansible/tasks/task.yaml.erb'
       end
+      # rubocop:enable Lint/UnusedMethodArgument
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
@@ -118,12 +120,14 @@ module Provider
         check_property :failure, FailureCondition
       end
 
+      # rubocop:disable Lint/UnusedMethodArgument
       def build_task(state, object)
         raise 'State must be present or absent' \
           unless %w[present absent].include? state
 
         compile 'templates/ansible/tasks/verifier.yaml.erb'
       end
+      # rubocop:enable Lint/UnusedMethodArgument
 
       private
 
