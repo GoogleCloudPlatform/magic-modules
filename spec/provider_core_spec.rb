@@ -17,16 +17,16 @@ describe Provider::Core do
   context '#format' do
     subject { described_class.new(mock('config'), mock('api')) }
 
-    it 'fails if cannot fit' do
-      expect do
-        subject.format [['x' * 21]], 0, 0, 20
-      end.to raise_error ArgumentError, /No code fits/
+    it 'does not fail if cannot fit' do
+      expect(
+        subject.format([['x' * 21]], 0, 0, 20)
+      ).to include('rubocop:disable Metrics/LineLength')
     end
 
-    it 'fails if cannot fit any' do
-      expect do
-        subject.format [['x' * 21], ['y' * 21], ['z' * 30]], 0, 0, 20
-      end.to raise_error ArgumentError, /No code fits/
+    it 'does not fail if cannot fit any' do
+      expect(
+        subject.format([['x' * 21], ['y' * 21], ['z' * 30]], 0, 0, 20)
+      ).to include 'rubocop:disable Metrics/LineLength'
     end
 
     it 'fits 80 chars' do
@@ -51,9 +51,9 @@ describe Provider::Core do
       end
 
       it 'does not fit' do
-        expect do
-          subject.format [['x' * 75]], 6
-        end.to raise_error(ArgumentError, /No code fits/)
+        expect(
+          subject.format([['x' * 75]], 6)
+        ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
 
@@ -63,9 +63,9 @@ describe Provider::Core do
       end
 
       it 'does not fit' do
-        expect do
-          subject.format [['x' * 75]], 0, 6
-        end.to raise_error(ArgumentError, /No code fits/)
+        expect(
+          subject.format([['x' * 75]], 0, 6)
+        ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
 
@@ -75,9 +75,9 @@ describe Provider::Core do
       end
 
       it 'does not fit' do
-        expect do
-          subject.format [['x' * 67]], 8, 6
-        end.to raise_error(ArgumentError, /No code fits/)
+        expect(
+          subject.format([['x' * 67]], 8, 6)
+        ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
 

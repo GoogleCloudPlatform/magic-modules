@@ -534,11 +534,11 @@ module Provider
         return alt_output if alt_fit
       end
 
-      return indent([
-        "# rubocop:disable Metrics/LineLength",
-        sources.last,
-        "# rubocop:enable Metrics/LineLength"
-      ], options[:indent])
+      indent([
+               '# rubocop:disable Metrics/LineLength',
+               sources.last,
+               '# rubocop:enable Metrics/LineLength'
+             ], options[:indent])
     end
 
     def format_fits?(output, start_indent,
