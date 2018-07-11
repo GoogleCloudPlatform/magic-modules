@@ -154,23 +154,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      sizeGb: !ruby/object:Provider::Terraform::PropertyOverride
-        name: size
-        default_from_api: true
-      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
-        name: image
-        diff_suppress_func: 'diskImageDiffSuppress'
-      sourceSnapshot: !ruby/object:Provider::Terraform::PropertyOverride
-        name: snapshot
-        diff_suppress_func: 'linkDiffSuppress'
-        description: |
-          {{description}}* snapshot
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
       zone: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func:  diskEncryptionKeyDiffSuppress
+        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
+      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
+        name: image
+        diff_suppress_func: 'diskImageDiffSuppress'
       image: !ruby/object:Provider::Terraform::PropertyOverride
         description: |
           The image from which to initialize this disk. This can be
@@ -182,22 +176,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
           [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
           For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
           These images can be referred by family name here.
-      type: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-        default_value: 'pd-standard'
-      name: !ruby/object:Provider::Terraform::PropertyOverride
-        input: true
-      licenses: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: false
-      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func:  diskEncryptionKeyDiffSuppress
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
-      sourceImageEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
-      sourceSnapshotEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       post_import: templates/terraform/post_import/disk.erb
@@ -471,6 +449,48 @@ overrides: !ruby/object:Provider::ResourceOverrides
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
+  RegionDisk: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/detach_disk.erb
+      encoder: templates/terraform/encoders/disk.erb
+      decoder: templates/terraform/decoders/disk.erb
+      resource_definition: templates/terraform/resource_definition/disk.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the disk encryption key will be stored in the raw
+        state as plain-text.
+        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+    examples: |
+      ```hcl
+      resource "google_compute_disk" "disk" {
+        name = "my-disk"
+        image = "debian-cloud/debian-9"
+        size = 50
+        type = "pd-ssd"
+        zone = "us-central1-a"
+      }
+
+      resource "google_compute_snapshot" "snapdisk" {
+        name = "my-disk-snapshot"
+        source_disk = "${google_compute_disk.disk.name}"
+        zone = "us-central1-a"
+      }
+
+      resource "google_compute_region_disk" "regiondisk" {
+        name = "my-regional-disk"
+        snapshot = "${google_compute_snapshot.snapdisk.self_link}"
+        type = "pd-ssd"
+        region = "us-central1"
+
+        replica_zones = ["us-central1-a", "us-central1-f"]
+      }
+      ```
   Route: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -1019,6 +1039,8 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_global_address_test.go'
     'google/resource_compute_region_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
+    'google/resource_compute_region_disk_test.go':
+      'templates/terraform/tests/resource_compute_region_disk_test.go'
     'google/resource_compute_router_test.go':
       'templates/terraform/tests/resource_compute_router_test.go'
     'google/resource_compute_target_https_proxy_test.go':

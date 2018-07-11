@@ -4,10 +4,12 @@ if v, ok := res["diskEncryptionKey"]; ok {
   // The raw key won't be returned, so we need to use the original.
   transformed["rawKey"] = d.Get("disk_encryption_key.0.raw_key")
   transformed["sha256"] = original["sha256"]
+  <% if object.name == 'Disk' -%>
   if v, ok := d.GetOk("disk_encryption_key_raw"); ok {
     transformed["rawKey"] = v
   }
   d.Set("disk_encryption_key_sha256", original["sha256"])
+  <% end -%>
   res["diskEncryptionKey"] = transformed
 }
 

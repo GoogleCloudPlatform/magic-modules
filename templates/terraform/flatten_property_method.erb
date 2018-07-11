@@ -53,6 +53,13 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
 		} // let terraform core handle it if we can't convert the string to an int.
 	}
 	return v
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+  if v == nil {
+    return v
+  }
+  return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
+<% elsif property.is_a?(Api::Type::ResourceRef) -%>
+  return ConvertSelfLinkToV1(v.(string))
 <% else -%>
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
