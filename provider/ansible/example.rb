@@ -54,41 +54,12 @@ module Provider
         check_property :failure, FailureCondition
       end
 
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def build_task(state, object)
         raise 'State must be present or absent' \
           unless %w[present absent].include? state
 
-        obj_name = Google::StringUtils.underscore(object.name)
-        verb = verbs[state.to_sym]
-        check_on_failure = @failure.enabled && state == 'absent'
-        status = state == 'present' ? 0 : 1
-        [
-          "- name: verify that #{obj_name} was #{verb}",
-          indent([
-            'shell: |',
-            # Ansible doesn't like multiline shell commands in playbooks.
-            indent(@command.tr("\n", ''), 2),
-            'register: results',
-            ('failed_when: results.rc == 0' if state == 'absent')
-          ].compact, 2),
-
-          '- name: verify that command succeeded',
-          indent([
-                   'assert:',
-                   indent([
-                            'that:',
-                            indent([
-                              "- results.rc == #{status}",
-                              ("- #{@failure.test}" if check_on_failure)
-                            ].compact, 2)
-                          ], 2)
-                 ], 2)
-        ].compact
+        compile 'templates/ansible/tasks/verifier.yaml.erb'
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
 
       private
 
