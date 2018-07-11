@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_instance_group
     register: instancegroup
-    code: |
+    code:
       name: <%= dependency_name('instanceGroup', 'targetTcpProxy') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
@@ -24,7 +24,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_health_check
     register: healthcheck
-    code: |
+    code:
       name: <%= dependency_name('healthCheck', 'targetTcpProxy') %>
       type: TCP
       tcp_health_check:
@@ -40,7 +40,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_backend_service
     register: backendservice
-    code: |
+    code:
       name: <%= dependency_name('backendService', 'targetTcpProxy') %>
       backends:
         - group: "{{ instancegroup }}"
@@ -52,7 +52,7 @@ dependencies:
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_target_tcp_proxy
-  code: |
+  code:
     name: <%= ctx[:name] %>
     proxy_header: 'PROXY_V1'
     service: "{{ backendservice }}"

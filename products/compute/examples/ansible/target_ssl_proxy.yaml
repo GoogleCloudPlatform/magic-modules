@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_instance_group
     register: instancegroup
-    code: |
+    code:
       name: <%= dependency_name('instanceGroup', 'targetSslProxy') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
@@ -24,7 +24,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_health_check
     register: healthcheck
-    code: |
+    code:
       name: <%= dependency_name('healthCheck', 'targetSslProxy') %>
       type: TCP
       tcp_health_check:
@@ -40,7 +40,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_backend_service
     register: backendservice
-    code: |
+    code:
       name: <%= dependency_name('backendService', 'targetSslProxy') %>
       backends:
         - group: "{{ instancegroup }}"
@@ -53,7 +53,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_ssl_certificate
     register: sslcert
-    code: |
+    code:
       name: <%= dependency_name('sslCert', 'targetSslProxy') %>
       description: |
         "A certificate for testing. Do not use this certificate in production"
@@ -86,7 +86,7 @@ dependencies:
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_target_ssl_proxy
-  code: |
+  code:
     name: <%= ctx[:name] %>
     ssl_certificates:
       - "{{ sslcert }}"

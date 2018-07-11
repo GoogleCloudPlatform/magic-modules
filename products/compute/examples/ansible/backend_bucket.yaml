@@ -17,7 +17,7 @@ dependencies:
     register: bucket
     scopes:
       - https://www.googleapis.com/auth/devstorage.full_control
-    code: |
+    code:
       name: <%= dependency_name('bucket', 'backendBucket') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -26,7 +26,7 @@ task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_backend_bucket
   scopes:
     - https://www.googleapis.com/auth/cloud-platform
-  code: |
+  code:
     name: <%= ctx[:name] %>
     bucket_name: "{{ bucket.name }}"
     description: "A BackendBucket to connect LNB w/ Storage Bucket"

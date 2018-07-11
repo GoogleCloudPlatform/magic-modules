@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_ssl_policy
-  code: |
+  code:
     name: <%= ctx[:name] %>
     profile: "CUSTOM"
     min_tls_version: "TLS_1_2"
