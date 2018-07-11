@@ -33,15 +33,79 @@ module Provider
       service_account_file: '/tmp/auth.pem'
     }.freeze
 
-    # Holds all information necessary to run gcloud and verify the creation
-    # of a resource.
-    #
-    # command         - The gcloud command being run
-    # failed_name     - The name of the resource being created
-    #                   (defaults to {{resource_name}})
-    #                   Used for verifying deletion.
-    # failed_verifier - A custom Jinja2 verifier to test if gcloud
-    #                   command post-deletion worked as intended.
+    # Examples are used to generate the EXAMPLES block of Ansible documentation
+    # and the integration tests.
+    # Integration tests are a series of YAML tasks (standalone actions).
+    # Integration tests are broken into three parts:
+    # * a list of dependency tasks that should be run.
+    # * a 'task' that is being tested (also used for EXAMPLES block)
+    # * a verifier that will verify cloud status
+    class Example < Api::Object
+      attr_reader :task
+      attr_reader :verifier
+      attr_reader :dependencies
+
+      def validate
+        super
+        check_property :task, Task
+        check_optional_property :verifier, Verifier
+        check_optional_property_list :dependencies, Task
+      end
+    end
+
+    # A Task represents a single Ansible action. This action is represented
+    # as a standalone YAML block.
+    class Task < Api::Object
+      include Compile::Core
+      attr_reader :name
+      attr_reader :code
+      attr_reader :scopes
+      attr_reader :register
+
+      def validate
+        super
+        check_property :name, String
+        check_property :code, Hash
+        check_optional_property_list :scopes, ::String
+      end
+
+      def build_test(state, object, noop = false)
+        build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)
+      end
+
+      def build_example(state, object)
+        build_task(state, EXAMPLE_DEFAULTS, object)
+      end
+
+      private
+
+      def build_task(state, hash, object, noop = false)
+        compile 'templates/ansible/tasks/task.yaml.erb'
+      end
+
+      def object_name_from_module_name(mod_name)
+        product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
+        product_name.tr('_', ' ')
+      end
+
+      def dependency_name(dependency, resource)
+        "#{dependency.downcase}-#{resource.downcase}"
+      end
+
+      def verbs
+        {
+          present: 'create',
+          absent: 'delete'
+        }
+      end
+    end
+
+    # Verifiers verify that the Ansible modules actually created changes
+    # in the cloud.
+    # A Verifier has:
+    # * A bash command.
+    # * A failure check. If the bash command fails, that may not be enough
+    #   to verify that the cloud status is correct.
     class Verifier < Api::Object
       include Compile::Core
       attr_reader :command
@@ -189,70 +253,6 @@ module Provider
           "projects/{{ gcp_project }}/#{plural}/#{@name}"
         ].join(' ')
         super
-      end
-    end
-
-    # Class responsible for holding a single Ansible task. This task may create
-    # a GCP resource or create a dependent GCP resource.
-    class Task < Api::Object
-      include Compile::Core
-      attr_reader :name
-      attr_reader :code
-      attr_reader :scopes
-      attr_reader :register
-
-      def validate
-        super
-        check_property :name, String
-        check_property :code, Hash
-        check_optional_property_list :scopes, ::String
-      end
-
-      def build_test(state, object, noop = false)
-        build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)
-      end
-
-      def build_example(state, object)
-        build_task(state, EXAMPLE_DEFAULTS, object)
-      end
-
-      def verbs
-        {
-          present: 'create',
-          absent: 'delete'
-        }
-      end
-
-      private
-
-      def build_task(state, hash, object, noop = false)
-        compile 'templates/ansible/tasks/task.yaml.erb'
-      end
-
-      def object_name_from_module_name(mod_name)
-        product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
-        product_name.tr('_', ' ')
-      end
-
-      def dependency_name(dependency, resource)
-        "#{dependency.downcase}-#{resource.downcase}"
-      end
-    end
-
-    # Class responsible for holding all information relating to Ansible
-    # examples.
-    class Example < Api::Object
-      attr_reader :task
-      attr_reader :facts
-      attr_reader :verifier
-      attr_reader :dependencies
-
-      def validate
-        super
-        check_property :task, Task
-        check_optional_property :facts, Task
-        check_optional_property :verifier, [Verifier, FactsVerifier]
-        check_optional_property_list :dependencies, Task
       end
     end
   end
