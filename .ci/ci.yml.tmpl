@@ -1,5 +1,5 @@
-{% set chef_modules = ['compute', 'sql', 'storage'] %}
-{% set puppet_modules = ['compute', 'sql', 'storage'] %}
+{% set chef_modules = ['compute', 'sql', 'storage', 'container', 'dns'] %}
+{% set puppet_modules = ['compute', 'sql', 'storage', 'container', 'dns', 'pubsub', 'resourcemanager'] %}
 {% set terraform_enabled = true %}
 {% set ansible_enabled = true %}
 {% macro names_as_list(repo, names) -%}
@@ -488,7 +488,7 @@ jobs:
                 force: true
           {% endfor %}
 
-          {% for module in puppet_modules %}
+          {% for module in chef_modules %}
             - put: chef-{{module}}-intermediate
               params:
                 repository: magic-modules-with-comment/build/chef/{{module}}
