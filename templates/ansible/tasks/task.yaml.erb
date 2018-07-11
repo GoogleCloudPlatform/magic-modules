@@ -11,11 +11,9 @@
 <%=
   lines(indent(compile_string(hash, @code.to_yaml.gsub('---', '').strip), 6))
 -%>
-<% if @scopes -%>
       scopes:
 <% (@scopes || object.__product.scopes).each do |scope| -%>
         - <%= scope %>
-<% end # @scopes.each -%>
 <% end -%>
 <% if state && state != 'facts' -%>
       state: <%= state %>
