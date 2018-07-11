@@ -20,10 +20,10 @@ require 'provider/ansible/manifest'
 module Provider
   module Ansible
     INTEGRATION_TEST_DEFAULTS = {
-      project: '"{{ gcp_project }}"',
-      auth_kind: '"{{ gcp_cred_kind }}"',
-      service_account_file: '"{{ gcp_cred_file }}"',
-      name: '"{{ resource_name }}"'
+      project: '{{ gcp_project }}',
+      auth_kind: '{{ gcp_cred_kind }}',
+      service_account_file: '{{ gcp_cred_file }}',
+      name: '{{ resource_name }}'
     }.freeze
 
     EXAMPLE_DEFAULTS = {
@@ -254,41 +254,17 @@ module Provider
 
       private
 
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
       def build_task(state, hash, object, noop = false)
-        verb = verbs[state.to_sym]
-
-        again = ''
-        again = ' that already exists' if noop && state == 'present'
-        again = ' that does not exist' if noop && state == 'absent'
-        scopes = (@scopes || object.__product.scopes).map { |x| "- #{x}" }
-        [
-          "- name: #{verb} a #{object_name_from_module_name(@name)}#{again}",
-          indent([
-            "#{@name}:",
-            indent([
-               @code.map do |key, value|
-                 "#{key}: #{compile_string(value, @code)}"
-               end,
-              'scopes:',
-              indent(lines(scopes), 2),
-              ("state: #{state}" if state != 'facts')
-            ].compact, 4),
-            ("register: #{@register}" unless @register.nil?)
-          ].compact, 2)
-        ]
+        compile 'templates/ansible/tasks/task.yaml.erb'
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
 
       def object_name_from_module_name(mod_name)
-        product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures[0]
+        product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
         product_name.tr('_', ' ')
       end
 
       def dependency_name(dependency, resource)
-        quote_string("#{dependency.downcase}-#{resource.downcase}")
+        "#{dependency.downcase}-#{resource.downcase}"
       end
     end
 
