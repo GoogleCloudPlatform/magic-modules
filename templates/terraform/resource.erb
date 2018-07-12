@@ -106,6 +106,15 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
   }
   <% end -%>
 
+<% if object.mutex -%>
+	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+<% end -%>
+
 	url, err := replaceVars(d, config, "<%= collection_url(object) -%>")
 	if err != nil {
 		return err
@@ -269,6 +278,15 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 			<% end -%>
 		<% end -%>
 
+<% if object.mutex -%>
+		lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+		if err != nil {
+			return err
+		}
+		mutexKV.Lock(lockName)
+		defer mutexKV.Unlock(lockName)
+<% end -%>
+
 		url, err = replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
 		if err != nil {
 			return err
@@ -322,6 +340,16 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% elsif object.custom_code.encoder -%>
 	obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
 	<% end -%>
+
+<% if object.mutex -%>
+	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+<% end -%>
+
 	url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
 	if err != nil {
 	return err
@@ -366,6 +394,15 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 		return err
   }
   <% end -%>
+
+<% if object.mutex -%>
+	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+<% end -%>
 
 	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
 	if err != nil {
