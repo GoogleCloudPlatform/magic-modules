@@ -47,10 +47,9 @@
     a partial or full URL to the resource. For example, the following are
     valid values:
 
-    * https://www.googleapis.com/compute/v1/projects/project/global/
-          snapshots/snapshot
-    * projects/project/global/snapshots/snapshot
-    * global/snapshots/snapshot
+    * `https://www.googleapis.com/compute/v1/projects/project/global/snapshots/snapshot`
+    * `projects/project/global/snapshots/snapshot`
+    * `global/snapshots/snapshot`
 - !ruby/object:Api::Type::NestedObject
   name: 'sourceSnapshotEncryptionKey'
   description: |
