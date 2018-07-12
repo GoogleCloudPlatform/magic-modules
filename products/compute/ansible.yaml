@@ -101,6 +101,12 @@ datasources: !ruby/object:Provider::ResourceOverrides
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides
+  Address: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      addressType: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      subnetwork: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
@@ -108,6 +114,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
           - timeout_seconds
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
+    properties:
+      labels: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      type: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
@@ -204,6 +215,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - 'products/compute/helpers/python/instance_metadata.py'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
+      description: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
       nextHopGateway: !ruby/object:Provider::Ansible::PropertyOverride
         description: |
           URL to a gateway that should handle matching packets.
@@ -216,11 +229,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
           * global/gateways/default-internet-gateway
   SslPolicy: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
+    version_added: '2.7'
   TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
+  TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      quicOverride: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
   TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
+    version_added: '2.7'
   # Not yet implemented.
   Autoscaler: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true

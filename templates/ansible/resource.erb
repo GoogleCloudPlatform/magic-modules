@@ -14,11 +14,11 @@ __metaclass__ = type
 
 <%
   metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       config))
-  supported_by = quote_string(@config.manifest.get('supported_by', config))
+                                                       object))
+  supported_by = quote_string(@config.manifest.get('supported_by', object))
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', config) -%>,
+                    'status': <%= @config.manifest.get('status', object) -%>,
                     'supported_by': <%= supported_by -%>}
 
 DOCUMENTATION = '''
@@ -27,10 +27,10 @@ module: <%= module_name(object) %>
 description:
 <%= lines(indent(bullet_lines(object.description, 4), 4)) -%>
 short_description: Creates a GCP <%= object.name %>
-version_added: <%= lines(@config.manifest.get('version_added', config)) -%>
-author: <%= lines(@config.manifest.get('author', config)) -%>
+version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
+author: <%= lines(@config.manifest.get('author', object)) -%>
 requirements:
-<% @config.manifest.get('requirements', config).each do |line| -%>
+<% @config.manifest.get('requirements', object).each do |line| -%>
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
 options:
