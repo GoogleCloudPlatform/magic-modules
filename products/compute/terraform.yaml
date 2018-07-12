@@ -540,7 +540,42 @@ overrides: !ruby/object:Provider::ResourceOverrides
             specified)  The zone of the instance specified in
             `next_hop_instance`.  Omit if `next_hop_instance` is specified as
             a URL.
+  Router: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
+    mutex: router/{{region}}/{{name}}
+    examples: |
+      ```hcl
+      resource "google_compute_network" "foobar" {
+        name                    = "my-network"
+        auto_create_subnetworks = false
+      }
 
+      resource "google_compute_router" "foobar" {
+        name    = "my-router"
+        network = "${google_compute_network.foobar.name}"
+        bgp {
+          asn               = 64514
+          advertise_mode    = "CUSTOM"
+          advertised_groups = ["ALL_SUBNETS"]
+          advertised_ip_ranges {
+            range = "1.2.3.4"
+          }
+          advertised_ip_ranges {
+            range = "6.7.0.0/16"
+          }
+        }
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
@@ -982,6 +1017,8 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_global_address_test.go'
     'google/resource_compute_region_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
+    'google/resource_compute_router_test.go':
+      'templates/terraform/tests/resource_compute_router_test.go'
     'google/resource_compute_target_https_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
     'google/resource_compute_target_ssl_proxy_test.go':
