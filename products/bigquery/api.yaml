@@ -26,6 +26,9 @@ objects:
     name: 'Dataset'
     kind: 'bigquery#dataset'
     base_url: projects/{{project}}/datasets
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     description: >
       Datasets allow you to organize and control access to your tables.
     properties:
@@ -146,6 +149,12 @@ objects:
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
     description: >
       A Table that belongs to a Dataset
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'dataset'
+        description: The dataset this table belongs to.
+        resource: 'Dataset'
+        imports: 'selfLink'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
@@ -313,15 +322,15 @@ objects:
                   name: 'type'
                   description: 'The field data type'
                   values:
-                      - :STRING
-                      - :BYTES
-                      - :INTEGER
-                      - :FLOAT
-                      - :TIMESTAMP
-                      - :DATE
-                      - :TIME
-                      - :DATETIME
-                      - :RECORD
+                    - :STRING
+                    - :BYTES
+                    - :INTEGER
+                    - :FLOAT
+                    - :TIMESTAMP
+                    - :DATE
+                    - :TIME
+                    - :DATETIME
+                    - :RECORD
       - !ruby/object:Api::Type::NestedObject
         name: 'encryptionConfiguration'
         description: Custom encryption configuration
@@ -356,7 +365,7 @@ objects:
             values:
               - :GZIP
               - :NONE
-          - !ruby/object:Api::Type::Enum
+          - !ruby/object:Api::Type::Boolean
             name: 'ignoreUnknownValues'
             description: >
               Indicates if BigQuery should allow extra values that are not
@@ -382,16 +391,15 @@ objects:
             name: 'sourceUris'
             description: >
               The fully-qualified URIs that point to your data in Google Cloud.
-            For Google Cloud Storage URIs: Each URI can contain one '*'
+              For Google Cloud Storage URIs: Each URI can contain one '*'
               wildcard character and it must come after the 'bucket' name. Size
               limits related to load jobs apply to external data sources. For
-            Google Cloud Bigtable URIs: Exactly one URI can be specified and it
+              Google Cloud Bigtable URIs: Exactly one URI can be specified and it
               has be a fully specified and valid HTTPS URL for a Google Cloud
               Bigtable table. For Google Cloud Datastore backups, exactly one
               URI can be specified. Also, the '*' wildcard character is not
               allowed.
-            item_type: Api::Type::String 
-
+            item_type: Api::Type::String
           - !ruby/object:Api::Type::NestedObject
             name: 'schema'
             description: 'The schema for the data. Schema is required for CSV and JSON formats'
@@ -401,7 +409,7 @@ objects:
                 description: 'Describes the fields in a table.'
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
-                    - !ruby/object:Api::Type::NestedObject
+                    - !ruby/object:Api::Type::String
                       name: 'description'
                       description: The field description
                     - !ruby/object:Api::Type::Array
@@ -445,7 +453,7 @@ objects:
                 default_value: 0
           - !ruby/object:Api::Type::NestedObject
             name: 'csvOptions'
-            description: Additional properties to set if sourceFormat is set to CSV.  
+            description: Additional properties to set if sourceFormat is set to CSV.
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'allowJaggedRows'
@@ -456,8 +464,7 @@ objects:
                 name: 'allowQuotedNewlines'
                 description: >
                   Indicates if BigQuery should allow quoted data sections that
-                  contain newline characters in a CSV file 
-                default: false
+                  contain newline characters in a CSV file
               - !ruby/object:Api::Type::Enum
                 name: 'encoding'
                 description: 'The character encoding of the data'
@@ -478,7 +485,7 @@ objects:
                 default_value: 0
           - !ruby/object:Api::Type::NestedObject
             name: 'bigtableOptions'
-            description: Additional options if sourceFormat is set to BIGTABLE.
+            description: 'Additional options if sourceFormat is set to BIGTABLE.'
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'ignoreUnspecifiedColumnFamilies'
@@ -510,30 +517,30 @@ objects:
                             values:
                               - :TEXT
                               - :BINARY
-                         - !ruby/object:Api::Type::String
-                            name: 'fieldName'
-                            description: >
-                              If the qualifier is not a valid BigQuery field
-                              identifier, a valid identifier must be provided as
-                              the column field name and is used as field name in
-                              queries.
-                         - !ruby/object:Api::Type::Boolean
-                            name: 'onlyReadLatest'
-                            description: >
-                              If this is set, only the latest version of value in this column are exposed
-                         - !ruby/object:Api::Type::String
-                            name: 'qualifierString'
-                            description: Qualifier of the column
-                            required: true
+                          - !ruby/object:Api::Type::String
+                             name: 'fieldName'
+                             description: >
+                               If the qualifier is not a valid BigQuery field
+                               identifier, a valid identifier must be provided as
+                               the column field name and is used as field name in
+                               queries.
+                          - !ruby/object:Api::Type::Boolean
+                             name: 'onlyReadLatest'
+                             description: >
+                               If this is set, only the latest version of value in this column are exposed
+                          - !ruby/object:Api::Type::String
+                             name: 'qualifierString'
+                             description: Qualifier of the column
+                             required: true
                           - !ruby/object:Api::Type::Enum
-                            name: 'type'
-                            description: The type to convert the value in cells of this column
-                            values:
-                              - :BYTES
-                              - :STRING
-                              - :INTEGER
-                              - :FLOAT
-                              - :BOOLEAN
+                             name: 'type'
+                             description: The type to convert the value in cells of this column
+                             values:
+                               - :BYTES
+                               - :STRING
+                               - :INTEGER
+                               - :FLOAT
+                               - :BOOLEAN
                     - !ruby/object:Api::Type::Enum
                       name: 'encoding'
                       description: The encoding of the values when the type is not STRING
