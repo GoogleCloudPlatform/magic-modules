@@ -156,6 +156,172 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: A user-friendly description of the dataset
+      - !ruby/object:Api::Type::String
+        name: 'friendlyName'
+        description: A descriptive name for this table
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'An opaque ID uniquely identifying the table.'
+        output: true
+      - !ruby/object:Api::Type::NameValues
+        name: 'labels'
+        description: >
+          The labels associated with this dataset. You can use these to
+          organize and group your datasets
+        key_type: Api::Type::String
+        value_type: Api::Type::String
+      - !ruby/object:Api::Type::Integer
+        name: 'lastModifiedTime'
+        description: >
+          The time when this table was last modified, in milliseconds since the
+          epoch.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        description: >
+          The geographic location where the table resides. This value is
+          inherited from the dataset.
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'numBytes'
+        description: >
+          The size of this table in bytes, excluding any data in the streaming
+          buffer.
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'numLongTermBytes'
+        description: >
+          The number of bytes in the table that are considered "long-term
+          storage".
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'numRows'
+        description: >
+          The number of rows of data in this table, excluding any data in the
+          streaming buffer.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        description: 'Describes the table type'
+        values:
+          - :TABLE
+          - :VIEW
+          - :EXTERNAL
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'view'
+        description: The view definition.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'useLegacySql'
+            description: >
+              Specifies whether to use BigQuery's legacy SQL for this view
+          - !ruby/object:Api::Type::Array
+            name: 'userDefinedFunctionResources'
+            description: >
+              Describes user-defined function resources used in the query.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'inlineCode'
+                  description: >
+                    An inline resource that contains code for a user-defined
+                    function (UDF). Providing a inline code resource is
+                    equivalent to providing a URI for a file containing the
+                    same code.
+                # TODO: Convert into cross-product ResourceRef
+                - !ruby/object:Api::Type::String
+                  name: 'resourceUri'
+                  description: >
+                    A code resource to load from a Google Cloud Storage URI
+                    (gs://bucket/path).
+      - !ruby/object:Api::Type::NestedObject
+        name: 'timePartitioning'
+        description: >
+          If specified, configures time-based partitioning for this table.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'expirationMs'
+            description: >
+              Number of milliseconds for which to keep the storage for a
+              partition.
+          - !ruby/object:Api::Type::Enum
+            name: 'type'
+            description: >
+              The only type supported is DAY, which will generate one partition
+              per day.
+            values:
+              - :DAY
+      - !ruby/object:Api::Type::NestedObject
+        name: 'streamingBuffer'
+        description: >
+          Contains information regarding this table's streaming buffer, if one
+          is present. This field will be absent if the table is not being
+          streamed to or if there is no data in the streaming buffer.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'estimatedBytes'
+            description: >
+              A lower-bound estimate of the number of bytes currently in the
+              streaming buffer.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'estimatedRows'
+            description: >
+              A lower-bound estimate of the number of rows currently in the
+              streaming buffer.
+            output: true
+          - !ruby/object:Api::Type::Integer
+            name: 'oldestEntryTime'
+            description: >
+              Contains the timestamp of the oldest entry in the streaming
+              buffer, in milliseconds since the epoch, if the streaming buffer
+              is available.
+            output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'schema'
+        description: Describes the schema of this table
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'fields'
+            description: Describes the fields in a table.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'description'
+                  description: >
+                    The field description. The maximum length is 1,024
+                    characters.
+                - !ruby/object:Api::Type::Array
+                  name: 'fields'
+                  description: >
+                    Describes the nested schema fields if the type property is
+                    set to RECORD.
+                  item_type: Api::Type::String
+                - !ruby/object:Api::Type::Enum
+                  name: 'mode'
+                  description: The field mode
+                  values:
+                    - :NULLABLE
+                    - :REQUIRED
+                    - :REPEATED
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: The field name
+                - !ruby/object:Api::Type::Enum
+                  name: 'type'
+                  description: 'The field data type'
+                  values:
+                      - :STRING
+                      - :BYTES
+                      - :INTEGER
+                      - :FLOAT
+                      - :TIMESTAMP
+                      - :DATE
+                      - :TIME
+                      - :DATETIME
+                      - :RECORD
       - !ruby/object:Api::Type::NestedObject
         name: 'encryptionConfiguration'
         description: Custom encryption configuration
@@ -200,11 +366,73 @@ objects:
             description: >
               The maximum number of bad records that BigQuery can ignore when reading data
             default_value: 0
+          - !ruby/object:Api::Type::Enum
+            name: 'sourceFormat'
+            description: The data format
+            values:
+              - :CSV
+              - :GOOGLE_SHEETS
+              - :NEWLINE_DELIMITED_JSON
+              - :AVRO
+              - :DATASTORE_BACKUP
+              - :BIGTABLE
+          # TODO: Investigate if this is feasable as a ResourceRef
+          # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
+          - !ruby/object:Api::Type::Array
+            name: 'sourceUris'
+            description: >
+              The fully-qualified URIs that point to your data in Google Cloud.
+            For Google Cloud Storage URIs: Each URI can contain one '*'
+              wildcard character and it must come after the 'bucket' name. Size
+              limits related to load jobs apply to external data sources. For
+            Google Cloud Bigtable URIs: Exactly one URI can be specified and it
+              has be a fully specified and valid HTTPS URL for a Google Cloud
+              Bigtable table. For Google Cloud Datastore backups, exactly one
+              URI can be specified. Also, the '*' wildcard character is not
+              allowed.
+            item_type: Api::Type::String 
+
           - !ruby/object:Api::Type::NestedObject
             name: 'schema'
             description: 'The schema for the data. Schema is required for CSV and JSON formats'
             properties:
-              - <THIS IS MY STOPPING POINT>
+              - !ruby/object:Api::Type::Array
+                name: 'fields'
+                description: 'Describes the fields in a table.'
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'description'
+                      description: The field description
+                    - !ruby/object:Api::Type::Array
+                      name: 'fields'
+                      description: >
+                        Describes the nested schema fields if the type property
+                        is set to RECORD
+                      item_type: Api::Type::String
+                    - !ruby/object:Api::Type::Enum
+                      name: 'mode'
+                      description: Field mode.
+                      values:
+                        - :NULLABLE
+                        - :REQUIRED
+                        - :REPEATED
+                    - !ruby/object:Api::Type::String
+                      name: 'name'
+                      description: Field name
+                    - !ruby/object:Api::Type::Enum
+                      name: 'type'
+                      description: Field data type
+                      values:
+                        - :STRING
+                        - :BYTES
+                        - :INTEGER
+                        - :FLOAT
+                        - :TIMESTAMP
+                        - :DATE
+                        - :TIME
+                        - :DATETIME
+                        - :RECORD
           - !ruby/object:Api::Type::NestedObject
             name: 'googleSheetsOptions'
             description: 'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
