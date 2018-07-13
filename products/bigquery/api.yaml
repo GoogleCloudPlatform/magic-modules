@@ -140,3 +140,192 @@ objects:
           The geographic location where the dataset should reside. Possible
           values include EU and US. The default value is US.
         default_value: US
+  - !ruby/object:Api::Resource
+    name: 'Table'
+    kind: 'bigquery#table'
+    base_url: projects/{{project}}/datasets/{{dataset}}/tables
+    description: >
+      A Table that belongs to a Dataset
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'creationTime'
+        output: true
+        description: >
+          The time when this dataset was created, in milliseconds since the
+          epoch.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: A user-friendly description of the dataset
+      - !ruby/object:Api::Type::NestedObject
+        name: 'encryptionConfiguration'
+        description: Custom encryption configuration
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kmsKeyName'
+            description: >
+              Describes the Cloud KMS encryption key that will be used to
+              protect destination BigQuery table. The BigQuery Service Account
+              associated with your project requires access to this encryption
+              key.
+      - !ruby/object:Api::Type::Integer
+        name: 'expirationTime'
+        description: >
+          The time when this table expires, in milliseconds since the epoch. If
+          not present, the table will persist indefinitely.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'externalDataConfiguration'
+        description: >
+          Describes the data format, location, and other properties of a table
+          stored outside of BigQuery. By defining these properties, the data
+          source can then be queried as if it were a standard BigQuery table.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'autodetect'
+            description: >
+              Try to detect schema and format options automatically. Any option
+              specified explicitly will be honored.
+          - !ruby/object:Api::Type::Enum
+            name: 'compression'
+            description: The compression type of the data source
+            values:
+              - :GZIP
+              - :NONE
+          - !ruby/object:Api::Type::Enum
+            name: 'ignoreUnknownValues'
+            description: >
+              Indicates if BigQuery should allow extra values that are not
+              represented in the table schema
+          - !ruby/object:Api::Type::Integer
+            name: 'maxBadRecords'
+            description: >
+              The maximum number of bad records that BigQuery can ignore when reading data
+            default_value: 0
+          - !ruby/object:Api::Type::NestedObject
+            name: 'schema'
+            description: 'The schema for the data. Schema is required for CSV and JSON formats'
+            properties:
+              - <THIS IS MY STOPPING POINT>
+          - !ruby/object:Api::Type::NestedObject
+            name: 'googleSheetsOptions'
+            description: 'Additional options if sourceFormat is set to GOOGLE_SHEETS.'
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'skipLeadingRows'
+                description: >
+                  The number of rows at the top of a Google Sheet that BigQuery
+                  will skip when reading the data.
+                default_value: 0
+          - !ruby/object:Api::Type::NestedObject
+            name: 'csvOptions'
+            description: Additional properties to set if sourceFormat is set to CSV.  
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowJaggedRows'
+                description: >
+                  Indicates if BigQuery should accept rows that are missing
+                  trailing optional columns
+              - !ruby/object:Api::Type::Boolean
+                name: 'allowQuotedNewlines'
+                description: >
+                  Indicates if BigQuery should allow quoted data sections that
+                  contain newline characters in a CSV file 
+                default: false
+              - !ruby/object:Api::Type::Enum
+                name: 'encoding'
+                description: 'The character encoding of the data'
+                values:
+                  - :UTF-8
+                  - :ISO-8859-1
+              - !ruby/object:Api::Type::String
+                name: 'fieldDelimiter'
+                description: 'The separator for fields in a CSV file'
+              - !ruby/object:Api::Type::String
+                name: 'quote'
+                description: 'The value that is used to quote data sections in a CSV file'
+              - !ruby/object:Api::Type::Integer
+                name: 'skipLeadingRows'
+                description: >
+                  The number of rows at the top of a CSV file that BigQuery
+                  will skip when reading the data.
+                default_value: 0
+          - !ruby/object:Api::Type::NestedObject
+            name: 'bigtableOptions'
+            description: Additional options if sourceFormat is set to BIGTABLE.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'ignoreUnspecifiedColumnFamilies'
+                description: >
+                  If field is true, then the column families that are not specified in
+                  columnFamilies list are not exposed in the table schema
+              - !ruby/object:Api::Type::Boolean
+                name: 'readRowkeyAsString'
+                description: >
+                  If field is true, then the rowkey column families will be
+                  read and converted to string.
+              - !ruby/object:Api::Type::Array
+                name: 'columnFamilies'
+                description: >
+                  List of column families to expose in the table schema along
+                  with their types.
+                item_type: !ruby/object:Api::Type::NestedObject
+                  properties:
+                    - !ruby/object:Api::Type::Array
+                      name: 'columns'
+                      description: >
+                         Lists of columns that should be exposed as individual
+                         fields as opposed to a list of (column name, value) pairs.
+                      item_type: !ruby/object:Api::Type::NestedObject
+                        properties:
+                          - !ruby/object:Api::Type::Enum
+                            name: 'encoding'
+                            description: The encoding of the values when the type is not STRING
+                            values:
+                              - :TEXT
+                              - :BINARY
+                         - !ruby/object:Api::Type::String
+                            name: 'fieldName'
+                            description: >
+                              If the qualifier is not a valid BigQuery field
+                              identifier, a valid identifier must be provided as
+                              the column field name and is used as field name in
+                              queries.
+                         - !ruby/object:Api::Type::Boolean
+                            name: 'onlyReadLatest'
+                            description: >
+                              If this is set, only the latest version of value in this column are exposed
+                         - !ruby/object:Api::Type::String
+                            name: 'qualifierString'
+                            description: Qualifier of the column
+                            required: true
+                          - !ruby/object:Api::Type::Enum
+                            name: 'type'
+                            description: The type to convert the value in cells of this column
+                            values:
+                              - :BYTES
+                              - :STRING
+                              - :INTEGER
+                              - :FLOAT
+                              - :BOOLEAN
+                    - !ruby/object:Api::Type::Enum
+                      name: 'encoding'
+                      description: The encoding of the values when the type is not STRING
+                      values:
+                        - :TEXT
+                        - :BINARY
+                    - !ruby/object:Api::Type::String
+                      name: 'familyId'
+                      description: Identifier of the column family.
+                    - !ruby/object:Api::Type::Boolean
+                      name: 'onlyReadLatest'
+                      description: >
+                        If this is set only the latest version of value are
+                        exposed for all columns in this column family
+                    - !ruby/object:Api::Type::Enum
+                      name: 'type'
+                      description: The type to convert the value in cells of this column family
+                      values:
+                        - :BYTES
+                        - :STRING
+                        - :INTEGER
+                        - :FLOAT
+                        - :BOOLEAN
