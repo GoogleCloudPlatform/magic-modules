@@ -30,13 +30,6 @@ This cookbook was tested on the following operating systems:
             ['* ', os.name, ' ', os.versions.join(', ')].join
           end.join("\n")) -%>
 
-<%# TODO(alexstephen): Remove this example. -%>
-## Example
-
-```ruby
-<%= compile "products/#{@api.prefix[1..-1]}/examples/chef/readme.rb" -%>
-```
-
 ## Credentials
 
 All Google Cloud Platform cookbooks use an unified authentication mechanism,
