@@ -65,7 +65,7 @@ OptionParser.new do |opt|
     puts opt
     exit
   end
-  opt.on('-d', '--debug', 'Show all debug logs') do |debug|
+  opt.on('-d', '--debug', 'Show all debug logs') do |_debug|
     Google::LOGGER.level = Logger::INFO
   end
 end.parse!
