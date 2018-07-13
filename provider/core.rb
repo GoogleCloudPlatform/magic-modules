@@ -29,7 +29,7 @@ module Provider
   DEFAULT_FORMAT_OPTIONS = {
     indent: 0,
     start_indent: 0,
-    max_columns: 80,
+    max_columns: 100,
     quiet: false
   }.freeze
 
@@ -52,7 +52,7 @@ module Provider
       @prop_data = Provider::TestData::Expectations.new(self, @data_gen)
       @generated = []
       @sourced = []
-      @max_columns = 80
+      @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
     end
 
     # Main entry point for the compiler. As this method is simply invoking other

@@ -19,26 +19,26 @@ describe Provider::Core do
 
     it 'does not fail if cannot fit' do
       expect(
-        subject.format([['x' * 21]], 0, 0, 20)
+        subject.format([['x' * 41]], 0, 0, 20)
       ).to include('rubocop:disable Metrics/LineLength')
     end
 
     it 'does not fail if cannot fit any' do
       expect(
-        subject.format([['x' * 21], ['y' * 21], ['z' * 30]], 0, 0, 20)
+        subject.format([['x' * 31], ['y' * 31], ['z' * 30]], 0, 0, 20)
       ).to include 'rubocop:disable Metrics/LineLength'
     end
 
-    it 'fits 80 chars' do
-      subject.format [['x' * 80]]
+    it 'fits 100 chars' do
+      subject.format [['x' * 100]]
     end
 
-    context 'fits 80 chars' do
+    context 'fits 100 chars' do
       subject do
         described_class.new(nil, nil).format([
-                                               ['x' * 80],
-                                               ['y' * 80],
-                                               ['z' * 80]
+                                               ['x' * 100],
+                                               ['y' * 100],
+                                               ['z' * 100]
                                              ])
       end
 
@@ -52,7 +52,7 @@ describe Provider::Core do
 
       it 'does not fit' do
         expect(
-          subject.format([['x' * 75]], 6)
+          subject.format([['x' * 95]], 6)
         ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
@@ -64,7 +64,7 @@ describe Provider::Core do
 
       it 'does not fit' do
         expect(
-          subject.format([['x' * 75]], 0, 6)
+          subject.format([['x' * 115]], 0, 6)
         ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
@@ -76,7 +76,7 @@ describe Provider::Core do
 
       it 'does not fit' do
         expect(
-          subject.format([['x' * 67]], 8, 6)
+          subject.format([['x' * 87]], 8, 6)
         ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
@@ -84,7 +84,7 @@ describe Provider::Core do
     context 'selects second option' do
       subject do
         described_class.new(nil, nil).format([
-                                               ['x' * 81],
+                                               ['x' * 101],
                                                ['y' * 80],
                                                ['z' * 80]
                                              ])
