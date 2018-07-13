@@ -36,6 +36,9 @@ func resource<%= resource_name -%>() *schema.Resource {
 		Update: resource<%= resource_name -%>Update,
 		<% end -%>
 		Delete: resource<%= resource_name -%>Delete,
+        <% if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+        CustomizeDiff: resource<%= resource_name -%>CustomizeDiff,
+        <% end -%>
 
 		Importer: &schema.ResourceImporter{
 			State: resource<%= resource_name -%>Import,
@@ -74,6 +77,14 @@ func resource<%= resource_name -%>() *schema.Resource {
 		},
 	}
 }
+<% if settable_properties.any? {|p| p.unordered_list} -%>
+func resource<%= resource_name -%>CustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+<% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
+<%= compile_template('templates/terraform/unordered_list_customize_diff.erb',
+			         prop: prop) -%>
+<% end -%>
+}
+<% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)

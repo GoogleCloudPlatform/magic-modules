@@ -623,6 +623,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           function: 'validateGCPName'
       secondaryIpRanges: !ruby/object:Provider::Terraform::PropertyOverride
         name: secondaryIpRange
+        unordered_list: true
       secondaryIpRanges.rangeName: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'

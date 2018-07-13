@@ -1,0 +1,34 @@
+keys := diff.GetChangedKeysPrefix(<%= go_literal(Google::StringUtils.underscore(prop.name)) -%>)
+if len(keys) < 1 {
+	return nil
+}
+count := diff.Get("<%= Google::StringUtils.underscore(prop.name) -%>.#").(int)
+if count < 1 {
+	return nil
+}
+old := make([]interface{}, count)
+new := make([]interface{}, count)
+for i := 0; i < count; i++ {
+    o, n := diff.GetChange(fmt.Sprintf("<%= Google::StringUtils.underscore(prop.name) -%>.%d", i))
+
+    if o != nil {
+        old = append(old, o)
+    }
+    if n != nil {
+        new = append(new, n)
+    }
+}
+if len(old) != len(new) {
+    return nil
+}
+
+for o, _ := range old {
+    for n, _ := range new {
+        if reflect.DeepEqual(o, n) {
+            break
+        }
+        return nil
+    }
+}
+
+return diff.Clear(<%= go_literal(Google::StringUtils.underscore(prop.name)) -%>)
