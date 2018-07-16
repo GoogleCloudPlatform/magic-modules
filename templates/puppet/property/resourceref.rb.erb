@@ -92,7 +92,12 @@ module Google
 -%>
             return entry.exports[:<%= imports -%>] if entry.title == @title
           end
+<%# Virtual ResourceRefs should allow text values if a resource isn't found -%>
+<% if property.resource_ref.virtual -%>
+          @title
+<% else -%>
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
+<% end -%>
         end
       end
 
