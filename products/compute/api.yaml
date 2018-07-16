@@ -2569,6 +2569,10 @@ objects:
     name: 'Router'
     kind: 'compute#router'
     base_url: projects/{{project}}/regions/{{region}}/routers
+    # Since Terraform has separate resources for router, router interface, and
+    # router peer, calling PUT on the router will delete the interface and peer.
+    # Use patch instead.
+    update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
