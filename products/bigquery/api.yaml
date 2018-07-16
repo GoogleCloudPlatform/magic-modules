@@ -26,9 +26,6 @@ objects:
     name: 'Dataset'
     kind: 'bigquery#dataset'
     base_url: projects/{{project}}/datasets
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
     description: >
       Datasets allow you to organize and control access to your tables.
     properties:
@@ -147,14 +144,14 @@ objects:
     name: 'Table'
     kind: 'bigquery#table'
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
+    exclude: true
     description: >
       A Table that belongs to a Dataset
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      # TODO: Convert to ResourceRef when multi-layered exports exist
+      - !ruby/object:Api::Type::String
         name: 'dataset'
         description: The dataset this table belongs to.
-        resource: 'Dataset'
-        imports: 'selfLink'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'

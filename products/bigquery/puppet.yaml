@@ -34,6 +34,8 @@ examples: !ruby/object:Api::Resource::HashArray
   Dataset:
     - delete_dataset.pp
     - dataset.pp
+  Table:
+    - table.pp
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
