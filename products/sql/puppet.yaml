@@ -65,10 +65,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         def return_if_object(response, kind)
           self.class.return_if_object(response, kind)
         end
-  Flag: !ruby/object:Provider::Puppet::ResourceOverride
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: |
-        raise('Cloud SQL flag does not match expectations.')
   Instance: !ruby/object:Provider::Puppet::ResourceOverride
     # TODO(alexstephen): Document the access_api_results field.
     access_api_results: true
@@ -107,12 +103,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
           request['settings']['settingsVersion'] =
             @fetched['settings']['settingsVersion']
         end
+  # Readonly resources.
   SslCert: !ruby/object:Provider::Puppet::ResourceOverride
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise('Cloud SQL SSL certificate mismatch.')
+    deprecated: true
+  Flag: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
   Tier: !ruby/object:Provider::Puppet::ResourceOverride
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise('Cloud SQL tier does not match expectations.')
+    exclude: true
 functions:
   - !ruby/object:Provider::Config::Function
     name: 'gsql_instance_ip'

@@ -62,9 +62,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
     resource_to_request: false
     return_if_object: false
     unwrap_resource: false
+  # Readonly resources.
   Project: !ruby/object:Provider::Puppet::ResourceOverride
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'DNS Project cannot be edited' if @dirty
+    deprecated: true
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray
