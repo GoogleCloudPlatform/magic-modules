@@ -227,6 +227,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
           * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
+  Router: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
   SslPolicy: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
     version_added: '2.7'
