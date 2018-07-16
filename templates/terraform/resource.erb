@@ -81,8 +81,11 @@ func resource<%= resource_name -%>() *schema.Resource {
 func resource<%= resource_name -%>CustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
 <% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 <%= compile_template('templates/terraform/unordered_list_customize_diff.erb',
-			         prop: prop) -%>
+                     prop: prop,
+                     resource_name: resource_name) -%>
 <% end -%>
+
+return nil
 }
 <% end -%>
 

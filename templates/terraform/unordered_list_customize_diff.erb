@@ -2,7 +2,18 @@ keys := diff.GetChangedKeysPrefix(<%= go_literal(Google::StringUtils.underscore(
 if len(keys) < 1 {
 	return nil
 }
-count := diff.Get("<%= Google::StringUtils.underscore(prop.name) -%>.#").(int)
+
+oldCount, newCount := diff.GetChange("<%= Google::StringUtils.underscore(prop.name) -%>.#")
+var count int
+if oldCount.(int) < newCount.(int) {
+    count = newCount.(int)
+} else {
+    count = oldCount.(int)
+}
+if count < 1 {
+    return nil
+}
+
 if count < 1 {
 	return nil
 }
@@ -18,17 +29,16 @@ for i := 0; i < count; i++ {
         new = append(new, n)
     }
 }
+
 if len(old) != len(new) {
     return nil
 }
 
-for o, _ := range old {
-    for n, _ := range new {
-        if reflect.DeepEqual(o, n) {
-            break
-        }
-        return nil
+oldSet := schema.NewSet(schema.HashResource(resource<%= resource_name -%>().Schema[<%= go_literal(Google::StringUtils.underscore(prop.name)) -%>].Elem.(*schema.Resource)), old)
+newSet := schema.NewSet(schema.HashResource(resource<%= resource_name -%>().Schema[<%= go_literal(Google::StringUtils.underscore(prop.name)) -%>].Elem.(*schema.Resource)), new)
+
+if oldSet.Equal(newSet) {
+    if err := diff.Clear(<%= go_literal(Google::StringUtils.underscore(prop.name)) -%>); err != nil {
+        return err
     }
 }
-
-return diff.Clear(<%= go_literal(Google::StringUtils.underscore(prop.name)) -%>)
