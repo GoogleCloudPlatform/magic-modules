@@ -30,7 +30,9 @@ describe Provider::Core do
     end
 
     it 'fits 100 chars' do
-      subject.format [['x' * 100]]
+      expect(
+        subject.format([['x' * 100]])
+      ).to eq('x' * 100)
     end
 
     context 'fits 100 chars' do
@@ -47,7 +49,9 @@ describe Provider::Core do
 
     context '#format(ident)' do
       it 'fits' do
-        subject.format [['x' * 74]], 6
+        expect(
+          subject.format([['x' * 74]], 6)
+        ).to eq((' ' * 6) + ('x' * 74))
       end
 
       it 'does not fit' do
@@ -59,7 +63,9 @@ describe Provider::Core do
 
     context '#format(start)' do
       it 'fits' do
-        subject.format [['x' * 74]], 0, 6
+        expect(
+          subject.format([['x' * 74]], 0, 6)
+        ).to eq('x' * 74)
       end
 
       it 'does not fit' do
@@ -71,7 +77,9 @@ describe Provider::Core do
 
     context '#format(start, indent)' do
       it 'fits' do
-        subject.format [['x' * 66]], 8, 6
+        expect(
+          subject.format([['x' * 66]], 8, 6)
+        ).to eq((' ' * 8) + ('x' * 66))
       end
 
       it 'does not fit' do
