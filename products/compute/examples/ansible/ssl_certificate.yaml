@@ -15,8 +15,8 @@ task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_ssl_certificate
   code:
     name: <%= ctx[:name] %>
-    description: |
-      "A certificate for testing. Do not use this certificate in production"
+    description: >
+      A certificate for testing. Do not use this certificate in production
     certificate: |
       -----BEGIN CERTIFICATE-----
       MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG
