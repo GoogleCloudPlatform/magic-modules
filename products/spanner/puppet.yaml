@@ -78,9 +78,29 @@ overrides: !ruby/object:Provider::ResourceOverrides
         )
     provider_helpers:
       - 'products/spanner/helpers/ruby/instance_helpers.rb.erb'
-  # Readonly resources.
   InstanceConfig: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      collection: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instanceConfigs',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      self_link: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instanceConfigs/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+    provider_helpers:
+      - 'products/spanner/helpers/ruby/instance_config_helpers.rb.erb'
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/spanner/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray

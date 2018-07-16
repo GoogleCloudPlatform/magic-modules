@@ -46,6 +46,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
     # TODO(nelsonjr): Implement specific actions, such as resize and setLabels.
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Disk cannot be edited'
+  DiskType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+    # TODO(nelsonjr): Make sure that attempts to create a disk fails
+    handlers: !ruby/object:Provider::Puppet::Handlers
+      flush: |
+        raise [
+          'DiskType requirements specified in the manifest do not match',
+          "values provided by Google Cloud Platform: #{dirty_display_formatted}"
+        ].join(' ')
+    provider_helpers:
+      - 'products/compute/helpers/ruby/provider_disk_type.rb'
   Instance: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_instance.rb'
@@ -101,9 +112,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
-  # Readonly resources.
-  DiskType: !ruby/object:Provider::Puppet::ResourceOverride
-    deprecated: true
+  # Deprecated readonly resources
   License: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true
   MachineType: !ruby/object:Provider::Puppet::ResourceOverride
