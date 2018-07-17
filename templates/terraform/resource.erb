@@ -36,6 +36,13 @@ func resource<%= resource_name -%>() *schema.Resource {
 		Update: resource<%= resource_name -%>Update,
 		<% end -%>
 		Delete: resource<%= resource_name -%>Delete,
+        <% if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+        CustomizeDiff: customdiff.All(
+            <%= settable_properties.select { |p| p.unordered_list }
+                                    .map { |p| "resource#{resource_name}#{Google::StringUtils.camelize(p.name, :upper)}SetStyleDiff"}
+                                    .join(",\n")-%>
+        ),
+        <% end -%>
 
 		Importer: &schema.ResourceImporter{
 			State: resource<%= resource_name -%>Import,
@@ -74,6 +81,13 @@ func resource<%= resource_name -%>() *schema.Resource {
 		},
 	}
 }
+<% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
+func resource<%= resource_name -%><%= Google::StringUtils.camelize(prop.name, :upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+<%= compile_template('templates/terraform/unordered_list_customize_diff.erb',
+                     prop: prop,
+                     resource_name: resource_name) -%>
+}
+<% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
