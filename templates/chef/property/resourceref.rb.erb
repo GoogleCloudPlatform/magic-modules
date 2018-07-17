@@ -84,7 +84,11 @@ module Google
           Chef.run_context.resource_collection.each do |entry|
             return entry.exports[:<%= imports -%>] if entry.name == @title
           end
+<% if property.resource_ref.readonly -%>
+          @title
+<% else -%>
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
+<% end -%>
         end
       end
 
