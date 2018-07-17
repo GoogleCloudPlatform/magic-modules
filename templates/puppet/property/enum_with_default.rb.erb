@@ -21,7 +21,10 @@ require 'google/<%= prop_ns_dir -%>/property/base'
 module Google
   module <%= product_ns %>
     module Property
-      # A Puppet property that holds an enum
+      # A Puppet property that holds an enum which contains a default value.
+      # Since default values for enums are not returned from the GCP API,
+      # we need to return true from `insync?` if the property is absent
+      # in the response but set to the default in the config.
       class <%= Google::StringUtils.camelize(prop.name, :upper) -%>Enum < Google::<%= product_ns %>::Property::Enum
         def insync?(is)
           debug("insync enum? #{name}: '#{is}' == '#{should}'")

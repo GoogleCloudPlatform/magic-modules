@@ -52,22 +52,13 @@ module Provider
                 .map { |p| generate_simple_property p.type.downcase, data }
     end
 
-    def generate_enum_properties(data, properties)
-      default_enums = properties.select do |p|
-        p.is_a?(Api::Type::Enum) && !p.default_value.nil?
-      end
-      default_enums.map do |p|
-        prop_name = Google::StringUtils.underscore(
-          "#{p.__resource.name}_#{p.name}"
-        )
-        {
-          source: File.join('templates', 'puppet',
-                            'property', 'enum_with_default.rb.erb'),
-          target: File.join('lib', 'google', data[:product_name],
-                            'property', "#{prop_name}.rb"),
-          overrides: { prop: p }
-        }
-      end
+    def generate_enum_properties(_data, _properties)
+      # By default, enums don't need properties.  In puppet and chef, which
+      # have less sophisticated diffing logic than our other tools, it is
+      # necessary to generate properties for enums where the default is
+      # 'unset' - this might be a good place to introduce the concept of
+      # diffs and diff suppression to puppet / chef.
+      []
     end
 
     # rubocop:disable Metrics/AbcSize
