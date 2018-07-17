@@ -25,7 +25,6 @@ module Provider
       attr_reader :delete
       attr_reader :editable
       attr_reader :filter_url
-      attr_reader :generate_facts
       attr_reader :hidden
       attr_reader :imports
       attr_reader :provider_helpers
@@ -49,7 +48,6 @@ module Provider
         default_value_property :exclude, false
         default_value_property :editable, true
         default_value_property :filter_url, ''
-        default_value_property :generate_facts, false
         default_value_property :imports, []
         default_value_property :provider_helpers, []
         default_value_property :unwrap_resource, false
@@ -62,7 +60,6 @@ module Provider
         check_optional_property :delete, ::String
         check_property :editable, :boolean
         check_property :filter_url, ::String
-        check_property :generate_facts, :boolean
         check_optional_property :hidden, ::Array
         check_property :imports, ::Array
         check_property :provider_helpers, ::Array

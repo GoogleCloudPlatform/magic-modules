@@ -23,6 +23,8 @@ module Provider
     extend Compile::Core
 
     attr_reader :overrides
+    # Overrides for datasources
+    attr_reader :datasources
     attr_reader :objects
     attr_reader :examples
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
