@@ -124,6 +124,12 @@ module Google
 
 <% end # object.save_api_results? -%>
       action :create do
+<% if object.deprecated -%>
+        Chef.deprecated(:generic,
+                        ["<%= object.out_name -%> has been deprecated.",
+                         "Please use a string instead."].join(" "))
+
+<% end -%>
 <% if object.self_link_query.nil? -%>
 <% if object.kind? -%>
         fetch = fetch_resource(@new_resource, self_link(@new_resource),
