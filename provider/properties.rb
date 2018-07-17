@@ -27,6 +27,7 @@ module Provider
       prop_map << generate_nested_object_properties(data, properties)
       prop_map << generate_resourceref_properties(data, properties)
       prop_map << generate_namevalues_properties(data, properties)
+      prop_map << generate_enum_properties(data, properties)
 
       generate_property_files(prop_map, data)
     end
@@ -49,6 +50,24 @@ module Provider
     def generate_primitive_properties(data, properties)
       properties.select { |p| p.is_a?(Api::Type::Primitive) }
                 .map { |p| generate_simple_property p.type.downcase, data }
+    end
+
+    def generate_enum_properties(data, properties)
+      default_enums = properties.select do |p|
+        p.is_a?(Api::Type::Enum) && !p.default_value.nil?
+      end
+      default_enums.map do |p|
+        prop_name = Google::StringUtils.underscore(
+          "#{p.__resource.name}_#{p.name}"
+        )
+        {
+          source: File.join('templates', 'puppet',
+                            'property', 'enum_with_default.rb.erb'),
+          target: File.join('lib', 'google', data[:product_name],
+                            'property', "#{prop_name}.rb"),
+          overrides: { prop: p }
+        }
+      end
     end
 
     # rubocop:disable Metrics/AbcSize

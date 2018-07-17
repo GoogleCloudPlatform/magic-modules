@@ -287,6 +287,26 @@ module Api
     class Enum < Primitive
       attr_reader :values
 
+      def property_type
+        if @default_value.nil?
+          super
+        else
+          camelized_name = Google::StringUtils.camelize(@name, :upper)
+          property_ns_prefix.concat(["#{camelized_name}Enum"]).join('::')
+        end
+      end
+
+      def requires
+        if @default_value.nil?
+          super
+        else
+          File.join(
+            'google', @__resource.__product.prefix[1..-1], 'property',
+            Google::StringUtils.underscore("#{@__resource.name}_#{@name}")
+          ).downcase
+        end
+      end
+
       def validate
         super
         check_property :values, ::Array
