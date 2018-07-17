@@ -64,6 +64,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           self.class.return_if_object(response, kind)
         end
   Flag: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Chef::Handlers
       update: raise('Cloud SQL flag does not match expectations.')
   Instance: !ruby/object:Provider::Chef::ResourceOverride
@@ -104,9 +105,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
             @__fetched['settings']['settingsVersion']
         end
   SslCert: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Chef::Handlers
       update: raise('Cloud SQL SSL certificate mismatch.')
   Tier: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Chef::Handlers
       update: raise('Cloud SQL tier does not match expectations.')
 examples: !ruby/object:Api::Resource::HashArray
