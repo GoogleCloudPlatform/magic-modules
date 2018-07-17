@@ -240,6 +240,7 @@ module Provider
       generate_network_datas data, object
     end
 
+    # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     def generate_datasources(output_folder, types, version)
@@ -249,11 +250,17 @@ module Provider
       @api.set_properties_based_on_version(version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
-          Google::LOGGER.info "Excluding #{object.name} datasource per user request"
+          Google::LOGGER.info(
+            "Excluding #{object.name} datasource per user request"
+          )
         elsif types.empty? && object.exclude
-          Google::LOGGER.info "Excluding #{object.name} datasource per API catalog"
+          Google::LOGGER.info(
+            "Excluding #{object.name} datasource per API catalog"
+          )
         elsif types.empty? && object.exclude_if_not_in_version(version)
-          Google::LOGGER.info "Excluding #{object.name} datasource per API version"
+          Google::LOGGER.info(
+            "Excluding #{object.name} datasource per API version"
+          )
         else
           generate_datasource object, output_folder, version
         end
@@ -261,13 +268,13 @@ module Provider
     end
     # rubocop:enable Metrics/CyclomaticComplexity
     # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/AbcSize
 
     def generate_datasource(object, output_folder, version)
       data = build_object_data(object, output_folder, version)
 
       compile_datasource data
     end
-
 
     # Generates all 6 network data files for a object.
     # This includes all combinations of seeds [0-2] and title == / != name
