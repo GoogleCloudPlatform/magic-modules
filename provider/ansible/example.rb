@@ -95,6 +95,65 @@ module Provider
       def verbs
         {
           present: 'created',
+          absent: 'deleted',
+          facts: 'verify'
+        }
+      end
+    end
+
+    # Holds all information necessary to run a facts module and verify the
+    # creation / deletion of a resource.
+    # Takes in a set of parameters, which are used as properties on the facts
+    # module.
+    class FactsVerifier < Api::Object
+      include Compile::Core
+
+      def validate
+        @failure ||= FailureCondition.new
+
+        check_property :parameters, Hash
+      end
+
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength
+      def build_task(state, object)
+        obj_name = Google::StringUtils.underscore(object.name)
+        verb = verbs[state.to_sym]
+        number = state == 'present' ? 1 : 0
+        module_name = ["gcp_#{object.__product.prefix[1..-1]}",
+                       Google::StringUtils.underscore(object.name),
+                       'facts'].join('_')
+        [
+          "- name: verify that #{obj_name} was #{verb}",
+          indent([
+            "#{module_name}:",
+            indent([
+                     'filters:',
+                     '   - name = "{{ resource_name }}"',
+                     @parameters.map { |k, v| "#{k}: #{v}" },
+                     'project: "{{ gcp_project }}"',
+                     'auth_kind: "{{ gcp_cred_kind }}"',
+                     'service_account_file: "{{ gcp_cred_file }}"',
+                     'scopes:',
+                     "  - #{object.__product.scopes[0]}"
+                   ], 4),
+            'register: results'
+          ].flatten.compact, 2),
+
+          '- name: verify that command succeeded',
+          '  assert:',
+          '    that:',
+          indent("- results['items'] | length == #{number}", 6)
+        ].compact
+      end
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
+
+      private
+
+      def verbs
+        {
+          present: 'created',
           absent: 'deleted'
         }
       end
@@ -196,6 +255,7 @@ module Provider
       private
 
       # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
       def build_task(state, hash, object, noop = false)
         verb = verbs[state.to_sym]
 
@@ -208,17 +268,17 @@ module Provider
           indent([
             "#{@name}:",
             indent([
-                     compile_string(hash, @code),
-                     'scopes:',
-                     indent(lines(scopes), 2),
-                     "state: #{state}"
-                   ], 4),
+              compile_string(hash, @code),
+              'scopes:',
+              indent(lines(scopes), 2),
+              ("state: #{state}" if state != 'facts')
+            ].compact, 4),
             ("register: #{@register}" unless @register.nil?)
           ].compact, 2)
         ]
       end
-      # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures[0]
@@ -234,13 +294,15 @@ module Provider
     # examples.
     class Example < Api::Object
       attr_reader :task
+      attr_reader :facts
       attr_reader :verifier
       attr_reader :dependencies
 
       def validate
         super
         check_property :task, Task
-        check_optional_property :verifier, Verifier
+        check_optional_property :facts, Task
+        check_optional_property :verifier, [Verifier, FactsVerifier]
         check_optional_property_list :dependencies, Task
       end
     end

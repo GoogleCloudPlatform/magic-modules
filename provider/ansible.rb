@@ -249,6 +249,10 @@ module Provider
         field.scan(/\S.{0,#{avail_columns}}\S(?=\s|$)|\S+/)
       end
 
+      def list_kind(object)
+        "#{object.kind}List"
+      end
+
       private
 
       def get_example(cfg_file)
@@ -299,6 +303,17 @@ module Provider
           default_template: 'templates/ansible/example.erb',
           out_file: File.join(target_folder,
                               "test/integration/targets/#{name}/tasks/main.yml")
+        )
+      end
+
+      def compile_datasource(data)
+        target_folder = data[:output_folder]
+        FileUtils.mkpath target_folder
+        name = "#{module_name(data[:object])}_facts"
+        generate_resource_file data.clone.merge(
+          default_template: 'templates/ansible/facts.erb',
+          out_file: File.join(target_folder,
+                              "lib/ansible/modules/cloud/google/#{name}.py")
         )
       end
 
