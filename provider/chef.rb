@@ -404,12 +404,11 @@ module Provider
         {
           source: File.join('templates', 'chef',
                             'property', 'enum_with_default.rb.erb'),
-          target: File.join('lib', 'google', data[:product_name],
+          target: File.join('libraries', 'google', data[:product_name],
                             'property', "#{prop_name}.rb"),
           overrides: { prop: p }
         }
       end
     end
-
   end
 end
