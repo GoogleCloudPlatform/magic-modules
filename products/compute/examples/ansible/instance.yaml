@@ -67,7 +67,7 @@ verifier: !ruby/object:Provider::Ansible::FactsVerifier
     zone: 'us-central1-a'
 facts: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_instance_facts
-  code: |
+  code:
     zone: 'us-central1-a'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
