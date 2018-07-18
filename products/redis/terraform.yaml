@@ -61,7 +61,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       authorizedNetwork: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.erb'
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
       locationId: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
       name: !ruby/object:Provider::Terraform::PropertyOverride
