@@ -44,12 +44,16 @@ module Provider
       attr_reader :task
       attr_reader :verifier
       attr_reader :dependencies
+      attr_reader :facts
 
       def validate
         super
         check_property :task, Task
         check_optional_property :verifier, Verifier
         check_optional_property_list :dependencies, Task
+        check_optional_property :facts, Task
+
+        @facts.set_variable(self, :__example) if @facts
       end
     end
 
@@ -144,7 +148,7 @@ module Provider
     # creation / deletion of a resource.
     # Takes in a set of parameters, which are used as properties on the facts
     # module.
-    class FactsVerifier < Api::Object
+    class FactsVerifier < Verifier
       include Compile::Core
 
       def validate
@@ -257,6 +261,40 @@ module Provider
           "projects/{{ gcp_project }}/#{plural}/#{@name}"
         ].join(' ')
         super
+      end
+    end
+
+    # A task for Ansible Facts.
+    # Uses information from a traditional Ansible task.
+    class FactsTask < Task
+      attr_reader :__example
+
+      def validate
+        check_property :name, String
+        check_optional_property_list :scopes, ::String
+      end
+
+      def build_test(state, object, noop = false)
+        @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
+        super(state, object, noop)
+      end
+
+      def build_example(state, object)
+        @code = build_code(object, EXAMPLE_DEFAULTS)
+        super(state, object)
+      end
+
+      private
+
+      def build_code(object, hash)
+        sample_code = @__example.task.code
+        # Grab all code values for parameters
+        code = object.parameters.map(&:name)
+                                .map { |para| { para => sample_code[para] } }
+                                .reduce({}, :merge)
+        code['filters'] = ["name = #{hash[:name]}"]
+        hash.each { |k, v| code[k.to_s] = v unless k == :name }
+        code
       end
     end
   end
