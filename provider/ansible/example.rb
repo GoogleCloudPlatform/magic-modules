@@ -148,9 +148,10 @@ module Provider
     # Holds all information necessary to run a facts module and verify the
     # creation / deletion of a resource.
     class FactsVerifier < Verifier
-      attr_reader :__example
       # Ruby YAML requires at least one value to create the object.
       attr_reader :noop
+
+      attr_reader :__example
       include Compile::Core
 
       def validate
@@ -249,20 +250,27 @@ module Provider
     # A task for Ansible Facts.
     # Uses information from a traditional Ansible task.
     class FactsTask < Task
+      # Ruby YAML requires at least one value to create the object.
+      attr_reader :noop
+
       attr_reader :__example
 
       def validate
-        check_property :name, String
-        check_optional_property_list :scopes, ::String
       end
 
       def build_test(state, object, noop = false)
         @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
+        @name = ["gcp_#{object.__product.prefix[1..-1]}",
+                 Google::StringUtils.underscore(object.name),
+                 'facts'].join('_')
         super(state, object, noop)
       end
 
       def build_example(state, object)
         @code = build_code(object, EXAMPLE_DEFAULTS)
+        @name = ["gcp_#{object.__product.prefix[1..-1]}",
+                 Google::StringUtils.underscore(object.name),
+                 'facts'].join('_')
         super(state, object)
       end
 
