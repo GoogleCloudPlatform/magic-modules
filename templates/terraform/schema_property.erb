@@ -64,9 +64,12 @@
     },
   },
 <% elsif property.is_a?(Api::Type::Array) -%>
-	<% unless property.max_size.nil? -%>
-			MaxItems: <%= property.max_size %>,
-	<% end -%>
+  <% unless property.min_size.nil? -%>
+      MinItems: <%= property.min_size %>,
+  <% end -%>
+ <% unless property.max_size.nil? -%>
+      MaxItems: <%= property.max_size %>,
+  <% end -%>
   <% if property.item_type.is_a?(Api::Type::NestedObject) -%>
       Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
