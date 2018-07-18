@@ -60,6 +60,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     return_if_object: false
     unwrap_resource: false
   Project: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Chef::Handlers
       update: |
         message = 'Project cannot be edited'
