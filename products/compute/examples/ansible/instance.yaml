@@ -63,7 +63,6 @@ task: !ruby/object:Provider::Ansible::Task
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
 verifier: !ruby/object:Provider::Ansible::FactsVerifier
-  parameters:
-    zone: 'us-central1-a'
+  noop: Dummy value.
 facts: !ruby/object:Provider::Ansible::FactsTask
   name: gcp_compute_instance_facts

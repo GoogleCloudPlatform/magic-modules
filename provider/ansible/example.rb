@@ -54,6 +54,7 @@ module Provider
         check_optional_property :facts, Task
 
         @facts.set_variable(self, :__example) if @facts
+        @verifier.set_variable(self, :__example) if @verifier.respond_to?(:__example)
       end
     end
 
@@ -129,7 +130,7 @@ module Provider
         raise 'State must be present or absent' \
           unless %w[present absent].include? state
 
-        compile 'templates/ansible/tasks/verifier.yaml.erb'
+        compile 'templates/ansible/verifiers/bash.yaml.erb'
       end
       # rubocop:enable Lint/UnusedMethodArgument
 
@@ -146,51 +147,24 @@ module Provider
 
     # Holds all information necessary to run a facts module and verify the
     # creation / deletion of a resource.
-    # Takes in a set of parameters, which are used as properties on the facts
-    # module.
     class FactsVerifier < Verifier
+      attr_reader :__example
+      # Ruby YAML requires at least one value to create the object.
+      attr_reader :noop
       include Compile::Core
 
       def validate
         @failure ||= FailureCondition.new
-
-        check_property :parameters, Hash
       end
 
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def build_task(state, object)
-        obj_name = Google::StringUtils.underscore(object.name)
-        verb = verbs[state.to_sym]
-        number = state == 'present' ? 1 : 0
+        @parameters = build_parameters(object)
         module_name = ["gcp_#{object.__product.prefix[1..-1]}",
                        Google::StringUtils.underscore(object.name),
                        'facts'].join('_')
-        [
-          "- name: verify that #{obj_name} was #{verb}",
-          indent([
-            "#{module_name}:",
-            indent([
-                     'filters:',
-                     '   - name = "{{ resource_name }}"',
-                     @parameters.map { |k, v| "#{k}: #{v}" },
-                     'project: "{{ gcp_project }}"',
-                     'auth_kind: "{{ gcp_cred_kind }}"',
-                     'service_account_file: "{{ gcp_cred_file }}"',
-                     'scopes:',
-                     "  - #{object.__product.scopes[0]}"
-                   ], 4),
-            'register: results'
-          ].flatten.compact, 2),
+        compile 'templates/ansible/verifiers/facts.yaml.erb'
 
-          '- name: verify that command succeeded',
-          '  assert:',
-          '    that:',
-          indent("- results['items'] | length == #{number}", 6)
-        ].compact
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
 
       private
 
@@ -199,6 +173,14 @@ module Provider
           present: 'created',
           absent: 'deleted'
         }
+      end
+
+      def build_parameters(object)
+        sample_code = @__example.task.code
+        # Grab all code values for parameters
+        object.parameters.map(&:name)
+                         .map { |para| { para => sample_code[para] } }
+                         .reduce({}, :merge)
       end
     end
 
