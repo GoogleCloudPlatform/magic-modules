@@ -13,6 +13,7 @@
 
 PROVIDER_FOLDERS = {
   ansible: 'build/ansible',
+  ansible_facts: 'build/ansible',
   puppet: 'build/puppet/%s',
   chef: 'build/chef/%s',
   terraform: 'build/terraform'
