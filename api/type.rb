@@ -223,6 +223,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :min_size
       attr_reader :max_size
 
       STRING_ARRAY_TYPE = [Api::Type::Array, Api::Type::String].freeze
@@ -242,6 +243,7 @@ module Api
           raise "Invalid type #{@item_type}"
         end
 
+        check_optional_property :min_size, ::Integer
         check_optional_property :max_size, ::Integer
       end
 
