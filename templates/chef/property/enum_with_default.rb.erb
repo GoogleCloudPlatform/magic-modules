@@ -16,24 +16,22 @@
 
 <%= lines(autogen_notice :ruby) -%>
 
-require 'google/<%= prop_ns_dir -%>/property/base'
-require 'google/<%= prop_ns_dir -%>/property/enum'
-
 module Google
   module <%= product_ns %>
     module Property
-      # A Puppet property that holds an enum which contains a default value.
-      # Since default values for enums are not returned from the GCP API,
-      # we need to return true from `insync?` if the property is absent
-      # in the response but set to the default in the config.
-      class <%= Google::StringUtils.camelize(prop.name, :upper) -%>Enum < Google::<%= product_ns %>::Property::Enum
-        def insync?(is)
-          debug("insync enum? #{name}: '#{is}' == '#{should}'")
-          if is == :absent && should == '<%= prop.default_value %>'
-            true
-          else
-            super
-          end
+      # A class to handle serialization of an enum with a
+      # default.  The default is important because GCP sometimes
+      # does not return the default value for an enum, but we need
+      # to avoid detecting a diff if it is explicitly set.
+      class <%= Google::StringUtils.camelize(prop.name, :upper) -%>Enum
+<%= emit_coerce(product_ns, 'Enum', 8) -%>
+        def self.api_parse(value)
+          return "<%= prop.default_value -%>" if value.nil?
+          value
+        end
+
+        def self.catalog_parse(value)
+          value
         end
       end
     end

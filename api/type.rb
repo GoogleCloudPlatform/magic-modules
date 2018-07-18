@@ -90,10 +90,20 @@ module Api
       self.class.name.split('::').last
     end
 
+    # This is only used in puppet and chef, and it is the name of the Ruby type
+    # which is meant to parse the value of the property.  Usually it is 'Enum'
+    # or 'Integer' or 'String', unless complex logic is needed.  If so, a
+    # class will be generated specific to that type (e.g. AddressAddressType),
+    # and this must return the fully qualified name of that class.
     def property_type
       property_ns_prefix.concat([type]).join('::')
     end
 
+    # This is only used in puppet and chef, and it is the string that must be
+    # used in a 'require' statement in order to use this property.  This is
+    # usually, e.g. 'google/compute/property/enum', but in the event that a
+    # class is generated specifically for a particular type, this will be the
+    # require path to that file.
     def requires
       File.join(
         'google',
@@ -287,8 +297,20 @@ module Api
     class Enum < Primitive
       attr_reader :values
 
+      def generate_unique_enum_class
+        # When an enum has a default value, it is sometimes omitted from return
+        # values from GCP.  This means that we need a diff-suppress, of sorts,
+        # which can only be done in a unique enum class.  We only need a unique
+        # enum class if the default value is non-nil.
+        !@default_value.nil?
+      end
+
       def property_type
-        if @default_value.nil?
+        # 'super' here means 'use the default Enum class', and
+        # the other branch means 'use a different unique Enum class'.  This
+        # doesn't do anything to actually generate the unique Enum class - that
+        # happens in overrides of provider's 'generate_enum_properties'.
+        if !generate_unique_enum_class
           super
         else
           camelized_name = Google::StringUtils.camelize(@name, :upper)
@@ -297,7 +319,10 @@ module Api
       end
 
       def requires
-        if @default_value.nil?
+        # Similar to property_type, this just picks the right file to require
+        # for resources which use this enum property.  We'll need to require the
+        # generated unique Enum class if it exists.
+        if !generate_unique_enum_class
           super
         else
           File.join(
