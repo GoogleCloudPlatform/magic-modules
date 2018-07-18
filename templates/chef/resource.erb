@@ -127,7 +127,8 @@ module Google
 <% if object.deprecated -%>
         Chef.deprecated(:generic,
                         ["<%= object.out_name -%> has been deprecated.",
-                         "Please use a string instead."].join(" "))
+                         "Please use the <%= object.name -%> Name instead."
+                        ].join(" "))
 
 <% end -%>
 <% if object.self_link_query.nil? -%>
