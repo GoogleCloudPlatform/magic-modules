@@ -53,7 +53,7 @@ module Provider
         check_optional_property_list :dependencies, Task
         check_optional_property :facts, Task
 
-        @facts.set_variable(self, :__example) if @facts
+        @facts&.set_variable(self, :__example)
         @verifier.set_variable(self, :__example) if @verifier.respond_to?(:__example)
       end
     end
@@ -161,13 +161,9 @@ module Provider
         @failure ||= FailureCondition.new
       end
 
-      def build_task(state, object)
+      def build_task(_state, object)
         @parameters = build_parameters(object)
-        module_name = ["gcp_#{object.__product.prefix[1..-1]}",
-                       Google::StringUtils.underscore(object.name),
-                       'facts'].join('_')
         compile 'templates/ansible/verifiers/facts.yaml.erb'
-
       end
 
       private
@@ -183,8 +179,8 @@ module Provider
         sample_code = @__example.task.code
         # Grab all code values for parameters
         object.parameters.map(&:name)
-                         .map { |para| { para => sample_code[para] } }
-                         .reduce({}, :merge)
+              .map { |para| { para => sample_code[para] } }
+              .reduce({}, :merge)
       end
     end
 
@@ -258,8 +254,7 @@ module Provider
 
       attr_reader :__example
 
-      def validate
-      end
+      def validate; end
 
       def build_test(state, object, noop = false)
         @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
@@ -283,8 +278,8 @@ module Provider
         sample_code = @__example.task.code
         # Grab all code values for parameters
         code = object.parameters.map(&:name)
-                                .map { |para| { para => sample_code[para] } }
-                                .reduce({}, :merge)
+                     .map { |para| { para => sample_code[para] } }
+                     .reduce({}, :merge)
         code['filters'] = ["name = #{hash[:name]}"]
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code

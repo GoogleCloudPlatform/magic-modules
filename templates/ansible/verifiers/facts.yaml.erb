@@ -1,4 +1,9 @@
-- name: verify that <%= Google::StringUtils.underscore(object.name) -%> was <%= lines(verbs[state.to_sym]) -%>
+<%
+  module_name = ["gcp_#{object.__product.prefix[1..-1]}",
+                 Google::StringUtils.underscore(object.name),
+                 'facts'].join('_')
+-%>
+- name: verify that <%= Google::StringUtils.underscore(object.name) -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
       filters:
          - name = "{{ resource_name }}"
@@ -14,4 +19,4 @@
 - name: verify that command succeeded
   assert:
     that:
-      - results['items'] | length == <%= state == 'present' ? 1 : 0 %>
+      - results['items'] | length == <%= _state == 'present' ? 1 : 0 %>
