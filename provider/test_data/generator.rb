@@ -34,9 +34,7 @@ module Provider
 
       def value(for_type, property, seed)
         return property.default_value if property.default_value
-        if for_type == Api::Type::Array
-          for_type = [Api::Type::Array, property.item_type_class]
-        end
+        for_type = [Api::Type::Array, property.item_type_class] if for_type == Api::Type::Array
         raise "Unknown property type: #{for_type} @ #{property}" \
           unless values.key?(for_type)
         values[for_type].call(property, seed)
