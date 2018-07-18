@@ -27,6 +27,7 @@ module Provider
       prop_map << generate_nested_object_properties(data, properties)
       prop_map << generate_resourceref_properties(data, properties)
       prop_map << generate_namevalues_properties(data, properties)
+      prop_map << generate_enum_properties(data, properties)
 
       generate_property_files(prop_map, data)
     end
@@ -49,6 +50,15 @@ module Provider
     def generate_primitive_properties(data, properties)
       properties.select { |p| p.is_a?(Api::Type::Primitive) }
                 .map { |p| generate_simple_property p.type.downcase, data }
+    end
+
+    def generate_enum_properties(_data, _properties)
+      # By default, enums don't need properties.  In puppet and chef, which
+      # have less sophisticated diffing logic than our other tools, it is
+      # necessary to generate properties for enums where the default is
+      # 'unset' - this might be a good place to introduce the concept of
+      # diffs and diff suppression to puppet / chef.
+      []
     end
 
     # rubocop:disable Metrics/AbcSize
