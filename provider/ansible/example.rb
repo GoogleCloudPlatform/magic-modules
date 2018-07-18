@@ -147,6 +147,9 @@ module Provider
 
     # Holds all information necessary to run a facts module and verify the
     # creation / deletion of a resource.
+    # FactsVerifiers are verifiers in the sense that they verify GCP status.
+    # They do not do this with bash commands, but with a Ansible facts module.
+    # This verifier will look + an act a lot like a Task.
     class FactsVerifier < Verifier
       # Ruby YAML requires at least one value to create the object.
       attr_reader :noop
