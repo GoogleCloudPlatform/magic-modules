@@ -534,5 +534,23 @@ module Provider
     def expand_function_vars(fn_config, data)
       data.gsub('{{function:name}}', fn_config.name)
     end
+
+    def generate_enum_properties(data, properties)
+      default_enums = properties.select do |p|
+        p.is_a?(Api::Type::Enum) && !p.default_value.nil?
+      end
+      default_enums.map do |p|
+        prop_name = Google::StringUtils.underscore(
+          "#{p.__resource.name}_#{p.name}"
+        )
+        {
+          source: File.join('templates', 'puppet',
+                            'property', 'enum_with_default.rb.erb'),
+          target: File.join('lib', 'google', data[:product_name],
+                            'property', "#{prop_name}.rb"),
+          overrides: { prop: p }
+        }
+      end
+    end
   end
 end
