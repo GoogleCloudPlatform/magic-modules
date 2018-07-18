@@ -24,6 +24,82 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
+datasources: !ruby/object:Provider::ResourceOverrides
+  Instance: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
+  Address: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Autoscaler: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  BackendBucket: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  BackendService: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Disk: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Firewall: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  GlobalAddress: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  GlobalForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  HealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  HttpHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  HttpsHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Image: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  InstanceGroupManager: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Network: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Route: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Router: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  SslCertificate: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  SslPolicy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Subnetwork: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetHttpProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetTcpProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  UrlMap: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  # Readonly resources.
+  DiskType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  License: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  MachineType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Region: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Zone: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
     properties:

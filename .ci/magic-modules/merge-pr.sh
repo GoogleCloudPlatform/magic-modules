@@ -44,9 +44,9 @@ echo "Merged PR #$ID." > ./commit_message
 
 set +e
 if [ "$REPO" != "GoogleCloudPlatform/magic-modules" ]; then
-  git remote add push-target "git@github.com:$REPO"
+  git remote add non-gcp-push-target "git@github.com:$REPO"
   # We know we have a commit, so all the machinery of the git resources is
   # unnecessary.  We can just try to push directly, without forcing.
-  ssh-agent bash -c "ssh-add ~/github_private_key; git push push-target $BRANCH"
+  ssh-agent bash -c "ssh-add ~/github_private_key; git push non-gcp-push-target $BRANCH"
 fi
 set -e
