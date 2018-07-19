@@ -21,6 +21,7 @@ module Provider
       attr_reader :access_api_results
       attr_reader :custom_create_resource
       attr_reader :custom_update_resource
+      attr_reader :deprecated
       attr_reader :handlers
       attr_reader :manual
       attr_reader :provider_helpers
@@ -69,6 +70,7 @@ module Provider
         check_property :access_api_results, :boolean
         check_property :custom_create_resource, :boolean
         check_property :custom_update_resource, :boolean
+        check_property :deprecated, :boolean
         check_optional_property :handlers, Provider::Puppet::Handlers
         check_property :manual, :boolean
         check_optional_property :requires, Array
@@ -86,6 +88,7 @@ module Provider
         default_value_property :access_api_results, false
         default_value_property :custom_create_resource, false
         default_value_property :custom_update_resource, false
+        default_value_property :deprecated, false
         default_value_property :manual, false
         default_value_property :provider_helpers, []
         default_value_property :resource_to_request, true

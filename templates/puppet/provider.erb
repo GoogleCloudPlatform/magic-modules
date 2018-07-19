@@ -60,6 +60,13 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   end
 
   def self.prefetch(resources)
+<% if object.deprecated -%>
+    Puppet.warning [
+      "<%= object.out_name -%> will be deprecated in a future release.",
+      "You can use strings to reference GCP <%= object.name -%>.",
+      "A <%= object.out_name -%> is no longer necessary"
+    ].join(" ")
+<% end -%>
     debug('prefetch')
     resources.each do |name, resource|
 <% if object&.handlers&.prefetch.nil? -%>
