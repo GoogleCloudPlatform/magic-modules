@@ -55,8 +55,7 @@ dependencies:
     register: sslcert
     code:
       name: <%= dependency_name('sslCert', 'targetSslProxy') %>
-      description: >
-        A certificate for testing. Do not use this certificate in production
+      description: A certificate for testing. Do not use this certificate in production
       certificate: |
         -----BEGIN CERTIFICATE-----
         MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG
