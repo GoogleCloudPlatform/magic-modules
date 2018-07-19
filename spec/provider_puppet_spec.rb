@@ -670,7 +670,7 @@ describe Provider::Puppet do
 
   def allow_open_spec_templates(rref = false)
     file_read_map 'templates/puppet/type.erb', 'spec/data/type_template.erb'
-    file_read_map 'templates/puppet/provider.erb', 'spec/data/prov_template.erb'
+    file_read_map 'templates/puppet/resource.erb', 'spec/data/prov_template.erb'
     file_read_map 'templates/puppet/provider_spec.erb',
                   'spec/data/prov_spec_template.erb'
     # 6 combinations of success1-3 and name/title
@@ -685,7 +685,7 @@ describe Provider::Puppet do
 
   def allow_open_real_templates
     allow_read 'templates/puppet/type.erb'
-    allow_read 'templates/puppet/provider.erb'
+    allow_read 'templates/puppet/resource.erb'
     allow_read 'templates/puppet/provider_spec.erb'
 
     allow_open 'templates/expand_variables.erb'

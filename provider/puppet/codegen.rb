@@ -61,7 +61,7 @@ module Provider
           File.join('products', data[:product_name], 'files',
                     "provider~#{object_name}.rb")
         else
-          'templates/puppet/provider.erb'
+          'templates/puppet/resource.erb'
         end
       end
     end
