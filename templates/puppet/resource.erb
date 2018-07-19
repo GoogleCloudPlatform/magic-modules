@@ -349,7 +349,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       else
         "#{p.out_name}: resource[:#{p.out_name}]"
       end
-    end, 2),
+    end + ['project: @fetched[:project]'], 2),
     '}'
   ]
 -%>
