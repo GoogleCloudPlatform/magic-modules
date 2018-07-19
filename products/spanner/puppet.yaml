@@ -79,6 +79,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/spanner/helpers/ruby/instance_helpers.rb.erb'
   InstanceConfig: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       collection: |
         URI.join(
