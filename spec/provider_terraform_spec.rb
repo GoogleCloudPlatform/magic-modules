@@ -63,7 +63,7 @@ describe Provider::Terraform do
     end
 
     describe '#collection_url' do
-      subject { provider.collection_url(resource) }
+      subject { provider.build_url(resource.collection_url) }
       it do
         version = product.version_obj_or_default(nil)
         product.set_properties_based_on_version(version)
@@ -72,7 +72,7 @@ describe Provider::Terraform do
     end
 
     describe '#collection_url beta' do
-      subject { provider.collection_url(resource) }
+      subject { provider.build_url(resource.collection_url) }
       it do
         version = product.version_obj_or_default('beta')
         product.set_properties_based_on_version(version)
@@ -81,7 +81,7 @@ describe Provider::Terraform do
     end
 
     describe '#self_link_url' do
-      subject { provider.self_link_url(resource) }
+      subject { provider.build_url(resource.self_link_url) }
       it do
         version = product.version_obj_or_default(nil)
         product.set_properties_based_on_version(version)
@@ -92,7 +92,7 @@ describe Provider::Terraform do
     end
 
     describe '#self_link_url beta' do
-      subject { provider.self_link_url(resource) }
+      subject { provider.build_url(resource.self_link_url) }
       it do
         version = product.version_obj_or_default('beta')
         product.set_properties_based_on_version(version)
