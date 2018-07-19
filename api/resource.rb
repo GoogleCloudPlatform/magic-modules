@@ -374,6 +374,13 @@ module Api
       [@__product.base_url, @async.operation.base_url]
     end
 
+    # A regex to check if a full URL was returned or just a shortname.
+    def regex_url
+      self_link_url.join.gsub('{{project}}', '.*')
+                        .gsub('{{name}}', '[a-z1-9\-]*')
+    end
+
+
     private
 
     # Given an array of properties, return all ResourceRefs contained within

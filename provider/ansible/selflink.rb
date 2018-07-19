@@ -47,8 +47,6 @@ module Provider
       end
 
       def selflink_function(resource)
-        url = build_url(resource.self_link_url).gsub('{project}', '.*')
-                                               .gsub('{name}', '[a-z1-9\-]*')
         lines([
                 method_decl(
                   "#{resource.name.underscore}_selflink",
@@ -58,7 +56,7 @@ module Provider
                   [
                     'if name is None:',
                     indent('return', 4),
-                    "url = r#{url}",
+                    "url = r#{build_url(resource.regex_url)}",
                     'if not re.match(url, name):',
                     # '%s' confuses Rubocop (it's Python code, not Ruby)
                     indent([
