@@ -59,6 +59,9 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   }
   return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
 <% elsif property.is_a?(Api::Type::ResourceRef) -%>
+  if v == nil {
+    return v
+  }
   return ConvertSelfLinkToV1(v.(string))
 <% else -%>
   return v
