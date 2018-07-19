@@ -66,6 +66,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           self.class.return_if_object(response, kind)
         end
   Flag: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: |
         raise('Cloud SQL flag does not match expectations.')
@@ -108,9 +109,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
             @fetched['settings']['settingsVersion']
         end
   SslCert: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise('Cloud SQL SSL certificate mismatch.')
   Tier: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise('Cloud SQL tier does not match expectations.')
 functions:

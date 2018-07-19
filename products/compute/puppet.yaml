@@ -47,6 +47,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Disk cannot be edited'
   DiskType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     # TODO(nelsonjr): Make sure that attempts to create a disk fails
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: |
@@ -111,6 +112,15 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
+  # Deprecated readonly resources
+  License: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  MachineType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  Region: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  Zone: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
 functions:
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_address_ip'

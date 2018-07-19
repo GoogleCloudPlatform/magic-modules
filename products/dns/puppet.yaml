@@ -63,6 +63,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     return_if_object: false
     unwrap_resource: false
   Project: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'DNS Project cannot be edited' if @dirty
 tests: !ruby/object:Api::Resource::HashArray
