@@ -328,8 +328,8 @@ context '<%= object.out_name -%>' do
   lines(indent(compile('templates/chef/resourceref_expandvars.erb'), 2), 1)
 -%>
 <%= lines(indent(compile_if(tests, %w[expectation_helpers]), 2), 1) -%>
-<%= lines(indent(emit_link('collection', collection_url(object), false), 2)) %>
-<%= lines(indent(emit_link('self_link', self_link_url(object), false), 2)) -%>
+<%= lines(indent(emit_link('collection', build_url(object.collection_url), false), 2)) %>
+<%= lines(indent(emit_link('self_link', build_url(object.self_link_url), false), 2)) -%>
 
 <% uri_data = @constants.value_assign(object) -%>
 <% if uri_data.empty? -%>

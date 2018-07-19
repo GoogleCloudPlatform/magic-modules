@@ -351,6 +351,26 @@ module Api
       end
     end
 
+    # Returns self link in two parts - base_url + product_url
+    def self_link_url
+      base_url = @__product.base_url.split("\n").map(&:strip).compact
+      if @self_link.nil?
+        [base_url, [@base_url, '{{name}}'].join('/')]
+      else
+        self_link = @self_link.split("\n").map(&:strip).compact
+        [base_url, self_link]
+      end
+    end
+
+    def collection_url
+      @base_url.split("\n").map(&:strip).compact
+    end
+
+    def async_operation_url
+      raise 'Not an async resource' if @async.nil?
+      [@__product.base_url, @async.operation.base_url]
+    end
+
     private
 
     # Given an array of properties, return all ResourceRefs contained within

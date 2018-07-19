@@ -12,7 +12,7 @@ def fetch_resource(resource, self_link)
 end
 <% end # object.kind? -%>
 
-<%= lines(emit_link('async_op_url', async_operation_url(object), false,
+<%= lines(emit_link('async_op_url', build_url(object.async_operation_url, true), false,
                     true)) -%>
 
 def wait_for_operation(response, resource)

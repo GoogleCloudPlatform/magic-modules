@@ -490,7 +490,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% if object&.handlers&.collection.nil? -%>
 <%=
   lines_before(
-    lines(indent(emit_link('collection', collection_url(object), true), 2))
+    lines(indent(emit_link('collection', build_url(object.collection_url), true), 2))
   )
 -%>
 <% else # object&.handlers&.collection.nil? -%>
@@ -503,7 +503,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% if object&.handlers&.self_link.nil? -%>
 <%=
   lines_before(
-    lines(indent(emit_link('self_link', self_link_url(object), true), 2))
+    lines(indent(emit_link('self_link', build_url(object.self_link_url), true), 2))
   )
 -%>
 <% else # object&.handlers&.self_link.nil? -%>

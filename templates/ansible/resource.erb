@@ -325,8 +325,8 @@ def unwrap_resource(result, module):
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-<%= lines(emit_link('self_link', self_link_url(object), object), 2) -%>
-<%= lines(emit_link('collection', collection_url(object), object), 2) -%>
+<%= lines(emit_link('self_link', build_url(object.self_link_url), object), 2) -%>
+<%= lines(emit_link('collection', build_url(object.collection_url), object), 2) -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response',
                                          ('kind' if object.kind?)]))

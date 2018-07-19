@@ -88,26 +88,9 @@ module Provider
         return "u#{quote_string(string)}" unless string.include? 'u\''
       end
 
-      def self_link_url(resource)
-        (product_url, resource_url) = self_link_raw_url(resource)
-        full_url = [product_url, resource_url].flatten.join
-        # Double {} replaced with single {} to support Python string
-        # interpolation
+      def build_url(url_parts, extra = false)
+        full_url = url_parts.flatten.join
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
-      end
-
-      def collection_url(resource)
-        base_url = resource.base_url.split("\n").map(&:strip).compact
-        full_url = [resource.__product.base_url, base_url].flatten.join
-        # Double {} replaced with single {} to support Python string
-        # interpolation
-        "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
-      end
-
-      def async_operation_url(resource)
-        base_url = resource.__product.base_url
-        url = [base_url, resource.async.operation.base_url].join
-        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.
