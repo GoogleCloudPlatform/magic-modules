@@ -363,7 +363,10 @@ module Api
     end
 
     def collection_url
-      @base_url.split("\n").map(&:strip).compact
+      [
+        @__product.base_url.split("\n").map(&:strip).compact,
+        @base_url.split("\n").map(&:strip).compact
+      ]
     end
 
     def async_operation_url

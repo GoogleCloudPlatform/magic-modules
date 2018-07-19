@@ -47,8 +47,8 @@ module Provider
       end
 
       def selflink_function(resource)
-        url = self_link_url(resource).gsub('{project}', '.*')
-                                     .gsub('{name}', '[a-z1-9\-]*')
+        url = build_url(resource.self_link_url).gsub('{project}', '.*')
+                                               .gsub('{name}', '[a-z1-9\-]*')
         lines([
                 method_decl(
                   "#{resource.name.underscore}_selflink",
@@ -62,7 +62,7 @@ module Provider
                     'if not re.match(url, name):',
                     # '%s' confuses Rubocop (it's Python code, not Ruby)
                     indent([
-                      "name = #{self_link_url(resource).gsub('{name}', '%s')}",
+                      "name = #{build_url(resource.self_link_url).gsub('{name}', '%s')}",
                       '.format(**params) % name'
                     ].join, 4),
                     # rubocop:enable Style/FormatStringToken
