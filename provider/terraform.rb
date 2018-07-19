@@ -72,7 +72,7 @@ module Provider
     end
 
     def update_url(resource, url_part)
-      return self_link_url(resource) if url_part.nil?
+      return build_url(resource.self_link_url) if url_part.nil?
       [resource.__product.base_url, url_part].flatten.join
     end
 
