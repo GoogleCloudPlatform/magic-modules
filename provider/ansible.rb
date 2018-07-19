@@ -89,7 +89,12 @@ module Provider
       end
 
       def build_url(url_parts, extra = false)
-        full_url = url_parts.flatten.join
+        if url_parts.is_a? Array
+          full_url = url_parts.flatten.join
+        else
+          full_url = url_parts
+        end
+
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
