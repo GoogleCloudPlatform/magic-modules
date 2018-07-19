@@ -88,12 +88,12 @@ module Provider
         return "u#{quote_string(string)}" unless string.include? 'u\''
       end
 
-      def build_url(url_parts, extra = false)
-        if url_parts.is_a? Array
-          full_url = url_parts.flatten.join
-        else
-          full_url = url_parts
-        end
+      def build_url(url_parts, _extra = false)
+        full_url = if url_parts.is_a? Array
+                     url_parts.flatten.join
+                   else
+                     url_parts
+                   end
 
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
       end

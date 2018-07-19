@@ -67,7 +67,7 @@ module Provider
                              force_new?(property.parent, resource))))
     end
 
-    def build_url(url_parts, extra = false)
+    def build_url(url_parts, _extra = false)
       url_parts.flatten.join
     end
 

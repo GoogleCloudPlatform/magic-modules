@@ -377,9 +377,8 @@ module Api
     # A regex to check if a full URL was returned or just a shortname.
     def regex_url
       self_link_url.join.gsub('{{project}}', '.*')
-                        .gsub('{{name}}', '[a-z1-9\-]*')
+                   .gsub('{{name}}', '[a-z1-9\-]*')
     end
-
 
     private
 
