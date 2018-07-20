@@ -147,10 +147,6 @@ def query_options(filters):
 
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-<% if object.kind? -%>
-    if result['kind'] != <%= quote_string(list_kind(object)) %>:
-        module.fail_json(msg="Incorrect result: {kind}".format(**result))
-<% end # object.kind? -%>
 
     return result
 if __name__ == "__main__":
