@@ -28,67 +28,67 @@ datasources: !ruby/object:Provider::ResourceOverrides
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Address: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Autoscaler: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   BackendBucket: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Firewall: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   GlobalAddress: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   GlobalForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   HealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   HttpHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   HttpsHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Image: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   InstanceGroupManager: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Network: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Router: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   SslCertificate: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   SslPolicy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Subnetwork: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetHttpProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetTcpProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   UrlMap: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   # Readonly resources.
   DiskType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true

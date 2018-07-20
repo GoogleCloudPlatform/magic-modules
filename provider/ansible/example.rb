@@ -48,6 +48,9 @@ module Provider
 
       def validate
         super
+        default_value_property :facts, FactsTask.new
+        default_value_property :verifier, FactsVerifier.new
+
         check_property :task, Task
         check_optional_property :verifier, Verifier
         check_optional_property_list :dependencies, Task
