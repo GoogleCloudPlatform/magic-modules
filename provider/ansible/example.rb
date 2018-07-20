@@ -84,6 +84,8 @@ module Provider
 
       private
 
+      # All of the arguments are used inside the ERB file, so we need
+      # to disable rubocop complaining about unused methods
       # rubocop:disable Lint/UnusedMethodArgument
       def build_task(state, hash, object, noop = false)
         compile 'templates/ansible/tasks/task.yaml.erb'
@@ -125,6 +127,8 @@ module Provider
         check_property :failure, FailureCondition
       end
 
+      # All of the arguments are used inside the ERB file, so we need
+      # to disable rubocop complaining about unused methods
       # rubocop:disable Lint/UnusedMethodArgument
       def build_task(state, object)
         raise 'State must be present or absent' \
