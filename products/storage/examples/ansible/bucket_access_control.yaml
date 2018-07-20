@@ -29,4 +29,7 @@ dependencies:
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
     register: bucket
-
+verifier: !ruby/object:Provider::Ansible::NoVerifier
+  reason: 'URI properties works strangely'
+facts: !ruby/object:Provider::Ansible::NoTask
+  reason: 'URI properties works strangely'

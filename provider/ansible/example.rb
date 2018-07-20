@@ -152,6 +152,24 @@ module Provider
       end
     end
 
+    class NoVerifier < Verifier
+      attr_reader :reason
+      def validate() end
+
+      def build_task(state, object)
+        ''
+      end
+    end
+
+    class NoTask < Task
+      attr_reader :reason
+      def validate() end
+
+      def build_task(state, object)
+        ''
+      end
+    end
+
     # Holds all information necessary to run a facts module and verify the
     # creation / deletion of a resource.
     # FactsVerifiers are verifiers in the sense that they verify GCP status.
