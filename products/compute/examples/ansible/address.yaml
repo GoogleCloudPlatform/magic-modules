@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_address
-  code: |
+  code:
     name: 'test-address1'
     region: 'us-west1'
     project: <%= ctx[:project] %>

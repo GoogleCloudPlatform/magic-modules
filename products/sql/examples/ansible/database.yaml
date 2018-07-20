@@ -14,7 +14,7 @@
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_sql_instance
-    code: |
+    code:
       name: <%= dependency_name('instance', 'database') %>
       settings:
         ip_configuration:
@@ -29,7 +29,7 @@ dependencies:
     register: instance
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_sql_database
-  code: |
+  code:
     name: <%= ctx[:name] %>
     charset: 'utf8'
     instance: "{{ instance }}"

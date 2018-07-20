@@ -14,7 +14,7 @@
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_disk
-    code: |
+    code:
       name: <%= dependency_name('disk', 'image') %>
       zone: us-central1-a
       project: <%= ctx[:project] %>
@@ -23,7 +23,7 @@ dependencies:
     register: disk
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_image
-  code: |
+  code:
     name: <%= ctx[:name] %>
     source_disk: "{{ disk }}"
     project: <%= ctx[:project] %>

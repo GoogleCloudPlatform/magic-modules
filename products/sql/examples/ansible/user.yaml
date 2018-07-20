@@ -14,7 +14,7 @@
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_sql_instance
-    code: |
+    code:
       name: <%= dependency_name('instance', 'user') %>
       settings:
         ip_configuration:
@@ -29,7 +29,7 @@ dependencies:
     register: instance
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_sql_user
-  code: |
+  code:
     # Can't use Ansible random name because it's too long
     name: 'test-user'
     host: '10.1.2.3'
