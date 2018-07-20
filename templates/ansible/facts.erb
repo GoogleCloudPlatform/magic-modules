@@ -16,6 +16,8 @@ __metaclass__ = type
   metadata_version = quote_string(@config.manifest.get('metadata_version',
                                                        config))
   supported_by = quote_string(@config.manifest.get('supported_by', config))
+
+  uri_props = object.uri_properties.reject { |para| para.name == 'name' }
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.get('status', config) -%>,
@@ -40,7 +42,7 @@ options:
            U(<%= object.filter_url -%>).
            Each additional filter in the list will act be added as an AND condition
            (filter1 and filter2)
-<% object.parameters.each do |prop| -%>
+<% uri_props.each do |prop| -%>
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
@@ -71,7 +73,7 @@ import json
 
 def main():
 <%
-  mod_props = object.parameters.map do |prop|
+  mod_props = uri_props.map do |prop|
     python_dict_for_property(prop, object)
   end
 -%>

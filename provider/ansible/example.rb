@@ -190,7 +190,7 @@ module Provider
                           .map(&:name)
                           .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        object.parameters
+        object.all_user_properties
               .map(&:name)
               .select { |para| url_parts.include? para }
               .map { |para| { para => sample_code[para] } }
