@@ -14,7 +14,7 @@
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_spanner_instance
-    code: |
+    code:
       name: <%= dependency_name('instance', 'database') %>
       display_name: 'My Spanner Instance'
       node_count: 2
@@ -27,7 +27,7 @@ dependencies:
     register: instance
 task: !ruby/object:Provider::Ansible::Task
     name: gcp_spanner_database
-    code: |
+    code:
       name: 'webstore'
       instance: "{{ instance }}"
       project: <%= ctx[:project] %>

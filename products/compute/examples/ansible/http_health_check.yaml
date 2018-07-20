@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_http_health_check
-  code: |
+  code:
       name: <%= ctx[:name] %>
       healthy_threshold: 10
       port: 8080

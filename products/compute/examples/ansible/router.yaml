@@ -15,14 +15,14 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_network
     register: network
-    code: |
+    code:
       name: <%= dependency_name('network', 'router') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_router
-  code: |
+  code:
     name: <%= ctx[:name] %>
     network: "{{ network }}"
     bgp:

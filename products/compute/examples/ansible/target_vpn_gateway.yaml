@@ -14,7 +14,7 @@
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_address
-    code: |
+    code:
       name: <%= dependency_name('address', 'vpnGateway') %>
       region: 'us-west1'
       project: <%= ctx[:project] %>
@@ -23,7 +23,7 @@ dependencies:
     register: address
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_network
-    code: |
+    code:
       name: <%= dependency_name('network', 'vpnGateway') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -31,7 +31,7 @@ dependencies:
     register: network
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_target_vpn_gateway
-  code: |
+  code:
     name: <%= ctx[:name] %>
     region: us-west1
     network: "{{ network }}"

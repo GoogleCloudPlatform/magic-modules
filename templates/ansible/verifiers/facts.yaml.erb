@@ -1,0 +1,22 @@
+<%
+  module_name = ["gcp_#{object.__product.prefix[1..-1]}",
+                 Google::StringUtils.underscore(object.name),
+                 'facts'].join('_')
+-%>
+- name: verify that <%= Google::StringUtils.underscore(object.name) -%> was <%= lines(verbs[_state.to_sym]) -%>
+  <%= module_name -%>:
+      filters:
+         - name = "{{ resource_name }}"
+<% @parameters.each do |k, v| -%>
+      <%= k -%>: <%= lines(v) -%>
+<% end -%>
+      project: "{{ gcp_project }}"
+      auth_kind: "{{ gcp_cred_kind }}"
+      service_account_file: "{{ gcp_cred_file }}"
+      scopes:
+        - <%= lines(object.__product.scopes[0]) -%>
+  register: results
+- name: verify that command succeeded
+  assert:
+    that:
+      - results['items'] | length == <%= _state == 'present' ? 1 : 0 %>

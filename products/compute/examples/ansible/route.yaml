@@ -15,14 +15,14 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_network
     register: network
-    code: |
+    code:
       name: <%= dependency_name('network', 'route') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_route
-  code: |
+  code:
     name: <%= ctx[:name] %>
     dest_range: '192.168.6.0/24'
     next_hop_gateway: 'global/gateways/default-internet-gateway'
