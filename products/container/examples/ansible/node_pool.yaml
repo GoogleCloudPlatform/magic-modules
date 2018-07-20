@@ -14,7 +14,7 @@
 
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_container_node_pool
-  code: |
+  code:
       name: <%= ctx[:name] %>
       initial_node_count: 4
       cluster: "{{ cluster }}"
@@ -25,7 +25,7 @@ task: !ruby/object:Provider::Ansible::Task
 dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_container_cluster
-    code: |
+    code:
       name: <%= dependency_name('cluster', 'nodePool') %>
       initial_node_count: 4
       zone: 'us-central1-a'

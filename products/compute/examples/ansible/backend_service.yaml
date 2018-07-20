@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_instance_group
     register: instancegroup
-    code: |
+    code:
       name: <%= dependency_name('instanceGroup', 'backendService') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
@@ -24,7 +24,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_http_health_check
     register: healthcheck
-    code: |
+    code:
       name: <%= dependency_name('httphealthcheck', 'backendservice') %>
       healthy_threshold: 10
       port: 8080
@@ -35,7 +35,7 @@ dependencies:
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_backend_service
-  code: |
+  code:
     name: <%= ctx[:name] %>
     backends:
       - group: "{{ instancegroup }}"

@@ -300,7 +300,7 @@ module Provider
 
         name = module_name(data[:object])
         generate_resource_file data.clone.merge(
-          default_template: 'templates/ansible/example.erb',
+          default_template: 'templates/ansible/integration_test.erb',
           out_file: File.join(target_folder,
                               "test/integration/targets/#{name}/tasks/main.yml")
         )

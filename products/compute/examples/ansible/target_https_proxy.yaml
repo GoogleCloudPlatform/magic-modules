@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_instance_group
     register: instancegroup
-    code: |
+    code:
       name: <%= dependency_name('instanceGroup', 'targetHttpsProxy') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
@@ -24,7 +24,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_http_health_check
     register: healthcheck
-    code: |
+    code:
       name: <%= dependency_name('httpHealthCheck', 'targetHttpsProxy') %>
       healthy_threshold: 10
       port: 8080
@@ -36,7 +36,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_backend_service
     register: backendservice
-    code: |
+    code:
       name: <%= dependency_name('backendService', 'targetHttpsProxy') %>
       backends:
         - group: "{{ instancegroup }}"
@@ -49,7 +49,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_url_map
     register: urlmap
-    code: |
+    code:
       name: <%= dependency_name('urlMap', 'targetHttpsProxy') %>
       default_service: "{{ backendservice }}"
       project: <%= ctx[:project] %>
@@ -58,10 +58,9 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_ssl_certificate
     register: sslcert
-    code: |
+    code:
       name: <%= dependency_name('sslCert', 'targetHttpsProxy') %>
-      description: |
-        "A certificate for testing. Do not use this certificate in production"
+      description: A certificate for testing. Do not use this certificate in production
       certificate: |
         -----BEGIN CERTIFICATE-----
         MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG
@@ -91,7 +90,7 @@ dependencies:
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_target_https_proxy
-  code: |
+  code:
     name: <%= ctx[:name] %>
     ssl_certificates:
       - "{{ sslcert }}"

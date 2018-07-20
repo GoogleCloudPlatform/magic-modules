@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_pubsub_topic
-  code: |
+  code:
     name: 'test-topic1'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
