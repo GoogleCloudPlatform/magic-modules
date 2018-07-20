@@ -152,20 +152,22 @@ module Provider
       end
     end
 
+    # A Verifier that doesn't build anything.
     class NoVerifier < Verifier
       attr_reader :reason
       def validate() end
 
-      def build_task(state, object)
+      def build_task(_state, _object)
         ''
       end
     end
 
+    # A Task that doesn't build anything.
     class NoTask < Task
       attr_reader :reason
       def validate() end
 
-      def build_task(state, object)
+      def build_task(_state, _object)
         ''
       end
     end
@@ -202,7 +204,7 @@ module Provider
 
       def build_parameters(object)
         sample_code = @__example.task.code
-        ignored_props = ['project', 'name']
+        ignored_props = %w[project name]
 
         url_parts = object.uri_properties
                           .map(&:name)
