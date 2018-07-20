@@ -184,10 +184,21 @@ module Provider
 
       def build_parameters(object)
         sample_code = @__example.task.code
+        ignored_props = ['project', 'name']
+
+        url_parts = object.uri_properties
+                          .map(&:name)
+                          .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        object.parameters.map(&:name)
+        object.parameters
+              .map(&:name)
+              .select { |para| url_parts.include? para }
               .map { |para| { para => sample_code[para] } }
               .reduce({}, :merge)
+      end
+
+      def name_parameter
+        compile_string(INTEGRATION_TEST_DEFAULTS, @__example.task.code['name']).join
       end
     end
 
