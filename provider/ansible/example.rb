@@ -27,8 +27,8 @@ module Provider
     }.freeze
 
     EXAMPLE_DEFAULTS = {
-      name: 'testObject',
-      project: 'testProject',
+      name: 'test_object',
+      project: 'test_project',
       auth_kind: 'service_account',
       service_account_file: '/tmp/auth.pem'
     }.freeze
