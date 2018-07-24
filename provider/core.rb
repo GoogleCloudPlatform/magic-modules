@@ -215,6 +215,7 @@ module Provider
 
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/AbcSize
     def generate_objects(output_folder, types, version)
       @api.set_properties_based_on_version(version)
       (@api.objects || []).each do |object|
@@ -231,6 +232,7 @@ module Provider
     end
     # rubocop:enable Metrics/CyclomaticComplexity
     # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/AbcSize
 
     def generate_object(object, output_folder, version)
       data = build_object_data(object, output_folder, version)

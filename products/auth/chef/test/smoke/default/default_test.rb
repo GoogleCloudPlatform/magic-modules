@@ -1,5 +1,3 @@
-# # encoding: utf-8
-
 # Inspec test for recipe gauth::default
 
 # The Inspec reference, with examples and extensive documentation, can be
