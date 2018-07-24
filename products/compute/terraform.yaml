@@ -48,6 +48,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
@@ -276,6 +278,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: true
       ipVersion: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       region: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
