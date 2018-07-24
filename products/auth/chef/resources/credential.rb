@@ -11,7 +11,8 @@ module Google
 
       property :name, String, identity: true, desired_state: false
       property :path, String, desired_state: false
-      property :scopes, Array, desired_state: false
+      property :scopes, Array, desired_state: false,
+               default: ['https://www.googleapis.com/auth/compute']
       property :__auth, ::Google::Authorization, desired_state: false
 
       action :serviceaccount do
