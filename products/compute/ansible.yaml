@@ -214,8 +214,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
-  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
-    editable: false
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
