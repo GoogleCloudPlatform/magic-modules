@@ -217,7 +217,7 @@ module Provider
     # rubocop:disable Metrics/PerceivedComplexity
     def generate_objects(output_folder, types, version)
       @api.set_properties_based_on_version(version)
-      @api.objects.each do |object|
+      (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude

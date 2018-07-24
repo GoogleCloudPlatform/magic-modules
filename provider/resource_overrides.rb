@@ -153,7 +153,7 @@ module Provider
     end
 
     def populate_nonoverridden_objects
-      @__api.objects.each do |object|
+      (@__api.objects || []).each do |object|
         var_name = "@#{object.name}".to_sym
         instance_variable_set(var_name, @__config.resource_override.new) \
           unless instance_variables.include?(var_name)
