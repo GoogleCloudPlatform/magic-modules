@@ -45,7 +45,6 @@ module Api
       attr_reader :async
       attr_reader :readonly
       attr_reader :exports
-      attr_reader :label_override
       attr_reader :transport
       attr_reader :references
       attr_reader :create_verb
@@ -235,7 +234,6 @@ module Api
       check_optional_property :self_link, String
       check_optional_property :self_link_query, Api::Resource::ResponseList
       check_optional_property :readonly, :boolean
-      check_optional_property :label_override, String
       check_optional_property :transport, Transport
       check_optional_property :references, ReferenceLinks
 
