@@ -22,10 +22,9 @@ manifest: !ruby/object:Provider::Chef::Manifest
   summary: 'Installs/Configures gauth'
   description: |
     Installs/Configures gauth
-  depends:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google-gauth'
-      versions: '< 0.2.0'
+  additional_info:
+    - gem 'googleauth'
+    - gem 'google-api-client', '0.10.1'
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 files: !ruby/object:Provider::Config::Files
