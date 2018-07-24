@@ -220,7 +220,6 @@ module Api
     # method size and complexity.
     #
     # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def validate
       super
       check_optional_property :async, Api::Async
@@ -254,7 +253,6 @@ module Api
       check_identity unless @identity.nil?
     end
     # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/MethodLength
 
     def properties
       (@properties || []).reject(&:exclude)
