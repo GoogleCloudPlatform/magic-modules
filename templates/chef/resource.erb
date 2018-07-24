@@ -411,7 +411,11 @@ module Google
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
 <% if object&.handlers&.update.nil? -%>
-<%   put_new = "::Google::#{product_ns}::Network::Put.new" -%>
+<% 
+  put_new = ["::Google::#{product_ns}::Network",
+             "#{object.update_verb.to_s.capitalize}.new"
+            ].join('::')
+-%>
 <%= lines(indent("update_req =", 12)) -%>
 <%=
   lines(indent_list([
