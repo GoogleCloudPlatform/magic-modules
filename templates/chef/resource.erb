@@ -435,6 +435,11 @@ module Google
             # TODO(nelsonjr): Check w/ Chef... can we print this in red?
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
+<% if object.input -%>
+            message = '<%= object.name -%> cannot be edited'
+            Chef::Log.fatal message
+            raise message
+<% else # if object.input -%>
 <% if object&.handlers&.update.nil? -%>
 <% 
   put_new = ["::Google::#{product_ns}::Network",
@@ -465,6 +470,7 @@ module Google
 <% else # object&.handlers&.update.nil? -%>
 <%= lines(indent(object.handlers.update, 12)) -%>
 <% end # object&.handlers&.update.nil? -%>
+<% end # if object.input -%>
           end
         end
 <% unless object.all_resourcerefs.empty? -%>
