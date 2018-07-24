@@ -240,7 +240,9 @@ def main():
                    end
 -%>
 <% if object.update.nil? -%>
-<%   if !false?(object.input) -%>
+<%   if object.input -%>
+    module.fail_json(msg="<%= object.name -%> cannot be edited")
+<%   else # object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   update_verb = object.update_verb.to_s.downcase
@@ -255,9 +257,7 @@ def main():
   )
 -%>
     return <%= method %>
-<%   else # !false?(object.input) -%>
-    module.fail_json(msg="<%= object.name -%> cannot be edited")
-<%   end # !false?(object.input) -%>
+<%   end # if object.input -%>
 <% else # object.update.nil? -%>
 <%= lines(indent(object.update, 4)) -%>
 <% end # object.update.nil? -%>
