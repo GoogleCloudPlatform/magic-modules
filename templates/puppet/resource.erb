@@ -318,6 +318,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
 <% if object&.handlers&.flush.nil? -%>
+<% if object.input -%>
+    raise '<%= object.name -%> cannot be edited.'
+<% else # if object.input -%>
 <%
   put_new = ["Google::#{product_ns}::Network",
              "#{object.update_verb.to_s.capitalize}.new"
@@ -339,6 +342,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
+<% end # object.input -%>
 <% else # object&.handlers&.flush.nil? -%>
 <%= lines(indent(object.handlers.flush, 4)) -%>
 <% end # object&.handlers&.flush.nil? -%>
