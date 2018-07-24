@@ -245,7 +245,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
        body_new = 'self_link(@resource)'
      end
 
-     request_new = ["::Google::#{product_ns}::Network",
+     request_new = ["Google::#{product_ns}::Network",
                     "#{object.create_verb.to_s.capitalize}.new"
                    ].join('::')
 
@@ -306,7 +306,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     return if @created || @deleted || !@dirty
 <% if object&.handlers&.flush.nil? -%>
 <%
-  put_new = ["::Google::#{product_ns}::Network",
+  put_new = ["Google::#{product_ns}::Network",
              "#{object.update_verb.to_s.capitalize}.new"
             ].join('::')
   custom_resource = true?(object.custom_update_resource)

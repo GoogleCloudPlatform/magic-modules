@@ -165,7 +165,7 @@ module Google
        body_new = 'self_link(@new_resource)'
      end
      request_new = ["::Google::#{product_ns}::Network",
-                    "#{object.create_verb.to_s.capitalize}.new"
+                    "#{object.create_verb.to_s.capitalize}"
                    ].join('::')
 -%>
             create_req = <%= request_new -%>.new(
