@@ -29,6 +29,9 @@ objects:
     description: >
       Datasets allow you to organize and control access to your tables.
     properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Dataset name'
       - !ruby/object:Api::Type::Array
         name: 'access'
         description: 'Access controls on the bucket.'
