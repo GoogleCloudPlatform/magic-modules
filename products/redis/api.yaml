@@ -92,12 +92,10 @@ objects:
       - !ruby/object:Api::Type::NameValues
         name: 'labels'
         description: Resource labels to represent user provided metadata.
-        key_type: Api::Type::String
         value_type: Api::Type::String
       - !ruby/object:Api::Type::NameValues
         name: 'redisConfigs'
         description: Redis configuration parameters, according to http://redis.io/topics/config.
-        key_type: Api::Type::String
         value_type: Api::Type::String
       - !ruby/object:Api::Type::String
         name: locationId
