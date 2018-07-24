@@ -124,9 +124,7 @@ module Google
 
     def find_credential
       credentials['data'].each do |entry|
-        if entry['credential']['_class'] == 'OAuth2Credentials'
-          return entry['credential']
-        end
+        return entry['credential'] if entry['credential']['_class'] == 'OAuth2Credentials'
       end
 
       raise "Credential not found in '#{file}'"

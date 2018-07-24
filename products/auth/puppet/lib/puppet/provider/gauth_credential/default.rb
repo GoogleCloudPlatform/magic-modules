@@ -14,7 +14,7 @@
 require 'google/object_store'
 require 'puppet'
 
-# A dummy provider that tells the user he needs to specify a provider.
+# A dummy provider that tells the user to specify a provider.
 Puppet::Type.type(:gauth_credential).provide(:default) do
   def self.init
     @resource_collector = Google::ObjectStore.instance
@@ -27,7 +27,7 @@ Puppet::Type.type(:gauth_credential).provide(:default) do
   end
 
   def self.prefetch(resources)
-    resources.each do |title, _|
+    resources.each_key do |title|
       raise "gauth_credential[#{title}] does not have a provider"
     end
   end

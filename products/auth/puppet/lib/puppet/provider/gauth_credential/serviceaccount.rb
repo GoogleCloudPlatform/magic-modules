@@ -17,6 +17,7 @@ require 'puppet'
 
 # A Puppet provider that implements authenticating requests using a Google Cloud
 # Platform service account.
+# rubocop:disable Metrics/BlockLength
 Puppet::Type.type(:gauth_credential).provide(:serviceaccount) do
   has_feature :serviceaccount
 
@@ -56,3 +57,4 @@ Puppet::Type.type(:gauth_credential).provide(:serviceaccount) do
                          .from_service_account_json!(path)
   end
 end
+# rubocop:enable Metrics/BlockLength

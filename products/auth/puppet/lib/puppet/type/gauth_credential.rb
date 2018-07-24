@@ -13,6 +13,7 @@
 
 # A Puppet resource that specifies the credentials and authentication method to
 # use when authorizing Google Cloud Platform API requests.
+# rubocop:disable Metrics/BlockLength
 Puppet::Type.newtype(:gauth_credential) do
   @doc = "Authentication for Google Cloud Platform.
 
@@ -65,3 +66,4 @@ Puppet::Type.newtype(:gauth_credential) do
     id
   end
 end
+# rubocop:enable Metrics/BlockLength
