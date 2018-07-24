@@ -97,7 +97,7 @@ module Provider
         @sourced << relative_path(target_file, output_folder)
         Google::LOGGER.info "Copying #{source} => #{target}"
         FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
-        FileUtils.cp source, target_file
+        FileUtils.copy_entry source, target_file
       end
     end
 
