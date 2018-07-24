@@ -25,12 +25,6 @@ manifest: !ruby/object:Provider::Chef::Manifest
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
-  ManagedZone: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'ManagedZone cannot be edited'
-        Chef::Log.fatal message
-        raise message
   ResourceRecordSet: !ruby/object:Provider::Chef::ResourceOverride
     handlers: !ruby/object:Provider::Chef::Handlers
       create: |
@@ -59,11 +53,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     unwrap_resource: false
   Project: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Project cannot be edited'
-        Chef::Log.fatal message
-        raise message
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
 properties:
