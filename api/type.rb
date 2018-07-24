@@ -446,6 +446,8 @@ module Api
         @description = 'A nested object resource' if @description.nil?
         @name = @__name if @name.nil?
         super
+
+        raise "Properties missing on #{name}" if @properties.nil?
         @properties.each do |p|
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
