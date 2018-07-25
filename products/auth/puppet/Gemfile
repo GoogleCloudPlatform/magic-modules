@@ -17,6 +17,7 @@ gem 'google-api-client'
 gem 'googleauth'
 
 group :test do
+  gem 'parallel_rspec'
   gem 'fakeweb'
   gem 'puppet', ENV['PUPPET_GEM_VERSION'] || '~> 4.2.0'
   gem 'puppet-lint'
@@ -27,11 +28,6 @@ group :test do
   gem 'rspec'
   gem 'rspec-mocks'
   gem 'rspec-puppet'
-  # TODO(alexstephen): Monitor rubocop upsteam changes
-  # https://github.com/bbatsov/rubocop/pull/4329
-  # Change will allow rubocop to use --ignore-parent-exclusion flag
-  # Current rubocop upstream will not check Chef files because of
-  # AllCops/Exclude
   gem 'rubocop'
   gem 'simplecov'
 end
