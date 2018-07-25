@@ -49,7 +49,8 @@ GEM
     multipart-post (2.0.0)
     os (0.9.6)
     parallel (1.12.1)
-    parallel_rspec (0.5.0)
+    parallel_tests (2.22.0)
+      parallel
     parser (2.5.1.2)
       ast (~> 2.4.0)
     powerpack (0.1.2)
@@ -117,7 +118,7 @@ DEPENDENCIES
   fakeweb
   google-api-client
   googleauth
-  parallel_rspec
+  parallel_tests
   puppet (~> 4.2.0)
   puppet-lint
   puppet-lint-unquoted_string-check

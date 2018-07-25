@@ -18,7 +18,7 @@ gem 'googleauth'
 
 group :test do
   gem 'fakeweb'
-  gem 'parallel_rspec'
+  gem 'parallel_tests'
   gem 'puppet', ENV['PUPPET_GEM_VERSION'] || '~> 4.2.0'
   gem 'puppet-lint'
   gem 'puppet-lint-unquoted_string-check'
