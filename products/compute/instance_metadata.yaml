@@ -37,5 +37,4 @@
     The metadata key/value pairs to assign to instances that are
     created from this template. These pairs can consist of custom
     metadata or predefined keys.
-  key_type: Api::Type::String
   value_type: Api::Type::String
