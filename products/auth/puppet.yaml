@@ -30,22 +30,16 @@ manifest: !ruby/object:Provider::Puppet::Manifest
 files: !ruby/object:Provider::Config::Files
   copy:
     'LICENSE': 'templates/LICENSE'
-    'Gemfile.lock': 'templates/puppet/Gemfile.lock'
+    'Gemfile': 'products/auth/puppet/Gemfile'
+    'Gemfile.lock': 'products/auth/puppet/Gemfile.lock'
     'README.md': 'products/auth/puppet/README.md'
     'lib/': 'products/auth/puppet/lib/'
     'lib/google/object_store.rb': 'google/object_store.rb'
     'spec/': 'products/auth/puppet/spec/'
     'spec/copyright.rb': 'spec/copyright.rb'
-    'spec/copyright_spec.rb': 'spec/copyright_spec.rb'
-    'spec/data/copyright_bad1.rb': 'spec/data/copyright_bad1.rb'
-    'spec/data/copyright_bad2.rb': 'spec/data/copyright_bad2.rb'
-    'spec/data/copyright_good1.rb': 'spec/data/copyright_good1.rb'
-    'spec/data/copyright_good2.rb': 'spec/data/copyright_good2.rb'
-    'spec/object_store_spec.rb': 'spec/object_store_spec.rb'
   compile:
     '.gitignore': 'templates/dot~gitignore'
     '.rubocop.yml': 'templates/dot~rubocop~root.yml'
-    'Gemfile': 'templates/puppet/Gemfile'
     'metadata.json': 'templates/puppet/metadata.json.erb'
     'CONTRIBUTING.md': 'templates/CONTRIBUTING.md.erb'
 <% # common~compile~after.yaml should be the last line of compile: section -%>
