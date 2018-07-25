@@ -129,7 +129,6 @@ objects:
         description: >
           The labels associated with this dataset. You can use these to
           organize and group your datasets
-        key_type: Api::Type::String
         value_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'lastModifiedTime'
@@ -177,7 +176,6 @@ objects:
         description: >
           The labels associated with this dataset. You can use these to
           organize and group your datasets
-        key_type: Api::Type::String
         value_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'lastModifiedTime'

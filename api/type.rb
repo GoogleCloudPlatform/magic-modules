@@ -494,6 +494,7 @@ module Api
 
       def validate
         super
+        default_value_property :key_type, Api::Type::String.to_s
         check_property :key_type, ::String
         check_property :value_type, ::String
         raise "Invalid type #{@key_type}" unless type?(@key_type)

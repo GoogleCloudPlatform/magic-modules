@@ -67,7 +67,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::NameValues
         name: 'labels'
-        key_type: Api::Type::String
         value_type: Api::Type::String
         description: |
           The labels associated with this Project.

@@ -42,7 +42,6 @@
   name: 'labels'
   description: |
     Labels to apply to this disk.  A list of key->value pairs.
-  key_type: Api::Type::String
   value_type: Api::Type::String
   update_verb: :POST
   update_url: 'projects/{{project}}/<%= ctx[:location] -%>s/{{<%= ctx[:location] -%>}}/disks/{{name}}/setLabels'
