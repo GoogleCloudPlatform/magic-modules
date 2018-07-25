@@ -81,8 +81,14 @@ To see the full product list visit the [`products`](products/) folder.
 Magic Modules requires:
 
 - git (so you can checkout the code)
-- Ruby 2.0 or higher
+- Ruby 2.5
 - Bundler gem
+
+### Ruby
+
+Since Ruby 2.5 is not yet available in some common distributions, we recommend using
+`rbenv` to ensure that you are using the correct Ruby version.  If you see an error
+about `unexpected keyword_rescue`, that means you're using an older Ruby.
 
 ### Downloading code
 
