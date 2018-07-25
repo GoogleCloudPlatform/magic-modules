@@ -125,13 +125,20 @@ resources:
           check_dependent_prs: true
           label: downstream-generated
 
-    - name: nmckinley-pr
+    - name: generate-terraform-image
       type: docker-image
       source:
-        repository: ((dockerhub-account.username))/concourse-github-pr-resource
+        repository: ((dockerhub-account.username))/generate-terraform
         username: ((dockerhub-account.username))
         password: ((dockerhub-account.password))
-        
+
+    - name: installed-magic-modules-image
+      type: docker-image
+      source:
+        repository: ((dockerhub-account.username))/installed-magic-modules
+        username: ((dockerhub-account.username))
+        password: ((dockerhub-account.password))
+
     - name: terraform-pr
       type: github-pull-request
       source:
@@ -539,13 +546,6 @@ jobs:
                     method: squash
                     commit_msg: mm-output/commit_message
 
-    - name: create-pr-image
-      plan:
-          - get: magic-modules
-          - put: nmckinley-pr
-            params:
-              build: magic-modules/.ci/containers/pull-request
-
     - name: test-terraform-pr
       plan:
           - aggregate:
@@ -584,3 +584,21 @@ jobs:
             params:
               file: dist/terraform-provider-google.{{arch}}
           {% endfor %}
+
+    - name: generate-images
+      plan:
+        - get: magic-modules-gcp
+          trigger: true
+          params:
+            submodules: [build/terraform]
+        - put: installed-magic-modules-image
+          params:
+            build: magic-modules-gcp
+            dockerfile: magic-modules-gcp/.ci/containers/installed-magic-modules/Dockerfile
+            tag_as_latest: true
+        - put: generate-terraform-image
+          params:
+            build: magic-modules-gcp
+            dockerfile: magic-modules-gcp/.ci/containers/generate-terraform/Dockerfile
+            tag_as_latest: true
+

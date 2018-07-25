@@ -7,8 +7,8 @@ platform: linux
 image_resource:
     type: docker-image
     source:
-        repository: nmckinley/go-ruby-python
-        tag: '1.9-2.5-2.7'
+        repository: nmckinley/generate-terraform
+        tag: 'latest'
 
 inputs:
     - name: magic-modules-branched

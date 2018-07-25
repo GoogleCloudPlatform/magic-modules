@@ -11,7 +11,7 @@ PATCH_DIR="$(pwd)/patches"
 # Create $GOPATH structure - in order to successfully run Terraform codegen, we need to run
 # it with a correctly-set-up $GOPATH.  It calls out to `goimports`, which means that
 # we need to have all the dependencies correctly downloaded.
-export GOPATH="${PWD}/go"
+export GOPATH="/go"
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 
 pushd magic-modules-branched
@@ -19,7 +19,7 @@ ln -s "${PWD}/build/terraform/" "${GOPATH}/src/github.com/terraform-providers/te
 popd
 
 pushd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
-go get
+go get -v
 popd
 
 pushd magic-modules-branched
