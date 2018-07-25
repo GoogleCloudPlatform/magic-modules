@@ -116,7 +116,6 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
 
     def label_name(product)
-      return product.label_override unless product.label_override.nil?
       Google::StringUtils.underscore(product.name)
                          .split('_')
                          .map { |x| x[0] }
