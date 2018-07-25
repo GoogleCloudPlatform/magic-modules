@@ -166,9 +166,8 @@ def main():
     create_link = 'collection(module)'
   elsif object.create_verb == :PUT
     create_link = 'self_link(module)'
-  else
-    raise "Ansible does not support create_verb #{object.create_verb}"
   end
+  create_verb = ".#{object.create_verb.to_s.downcase}"
   method = method_call('create', ['module', create_link,
                                   ('kind' if object.kind?)])
 -%>
@@ -192,13 +191,6 @@ def main():
 <% if object.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  if object.create_verb.nil? || object.create_verb == :POST
-    create_verb = '.post'
-  elsif object.create_verb == :PUT
-    create_verb = '.put'
-  else
-    raise "Ansible does not support create_verb #{object.create_verb}"
-  end
   create_request = if object.custom_create_resource
                      'resource_to_create'
                    else

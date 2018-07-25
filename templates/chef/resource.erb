@@ -161,11 +161,12 @@ module Google
 <%
      if object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@new_resource)'
-       request_new = "::Google::#{product_ns}::Network::Post"
      elsif object.create_verb == :PUT
        body_new = 'self_link(@new_resource)'
-       request_new = "::Google::#{product_ns}::Network::Put"
      end
+     request_new = ["::Google::#{product_ns}::Network",
+                    "#{object.create_verb.to_s.capitalize}"
+                   ].join('::')
 -%>
             create_req = <%= request_new -%>.new(
               <%= body_new -%>, fetch_auth(@new_resource),
@@ -411,7 +412,11 @@ module Google
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
 <% if object&.handlers&.update.nil? -%>
-<%   put_new = "::Google::#{product_ns}::Network::Put.new" -%>
+<% 
+  put_new = ["::Google::#{product_ns}::Network",
+             "#{object.update_verb.to_s.capitalize}.new"
+            ].join('::')
+-%>
 <%= lines(indent("update_req =", 12)) -%>
 <%=
   lines(indent_list([
