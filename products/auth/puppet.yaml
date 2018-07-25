@@ -37,6 +37,7 @@ files: !ruby/object:Provider::Config::Files
     'lib/google/object_store.rb': 'google/object_store.rb'
     'spec/': 'products/auth/puppet/spec/'
     'spec/copyright.rb': 'spec/copyright.rb'
+    'spec/object_store_spec.rb': 'spec/object_store_spec.rb'
   compile:
     '.gitignore': 'templates/dot~gitignore'
     '.rubocop.yml': 'templates/dot~rubocop~root.yml'

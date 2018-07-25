@@ -39,7 +39,7 @@ Puppet::Type.newtype(:gauth_credential) do
   newparam :path, feature: :serviceaccount
 
   newparam :scopes, feature: :serviceaccount,
-    defaultto: ['https://www.googleapis.com/auth/compute']
+                    defaultto: ['https://www.googleapis.com/auth/compute']
 
   def authorization
     provider.authorization
