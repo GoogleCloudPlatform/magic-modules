@@ -67,6 +67,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address`: The IP of the created resource.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{zone}}/{{name}}"
     examples: |
@@ -227,7 +229,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/forwarding_rule.erb
+      post_create: templates/terraform/post_create/labels.erb
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -282,6 +284,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: false
       region: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
