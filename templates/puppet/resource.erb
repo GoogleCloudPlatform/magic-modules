@@ -241,11 +241,13 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%
      if object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
-       request_new = "Google::#{product_ns}::Network::Post.new"
      elsif object.create_verb == :PUT
        body_new = 'self_link(@resource)'
-       request_new = "Google::#{product_ns}::Network::Put.new"
      end
+
+     request_new = ["Google::#{product_ns}::Network",
+                    "#{object.create_verb.to_s.capitalize}.new"
+                   ].join('::')
 
      request_patch = get_code_multiline config, 'resource_create_patch'
      custom_resource = true?(object.custom_create_resource)
@@ -302,18 +304,12 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
+<% if object&.handlers&.flush.nil? -%>
 <%
-   if object&.handlers&.flush.nil?
-     put_new = if object.update_verb.nil?
-                 "Google::#{product_ns}::Network::Put.new"
-               else
-                 [
-                   ['Google', product_ns, 'Network',
-                    object.update_verb.id2name.capitalize].join('::'),
-                   '.new'
-                 ].join
-               end
-    custom_resource = true?(object.custom_update_resource)
+  put_new = ["Google::#{product_ns}::Network",
+             "#{object.update_verb.to_s.capitalize}.new"
+            ].join('::')
+  custom_resource = true?(object.custom_update_resource)
 -%>
 <%=
   lines(indent_list(["update_req = #{put_new}(self_link(@resource)"].concat(
