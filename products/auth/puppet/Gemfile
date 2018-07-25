@@ -17,8 +17,8 @@ gem 'google-api-client'
 gem 'googleauth'
 
 group :test do
-  gem 'parallel_rspec'
   gem 'fakeweb'
+  gem 'parallel_rspec'
   gem 'puppet', ENV['PUPPET_GEM_VERSION'] || '~> 4.2.0'
   gem 'puppet-lint'
   gem 'puppet-lint-unquoted_string-check'
