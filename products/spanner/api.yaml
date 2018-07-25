@@ -81,7 +81,6 @@ objects:
       # 'state' not suitable for state convergeance.
       - !ruby/object:Api::Type::NameValues
         name: 'labels'
-        key_type: Api::Type::String
         value_type: Api::Type::String
         description: |
           Cloud Labels are a flexible and lightweight mechanism for organizing
