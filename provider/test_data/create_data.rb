@@ -119,8 +119,8 @@ module Provider
 
       def expect_array_item_rref(item, seed = 0)
         size = @data_gen.object_size(item, seed, true)
-        imports = Google::StringUtils.underscore(item.item_type.imports)
-        resource = Google::StringUtils.underscore(item.item_type.resource)
+        imports = item.item_type.imports.underscore
+        resource = item.item_type.resource.underscore
         @provider.indent_list(
           (0..size - 1).map do |index|
             "'#{imports.tr('_', '')}(resource(#{resource},#{index}))'"

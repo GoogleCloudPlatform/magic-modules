@@ -34,7 +34,7 @@ module Provider
     def generate_resource(data)
       target_folder = data[:output_folder]
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
+      name = data[:object].name.underscore
       generate_resource_file data.clone.merge(
         default_template: 'templates/example/resource.erb',
         out_file: File.join(target_folder, "#{name}.rb")

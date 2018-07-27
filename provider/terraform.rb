@@ -134,8 +134,8 @@ module Provider
     def generate_resource(data)
       target_folder = File.join(data[:output_folder], 'google')
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
-      product_name = Google::StringUtils.underscore(data[:product_name])
+      name = data[:object].name.underscore
+      product_name = data[:product_name].underscore
       filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
       generate_resource_file data.clone.merge(
         default_template: 'templates/terraform/resource.erb',
@@ -151,8 +151,8 @@ module Provider
       target_folder = data[:output_folder]
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = Google::StringUtils.underscore(data[:object].name)
-      product_name = Google::StringUtils.underscore(data[:product_name])
+      name = data[:object].name.underscore
+      product_name = data[:product_name].underscore
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
       generate_resource_file data.clone.merge(

@@ -15,7 +15,7 @@
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
   f, err := <%= build_expand_resource_ref('v.(string)', property) %>
   if err != nil {
-    return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
+    return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
   }
   return "https://www.googleapis.com/compute/v1/" + f.RelativeLink(), nil
 }

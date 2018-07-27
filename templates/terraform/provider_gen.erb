@@ -26,6 +26,6 @@ end -%>
 var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
 <% product.objects.reject { |r| r.exclude }.each do |object| -%>
 <% resource_name = product_ns + object.name -%>
-	"google_<%= Google::StringUtils.underscore(resource_name) -%>": resource<%= resource_name -%>(),
+	"google_<%= resource_name.underscore -%>": resource<%= resource_name -%>(),
 <% end -%>
 }

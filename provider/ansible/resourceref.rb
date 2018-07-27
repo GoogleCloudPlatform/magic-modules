@@ -63,7 +63,7 @@ module Provider
       def path_for_rref(rref)
         past_values = []
         until rref.nil?
-          past_values << Google::StringUtils.underscore(rref.name)
+          past_values << rref.name.underscore
           # TODO(alexstephen): Investigate a better way to handle parent
           # pointers on Arrays of NestedObjects
           rref = if rref.is_a?(Api::Type::NestedObject) && \

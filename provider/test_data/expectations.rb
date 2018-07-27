@@ -62,7 +62,7 @@ module Provider
             # We need to verify that only resourcerefs directly belonging to
             # this object are inserted into the expectation.
             next unless ref.is_a? Api::Type::ResourceRef
-            name = Google::StringUtils.underscore(ref.resource_ref.name)
+            name = ref.resource_ref.name.underscore
             value = @data_gen.value(ref.property.class, ref.property, 0)
             { name => value }
           end
@@ -150,7 +150,7 @@ module Provider
 
           rrefs.each do |ref|
             next if ref.object == object
-            name = Google::StringUtils.underscore(ref.object.name)
+            name = ref.object.name.underscore
             # Puppet style refs include a seed
             code << create_expectation("expect_network_get_success_#{name}",
                                        true, ref.object, 12, [],
@@ -192,7 +192,7 @@ module Provider
           # We need to verify that only resourcerefs directly belonging to this
           # object are inserted into the expectation.
           next unless ref.is_a? Api::Type::ResourceRef
-          name = Google::StringUtils.underscore(ref.resource_ref.name)
+          name = ref.resource_ref.name.underscore
           value = @data_gen.value(ref.property.class, ref.property, id - 1)
           { name => value }
         end
@@ -232,7 +232,7 @@ module Provider
           # with same ID objects
           next if ref.object == object
 
-          ref_name = Google::StringUtils.underscore(ref.object.name)
+          ref_name = ref.object.name.underscore
 
           # Find the machine resource to safity the object's dependency. If an
           # object required by the object being tested in turn requires 1+ other
