@@ -249,7 +249,7 @@ def main():
 <%   if object.input && update_props.empty? -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <%   else # object.input -%>
-<%   if !false?(object.editable) && update_props.empty? -%>
+<%   if object.editable || !update_props.empty? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   update_verb = object.update_verb.to_s.downcase
