@@ -51,7 +51,7 @@ module Provider
 
       def generate(object, _, kind, seed, extra)
         props = object.all_user_properties
-        name = Google::StringUtils.underscore(object.name)
+        name = object.name.underscore
 
         extra = extra.merge(
           project: "'test project\##{seed} data'",

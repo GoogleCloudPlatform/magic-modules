@@ -263,7 +263,7 @@ module Provider
       def build_test(state, object, noop = false)
         @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
         @name = ["gcp_#{object.__product.prefix[1..-1]}",
-                 Google::StringUtils.underscore(object.name),
+                 object.name.underscore,
                  'facts'].join('_')
         super(state, object, noop)
       end
@@ -271,7 +271,7 @@ module Provider
       def build_example(state, object)
         @code = build_code(object, EXAMPLE_DEFAULTS)
         @name = ["gcp_#{object.__product.prefix[1..-1]}",
-                 Google::StringUtils.underscore(object.name),
+                 object.name.underscore,
                  'facts'].join('_')
         super(state, object)
       end

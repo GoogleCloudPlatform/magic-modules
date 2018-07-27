@@ -1,4 +1,4 @@
-- name: verify that <%= Google::StringUtils.underscore(object.name) -%> was <%= lines(verbs[state.to_sym]) -%>
+- name: verify that <%= object.name.underscore -%> was <%= lines(verbs[state.to_sym]) -%>
   shell: |
 <%= lines(indent(@command.tr("\n", ''), 4)) -%>
   register: results

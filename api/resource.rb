@@ -198,7 +198,7 @@ module Api
     end
 
     def out_name
-      [@__product.prefix, Google::StringUtils.underscore(@name)].join('_')
+      [@__product.prefix, @name.underscore].join('_')
     end
 
     def identity
