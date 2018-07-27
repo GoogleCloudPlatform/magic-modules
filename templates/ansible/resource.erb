@@ -155,6 +155,9 @@ def main():
                                    ('fetch' if object.access_api_results)
                                  ])
 -%>
+<% unless update_props.empty? -%>
+                update_fields(resource_to_request(module), fetch_to_hash(fetch))
+<% end -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
                 changed = True
         else:
@@ -242,9 +245,10 @@ def main():
                    end
 -%>
 <% if object.update.nil? -%>
-<%   if object.input -%>
+<%   if object.input && update_props.empty? -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <%   else # object.input -%>
+<%   if !false?(object.editable) && update_props.empty? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   update_verb = object.update_verb.to_s.downcase
