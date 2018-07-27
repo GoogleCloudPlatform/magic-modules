@@ -23,7 +23,7 @@ module Google
       # default.  The default is important because GCP sometimes
       # does not return the default value for an enum, but we need
       # to avoid detecting a diff if it is explicitly set.
-      class <%= Google::StringUtils.camelize(prop.name, :upper) -%>Enum
+      class <%= prop.name.camelize(:upper) -%>Enum
 <%= emit_coerce(product_ns, 'Enum', 8) -%>
         def self.api_parse(value)
           return "<%= prop.default_value -%>" if value.nil?

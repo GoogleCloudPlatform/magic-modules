@@ -35,7 +35,7 @@ options:
                      .reject { |obj| obj.exports.nil? }
 -%>
 <% readonlys.each do |virt| -%>
-      - <%= Google::StringUtils.underscore(virt.name) %>
+      - <%= virt.name.underscore %>
 <% end -%>
   return:
     description: An optional value to describe what part of the attribute should
@@ -144,7 +144,7 @@ class Gcp<%= object.name -%>(object):
       if object.exports[0].is_a? String
         default = object.exports[0]
       else
-        default = Google::StringUtils.underscore(object.exports[0].name)
+        default = object.exports[0].name.underscore
       end
     end
 -%>

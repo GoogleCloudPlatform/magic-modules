@@ -380,7 +380,7 @@ module Provider
 
     def generate_typed_array(data, prop)
       type = Module.const_get(prop.item_type).new(prop.name).type
-      file = Google::StringUtils.underscore(type)
+      file = type.underscore
       prop_map = []
       prop_map << {
         source: File.join('templates', 'puppet', 'property',
@@ -423,9 +423,9 @@ module Provider
 
     def emit_nested_object_overrides(data)
       data.clone.merge(
-        api_name: Google::StringUtils.camelize(data[:api_name], :upper),
-        object_type: Google::StringUtils.camelize(data[:obj_name], :upper),
-        product_ns: Google::StringUtils.camelize(data[:product_name], :upper),
+        api_name: data[:api_name].camelize(:upper),
+        object_type: data[:obj_name].camelize(:upper),
+        product_ns: data[:product_name].camelize(:upper),
         class_name: if data[:emit_array]
                       data[:property].item_type.property_class.last
                     else
@@ -540,9 +540,7 @@ module Provider
         p.is_a?(Api::Type::Enum) && !p.default_value.nil?
       end
       default_enums.map do |p|
-        prop_name = Google::StringUtils.underscore(
-          "#{p.__resource.name}_#{p.name}"
-        )
+        prop_name = "#{p.__resource.name}_#{p.name}".underscore
         {
           source: File.join('templates', 'puppet',
                             'property', 'enum_with_default.rb.erb'),

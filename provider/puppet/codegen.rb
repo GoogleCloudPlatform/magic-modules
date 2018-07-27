@@ -56,7 +56,7 @@ module Provider
       end
 
       def provider_template_source(data)
-        object_name = Google::StringUtils.underscore(data[:object].name)
+        object_name = data[:object].name.underscore
         if true?(data[:object].manual)
           File.join('products', data[:product_name], 'files',
                     "provider~#{object_name}.rb")

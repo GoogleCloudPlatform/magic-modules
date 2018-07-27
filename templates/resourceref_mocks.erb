@@ -17,7 +17,7 @@
 <% object.all_resourcerefs.each do |ref| -%>
 <%
   prop_ref = ref.resource_ref
-  ref_underscore_name = Google::StringUtils.underscore(ref.resource)
+  ref_underscore_name = ref.resource.underscore
   ref_index ||= 0
   ref_name = "resource(#{ref_underscore_name},#{ref_index})"
 -%>

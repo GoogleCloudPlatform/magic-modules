@@ -33,7 +33,7 @@ module Provider
         if resource.import_format.nil? || resource.import_format.empty?
           underscored_base_url = resource.base_url.gsub(
             /{{[[:word:]]+}}/
-          ) { |api_name| Google::StringUtils.underscore(api_name) }
+          ) { |api_name| api_name.underscore }
 
           # We assume that all resources have a name field
           id_formats = [underscored_base_url + '/{{name}}']

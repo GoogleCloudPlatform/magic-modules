@@ -39,8 +39,7 @@ module Provider
           data[:output_folder],
           { prop[:target] => prop[:source] },
           {
-            product_ns: Google::StringUtils.camelize(data[:product_name],
-                                                     :upper),
+            product_ns: data[:product_name].camelize(:upper),
             prop_ns_dir: data[:product_name].downcase
           }.merge((prop[:overrides] || {}))
         )
@@ -102,7 +101,7 @@ module Provider
           api_name: prop.name.underscore,
           property: prop,
           nested_properties: prop.properties,
-          obj_name: Google::StringUtils.underscore(data[:object].name)
+          obj_name: data[:object].name.underscore
         )
       )
 
@@ -120,7 +119,7 @@ module Provider
           api_name: prop.name.underscore,
           property: prop,
           nested_properties: prop.item_type.properties,
-          obj_name: Google::StringUtils.underscore(data[:object].name)
+          obj_name: data[:object].name.underscore
         )
       )
 
@@ -135,7 +134,7 @@ module Provider
     end
 
     def generate_resourceref_object(data, prop)
-      resource = Google::StringUtils.underscore(prop.resource_ref.name)
+      resource = prop.resource_ref.name.underscore
       imports = prop.imports.underscore
       return if resourceref_tracker.key?([resource, imports])
       resourceref_tracker[[resource, imports]] = false
@@ -151,7 +150,7 @@ module Provider
     end
 
     def generate_resourceref_array(data, prop)
-      resource = Google::StringUtils.underscore(prop.resource_ref.name)
+      resource = prop.resource_ref.name.underscore
       imports = prop.imports.underscore
       return if resourceref_tracker.key?([resource, imports]) \
         && resourceref_tracker[[resource, imports]] == true
