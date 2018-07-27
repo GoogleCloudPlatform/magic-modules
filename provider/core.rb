@@ -569,6 +569,17 @@ module Provider
       Pathname.new(target).relative_path_from(Pathname.new(base))
     end
 
+    # Filter the properties to keep only the ones requiring custom update
+    # method and group them by update url & verb.
+    def properties_by_custom_update(properties)
+      update_props = properties.reject do |p|
+        p.update_url.nil? || p.update_verb.nil?
+      end
+      update_props.group_by do |p|
+        { update_url: p.update_url, update_verb: p.update_verb }
+      end
+    end
+
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.
     private
@@ -753,17 +764,6 @@ module Provider
         return matcher[:year] unless matcher.nil?
       end
       Time.now.year
-    end
-
-    # Filter the properties to keep only the ones requiring custom update
-    # method and group them by update url & verb.
-    def properties_by_custom_update(properties)
-      update_props = properties.reject do |p|
-        p.update_url.nil? || p.update_verb.nil?
-      end
-      update_props.group_by do |p|
-        { update_url: p.update_url, update_verb: p.update_verb }
-      end
     end
   end
 end
