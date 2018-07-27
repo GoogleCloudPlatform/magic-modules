@@ -117,10 +117,10 @@ module Provider
 
     def label_name(product)
       product.name.underscore
-                  .split('_')
-                  .map { |x| x[0] }
-                  .join
-                  .concat('_label')
+             .split('_')
+             .map { |x| x[0] }
+             .join
+             .concat('_label')
     end
 
     # Returns a list of all resource types being tested
