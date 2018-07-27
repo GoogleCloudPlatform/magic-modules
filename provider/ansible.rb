@@ -114,14 +114,14 @@ module Provider
       # Example: gcp_dns_managed_zone
       def module_name(object)
         ["gcp_#{object.__product.prefix[1..-1]}",
-         Google::StringUtils.underscore(object.name)].join('_')
+         object.name.underscore].join('_')
       end
 
       def build_object_data(object, output_folder, version)
         # Method is overriden to add Ansible example objects to the data object.
         data = super
 
-        prod_name = Google::StringUtils.underscore(data[:object].name)
+        prod_name = data[:object].name.underscore
         path = ["products/#{data[:product_name]}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
@@ -180,7 +180,7 @@ module Provider
       def rrefs_in_link(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         (object.parameters || []).select do |p|
-          props_in_link.include?(Google::StringUtils.underscore(p.name)) && \
+          props_in_link.include?(p.name.underscore) && \
             p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
       end
@@ -191,7 +191,7 @@ module Provider
         props = props_in_link.map do |p|
           # Select a resourceref if it exists.
           rref = (object.parameters || []).select do |prop|
-            Google::StringUtils.underscore(prop.name) == p && \
+            prop.name.underscore == p && \
               prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
           end
           if rref.any?
@@ -277,7 +277,7 @@ module Provider
       end
 
       def example_defaults(data)
-        obj_name = Google::StringUtils.underscore(data[:object].name)
+        obj_name = data[:object].name.underscore
         path = ["products/#{data[:product_name]}",
                 "examples/ansible/#{obj_name}.yaml"].join('/')
 
@@ -285,7 +285,7 @@ module Provider
       end
 
       def generate_resource_tests(data)
-        prod_name = Google::StringUtils.underscore(data[:object].name)
+        prod_name = data[:object].name.underscore
         path = ["products/#{data[:product_name]}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 

@@ -14,6 +14,7 @@
 require 'compile/core'
 require 'dependencies/dependency_graph'
 require 'fileutils'
+require 'google/extensions'
 require 'google/logger'
 require 'pathname'
 require 'provider/properties'
@@ -120,7 +121,7 @@ module Provider
         output_folder,
         @config.test_data.network,
         lambda do |object, file|
-          type = Google::StringUtils.underscore(object.name)
+          type = object.name.underscore
           ["spec/data/network/#{object.out_name}/#{file}.yaml",
            "products/#{@api.prefix[1..-1]}/files/spec~#{type}~#{file}.yaml"]
         end
@@ -170,7 +171,7 @@ module Provider
       create_object_list(
         test_data,
         lambda do |object, file|
-          type = Google::StringUtils.underscore(object.name)
+          type = object.name.underscore
           ["spec/data/network/#{object.out_name}/#{file}.yaml",
            "products/#{@api.prefix[1..-1]}/files/spec~#{type}~#{file}.yaml"]
         end

@@ -79,7 +79,7 @@ For complete details of the authentication cookbook, visit the
 
 ```ruby
 <%= compile ["products/#{@api.prefix[1..-1]}/examples/chef/",
-             "#{Google::StringUtils.underscore(object.name)}.rb"].join('') %>
+             "#{object.name.underscore}.rb"].join('') %>
 ```
 
 #### Reference

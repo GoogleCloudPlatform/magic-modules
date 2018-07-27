@@ -1,9 +1,9 @@
 <%
   module_name = ["gcp_#{object.__product.prefix[1..-1]}",
-                 Google::StringUtils.underscore(object.name),
+                 object.name.underscore,
                  'facts'].join('_')
 -%>
-- name: verify that <%= Google::StringUtils.underscore(object.name) -%> was <%= lines(verbs[_state.to_sym]) -%>
+- name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
       filters:
          - name = "{{ resource_name }}"

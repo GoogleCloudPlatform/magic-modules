@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/extensions'
 require 'google/logger'
 require 'google/yaml_validator'
 
@@ -40,7 +41,7 @@ module Api
     end
 
     def out_name
-      Google::StringUtils.underscore(@name)
+      @name.underscore
     end
   end
 end

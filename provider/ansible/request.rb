@@ -129,7 +129,7 @@ module Provider
             ", #{module_name}).to_request()"
           ].join
         elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
-          prop_name = Google::StringUtils.underscore(prop.name)
+          prop_name = prop.name.underscore
           [
             "replace_resource_dict(#{hash_name}",
             ".get(#{unicode_string(prop_name)}, {}), ",
@@ -145,7 +145,7 @@ module Provider
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::ResourceRef) && \
               !prop.item_type.resource_ref.readonly
-          prop_name = Google::StringUtils.underscore(prop.name)
+          prop_name = prop.name.underscore
           [
             "replace_resource_dict(#{hash_name}",
             ".get(#{quote_string(prop_name)}, []), ",

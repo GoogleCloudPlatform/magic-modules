@@ -37,7 +37,7 @@
 -%>
 <%
   api_name_lower = product_ns.downcase
-  resource_name = Google::StringUtils.underscore(object.name)
+  resource_name = object.name.underscore
   properties = object.all_user_properties
 -%>
 ---
