@@ -16,7 +16,7 @@ name: Google Cloud Resource Manager
 prefix: gresourcemanager
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://cloudresourcemanager.googleapis.com/v1/
 scopes:
   # All access is needed to create projects.

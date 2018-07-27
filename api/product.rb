@@ -45,7 +45,7 @@ module Api
       attr_reader :default
       attr_reader :name
 
-      ORDER = %w[v1 beta alpha].freeze
+      ORDER = %w[ga beta alpha].freeze
 
       def validate
         super

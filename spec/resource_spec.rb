@@ -24,9 +24,9 @@ describe Api::Resource do
       product.objects.find { |o| o.name == 'AnotherResource' }
     end
 
-    context 'v1' do
+    context 'ga' do
       it do
-        version = product.version_obj('v1')
+        version = product.version_obj('ga')
         subject.exclude_if_not_in_version(version)
         is_expected.not_to(contain_property_with_name('beta-property'))
         is_expected.to(contain_property_with_name('property1'))
