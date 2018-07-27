@@ -12,9 +12,10 @@
 # limitations under the License.
 require 'google/string_utils'
 
+# The Ruby String class. It's being extended to add StringUtils methods.
 class String
   def underscore
-    Google::StringUtils.underscore(self) 
+    Google::StringUtils.underscore(self)
   end
 
   def camelize(style = :lower)
