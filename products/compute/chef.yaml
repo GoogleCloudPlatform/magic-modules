@@ -32,6 +32,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
     deprecated: true
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_disk_type.rb'
+  Instance: !ruby/object:Provider::Chef::ResourceOverride
+    provider_helpers:
+      - 'products/compute/helpers/ruby/provider_instance.rb'
+      - 'products/compute/helpers/ruby/instance_metadata.rb'
   Network: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_network.rb'
