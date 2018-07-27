@@ -186,7 +186,7 @@ module Provider
       # at the end.
       def minimal_yaml(prop, spaces)
         [
-          "#{Google::StringUtils.underscore(prop.name)}:",
+          "#{prop.name.underscore}:",
           indent(
             [
               'description:',

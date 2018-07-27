@@ -145,8 +145,7 @@ module Api
       num_parts = name_parts.flatten.size
       shrunk_names = recurse_shrink_name(name_parts,
                                          (1.0 * MAX_NAME / num_parts).round)
-      type_name = Google::StringUtils.camelize(shrunk_names.flatten.join('_'),
-                                               :upper)
+      type_name = shrunk_names.flatten.join('_').camelize(:upper)
       property_ns_prefix.concat([type_name])
     end
 
@@ -158,9 +157,9 @@ module Api
     def shrink_type_name_parts(type)
       type.map do |t|
         if t.is_a?(::Array)
-          t.map { |u| Google::StringUtils.underscore(u).split('_') }
+          t.map { |u| u.underscore.split('_') }
         else
-          Google::StringUtils.underscore(t).split('_')
+          t.underscore.split('_')
         end
       end
     end
@@ -315,7 +314,7 @@ module Api
         if !generate_unique_enum_class
           super
         else
-          camelized_name = Google::StringUtils.camelize(@name, :upper)
+          camelized_name = @name.camelize(:upper)
           property_ns_prefix.concat(["#{camelized_name}Enum"]).join('::')
         end
       end
@@ -329,7 +328,7 @@ module Api
         else
           File.join(
             'google', @__resource.__product.prefix[1..-1], 'property',
-            Google::StringUtils.underscore("#{@__resource.name}_#{@name}")
+            "#{@__resource.name}_#{@name}".underscore
           ).downcase
         end
       end
@@ -360,7 +359,7 @@ module Api
       end
 
       def out_name
-        Google::StringUtils.underscore(EXPORT_KEY)
+        EXPORT_KEY.underscore
       end
     end
 
@@ -468,7 +467,7 @@ module Api
       def property_file
         File.join(
           'google', @__resource.__product.prefix[1..-1], 'property',
-          [@__resource.name, Google::StringUtils.underscore(@name)].join('_')
+          [@__resource.name, @name.underscore].join('_')
         ).downcase
       end
 
@@ -513,8 +512,7 @@ module Api
     def property_ns_prefix
       [
         'Google',
-        Google::StringUtils.camelize(@__resource.__product.prefix[1..-1],
-                                     :upper),
+        @__resource.__product.prefix[1..-1].camelize(:upper),
         'Property'
       ]
     end

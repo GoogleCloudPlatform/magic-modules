@@ -118,7 +118,7 @@ required gems.
 
 ```puppet
 <%= compile File.join('products', @api.prefix[1..-1], 'examples', 'puppet',
-                      "#{Google::StringUtils.underscore(object.name)}.pp") %>
+                      "#{object.name.underscore}.pp") %>
 ```
 
 <% end # objects.each -%>
@@ -169,7 +169,7 @@ change by asserting it in the manifest.
 
 ```puppet
 <%= compile File.join('products', @api.prefix[1..-1], 'examples', 'puppet',
-                      "#{Google::StringUtils.underscore(object.name)}.pp") %>
+                      "#{object.name.underscore}.pp") %>
 ```
 
 #### Reference

@@ -51,7 +51,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     transformed := make(map[string]interface{})
 
 <%       nested_properties.each do |prop| -%>
-      transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+      transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name.underscore -%>"], d, config)
       if err != nil {
         return nil, err
       }

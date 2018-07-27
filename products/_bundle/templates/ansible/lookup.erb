@@ -161,7 +161,7 @@ class LookupModule(LookupBase):
 <%
   opts_code = []
   readonlys.each do |object|
-    name = Google::StringUtils.underscore(object.name)
+    name = object.name.underscore
     opts_code << "#{quote_string(name)}: Gcp#{object.name}"
   end
 -%>

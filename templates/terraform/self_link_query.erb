@@ -12,12 +12,12 @@
 	for _, item := range listObj {
 	<% object.identity.each do |prop| -%>
 		<% if settable_properties.include?(prop) -%>
-		this<%= titlelize_property(prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
+		this<%= titlelize_property(prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 		if err != nil {
 			return err
 		}
 		<% else -%>
-			this<%= titlelize_property(prop) -%> := d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")
+			this<%= titlelize_property(prop) -%> := d.Get("<%= prop.name.underscore -%>")
 		<% end -%>
 		that<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name -%>"])
 		log.Printf("[DEBUG] Checking equality of %#v, %#v", that<%= titlelize_property(prop) -%>, this<%= titlelize_property(prop) -%>)
