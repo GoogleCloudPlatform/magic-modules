@@ -400,7 +400,7 @@ def response_to_hash(module, response):
 <% readonly_selflink_rrefs.each do |resource| -%>
 
 
-def <%= Google::StringUtils.underscore(resource.name) -%>_selflink(name, params):
+def <%= resource.name.underscore -%>_selflink(name, params):
     if name is None:
         return
     url = r<%= lines(build_url(resource.regex_url)) -%>
