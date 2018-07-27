@@ -315,6 +315,19 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
+<% update_props = properties_by_custom_update(object.all_user_properties) -%>
+<% update_props.each do |key, props| -%>
+    if <%= props.map { |prop| "@dirty[:#{Google::StringUtils.underscore(prop.name)})]" }.join(' || ') -%>:
+      Google::<%= product_ns -%>::Network::<%= key[:update_verb].capitalize -%>.new(
+        <%= update_url(object, key[:update_url]) -%>,
+        {
+<%= lines(indent_list(props.map { |prop| "#{prop.api_name}: @resource[:#{prop.out_name}]" }, 10)) -%>
+        },
+        fetch_auth(@resource),
+        'application/json'
+      )
+    end
+<% end # update_props.each -%>
 <% if object&.handlers&.flush.nil? -%>
 <% if object.input -%>
     raise '<%= object.name -%> cannot be edited.'

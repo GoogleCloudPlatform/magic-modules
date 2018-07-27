@@ -76,11 +76,6 @@ module Provider
       url_parts.flatten.join
     end
 
-    def update_url(resource, url_part)
-      return build_url(resource.self_link_url) if url_part.nil?
-      [resource.__product.base_url, url_part].flatten.join
-    end
-
     # Transforms a format string with field markers to a regex string with
     # capture groups.
     #

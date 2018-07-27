@@ -580,6 +580,11 @@ module Provider
       end
     end
 
+    def update_url(resource, url_part)
+      return self_link_url(resource) if url_part.nil?
+      [resource.__product.base_url, url_part].flatten.join
+    end
+
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.
     private
