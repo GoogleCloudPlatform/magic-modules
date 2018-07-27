@@ -156,7 +156,8 @@ def main():
                                  ])
 -%>
 <% unless update_props.empty? -%>
-                update_fields(resource_to_request(module), fetch_to_hash(fetch))
+                update_fields(module, resource_to_request(module),
+                              response_to_hash(module, fetch))
 <% end -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
                 changed = True
@@ -270,19 +271,19 @@ def main():
 
 
 <% unless update_props.empty? -%>
-def update_fields(request, response):
-    difference = GcpDifference(request).difference(GcpDifference(response))
+def update_fields(module, request, response):
+    difference = GcpRequest(request).difference(GcpRequest(response))
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <% update_props.each do |key, props| -%>
     if <%= props.map { |prop| "difference.get(#{quote_string(Google::StringUtils.underscore(prop.name))})" }.join(' || ') -%>:
         auth.<%= key[:update_verb].downcase -%>(
-          ''.join([
-              "<%= object.__product.base_url -%>",
-              "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
-          ]).format(**module.params),
-          {
-<%= lines(indent_list(props.map { |p| "#{Google::StringUtils.underscore(p.name)}: module.params('#{Google::StringUtils.underscore(p.name)}')" }, 12)) -%>
-          }
+            ''.join([
+                "<%= object.__product.base_url -%>",
+                "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
+            ]).format(**module.params),
+            {
+<%= lines(indent_list(props.map { |p| "#{quote_string(Google::StringUtils.underscore(p.name))}: module.params('#{Google::StringUtils.underscore(p.name)}')" }, 16)) -%>
+            }
         )
 <% end # update_props.each -%>
 
