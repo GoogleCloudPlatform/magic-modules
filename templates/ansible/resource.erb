@@ -282,7 +282,7 @@ def update_fields(module, request, response):
                 "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
             ]).format(**module.params),
             {
-<%= lines(indent_list(props.map { |p| "#{quote_string(Google::StringUtils.underscore(p.name))}: module.params('#{Google::StringUtils.underscore(p.name)}')" }, 16)) -%>
+<%= lines(indent(request_properties(props), 12)) -%>
             }
         )
 <% end # update_props.each -%>
