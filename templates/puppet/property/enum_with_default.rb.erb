@@ -26,7 +26,7 @@ module Google
       # Since default values for enums are not returned from the GCP API,
       # we need to return true from `insync?` if the property is absent
       # in the response but set to the default in the config.
-      class <%= Google::StringUtils.camelize(prop.name, :upper) -%>Enum < Google::<%= product_ns %>::Property::Enum
+      class <%= prop.name.camelize(:upper) -%>Enum < Google::<%= product_ns %>::Property::Enum
         def insync?(is)
           debug("insync enum? #{name}: '#{is}' == '#{should}'")
           if is == :absent && should == '<%= prop.default_value %>'

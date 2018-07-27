@@ -26,7 +26,7 @@
                     .select { |o| !o.exclude_if_not_in_version(version) }
                     .map do |object|
                       ["gcp_#{object.__product.prefix[1..-1]}",
-                      Google::StringUtils.underscore(object.name)].join('_')
+                       object.name.underscore].join('_')
                     end
 -%>
 <% object_names.each do |obj_name| -%>

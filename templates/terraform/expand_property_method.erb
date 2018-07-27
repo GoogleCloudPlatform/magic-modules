@@ -76,7 +76,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   for _, raw := range l {
     f, err := <%= build_expand_resource_ref('raw.(string)', property.item_type) %>
     if err != nil {
-      return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
+      return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
     }
     req = append(req, f.RelativeLink())
   }
@@ -86,7 +86,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <%       if property.is_a?(Api::Type::ResourceRef) -%>
   f, err := <%= build_expand_resource_ref('v.(string)', property) %>
   if err != nil {
-    return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
+    return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
   }
   return f.RelativeLink(), nil
 }

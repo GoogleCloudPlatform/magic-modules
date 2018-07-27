@@ -13,7 +13,7 @@
   # limitations under the License.
 <% end -%>
 <% if tf_types.include?(property.class) -%>
-"<%= Google::StringUtils.underscore(property.name) -%>": {
+"<%= property.name.underscore -%>": {
   <% if property.is_set -%>
   Type: schema.TypeSet,
   <% else -%>

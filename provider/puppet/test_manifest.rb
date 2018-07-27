@@ -62,7 +62,7 @@ module Provider
     # Generates a resource block for a resource ref.
     # Requires the ResourceRef and an index.
     def generate_ref(ref, index)
-      ref_name = Google::StringUtils.underscore(ref.name)
+      ref_name = ref.name.underscore
       generate_object(ref, "resource(#{ref_name},#{index})", :resource,
                       index, ensure: 'present')
     end

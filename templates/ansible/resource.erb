@@ -56,7 +56,7 @@ notes:
 
 <% if example -%>
 EXAMPLES = '''
-<% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
+<% res_readable_name = object.name.uncombine -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
 <%= lines(depend.build_test('present', object, false)) -%>

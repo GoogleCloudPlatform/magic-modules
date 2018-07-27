@@ -1,5 +1,5 @@
 
-* `<%= Google::StringUtils.underscore(property.name) -%>` -
+* `<%= property.name.underscore -%>` -
 <% if property.required -%>
   (Required)
 <% elsif !property.output -%>
