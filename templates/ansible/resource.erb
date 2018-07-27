@@ -16,6 +16,8 @@ __metaclass__ = type
   metadata_version = quote_string(@config.manifest.get('metadata_version',
                                                        object))
   supported_by = quote_string(@config.manifest.get('supported_by', object))
+  supported_by = quote_string(@config.manifest.get('supported_by', config))
+  update_props = properties_by_custom_update(object.all_user_properties)
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.get('status', object) -%>,
@@ -263,6 +265,25 @@ def main():
 <% end # object.update.nil? -%>
 
 
+<% unless update_props.empty? -%>
+def update_fields(request, response):
+    difference = GcpDifference(request).difference(GcpDifference(response))
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% update_props.each do |key, props| -%>
+    if <%= props.map { |prop| "difference.get(#{quote_string(Google::StringUtils.underscore(prop.name))})" }.join(' || ') -%>:
+        auth.<%= key[:update_verb].downcase -%>(
+          ''.join([
+              "<%= object.__product.base_url -%>",
+              "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
+          ]).format(**module.params),
+          {
+<%= lines(indent_list(props.map { |p| "#{Google::StringUtils.underscore(p.name)}: module.params('#{Google::StringUtils.underscore(p.name)}')" }, 12)) -%>
+          }
+        )
+<% end # update_props.each -%>
+
+
+<% end # unless update_props.empty? -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.access_api_results)]))
