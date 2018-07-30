@@ -23,7 +23,6 @@ Database:
             expect_network_create \\
               1,
               {
-                'name' => 'test name#0 data',
                 'extraStatements' => %w[ww xx],
                 'create_statement' => 'CREATE DATABASE `test name#0 data`'
               },
@@ -38,7 +37,6 @@ Database:
             expect_network_create \\
               1,
               {
-                'name' => 'title0',
                 'extraStatements' => %w[ww xx],
                 'create_statement' => 'CREATE DATABASE `title0`'
               },

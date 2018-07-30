@@ -124,13 +124,6 @@ test_data: !ruby/object:Provider::Config::TestData
       - success2~title
       - success3~name
       - success3~title
-    Database:
-      - success1~name
-      - success1~title
-      - success2~name
-      - success2~title
-      - success3~name
-      - success3~title
 changelog:
   - !ruby/object:Provider::Config::Changelog
     version: '0.1.0'
