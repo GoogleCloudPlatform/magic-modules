@@ -34,6 +34,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       resource_to_request_patch: |
         request[:create_statement] = "CREATE DATABASE `#{name}`"
+        request.delete(:name)
       collection: |
         URI.join(
           'https://spanner.googleapis.com/v1/',
