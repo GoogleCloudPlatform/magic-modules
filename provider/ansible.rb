@@ -21,7 +21,6 @@ require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
 require 'provider/ansible/resource_override'
 require 'provider/ansible/property_override'
-require 'provider/ansible/selflink'
 
 module Provider
   module Ansible
@@ -63,7 +62,6 @@ module Provider
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
       include Provider::Ansible::Request
-      include Provider::Ansible::SelfLink
 
       def initialize(config, api)
         super(config, api)
@@ -88,26 +86,14 @@ module Provider
         return "u#{quote_string(string)}" unless string.include? 'u\''
       end
 
-      def self_link_url(resource)
-        (product_url, resource_url) = self_link_raw_url(resource)
-        full_url = [product_url, resource_url].flatten.join
-        # Double {} replaced with single {} to support Python string
-        # interpolation
-        "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
-      end
+      def build_url(url_parts, _extra = false)
+        full_url = if url_parts.is_a? Array
+                     url_parts.flatten.join
+                   else
+                     url_parts
+                   end
 
-      def collection_url(resource)
-        base_url = resource.base_url.split("\n").map(&:strip).compact
-        full_url = [resource.__product.base_url, base_url].flatten.join
-        # Double {} replaced with single {} to support Python string
-        # interpolation
         "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
-      end
-
-      def async_operation_url(resource)
-        base_url = resource.__product.base_url
-        url = [base_url, resource.async.operation.base_url].join
-        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.

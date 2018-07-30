@@ -92,12 +92,36 @@ module Google
 -%>
             return entry.exports[:<%= imports -%>] if entry.title == @title
           end
+<%# Readonly ResourceRefs should regex check + assemble from shortnames for selflinks -%>
+<% if property.resource_ref.readonly && property.imports == 'selfLink' -%>
+
+          unless /<%= property.resource_ref.regex_url.gsub('/', '\/') -%>/.match(@title)
+            # We'll asssmble the self_link for the user.
+            # We need to get the project name to assemble the self_link
+            projects = Google::ObjectStore.instance
+                                          .resources
+                                          .reject { |name, _a| name == :gauth_credential }
+                                          .map { |_name, array| array.map(&:exports) }
+                                          .flatten
+                                          .map { |x| x[:project] }
+                                          .compact
+                                          .uniq
+            return "<%= property.resource_ref.self_link_url.join.gsub('{{name}}', '#{@title}').gsub('{{project}}', '#{projects[0]}') -%>" \
+              if projects.length == 1
+            raise ["Your Puppet manifest contains multiple projects.",
+                   "We cannot determine which project you wish to use.",
+                   "Please replace #{@title} with a full URL of the form:",
+                   "<%= property.resource_ref.self_link_url.join -%>"
+                  ].join(' ')
+          end
+
+<% end # if resource_ref.readonly && selfLink -%>
 <%# Readonly ResourceRefs should allow text values if a resource isn't found -%>
 <% if property.resource_ref.readonly -%>
           @title
 <% else -%>
           raise ArgumentError, "<%= out_name -%>[#{@title}] required"
-<% end -%>
+<% end # if property.resource_ref.readonly -%>
         end
       end
 

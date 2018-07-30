@@ -96,7 +96,7 @@ def main():
     module.exit_json(**return_value)
 
 
-<%= lines(emit_link('collection', collection_url(object), object)) -%>
+<%= lines(emit_link('collection', build_url(object.collection_url), object)) -%>
 
 
 def fetch_list(module, link, query):
