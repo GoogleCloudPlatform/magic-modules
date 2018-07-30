@@ -75,6 +75,13 @@ RETURN = '''
 ################################################################################
 # Imports
 ################################################################################
+<%
+  readonly_selflink_rrefs = object.all_resourcerefs
+                                  .select { |prop| prop.resource_ref.readonly }
+                                  .select { |prop| prop.imports == 'selfLink' }
+                                  .map(&:resource_ref)
+                                  .uniq
+-%>
 
 <%
   import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
@@ -86,7 +93,7 @@ import json
 <%
   imports = object.imports || []
   imports << 'time' if object.async
-  imports << 're' unless readonly_selflink_rrefs(object).empty?
+  imports << 're' unless readonly_selflink_rrefs.empty?
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
@@ -325,8 +332,8 @@ def unwrap_resource(result, module):
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-<%= lines(emit_link('self_link', self_link_url(object), object), 2) -%>
-<%= lines(emit_link('collection', collection_url(object), object), 2) -%>
+<%= lines(emit_link('self_link', build_url(object.self_link_url), object), 2) -%>
+<%= lines(emit_link('collection', build_url(object.collection_url), object), 2) -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response',
                                          ('kind' if object.kind?)]))
@@ -390,7 +397,17 @@ def response_to_hash(module, response):
     return {
 <%= lines(response_properties(object.properties)) -%>
     }
-<%= lines_before(selflink_functions(object), 1) -%>
+<% readonly_selflink_rrefs.each do |resource| -%>
+
+
+def <%= resource.name.underscore -%>_selflink(name, params):
+    if name is None:
+        return
+    url = r<%= lines(build_url(resource.regex_url)) -%>
+    if not re.match(url, name):
+        name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
+    return name
+<% end -%>
 <%= lines_before(compile('templates/ansible/async.erb'), 1) -%>
 <%= lines_before(compile('templates/ansible/provider_helpers.erb'), 1) -%>
 <%= lines_before(compile('templates/ansible/properties.erb'), 1) -%>
