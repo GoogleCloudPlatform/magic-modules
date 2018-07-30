@@ -391,7 +391,8 @@ module Provider
     end
     # rubocop:enable Metrics/AbcSize
 
-    def build_url(product_url, obj_url, extra = false)
+    def build_url(url_parts, extra = false)
+      (product_url, obj_url) = url_parts
       extra_arg = ''
       extra_arg = ', extra_data' if obj_url.to_s.include?('<|extra|>') || extra
       ['URI.join(',
@@ -401,32 +402,6 @@ module Provider
                indent('data' + extra_arg, 2),
                ')'], 2),
        ')'].join("\n")
-    end
-
-    def async_operation_url(resource)
-      build_url(resource.__product.base_url,
-                resource.async.operation.base_url,
-                true)
-    end
-
-    def collection_url(resource)
-      base_url = resource.base_url.split("\n").map(&:strip).compact
-      build_url(resource.__product.base_url, base_url)
-    end
-
-    def self_link_raw_url(resource)
-      base_url = resource.__product.base_url.split("\n").map(&:strip).compact
-      if resource.self_link.nil?
-        [base_url, [resource.base_url, '{{name}}'].join('/')]
-      else
-        self_link = resource.self_link.split("\n").map(&:strip).compact
-        [base_url, self_link]
-      end
-    end
-
-    def self_link_url(resource)
-      (product_url, resource_url) = self_link_raw_url(resource)
-      build_url(product_url, resource_url)
     end
 
     def extract_variables(template)

@@ -573,14 +573,14 @@ module Google
         end
 
 <% if object&.handlers&.collection.nil? -%>
-<%= lines(indent(emit_link('collection', collection_url(object), true), 8)) %>
+<%= lines(indent(emit_link('collection', build_url(object.collection_url), true), 8)) %>
 <% else # object&.handlers&.collection.nil? -%>
 <%=
   lines(indent(emit_link('collection', object.handlers.collection, true), 8))
  %>
 <% end # object&.handlers&.collection.nil? -%>
 <% if object&.handlers&.self_link.nil? -%>
-<%= lines(indent(emit_link('self_link', self_link_url(object), true), 8), 1) -%>
+<%= lines(indent(emit_link('self_link', build_url(object.self_link_url), true), 8), 1) -%>
 <% else # object&.handlers&.self_link.nil? -%>
 <%=
   lines(indent(emit_link('self_link', object.handlers.self_link, true), 8), 1)

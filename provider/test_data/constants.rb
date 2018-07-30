@@ -128,9 +128,8 @@ module Provider
       end
 
       def self_link_variables(object)
-        @provider.extract_variables([@provider.self_link_raw_url(object)
-                                              .join('/'),
-                                     @provider.collection_url(object)]
+        @provider.extract_variables([object.self_link_url.join('/'),
+                                     @provider.build_url(object.collection_url)]
                                              .join("\n")).uniq
       end
     end
