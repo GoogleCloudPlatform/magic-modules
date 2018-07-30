@@ -76,8 +76,30 @@ overrides: !ruby/object:Provider::ResourceOverrides
         )
     provider_helpers:
       - 'products/spanner/helpers/ruby/instance_helpers.rb.erb'
+      - 'products/spanner/helpers/chef/instance_helpers.rb.erb'
   InstanceConfig: !ruby/object:Provider::Chef::ResourceOverride
-    exclude: true
+    deprecated: true
+    handlers: !ruby/object:Provider::Chef::Handlers
+      collection: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instanceConfigs',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+      self_link: |
+        URI.join(
+          'https://spanner.googleapis.com/v1/',
+          expand_variables(
+            'projects/{{project}}/instanceConfigs/{{name}}',
+            data
+          ).split('/').map { |p| p.gsub('%3A', ':') }
+                      .join('/')
+        )
+    provider_helpers:
+      - 'products/spanner/helpers/ruby/instance_config_helpers.rb.erb'
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/spanner/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray
@@ -96,6 +118,13 @@ files: !ruby/object:Provider::Config::Files
 test_data: !ruby/object:Provider::Config::TestData
   network: !ruby/object:Api::Resource::HashArray
     Instance:
+      - success1~name
+      - success1~title
+      - success2~name
+      - success2~title
+      - success3~name
+      - success3~title
+    Database:
       - success1~name
       - success1~title
       - success2~name
