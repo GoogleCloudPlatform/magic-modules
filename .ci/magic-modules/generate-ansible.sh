@@ -33,7 +33,7 @@ git add -A
 git commit -m "$ANSIBLE_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/modular-magician/ansible" "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "origin/rebase"
+apply_patches "$PATCH_DIR/modular-magician/ansible" "$ANSIBLE_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "devel"
 popd
 popd
 

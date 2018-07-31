@@ -63,7 +63,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if ANSIBLE_PR=$(hub pull-request -b "$ANSIBLE_REPO_USER/ansible:rebase" -F ./downstream_body); then
+    if ANSIBLE_PR=$(hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $ANSIBLE_PR ${NEWLINE}"
     else
       echo "Ansible - did not generate a PR."
