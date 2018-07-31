@@ -275,14 +275,14 @@ def update_fields(module, request, response):
     difference = GcpRequest(request).difference(GcpRequest(response))
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <% update_props.each do |key, props| -%>
-    if <%= props.map { |prop| "difference.get(#{quote_string(prop.name.underscore))})" }.join(' || ') -%>:
+    if <%= props.map { |prop| "difference.get(#{quote_string(prop.name.underscore)})" }.join(' || ') -%>:
         auth.<%= key[:update_verb].downcase -%>(
             ''.join([
                 "<%= object.__product.base_url -%>",
                 "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
             ]).format(**module.params),
             {
-<%= lines(indent(request_properties(props), 12)) -%>
+<%= lines(indent(request_properties(props, 12), 12)) -%>
             }
         )
 <% end # update_props.each -%>
