@@ -3,6 +3,8 @@
 def <%= props[0].name.downcase -%>_update(data)
   Google::<%= product_ns -%>::Network::<%= key[:update_verb].capitalize -%>.new(
 <%= indent(build_url(object.__product.base_url, key[:update_url]), 4) -%>,
+    fetch_auth(@resource),
+    'application/json',
     {
 <%
   update_prop_statements = props.map do |prop|
@@ -14,10 +16,8 @@ def <%= props[0].name.downcase -%>_update(data)
   end
 -%>
 <%= lines(indent_list(update_prop_statements, 6)) -%>
-    },
-    fetch_auth(@resource),
-    'application/json'
-  )
+    }.to_json
+  ).send
 end
 
 <% end # update_props.each -%>

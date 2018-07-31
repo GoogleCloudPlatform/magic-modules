@@ -317,7 +317,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     return if @created || @deleted || !@dirty
 <% update_props = properties_by_custom_update(object.all_user_properties) -%>
 <% update_props.each do |key, props| -%>
-<% prop_statement = props.map { |prop| "@dirty[:#{Google::StringUtils.underscore(prop.name)})]" }.join(' || ') -%>
+<% prop_statement = props.map { |prop| "@dirty[:#{Google::StringUtils.underscore(prop.name)}]" }.join(' || ') -%>
     <%= props.first.name.downcase -%>_update(@resource) if <%=  prop_statement %>
 <% end # update_props.each -%>
 <% if object&.handlers&.flush.nil? -%>
@@ -359,7 +359,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     }
   end
 
-<%= lines(compile('templates/puppetchef/update_props.erb')) -%>
+<%= lines(indent(compile('templates/puppetchef/update_props.erb'), 2)) -%>
 <% unless object.exports.nil? -%>
 <%
   exp_list = [
