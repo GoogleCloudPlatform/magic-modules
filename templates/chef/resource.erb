@@ -159,11 +159,14 @@ module Google
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
 <% if object&.handlers&.create.nil? -%>
 <%
-     if object.create_verb.nil? || object.create_verb == :POST
+     if !object.create_url.nil?
+       body_new = 'create_link(@new_resource)'
+     elsif object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@new_resource)'
      elsif object.create_verb == :PUT
        body_new = 'self_link(@new_resource)'
      end
+
      request_new = ["::Google::#{product_ns}::Network",
                     "#{object.create_verb.to_s.capitalize}"
                    ].join('::')
@@ -301,8 +304,20 @@ module Google
   ], 10, 0))
 -%>
 <% if object&.handlers&.delete.nil? -%>
-            delete_req = ::Google::<%= product_ns -%>::Network::Delete.new(
-              self_link(@new_resource), fetch_auth(@new_resource)
+<%
+     request_new = "::Google::#{product_ns}::Network::Delete"
+     if object.delete_verb == :POST
+       request_new = "::Google::#{product_ns}::Network::Post"
+     end
+
+     if object.delete_url.nil?
+        body_new = 'self_link(@new_resource)'
+     else
+        body_new = 'delete_link(@new_resource)'
+     end
+-%>
+            delete_req = <%= request_new -%>.new(
+              <%= body_new -%>, fetch_auth(@new_resource)
             )
 <%   unless object.async -%>
 <%     obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
@@ -596,6 +611,12 @@ module Google
   lines(indent(emit_link('self_link', object.handlers.self_link, true), 8), 1)
 -%>
 <% end # object&.handlers&.self_link.nil? -%>
+<%- unless object.create_url.nil? -%>
+<%= lines(indent(emit_link('create_link', build_url(object.full_create_url), true), 8), 1)-%>
+<%- end # object.create_url.nil? -%>
+<%- unless object.delete_url.nil? -%>
+<%= lines(indent(emit_link('delete_link', build_url(object.full_delete_url), true), 8), 1)-%>
+<%- end # object.delete_url.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/return_if_object.erb'), 8)) %>
 <% else # object&.handlers&.return_if_object.nil? -%>

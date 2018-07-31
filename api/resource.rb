@@ -26,6 +26,13 @@ module Api
       attr_reader :description
       attr_reader :kind
       attr_reader :base_url
+      # URL to use for creating the resource. If not specified, the
+      # collection url (when create_verb is default or :POST) or
+      # self_link (when create_verb is :PUT) is used instead.
+      attr_reader :create_url
+      # URL to use to delete the resource. If not specified, the
+      # self link is used.
+      attr_reader :delete_url
       # URL to use for updating the resource. If not specified, the self link
       # will be used. This currently can only be used with Terraform resources.
       # TODO(#302): Add support for the other providers.
@@ -48,6 +55,7 @@ module Api
       attr_reader :transport
       attr_reader :references
       attr_reader :create_verb
+      attr_reader :delete_verb
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
       attr_reader :min_version # Minimum API version this resource is in
@@ -220,10 +228,13 @@ module Api
     # method size and complexity.
     #
     # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/MethodLength
     def validate
       super
       check_optional_property :async, Api::Async
       check_optional_property :base_url, String
+      check_optional_property :create_url, String
+      check_optional_property :delete_url, String
       check_optional_property :update_url, String
       check_property :description, String
       check_optional_property :exclude, :boolean
@@ -239,6 +250,7 @@ module Api
       check_property :properties, Array unless @exclude
 
       check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
+      check_property_oneof_default :delete_verb, %i[POST DELETE], :DELETE, Symbol
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
@@ -253,6 +265,7 @@ module Api
       check_identity unless @identity.nil?
     end
     # rubocop:enable Metrics/AbcSize
+    # rubocop:enable Metrics/MethodLength
 
     def properties
       (@properties || []).reject(&:exclude)
@@ -374,6 +387,38 @@ module Api
       [@__product.base_url, @async.operation.base_url]
     end
 
+    def default_create_url
+      if @create_verb.nil? || @create_verb == :POST
+        collection_url
+      elsif @create_verb == :PUT
+        self_link_url
+      else
+        raise "unsupported create verb #{@create_verb}"
+      end
+    end
+
+    def full_create_url
+      if @create_url.nil?
+        default_create_url
+      else
+        [
+          @__product.base_url.split("\n").map(&:strip).compact,
+          @create_url
+        ]
+      end
+    end
+
+    def full_delete_url
+      if @delete_url.nil?
+        self_link_url
+      else
+        [
+          @__product.base_url.split("\n").map(&:strip).compact,
+          @delete_url
+        ]
+      end
+    end
+
     # A regex to check if a full URL was returned or just a shortname.
     def regex_url
       self_link_url.join.gsub('{{project}}', '.*')
@@ -425,7 +470,6 @@ module Api
 
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/PerceivedComplexity
   end
   # rubocop:enable Metrics/ClassLength
