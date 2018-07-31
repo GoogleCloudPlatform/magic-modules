@@ -18,7 +18,7 @@ name: Google Compute Engine
 prefix: gcompute
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://www.googleapis.com/compute/v1/
     default: true
   - !ruby/object:Api::Product::Version

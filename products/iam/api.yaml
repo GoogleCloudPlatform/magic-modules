@@ -18,7 +18,7 @@ name: Google Cloud IAM
 prefix: giam
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://iam.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/iam
