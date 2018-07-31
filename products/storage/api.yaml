@@ -16,7 +16,7 @@ name: Google Cloud Storage
 prefix: gstorage
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://www.googleapis.com/storage/v1/
 scopes:
   - https://www.googleapis.com/auth/devstorage.full_control

@@ -16,7 +16,7 @@ name: Google Cloud BigQuery
 prefix: gbigquery
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://www.googleapis.com/bigquery/v2/
     default: true
 scopes:
