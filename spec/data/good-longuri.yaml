@@ -16,7 +16,7 @@ name: My Product
 prefix: myproduct
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: http://myproduct.google.com/myapi/v123
 scopes:
   - http://scope-to-my-api/
