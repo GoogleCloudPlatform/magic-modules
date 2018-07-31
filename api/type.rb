@@ -166,9 +166,18 @@ module Api
       NAME = Api::Type::String.new('name')
     end
 
+    # Properties that are fetched externally
+    class FetchedExternal < Type
+      attr_writer :resource
+
+      def api_name
+        name
+      end
+    end
+
     # Represents a fingerprint.  A fingerprint is an output-only
     # field used for optimistic locking during updates.
-    class Fingerprint < String
+    class Fingerprint < FetchedExternal
       def validate
         super
         @output = true if @output.nil?
@@ -301,15 +310,6 @@ module Api
       def validate
         super
         check_property :values, ::Array
-      end
-    end
-
-    # Properties that are fetched externally
-    class FetchedExternal < Type
-      attr_writer :resource
-
-      def api_name
-        name
       end
     end
 
