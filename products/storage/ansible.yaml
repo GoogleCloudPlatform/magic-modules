@@ -25,6 +25,10 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 overrides: !ruby/object:Provider::ResourceOverrides
+  Bucket: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      defaultObjectAcl: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
   ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
