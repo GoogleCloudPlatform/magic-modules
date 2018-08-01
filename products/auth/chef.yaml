@@ -37,8 +37,6 @@ files: !ruby/object:Provider::Config::Files
     'recipes/default.rb': 'products/auth/chef/recipes/default.rb'
     'resources/credential.rb': 'products/auth/chef/resources/credential.rb'
     'resources/google/authorization.rb': 'products/auth/chef/resources/google/authorization.rb'
-    'spec/spec_helper.rb': 'products/auth/chef/spec/spec_helper.rb'
-    'spec/unit/recipes/default_spec.rb': 'products/auth/chef/spec/unit/recipes/default_spec.rb'
     'test/smoke/default/default_test.rb': 'products/auth/chef/test/smoke/default/default_test.rb'
   compile:
     '.gitignore': 'templates/dot~gitignore'
