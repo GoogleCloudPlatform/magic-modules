@@ -24,7 +24,7 @@ $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 
   inside_indent = 8
 
-  requires = generate_requires(object.all_user_properties) + object.requires
+  requires = generate_requires(object.all_user_properties) + (object.requires || [])
   requires << 'chef/resource'
   requires << 'google/hash_utils'
   requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'get')
