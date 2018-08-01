@@ -11,29 +11,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Provider::Puppet::Config
-manifest: !ruby/object:Provider::Puppet::Manifest
+--- !ruby/object:Provider::Chef::Config
+manifest: !ruby/object:Provider::Chef::Manifest
   version: '0.1.0'
-  source: 'https://github.com/GoogleCloudPlatform/puppet-google-spanner'
-  homepage: 'https://github.com/GoogleCloudPlatform/puppet-google-spanner'
-  issues:
-    'https://github.com/GoogleCloudPlatform/puppet-google-spanner/issues'
-  summary: 'A Puppet module to manage Google Spanner resources.'
-  tags:
-    - google
-    - cloud
-    - spanner
-  requires:
+  source: 'https://github.com/GoogleCloudPlatform/chef-google-spanner'
+  issues: 'https://github.com/GoogleCloudPlatform/chef-google-spanner/issues'
+  summary: 'A Chef cookbook to manage Google Cloud Spanner resources'
+  description: |
+    This cookbook provides the built-in types and services for Chef to manage
+    Google Cloud Spanner resources, as native Chef types.
+  depends:
     - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+      name: 'google-gauth'
+      versions: '< 0.2.0'
   operating_systems:
-<%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
+<%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
-  Database: !ruby/object:Provider::Puppet::ResourceOverride
-    handlers: !ruby/object:Provider::Puppet::Handlers
+  Database: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
       resource_to_request_patch: |
-        request[:create_statement] = "CREATE DATABASE `#{name}`"
+        request[:create_statement] = "CREATE DATABASE `#{request[:name]}`"
         request.delete(:name)
       collection: |
         URI.join(
@@ -55,10 +52,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         )
     provider_helpers:
       - 'products/spanner/helpers/ruby/database_helpers.rb.erb'
-  Instance: !ruby/object:Provider::Puppet::ResourceOverride
+  Instance: !ruby/object:Provider::Chef::ResourceOverride
     custom_create_resource: true
     custom_update_resource: true
-    handlers: !ruby/object:Provider::Puppet::Handlers
+    handlers: !ruby/object:Provider::Chef::Handlers
       collection: |
         URI.join(
           'https://spanner.googleapis.com/v1/',
@@ -78,11 +75,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
                       .join('/')
         )
     provider_helpers:
-      - 'products/spanner/helpers/puppet/instance_helpers.rb.erb'
       - 'products/spanner/helpers/ruby/instance_helpers.rb.erb'
-  InstanceConfig: !ruby/object:Provider::Puppet::ResourceOverride
+      - 'products/spanner/helpers/chef/instance_helpers.rb.erb'
+  InstanceConfig: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Puppet::Handlers
+    handlers: !ruby/object:Provider::Chef::Handlers
       collection: |
         URI.join(
           'https://spanner.googleapis.com/v1/',
@@ -107,18 +104,16 @@ tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/spanner/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray
   Database:
-    - database.pp
-  InstanceConfig:
-    - instance_config.pp
+    - database.rb
   Instance:
-    - delete_instance.pp
-    - instance.pp
+    - delete_instance.rb
+    - instance.rb
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
+<%= indent(compile('provider/chef/common~copy.yaml'), 4) %>
   compile:
-<%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
-<%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>
+<%= indent(include('provider/chef/common~compile~before.yaml'), 4) %>
+<%= indent(include('provider/chef/common~compile~after.yaml'), 4) %>
 <% # common~compile~after.yaml should be the last line of compile: section -%>
 test_data: !ruby/object:Provider::Config::TestData
   network: !ruby/object:Api::Resource::HashArray

@@ -78,7 +78,7 @@ module Google
                  ],
                  # Prop name on first line, all others on second line
                  [
-                   "#{prop_name}",
+                   "#{prop_name},",
                    ["#{indent(prop_decl(prop), 9)}",
                     "coerce: ::#{prop.property_type}.coerce",
                     prop_attrs].flatten.join(', ')
@@ -167,10 +167,15 @@ module Google
      request_new = ["::Google::#{product_ns}::Network",
                     "#{object.create_verb.to_s.capitalize}"
                    ].join('::')
+     custom_resource = if true?(object.custom_create_resource)
+                         'resource_to_create'
+                       else
+                         'resource_to_request'
+                       end
 -%>
             create_req = <%= request_new -%>.new(
               <%= body_new -%>, fetch_auth(@new_resource),
-              'application/json', resource_to_request
+              'application/json', <%= custom_resource %>
             )
 <%   unless object.async -%>
 <%
@@ -416,6 +421,11 @@ module Google
   put_new = ["::Google::#{product_ns}::Network",
              "#{object.update_verb.to_s.capitalize}.new"
             ].join('::')
+  custom_resource = if true?(object.custom_create_resource)
+                      'resource_to_update'
+                    else
+                      'resource_to_request'
+                    end
 -%>
 <%= lines(indent("update_req =", 12)) -%>
 <%=
@@ -424,7 +434,7 @@ module Google
     indent([
       'fetch_auth(@new_resource)',
       "'application/json'",
-      'resource_to_request)'
+      "#{custom_resource})"
     ], put_new.length + 1).split("\n")
   ), 14))
 -%>
