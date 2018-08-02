@@ -190,6 +190,22 @@ module Provider
            "products/#{@api.prefix[1..-1]}/examples/puppet/#{file}"]
         end
       )
+
+      # Compile the spec tests which depend on the examples.
+      # If a create and delete example both exist, generate
+      # the spec file.  Select all the objects which have
+      # both create and delete examples, named the standard way.
+      @api.objects.each do |obj|
+        ex = @config.examples[obj.name]
+        next if ex.nil?
+        o = Google::StringUtils.underscore(obj.name)
+        # We can only generate the spec file if both examples exist.
+        next unless ex.include?("#{o}.pp") && ex.include?("delete_#{o}.pp")
+        compile_file_list(output_folder,
+                          [["spec/integration/#{o}/integration_spec.rb",
+                            'templates/puppet/integration_spec.rb']],
+                          obj: obj)
+      end
     end
 
     def compile_end2end_tests(output_folder)

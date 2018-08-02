@@ -14,26 +14,8 @@
 <% end -%>
 <%= compile 'templates/license.erb' -%>
 
-<%= lines(autogen_notice :puppet) -%>
+<%= lines(autogen_notice :ruby) -%>
 
-source 'https://rubygems.org'
-group :test do
-  gem 'google-api-client'
-  gem 'googleauth'
-  gem 'metadata-json-lint'
-  gem 'parallel_tests'
-  gem 'puppet', ENV['PUPPET_GEM_VERSION'] || '>= 4.2.0'
-  gem 'puppet-lint'
-  gem 'puppet-lint-unquoted_string-check'
-  gem 'puppet-syntax'
-  gem 'puppetlabs_spec_helper'
-  gem 'rake', '~> 10.0'
-  gem 'rspec'
-  gem 'rspec-mocks'
-  gem 'rspec-puppet'
-  gem 'rubocop'
-  gem 'semantic_puppet'
-  gem 'simplecov'
-  gem 'vcr'
-  gem 'webmock'
-end
+function gcompute_health_check_ref(String $name, String $project_name) >> String {
+  "https://www.googleapis.com/compute/v1/projects/$project_name/global/healthChecks/$name"
+}

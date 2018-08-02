@@ -25,41 +25,20 @@
 ENV['TZ'] = 'UTC'
 
 #----------------------------------------------------------
-# Setup code coverage
-
-require 'simplecov'
-SimpleCov.start unless ENV['DISABLE_COVERAGE']
-
-#----------------------------------------------------------
 # Add test path to the search libs
 
 $LOAD_PATH.unshift(File.expand_path('.'))
 <% if spec_stubs? -%>
 $LOAD_PATH.unshift(File.expand_path('./spec/stubs'))
+# Add fixtures so that they can be loaded by integration tests.
+$LOAD_PATH.unshift(File.expand_path('./spec/fixtures/modules/gauth/lib'))
+$LOAD_PATH.unshift(File.expand_path('./spec/fixtures/modules/<%= @api.prefix -%>/lib'))
 <% end # spec_stubs? -%>
 
 #----------------------------------------------------------
 # Block all network traffic
-
-require 'network_blocker'
-
-#----------------------------------------------------------
-# Auto require files
-
-files = []
-files << 'spec/bundle.rb'
-files << 'spec/copyright.rb'
-files << 'spec/fake_auth.rb'
-files << 'spec/test_constants.rb'
-files << File.join('lib', '**', '*.rb')
-
-# Require all files so we can track them via code coverage
-Dir[*files].reject { |p| File.directory? p }
-           .each do |f|
-             puts "Auto requiring #{f}" \
-               if ENV['RSPEC_DEBUG']
-             require f
-           end
+require 'puppetlabs_spec_helper/module_spec_helper'
+require 'webmock/rspec'
 
 #----------------------------------------------------------
 # Setup PuppetSpec to allow executing the Puppet manifests from within tests
@@ -106,10 +85,25 @@ RSpec.configure do |c|
 
   c.after :each do
     Puppet::Test::TestHelper.after_each_test
-    Dir.stub(:entries)
     PuppetSpec::Files.cleanup
   end
 end
+
+def get_example(example_name)
+  ex = read_example(example_name)
+  healthcheck_fn = File.open('spec/fixtures/mock_hc_fn.pp').read
+  healthcheck_fn + "\n\n" + ex
+end
+
+def read_example(example_name)
+  # It's not ideal, but puppet unit tests don't support
+  # these facts-as-variables, so we have to do these
+  # substitutions ourselves.
+  File.open("examples/#{example_name}.pp", 'rb').read\
+      .gsub('$project', '"personal-graphite-testing"')\
+      .gsub('$cred_path', '"/home/nmckinley/.gcloud/Terraform.json"')
+end
+
 
 require 'mocha/test_unit'
 

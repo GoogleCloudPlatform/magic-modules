@@ -26,6 +26,7 @@ end
 <% end # unless config.nil? -%>
 'LICENSE': 'templates/LICENSE'
 'Gemfile.lock': 'templates/puppet/Gemfile.lock'
+'Rakefile' : 'templates/puppet/Rakefile'
 'lib/google/hash_utils.rb': 'google/hash_utils.rb'
 'lib/google/string_utils.rb': 'google/string_utils.rb'
 'spec/copyright.rb': 'spec/copyright.rb'

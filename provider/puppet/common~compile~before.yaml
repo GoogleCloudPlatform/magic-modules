@@ -17,6 +17,7 @@
 '.gitignore': 'templates/dot~gitignore'
 '.rubocop.yml': 'templates/dot~rubocop~root.yml'
 'Gemfile': 'templates/puppet/Gemfile'
+'.fixtures.yml': 'templates/puppet/fixtures.yml.erb'
 'README.md': 'templates/puppet/README.md.erb'
 'metadata.json': 'templates/puppet/metadata.json.erb'
 'spec/.rubocop.yml': 'templates/dot~rubocop~spec.yml'
@@ -25,3 +26,4 @@
 'spec/puppetlint_spec.rb': 'templates/puppet/puppetlint_spec.rb.erb'
 'spec/spec_helper.rb': 'templates/puppet/spec_helper.rb.erb'
 'spec/test_constants.rb': 'templates/test_constants.rb.erb'
+'spec/fixtures/mock_hc_fn.pp': 'templates/puppet/mock_healthcheck_fn.pp'
