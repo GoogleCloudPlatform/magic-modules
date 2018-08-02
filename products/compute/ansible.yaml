@@ -121,6 +121,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.7'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
+      target: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
       IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
         description: |
           The IP address that this forwarding rule is serving on behalf of.
