@@ -157,8 +157,13 @@ def main():
                 changed = True
         else:
 <%
+  if object.delete_url.nil?
+    delete_url = 'self_link(module)'
+  else
+    delete_url = 'delete_link(module)'
+  end
   method = method_call('delete', [
-                                   'module', 'self_link(module)',
+                                   'module', delete_url,
                                    ('kind' if object.kind?),
                                    ('fetch' if object.access_api_results)
                                  ])
@@ -169,11 +174,14 @@ def main():
     else:
         if state == 'present':
 <%
-  if object.create_verb.nil? || object.create_verb == :POST
-    create_link = 'collection(module)'
+  if !object.create_url.nil?
+    create_link = 'create_link(module)'
+  elsif object.create_verb.nil? || object.create_verb == :POST
+      create_link = 'collection(module)'
   elsif object.create_verb == :PUT
-    create_link = 'self_link(module)'
+      create_link = 'self_link(module)'
   end
+
   create_verb = ".#{object.create_verb.to_s.downcase}"
   method = method_call('create', ['module', create_link,
                                   ('kind' if object.kind?)])
@@ -262,10 +270,15 @@ def main():
 <% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
+  delete_verb = 'delete'
+  unless object.delete_verb.nil?
+    delete_verb = object.delete_verb.to_s.downcase
+  end
+
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
-     method_call("auth.delete", ['link']),
+     method_call("auth.#{delete_verb}", ['link']),
      ('kind' if !object.async && object.kind?)
    ]
   )
@@ -334,6 +347,12 @@ def unwrap_resource(result, module):
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
 <%= lines(emit_link('self_link', build_url(object.self_link_url), object), 2) -%>
 <%= lines(emit_link('collection', build_url(object.collection_url), object), 2) -%>
+<%- unless object.create_url.nil? -%>
+<%=lines(emit_link('create_link', build_url(object.full_create_url), object), 2)-%>
+<% end -%>
+<% unless object.delete_url.nil? -%>
+<%= lines(emit_link('delete_link', build_url(object.full_delete_url), object), 2) -%>
+<% end -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response',
                                          ('kind' if object.kind?)]))

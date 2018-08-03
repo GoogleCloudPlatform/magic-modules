@@ -129,13 +129,13 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 	defer mutexKV.Unlock(lockName)
 <% end -%>
 
-	url, err := replaceVars(d, config, "<%= build_url(object.collection_url) -%>")
+	url, err := replaceVars(d, config, "<%= build_url(object.full_create_url) -%>")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-	res, err := Post(config, url, obj)
+	res, err := <%= object.create_verb.to_s.capitalize -%>(config, url, obj)
 	if err != nil {
 		return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
 	}
@@ -418,14 +418,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 	defer mutexKV.Unlock(lockName)
 <% end -%>
 
-	url, err := replaceVars(d, config, "<%= build_url(object.self_link_url) -%>")
+	url, err := replaceVars(d, config, "<%= build_url(object.full_delete_url) -%>")
 	if err != nil {
 		return err
 	}
 
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 	log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-	res, err := Delete(config, url)
+	res, err := <%= object.delete_verb.to_s.capitalize -%>(config, url)
 	if err != nil {
 		return handleNotFoundError(err, d, "<%= object.name -%>")
 	}
