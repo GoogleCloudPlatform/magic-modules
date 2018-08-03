@@ -1,11 +1,11 @@
 <% autogen_exception -%>
 <% require 'json' -%>
 <%
-  os_support = manifest.operating_systems.map do |os|
+  os_support = (manifest.operating_systems || []).map do |os|
     { operatingsystem: os.name, operatingsystemrelease: os.versions }
   end
 
-  requirements = manifest.requires.map do |req|
+  requirements = (manifest.requires || []).map do |req|
     { name: req.name, version_requirement: req.versions }
   end
 
