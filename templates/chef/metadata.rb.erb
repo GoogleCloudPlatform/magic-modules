@@ -24,7 +24,7 @@ description '<%= manifest.summary -%>'
 long_description '
 <%= indent(wrap_field(manifest.description, 4), 2) -%>'
 version '<%= manifest.version -%>'
-<% manifest.depends.each do |dep| -%>
+<% (manifest.depends || []).each do |dep| -%>
 depends '<%= dep.name -%>', '<%= dep.versions -%>'
 <% end -%>
 <%= lines(emit_rubocop(binding, :attribute, 'issues_url', :disabled)) -%>
@@ -33,6 +33,7 @@ issues_url '<%= manifest.issues -%>' \
 <%= lines(emit_rubocop(binding, :attribute, 'issues_url', :enabled)) -%>
 source_url '<%= manifest.source -%>' \
   if respond_to?(:source_url)
+<%= lines(manifest.additional_info) if manifest.additional_info -%>
 
 supports 'centos'
 supports 'debian'
