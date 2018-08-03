@@ -885,7 +885,6 @@ objects:
         update_verb: :POST
         update_url:
           'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
-        min_version: beta
       - !ruby/object:Api::Type::NameValues
         name: 'labels'
         description: |
