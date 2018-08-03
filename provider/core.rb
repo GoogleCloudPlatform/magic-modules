@@ -97,7 +97,7 @@ module Provider
         @sourced << relative_path(target_file, output_folder)
         Google::LOGGER.info "Copying #{source} => #{target}"
         FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
-        FileUtils.cp source, target_file
+        FileUtils.copy_entry source, target_file
       end
     end
 
@@ -215,9 +215,10 @@ module Provider
 
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/AbcSize
     def generate_objects(output_folder, types, version)
       @api.set_properties_based_on_version(version)
-      @api.objects.each do |object|
+      (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
@@ -231,6 +232,7 @@ module Provider
     end
     # rubocop:enable Metrics/CyclomaticComplexity
     # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/AbcSize
 
     def generate_object(object, output_folder, version)
       data = build_object_data(object, output_folder, version)

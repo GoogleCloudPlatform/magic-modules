@@ -218,6 +218,10 @@ module Provider
       raise "#{self.class}#provider not implemented"
     end
 
+    def self.next_version(version)
+      [Gem::Version.new(version).bump, 0].join('.')
+    end
+
     def validate
       super
 
