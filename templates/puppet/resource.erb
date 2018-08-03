@@ -239,7 +239,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     @created = true
 <% if object&.handlers&.create.nil? -%>
 <%
-     if object.create_verb.nil? || object.create_verb == :POST
+     if !object.create_url.nil?
+        body_new = 'create_link(@resource)'
+     elsif object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
      elsif object.create_verb == :PUT
        body_new = 'self_link(@resource)'
@@ -278,12 +280,23 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     debug('destroy')
     @deleted = true
 <% if object&.handlers&.delete.nil? -%>
-<%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
+<%
+     if object.delete_verb.nil? || object.delete_verb == :DELETE
+       request_new = "Google::#{product_ns}::Network::Delete.new"
+     elsif object.delete_verb == :POST
+       request_new = "Google::#{product_ns}::Network::Post.new"
+     end
+     if object.delete_url.nil?
+        body_new = 'self_link(@resource)'
+     else
+        body_new = 'delete_url(@resource)'
+     end
+-%>
 <%=
-  lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
+  lines(indent_list(["delete_req = #{request_new}(#{body_new}"].concat(
     indent([
       'fetch_auth(@resource))'
-    ], dele_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
+    ], request_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
   ), 4))
 -%>
 <% kind_param = object.kind? ? ", '#{object.kind}'" : '' -%>
@@ -513,6 +526,20 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   )
 -%>
 <% end # object&.handlers&.self_link.nil? -%>
+<% unless object.create_url.nil? -%>
+<%=
+  lines_before(
+    lines(indent(emit_link('create_link', build_url(object.full_create_url), true), 2))
+  )
+-%>
+<% end # object.create_url.nil? -%>
+<% unless object.delete_url.nil? -%>
+<%=
+  lines_before(
+    lines(indent(emit_link('delete_link', build_url(object.full_delete_url), true), 2))
+  )
+-%>
+<% end # object.delete_url.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
 <%=
   lines_before(lines(indent(compile('templates/return_if_object.erb'), 2)))
