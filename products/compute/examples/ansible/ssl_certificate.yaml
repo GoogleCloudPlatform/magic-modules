@@ -34,7 +34,7 @@ task: !ruby/object:Provider::Ansible::Task
       M3jcqgA4fSW/oKw6UJxp+M6a+nGMX+UJR3YgAiEAvvl39QRVAiv84hdoCuyON0lJ
       zqGNhIPGq2ULqXKK8BY=
       -----END CERTIFICATE-----
-    private_key: >
+    private_key: |
       -----BEGIN EC PRIVATE KEY-----
       MHcCAQEEIObtRo8tkUqoMjeHhsOh2ouPpXCgBcP+EDxZCB/tws15oAoGCCqGSM49
       AwEHoUQDQgAEHGzpcRJ4XzfBJCCPMQeXQpTXwlblimODQCuQ4mzkzTv0dXyB750f
