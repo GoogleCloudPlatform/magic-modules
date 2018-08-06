@@ -62,7 +62,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::FactsVerifier
-  noop: Dummy value.
-facts: !ruby/object:Provider::Ansible::FactsTask
-  noop: Dummy value.
