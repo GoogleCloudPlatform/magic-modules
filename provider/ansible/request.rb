@@ -19,41 +19,41 @@ module Provider
     module Request
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
-      def request_properties(properties, indent = 4)
+      def request_properties(properties, indent)
         indent_list(
           properties.map do |prop|
-            request_property(prop, 'module.params', 'module')
+            request_property(prop, 'module.params', 'module', indent)
           end,
           indent
         )
       end
 
-      def response_properties(properties, indent = 8)
+      def response_properties(properties, indent)
         indent_list(
           properties.map do |prop|
-            response_property(prop, 'response', 'module')
+            response_property(prop, 'response', 'module', indent)
           end,
           indent
         )
       end
 
-      def request_properties_in_classes(properties, indent = 4,
+      def request_properties_in_classes(properties, indent,
                                         hash_name = 'self.request',
                                         module_name = 'self.module')
         indent_list(
           properties.map do |prop|
-            request_property(prop, hash_name, module_name)
+            request_property(prop, hash_name, module_name, indent)
           end,
           indent
         )
       end
 
-      def response_properties_in_classes(properties, indent = 8,
+      def response_properties_in_classes(properties, indent,
                                          hash_name = 'self.request',
                                          module_name = 'self.module')
         indent_list(
           properties.map do |prop|
-            response_property(prop, hash_name, module_name)
+            response_property(prop, hash_name, module_name, indent)
           end,
           indent
         )
@@ -73,18 +73,36 @@ module Provider
 
       private
 
-      def request_property(prop, hash_name, module_name)
-        [
-          "#{unicode_string(prop.api_name)}:",
-          request_output(prop, hash_name, module_name).to_s
-        ].join(' ')
+      def request_property(prop, hash_name, module_name, indent)
+        format(
+          [
+            [
+              [
+                "#{unicode_string(prop.api_name)}:",
+                request_output(prop, hash_name, module_name).to_s
+              ].join(' ')
+            ],
+            [
+              "#{unicode_string(prop.api_name)}:",
+              indent(request_output(prop, hash_name, module_name).to_s, 4)
+            ]
+          ], 0, indent, 160)
       end
 
-      def response_property(prop, hash_name, module_name)
-        [
-          "#{unicode_string(prop.api_name)}:",
-          response_output(prop, hash_name, module_name).to_s
-        ].join(' ')
+      def response_property(prop, hash_name, module_name, indent)
+        format(
+          [
+            [
+              [
+                "#{unicode_string(prop.api_name)}:",
+                response_output(prop, hash_name, module_name).to_s
+              ].join(' ')
+            ],
+            [
+              "#{unicode_string(prop.api_name)}:",
+              indent(response_output(prop, hash_name, module_name).to_s, 4)
+            ]
+          ], 0, indent, 160)
       end
 
       def response_output(prop, hash_name, module_name)
