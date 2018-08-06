@@ -40,7 +40,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           req = ::Google::Iam::Network::Get.new(
             self_link(service_account: @new_resource.service_account,
                       project: @new_resource.project, key_id: key_id),
-            fetch_auth(resource)
+            fetch_auth(@new_resource)
           )
           fetch = return_if_object req.send
           unless fetch.nil?
@@ -62,7 +62,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           ::File.open(@new_resource.path, 'w') { |file| file.write(json) }
         end
       delete: |
-        (_, key_id) = get_key_id(resource)
+        (_, key_id) = get_key_id(@new_resource)
         delete_req = ::Google::Iam::Network::Delete.new(
           self_link(service_account: @new_resource.service_account,
                     project: @new_resource.project, key_id: key_id),
