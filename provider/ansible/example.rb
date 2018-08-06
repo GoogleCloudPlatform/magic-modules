@@ -314,10 +314,18 @@ module Provider
 
       def build_code(object, hash)
         sample_code = @__example.task.code
+        ignored_props = %w[project name]
+
+        url_parts = object.uri_properties
+                          .map(&:name)
+                          .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        code = object.parameters.map(&:name)
+        code = object.all_user_properties
+                     .map(&:name)
+                     .select { |para| url_parts.include? para }
                      .map { |para| { para => sample_code[para] } }
                      .reduce({}, :merge)
+
         code['filters'] = ["name = #{hash[:name]}"]
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code

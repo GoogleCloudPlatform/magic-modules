@@ -30,6 +30,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Autoscaler: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
     version_added: '2.7'
   BackendBucket: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
@@ -62,12 +63,14 @@ datasources: !ruby/object:Provider::ResourceOverrides
   Network: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
     version_added: '2.7'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Router: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
     version_added: '2.7'
   SslCertificate: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
