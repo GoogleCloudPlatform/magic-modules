@@ -49,11 +49,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute instance-templates describe
-      --project="{{ gcp_project}}"
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: global
-    type: instanceTemplates
