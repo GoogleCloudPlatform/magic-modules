@@ -92,7 +92,7 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-  <% if has_project -%>
+  <% if has_project and object.async -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -234,7 +234,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-  <% if has_project -%>
+	<% if has_project and object.async -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err

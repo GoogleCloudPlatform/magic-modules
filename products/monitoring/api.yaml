@@ -1,0 +1,98 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Api::Product
+name: Stackdriver Monitoring and Alerting
+prefix: gmonitoring
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://monitoring.googleapis.com/v3/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'AlertPolicy'
+    base_url: projects/{{project}}/alertPolicies
+    self_link: projects/{{project}}/alertPolicies/{{name}}
+    update_verb: :PATCH
+    input: true
+    description: |
+      A description of the conditions under which some aspect of your system is
+      considered to be "unhealthy" and the ways to notify people or services
+      about this state.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/monitoring/docs/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/'
+
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Required if the policy exists.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+         'A short name or phrase used to identify the policy in
+         dashboards, notifications, and incidents. To avoid confusion, don't use
+         the same display name for multiple policies in the same project. The
+         name is limited to 512 Unicode characters.'
+        required: true
+      - !ruby/object:Api::Type::Array
+        name: 'conditions'
+        description: |
+         'A list of conditions for the policy. The conditions are combined by
+         AND or OR according to the combiner field. If the combined conditions
+         evaluate to true, then an incident is created. A policy can have from
+         one to six conditions.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                Required if the condition exists.
+            - !ruby/object:Api::Type::String
+              name: 'displayName'
+              description: |
+                A condition that compares a time series against a threshold.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'conditionThreshold'
+              description: |
+                cannot be set with conditionAbsent
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'filter'
+                  description: |
+                    A filter that identifies which time series should be
+                    compared with the threshold.
+                - !ruby/object:Api::Type::Time
+                  name: 'duration'
+                  description: |
+                    The amount of time that a time series must violate the
+                    threshold to be considered failing. Currently, only values
+                    that are a multiple of a minute--e.g., 0, 60, 120, or 300
+                    seconds--are supported. If an invalid value is given, an
+                    error will be returned.
+                  required: true
+            - !ruby/object:Api::Type::NestedObject
+              name: 'conditionAbsent'
+              description: |
+                cannot be set with conditionThreshold
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'filter'
+                  description: |
+                    A filter that identifies which time series should be
+                    compared with the threshold.
