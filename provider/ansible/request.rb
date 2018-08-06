@@ -86,7 +86,8 @@ module Provider
               "#{unicode_string(prop.api_name)}:",
               indent(request_output(prop, hash_name, module_name).to_s, 4)
             ]
-          ], 0, indent, 160)
+          ], 0, indent, 160
+        )
       end
 
       def response_property(prop, hash_name, module_name, indent)
@@ -102,7 +103,8 @@ module Provider
               "#{unicode_string(prop.api_name)}:",
               indent(response_output(prop, hash_name, module_name).to_s, 4)
             ]
-          ], 0, indent, 160)
+          ], 0, indent, 160
+        )
       end
 
       def response_output(prop, hash_name, module_name)
