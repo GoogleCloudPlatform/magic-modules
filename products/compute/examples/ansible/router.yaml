@@ -37,12 +37,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute routers describe
-      --project="{{ gcp_project}}"
-      --region=us-west1
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: regions/us-west1
-    type: routes

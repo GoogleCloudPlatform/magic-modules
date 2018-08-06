@@ -9,7 +9,7 @@
 - name: <%= verb -%> a <%= object_name_from_module_name(@name) -%><%= again %>
   <%= @name -%>:
 <%=
-  lines(indent(compile_string(hash, @code.to_yaml.gsub('---', '').strip), 6))
+  lines(indent(compile_string(hash, @code.to_yaml.sub('---', '').strip), 6))
 -%>
 <% if state && state != 'facts' -%>
       state: <%= state %>
