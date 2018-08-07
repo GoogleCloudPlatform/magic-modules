@@ -1,0 +1,1068 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# These resource types are here until the PRs get merged in upstream.  :)
+resource_types:
+    - name: git-branch
+      type: docker-image
+      source:
+          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
+          repository: nmckinley/concourse-git-resource
+          tag: v0.1.7
+
+    - name: github-pull-request
+      type: docker-image
+      source:
+          repository: nmckinley/concourse-github-pr-resource
+          tag: v0.1.10
+
+    - name: gcs-resource
+      type: docker-image
+      source:
+        repository: frodenas/gcs-resource
+
+resources:
+    - name: magic-modules
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/magic-modules.git
+          private_key: ((repo-key.private_key))
+
+    - name: magic-modules-gcp
+      type: git-branch
+      source:
+          uri: git@github.com:GoogleCloudPlatform/magic-modules.git
+          private_key: ((repo-key.private_key))
+
+    - name: magic-modules-external-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+
+    - name: magic-modules-new-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          authorship_restriction: true
+
+
+    - name: terraform-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
+
+
+
+    - name: ansible-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/ansible.git
+          private_key: ((repo-key.private_key))
+
+
+
+    - name: puppet-_bundle-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-auth-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-auth.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-bigquery-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-bigquery.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-compute-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-compute.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-sql-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-sql.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-storage-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-storage.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-spanner-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-spanner.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-container-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-container.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-dns-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-dns.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-pubsub-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-pubsub.git
+        private_key: ((repo-key.private_key))
+
+    - name: puppet-resourcemanager-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google-resourcemanager.git
+        private_key: ((repo-key.private_key))
+
+
+
+    - name: chef-_bundle-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/puppet-google..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-auth-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-auth..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-compute-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-compute..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-sql-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-sql..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-storage-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-storage..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-spanner-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-spanner..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-container-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-container..git
+        private_key: ((repo-key.private_key))
+
+    - name: chef-dns-intermediate
+      type: git-branch
+      source:
+        uri: git@github.com:((github-account.username))/chef-google-dns..git
+        private_key: ((repo-key.private_key))
+
+
+    - name: terraform-head
+      type: git-branch
+      source:
+          uri: git@github.com:terraform-providers/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
+
+    - name: mm-approved-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          only_mergeable: true
+          require_review_approval: true
+          check_dependent_prs: true
+          label: downstream-generated
+
+    - name: nmckinley-pr
+      type: docker-image
+      source:
+        repository: ((dockerhub-account.username))/concourse-github-pr-resource
+        username: ((dockerhub-account.username))
+        password: ((dockerhub-account.password))
+        
+    - name: terraform-pr
+      type: github-pull-request
+      source:
+        repo: terraform-providers/terraform-provider-google
+        private_key: ((repo-key.private_key))
+        access_token: ((github-account.password))
+        label: autogenerated
+
+    - name: gcp-bucket
+      type: gcs-resource
+      source:
+        bucket: ((gcp-bucket))
+        json_key: ((gcp-bucket-json-key))
+        regexp: dist/terraform-provider-google.*
+
+    - name: night-trigger
+      type: time
+      source:
+        start: 11:00 PM
+        stop: 11:59 PM
+        location: America/Los_Angeles
+
+jobs:
+    - name: authorize-single-rev
+      plan:
+          - get: magic-modules-external-prs
+            version: every
+            trigger: false
+          - put: magic-modules-new-prs
+            params:
+                status: pending
+                path: magic-modules-external-prs
+
+    - name: mm-generate
+      plan:
+          - get: magic-modules
+            resource: magic-modules-new-prs
+            version: every
+            trigger: true
+            params:
+              fetch_merge: true
+            # consumes: magic-modules (because that's where the code is)
+            # products: patches
+          - aggregate:
+            - task: get-merged-patches
+              file: magic-modules/.ci/magic-modules/get-merged-patches.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+              # consumes: magic-modules (detached HEAD)
+              # produces: magic-modules-branched (new branch, with submodule)
+            - task: branch-magic-modules
+              file: magic-modules/.ci/magic-modules/branch.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: build/puppet/_bundle build/puppet/auth build/puppet/bigquery build/puppet/compute build/puppet/sql build/puppet/storage build/puppet/spanner build/puppet/container build/puppet/dns build/puppet/pubsub build/puppet/resourcemanager build/chef/_bundle build/chef/auth build/chef/compute build/chef/sql build/chef/storage build/chef/spanner build/chef/container build/chef/dns build/terraform build/ansible
+            - put: magic-modules-new-prs
+              params:
+                status: pending
+                path: magic-modules
+          - aggregate:
+          
+            - do:
+                # consumes: magic-modules-branched
+                # produces: terraform-generated
+              - task: generate-terraform
+                file: magic-modules-branched/.ci/magic-modules/generate-terraform.yml
+              # Puts 'terraform-generated' into the robot's fork.
+              - put: terraform-intermediate
+                params:
+                    repository: terraform-generated
+                    branch_file: magic-modules-branched/branchname
+                    only_if_diff: true
+                    force: true
+          
+          
+            - do:
+                # consumes: magic-modules-branched
+                # produces: ansible-generated
+              - task: generate-ansible
+                file: magic-modules-branched/.ci/magic-modules/generate-ansible.yml
+              # Puts 'ansible-generated' into the robot's fork.
+              - put: ansible-intermediate
+                params:
+                    repository: ansible-generated
+                    branch_file: magic-modules-branched/branchname
+                    only_if_diff: true
+                    force: true
+          
+          
+            - do:
+                # consumes: magic-modules-branched
+                # produces: puppet-generated
+              - task: generate-puppet
+                file: magic-modules-branched/.ci/magic-modules/generate-puppet.yml
+                params:
+                  PRODUCTS: _bundle,auth,bigquery,compute,sql,storage,spanner,container,dns,pubsub,resourcemanager
+              - aggregate:
+                
+                - put: puppet-_bundle-intermediate
+                  params:
+                      repository: puppet-generated/_bundle
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-auth-intermediate
+                  params:
+                      repository: puppet-generated/auth
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-bigquery-intermediate
+                  params:
+                      repository: puppet-generated/bigquery
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-compute-intermediate
+                  params:
+                      repository: puppet-generated/compute
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-sql-intermediate
+                  params:
+                      repository: puppet-generated/sql
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-storage-intermediate
+                  params:
+                      repository: puppet-generated/storage
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-spanner-intermediate
+                  params:
+                      repository: puppet-generated/spanner
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-container-intermediate
+                  params:
+                      repository: puppet-generated/container
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-dns-intermediate
+                  params:
+                      repository: puppet-generated/dns
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-pubsub-intermediate
+                  params:
+                      repository: puppet-generated/pubsub
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: puppet-resourcemanager-intermediate
+                  params:
+                      repository: puppet-generated/resourcemanager
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+          
+
+          
+            - do:
+                # consumes: magic-modules-branched
+                # produces: chef-generated
+              - task: generate-chef
+                file: magic-modules-branched/.ci/magic-modules/generate-chef.yml
+                params:
+                  PRODUCTS: _bundle,auth,compute,sql,storage,spanner,container,dns
+              - aggregate:
+                
+                - put: chef-_bundle-intermediate
+                  params:
+                      repository: chef-generated/_bundle
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-auth-intermediate
+                  params:
+                      repository: chef-generated/auth
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-compute-intermediate
+                  params:
+                      repository: chef-generated/compute
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-sql-intermediate
+                  params:
+                      repository: chef-generated/sql
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-storage-intermediate
+                  params:
+                      repository: chef-generated/storage
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-spanner-intermediate
+                  params:
+                      repository: chef-generated/spanner
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-container-intermediate
+                  params:
+                      repository: chef-generated/container
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+                - put: chef-dns-intermediate
+                  params:
+                      repository: chef-generated/dns
+                      branch_file: magic-modules-branched/branchname
+                      only_if_diff: true
+                      force: true
+                
+          
+            on_failure:
+              put: magic-modules-new-prs
+              params:
+                status: failure
+                context: code-generation
+                path: magic-modules
+
+            # consumes: magic-modules-branched
+            # produces: magic-modules-submodules
+          - task: point-to-submodules
+            file: magic-modules-branched/.ci/magic-modules/point-to-submodules.yml
+            params:
+                # This needs to match the username for the 'intermediate' resources.
+                GH_USERNAME: ((github-account.username))
+                CREDS: ((repo-key.private_key))
+                PUPPET_MODULES: _bundle,auth,bigquery,compute,sql,storage,spanner,container,dns,pubsub,resourcemanager
+                CHEF_MODULES: _bundle,auth,compute,sql,storage,spanner,container,dns
+                TERRAFORM_ENABLED: True
+                ANSIBLE_ENABLED: True
+
+          # Push the magic modules branch that contains the updated submodules.
+          - put: magic-modules
+            params:
+                repository: magic-modules-submodules
+                branch_file: magic-modules-branched/branchname
+                force: true
+
+
+    - name: terraform-test
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [build/terraform]
+          passed: [mm-generate]
+        - task: test
+          file: magic-modules/.ci/unit-tests/task.yml
+          timeout: 30m
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: terraform-tests
+                  path: magic-modules-new-prs
+
+
+    - name: ansible-test
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [build/ansible]
+          passed: [mm-generate]
+        - task: test
+          file: magic-modules/.ci/unit-tests/ansible.yml
+          timeout: 30m
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: ansible-tests
+                  path: magic-modules-new-prs
+
+    - name: puppet-test
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules:
+              
+                - build/puppet/_bundle
+              
+                - build/puppet/auth
+              
+                - build/puppet/bigquery
+              
+                - build/puppet/compute
+              
+                - build/puppet/sql
+              
+                - build/puppet/storage
+              
+                - build/puppet/spanner
+              
+                - build/puppet/container
+              
+                - build/puppet/dns
+              
+                - build/puppet/pubsub
+              
+                - build/puppet/resourcemanager
+              
+          passed: [mm-generate]
+        - aggregate:
+          
+          - task: test-_bundle
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: _bundle
+          
+          - task: test-auth
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: auth
+          
+          - task: test-bigquery
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: bigquery
+          
+          - task: test-compute
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: compute
+              EXCLUDE_PATTERN: spec/gcompute_instance_group_manager_provider_spec.rb,spec/gcompute_instance_provider_spec.rb,spec/gcompute_instance_template_provider_spec.rb,spec/gcompute_target_https_proxy_provider_spec.rb,spec/gcompute_target_ssl_proxy_provider_spec.rb,spec/puppetlint_spec.rb
+          
+          - task: test-sql
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: sql
+          
+          - task: test-storage
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: storage
+          
+          - task: test-spanner
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: spanner
+          
+          - task: test-container
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: container
+          
+          - task: test-dns
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: dns
+          
+          - task: test-pubsub
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: pubsub
+          
+          - task: test-resourcemanager
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: resourcemanager
+          
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: puppet-tests
+                  path: magic-modules-new-prs
+
+    - name: chef-test
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules:
+              
+                - build/chef/_bundle
+              
+                - build/chef/auth
+              
+                - build/chef/compute
+              
+                - build/chef/sql
+              
+                - build/chef/storage
+              
+                - build/chef/spanner
+              
+                - build/chef/container
+              
+                - build/chef/dns
+              
+          passed: [mm-generate]
+        - aggregate:
+          
+          - task: test-_bundle
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: _bundle
+          
+          - task: test-auth
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: auth
+          
+          - task: test-compute
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: compute
+          
+          - task: test-sql
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: sql
+          
+          - task: test-storage
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: storage
+          
+          - task: test-spanner
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: spanner
+          
+          - task: test-container
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: container
+          
+          - task: test-dns
+            file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
+            params:
+              PRODUCT: dns
+          
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: chef-tests
+                  path: magic-modules-new-prs
+
+    - name: create-prs
+      plan:
+          - get: magic-modules
+            version: every
+            trigger: true
+            params:
+                submodules: [build/puppet/_bundle,build/puppet/auth,build/puppet/bigquery,build/puppet/compute,build/puppet/sql,build/puppet/storage,build/puppet/spanner,build/puppet/container,build/puppet/dns,build/puppet/pubsub,build/puppet/resourcemanager,build/chef/_bundle,build/chef/auth,build/chef/compute,build/chef/sql,build/chef/storage,build/chef/spanner,build/chef/container,build/chef/dns,build/terraform,build/ansible]
+            passed:
+              - mm-generate
+              - chef-test
+              - puppet-test
+              - terraform-test
+              - ansible-test
+          - get: mm-initial-pr
+            resource: magic-modules-new-prs
+            passed: [mm-generate]
+            version: every
+          # This task either uses the 'hub' cli to create a PR from the generated repo,
+          # or, if a PR already exists, it uses 'git branch -f' to update the branch
+          # that PR is from to point at the commit generated earlier from this run
+          # of the pipeline.
+          - task: create-or-update-pr
+            file: magic-modules/.ci/magic-modules/create-pr.yml
+            params:
+                GITHUB_TOKEN: ((github-account.password))
+                # This is what tells us which terraform repo to write PRs against - this
+                # is what you change if you want to test this in a non-live environment.
+                TERRAFORM_REPO_USER: terraform-providers
+                ANSIBLE_REPO_USER: modular-magician
+                PUPPET_REPO_USER: GoogleCloudPlatform
+                PUPPET_MODULES: _bundle,auth,bigquery,compute,sql,storage,spanner,container,dns,pubsub,resourcemanager
+                CHEF_REPO_USER: GoogleCloudPlatform
+                CHEF_MODULES: _bundle,auth,compute,sql,storage,spanner,container,dns
+            on_failure:
+              put: magic-modules-new-prs
+              params:
+                  status: failure
+                  context: pr-creation
+                  path: mm-initial-pr
+          # This will be a no-op the first time through the pipeline.  This pushes the updated
+          # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
+          # first time through the pipeline, that branch is unchanged by the create-prs task,
+          # because a new PR has just been created from that branch.  The second time through
+          # the pipeline (when a PR needs to be updated), this does that updating by pushing
+          # the new code to the repository/branch from which a pull request is already open.
+          - aggregate:
+          
+            - put: terraform-intermediate
+              params:
+                repository: magic-modules-with-comment/build/terraform
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                # Every time a change runs through this pipeline, it will generate a commit with
+                # a different hash - the hash includes timestamps.  Therefore, even if there's no
+                # code diff, this push will update terraform's pending PR on every update to the
+                # magic-modules PR.  With this 'only_if_diff' feature, if the change to the
+                # magic-modules PR does not require an update to the terraform PR, this will
+                # not push the update even though the commit hashes are different.
+                only_if_diff: true
+                force: true
+          
+          
+            - put: ansible-intermediate
+              params:
+                repository: magic-modules-with-comment/build/ansible
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                # See comment on terraform-intermediate
+                only_if_diff: true
+                force: true
+          
+          
+            - put: puppet-_bundle-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/_bundle
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-auth-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/auth
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-bigquery-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/bigquery
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-compute-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/compute
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-sql-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/sql
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-storage-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/storage
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-spanner-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/spanner
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-container-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/container
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-dns-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/dns
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-pubsub-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/pubsub
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: puppet-resourcemanager-intermediate
+              params:
+                repository: magic-modules-with-comment/build/puppet/resourcemanager
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+
+          
+            - put: chef-_bundle-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/_bundle
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-auth-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/auth
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-compute-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/compute
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-sql-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/sql
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-storage-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/storage
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-spanner-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/spanner
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-container-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/container
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+            - put: chef-dns-intermediate
+              params:
+                repository: magic-modules-with-comment/build/chef/dns
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                only_if_diff: true
+                force: true
+          
+
+          # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
+          # time through, it works the same way as the preceding push.
+          - put: magic-modules
+            params:
+              repository: magic-modules-with-comment/
+              branch_file: magic-modules-with-comment/original_pr_branch_name
+              only_if_diff: true
+              force: true
+          # Once everything is done and working, post the updated information to the
+          # magic-modules PR.
+          - put: magic-modules-new-prs
+            params:
+                status: success
+                label: downstream-generated
+                path: mm-initial-pr
+                comment: magic-modules-with-comment/pr_comment
+
+    - name: merge-prs
+      plan:
+          - get: mm-approved-prs
+            params:
+              fetch_merge: true
+          - task: merge-and-update
+            file: mm-approved-prs/.ci/magic-modules/merge.yml
+            params:
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: "build/puppet/_bundle build/puppet/auth build/puppet/bigquery build/puppet/compute build/puppet/sql build/puppet/storage build/puppet/spanner build/puppet/container build/puppet/dns build/puppet/pubsub build/puppet/resourcemanager build/chef/_bundle build/chef/auth build/chef/compute build/chef/sql build/chef/storage build/chef/spanner build/chef/container build/chef/dns build/terraform build/ansible"
+          # TODO(ndmckinley): This will work to update the magic-modules PR *if* the original PR
+          # was opened from the magic-modules repository.  That's not always going to be
+          # true - figure out what to do if, for instance, we can't modify the PR.
+          - put: magic-modules-gcp
+            params:
+                repository: mm-output
+                branch_file: mm-approved-prs/.git/branch
+                only_if_diff: true
+          - put: mm-approved-prs
+            params:
+                path: mm-output
+                status: success
+                merge:
+                    method: squash
+                    commit_msg: mm-output/commit_message
+
+    - name: create-pr-image
+      plan:
+          - get: magic-modules
+          - put: nmckinley-pr
+            params:
+              build: magic-modules/.ci/containers/pull-request
+
+    - name: test-terraform-pr
+      plan:
+          - aggregate:
+              - get: magic-modules
+              - get: terraform
+                resource: terraform-pr
+                version: every
+                trigger: true
+          - task: test
+            file: magic-modules/.ci/unit-tests/test-terraform.yml
+            on_failure:
+              put: terraform-pr
+              params:
+                path: terraform-pr
+                status: failure
+            on_success:
+              put: terraform-pr
+              params:
+                path: terraform-pr
+                status: success
+
+    - name: nightly-build
+      plan:
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+          - get: terraform-head
+
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
+
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.darwin_amd64
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.freebsd_386
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.freebsd_amd64
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.freebsd_arm
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.linux_386
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.linux_amd64
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.linux_arm
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.openbsd_386
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.openbsd_amd64
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.solaris_amd64
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.windows_386.exe
+          
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.windows_amd64.exe
+          
