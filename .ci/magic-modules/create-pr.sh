@@ -83,7 +83,12 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if PUP_PR=$(hub pull-request -b "$PUPPET_REPO_USER/puppet-google-$PRD:master" -F ./downstream_body); then
+    if [ "$PRD" == "*_bundle*"]; then
+      repo="puppet-google"
+    else
+      repo="puppet-google-$PRD"
+    fi
+    if PUP_PR=$(hub pull-request -b "$PUPPET_REPO_USER/$repo:master" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $PUP_PR ${NEWLINE}"
     else
       echo "Puppet $PRD - did not generate a PR."
@@ -103,7 +108,12 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if CHEF_PR=$(hub pull-request -b "$CHEF_REPO_USER/chef-google-$PRD:master" -F ./downstream_body); then
+    if [ "$PRD" == "*_bundle*"]; then
+      repo="chef-google"
+    else
+      repo="chef-google-$PRD"
+    fi
+    if CHEF_PR=$(hub pull-request -b "$CHEF_REPO_USER/$repo:master" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $CHEF_PR ${NEWLINE}"
     else
       echo "Chef $PRD - did not generate a PR."
