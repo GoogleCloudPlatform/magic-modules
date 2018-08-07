@@ -78,7 +78,10 @@ module Provider
     private
 
     def release_files
-      @config.manifest.releases.map { |p, _| "products/#{p}/puppet.yaml" }
+      @config.manifest
+             .releases
+             .reject { |k, _v| k == 'auth' }
+             .map { |p, _| "products/#{p}/puppet.yaml" }
              .select { |c| File.exist?(c) }
     end
 
