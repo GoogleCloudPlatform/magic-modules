@@ -84,7 +84,7 @@ module Provider
         {
           name: product.name,
           prefix: product.prefix,
-          objects: product.objects.reject(&:exclude),
+          objects: (product.objects || []).reject(&:exclude),
           source: config.manifest.source
         }
       end \
