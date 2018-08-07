@@ -96,3 +96,4 @@ objects:
                   description: |
                     A filter that identifies which time series should be
                     compared with the threshold.
+        required: true
