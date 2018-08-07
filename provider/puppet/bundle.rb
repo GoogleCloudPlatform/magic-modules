@@ -16,18 +16,14 @@ require 'provider/puppet'
 require 'provider/config'
 require 'provider/core'
 
+IGNORED_MODULES = ['cloud', 'gauth']
+
 module Provider
   # A provider to generate the "bundle" module.
   class PuppetBundle < Provider::Core
     # A manifest for the "bundle" module
     class Manifest < Provider::Puppet::Manifest
-      attr_reader :releases
-
-      def validate
-        @requires = [] if @requires.nil?
-        check_property :releases, Hash
-        super
-      end
+      attr_accessor :releases
     end
 
     # The configuration for the "bundle" module (in puppet.yaml)
@@ -37,15 +33,12 @@ module Provider
       def provider
         ::Provider::PuppetBundle
       end
-
-      def validate
-        check_property :manifest, Provider::PuppetBundle::Manifest
-      end
     end
 
     def generate(output_folder, _types, _version_name)
       # Let's build all the dependencies off of the products we found on our
       # path and has the corresponding provider.yaml file
+      @config.manifest.releases = releases
       generate_requirements
 
       # Always include authentication module
@@ -59,6 +52,21 @@ module Provider
     end
 
     def products
+      all_products.reject { |k, v| IGNORED_MODULES.include?(k.prefix) }
+    end
+
+    def releases
+      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version }}
+                  .reduce({}, :merge)
+    end
+
+    private
+
+    def release_files
+      Dir.glob("products/**/puppet.yaml")
+    end
+
+    def all_products
       @products ||= begin
         prod_map =
           release_files.map do |product_config|
@@ -73,16 +81,6 @@ module Provider
           end
         Hash[prod_map.sort_by { |p| p[0].prefix }]
       end
-    end
-
-    private
-
-    def release_files
-      @config.manifest
-             .releases
-             .reject { |k, _v| k == 'auth' }
-             .map { |p, _| "products/#{p}/puppet.yaml" }
-             .select { |c| File.exist?(c) }
     end
 
     def auth_ver

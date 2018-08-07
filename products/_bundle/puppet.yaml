@@ -23,18 +23,6 @@ manifest: !ruby/object:Provider::PuppetBundle::Manifest
     - !ruby/object:Provider::Config::Requirements
       name: 'google/glogging'
       versions: '>= 0.1.0 < 0.2.0'
-  releases:
-    auth: 0.2.0
-    compute: 0.2.1
-    container: 0.2.0
-    dns: 0.1.1
-    iam: 0.1.1
-    logging: 0.1.1
-    pubsub: 0.1.0
-    resourcemanager: 0.1.1
-    spanner: 0.1.0
-    sql: 0.3.0
-    storage: 0.2.0
   tags:
     - google
     - cloud
