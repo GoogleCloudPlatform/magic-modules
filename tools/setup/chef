@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Chef Setup Script
+# This script replaces all cookbooks in your Chef cookbook path with the
+# cookbooks in this instance of Magic Modules
+
+# This script should be run from MM root.
+MODPATH="$HOME/cookbooks"
+
+if [ ! -d "$MODPATH" ]; then
+  mkdir $MODPATH
+fi
+
+for mod in `pwd`/build/chef/*; do
+  shortname=$(basename $mod)
+  mod_name="google-g$shortname"
+  new_path="$MODPATH/$mod_name"
+  ln -sf $mod $new_path
+done
