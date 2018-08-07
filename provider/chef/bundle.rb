@@ -16,7 +16,7 @@ require 'provider/chef'
 require 'provider/config'
 require 'provider/core'
 
-IGNORED_COOKBOOKS = ['cloud', 'gauth']
+IGNORED_COOKBOOKS = %w[cloud gauth].freeze
 
 module Provider
   # A provider to generate the "bundle" module.
@@ -58,7 +58,7 @@ module Provider
     end
 
     def products
-      all_products.reject { |k, v| IGNORED_COOKBOOKS.include?(k.prefix) }
+      all_products.reject { |k, _v| IGNORED_COOKBOOKS.include?(k.prefix) }
     end
 
     def product_details
@@ -80,14 +80,14 @@ module Provider
     end
 
     def releases
-      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version }}
+      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version } }
                   .reduce({}, :merge)
     end
 
     private
 
     def release_files
-      Dir.glob("products/**/chef.yaml")
+      Dir.glob('products/**/chef.yaml')
     end
 
     def all_products
@@ -106,7 +106,6 @@ module Provider
         Hash[prod_map.sort_by { |p| p[0].prefix }]
       end
     end
-
 
     def next_version(version)
       [Gem::Version.new(version).bump, 0].join('.')

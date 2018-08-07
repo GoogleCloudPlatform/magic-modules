@@ -16,7 +16,7 @@ require 'provider/puppet'
 require 'provider/config'
 require 'provider/core'
 
-IGNORED_MODULES = ['cloud', 'gauth']
+IGNORED_MODULES = %w[cloud gauth].freeze
 
 module Provider
   # A provider to generate the "bundle" module.
@@ -52,18 +52,18 @@ module Provider
     end
 
     def products
-      all_products.reject { |k, v| IGNORED_MODULES.include?(k.prefix) }
+      all_products.reject { |k, _v| IGNORED_MODULES.include?(k.prefix) }
     end
 
     def releases
-      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version }}
+      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version } }
                   .reduce({}, :merge)
     end
 
     private
 
     def release_files
-      Dir.glob("products/**/puppet.yaml")
+      Dir.glob('products/**/puppet.yaml')
     end
 
     def all_products
