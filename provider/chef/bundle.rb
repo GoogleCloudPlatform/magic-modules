@@ -16,6 +16,8 @@ require 'provider/chef'
 require 'provider/config'
 require 'provider/core'
 
+IGNORED_COOKBOOKS = ['cloud', 'gauth']
+
 module Provider
   # A provider to generate the "bundle" module.
   class ChefBundle < Provider::Core
@@ -35,14 +37,7 @@ module Provider
     # A manifest for the "bundle" module
     class Manifest < Provider::Chef::Manifest
       attr_reader :products
-      attr_reader :releases
-
-      def validate
-        @requires = []
-        check_property_list :products, Provider::Config::BundledProduct
-        check_property :releases, Hash
-        super
-      end
+      attr_accessor :releases
     end
 
     def generate(output_folder, _types, _version_name)
@@ -63,20 +58,7 @@ module Provider
     end
 
     def products
-      @products ||= begin
-        prod_map =
-          release_files.map do |product_config|
-            product =
-              Api::Compiler.new(File.join(File.dirname(product_config),
-                                          'api.yaml')).run
-            product.validate
-            config = Provider::Config.parse(product_config, product)
-            config.validate
-
-            [product, config]
-          end
-        Hash[prod_map.sort_by { |p| p[0].prefix }]
-      end
+      all_products.reject { |k, v| IGNORED_COOKBOOKS.include?(k.prefix) }
     end
 
     def product_details
@@ -97,15 +79,34 @@ module Provider
       end
     end
 
+    def releases
+      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version }}
+                  .reduce({}, :merge)
+    end
+
     private
 
     def release_files
-      @config.manifest
-             .releases
-             .reject { |k, _v| k == 'auth' }
-             .map { |p, _| "products/#{p}/chef.yaml" }
-             .select { |c| File.exist?(c) }
+      Dir.glob("products/**/chef.yaml")
     end
+
+    def all_products
+      @products ||= begin
+        prod_map =
+          release_files.map do |product_config|
+            product =
+              Api::Compiler.new(File.join(File.dirname(product_config),
+                                          'api.yaml')).run
+            product.validate
+            config = Provider::Config.parse(product_config, product)
+            config.validate
+
+            [product, config]
+          end
+        Hash[prod_map.sort_by { |p| p[0].prefix }]
+      end
+    end
+
 
     def next_version(version)
       [Gem::Version.new(version).bump, 0].join('.')
