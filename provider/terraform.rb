@@ -53,7 +53,6 @@ module Provider
         Api::Type::Array => 'schema.TypeList',
         Api::Type::NameValues => 'schema.TypeMap',
         Api::Type::Fingerprint => 'schema.TypeString',
-        Api::Type::Status => 'schema.TypeString'
       }
     end
 

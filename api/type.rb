@@ -212,19 +212,6 @@ module Api
       end
     end
 
-    # Represents a status message.  These are output-only
-    # fields which return string messages meant to be human-readable.
-    class Status < String
-      def validate
-        super
-        @output = true if @output.nil?
-        # This mostly isn't useful information - operation errors cover the
-        # same ground and are already handled. Consequently we exclude it
-        # by default and override it where useful.
-        @exclude ||= true
-      end
-    end
-
     # Represents a timestamp
     class Time < Primitive
     end
