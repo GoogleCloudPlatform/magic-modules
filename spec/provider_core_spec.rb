@@ -17,28 +17,30 @@ describe Provider::Core do
   context '#format' do
     subject { described_class.new(mock('config'), mock('api')) }
 
-    it 'fails if cannot fit' do
-      expect do
-        subject.format [['x' * 21]], 0, 0, 20
-      end.to raise_error ArgumentError, /No code fits/
+    it 'does not fail if cannot fit' do
+      expect(
+        subject.format([['x' * 41]], 0, 0, 20)
+      ).to include('rubocop:disable Metrics/LineLength')
     end
 
-    it 'fails if cannot fit any' do
-      expect do
-        subject.format [['x' * 21], ['y' * 21], ['z' * 30]], 0, 0, 20
-      end.to raise_error ArgumentError, /No code fits/
+    it 'does not fail if cannot fit any' do
+      expect(
+        subject.format([['x' * 31], ['y' * 31], ['z' * 30]], 0, 0, 20)
+      ).to include 'rubocop:disable Metrics/LineLength'
     end
 
-    it 'fits 80 chars' do
-      subject.format [['x' * 80]]
+    it 'fits 100 chars' do
+      expect(
+        subject.format([['x' * 100]])
+      ).to eq('x' * 100)
     end
 
-    context 'fits 80 chars' do
+    context 'fits 100 chars' do
       subject do
         described_class.new(nil, nil).format([
-                                               ['x' * 80],
-                                               ['y' * 80],
-                                               ['z' * 80]
+                                               ['x' * 100],
+                                               ['y' * 100],
+                                               ['z' * 100]
                                              ])
       end
 
@@ -47,44 +49,50 @@ describe Provider::Core do
 
     context '#format(ident)' do
       it 'fits' do
-        subject.format [['x' * 74]], 6
+        expect(
+          subject.format([['x' * 74]], 6)
+        ).to eq((' ' * 6) + ('x' * 74))
       end
 
       it 'does not fit' do
-        expect do
-          subject.format [['x' * 75]], 6
-        end.to raise_error(ArgumentError, /No code fits/)
+        expect(
+          subject.format([['x' * 95]], 6)
+        ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
 
     context '#format(start)' do
       it 'fits' do
-        subject.format [['x' * 74]], 0, 6
+        expect(
+          subject.format([['x' * 74]], 0, 6)
+        ).to eq('x' * 74)
       end
 
       it 'does not fit' do
-        expect do
-          subject.format [['x' * 75]], 0, 6
-        end.to raise_error(ArgumentError, /No code fits/)
+        expect(
+          subject.format([['x' * 115]], 0, 6)
+        ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
 
     context '#format(start, indent)' do
       it 'fits' do
-        subject.format [['x' * 66]], 8, 6
+        expect(
+          subject.format([['x' * 66]], 8, 6)
+        ).to eq((' ' * 8) + ('x' * 66))
       end
 
       it 'does not fit' do
-        expect do
-          subject.format [['x' * 67]], 8, 6
-        end.to raise_error(ArgumentError, /No code fits/)
+        expect(
+          subject.format([['x' * 87]], 8, 6)
+        ).to include 'rubocop:disable Metrics/LineLength'
       end
     end
 
     context 'selects second option' do
       subject do
         described_class.new(nil, nil).format([
-                                               ['x' * 81],
+                                               ['x' * 101],
                                                ['y' * 80],
                                                ['z' * 80]
                                              ])

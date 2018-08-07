@@ -60,6 +60,13 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   end
 
   def self.prefetch(resources)
+<% if object.deprecated -%>
+    Puppet.warning [
+      "<%= object.out_name -%> will be deprecated in a future release.",
+      "You can use strings to reference GCP <%= object.name -%>.",
+      "A <%= object.out_name -%> is no longer necessary"
+    ].join(" ")
+<% end -%>
     debug('prefetch')
     resources.each do |name, resource|
 <% if object&.handlers&.prefetch.nil? -%>
@@ -149,20 +156,20 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
         ], 0, 7)
       else
         format([
-          ["#{name}: #{type}.api_munge(fetch['#{prop.field_name}'])"],
+          ["#{name}: #{type}.api_munge(fetch['#{prop.api_name}'])"],
           [
             "#{name}:",
-            indent("#{type}.api_munge(fetch['#{prop.field_name}'])", 2)
+            indent("#{type}.api_munge(fetch['#{prop.api_name}'])", 2)
           ],
           [
             "#{name}: #{type}.api_munge(",
-            indent("fetch['#{prop.field_name}']", 2),
+            indent("fetch['#{prop.api_name}']", 2),
             ')',
           ],
           [
             "#{name}:",
             indent(["#{type}.api_munge(",
-                    indent("fetch['#{prop.field_name}']", 2),
+                    indent("fetch['#{prop.api_name}']", 2),
                     ')'], 2)
           ]
         ], 0, 7) # 6 spaces = indent, 1 space = trailing comma (it's a list)
@@ -211,7 +218,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
                            f2h_code, file_relative), 2), 1)
 -%>
 <%= lines(get_code_multiline(config, 'constructor')) -%>
-<% unless object.virtual -%>
+<% unless object.readonly -%>
   def exists?
     debug("exists? #{@property_hash[:ensure] == :present}")
     @property_hash[:ensure] == :present
@@ -232,13 +239,17 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     @created = true
 <% if object&.handlers&.create.nil? -%>
 <%
-     if object.create_verb.nil? || object.create_verb == :POST
+     if !object.create_url.nil?
+        body_new = 'create_link(@resource)'
+     elsif object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@resource)'
-       request_new = "Google::#{product_ns}::Network::Post.new"
      elsif object.create_verb == :PUT
        body_new = 'self_link(@resource)'
-       request_new = "Google::#{product_ns}::Network::Put.new"
      end
+
+     request_new = ["Google::#{product_ns}::Network",
+                    "#{object.create_verb.to_s.capitalize}.new"
+                   ].join('::')
 
      request_patch = get_code_multiline config, 'resource_create_patch'
      custom_resource = true?(object.custom_create_resource)
@@ -269,12 +280,23 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     debug('destroy')
     @deleted = true
 <% if object&.handlers&.delete.nil? -%>
-<%   dele_new = "Google::#{product_ns}::Network::Delete.new" -%>
+<%
+     if object.delete_verb.nil? || object.delete_verb == :DELETE
+       request_new = "Google::#{product_ns}::Network::Delete.new"
+     elsif object.delete_verb == :POST
+       request_new = "Google::#{product_ns}::Network::Post.new"
+     end
+     if object.delete_url.nil?
+        body_new = 'self_link(@resource)'
+     else
+        body_new = 'delete_url(@resource)'
+     end
+-%>
 <%=
-  lines(indent_list(["delete_req = #{dele_new}(self_link(@resource)"].concat(
+  lines(indent_list(["delete_req = #{request_new}(#{body_new}"].concat(
     indent([
       'fetch_auth(@resource))'
-    ], dele_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
+    ], request_new.length + 14).split("\n") # 14 = 'delete_req = ' + '('
   ), 4))
 -%>
 <% kind_param = object.kind? ? ", '#{object.kind}'" : '' -%>
@@ -295,18 +317,12 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
+<% if object&.handlers&.flush.nil? -%>
 <%
-   if object&.handlers&.flush.nil?
-     put_new = if object.update_verb.nil?
-                 "Google::#{product_ns}::Network::Put.new"
-               else
-                 [
-                   ['Google', product_ns, 'Network',
-                    object.update_verb.id2name.capitalize].join('::'),
-                   '.new'
-                 ].join
-               end
-    custom_resource = true?(object.custom_update_resource)
+  put_new = ["Google::#{product_ns}::Network",
+             "#{object.update_verb.to_s.capitalize}.new"
+            ].join('::')
+  custom_resource = true?(object.custom_update_resource)
 -%>
 <%=
   lines(indent_list(["update_req = #{put_new}(self_link(@resource)"].concat(
@@ -342,11 +358,11 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     '{',
     indent_list(object.exported_properties.map do |p|
       if p.is_a?(Api::Type::FetchedExternal)
-        "#{p.out_name}: @fetched['#{p.field_name}']"
+        "#{p.out_name}: @fetched['#{p.api_name}']"
       else
         "#{p.out_name}: resource[:#{p.out_name}]"
       end
-    end, 2),
+    end + ['project: resource[:project]'], 2),
     '}'
   ]
 -%>
@@ -404,14 +420,14 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   prop_code.concat(
     object.properties.select { |p| !p.output }
                      .map do |prop|
-                       "#{prop.field_name}: @resource[:#{prop.out_name}]"
+                       "#{prop.api_name}: @resource[:#{prop.out_name}]"
                      end
   )
   prop_code.concat(
     (object.parameters || [])
       .select { |p| p.input }
       .map do |prop|
-        "#{prop.field_name}: @resource[:#{prop.out_name}]"
+        "#{prop.api_name}: @resource[:#{prop.out_name}]"
       end
   )
 
@@ -487,7 +503,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% if object&.handlers&.collection.nil? -%>
 <%=
   lines_before(
-    lines(indent(emit_link('collection', collection_url(object), true), 2))
+    lines(indent(emit_link('collection', build_url(object.collection_url), true), 2))
   )
 -%>
 <% else # object&.handlers&.collection.nil? -%>
@@ -500,7 +516,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% if object&.handlers&.self_link.nil? -%>
 <%=
   lines_before(
-    lines(indent(emit_link('self_link', self_link_url(object), true), 2))
+    lines(indent(emit_link('self_link', build_url(object.self_link_url), true), 2))
   )
 -%>
 <% else # object&.handlers&.self_link.nil? -%>
@@ -510,6 +526,20 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   )
 -%>
 <% end # object&.handlers&.self_link.nil? -%>
+<% unless object.create_url.nil? -%>
+<%=
+  lines_before(
+    lines(indent(emit_link('create_link', build_url(object.full_create_url), true), 2))
+  )
+-%>
+<% end # object.create_url.nil? -%>
+<% unless object.delete_url.nil? -%>
+<%=
+  lines_before(
+    lines(indent(emit_link('delete_link', build_url(object.full_delete_url), true), 2))
+  )
+-%>
+<% end # object.delete_url.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
 <%=
   lines_before(lines(indent(compile('templates/return_if_object.erb'), 2)))

@@ -19,7 +19,7 @@
 require 'spec_helper'
 
 <%
-if object.virtual
+if object.readonly
   test_matrix = Provider::TestMatrix.new(template, object, self,
     exists: {
       changes: [ # read-only object mistmatch
@@ -94,7 +94,7 @@ manifester = Provider::PuppetTestManifestFormatter.new self
                                                         /not supported/)
   end
 
-<% if object.virtual -%>
+<% if object.readonly -%>
 <% # Object does NOT provides 'ensure' parameter -%>
 <%= test_matrix.push(:ignore, :exists) -%>
 <%= test_matrix.push(:ignore, :exists, :no_change) -%>
@@ -309,7 +309,7 @@ manifester = Provider::PuppetTestManifestFormatter.new self
   context '#flush' do
     subject do
       Puppet::Type.type(:<%= object.out_name -%>).new(
-<% unless object.virtual -%>
+<% unless object.readonly -%>
         ensure: :present,
 <% end -%>
         name: 'my-name'
@@ -343,7 +343,7 @@ manifester = Provider::PuppetTestManifestFormatter.new self
 -%>
   def create_type(id)
     Puppet::Type.type(:<%= object.out_name -%>).new(
-<% unless object.virtual -%>
+<% unless object.readonly -%>
       ensure: :present,
 <% end -%>
 <%
@@ -369,8 +369,8 @@ manifester = Provider::PuppetTestManifestFormatter.new self
 
 <% end # object.encoder? -%>
 <%= lines(indent(compile_if(tests, %w[expectation_helpers]), 2), 1) -%>
-<%= lines(indent(emit_link('collection', collection_url(object), false), 2)) %>
-<%= lines(indent(emit_link('self_link', self_link_url(object), false), 2)) -%>
+<%= lines(indent(emit_link('collection', build_url(object.collection_url), false), 2)) %>
+<%= lines(indent(emit_link('self_link', build_url(object.self_link_url), false), 2)) -%>
 
 <% if @constants.value_assign(object).empty? -%>
   def uri_data(_id)

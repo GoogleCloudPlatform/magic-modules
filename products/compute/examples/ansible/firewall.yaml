@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_firewall
-  code: |
+  code:
     name: <%= ctx[:name] %>
     allowed:
       - ip_protocol: 'tcp'
@@ -27,11 +27,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute firewall-rules describe
-      --project="{{ gcp_project}}"
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: global
-    type: firewalls

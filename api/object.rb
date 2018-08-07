@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/extensions'
 require 'google/logger'
 require 'google/yaml_validator'
 
@@ -29,8 +30,6 @@ module Api
 
       # original value of :name before the provider override happens
       # same as :name if not overridden in provider
-      # TODO(rosbo): Add a pre-validate method and ensure this value is never
-      # set by the user.
       attr_reader :api_name
 
       def validate
@@ -42,7 +41,7 @@ module Api
     end
 
     def out_name
-      Google::StringUtils.underscore(@name)
+      @name.underscore
     end
   end
 end

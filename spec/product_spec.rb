@@ -25,7 +25,7 @@ describe Api::Product do
         product('name: "foo"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
-                '    name: v1',
+                '    name: ga',
                 '    base_url: "http://foo/var/"',
                 'objects:',
                 '  - !ruby/object:Api::Resource',
@@ -74,7 +74,7 @@ describe Api::Product do
                 'prefix: "bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
-                '    name: v1',
+                '    name: ga',
                 '    base_url: "http://foo/var/v1"',
                 '    default: true',
                 '  - !ruby/object:Api::Product::Version',
@@ -109,7 +109,7 @@ describe Api::Product do
                 'prefix: "bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
-                '    name: v1',
+                '    name: ga',
                 '    base_url: "http://foo/var/v1"',
                 '  - !ruby/object:Api::Product::Version',
                 '    name: beta',
@@ -140,7 +140,7 @@ describe Api::Product do
                 'prefix: "bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
-                '    name: v1',
+                '    name: ga',
                 '    base_url: "baz"').validate
       end
     end
@@ -154,7 +154,7 @@ describe Api::Product do
                 'prefix: "bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
-                '    name: v1',
+                '    name: ga',
                 '    base_url: "baz"',
                 'objects:',
                 '  - bah. bad object!').validate

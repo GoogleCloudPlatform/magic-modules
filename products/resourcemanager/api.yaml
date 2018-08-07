@@ -16,7 +16,7 @@ name: Google Cloud Resource Manager
 prefix: gresourcemanager
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://cloudresourcemanager.googleapis.com/v1/
 scopes:
   # All access is needed to create projects.
@@ -32,7 +32,7 @@ objects:
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'
-        field: 'projectId'
+        api_name: 'projectId'
         description: |
           The unique, user-assigned ID of the Project. It must be 6 to 30
           lowercase letters, digits, or hyphens. It must start with a letter.
@@ -42,7 +42,7 @@ objects:
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'number'
-        field: 'projectNumber'
+        api_name: 'projectNumber'
         description: Number uniquely identifying the project.
         output: true
       - !ruby/object:Api::Type::Enum
@@ -67,7 +67,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::NameValues
         name: 'labels'
-        key_type: Api::Type::String
         value_type: Api::Type::String
         description: |
           The labels associated with this Project.

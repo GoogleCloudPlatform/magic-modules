@@ -93,7 +93,7 @@ module Provider
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/PerceivedComplexity
       # prop_name_method should be a valid method on a Api::Type::*
-      # Typically, this will be "out_name" or "field_name"
+      # Typically, this will be "out_name" or "api_name"
       def emit_manifest_array(type, prop, seed, ctx, prop_name_method)
         subtype = prop.item_type_class
         name = prop_name_method.call
@@ -121,7 +121,7 @@ module Provider
 
       # Returns the title of the block being referenced
       def emit_resource(prop, seed, _ctx)
-        name = Google::StringUtils.underscore(prop.resource_ref.name)
+        name = prop.resource_ref.name.underscore
         "resource(#{name},#{seed % MAX_ARRAY_SIZE})"
       end
 

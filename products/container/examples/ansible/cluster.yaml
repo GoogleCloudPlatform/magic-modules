@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_container_cluster
-  code: |
+  code:
     name: <%= ctx[:name] %>
     initial_node_count: 2
     master_auth:

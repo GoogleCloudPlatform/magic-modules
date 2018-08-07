@@ -56,7 +56,6 @@
     account is used.
 - !ruby/object:Api::Type::NameValues
   name: 'metadata'
-  key_type: Api::Type::String
   value_type: Api::Type::String
   description: |
     The metadata key/value pairs assigned to instances in the cluster.
@@ -84,7 +83,6 @@
     type, the latest version of it will be used.
 - !ruby/object:Api::Type::NameValues
   name: 'labels'
-  key_type: Api::Type::String
   value_type: Api::Type::String
   description: |
     The map of Kubernetes labels (key/value pairs) to be applied to

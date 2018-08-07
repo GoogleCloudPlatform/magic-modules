@@ -53,7 +53,7 @@ module Provider
     # Generates a resource block for a resource ref.
     # Requires the ResourceRef and an index.
     def generate_ref(ref, index)
-      ref_name = Google::StringUtils.underscore(ref.name)
+      ref_name = ref.name.underscore
       generate_object(ref, "resource(#{ref_name},#{index})", :resource,
                       index, action: ':create')
     end
@@ -84,13 +84,13 @@ module Provider
     # Generates a key value pair for a property depending on its type
     # Valid options:
     #   first_level: Says if this is the first level being generated
-    def emit_manifest_assign(prop, seed, ctx, prop_field_name, opts = {})
+    def emit_manifest_assign(prop, seed, ctx, prop_api_name, opts = {})
       # Chef name field must use label_name
       if prop.name == 'name' && opts[:first_level]
         [@provider.label_name(prop.__resource),
          formatter(prop.class, @datagen.value(prop.class, prop, seed))]
       else
-        super(prop, seed, ctx, prop_field_name)
+        super(prop, seed, ctx, prop_api_name)
       end
     end
 

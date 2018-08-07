@@ -24,13 +24,12 @@ manifest: !ruby/object:Provider::Chef::Manifest
     This cookbook provides the built-in types and services for Chef to manage
     Google Cloud Compute resources, as native Chef types.
   depends:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google-gauth'
-      versions: '< 0.2.0'
+<%= indent(compile('provider/chef/common~depends.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Chef::Handlers
       update: |
         message = 'DiskType cannot be edited'
@@ -61,6 +60,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_network.rb'
   Region: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Chef::Handlers
       update: |
         message = 'Region cannot be edited'
@@ -69,6 +69,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_target_pool.rb'
+  Zone: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
+  MachineType: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
+  License: !ruby/object:Provider::Chef::ResourceOverride
+    deprecated: true
   # Not yet implemented.
   Autoscaler: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true

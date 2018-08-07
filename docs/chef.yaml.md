@@ -64,7 +64,7 @@ Example:
           include:
             - ...
         overrides:
-          <field_name>: <new_field_name>
+          <api_name>: <new_api_name>
     examples: !ruby/object:Api::Resource::HashArray
       <ObjectName>:
         - <object_name>.rb

@@ -48,6 +48,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
@@ -65,6 +67,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address`: The IP of the created resource.
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{zone}}/{{name}}"
     examples: |
@@ -154,23 +158,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      sizeGb: !ruby/object:Provider::Terraform::PropertyOverride
-        name: size
-        default_from_api: true
-      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
-        name: image
-        diff_suppress_func: 'diskImageDiffSuppress'
-      sourceSnapshot: !ruby/object:Provider::Terraform::PropertyOverride
-        name: snapshot
-        diff_suppress_func: 'linkDiffSuppress'
-        description: |
-          {{description}}* snapshot
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
       zone: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func:  diskEncryptionKeyDiffSuppress
+        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
+      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
+        name: image
+        diff_suppress_func: 'diskImageDiffSuppress'
       image: !ruby/object:Provider::Terraform::PropertyOverride
         description: |
           The image from which to initialize this disk. This can be
@@ -182,22 +180,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
           [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
           For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
           These images can be referred by family name here.
-      type: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-        default_value: 'pd-standard'
-      name: !ruby/object:Provider::Terraform::PropertyOverride
-        input: true
-      licenses: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: false
-      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func:  diskEncryptionKeyDiffSuppress
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
-      sourceImageEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
-      sourceSnapshotEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       post_import: templates/terraform/post_import/disk.erb
@@ -247,7 +229,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/forwarding_rule.erb
+      post_create: templates/terraform/post_create/labels.erb
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -298,8 +280,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: true
       ipVersion: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
       region: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
@@ -471,6 +457,48 @@ overrides: !ruby/object:Provider::ResourceOverrides
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
+  RegionDisk: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/detach_disk.erb
+      encoder: templates/terraform/encoders/disk.erb
+      decoder: templates/terraform/decoders/disk.erb
+      resource_definition: templates/terraform/resource_definition/disk.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the disk encryption key will be stored in the raw
+        state as plain-text.
+        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+    examples: |
+      ```hcl
+      resource "google_compute_disk" "disk" {
+        name = "my-disk"
+        image = "debian-cloud/debian-9"
+        size = 50
+        type = "pd-ssd"
+        zone = "us-central1-a"
+      }
+
+      resource "google_compute_snapshot" "snapdisk" {
+        name = "my-disk-snapshot"
+        source_disk = "${google_compute_disk.disk.name}"
+        zone = "us-central1-a"
+      }
+
+      resource "google_compute_region_disk" "regiondisk" {
+        name = "my-regional-disk"
+        snapshot = "${google_compute_snapshot.snapdisk.self_link}"
+        type = "pd-ssd"
+        region = "us-central1"
+
+        replica_zones = ["us-central1-a", "us-central1-f"]
+      }
+      ```
   Route: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -506,30 +534,28 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
         # Description here is overridden because puppet won't compile if you ask
         # it to include docs greater than 80 characters.
-        description: |
+        description: |+
           URL to a gateway that should handle matching packets.
-
           Currently, you can only specify the internet gateway, using a full or
           partial valid URL:
-
-          * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
-          * projects/project/global/gateways/default-internet-gateway
-          * global/gateways/default-internet-gateway
-          You can also provide the string 'default-internet-gateway'.
+          * `https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway`
+          * `projects/project/global/gateways/default-internet-gateway`
+          * `global/gateways/default-internet-gateway`
+          * The string `default-internet-gateway`.
+          
       nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_instance.erb
         # Description here is overridden because puppet won't compile if you ask
         # it to include docs greater than 80 characters.
-        description: |
+        description: |+
           URL to an instance that should handle matching packets.
           You can specify this as a full or partial URL. For example:
-
-          * https://www.googleapis.com/compute/v1/projects/project/zones/zone/instances/instance
-          * projects/project/zones/zone/instances/instance
-          * zones/zone/instances/instance
-          You can also provide just the instance name, with the zone in
-          `next_hop_instance_zone`.
+          * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/instances/instance`
+          * `projects/project/zones/zone/instances/instance`
+          * `zones/zone/instances/instance`
+          * Just the instance name, with the zone in `next_hop_instance_zone`.
+          
       tags: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/set_to_list.erb
         is_set: true
@@ -537,11 +563,47 @@ overrides: !ruby/object:Provider::ResourceOverrides
       decoder: templates/terraform/decoders/route.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/route.erb
     docs: !ruby/object:Provider::Terraform::Docs
-      optional_properties: |
+      optional_properties: |+
           * `next_hop_instance_zone` - (Optional when `next_hop_instance` is
             specified)  The zone of the instance specified in
             `next_hop_instance`.  Omit if `next_hop_instance` is specified as
             a URL.
+  Router: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{region}}/{{name}}"
+    mutex: router/{{region}}/{{name}}
+    examples: |
+      ```hcl
+      resource "google_compute_network" "foobar" {
+        name                    = "my-network"
+        auto_create_subnetworks = false
+      }
+
+      resource "google_compute_router" "foobar" {
+        name    = "my-router"
+        network = "${google_compute_network.foobar.name}"
+        bgp {
+          asn               = 64514
+          advertise_mode    = "CUSTOM"
+          advertised_groups = ["ALL_SUBNETS"]
+          advertised_ip_ranges {
+            range = "1.2.3.4"
+          }
+          advertised_ip_ranges {
+            range = "6.7.0.0/16"
+          }
+        }
+      }
+      ```
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
@@ -623,6 +685,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
           function: 'validateGCPName'
       secondaryIpRanges: !ruby/object:Provider::Terraform::PropertyOverride
         name: secondaryIpRange
+        unordered_list: true
+        default_from_api: true
       secondaryIpRanges.rangeName: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
@@ -1090,6 +1154,10 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_global_address_test.go'
     'google/resource_compute_region_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
+    'google/resource_compute_region_disk_test.go':
+      'templates/terraform/tests/resource_compute_region_disk_test.go'
+    'google/resource_compute_router_test.go':
+      'templates/terraform/tests/resource_compute_router_test.go'
     'google/resource_compute_target_https_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
     'google/resource_compute_target_ssl_proxy_test.go':

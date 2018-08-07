@@ -1,5 +1,5 @@
-{% set chef_modules = ['compute', 'sql', 'storage'] %}
-{% set puppet_modules = ['compute', 'sql', 'storage'] %}
+{% set chef_modules = ['auth', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns'] %}
+{% set puppet_modules = ['auth', 'bigquery', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'pubsub', 'resourcemanager'] %}
 {% set terraform_enabled = true %}
 {% set ansible_enabled = true %}
 {% macro names_as_list(repo, names) -%}
@@ -41,7 +41,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.7
+          tag: v0.1.10
 
     - name: gcs-resource
       type: docker-image
@@ -167,21 +167,31 @@ jobs:
 
     - name: mm-generate
       plan:
-          - aggregate:
-              - get: magic-modules
-                resource: magic-modules-new-prs
-                version: every
-                trigger: true
-                params:
-                    fetch_merge: true
-            # consumes: magic-modules (detached HEAD)
-            # produces: magic-modules-branched (new branch, with submodule)
-          - task: branch-magic-modules
-            file: magic-modules/.ci/magic-modules/branch.yml
+          - get: magic-modules
+            resource: magic-modules-new-prs
+            version: every
+            trigger: true
             params:
-              GH_TOKEN: ((github-account.password))
-              CREDS: ((repo-key.private_key))
-              ALL_SUBMODULES: {{' '.join(all_submodules)}}
+              fetch_merge: true
+            # consumes: magic-modules (because that's where the code is)
+            # products: patches
+          - aggregate:
+            - task: get-merged-patches
+              file: magic-modules/.ci/magic-modules/get-merged-patches.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+              # consumes: magic-modules (detached HEAD)
+              # produces: magic-modules-branched (new branch, with submodule)
+            - task: branch-magic-modules
+              file: magic-modules/.ci/magic-modules/branch.yml
+              params:
+                GH_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+                ALL_SUBMODULES: {{' '.join(all_submodules)}}
+            - put: magic-modules-new-prs
+              params:
+                status: pending
+                path: magic-modules
           - aggregate:
           {% if terraform_enabled %}
             - do:
@@ -248,6 +258,12 @@ jobs:
                       force: true
                 {% endfor %}
           {% endif %}
+            on_failure:
+              put: magic-modules-new-prs
+              params:
+                status: failure
+                context: code-generation
+                path: magic-modules
 
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
@@ -267,7 +283,6 @@ jobs:
             params:
                 repository: magic-modules-submodules
                 branch_file: magic-modules-branched/branchname
-                only_if_diff: true
                 force: true
 
 {% if terraform_enabled %}
@@ -281,6 +296,16 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/task.yml
+          timeout: 30m
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: terraform-tests
+                  path: magic-modules-new-prs
 {% endif %}
 {% if ansible_enabled %}
     - name: ansible-test
@@ -293,6 +318,16 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/ansible.yml
+          timeout: 30m
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: ansible-tests
+                  path: magic-modules-new-prs
 {% endif %}
     - name: puppet-test
       plan:
@@ -309,12 +344,22 @@ jobs:
           {% for module in puppet_modules %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
             params:
               PRODUCT: {{module}}
             {%- if puppet_test_excludes.get(module) %}
               EXCLUDE_PATTERN: {{','.join(puppet_test_excludes[module])}}
             {%- endif %}
           {% endfor %}
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: puppet-tests
+                  path: magic-modules-new-prs
 
     - name: chef-test
       plan:
@@ -331,12 +376,22 @@ jobs:
           {% for module in chef_modules %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/chef.yml
+            timeout: 30m
             params:
               PRODUCT: {{module}}
             {%- if chef_test_excludes.get(module) %}
               EXCLUDE_PATTERN: {{','.join(chef_test_excludes[module])}}
             {%- endif %}
           {% endfor %}
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: chef-tests
+                  path: magic-modules-new-prs
 
     - name: create-prs
       plan:
@@ -391,6 +446,7 @@ jobs:
               put: magic-modules-new-prs
               params:
                   status: failure
+                  context: pr-creation
                   path: mm-initial-pr
           # This will be a no-op the first time through the pipeline.  This pushes the updated
           # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
@@ -431,7 +487,7 @@ jobs:
                 force: true
           {% endfor %}
 
-          {% for module in puppet_modules %}
+          {% for module in chef_modules %}
             - put: chef-{{module}}-intermediate
               params:
                 repository: magic-modules-with-comment/build/chef/{{module}}

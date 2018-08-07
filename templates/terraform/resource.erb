@@ -36,6 +36,13 @@ func resource<%= resource_name -%>() *schema.Resource {
 		Update: resource<%= resource_name -%>Update,
 		<% end -%>
 		Delete: resource<%= resource_name -%>Delete,
+        <% if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+        CustomizeDiff: customdiff.All(
+            <%= settable_properties.select { |p| p.unordered_list }
+                                    .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
+                                    .join(",\n")-%>
+        ),
+        <% end -%>
 
 		Importer: &schema.ResourceImporter{
 			State: resource<%= resource_name -%>Import,
@@ -74,6 +81,13 @@ func resource<%= resource_name -%>() *schema.Resource {
 		},
 	}
 }
+<% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
+func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+<%= compile_template('templates/terraform/unordered_list_customize_diff.erb',
+                     prop: prop,
+                     resource_name: resource_name) -%>
+}
+<% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -87,13 +101,13 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
 	obj := make(map[string]interface{})
 <% settable_properties.each do |prop| -%>
-	<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
+	<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 	if err != nil {
 		return err
 	<% unless prop.send_empty_value -%>
-	} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+	} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 	<% else -%>
-	} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+	} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 	<% end -%>
 		obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
 	}
@@ -106,13 +120,22 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
   }
   <% end -%>
 
-	url, err := replaceVars(d, config, "<%= collection_url(object) -%>")
+<% if object.mutex -%>
+	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+<% end -%>
+
+	url, err := replaceVars(d, config, "<%= build_url(object.full_create_url) -%>")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-	res, err := Post(config, url, obj)
+	res, err := <%= object.create_verb.to_s.capitalize -%>(config, url, obj)
 	if err != nil {
 		return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
 	}
@@ -159,7 +182,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
   }
   <% end -%>
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+	url, err := replaceVars(d, config, "<%= build_url(object.self_link_url) -%>")
 	if err != nil {
 		return err
 	}
@@ -188,8 +211,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 
 
-<% properties.reject(&:ignore_read).each do |prop| -%>
-  if err := d.Set("<%= Google::StringUtils.underscore(prop.name) -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
+<% properties.each do |prop| -%>
+  if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
 <% end -%>
@@ -226,11 +249,11 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	d.Partial(true)
 
 	<% properties_by_custom_update(properties).each do |key, props| -%>
-	if <%= props.map { |prop| "d.HasChange(\"#{Google::StringUtils.underscore(prop.name)}\")" }.join ' || ' -%> {
+	if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
 		obj := make(map[string]interface{})
 		<% props.each do |prop| -%>
 			<% if settable_properties.include? prop -%>
-				<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
+				<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 			if err != nil {
 			return err
 			<%# There is some nuance in when we choose to send a value to an update function.
@@ -251,9 +274,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 					in question is go's literal nil.
 			-%>
 			<% unless prop.send_empty_value -%>
-			} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+			} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 			<% else -%>
-			} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+			} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 			<% end -%>
 			<% if prop.update_statement -%>
 					obj["<%= prop.api_name -%>"] = <%= compile_template(prop.update_statement,
@@ -264,10 +287,19 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
       <% end -%>
 			}
 			<% else -%>
-			<%= prop.api_name -%>Prop := d.Get("<%= Google::StringUtils.underscore(prop.name) -%>")
+			<%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
 			obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
 			<% end -%>
 		<% end -%>
+
+<% if object.mutex -%>
+		lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+		if err != nil {
+			return err
+		}
+		mutexKV.Lock(lockName)
+		defer mutexKV.Unlock(lockName)
+<% end -%>
 
 		url, err = replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
 		if err != nil {
@@ -295,7 +327,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 		<% end -%>
 
 		<% props.each do |prop|	-%>
-		d.SetPartial("<%= Google::StringUtils.underscore(prop.name) -%>")
+		d.SetPartial("<%= prop.name.underscore -%>")
 		<% end -%>
 	}
 	<% end -%>
@@ -304,13 +336,13 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% else # if object.input -%>
 	obj := make(map[string]interface{})
 	<% settable_properties.each do |prop| -%>
-		<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= Google::StringUtils.underscore(prop.name) -%>"), d, config)
+		<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 		if err != nil {
 				return err
 		<% unless prop.send_empty_value -%>
-		} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+		} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 		<% else -%>
-		} else if v, ok := d.GetOkExists("<%= Google::StringUtils.underscore(prop.name) -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+		} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 		<% end -%>
 			obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
 		}
@@ -322,6 +354,16 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	<% elsif object.custom_code.encoder -%>
 	obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
 	<% end -%>
+
+<% if object.mutex -%>
+	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+<% end -%>
+
 	url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
 	if err != nil {
 	return err
@@ -367,14 +409,23 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
   }
   <% end -%>
 
-	url, err := replaceVars(d, config, "<%= self_link_url(object) -%>")
+<% if object.mutex -%>
+	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+	if err != nil {
+		return err
+	}
+	mutexKV.Lock(lockName)
+	defer mutexKV.Unlock(lockName)
+<% end -%>
+
+	url, err := replaceVars(d, config, "<%= build_url(object.full_delete_url) -%>")
 	if err != nil {
 		return err
 	}
 
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 	log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-	res, err := Delete(config, url)
+	res, err := <%= object.delete_verb.to_s.capitalize -%>(config, url)
 	if err != nil {
 		return handleNotFoundError(err, d, "<%= object.name -%>")
 	}

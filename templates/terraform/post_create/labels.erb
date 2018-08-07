@@ -6,18 +6,19 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     }
 
     obj := make(map[string]interface{})
-    labelsProp, err := expandComputeForwardingRuleLabels(v, d, config)
+    // d.Get("labels") will have been overridden by the Read call.
+    labelsProp, err := expand<%= resource_name -%>Labels(v, d, config)
     obj["labels"] = labelsProp
     labelFingerprintProp := d.Get("label_fingerprint")
     obj["labelFingerprint"] = labelFingerprintProp
 
-    url, err = replaceVars(d, config, "https://www.googleapis.com/compute/beta/projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels")
+    url, err = replaceVars(d, config, "<%= build_url(object.self_link_url) -%>/setLabels")
     if err != nil {
         return err
     }
     res, err = sendRequest(config, "POST", url, obj)
     if err != nil {
-        return fmt.Errorf("Error adding labels to ForwardingRule %q: %s", d.Id(), err)
+      return fmt.Errorf("Error adding labels to <%= resource_name -%> %q: %s", d.Id(), err)
     }
 
     err = Convert(res, op)
@@ -26,7 +27,7 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     }
 
     err = computeOperationWaitTime(
-        config.clientCompute, op, project, "Updating ForwardingRule",
+        config.clientCompute, op, project, "Updating <%= resource_name -%> Labels",
         int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
     if err != nil {

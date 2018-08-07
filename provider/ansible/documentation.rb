@@ -142,6 +142,8 @@ module Provider
 
       # Builds out the minimal YAML block for DOCUMENTATION
       # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/AbcSize
       def minimal_doc_block(prop, _object, spaces)
         required = prop.required && !prop.default_value ? 'true' : 'false'
         [
@@ -151,6 +153,7 @@ module Provider
             ("default: #{prop.default_value}" if prop.default_value),
             ('type: bool' if prop.is_a? Api::Type::Boolean),
             ("aliases: [#{prop.aliases.join(', ')}]" if prop.aliases),
+            ("version_added: #{prop.version_added}" if prop.version_added),
             (if prop.is_a? Api::Type::Enum
                [
                  'choices:',
@@ -161,7 +164,8 @@ module Provider
         ]
       end
       # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/PerceivedComplexity
 
       # Builds out the minimal YAML block for RETURNS
       def minimal_return_block(prop, spaces)
@@ -186,7 +190,7 @@ module Provider
       # at the end.
       def minimal_yaml(prop, spaces)
         [
-          "#{Google::StringUtils.underscore(prop.name)}:",
+          "#{prop.name.underscore}:",
           indent(
             [
               'description:',

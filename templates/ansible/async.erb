@@ -4,7 +4,7 @@
   res_path = path2navigate(object.async.result.path)
 -%>
 <%=
-  lines(emit_link('async_op_url', async_operation_url(object), object, true), 2)
+  lines(emit_link('async_op_url', build_url(object.async_operation_url, true), object, true), 2)
 -%>
 def wait_for_operation(module, response):
 <% if object.kind? -%>
@@ -14,7 +14,7 @@ def wait_for_operation(module, response):
     op_result = return_if_object(module, response)
 <% end # object.kind? -%>
     if op_result is None:
-        return None
+        return {}
     status = navigate_hash(op_result, <%= stat_path -%>)
 <% if object.self_link_query.nil? -%>
     wait_done = wait_for_completion(status, op_result, module)

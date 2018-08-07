@@ -15,7 +15,7 @@
 name: My Product
 prefix: myproduct
 versions:
-  - name: v1
+  - name: ga
     base_url: http://myproduct.google.com/api
 scopes:
   - http://scope-to-my-api/

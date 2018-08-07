@@ -34,9 +34,7 @@ module Provider
 
       def value(for_type, property, seed)
         return property.default_value if property.default_value
-        if for_type == Api::Type::Array
-          for_type = [Api::Type::Array, property.item_type_class]
-        end
+        for_type = [Api::Type::Array, property.item_type_class] if for_type == Api::Type::Array
         raise "Unknown property type: #{for_type} @ #{property}" \
           unless values.key?(for_type)
         values[for_type].call(property, seed)
@@ -145,7 +143,7 @@ module Provider
       end
 
       def selflink_value(prop, seed)
-        name = Google::StringUtils.underscore(prop.resource.name)
+        name = prop.resource.name.underscore
         "selflink(resource(#{name},#{seed}))"
       end
 
@@ -154,7 +152,7 @@ module Provider
       end
 
       def resource_value(prop, seed)
-        name = Google::StringUtils.underscore(prop.resource_ref.name)
+        name = prop.resource_ref.name.underscore
         "'resource(#{name},#{seed})'"
       end
 
@@ -192,7 +190,7 @@ module Provider
             if hash[:exported_values]
               # Return the exported value.
               imports = prop.item_type.imports.downcase
-              resource = Google::StringUtils.underscore(prop.item_type.resource)
+              resource = prop.item_type.resource.underscore
               "#{imports}(resource(#{resource},#{index}))"
             else
               resource_value(prop.item_type, index)

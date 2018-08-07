@@ -26,7 +26,7 @@ Puppet::Functions.create_function(:<%= fn.name -%>) do
 <% fn.arguments.each do |arg| -%>
 <% type_parts = arg.type.split('::') -%>
 <% if type_parts[0, 2] == %w[Api Type] -%>
-<% type = Google::StringUtils.camelize(type_parts.last, :upper) -%>
+<% type = type_parts.last.camelize(:upper) -%>
     param '<%= type -%>', :<%= arg.name %>
 <% else # arg.type.starts_with?('Api::Type') -%>
     param 'Runtime[ruby, "<%= arg.type -%>"]', :<%= arg.name %>

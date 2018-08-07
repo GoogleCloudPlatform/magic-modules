@@ -35,8 +35,9 @@ module Provider
       end
 
       # Get value from config and fallback to manifest.
-      def get(value, config)
-        return config[value] unless config[value].nil?
+      def get(value, object)
+        return object.instance_variable_get("@#{value}".to_sym) \
+          unless object.instance_variable_get("@#{value}".to_sym).nil?
         instance_variable_get("@#{value}".to_sym)
       end
     end

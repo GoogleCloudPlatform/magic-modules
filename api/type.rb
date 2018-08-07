@@ -29,7 +29,6 @@ module Api
 
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation
-      attr_reader :field
       attr_reader :required
       attr_reader :update_verb
       attr_reader :update_url
@@ -57,7 +56,6 @@ module Api
       check_optional_property :min_version, ::String
 
       check_optional_property :output, :boolean
-      check_optional_property :field, ::String
       check_optional_property :required, :boolean
 
       raise 'Property cannot be output and required at the same time.' \
@@ -92,10 +90,20 @@ module Api
       self.class.name.split('::').last
     end
 
+    # This is only used in puppet and chef, and it is the name of the Ruby type
+    # which is meant to parse the value of the property.  Usually it is 'Enum'
+    # or 'Integer' or 'String', unless complex logic is needed.  If so, a
+    # class will be generated specific to that type (e.g. AddressAddressType),
+    # and this must return the fully qualified name of that class.
     def property_type
       property_ns_prefix.concat([type]).join('::')
     end
 
+    # This is only used in puppet and chef, and it is the string that must be
+    # used in a 'require' statement in order to use this property.  This is
+    # usually, e.g. 'google/compute/property/enum', but in the event that a
+    # class is generated specifically for a particular type, this will be the
+    # require path to that file.
     def requires
       File.join(
         'google',
@@ -103,10 +111,6 @@ module Api
         'property',
         type
       ).downcase
-    end
-
-    def field_name
-      @field || @name
     end
 
     def parent
@@ -141,8 +145,7 @@ module Api
       num_parts = name_parts.flatten.size
       shrunk_names = recurse_shrink_name(name_parts,
                                          (1.0 * MAX_NAME / num_parts).round)
-      type_name = Google::StringUtils.camelize(shrunk_names.flatten.join('_'),
-                                               :upper)
+      type_name = shrunk_names.flatten.join('_').camelize(:upper)
       property_ns_prefix.concat([type_name])
     end
 
@@ -154,9 +157,9 @@ module Api
     def shrink_type_name_parts(type)
       type.map do |t|
         if t.is_a?(::Array)
-          t.map { |u| Google::StringUtils.underscore(u).split('_') }
+          t.map { |u| u.underscore.split('_') }
         else
-          Google::StringUtils.underscore(t).split('_')
+          t.underscore.split('_')
         end
       end
     end
@@ -242,6 +245,7 @@ module Api
     # Represents an array, and stores its items' type
     class Array < Composite
       attr_reader :item_type
+      attr_reader :min_size
       attr_reader :max_size
 
       STRING_ARRAY_TYPE = [Api::Type::Array, Api::Type::String].freeze
@@ -261,6 +265,7 @@ module Api
           raise "Invalid type #{@item_type}"
         end
 
+        check_optional_property :min_size, ::Integer
         check_optional_property :max_size, ::Integer
       end
 
@@ -306,6 +311,41 @@ module Api
     class Enum < Primitive
       attr_reader :values
 
+      def generate_unique_enum_class
+        # When an enum has a default value, it is sometimes omitted from return
+        # values from GCP.  This means that we need a diff-suppress, of sorts,
+        # which can only be done in a unique enum class.  We only need a unique
+        # enum class if the default value is non-nil.
+        !@default_value.nil?
+      end
+
+      def property_type
+        # 'super' here means 'use the default Enum class', and
+        # the other branch means 'use a different unique Enum class'.  This
+        # doesn't do anything to actually generate the unique Enum class - that
+        # happens in overrides of provider's 'generate_enum_properties'.
+        if !generate_unique_enum_class
+          super
+        else
+          camelized_name = @name.camelize(:upper)
+          property_ns_prefix.concat(["#{camelized_name}Enum"]).join('::')
+        end
+      end
+
+      def requires
+        # Similar to property_type, this just picks the right file to require
+        # for resources which use this enum property.  We'll need to require the
+        # generated unique Enum class if it exists.
+        if !generate_unique_enum_class
+          super
+        else
+          File.join(
+            'google', @__resource.__product.prefix[1..-1], 'property',
+            "#{@__resource.name}_#{@name}".underscore
+          ).downcase
+        end
+      end
+
       def validate
         super
         check_property :values, ::Array
@@ -315,6 +355,10 @@ module Api
     # Properties that are fetched externally
     class FetchedExternal < Type
       attr_writer :resource
+
+      def api_name
+        name
+      end
     end
 
     # Represents a 'selfLink' property, which returns the URI of the resource.
@@ -328,11 +372,7 @@ module Api
       end
 
       def out_name
-        Google::StringUtils.underscore(EXPORT_KEY)
-      end
-
-      def field_name
-        name
+        EXPORT_KEY.underscore
       end
     end
 
@@ -422,6 +462,8 @@ module Api
         @description = 'A nested object resource' if @description.nil?
         @name = @__name if @name.nil?
         super
+
+        raise "Properties missing on #{name}" if @properties.nil?
         @properties.each do |p|
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
@@ -442,7 +484,7 @@ module Api
       def property_file
         File.join(
           'google', @__resource.__product.prefix[1..-1], 'property',
-          [@__resource.name, Google::StringUtils.underscore(@name)].join('_')
+          [@__resource.name, @name.underscore].join('_')
         ).downcase
       end
 
@@ -472,6 +514,7 @@ module Api
 
       def validate
         super
+        default_value_property :key_type, Api::Type::String.to_s
         check_property :key_type, ::String
         check_property :value_type, ::String
         raise "Invalid type #{@key_type}" unless type?(@key_type)
@@ -490,8 +533,7 @@ module Api
     def property_ns_prefix
       [
         'Google',
-        Google::StringUtils.camelize(@__resource.__product.prefix[1..-1],
-                                     :upper),
+        @__resource.__product.prefix[1..-1].camelize(:upper),
         'Property'
       ]
     end

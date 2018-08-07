@@ -19,6 +19,9 @@ module Provider
     # Chef specific properties to be added to Api::Resource
     module OverrideProperties
       attr_reader :access_api_results
+      attr_reader :custom_create_resource
+      attr_reader :custom_update_resource
+      attr_reader :deprecated
       attr_reader :handlers
       attr_reader :manual
       attr_reader :provider_helpers
@@ -60,6 +63,9 @@ module Provider
         super
 
         check_property :access_api_results, :boolean
+        check_optional_property :custom_create_resource, :boolean
+        check_optional_property :custom_update_resource, :boolean
+        check_property :deprecated, :boolean
         check_optional_property :handlers, Provider::Chef::Handlers
         check_property :manual, :boolean
         check_property :resource_to_request, :boolean
@@ -73,6 +79,7 @@ module Provider
 
       def assign_defaults
         default_value_property :access_api_results, false
+        default_value_property :deprecated, false
         default_value_property :manual, false
         default_value_property :provider_helpers, []
         default_value_property :resource_to_request, true

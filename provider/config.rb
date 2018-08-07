@@ -23,6 +23,8 @@ module Provider
     extend Compile::Core
 
     attr_reader :overrides
+    # Overrides for datasources
+    attr_reader :datasources
     attr_reader :objects
     attr_reader :examples
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
@@ -194,7 +196,7 @@ module Provider
       end
     end
 
-    def self.parse(cfg_file, api = nil)
+    def self.parse(cfg_file, api = nil, _version_name = nil)
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
       config = Google::YamlValidator.parse(source)
@@ -214,6 +216,10 @@ module Provider
 
     def provider
       raise "#{self.class}#provider not implemented"
+    end
+
+    def self.next_version(version)
+      [Gem::Version.new(version).bump, 0].join('.')
     end
 
     def validate
