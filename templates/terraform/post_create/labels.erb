@@ -1,3 +1,4 @@
+<% if properties.any?{ |p| p.name == "labels" } -%>
 if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
     // Labels cannot be set in a create.  We'll have to set them here.
     err = resource<%= resource_name -%>Read(d, meta)
@@ -35,3 +36,4 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     }
 
 }
+<% end -%>
