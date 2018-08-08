@@ -3792,6 +3792,7 @@ objects:
       - !ruby/object:Api::Type::String
         exclude: true
         name: 'detailedStatus'
+        output: true
         description: 'Detailed status message for the VPN tunnel.'
   - !ruby/object:Api::Resource
     name: 'Zone'
