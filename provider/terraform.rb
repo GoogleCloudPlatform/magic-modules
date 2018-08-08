@@ -52,7 +52,7 @@ module Provider
         Api::Type::NestedObject => 'schema.TypeList',
         Api::Type::Array => 'schema.TypeList',
         Api::Type::NameValues => 'schema.TypeMap',
-        Api::Type::Fingerprint => 'schema.TypeString',
+        Api::Type::Fingerprint => 'schema.TypeString'
       }
     end
 
