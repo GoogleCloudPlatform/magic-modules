@@ -39,8 +39,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
-    facts: !ruby/object:Provider::Ansible::FactsOverride
-      has_filters: false
     provider_helpers:
       - 'products/pubsub/helpers/python/provider_topic.py'
   Subscription: !ruby/object:Provider::Ansible::ResourceOverride
@@ -48,8 +46,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
-    facts: !ruby/object:Provider::Ansible::FactsOverride
-      has_filters: false
     provider_helpers:
       - 'products/pubsub/helpers/python/provider_subscription.py'
 examples: !ruby/object:Api::Resource::HashArray

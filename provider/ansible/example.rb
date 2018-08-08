@@ -312,6 +312,7 @@ module Provider
 
       private
 
+      # rubocop:disable Metrics/AbcSize
       def build_code(object, hash)
         sample_code = @__example.task.code
         ignored_props = %w[project name]
@@ -330,6 +331,7 @@ module Provider
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code
       end
+      # rubocop:enable Metrics/AbcSize
     end
   end
 end

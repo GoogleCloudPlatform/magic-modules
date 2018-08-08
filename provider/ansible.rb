@@ -219,6 +219,15 @@ module Provider
       end
 
       def generate_resource(data)
+        # Add facts from datasources to non-datasource if they exist.
+        # Some values from datasources.facts may be necessary for building integration
+        # tests, which is done before datasource building.
+        # We don't want to duplicate those .facts values though.
+        name = "@#{data[:object].name}".to_sym
+        data[:object].instance_variable_set(:@facts,
+                                            @config&.datasources
+                                                   &.instance_variable_get(name)
+                                                   &.facts)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = module_name(data[:object])
