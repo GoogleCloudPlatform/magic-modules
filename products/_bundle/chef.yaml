@@ -39,6 +39,7 @@ manifest: !ruby/object:Provider::ChefBundle::Manifest
 files: !ruby/object:Provider::Config::Files
   copy:
     'LICENSE': 'templates/LICENSE'
+    'spec/': 'products/_bundle/files/spec/'
   compile:
     'README.md': 'products/_bundle/templates/chef/README.md.erb'
     '.gitignore': 'templates/dot~gitignore'

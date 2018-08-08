@@ -34,6 +34,7 @@ manifest: !ruby/object:Provider::PuppetBundle::Manifest
 files: !ruby/object:Provider::Config::Files
   copy:
     'LICENSE': 'templates/LICENSE'
+    'spec/': 'products/_bundle/files/spec/'
   compile:
     'README.md': 'products/_bundle/templates/puppet/README.md.erb'
     'metadata.json': 'templates/puppet/metadata.json.erb'
