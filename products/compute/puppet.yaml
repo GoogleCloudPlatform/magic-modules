@@ -106,8 +106,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
-  TargetVpnGateway: !ruby/object:Provider::Puppet::ResourceOverride
-    exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   # Deprecated readonly resources
@@ -555,11 +553,13 @@ examples: !ruby/object:Api::Resource::HashArray
   TargetSslProxy:
     - delete_target_ssl_proxy.pp
     - target_ssl_proxy.pp
-  # TargetVpnGateway
+  TargetVpnGateway:
+    - target_vpn_gateway.pp
   UrlMap:
     - delete_url_map.pp
     - url_map.pp
-  # VpnTunnel
+  VpnTunnel:
+    - vpn_tunnel.pp
   # ZoneOperation -- not useful for state convergence
   Zone:
     - zone.pp
