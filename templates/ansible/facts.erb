@@ -93,8 +93,8 @@ def main():
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
 
     items = fetch_list(module, collection(module), query_options(module.params['filters']))
-    if items.get('items'):
-        items = items.get('items')
+    if items.get(<%= quote_string(object.facts.list_key) -%>):
+        items = items.get(<%= quote_string(object.facts.list_key) -%>)
     else:
         items = []
     return_value = {
