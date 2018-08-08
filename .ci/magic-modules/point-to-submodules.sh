@@ -17,7 +17,7 @@ IFS="," read -ra PRODUCT_ARRAY <<< "$PUPPET_MODULES"
 for PRD in "${PRODUCT_ARRAY[@]}"; do
   git config -f .gitmodules "submodule.build/puppet/$PRD.branch" "$BRANCH"
   # Bundle repo does not use the same naming scheme as the others
-  if [ "$PRD" == "*_bundle*"]; then
+  if [[ $PRD == *"_bundle"* ]]; then
     repo="puppet-google"
   else
     repo="puppet-google-$PRD"
@@ -32,7 +32,7 @@ IFS="," read -ra PRODUCT_ARRAY <<< "$CHEF_MODULES"
 for PRD in "${PRODUCT_ARRAY[@]}"; do
   git config -f .gitmodules "submodule.build/chef/$PRD.branch" "$BRANCH"
   # Bundle repo does not use the same naming scheme as the others
-  if [ "$PRD" == "*_bundle*"]; then
+  if [[ $PRD == *"_bundle"* ]]; then
     repo="chef-google"
   else
     repo="chef-google-$PRD"

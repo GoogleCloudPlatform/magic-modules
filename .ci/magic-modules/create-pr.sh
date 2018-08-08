@@ -83,7 +83,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if [ "$PRD" == "*_bundle*"]; then
+    if [[ $PRD == *"_bundle"* ]]; then
       repo="puppet-google"
     else
       repo="puppet-google-$PRD"
@@ -108,7 +108,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if [ "$PRD" == "*_bundle*"]; then
+    if [[ $PRD == *"_bundle"* ]]; then
       repo="chef-google"
     else
       repo="chef-google-$PRD"
