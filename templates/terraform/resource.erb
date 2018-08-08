@@ -135,7 +135,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 	}
 
 	log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-	res, err := <%= object.create_verb.to_s.capitalize -%>(config, url, obj)
+	res, err := sendRequest(config, "<%= object.create_verb.to_s.upcase -%>", url, obj)
 	if err != nil {
 		return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
 	}
@@ -187,7 +187,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return err
 	}
 
-	res, err := Get(config, url)
+	res, err := sendRequest(config, "GET", url, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
@@ -425,7 +425,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
 	log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-	res, err := <%= object.delete_verb.to_s.capitalize -%>(config, url)
+	res, err := sendRequest(config, "<%= object.delete_verb.to_s.upcase -%>", url, nil)
 	if err != nil {
 		return handleNotFoundError(err, d, "<%= object.name -%>")
 	}
