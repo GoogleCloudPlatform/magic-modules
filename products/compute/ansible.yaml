@@ -92,6 +92,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.7'
   UrlMap: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
+  VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
   # Readonly resources.
   DiskType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
@@ -264,6 +266,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 examples: !ruby/object:Api::Resource::HashArray

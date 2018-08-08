@@ -12,9 +12,13 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 <% end -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
-    if v == nil {
-        return v
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+	if v == nil || v.(string) == "" {
+		return "", nil
+	}
+    f, err := parseRegionalFieldValue("routers", v.(string), "project", "region", "zone", d, config, true)
+    if err != nil {
+        return nil, fmt.Errorf("Invalid value for <%= Google::StringUtils.underscore(property.name) -%>: %s", err)
     }
-	return NameFromSelfLinkStateFunc(v)
+    return "https://www.googleapis.com/compute/v1/" + f.RelativeLink(), nil
 }
