@@ -36,12 +36,14 @@ requirements:
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
 options:
+<% if object.facts.has_filters -%>
     filters:
        description:
            A list of filter value pairs. Available filters are listed here
            U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
            Each additional filter in the list will act be added as an AND condition
            (filter1 and filter2)
+<% end -%>
 <% uri_props.each do |prop| -%>
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
@@ -84,7 +86,9 @@ def main():
 -%>
     module = GcpModule(
         argument_spec=dict(
+<% if object.facts.has_filters -%>
             filters=dict(type='list', elements='str'),
+<% end #if object.facts.has_filters -%>
 <%= lines(indent_list(mod_props, 12)) -%>
         )
     )
@@ -92,7 +96,8 @@ def main():
     if 'scopes' not in module.params:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
 
-    items = fetch_list(module, collection(module), query_options(module.params['filters']))
+    items = <%= method_call('fetch_list', ['module', 'collection(module)',
+                                          ('query_options(module.params[\'filters\'])' if object.facts.has_filters)]) %>
     if items.get(<%= quote_string(object.facts.list_key) -%>):
         items = items.get(<%= quote_string(object.facts.list_key) -%>)
     else:
@@ -106,13 +111,14 @@ def main():
 <%= lines(emit_link('collection', build_url(object.collection_url), object)) -%>
 
 
-def fetch_list(module, link, query):
+<%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
 <% prod_name = object.__product.prefix[1..-1] -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    response = auth.get(link, params={'filter': query})
+    response = <%= method_call('auth.get', ['link', ('params={\'filter\': query}' if object.facts.has_filters)]) %>
     return return_if_object(module, response)
 
 
+<% if object.facts.has_filters -%>
 def query_options(filters):
     if not filters:
         return ''
@@ -131,6 +137,7 @@ def query_options(filters):
         return ' '.join(queries)
 
 
+<% end -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response']))
 -%>
