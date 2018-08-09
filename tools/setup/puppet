@@ -7,7 +7,7 @@
 # This script should be run from MM root.
 MODPATH="$HOME/.puppetlabs/etc/code/modules"
 
-for mod in `pwd`/build/puppet/*; do
+for mod in "`pwd`/build/puppet/"*; do
   shortname="$(basename $mod)"
   mod_name="g$shortname"
   new_path="$MODPATH/$mod_name"

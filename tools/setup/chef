@@ -8,10 +8,10 @@
 MODPATH="$HOME/cookbooks"
 
 if [ ! -d "$MODPATH" ]; then
-  mkdir $MODPATH
+  mkdir "$MODPATH"
 fi
 
-for mod in `pwd`/build/chef/*; do
+for mod in "`pwd`/build/chef/"*; do
   shortname=$(basename $mod)
   mod_name="google-g$shortname"
   new_path="$MODPATH/$mod_name"
