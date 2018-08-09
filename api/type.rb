@@ -16,7 +16,6 @@ require 'google/string_utils'
 
 module Api
   # Represents a property type
-  # rubocop:disable Metrics/ClassLength
   class Type < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
@@ -131,39 +130,6 @@ module Api
 
     private
 
-    # Shrinks a long composite type name into something that can barely be
-    # read by humans.
-    #
-    # E.g.: Google::Compute::Property::AutoscalerCustomMetricUtilizationsArray
-    #   --> Google::Compute::Property::Autos.....Custo.Metri.Utili.......Arr..
-    #   --> Google::Compute::Property::AutosCustoMetriUtiliArr
-    def shrink_type_name(type)
-      name_parts = shrink_type_name_parts(type)
-
-      # Isolate the Google common prefix
-      name_parts = name_parts.drop(property_ns_prefix.size)
-      num_parts = name_parts.flatten.size
-      shrunk_names = recurse_shrink_name(name_parts,
-                                         (1.0 * MAX_NAME / num_parts).round)
-      type_name = shrunk_names.flatten.join('_').camelize(:upper)
-      property_ns_prefix.concat([type_name])
-    end
-
-    def recurse_shrink_name(name, max_size)
-      return name[0, max_size] unless name.is_a?(::Array)
-      name.map { |part| recurse_shrink_name(part, max_size) }
-    end
-
-    def shrink_type_name_parts(type)
-      type.map do |t|
-        if t.is_a?(::Array)
-          t.map { |u| u.underscore.split('_') }
-        else
-          t.underscore.split('_')
-        end
-      end
-    end
-
     # A constant value to be provided as field
     class Constant < Type
       attr_reader :value
@@ -269,9 +235,8 @@ module Api
           type = property_ns_prefix
           type << get_type(@item_type).new(@name).type
         end
-        type = shrink_type_name(type)
-        class_name = type.pop
-        type << "#{class_name}Array"
+        type[-1] = "#{type[-1].camelize(:upper)}Array"
+        type
       end
 
       def property_type
@@ -409,7 +374,8 @@ module Api
       def property_class
         type = property_ns_prefix
         type << [@resource, @imports, 'Ref']
-        shrink_type_name(type)
+        type[-1] = type[-1].join('_').camelize(:upper)
+        type
       end
 
       def property_type
@@ -461,7 +427,8 @@ module Api
       def property_class
         type = property_ns_prefix
         type << [@__resource.name, @name]
-        shrink_type_name(type)
+        type[-1] = type[-1].join('_').camelize(:upper)
+        type
       end
 
       def property_type
@@ -525,5 +492,4 @@ module Api
       ]
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end
