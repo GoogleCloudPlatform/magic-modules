@@ -1,0 +1,153 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2017 Google
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+<%= lines(autogen_notice :python) -%>
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+################################################################################
+# Documentation
+################################################################################
+
+<%
+  metadata_version = quote_string(@config.manifest.get('metadata_version',
+                                                       object))
+  supported_by = quote_string(@config.manifest.get('supported_by', object))
+
+  uri_props = object.uri_properties.reject { |para| para.name == 'name' }
+-%>
+ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
+                    'status': <%= @config.manifest.get('status', object) -%>,
+                    'supported_by': <%= supported_by -%>}
+
+DOCUMENTATION = '''
+---
+module: <%= module_name(object) %>_facts
+description:
+  - Gather facts for GCP <%= object.name %>
+short_description: Gather facts for GCP <%= object.name  %>
+version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
+author: <%= lines(@config.manifest.get('author', object)) -%>
+requirements:
+<% @config.manifest.get('requirements', object).each do |line| -%>
+<%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
+<% end -%>
+options:
+    filters:
+       description:
+           A list of filter value pairs. Available filters are listed here
+           U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
+           Each additional filter in the list will act be added as an AND condition
+           (filter1 and filter2)
+<% uri_props.each do |prop| -%>
+<%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
+<% end -%>
+extends_documentation_fragment: gcp
+'''
+
+<% if example and example.facts -%>
+EXAMPLES = '''
+<%= lines(example.facts.build_example('facts', object)) -%>
+'''
+<% end -%>
+
+RETURN = '''
+<% object.all_user_properties.each do |prop| -%>
+<%= lines(indent(return_property_yaml(prop, 4), 4)) -%>
+<% end -%>
+'''
+
+################################################################################
+# Imports
+################################################################################
+from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest
+import json
+
+################################################################################
+# Main
+################################################################################
+
+
+def main():
+<%
+  mod_props = uri_props.map do |prop|
+    python_dict_for_property(prop, object)
+  end
+-%>
+    module = GcpModule(
+        argument_spec=dict(
+            filters=dict(type='list', elements='str'),
+<%= lines(indent_list(mod_props, 12)) -%>
+        )
+    )
+
+    if 'scopes' not in module.params:
+        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
+
+    items = fetch_list(module, collection(module), query_options(module.params['filters']))
+    if items.get('items'):
+        items = items.get('items')
+    else:
+        items = []
+    return_value = {
+        'items': items
+    }
+    module.exit_json(**return_value)
+
+
+<%= lines(emit_link('collection', build_url(object.collection_url), object)) -%>
+
+
+def fetch_list(module, link, query):
+<% prod_name = object.__product.prefix[1..-1] -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    response = auth.get(link, params={'filter': query})
+    return return_if_object(module, response)
+
+
+def query_options(filters):
+    if not filters:
+        return ''
+
+    if len(filters) == 1:
+        return filters[0]
+    else:
+        queries = []
+        for f in filters:
+            # For multiple queries, all queries should have ()
+            if f[0] != '(' and f[-1] != ')':
+                queries.append("(%s)" % ''.join(f))
+            else:
+                queries.append(f)
+
+        return ' '.join(queries)
+
+
+<%=
+  lines(method_decl('return_if_object', ['module', 'response']))
+-%>
+    # If not found, return nothing.
+    if response.status_code == 404:
+        return None
+
+    # If no content, return nothing.
+    if response.status_code == 204:
+        return None
+
+    try:
+        module.raise_for_status(response)
+        result = response.json()
+    except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
+        module.fail_json(msg="Invalid JSON response with error: %s" % inst)
+
+    if navigate_hash(result, ['error', 'errors']):
+        module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
+
+    return result
+
+
+if __name__ == "__main__":
+    main()

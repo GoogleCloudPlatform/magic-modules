@@ -1,0 +1,14 @@
+- name: verify that <%= object.name.underscore -%> was <%= lines(verbs[state.to_sym]) -%>
+  shell: |
+<%= lines(indent(@command.tr("\n", ''), 4)) -%>
+  register: results
+<% if state == 'absent' -%>
+  failed_when: results.rc == 0
+<% end -%>
+- name: verify that command succeeded
+  assert:
+    that:
+      - results.rc == <%= state == 'present' ? 0 : 1 %>
+<% if @failure.enabled && state == 'absent' -%>
+      - <%= lines(@failure.test) -%>
+<% end -%>

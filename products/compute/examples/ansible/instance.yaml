@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_disk
     register: disk
-    code: |
+    code:
       name: <%= dependency_name('disk', 'instance') %>
       size_gb: 50
       source_image: 'projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts'
@@ -26,7 +26,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_network
     register: network
-    code: |
+    code:
       name: <%= dependency_name('network', 'instance') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -34,7 +34,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_address
     register: address
-    code: |
+    code:
       name: <%= dependency_name('address', 'instance') %>
       region: 'us-central1'
       project: <%= ctx[:project] %>
@@ -42,7 +42,7 @@ dependencies:
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_instance
-  code: |
+  code:
     name: <%= ctx[:name] %>
     machine_type: n1-standard-1
     disks:
@@ -62,12 +62,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute instances describe
-      --project="{{ gcp_project }}"
-      --zone="us-central1-a"
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: zones/us-central1-a
-    type: instances

@@ -1,0 +1,8 @@
+def encode_request(request, module):
+    request['name'] =
+      "projects/%(project)/instanceConfigs/%(name)".format(**module.params)
+    return request
+
+def decode_response(response, module):
+    response['name'] = response['name'].split('/')[-1]
+    return response

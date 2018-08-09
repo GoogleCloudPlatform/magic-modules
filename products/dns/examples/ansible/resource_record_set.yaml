@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_dns_resource_record_set
-  code: |
+  code:
     name: 'www.testzone-4.com.'
     managed_zone: "{{ managed_zone }}"
     type: 'A'
@@ -28,10 +28,14 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_dns_managed_zone
     register: managed_zone
-    code: |
+    code:
         name: <%= dependency_name('managedZone', 'rrs') %>
         dns_name: 'testzone-4.com.'
         description: 'test zone'
         project: <%= ctx[:project] %>
         auth_kind: <%= ctx[:auth_kind] %>
         service_account_file: <%= ctx[:service_account_file] %>
+verifier: !ruby/object:Provider::Ansible::NoVerifier
+  reason: 'Formatting issues'
+task: !ruby/object:Provider::Ansible::NoTask
+  reason: 'Formatting issues'

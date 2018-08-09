@@ -149,7 +149,7 @@ Arguments:
     guidelines)
 -   `opts (hash)`: a name/value pair of options
 
-Example (excerpt from `templates/puppet/provider.erb`):
+Example (excerpt from `templates/puppet/resource.erb`):
 
     <%=
       lines(indent(emit_method('self.resource_to_hash', %w[resource], r2h_code,
@@ -342,7 +342,7 @@ list of items has the following properties:
 -   Indented by N (`amount`) instances of `filler`
 -   Every line item (except the last) is terminated with a `,`
 
-Example (excerpt from `templates/puppet/provider.erb`):
+Example (excerpt from `templates/puppet/resource.erb`):
 
     f2h_code = [
         '{',

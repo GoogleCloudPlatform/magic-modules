@@ -53,6 +53,7 @@ module Google
     prop_name = "property :#{label_name(object)}" if prop.out_name == 'name'
     prop_attrs = [
       ('name_property: true' if prop.out_name == 'name'),
+      ("default: #{ruby_literal(prop.default_value)}" if prop.default_value),
       'desired_state: true'
     ].compact
 -%>
@@ -77,7 +78,7 @@ module Google
                  ],
                  # Prop name on first line, all others on second line
                  [
-                   "#{prop_name}",
+                   "#{prop_name},",
                    ["#{indent(prop_decl(prop), 9)}",
                     "coerce: ::#{prop.property_type}.coerce",
                     prop_attrs].flatten.join(', ')
@@ -123,6 +124,13 @@ module Google
 
 <% end # object.save_api_results? -%>
       action :create do
+<% if object.deprecated -%>
+        Chef.deprecated(:generic,
+                        ["<%= object.out_name -%> has been deprecated.",
+                         "Please use the <%= object.name -%> Name instead."
+                        ].join(" "))
+
+<% end -%>
 <% if object.self_link_query.nil? -%>
 <% if object.kind? -%>
         fetch = fetch_resource(@new_resource, self_link(@new_resource),
@@ -151,17 +159,26 @@ module Google
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
 <% if object&.handlers&.create.nil? -%>
 <%
-     if object.create_verb.nil? || object.create_verb == :POST
+     if !object.create_url.nil?
+       body_new = 'create_link(@new_resource)'
+     elsif object.create_verb.nil? || object.create_verb == :POST
        body_new = 'collection(@new_resource)'
-       request_new = "::Google::#{product_ns}::Network::Post"
      elsif object.create_verb == :PUT
        body_new = 'self_link(@new_resource)'
-       request_new = "::Google::#{product_ns}::Network::Put"
      end
+
+     request_new = ["::Google::#{product_ns}::Network",
+                    "#{object.create_verb.to_s.capitalize}"
+                   ].join('::')
+     custom_resource = if true?(object.custom_create_resource)
+                         'resource_to_create'
+                       else
+                         'resource_to_request'
+                       end
 -%>
             create_req = <%= request_new -%>.new(
               <%= body_new -%>, fetch_auth(@new_resource),
-              'application/json', resource_to_request
+              'application/json', <%= custom_resource %>
             )
 <%   unless object.async -%>
 <%
@@ -191,11 +208,9 @@ module Google
   fetch_code = object.properties.reject(&:input).map do |prop|
     name = property_out_name(prop)
     name = label_name(object) if prop.out_name == 'name'
-    api_name = prop.name
     type = "::#{prop.property_type}"
-    field_name = prop.field || prop.name
-    if api_name.include?('.')
-      fetch_tree = api_name.split('.').join(' ')
+    if prop.api_name.include?('.')
+      fetch_tree = prop.api_name.split('.').join(' ')
       assignment = format(
         [
           [
@@ -231,17 +246,17 @@ module Google
         [
           [
            "@current_resource.#{name} =",
-           "#{type}.api_parse(fetch['#{field_name}'])"
+           "#{type}.api_parse(fetch['#{prop.api_name}'])"
           ].join(' '),
           [
             "@current_resource.#{name} =",
-            indent("#{type}.api_parse(fetch['#{field_name}'])", 2)
+            indent("#{type}.api_parse(fetch['#{prop.api_name}'])", 2)
           ],
           [
             "@current_resource.#{name} =",
             indent([
               "#{type}.api_parse(",
-              indent("fetch['#{field_name}']", 2),
+              indent("fetch['#{prop.api_name}']", 2),
               ')'
             ], 2)
           ]
@@ -289,8 +304,20 @@ module Google
   ], 10, 0))
 -%>
 <% if object&.handlers&.delete.nil? -%>
-            delete_req = ::Google::<%= product_ns -%>::Network::Delete.new(
-              self_link(@new_resource), fetch_auth(@new_resource)
+<%
+     request_new = "::Google::#{product_ns}::Network::Delete"
+     if object.delete_verb == :POST
+       request_new = "::Google::#{product_ns}::Network::Post"
+     end
+
+     if object.delete_url.nil?
+        body_new = 'self_link(@new_resource)'
+     else
+        body_new = 'delete_link(@new_resource)'
+     end
+-%>
+            delete_req = <%= request_new -%>.new(
+              <%= body_new -%>, fetch_auth(@new_resource)
             )
 <%   unless object.async -%>
 <%     obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
@@ -315,7 +342,7 @@ module Google
       exp_name = p.out_name
       exp_name = label_name(object) if p.name == 'name'
       if p.is_a?(Api::Type::FetchedExternal)
-        "#{p.out_name}: __fetched['#{p.field_name}']"
+        "#{p.out_name}: __fetched['#{p.api_name}']"
       else
         "#{p.out_name}: #{exp_name}"
       end
@@ -336,8 +363,8 @@ module Google
     override_name = property_out_name(prop)
     override_name = label_name(object) if override_name == 'name'
     format([
-      ["#{prop.field_name}: new_resource.#{override_name}"],
-      ["#{prop.field_name}:",
+      ["#{prop.api_name}: new_resource.#{override_name}"],
+      ["#{prop.api_name}:",
        indent("new_resource.#{override_name}", 2)],
     ], 0, 12)
   end)
@@ -348,8 +375,8 @@ module Google
              override_name = property_out_name(prop)
              override_name = label_name(object) if override_name == 'name'
              format([
-               ["#{prop.field_name}: new_resource.#{override_name}"],
-               ["#{prop.field_name}:",
+               ["#{prop.api_name}: new_resource.#{override_name}"],
+               ["#{prop.api_name}:",
                 indent("new_resource.#{override_name}", 2)],
              ], 0, 12)
            end
@@ -405,7 +432,16 @@ module Google
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
 <% if object&.handlers&.update.nil? -%>
-<%   put_new = "::Google::#{product_ns}::Network::Put.new" -%>
+<% 
+  put_new = ["::Google::#{product_ns}::Network",
+             "#{object.update_verb.to_s.capitalize}.new"
+            ].join('::')
+  custom_resource = if true?(object.custom_create_resource)
+                      'resource_to_update'
+                    else
+                      'resource_to_request'
+                    end
+-%>
 <%= lines(indent("update_req =", 12)) -%>
 <%=
   lines(indent_list([
@@ -413,7 +449,7 @@ module Google
     indent([
       'fetch_auth(@new_resource)',
       "'application/json'",
-      'resource_to_request)'
+      "#{custom_resource})"
     ], put_new.length + 1).split("\n")
   ), 14))
 -%>
@@ -562,19 +598,25 @@ module Google
         end
 
 <% if object&.handlers&.collection.nil? -%>
-<%= lines(indent(emit_link('collection', collection_url(object), true), 8)) %>
+<%= lines(indent(emit_link('collection', build_url(object.collection_url), true), 8)) %>
 <% else # object&.handlers&.collection.nil? -%>
 <%=
   lines(indent(emit_link('collection', object.handlers.collection, true), 8))
  %>
 <% end # object&.handlers&.collection.nil? -%>
 <% if object&.handlers&.self_link.nil? -%>
-<%= lines(indent(emit_link('self_link', self_link_url(object), true), 8), 1) -%>
+<%= lines(indent(emit_link('self_link', build_url(object.self_link_url), true), 8), 1) -%>
 <% else # object&.handlers&.self_link.nil? -%>
 <%=
   lines(indent(emit_link('self_link', object.handlers.self_link, true), 8), 1)
 -%>
 <% end # object&.handlers&.self_link.nil? -%>
+<%- unless object.create_url.nil? -%>
+<%= lines(indent(emit_link('create_link', build_url(object.full_create_url), true), 8), 1)-%>
+<%- end # object.create_url.nil? -%>
+<%- unless object.delete_url.nil? -%>
+<%= lines(indent(emit_link('delete_link', build_url(object.full_delete_url), true), 8), 1)-%>
+<%- end # object.delete_url.nil? -%>
 <% if object&.handlers&.return_if_object.nil? -%>
 <%= lines(indent(compile('templates/return_if_object.erb'), 8)) %>
 <% else # object&.handlers&.return_if_object.nil? -%>

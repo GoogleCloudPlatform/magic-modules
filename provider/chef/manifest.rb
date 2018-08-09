@@ -17,6 +17,7 @@ module Provider
   class Chef < Provider::Core
     # Metadata for manifest.json
     class Manifest < Api::Object
+      attr_reader :additional_info
       attr_reader :depends
       attr_reader :description
       attr_reader :issues
@@ -27,7 +28,8 @@ module Provider
       attr_reader :version
 
       def validate
-        check_property :depends, Array
+        check_optional_property :additional_info, Array
+        check_optional_property :depends, Array
         check_property :description, String
         check_property :issues, String
         check_property :operating_systems, Array

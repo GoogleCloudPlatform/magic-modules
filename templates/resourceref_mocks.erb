@@ -17,7 +17,7 @@
 <% object.all_resourcerefs.each do |ref| -%>
 <%
   prop_ref = ref.resource_ref
-  ref_underscore_name = Google::StringUtils.underscore(ref.resource)
+  ref_underscore_name = ref.resource.underscore
   ref_index ||= 0
   ref_name = "resource(#{ref_underscore_name},#{ref_index})"
 -%>
@@ -68,7 +68,7 @@ end
 <% end # value.keys.empty? -%>
 <%
   self_link_ref = emit_link("self_link_#{ref_underscore_name}",
-                            self_link_url(prop_ref),
+                            build_url(prop_ref.self_link_url),
                             false)
   self_link_ref = self_link_ref.gsub("expand_variables",
                                      "expand_variables_#{ref_underscore_name}")

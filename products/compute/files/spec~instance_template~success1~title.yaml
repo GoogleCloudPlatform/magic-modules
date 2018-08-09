@@ -138,21 +138,21 @@ properties:
     onHostMaintenance: test on_host_maintenance#0 data
     preemptible: true
   serviceAccounts:
-  - email: true
+  - email: test email#0 data
     scopes:
     - rr
     - ss
     - tt
     - uu
     - vv
-  - email: false
+  - email: test email#1 data
     scopes:
     - ll
     - mm
     - nn
     - oo
     - pp
-  - email: true
+  - email: test email#2 data
     scopes:
     - ee
     - ff

@@ -14,6 +14,7 @@
 require 'compile/core'
 require 'dependencies/dependency_graph'
 require 'fileutils'
+require 'google/extensions'
 require 'google/logger'
 require 'pathname'
 require 'provider/properties'
@@ -29,7 +30,7 @@ module Provider
   DEFAULT_FORMAT_OPTIONS = {
     indent: 0,
     start_indent: 0,
-    max_columns: 80,
+    max_columns: 100,
     quiet: false
   }.freeze
 
@@ -52,7 +53,7 @@ module Provider
       @prop_data = Provider::TestData::Expectations.new(self, @data_gen)
       @generated = []
       @sourced = []
-      @max_columns = 80
+      @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
@@ -78,6 +79,9 @@ module Provider
       # or compiled.
       compile_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
+
+      generate_datasources(output_folder, types, version) \
+        unless @config.datasources.nil?
       apply_file_acls(output_folder) \
         unless @config.files.nil? || @config.files.permissions.nil?
       verify_test_matrixes
@@ -93,7 +97,7 @@ module Provider
         @sourced << relative_path(target_file, output_folder)
         Google::LOGGER.info "Copying #{source} => #{target}"
         FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
-        FileUtils.cp source, target_file
+        FileUtils.copy_entry source, target_file
       end
     end
 
@@ -117,7 +121,7 @@ module Provider
         output_folder,
         @config.test_data.network,
         lambda do |object, file|
-          type = Google::StringUtils.underscore(object.name)
+          type = object.name.underscore
           ["spec/data/network/#{object.out_name}/#{file}.yaml",
            "products/#{@api.prefix[1..-1]}/files/spec~#{type}~#{file}.yaml"]
         end
@@ -167,7 +171,7 @@ module Provider
       create_object_list(
         test_data,
         lambda do |object, file|
-          type = Google::StringUtils.underscore(object.name)
+          type = object.name.underscore
           ["spec/data/network/#{object.out_name}/#{file}.yaml",
            "products/#{@api.prefix[1..-1]}/files/spec~#{type}~#{file}.yaml"]
         end
@@ -199,7 +203,7 @@ module Provider
             output_folder: output_folder,
             out_file: target_file,
             prop_ns_dir: @api.prefix[1..-1].downcase,
-            product_ns: Google::StringUtils.camelize(@api.prefix[1..-1], :upper)
+            product_ns: @api.prefix[1..-1].camelize(:upper)
           )
         )
 
@@ -211,9 +215,10 @@ module Provider
 
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/AbcSize
     def generate_objects(output_folder, types, version)
       @api.set_properties_based_on_version(version)
-      @api.objects.each do |object|
+      (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
@@ -227,6 +232,7 @@ module Provider
     end
     # rubocop:enable Metrics/CyclomaticComplexity
     # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/AbcSize
 
     def generate_object(object, output_folder, version)
       data = build_object_data(object, output_folder, version)
@@ -235,6 +241,42 @@ module Provider
       generate_resource_tests data
       generate_properties data, object.all_user_properties
       generate_network_datas data, object
+    end
+
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
+    def generate_datasources(output_folder, types, version)
+      # We need to apply overrides for datasources
+      @config.datasources.validate
+
+      @api.set_properties_based_on_version(version)
+      @api.objects.each do |object|
+        if !types.empty? && !types.include?(object.name)
+          Google::LOGGER.info(
+            "Excluding #{object.name} datasource per user request"
+          )
+        elsif types.empty? && object.exclude
+          Google::LOGGER.info(
+            "Excluding #{object.name} datasource per API catalog"
+          )
+        elsif types.empty? && object.exclude_if_not_in_version(version)
+          Google::LOGGER.info(
+            "Excluding #{object.name} datasource per API version"
+          )
+        else
+          generate_datasource object, output_folder, version
+        end
+      end
+    end
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/AbcSize
+
+    def generate_datasource(object, output_folder, version)
+      data = build_object_data(object, output_folder, version)
+
+      compile_datasource data
     end
 
     # Generates all 6 network data files for a object.
@@ -307,8 +349,7 @@ module Provider
 
     def generate_resource_file(data)
       product_ns = if @config.name.nil?
-                     Google::StringUtils.camelize(data[:object].__product
-                       .prefix[1..-1], :upper)
+                     data[:object].__product.prefix[1..-1].camelize(:upper)
                    else
                      @config.name
                    end
@@ -343,13 +384,17 @@ module Provider
                  [[vars, ','].join],
                  # vars is too big to fit, split in half
                  vars_parts.each_slice((vars_parts.size / 2.0).round).to_a
-                   .map { |p| quote_string(p.join('/')) + ',' }
+                 .map.with_index do |p, i|
+                   # Use implicit string joining for the first line.
+                   quote_string(p.join('/')) + (i.zero? ? ' \\' : ',')
+                 end
                ], 0, 8)
       end
     end
     # rubocop:enable Metrics/AbcSize
 
-    def build_url(product_url, obj_url, extra = false)
+    def build_url(url_parts, extra = false)
+      (product_url, obj_url) = url_parts
       extra_arg = ''
       extra_arg = ', extra_data' if obj_url.to_s.include?('<|extra|>') || extra
       ['URI.join(',
@@ -359,32 +404,6 @@ module Provider
                indent('data' + extra_arg, 2),
                ')'], 2),
        ')'].join("\n")
-    end
-
-    def async_operation_url(resource)
-      build_url(resource.__product.base_url,
-                resource.async.operation.base_url,
-                true)
-    end
-
-    def collection_url(resource)
-      base_url = resource.base_url.split("\n").map(&:strip).compact
-      build_url(resource.__product.base_url, base_url)
-    end
-
-    def self_link_raw_url(resource)
-      base_url = resource.__product.base_url.split("\n").map(&:strip).compact
-      if resource.self_link.nil?
-        [base_url, [resource.base_url, '{{name}}'].join('/')]
-      else
-        self_link = resource.self_link.split("\n").map(&:strip).compact
-        [base_url, self_link]
-      end
-    end
-
-    def self_link_url(resource)
-      (product_url, resource_url) = self_link_raw_url(resource)
-      build_url(product_url, resource_url)
     end
 
     def extract_variables(template)
@@ -530,22 +549,12 @@ module Provider
                                                          options, avail_columns)
         return alt_output if alt_fit
       end
-      fail_and_log_format_error output, options, avail_columns \
-        unless options[:quiet]
-    end
 
-    def fail_and_log_format_error(output, options, avail_columns)
-      Google::LOGGER.info [
-        ["No code option fits in #{avail_columns} columns",
-         "w/ #{options[:start_indent]} left indent:"].join(' '),
-        format_sources(output.split("\n"), options[:start_indent],
-                       options[:max_columns]),
-        (unless options[:on_misfit].nil?
-           format_sources(alt_output.split("\n"), options[:start_indent],
-                          options[:max_columns])
-         end)
-      ].compact.join("\n")
-      raise ArgumentError, "No code fits in #{avail_columns}"
+      indent([
+               '# rubocop:disable Metrics/LineLength',
+               sources.last,
+               '# rubocop:enable Metrics/LineLength'
+             ], options[:indent])
     end
 
     def format_fits?(output, start_indent,
@@ -670,9 +679,8 @@ module Provider
     end
 
     def emit_user_agent(product, extra, notes, file_name)
-      prov_text = Google::StringUtils.camelize(self.class.name.split('::').last,
-                                               :upper)
-      prod_text = Google::StringUtils.camelize(product, :upper)
+      prov_text = self.class.name.split('::').last.camelize(:upper)
+      prod_text = product.camelize(:upper)
       ua_generator = notes.map { |n| "# #{n}" }.concat(
         [
           "version = '1.0.0'",

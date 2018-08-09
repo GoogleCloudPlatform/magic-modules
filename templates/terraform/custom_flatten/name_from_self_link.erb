@@ -13,5 +13,8 @@
 	# limitations under the License.
 <% end -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
+    if v == nil {
+        return v
+    }
 	return NameFromSelfLinkStateFunc(v)
 }

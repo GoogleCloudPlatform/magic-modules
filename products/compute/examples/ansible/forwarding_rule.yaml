@@ -14,7 +14,7 @@
 dependencies:
  - !ruby/object:Provider::Ansible::Task
    name: gcp_compute_address
-   code: |
+   code:
      name: <%= dependency_name('address', 'forwardingRule') %>
      region: 'us-west1'
      project: <%= ctx[:project] %>
@@ -23,7 +23,7 @@ dependencies:
    register: address
  - !ruby/object:Provider::Ansible::Task
    name: gcp_compute_target_pool
-   code: |
+   code:
      name: <%= dependency_name('targetPool', 'forwardingRule') %>
      region: 'us-west1'
      project: <%= ctx[:project] %>
@@ -34,7 +34,7 @@ task: !ruby/object:Provider::Ansible::Task
    name: gcp_compute_forwarding_rule
 # TODO(alexstephen): Build out a encoder that automatically creates port ranges
 # if a single number is included.
-   code: |
+   code:
      name: <%= ctx[:name] %>
      region: 'us-west1'
      target: "{{ targetpool }}"
@@ -44,13 +44,3 @@ task: !ruby/object:Provider::Ansible::Task
      project: <%= ctx[:project] %>
      auth_kind: <%= ctx[:auth_kind] %>
      service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute forwarding-rules describe
-      --project="{{ gcp_project }}"
-      --region=us-west1
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: regions/us-west1
-    type: forwardingRules
-    name: "{{ resource_name }}"

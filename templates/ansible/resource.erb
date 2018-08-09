@@ -14,11 +14,11 @@ __metaclass__ = type
 
 <%
   metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       config))
-  supported_by = quote_string(@config.manifest.get('supported_by', config))
+                                                       object))
+  supported_by = quote_string(@config.manifest.get('supported_by', object))
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', config) -%>,
+                    'status': <%= @config.manifest.get('status', object) -%>,
                     'supported_by': <%= supported_by -%>}
 
 DOCUMENTATION = '''
@@ -27,10 +27,10 @@ module: <%= module_name(object) %>
 description:
 <%= lines(indent(bullet_lines(object.description, 4), 4)) -%>
 short_description: Creates a GCP <%= object.name %>
-version_added: <%= lines(@config.manifest.get('version_added', config)) -%>
-author: <%= lines(@config.manifest.get('author', config)) -%>
+version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
+author: <%= lines(@config.manifest.get('author', object)) -%>
 requirements:
-<% @config.manifest.get('requirements', config).each do |line| -%>
+<% @config.manifest.get('requirements', object).each do |line| -%>
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
 options:
@@ -43,11 +43,20 @@ options:
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
+<% if object.references -%>
+notes:
+<% if object.references.api -%>
+    - "API Reference: U(<%= object.references.api -%>)"
+<% end -%>
+<% object.references.guides.each do |guide, link| -%>
+    - "<%= guide -%>: U(<%= link -%>)"
+<% end # object.references -%>
+<% end # if object.references -%>
 '''
 
 <% if example -%>
 EXAMPLES = '''
-<% res_readable_name = Google::StringUtils.uncombine(object.name) -%>
+<% res_readable_name = object.name.uncombine -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
 <%= lines(depend.build_test('present', object, false)) -%>
@@ -66,18 +75,25 @@ RETURN = '''
 ################################################################################
 # Imports
 ################################################################################
+<%
+  readonly_selflink_rrefs = object.all_resourcerefs
+                                  .select { |prop| prop.resource_ref.readonly }
+                                  .select { |prop| prop.imports == 'selfLink' }
+                                  .map(&:resource_ref)
+                                  .uniq
+-%>
 
 <%
   import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
   import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
-  import += ', replace_resource_dict' if nonvirtual_rrefs(object)
+  import += ', replace_resource_dict' if nonreadonly_rrefs(object)
 -%>
 <%= lines(import) -%>
 import json
 <%
   imports = object.imports || []
   imports << 'time' if object.async
-  imports << 're' unless virtual_selflink_rrefs(object).empty?
+  imports << 're' unless readonly_selflink_rrefs.empty?
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
@@ -101,6 +117,9 @@ def main():
         )
     )
 
+    if not module.params['scopes']:
+        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
+
     state = module.params['state']
 <% if object.kind? -%>
     kind = <%= lines(quote_string(object.kind)) -%>
@@ -119,10 +138,10 @@ def main():
                                    '<%= object.self_link_query.items -%>')
 <% end # object.self_link_query.nil? -%>
     changed = False
-<% if object.virtual -%>
+<% if object.readonly -%>
     if not fetch:
         module.fail_json(msg="<%= object.name -%> is not valid")
-<% else # object.virtual -%>
+<% else # object.readonly -%>
 
     if fetch:
         if state == 'present':
@@ -138,8 +157,13 @@ def main():
                 changed = True
         else:
 <%
+  if object.delete_url.nil?
+    delete_url = 'self_link(module)'
+  else
+    delete_url = 'delete_link(module)'
+  end
   method = method_call('delete', [
-                                   'module', 'self_link(module)',
+                                   'module', delete_url,
                                    ('kind' if object.kind?),
                                    ('fetch' if object.access_api_results)
                                  ])
@@ -150,13 +174,15 @@ def main():
     else:
         if state == 'present':
 <%
-  if object.create_verb.nil? || object.create_verb == :POST
-    create_link = 'collection(module)'
+  if !object.create_url.nil?
+    create_link = 'create_link(module)'
+  elsif object.create_verb.nil? || object.create_verb == :POST
+      create_link = 'collection(module)'
   elsif object.create_verb == :PUT
-    create_link = 'self_link(module)'
-  else
-    raise "Ansible does not support create_verb #{object.create_verb}"
+      create_link = 'self_link(module)'
   end
+
+  create_verb = ".#{object.create_verb.to_s.downcase}"
   method = method_call('create', ['module', create_link,
                                   ('kind' if object.kind?)])
 -%>
@@ -166,13 +192,13 @@ def main():
             fetch = {}
 
     fetch.update({'changed': changed})
-<% end # object.virtual -%>
+<% end # object.readonly -%>
 
     module.exit_json(**fetch)
 
 
 <% prod_name = object.__product.prefix[1..-1] -%>
-<% unless object.virtual -%>
+<% unless object.readonly -%>
 <%# TODO: kind param not always needed.
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
 -%>
@@ -180,20 +206,18 @@ def main():
 <% if object.create.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  if object.create_verb.nil? || object.create_verb == :POST
-    create_verb = '.post'
-  elsif object.create_verb == :PUT
-    create_verb = '.put'
-  else
-    raise "Ansible does not support create_verb #{object.create_verb}"
-  end
+  create_request = if object.custom_create_resource
+                     'resource_to_create'
+                   else
+                     'resource_to_request'
+                   end
 -%>
 <%
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth#{create_verb}",
-                 ['link', 'resource_to_request(module)']),
+                 ['link', "#{create_request}(module)"]),
      ('kind' if !object.async && object.kind?)
    ]
   )
@@ -208,6 +232,13 @@ def main():
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.access_api_results)]))
 -%>
+<%
+  update_request = if object.custom_update_resource
+                     'resource_to_update'
+                   else
+                     'resource_to_request'
+                   end
+-%>
 <% if object.update.nil? -%>
 <%   if !false?(object.editable) -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
@@ -218,7 +249,7 @@ def main():
     [
      'module',
      method_call("auth.#{update_verb}",
-                 ['link', 'resource_to_request(module)']),
+                 ['link', "#{update_request}(module)"]),
      ('kind' if !object.async && object.kind?)
    ]
   )
@@ -239,10 +270,15 @@ def main():
 <% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
+  delete_verb = 'delete'
+  unless object.delete_verb.nil?
+    delete_verb = object.delete_verb.to_s.downcase
+  end
+
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
-     method_call("auth.delete", ['link']),
+     method_call("auth.#{delete_verb}", ['link']),
      ('kind' if !object.async && object.kind?)
    ]
   )
@@ -253,7 +289,7 @@ def main():
 <% end # if object.delete.nil? -%>
 
 
-<% end # unless object.virtual -%>
+<% end # unless object.readonly -%>
 def resource_to_request(module):
 <%
   properties_in_request = [
@@ -309,8 +345,14 @@ def unwrap_resource(result, module):
 
 
 <%= lines(compile('templates/ansible/transport.erb'), 2) -%>
-<%= lines(emit_link('self_link', self_link_url(object), object), 2) -%>
-<%= lines(emit_link('collection', collection_url(object), object), 2) -%>
+<%= lines(emit_link('self_link', build_url(object.self_link_url), object), 2) -%>
+<%= lines(emit_link('collection', build_url(object.collection_url), object), 2) -%>
+<%- unless object.create_url.nil? -%>
+<%=lines(emit_link('create_link', build_url(object.full_create_url), object), 2)-%>
+<% end -%>
+<% unless object.delete_url.nil? -%>
+<%= lines(emit_link('delete_link', build_url(object.full_delete_url), object), 2) -%>
+<% end -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response',
                                          ('kind' if object.kind?)]))
@@ -374,10 +416,21 @@ def response_to_hash(module, response):
     return {
 <%= lines(response_properties(object.properties)) -%>
     }
-<%= lines_before(selflink_functions(object), 1) -%>
+<% readonly_selflink_rrefs.each do |resource| -%>
+
+
+def <%= resource.name.underscore -%>_selflink(name, params):
+    if name is None:
+        return
+    url = r<%= lines(build_url(resource.regex_url)) -%>
+    if not re.match(url, name):
+        name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
+    return name
+<% end -%>
 <%= lines_before(compile('templates/ansible/async.erb'), 1) -%>
 <%= lines_before(compile('templates/ansible/provider_helpers.erb'), 1) -%>
 <%= lines_before(compile('templates/ansible/properties.erb'), 1) -%>
+
 
 if __name__ == '__main__':
     main()

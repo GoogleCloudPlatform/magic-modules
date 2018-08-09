@@ -26,7 +26,7 @@ module Provider
     module ResourceRef
       # Builds out a list of statements that handle ResourceRef creation
       def resourceref_handlers(object)
-        rrefs = nonvirtual_rrefs(object)
+        rrefs = nonreadonly_rrefs(object)
         return unless rrefs.any?
         comments = [
           '# Converts data from:',
@@ -63,7 +63,7 @@ module Provider
       def path_for_rref(rref)
         past_values = []
         until rref.nil?
-          past_values << Google::StringUtils.underscore(rref.name)
+          past_values << rref.name.underscore
           # TODO(alexstephen): Investigate a better way to handle parent
           # pointers on Arrays of NestedObjects
           rref = if rref.is_a?(Api::Type::NestedObject) && \

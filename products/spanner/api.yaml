@@ -16,7 +16,7 @@ name: Google Spanner
 prefix: gspanner
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: https://spanner.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/spanner.admin
@@ -30,7 +30,7 @@ objects:
     exports:
       - !ruby/object:Api::Type::FetchedExternal
         name: name
-    virtual: true
+    readonly: true
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_response
@@ -81,7 +81,6 @@ objects:
       # 'state' not suitable for state convergeance.
       - !ruby/object:Api::Type::NameValues
         name: 'labels'
-        key_type: Api::Type::String
         value_type: Api::Type::String
         description: |
           Cloud Labels are a flexible and lightweight mechanism for organizing

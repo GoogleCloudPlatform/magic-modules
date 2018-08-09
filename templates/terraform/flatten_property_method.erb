@@ -26,8 +26,8 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   original := v.(map[string]interface{})
   transformed := make(map[string]interface{})
   <% property.properties.each do |prop| -%>
-    transformed["<%= Google::StringUtils.underscore(prop.name) -%>"] =
-    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name -%>"])
+    transformed["<%= prop.name.underscore -%>"] =
+    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"])
   <% end -%>
   return []interface{}{transformed}
 <% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
@@ -40,7 +40,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     original := raw.(map[string]interface{})
     transformed = append(transformed, map[string]interface{}{
     <% property.item_type.properties.each do |prop| -%>
-      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name -%>"]),
+      "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
     <% end -%>
     })
   }
@@ -53,6 +53,16 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
 		} // let terraform core handle it if we can't convert the string to an int.
 	}
 	return v
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+  if v == nil {
+    return v
+  }
+  return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
+<% elsif property.is_a?(Api::Type::ResourceRef) -%>
+  if v == nil {
+    return v
+  }
+  return ConvertSelfLinkToV1(v.(string))
 <% else -%>
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>

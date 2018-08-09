@@ -13,19 +13,9 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_address
-  code: |
+  code:
     name: 'test-address1'
     region: 'us-west1'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud compute addresses describe
-      --project="{{ gcp_project}}"
-      --region=us-west1
-      test-address1
-  failure: !ruby/object:Provider::Ansible::ComputeFailureCondition
-    region: regions/us-west1
-    type: addresses
-    name: test-address1

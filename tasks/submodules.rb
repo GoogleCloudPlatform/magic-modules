@@ -16,7 +16,14 @@ require 'tasks/common'
 TEST_RUNNER = {
   puppet: 'rake test',
   chef: 'rake test',
-  ansible: 'exit 1'
+  ansible: 'exit 1',
+  # Terraform is more complicated since go tests need to be run from within
+  # a GOPATH.
+  terraform: 'GOPATH=`mktemp -d`/go;'\
+             'mkdir -p $GOPATH/src/github.com/terraform-providers/;'\
+             'ln -s $PWD $GOPATH/src/github.com/terraform-providers/terraform-provider-google;'\
+             'cd $GOPATH/src/github.com/terraform-providers/terraform-provider-google;'\
+             'go get; make test'
 }.freeze
 
 def test_module(provider, mod)

@@ -1,0 +1,18 @@
+def decode_response(response, module):
+    if not response:
+        return response
+
+    if 'name' not in response:
+        return response
+
+    if '/operations/' in response['name']:
+        return response
+
+    response['name'] = response['name'].split('/')[-1]
+    return response
+
+
+def encode_request(request, module):
+    request['create_statement'] = "CREATE DATABASE `{0}`".format(module.params['name'])
+    del request['name']
+    return request

@@ -19,6 +19,8 @@ module Provider
     module OverrideProperties
       attr_reader :access_api_results
       attr_reader :collection
+      attr_reader :custom_create_resource
+      attr_reader :custom_update_resource
       attr_reader :create
       attr_reader :delete
       attr_reader :editable
@@ -34,10 +36,13 @@ module Provider
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
+      # rubocop:disable Metrics/AbcSize
       def validate
         super
 
         default_value_property :access_api_results, false
+        default_value_property :custom_create_resource, false
+        default_value_property :custom_update_resource, false
         default_value_property :exclude, false
         default_value_property :editable, true
         default_value_property :imports, []
@@ -46,6 +51,8 @@ module Provider
 
         check_property :access_api_results, :boolean
         check_optional_property :collection, ::String
+        check_property :custom_create_resource, :boolean
+        check_property :custom_update_resource, :boolean
         check_optional_property :create, ::String
         check_optional_property :delete, ::String
         check_property :editable, :boolean
@@ -58,6 +65,7 @@ module Provider
         check_optional_property :version_added, ::String
       end
       # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/AbcSize
 
       private
 

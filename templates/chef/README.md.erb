@@ -65,12 +65,21 @@ For complete details of the authentication cookbook, visit the
 ### <%= object.out_name -%>
 
 <%= object.description %>
+<% if object.references -%>
+#### Reference Guides
+<% if object.references.api -%>
+* [API Reference](<%= object.references.api -%>)
+<% end -%>
+<% object.references.guides.each do |guide, link| -%>
+* [<%= guide -%>](<%= link -%>)
+<% end # object.references.guides -%>
+<% end # if object.references -%>
 
 #### Example
 
 ```ruby
 <%= compile ["products/#{@api.prefix[1..-1]}/examples/chef/",
-             "#{Google::StringUtils.underscore(object.name)}.rb"].join('') %>
+             "#{object.name.underscore}.rb"].join('') %>
 ```
 
 #### Reference

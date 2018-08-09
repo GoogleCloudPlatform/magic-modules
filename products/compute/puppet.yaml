@@ -26,9 +26,7 @@ manifest: !ruby/object:Provider::Puppet::Manifest
     - engine
     - gce
   requires:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+<%= indent(compile('provider/puppet/common~requires.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 # TODO(nelsonjr): Match all special behavior Puppet <=> Chef.
@@ -47,6 +45,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Disk cannot be edited'
   DiskType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     # TODO(nelsonjr): Make sure that attempts to create a disk fails
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: |
@@ -103,10 +102,21 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       flush: raise 'Region cannot be edited' if @dirty
   # Not yet implemented.
-  TargetVpnGateway: !ruby/object:Provider::Puppet::ResourceOverride
+  Autoscaler: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
+  # Deprecated readonly resources
+  License: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  MachineType: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  Region: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
+  Zone: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
 functions:
   - !ruby/object:Provider::Config::Function
     name: 'gcompute_address_ip'
@@ -543,11 +553,13 @@ examples: !ruby/object:Api::Resource::HashArray
   TargetSslProxy:
     - delete_target_ssl_proxy.pp
     - target_ssl_proxy.pp
-  # TargetVpnGateway
+  TargetVpnGateway:
+    - target_vpn_gateway.pp
   UrlMap:
     - delete_url_map.pp
     - url_map.pp
-  # VpnTunnel
+  VpnTunnel:
+    - vpn_tunnel.pp
   # ZoneOperation -- not useful for state convergence
   Zone:
     - zone.pp

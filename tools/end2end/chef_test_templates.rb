@@ -193,7 +193,7 @@ module Chef
     end
   end
 
-  # A template for a test that follows the virtual test workflow:
+  # A template for a test that follows the readonly test workflow:
   #
   #   @pre
   #   - create
@@ -210,7 +210,7 @@ module Chef
       file = Google::StringUtils.underscore(@resource_name || @name)
 
       resources = @resource_count || 2 # 1=resource + 1=auth
-      affected = @affected_count || 0 # virtual resources are never updated.
+      affected = @affected_count || 0 # readonly resources are never updated.
       changed_resource = \
         "Chef Client finished, #{affected}/#{resources} resources updated"
       create_name = @create || "tests~#{file}"

@@ -28,7 +28,7 @@ module Provider
         check_property :homepage, String
         check_property :issues, String
         check_property :operating_systems, Array
-        check_property :requires, Array
+        check_optional_property :requires, Array
         check_property :source, String
         check_property :summary, String
         check_property :tags, Array

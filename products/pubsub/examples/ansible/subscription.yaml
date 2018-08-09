@@ -13,7 +13,7 @@
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_pubsub_subscription
-  code: |
+  code:
     name: <%= ctx[:name] %>
     topic: "{{ topic }}"
     push_config:
@@ -26,7 +26,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_pubsub_topic
     register: topic
-    code: |
+    code:
       name: <%= dependency_name('topic', 'subscription') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>

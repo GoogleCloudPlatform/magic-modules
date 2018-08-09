@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_global_address
     register: globaladdress
-    code: |
+    code:
       name: <%= dependency_name('globalAddress', 'globalForwardingRule') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
@@ -23,7 +23,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_instance_group
     register: instancegroup
-    code: |
+    code:
       name: <%= dependency_name('instanceGroup', 'globalForwardingRule') %>
       zone: 'us-central1-a'
       project: <%= ctx[:project] %>
@@ -32,7 +32,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_http_health_check
     register: healthcheck
-    code: |
+    code:
       name: <%= dependency_name('httpHealthCheck', 'globalForwardingRule') %>
       healthy_threshold: 10
       port: 8080
@@ -44,7 +44,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_backend_service
     register: backendservice
-    code: |
+    code:
       name: <%= dependency_name('backendService', 'globalForwardingRule') %>
       backends:
         - group: "{{ instancegroup }}"
@@ -57,7 +57,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_url_map
     register: urlmap
-    code: |
+    code:
       name: <%= dependency_name('urlMap', 'globalForwardingRule') %>
       default_service: "{{ backendservice }}"
       project: <%= ctx[:project] %>
@@ -66,7 +66,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_compute_target_http_proxy
     register: httpproxy
-    code: |
+    code:
       name: <%= dependency_name('targetHttpProxy', 'globalForwardingRule') %>
       url_map: "{{ urlmap }}"
       project: <%= ctx[:project] %>
@@ -76,7 +76,7 @@ task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_global_forwarding_rule
 # TODO(alexstephen): Build out a encoder that automatically creates port ranges
 # if a single number is included.
-  code: |
+  code:
     name: <%= ctx[:name] %>
     ip_address: "{{ globaladdress.address }}"
     ip_protocol: 'TCP'

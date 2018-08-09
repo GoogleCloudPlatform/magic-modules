@@ -24,9 +24,7 @@ manifest: !ruby/object:Provider::Puppet::Manifest
     - cloud
     - spanner
   requires:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google/gauth'
-      versions: '>= 0.2.0 < 0.3.0'
+<%= indent(compile('provider/puppet/common~requires.yaml'), 4) %>
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
@@ -34,6 +32,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       resource_to_request_patch: |
         request[:create_statement] = "CREATE DATABASE `#{name}`"
+        request.delete(:name)
       collection: |
         URI.join(
           'https://spanner.googleapis.com/v1/',
@@ -77,8 +76,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
                       .join('/')
         )
     provider_helpers:
+      - 'products/spanner/helpers/puppet/instance_helpers.rb.erb'
       - 'products/spanner/helpers/ruby/instance_helpers.rb.erb'
   InstanceConfig: !ruby/object:Provider::Puppet::ResourceOverride
+    deprecated: true
     handlers: !ruby/object:Provider::Puppet::Handlers
       collection: |
         URI.join(

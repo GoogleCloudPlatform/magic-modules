@@ -1,5 +1,5 @@
 ---
-# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the CI repo.
+# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the patches.
 # It spits out "ansible-generated", a ansible repo on a new branch (named after the
 # HEAD commit on the PR), with the new generated code in it.
 platform: linux
@@ -12,6 +12,7 @@ image_resource:
 
 inputs:
     - name: magic-modules-branched
+    - name: patches
 
 outputs:
     - name: ansible-generated

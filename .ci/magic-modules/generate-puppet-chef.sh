@@ -6,6 +6,8 @@
 
 set -x
 set -e
+source "$(dirname "$0")/helpers.sh"
+PATCH_DIR="$(pwd)/patches"
 
 IFS="," read -ra PRODUCT_ARRAY <<< "$PRODUCTS"
 for PRD in "${PRODUCT_ARRAY[@]}"; do
@@ -13,10 +15,8 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
     LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
     find build/"${PROVIDER}/${PRD}"/ -type f -not -name '.git*' -not -name '.last_run.json' -print0 | xargs -0 rm -rf --
     bundle install
-    # This prints so much logging data that it can slow or actually crash concourse.  :)
-    # If you need to find out what went wrong, use 'fly intercept' to grab the container
-    # and read the log from the root directory there.
-    bundle exec compiler -p "products/$PRD" -e "$PROVIDER" -o "build/$PROVIDER/$PRD" 2> "/$PRD.log"
+    # Running with the --debug flag will cause Concourse to crash
+    bundle exec compiler -p "products/$PRD" -e "$PROVIDER" -o "build/$PROVIDER/$PRD"
 
     # This command can crash - if that happens, the script should not fail.
     set +e
@@ -35,6 +35,7 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
       # Set the "author" to the commit's real author.
       git commit -m "$COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
       git checkout -B "$(cat ../../../branchname)"
+      apply_patches "$PATCH_DIR/GoogleCloudPlatform/$PROVIDER-google-$PRD" "$COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
     popd
   popd
   git clone "magic-modules-branched/build/$PROVIDER/$PRD" "$PROVIDER-generated/$PRD"
