@@ -345,6 +345,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       serviceLabel: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
+      allPorts: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl

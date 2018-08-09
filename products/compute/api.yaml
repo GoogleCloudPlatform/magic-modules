@@ -24,6 +24,9 @@ versions:
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://www.googleapis.com/compute/beta/
+  - !ruby/object:Api::Product::Version
+    name: alpha
+    base_url: https://www.googleapis.com/compute/alpha/
 scopes:
   - https://www.googleapis.com/auth/compute
 objects:
@@ -887,6 +890,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
+    min_version: alpha
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
     exports:
       - !ruby/object:Api::Type::SelfLink
