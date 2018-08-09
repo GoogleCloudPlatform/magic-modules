@@ -16,6 +16,8 @@ require 'provider/chef'
 require 'provider/config'
 require 'provider/core'
 
+IGNORED_COOKBOOKS = %w[cloud gauth].freeze
+
 module Provider
   # A provider to generate the "bundle" module.
   class ChefBundle < Provider::Core
@@ -35,14 +37,7 @@ module Provider
     # A manifest for the "bundle" module
     class Manifest < Provider::Chef::Manifest
       attr_reader :products
-      attr_reader :releases
-
-      def validate
-        @requires = []
-        check_property_list :products, Provider::Config::BundledProduct
-        check_property :releases, Hash
-        super
-      end
+      attr_accessor :releases
     end
 
     def generate(output_folder, _types, _version_name)
@@ -63,6 +58,39 @@ module Provider
     end
 
     def products
+      all_products.reject { |k, _v| IGNORED_COOKBOOKS.include?(k.prefix) }
+    end
+
+    def product_details
+      products.map do |product, config|
+        {
+          name: product.name,
+          prefix: product.prefix,
+          objects: (product.objects || []).reject(&:exclude),
+          source: config.manifest.source
+        }
+      end \
+      + @config.manifest.products.map do |product|
+        {
+          name: product.display_name,
+          prefix: product.prefix,
+          source: product.source
+        }
+      end
+    end
+
+    def releases
+      all_products.map { |k, v| { k.prefix[1..-1] => v.manifest.version } }
+                  .reduce({}, :merge)
+    end
+
+    private
+
+    def release_files
+      Dir.glob('products/**/chef.yaml')
+    end
+
+    def all_products
       @products ||= begin
         prod_map =
           release_files.map do |product_config|
@@ -77,31 +105,6 @@ module Provider
           end
         Hash[prod_map.sort_by { |p| p[0].prefix }]
       end
-    end
-
-    def product_details
-      products.map do |product, config|
-        {
-          name: product.name,
-          prefix: product.prefix,
-          objects: product.objects.reject(&:exclude),
-          source: config.manifest.source
-        }
-      end \
-      + @config.manifest.products.map do |product|
-        {
-          name: product.display_name,
-          prefix: product.prefix,
-          source: product.source
-        }
-      end
-    end
-
-    private
-
-    def release_files
-      @config.manifest.releases.map { |p, _| "products/#{p}/chef.yaml" }
-             .select { |c| File.exist?(c) }
     end
 
     def next_version(version)
