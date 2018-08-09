@@ -78,3 +78,6 @@
 [submodule "build/chef/spanner"]
 	path = build/chef/spanner
 	url = git@github.com:GoogleCloudPlatform/chef-google-spanner.git
+[submodule "build/chef/iam"]
+	path = build/chef/iam
+	url = git@github.com:GoogleCloudPlatform/chef-google-iam.git
