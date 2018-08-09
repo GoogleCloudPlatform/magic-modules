@@ -59,7 +59,7 @@ EXAMPLES = '''
 <% res_readable_name = object.name.uncombine -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', object, false)) -%>
+<%= lines(depend.build_test('present', object, false), 1) -%>
 <%   end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
 <%= lines(example.task.build_example('present', object)) -%>
