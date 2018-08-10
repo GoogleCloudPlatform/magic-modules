@@ -225,7 +225,7 @@ module Provider
         # Some values from datasources.facts may be necessary for building integration
         # tests, which is done before datasource building.
         # We don't want to duplicate those .facts values though.
-        set_datasource(data)
+        datasource_info(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = module_name(data[:object])
@@ -277,10 +277,10 @@ module Provider
         )
       end
 
-      def set_datasource(data)
+      def datasource_info(data)
         name = "@#{data[:object].name}".to_sym
         facts_info = @config&.datasources&.instance_variable_get(name)&.facts
-        facts_info = Provider::Ansible::FactsOverride.new unless facts_info
+        facts_info ||= Provider::Ansible::FactsOverride.new
         facts_info.validate
         data[:object].instance_variable_set(:@facts, facts_info)
       end
