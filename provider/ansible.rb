@@ -22,6 +22,8 @@ require 'provider/ansible/property_override'
 require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
 require 'provider/ansible/resource_override'
+require 'provider/ansible/property_override'
+require 'provider/ansible/facts_override'
 
 module Provider
   module Ansible
@@ -223,11 +225,7 @@ module Provider
         # Some values from datasources.facts may be necessary for building integration
         # tests, which is done before datasource building.
         # We don't want to duplicate those .facts values though.
-        name = "@#{data[:object].name}".to_sym
-        data[:object].instance_variable_set(:@facts,
-                                            @config&.datasources
-                                                   &.instance_variable_get(name)
-                                                   &.facts)
+        set_datasource(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = module_name(data[:object])
@@ -277,6 +275,14 @@ module Provider
           out_file: File.join(target_folder,
                               "lib/ansible/modules/cloud/google/#{name}.py")
         )
+      end
+
+      def set_datasource(data)
+        name = "@#{data[:object].name}".to_sym
+        facts_info = @config&.datasources&.instance_variable_get(name)&.facts
+        facts_info = Provider::Ansible::FactsOverride.new unless facts_info
+        facts_info.validate
+        data[:object].instance_variable_set(:@facts, facts_info)
       end
 
       def generate_network_datas(data, object) end
