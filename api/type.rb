@@ -183,7 +183,6 @@ module Api
         @output = true if @output.nil?
         # TODO(ndmckinley): This doesn't work in puppet, chef, or ansible.
         # Consequently we exclude it by default and override it in Terraform.
-        @exclude ||= true
       end
     end
 
