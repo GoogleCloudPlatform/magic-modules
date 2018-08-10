@@ -19,115 +19,119 @@ package google
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
-	resource_name = product_ns + object.name
-	properties = object.all_user_properties
-	settable_properties = properties.reject(&:output)
-	api_name_lower = String.new(product_ns)
-	api_name_lower[0] = api_name_lower[0].downcase
-	has_project = object.base_url.include?("{{project}}")
-	has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
+    resource_name = product_ns + object.name
+    properties = object.all_user_properties
+    settable_properties = properties.reject(&:output)
+    api_name_lower = String.new(product_ns)
+    api_name_lower[0] = api_name_lower[0].downcase
+    has_project = object.base_url.include?("{{project}}")
+    has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
 	return &schema.Resource{
 		Create: resource<%= resource_name -%>Create,
 		Read: resource<%= resource_name -%>Read,
-		<% if updatable?(object, properties) -%>
+<%      if updatable?(object, properties) -%>
 		Update: resource<%= resource_name -%>Update,
-		<% end -%>
+<%      end -%>
 		Delete: resource<%= resource_name -%>Delete,
-        <% if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
-        CustomizeDiff: customdiff.All(
-            <%= settable_properties.select { |p| p.unordered_list }
-                                    .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
-                                    .join(",\n")-%>
+<%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+		CustomizeDiff: customdiff.All(
+<%=         
+            settable_properties.select { |p| p.unordered_list }
+                               .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
+                               .join(",\n")
+-%>
         ),
-        <% end -%>
+<%      end -%>
 
 		Importer: &schema.ResourceImporter{
 			State: resource<%= resource_name -%>Import,
 		},
 
-		<% unless object.async.nil? -%>
+<%      unless object.async.nil? -%>
 		Timeouts: &schema.ResourceTimeout {
 			Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
-			<% if updatable?(object, properties) -%>
+<%          if updatable?(object, properties) -%>
 			Update: schema.DefaultTimeout(<%= object.async.operation.timeouts.update_sec -%> * time.Second),
-			<% end -%>
+<%          end -%>
 			Delete: schema.DefaultTimeout(<%= object.async.operation.timeouts.delete_sec -%> * time.Second),
 		},
-		<% end -%>
-<%= lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
+<%      end -%>
+<%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
 		Schema: map[string]*schema.Schema{
-<% order_properties(properties).each do |prop| -%>
-	<%= lines(build_schema_property(prop, object)) -%>
-<% end -%>
-<%= lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<% if has_project -%>
+<%          order_properties(properties).each do |prop| -%>
+<%=             lines(build_schema_property(prop, object)) -%>
+<%          end -%>
+<%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+<%          if has_project -%>
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-<% end -%>
-<% if has_self_link -%>
+<%          end -%>
+<%          if has_self_link -%>
 			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-<% end -%>
+<%          end -%>
 		},
 	}
 }
 <% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
-<%= compile_template('templates/terraform/unordered_list_customize_diff.erb',
+<%=
+    compile_template('templates/terraform/unordered_list_customize_diff.erb',
                      prop: prop,
-                     resource_name: resource_name) -%>
+                     resource_name: resource_name)
+-%>
 }
 <% end -%>
 
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-  <% if has_project -%>
+<%  if has_project -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
-  }
-  <% end -%>
+	}
+<%  end -%>
 
 	obj := make(map[string]interface{})
-<% settable_properties.each do |prop| -%>
+<%  settable_properties.each do |prop| -%>
 	<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
 	if err != nil {
 		return err
-	<% unless prop.send_empty_value -%>
+<%      unless prop.send_empty_value -%>
 	} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-	<% else -%>
+<%      else -%>
 	} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-	<% end -%>
+<%      end -%>
 		obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
 	}
-<% end -%>
+<%  end -%>
 
-  <% if object.custom_code.encoder -%>
-  obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
-  if err != nil {
-    return err
-  }
-  <% end -%>
+<%  if object.custom_code.encoder -%>
+	obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+	if err != nil {
+		return err
+	}
+<%  end -%>
 
-<% if object.mutex -%>
+<%  if object.mutex -%>
 	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
 	if err != nil {
 		return err
 	}
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
-<% end -%>
+<%  end -%>
 
 	url, err := replaceVars(d, config, "<%= build_url(object.full_create_url) -%>")
 	if err != nil {
@@ -147,7 +151,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 	}
 	d.SetId(id)
 
-	<% unless object.async.nil? -%>
+<%  unless object.async.nil? -%>
 	op := &<%= api_name_lower -%>.Operation{}
 	err = Convert(res, op)
 	if err != nil {
@@ -163,7 +167,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 		d.SetId("")
 		return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
 	}
-	<% end -%>
+<%  end -%>
 
 	log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
@@ -175,12 +179,12 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-  <% if has_project -%>
+ <% if has_project -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
-  }
-  <% end -%>
+	}
+<%  end -%>
 
 	url, err := replaceVars(d, config, "<%= build_url(object.self_link_url) -%>")
 	if err != nil {
@@ -192,40 +196,39 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 		return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
 	}
 
-<% unless object.self_link_query.nil? -%>
-	<%# This part of the template extracts the one resource we're interested in
-			from the list that gets returned.  self_link_query is a field which
-			describes a list result from a read. -%>
-    <%= compile_template('templates/terraform/self_link_query.erb',
-												 object: object,
-												 settable_properties: settable_properties,
-												 resource_name: resource_name) -%>
+<%  unless object.self_link_query.nil? -%>
+<%#     This part of the template extracts the one resource we're interested in
+        from the list that gets returned.  self_link_query is a field which
+        describes a list result from a read. -%>
+<%=     compile_template('templates/terraform/self_link_query.erb',
+                         object: object,
+                         settable_properties: settable_properties,
+                         resource_name: resource_name) -%>
 <% end -%>
 
-<% if object.custom_code.decoder -%>
-  res, err = resource<%= resource_name -%>Decoder(d, meta, res)
-  if err != nil {
-    return err
-  }
-<% end -%>
+<%  if object.custom_code.decoder -%>
+	res, err = resource<%= resource_name -%>Decoder(d, meta, res)
+	if err != nil {
+		return err
+	}
+<%  end -%>
 
 
-
-<% properties.select { |p| !p.ignore_read }.each do |prop| -%>
-  if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
+<%  properties.select { |p| !p.ignore_read }.each do |prop| -%>
+	if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
-<% end -%>
-<% if has_self_link -%>
+<%  end -%>
+<%  if has_self_link -%>
 	if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
-<% end -%>
-<% if has_project -%>
+<%  end -%>
+<%  if has_project -%>
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
 	}
-<% end -%>
+<%  end -%>
 
 	return nil
 }
@@ -234,72 +237,72 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-  <% if has_project -%>
+<%  if has_project -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
-  <% end -%>
+<%  end -%>
 
-	<% if object.input -%>
+<%  if object.input -%>
 	var url string
 	var res map[string]interface{}
 	op := &<%= api_name_lower -%>.Operation{}
 
 	d.Partial(true)
 
-	<% properties_by_custom_update(properties).each do |key, props| -%>
+<%  properties_by_custom_update(properties).each do |key, props| -%>
 	if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
 		obj := make(map[string]interface{})
-		<% props.each do |prop| -%>
-			<% if settable_properties.include? prop -%>
-				<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-			if err != nil {
+<%      props.each do |prop| -%>
+<%      if settable_properties.include? prop -%>
+		<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+		if err != nil {
 			return err
-			<%# There is some nuance in when we choose to send a value to an update function.
-					This is unfortunate, but it's because of the way that GCP works, so there's
-					no easy way out.  Some APIs require you to send `enable_foo: false`, while
-					others will crash if you send `attribute: ''`.  We require this nuance to
-					be annotated in api.yaml, since it is not discoverable automatically.
+<%#         There is some nuance in when we choose to send a value to an update function.
+            This is unfortunate, but it's because of the way that GCP works, so there's
+            no easy way out.  Some APIs require you to send `enable_foo: false`, while
+            others will crash if you send `attribute: ''`.  We require this nuance to
+            be annotated in api.yaml, since it is not discoverable automatically.
 
-					The behavior here, which we believe to be correct, is to send a value if
-					* It is non-empty OR
-					* It is marked send_empty_value in api.yaml.
-					AND
-					* It has been set by the user OR
-					* It has been modified by the expander in any way
+            The behavior here, which we believe to be correct, is to send a value if
+            * It is non-empty OR
+            * It is marked send_empty_value in api.yaml.
+            AND
+            * It has been set by the user OR
+            * It has been modified by the expander in any way
 
-					This subsumes both `ForceSendFields` and `NullFields` in the go API client -
-					`NullFields` is a special case of `send_empty_value` where the empty value
-					in question is go's literal nil.
-			-%>
-			<% unless prop.send_empty_value -%>
-			} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-			<% else -%>
-			} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-			<% end -%>
-			<% if prop.update_statement -%>
-					obj["<%= prop.api_name -%>"] = <%= compile_template(prop.update_statement,
-																															prefix: resource_name,
-																															property: prop) -%>
-      <% else -%>
-				obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-      <% end -%>
-			}
-			<% else -%>
-			<%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
+            This subsumes both `ForceSendFields` and `NullFields` in the go API client -
+            `NullFields` is a special case of `send_empty_value` where the empty value
+            in question is go's literal nil.
+-%>
+<%          unless prop.send_empty_value -%>
+		} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%          else -%>
+		} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%          end -%>
+<%          if prop.update_statement -%>
+			obj["<%= prop.api_name -%>"] = <%= compile_template(prop.update_statement,
+                                                                prefix: resource_name,
+                                                                property: prop) -%>
+<%          else -%>
 			obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-			<% end -%>
-		<% end -%>
+<%          end -%>
+		}
+<%      else # if settable_properties.include? prop -%>
+		<%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
+		obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+<%      end # if settable_properties.include? prop -%>
+<%      end # props.each -%>
 
-<% if object.mutex -%>
+<%      if object.mutex -%>
 		lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
 		if err != nil {
 			return err
 		}
 		mutexKV.Lock(lockName)
 		defer mutexKV.Unlock(lockName)
-<% end -%>
+<%      end -%>
 
 		url, err = replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
 		if err != nil {
@@ -310,7 +313,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
 		}
 
-		<% unless object.async.nil? -%>
+<%      unless object.async.nil? -%>
 		err = Convert(res, op)
 		if err != nil {
 			return err
@@ -324,45 +327,45 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 			return err
 		}
 
-		<% end -%>
+<%      end -%>
 
-		<% props.each do |prop|	-%>
+<%      props.each do |prop|	-%>
 		d.SetPartial("<%= prop.name.underscore -%>")
-		<% end -%>
+<%      end -%>
 	}
-	<% end -%>
+<%  end -%>
 
 	d.Partial(false)
-	<% else # if object.input -%>
+<%  else # if object.input -%>
 	obj := make(map[string]interface{})
-	<% settable_properties.each do |prop| -%>
-		<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-		if err != nil {
-				return err
-		<% unless prop.send_empty_value -%>
-		} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-		<% else -%>
-		} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-		<% end -%>
-			obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-		}
-	<% end -%>
+<%  settable_properties.each do |prop| -%>
+	<%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+	if err != nil {
+		return err
+<%      unless prop.send_empty_value -%>
+	} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%      else -%>
+	} else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%      end -%>
+		obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+	}
+<%  end -%>
 
-	<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
-	<% if object.custom_code.update_encoder -%>
+<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
+<%  if object.custom_code.update_encoder -%>
 	obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
-	<% elsif object.custom_code.encoder -%>
+<%  elsif object.custom_code.encoder -%>
 	obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
-	<% end -%>
+<%  end -%>
 
-<% if object.mutex -%>
+<%  if object.mutex -%>
 	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
 	if err != nil {
 		return err
 	}
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
-<% end -%>
+<%  end -%>
 
 	url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
 	if err != nil {
@@ -377,11 +380,11 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
 	}
 
-	<% unless object.async.nil? -%>
+<%  unless object.async.nil? -%>
 	op := &<%= api_name_lower -%>.Operation{}
 	err = Convert(res, op)
 	if err != nil {
-	return err
+		return err
 	}
 
 	err = <%= api_name_lower -%>OperationWaitTime(
@@ -389,34 +392,34 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 	int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 	if err != nil {
-	return err
+		return err
 	}
-	<% end -%>
-	<% end -%>
+<%  end -%>
+<%  end # if object.input -%>
 
 <%= lines(compile(object.custom_code.post_update)) if object.custom_code.post_update -%>
 	return resource<%= resource_name -%>Read(d, meta)
 }
-<% end -%>
+<% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-  <% if has_project -%>
+<%  if has_project -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
-  }
-  <% end -%>
+	}
+<%  end -%>
 
-<% if object.mutex -%>
+<%  if object.mutex -%>
 	lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
 	if err != nil {
 		return err
 	}
 	mutexKV.Lock(lockName)
 	defer mutexKV.Unlock(lockName)
-<% end -%>
+<%  end -%>
 
 	url, err := replaceVars(d, config, "<%= build_url(object.full_delete_url) -%>")
 	if err != nil {
@@ -430,7 +433,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 		return handleNotFoundError(err, d, "<%= object.name -%>")
 	}
 
-	<% unless object.async.nil? -%>
+<%  unless object.async.nil? -%>
 	op := &<%= api_name_lower -%>.Operation{}
 	err = Convert(res, op)
 	if err != nil {
@@ -444,7 +447,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 	if err != nil {
 		return err
 	}
-	<% end -%>
+<%  end -%>
 
 	log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
 	return nil
@@ -452,7 +455,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <% if object.custom_code.custom_import -%>
-  <%= lines(compile(object.custom_code.custom_import)) -%>
+<%= lines(compile(object.custom_code.custom_import)) -%>
 <% else -%>
 	config := meta.(*Config)
 	parseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.join('","') -%>"}, d, config)
@@ -463,7 +466,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-  <%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
+<%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
 
 	return []*schema.ResourceData{d}, nil
 <% end -%>
@@ -479,18 +482,18 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 
 <% if object.custom_code.encoder -%>
 func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-  <%= lines(compile(object.custom_code.encoder)) -%>
+<%= lines(compile(object.custom_code.encoder)) -%>
 }
 <% end -%>
 
 <% if object.custom_code.update_encoder-%>
 func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-  <%= lines(compile(object.custom_code.update_encoder)) -%>
+<%= lines(compile(object.custom_code.update_encoder)) -%>
 }
 <% end -%>
 
 <% if object.custom_code.decoder -%>
 func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-  <%= lines(compile(object.custom_code.decoder)) -%>
+<%= lines(compile(object.custom_code.decoder)) -%>
 }
 <% end -%>
