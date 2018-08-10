@@ -185,12 +185,3 @@
     subnetwork must be specified.
 
     This field is not used for external load balancing.
-- !ruby/object:Api::Type::Boolean
-  name: 'allPorts'
-  description: |
-    When the load balancing scheme is INTERNAL, this can be used to indicate
-    that all ports should be supported on the ForwardingRule. 
-
-    This cannot be used with the ports[] or portRange fields.
-
-    This cannot be used when the load balancing scheme is EXTERNAL.

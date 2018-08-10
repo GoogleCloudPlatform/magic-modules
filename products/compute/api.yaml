@@ -981,6 +981,16 @@ objects:
           This field is only used for internal load balancing.
         output: true
         min_version: beta
+      - !ruby/object:Api::Type::Boolean
+        name: 'allPorts'
+        description: |
+          When the load balancing scheme is INTERNAL, this can be used to indicate
+          that all ports should be supported on the ForwardingRule. 
+
+          This cannot be used with the ports[] or portRange fields.
+
+          This cannot be used when the load balancing scheme is EXTERNAL.
+
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'
