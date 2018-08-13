@@ -16,6 +16,7 @@ $LOAD_PATH.unshift File.dirname(__FILE__)
 Dir.chdir(File.join(File.dirname(__FILE__), "..", ".."))
 
 require 'optparse'
+require 'compile/core'
 
 ##########################################################
 # Default Options
@@ -36,7 +37,8 @@ ADDITIONAL_FILES = [
 ]
 
 @options = {
-  directory: "build/ansible/"
+  directory: "build/ansible/",
+  ansible_version: '2.7'
 }
 ###########################################################
 # Functions
@@ -63,7 +65,7 @@ def get_all_modules(remote)
   git_run("git checkout #{remote}/devel", true)
   files = git_run("git ls-files -- lib/ansible/modules/cloud/google/gcp_*")
   files.split("\n")
-       .reject { |line| IGNORED_MODULES.include?(files) }
+       .reject { |line| IGNORED_MODULES.include?(line) }
 end
 
 def check_if_different(file, remote1, remote2)
@@ -75,14 +77,28 @@ end
 def checkout_file(file)
   git_run("git checkout magician/devel -- #{file}", true)
 end
+
+def commit_message(mod_name)
+  file = "lib/ansible/modules/cloud/google/#{mod_name}.py"
+  if git_run("git cat-file -e upstream/devel:#{file}")
+    "Bug fixes for #{mod_name}"
+  else
+    "New GCP Module: #{mod_name}"
+  end
+end
 #############################################################
 # Main
+#############################################################
 
 OptionParser.new do |opts|
   opts.banner = "Usage: run [options]"
 
   opts.on("--dir", "--directory", "Ansible repo location") do |v|
     @options[:directory] = v
+  end
+
+  opts.on("-v", "--version", "Ansible version") do |v|
+    @options[:ansible_version] = v
   end
 end.parse!
 
@@ -120,7 +136,18 @@ files.each do |mod|
   changed_files.each { |file| checkout_file(file) }
 
   # Make a commit
-  git_run("git commit -m \"#{mod} changes\"", true)
+  message = commit_message(mod_name)
+  git_run("git commit -m \"#{message}\"", true)
   puts "PR built for #{mod_name}"
-  exit 0
+
+  # Create PR message.
+  File.write("tools/ansible-pr/templates/#{mod_name}",
+             compile_file('tools/ansible-pr/template.md.erb', {
+    mod_name: mod_name,
+    new: message.include?("New GCP"),
+    ansible_version: @options[:ansible_version],
+    commit_message: commit_message
+  }))
+  #
+  # Create PR
 end
