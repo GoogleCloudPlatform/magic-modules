@@ -1,0 +1,193 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Provider::ResourceOverrides
+  Attestor: !ruby/object:Provider::Terraform::ResourceOverride
+    import_format: ["projects/{{project}}/attestors/{{name}}"]
+    examples: |
+      ```hcl
+      resource "google_containeranalysis_note" "note" {
+        name = "test-attestor-note"
+        attestation_authority {
+          hint {
+            human_readable_name = "Attestor Note"
+          }
+        }
+      }
+
+      resource "google_binaryauthorization_attestor" "attestor" {
+        name = "test-attestor"
+        attestation_authority_note {
+          note_reference = "${google_containeranalysis_note.note.name}"
+          public_keys {
+            ascii_armored_pgp_public_key = <<EOF
+      mQENBFtP0doBCADF+joTiXWKVuP8kJt3fgpBSjT9h8ezMfKA4aXZctYLx5wslWQl
+      bB7Iu2ezkECNzoEeU7WxUe8a61pMCh9cisS9H5mB2K2uM4Jnf8tgFeXn3akJDVo0
+      oR1IC+Dp9mXbRSK3MAvKkOwWlG99sx3uEdvmeBRHBOO+grchLx24EThXFOyP9Fk6
+      V39j6xMjw4aggLD15B4V0v9JqBDdJiIYFzszZDL6pJwZrzcP0z8JO4rTZd+f64bD
+      Mpj52j/pQfA8lZHOaAgb1OrthLdMrBAjoDjArV4Ek7vSbrcgYWcI6BhsQrFoxKdX
+      83TZKai55ZCfCLIskwUIzA1NLVwyzCS+fSN/ABEBAAG0KCJUZXN0IEF0dGVzdG9y
+      IiA8ZGFuYWhvZmZtYW5AZ29vZ2xlLmNvbT6JAU4EEwEIADgWIQRfWkqHt6hpTA1L
+      uY060eeM4dc66AUCW0/R2gIbLwULCQgHAgYVCgkICwIEFgIDAQIeAQIXgAAKCRA6
+      0eeM4dc66HdpCAC4ot3b0OyxPb0Ip+WT2U0PbpTBPJklesuwpIrM4Lh0N+1nVRLC
+      51WSmVbM8BiAFhLbN9LpdHhds1kUrHF7+wWAjdR8sqAj9otc6HGRM/3qfa2qgh+U
+      WTEk/3us/rYSi7T7TkMuutRMIa1IkR13uKiW56csEMnbOQpn9rDqwIr5R8nlZP5h
+      MAU9vdm1DIv567meMqTaVZgR3w7bck2P49AO8lO5ERFpVkErtu/98y+rUy9d789l
+      +OPuS1NGnxI1YKsNaWJF4uJVuvQuZ1twrhCbGNtVorO2U12+cEq+YtUxj7kmdOC1
+      qoIRW6y0+UlAc+MbqfL0ziHDOAmcqz1GnROg
+      =6Bvm
+      EOF
+          }
+        }
+      }
+      ```
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      attestationAuthorityNote.noteReference: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        description: |
+          The resource name of a ATTESTATION_AUTHORITY Note, created by the
+          user. If the Note is in a different project from the Attestor, it
+          should be specified in the format `projects/*/notes/*` (or the legacy
+          `providers/*/notes/*`). This field may not be updated.
+          An attestation by this attestor is stored as a Container Analysis
+          ATTESTATION_AUTHORITY Occurrence that names a container image
+          and that links to this Note.
+  Policy: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{project}}"
+    import_format: ["projects/{{project}}"]
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
+      pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.erb'
+    examples: |
+      ```hcl
+      resource "google_containeranalysis_note" "note" {
+        name = "test-attestor-note"
+        attestation_authority {
+          hint {
+            human_readable_name = "My attestor"
+          }
+        }
+      }
+
+      resource "google_binaryauthorization_attestor" "attestor" {
+        name = "test-attestor"
+        attestation_authority_note {
+          note_reference = "${google_containeranalysis_note.note.name}"
+        }
+      }
+
+      resource "google_binaryauthorization_policy" "policy" {
+        admission_whitelist_patterns {
+          name_pattern= "gcr.io/google_containers/*"
+        }
+
+        default_admission_rule {
+          evaluation_mode = "ALWAYS_ALLOW"
+          enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+        }
+
+        cluster_admission_rules {
+          cluster = "us-central1-a.prod-cluster"
+          evaluation_mode = "REQUIRE_ATTESTATION"
+          enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+          require_attestations_by = ["${google_binaryauthorization_attestor.attestor.name}"]
+        }
+      }
+      ```
+    properties:
+      clusterAdmissionRules: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            // require_attestations_by is a set of strings that can have the format
+            // projects/{project}/attestors/{attestor} or {attestor}. We diffsuppress
+            // and hash that set on the name, but now we need to make sure that the
+            // overall hash here respects that so changing the attestor format doesn't
+            // change the hash code of cluster_admission_rules.
+            raw := v.(map[string]interface{})
+            at := raw["require_attestations_by"].(*schema.Set)
+            if at != nil {
+              t := convertAndMapStringArr(at.List(), GetResourceNameFromSelfLink)
+              raw["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, resourceBinaryauthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+            return hashcode.String(buf.String())
+          }
+      clusterAdmissionRules.requireAttestationsBy: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: selfLinkNameHash
+        custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        description: |
+          The resource names of the attestors that must attest to a
+          container image. If the attestor is in a different project from the
+          policy, it should be specified in the format `projects/*/attestors/*`.
+          Each attestor must exist before a policy can reference it. To add an
+          attestor to a policy the principal issuing the policy change
+          request must be able to read the attestor resource.
+
+          Note: this field must be non-empty when the evaluation_mode field
+          specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+      defaultAdmissionRule.requireAttestationsBy: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: selfLinkNameHash
+        custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        description: |
+          The resource names of the attestors that must attest to a
+          container image. If the attestor is in a different project from the
+          policy, it should be specified in the format `projects/*/attestors/*`.
+          Each attestor must exist before a policy can reference it. To add an
+          attestor to a policy the principal issuing the policy change
+          request must be able to read the attestor resource.
+
+          Note: this field must be non-empty when the evaluation_mode field
+          specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+
+# This is for a list of example files.
+examples: !ruby/object:Api::Resource::HashArray
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # All of these files will be copied verbatim.
+  copy:
+    'google/transport.go': 'templates/terraform/transport.go'
+    'google/transport_test.go': 'templates/terraform/transport_test.go'
+    'google/import.go': 'templates/terraform/import.go'
+    'google/import_test.go': 'templates/terraform/import_test.go'
+    # Handwritten acceptance tests for autogenerated resources.
+    # Adding them here allows updating the tests as part of a MM pull request.
+    'google/resource_binaryauthorization_attestor_test.go':
+      'templates/terraform/tests/resource_binaryauthorization_attestor_test.go'
+    'google/resource_binaryauthorization_policy_test.go':
+      'templates/terraform/tests/resource_binaryauthorization_policy_test.go'
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+    'google/provider_{{product_name}}_gen.go': 'templates/terraform/provider_gen.erb'
+
+# This is for custom testing code. All of our tests follow a specific pattern
+# that sometimes needs to be deviated from. We're working towards a world where
+# these handwritten tests would be unnecessary in many cases (custom types).
+tests: !ruby/object:Api::Resource::HashArray
+
+# This would be for custom network responses. Tests work by running some block
+# of autogenerated code and then verifying the network calls.
+# The network call verifications are automatically generated, but can be
+# overriden.
+test_data: !ruby/object:Provider::Config::TestData

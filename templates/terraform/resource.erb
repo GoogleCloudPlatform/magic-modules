@@ -96,13 +96,6 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-
     obj := make(map[string]interface{})
 <%  settable_properties.each do |prop| -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
@@ -152,6 +145,12 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 <%  unless object.async.nil? -%>
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
     op := &<%= api_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
@@ -237,18 +236,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-
 <%  if object.input -%>
-    var url string
-    var res map[string]interface{}
-    op := &<%= api_name_lower -%>.Operation{}
-
     d.Partial(true)
 
 <%  properties_by_custom_update(properties).each do |key, props| -%>
@@ -304,16 +292,27 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         defer mutexKV.Unlock(lockName)
 <%      end -%>
 
-        url, err = replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
+        url, err := replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
         if err != nil {
             return err
         }
-        res, err = sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
+<%      if object.async.nil? -%>
+        _, err = sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
+<%      else -%>
+        res, err := sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
+<%      end -%>
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
 <%      unless object.async.nil? -%>
+<%      if has_project -%>
+        project, err := getProject(d, config)
+        if err != nil {
+            return err
+        }
+<%      end -%>
+        op := &<%= api_name_lower -%>.Operation{}
         err = Convert(res, op)
         if err != nil {
             return err
@@ -374,13 +373,23 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
+<%  if object.async.nil? -%>
+    _, err = sendRequest(config, "<%= object.update_verb -%>", url, obj)
+<%  else -%>
     res, err := sendRequest(config, "<%= object.update_verb -%>", url, obj)
+<% end -%>
 
     if err != nil {
     return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
     }
 
 <%  unless object.async.nil? -%>
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
     op := &<%= api_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
@@ -405,13 +414,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
@@ -426,14 +428,22 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return err
     }
 
+<%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
+    var obj map[string]interface{}
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-    res, err := sendRequest(config, "<%= object.delete_verb.to_s.upcase -%>", url, nil)
+    res, err := sendRequest(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj)
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
 
 <%  unless object.async.nil? -%>
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
     op := &<%= api_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {

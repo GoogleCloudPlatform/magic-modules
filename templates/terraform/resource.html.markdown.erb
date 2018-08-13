@@ -83,6 +83,7 @@ The following arguments are supported:
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
+
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
@@ -107,6 +108,7 @@ The following arguments are supported:
 <%= "\n" + object.docs.optional_properties -%>
 <% end -%>
 
+<% unless properties.select(&:output).empty? && object.docs.attributes.nil? -%>
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -123,6 +125,7 @@ In addition to the arguments listed above, the following computed attributes are
 <% end -%>
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>
+<% end -%>
 <% end -%>
 
 <% unless object.async.nil? -%>

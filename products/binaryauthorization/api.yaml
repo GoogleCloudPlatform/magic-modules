@@ -1,0 +1,214 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Binary Authorization
+prefix: gbinaryauthorization
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://binaryauthorization.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Attestor'
+    base_url: projects/{{project}}/attestors?attestorId={{name}}
+    self_link: projects/{{project}}/attestors/{{name}}
+    description: |
+      An attestor that attests to container image artifacts.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/binary-authorization/'
+      api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The resource name.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          A descriptive comment. This field may be updated. The field may be
+          displayed in chooser dialogs.
+      - !ruby/object:Api::Type::NestedObject
+        name: attestationAuthorityNote
+        api_name: userOwnedDrydockNote
+        description: |
+          A Container Analysis ATTESTATION_AUTHORITY Note, created by the user.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: noteReference
+            description: |
+              The resource name of a ATTESTATION_AUTHORITY Note, created by the
+              user, in the format: `projects/*/notes/*` (or the legacy
+              `providers/*/notes/*`). This field may not be updated.
+              An attestation by this attestor is stored as a Container Analysis
+              ATTESTATION_AUTHORITY Occurrence that names a container image
+              and that links to this Note.
+            required: true
+            input: true
+          - !ruby/object:Api::Type::Array
+            name: publicKeys
+            description: |
+              Public keys that verify attestations signed by this attestor. This
+              field may be updated.
+              If this field is non-empty, one of the specified public keys must
+              verify that an attestation was signed by this attestor for the
+              image specified in the admission request.
+              If this field is empty, this attestor always returns that no valid
+              attestations exist.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: comment
+                  description: |
+                    A descriptive comment. This field may be updated.
+                - !ruby/object:Api::Type::String
+                  name: id
+                  description: |
+                    This field will be overwritten with key ID information, for
+                    example, an identifier extracted from a PGP public key. This
+                    field may not be updated.
+                  output: true
+                - !ruby/object:Api::Type::String
+                  name: asciiArmoredPgpPublicKey
+                  description: |
+                    ASCII-armored representation of a PGP public key, as the
+                    entire output by the command
+                    `gpg --export --armor foo@example.com` (either LF or CRLF
+                    line endings).
+                  required: true
+          - !ruby/object:Api::Type::String
+            name: delegationServiceAccountEmail
+            description: |
+              This field will contain the service account email address that
+              this Attestor will use as the principal when querying Container
+              Analysis. Attestor administrators must grant this service account
+              the IAM role needed to read attestations from the noteReference in
+              Container Analysis (containeranalysis.notes.occurrences.viewer).
+              This email address is fixed for the lifetime of the Attestor, but
+              callers should not make any other assumptions about the service
+              account email; future versions may use an email based on a
+              different naming pattern.
+            output: true
+  - !ruby/object:Api::Resource
+    name: 'Policy'
+    base_url: projects/{{project}}/policy
+    self_link: projects/{{project}}/policy
+    description: |
+      A policy for container image binary authorization.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/binary-authorization/'
+      api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
+    create_verb: :PUT
+    delete_verb: :PUT
+    properties:
+      - !ruby/object:Api::Type::String
+        name: description
+        description: A descriptive comment.
+      - !ruby/object:Api::Type::Array
+        name: admissionWhitelistPatterns
+        description: |
+          Admission policy whitelisting. A matching admission request will
+          always be permitted. This feature is typically used to exclude Google
+          or third-party infrastructure images from Binary Authorization
+          policies.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: namePattern
+              description: |
+                An image name pattern to whitelist, in the form
+                registry/path/to/image. This supports a trailing * as a
+                wildcard, but this is allowed only in text after the registry/
+                part.
+      - !ruby/object:Api::Type::NameValues
+        name: clusterAdmissionRules
+        description: |
+          Admission policy whitelisting. A matching admission request will
+          always be permitted. This feature is typically used to exclude Google
+          or third-party infrastructure images from Binary Authorization
+          policies.
+        key_type: Api::Type::String
+        key_name: cluster
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: clusterAdmissionRule
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: evaluationMode
+              description: How this admission rule will be evaluated.
+              values:
+                - :ALWAYS_ALLOW
+                - :REQUIRE_ATTESTATION
+                - :ALWAYS_DENY
+            - !ruby/object:Api::Type::Array
+              name: requireAttestationsBy
+              description: |
+                The resource names of the attestors that must attest to a
+                container image, in the format projects/*/attestors/*. Each
+                attestor must exist before a policy can reference it. To add an
+                attestor to a policy the principal issuing the policy change
+                request must be able to read the attestor resource.
+
+                Note: this field must be non-empty when the evaluationMode field
+                specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Enum
+              name: enforcementMode
+              description: |
+                The action when a pod creation is denied by the admission rule.
+              values:
+                - :ENFORCED_BLOCK_AND_AUDIT_LOG
+                - :DRYRUN_AUDIT_LOG_ONLY
+      - !ruby/object:Api::Type::NestedObject
+          name: defaultAdmissionRule
+          description: |
+            Default admission rule for a cluster without a per-cluster admission
+            rule.
+          required: true
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: evaluationMode
+              description: How this admission rule will be evaluated.
+              required: true
+              values:
+                - :ALWAYS_ALLOW
+                - :REQUIRE_ATTESTATION
+                - :ALWAYS_DENY
+            - !ruby/object:Api::Type::Array
+              name: requireAttestationsBy
+              description: |
+                The resource names of the attestors that must attest to a
+                container image, in the format projects/*/attestors/*. Each
+                attestor must exist before a policy can reference it. To add an
+                attestor to a policy the principal issuing the policy change
+                request must be able to read the attestor resource.
+
+                Note: this field must be non-empty when the evaluationMode field
+                specifies REQUIRE_ATTESTATION, otherwise it must be empty.
+              item_type: Api::Type::String
+            - !ruby/object:Api::Type::Enum
+              name: enforcementMode
+              required: true
+              description: |
+                The action when a pod creation is denied by the admission rule.
+              values:
+                - :ENFORCED_BLOCK_AND_AUDIT_LOG
+                - :DRYRUN_AUDIT_LOG_ONLY
