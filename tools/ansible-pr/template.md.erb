@@ -1,20 +1,20 @@
 ##### SUMMARY
 <!--- Describe the change, including rationale and design decisions -->
-<%= commit_message %>
+<%= ctx[:commit_msg] %>
 
 ##### ISSUE TYPE
-<% if new -%>
+<% if ctx[:new] -%>
  - New Module Pull Request
  <% else -%>
  - Bugfix Pull Request
  <% end -%>
 
 ##### COMPONENT NAME
-<%= mod_name %>
+<%= ctx[:mod_name] %>
 
 ##### ANSIBLE VERSION
 ```
-<%= ansible_version %>
+<%= ctx[:ansible_version] %>
 ```
 
 

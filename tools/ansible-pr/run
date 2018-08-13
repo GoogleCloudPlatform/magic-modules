@@ -17,6 +17,7 @@ Dir.chdir(File.join(File.dirname(__FILE__), "..", ".."))
 
 require 'optparse'
 require 'compile/core'
+include Compile::Core
 
 ##########################################################
 # Default Options
@@ -142,12 +143,12 @@ files.each do |mod|
 
   # Create PR message.
   File.write("tools/ansible-pr/templates/#{mod_name}",
-             compile_file('tools/ansible-pr/template.md.erb', {
+             lines(compile_file({
     mod_name: mod_name,
     new: message.include?("New GCP"),
     ansible_version: @options[:ansible_version],
-    commit_message: commit_message
-  }))
+    commit_msg: message
+  }, 'tools/ansible-pr/template.md.erb')))
   #
   # Create PR
 end
