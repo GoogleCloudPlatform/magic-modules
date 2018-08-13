@@ -12,20 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# rubocop:disable Style/MixinUsage
-# rubocop:disable Style/CommandLiteral
-# rubocop:disable Lint/LiteralAsCondition
-# rubocop:disable Style/CommandLiteral
-# rubocop:disable Style/RegexpLiteral
-# rubocop:disable Metrics/LineLength
-# rubocop:disable Lint/UnneededDisable
-
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', '..')
 Dir.chdir(File.join(File.dirname(__FILE__), '..', '..'))
 
 require 'optparse'
 require 'compile/core'
-include Compile::Core
+
+# Class to handle Compile include to avoid Rubocop issues.
+class Compile
+  include Compile::Core
+end
 
 ##########################################################
 # Default Options
@@ -56,7 +52,12 @@ ADDITIONAL_FILES = [
 
 def git_run(cmd, silent = false, opts = @options)
   silent_cmd = silent ? '>/dev/null' : ''
-  `pushd #{opts[:directory]} >/dev/null; #{cmd}#{silent_cmd} 2>&1; popd #{opts[:directory]} > /dev/null`
+  command = [
+    "pushd #{opts[:directory]} >/dev/null",
+    "#{cmd}#{silent_cmd} 2>&1",
+    "popd #{opts[:directory]} > /dev/null"
+  ]
+  %x("#{command.join('; ')}")
 end
 
 # Check that remotes are in order
@@ -118,9 +119,12 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+# rubocop:disable Style/SpecialGlobalVars
 # Check if everything is installed properly.
-raise 'Please install the hub CLI' unless `hub`
+%x(which hub)
+raise 'Please install the hub CLI' unless $?.success?
 check_remotes
+# rubocop:enable Style/SpecialGlobalVars
 
 # Add Magician Git repo
 git_run("git remote add magician #{MAGICIAN_GIT}", true)
@@ -130,7 +134,9 @@ puts 'Everything is setup properly'
 
 # Check to see which additional files need to be placed in new PRs.
 changed_files = []
-ADDITIONAL_FILES.each { |file| changed_files << file if check_if_different(file, 'magician', 'upstream') }
+ADDITIONAL_FILES.each do |file|
+  changed_files << file if check_if_different(file, 'magician', 'upstream')
+end
 
 puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 
@@ -139,14 +145,15 @@ files = get_all_modules('magician')
 
 # Create a PR for each file.
 files.each do |mod|
-  mod_name = /lib\/ansible\/modules\/cloud\/google\/([a-z_]*)\.py/.match(mod.strip)[1]
+  mod_name = %r{lib/ansible/modules/cloud/google/([a-z_]*)\.py}.match(mod.strip)[1]
   puts "Building PR for #{mod_name}"
 
+  # Create a new branch
   git_run('git checkout upstream/devel', true)
   git_run("git branch -D #{mod_name}", true)
   git_run("git checkout -b #{mod_name}", true)
 
-  # Checkout the files
+  # Checkout all the files (module, tests, additional files)
   checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
   checkout_file("test/integration/targets/#{mod_name}/")
   changed_files.each { |file| checkout_file(file) }
@@ -155,26 +162,22 @@ files.each do |mod|
   message = commit_message(mod_name)
   git_run("git commit -m \"#{message}\"", true)
 
-  # Create PR message.
+  # Create PR message and save to file.
   File.write("tools/ansible-pr/templates/#{mod_name}",
-             lines(compile_file({
-                                  mod_name: mod_name,
-                                  new: message.include?('New GCP'),
-                                  ansible_version: @options[:ansible_version],
-                                  commit_msg: message
-                                }, 'tools/ansible-pr/template.md.erb')))
+             lines(Compile.new.compile_file({
+                                              mod_name: mod_name,
+                                              new: message.include?('New GCP'),
+                                              ansible_version: @options[:ansible_version],
+                                              commit_msg: message
+                                            }, 'tools/ansible-pr/template.md.erb')))
 
-  # Create PR
+  # Create PR using branch + message.
   git_run('git push origin HEAD --force')
-  output = git_run("hub pull-request -b ansible/ansible:devel -F ../../tools/ansible-pr/templates/#{mod_name}") unless @options[:dry_run]
+  unless @options[:dry_run]
+    repo = 'ansible/ansible:devel'
+    message_loc = "../../tools/ansible-pr/templates/#{mod_name}"
+    output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
+  end
   puts output
   puts "PR built for #{mod_name}"
 end
-
-# rubocop:enable Style/MixinUsage
-# rubocop:enable Style/CommandLiteral
-# rubocop:enable Lint/LiteralAsCondition
-# rubocop:enable Lint/UnneededDisable
-# rubocop:enable Style/CommandLiteral
-# rubocop:enable Style/RegexpLiteral
-# rubocop:enable Metrics/LineLength
