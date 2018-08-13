@@ -71,6 +71,8 @@ module Provider
         type = prop.class
         if prop.is_a?(Api::Type::Primitive)
           [name, formatter(type, @datagen.value(type, prop, seed))]
+        elsif prop.is_a?(Api::Type::FetchedExternal)
+          [name, formatter(type, @datagen.value(type, prop, seed))]
         elsif prop.is_a?(Api::Type::Array)
           emit_manifest_array(type, prop, seed, ctx, prop_name_method)
         elsif prop.is_a?(Api::Type::NestedObject)

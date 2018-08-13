@@ -177,12 +177,11 @@ module Api
 
     # Represents a fingerprint.  A fingerprint is an output-only
     # field used for optimistic locking during updates.
+    # They are fetched from the GCP response.
     class Fingerprint < FetchedExternal
       def validate
         super
         @output = true if @output.nil?
-        # TODO(ndmckinley): This doesn't work in puppet, chef, or ansible.
-        # Consequently we exclude it by default and override it in Terraform.
       end
     end
 
