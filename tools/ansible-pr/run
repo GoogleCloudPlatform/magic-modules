@@ -19,7 +19,7 @@ require 'optparse'
 require 'compile/core'
 
 # Class to handle Compile include to avoid Rubocop issues.
-class Compile
+class CompileClass
   include Compile::Core
 end
 
@@ -43,7 +43,7 @@ ADDITIONAL_FILES = [
 ].freeze
 
 @options = {
-  directory: 'build/ansible/',
+  directory: "#{Dir.pwd}/build/ansible/",
   ansible_version: '2.7',
   dry_run: false
 }
@@ -57,7 +57,7 @@ def git_run(cmd, silent = false, opts = @options)
     "#{cmd}#{silent_cmd} 2>&1",
     "popd #{opts[:directory]} > /dev/null"
   ]
-  %x("#{command.join('; ')}")
+  %x(#{command.join('; ')})
 end
 
 # Check that remotes are in order
@@ -144,6 +144,7 @@ puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 files = get_all_modules('magician')
 
 # Create a PR for each file.
+# rubocop:disable Metrics/BlockLength
 files.each do |mod|
   mod_name = %r{lib/ansible/modules/cloud/google/([a-z_]*)\.py}.match(mod.strip)[1]
   puts "Building PR for #{mod_name}"
@@ -164,12 +165,15 @@ files.each do |mod|
 
   # Create PR message and save to file.
   File.write("tools/ansible-pr/templates/#{mod_name}",
-             lines(Compile.new.compile_file({
-                                              mod_name: mod_name,
-                                              new: message.include?('New GCP'),
-                                              ansible_version: @options[:ansible_version],
-                                              commit_msg: message
-                                            }, 'tools/ansible-pr/template.md.erb')))
+             CompileClass.new.lines(
+               CompileClass.new.compile_file({
+                                               mod_name: mod_name,
+                                               new: message.include?('New GCP'),
+                                               ansible_version: @options[:ansible_version],
+                                               commit_msg: message
+                                             },
+                                             'tools/ansible-pr/template.md.erb')
+             ))
 
   # Create PR using branch + message.
   git_run('git push origin HEAD --force')
@@ -181,3 +185,4 @@ files.each do |mod|
   puts output
   puts "PR built for #{mod_name}"
 end
+# rubocop:enable Metrics/BlockLength
