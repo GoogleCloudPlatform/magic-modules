@@ -30,6 +30,11 @@ IGNORED_MODULES = [
   'lib/ansible/modules/cloud/google/gcp_url_map.py',
 ]
 
+ADDITIONAL_FILES = [
+  'lib/ansible/module_utils/gcp_utils.py',
+  'lib/ansible/utils/module_docs_fragments/gcp.py',
+]
+
 @options = {
   directory: "build/ansible/"
 }
@@ -60,6 +65,16 @@ def get_all_modules(remote)
   files.split("\n")
        .reject { |line| IGNORED_MODULES.include?(files) }
 end
+
+def check_if_different(file, remote1, remote2)
+  @files ||= git_run("git diff --name-only #{remote1}/devel #{remote2}/devel")
+  @files.split("\n")
+        .include?(file)
+end
+
+def checkout_file(file)
+  git_run("git checkout magician/devel -- #{file}", true)
+end
 #############################################################
 # Main
 
@@ -77,6 +92,35 @@ check_remotes
 
 # Add Magician Git repo
 git_run("git remote add magician #{MAGICIAN_GIT}", true)
+git_run("git fetch upstream devel", true)
+
+puts "Everything is setup properly"
+
+# Check to see which additional files need to be placed in new PRs.
+changed_files = []
+ADDITIONAL_FILES.each { |file| changed_files << file if check_if_different(file, "magician", "upstream") }
+
+puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 
 # Find list of all modules.
-puts get_all_modules('magician')
+files = get_all_modules('magician')
+
+# Create a PR for each file.
+files.each do |mod|
+  mod_name = /lib\/ansible\/modules\/cloud\/google\/([a-z_]*)\.py/.match(mod.strip)[1]
+  puts "Building PR for #{mod_name}"
+
+  git_run("git checkout upstream/devel", true)
+  git_run("git branch -D #{mod_name}", true)
+  git_run("git checkout -b #{mod_name}", true)
+
+  # Checkout the files
+  checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
+  checkout_file("test/integration/targets/#{mod_name}/")
+  changed_files.each { |file| checkout_file(file) }
+
+  # Make a commit
+  git_run("git commit -m \"#{mod} changes\"", true)
+  puts "PR built for #{mod_name}"
+  exit 0
+end
