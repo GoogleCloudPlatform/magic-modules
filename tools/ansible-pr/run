@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$LOAD_PATH.unshift File.dirname(__FILE__)
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), "..", "..")
 Dir.chdir(File.join(File.dirname(__FILE__), "..", ".."))
 
 require 'optparse'
@@ -39,7 +39,8 @@ ADDITIONAL_FILES = [
 
 @options = {
   directory: "build/ansible/",
-  ansible_version: '2.7'
+  ansible_version: '2.7',
+  dry_run: false
 }
 ###########################################################
 # Functions
@@ -102,8 +103,17 @@ OptionParser.new do |opts|
   opts.on("-v", "--version", "Ansible version") do |v|
     @options[:ansible_version] = v
   end
+
+  opts.on("-u", "--user", "Github username") do |v|
+    @options[:user] = v
+  end
+
+  opts.on("-d", "--dry-run", "Dry run") do |v|
+    @options[:dry_run] = true
+  end
 end.parse!
 
+raise "Please select user" unless @options[:user]
 # Check if everything is installed properly.
 raise "Please install the hub CLI" unless `hub`
 check_remotes
@@ -150,6 +160,7 @@ files.each do |mod|
     ansible_version: @options[:ansible_version],
     commit_msg: message
   }, 'tools/ansible-pr/template.md.erb')))
-  #
+
   # Create PR
+  git_run("hub pull-request -b #{@options[:user]}/ansible:devel -F tools/ansible-pr/templates/#{mod_name}") unless @options[:dry_run]
 end
