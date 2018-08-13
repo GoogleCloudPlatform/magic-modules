@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__), "..", "..")
-Dir.chdir(File.join(File.dirname(__FILE__), "..", ".."))
+# rubocop:disable Style/MixinUsage
+# rubocop:disable Style/CommandLiteral
+# rubocop:disable Lint/LiteralAsCondition
+# rubocop:disable Style/CommandLiteral
+# rubocop:disable Style/RegexpLiteral
+# rubocop:disable Metrics/LineLength
+# rubocop:disable Lint/UnneededDisable
+
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', '..')
+Dir.chdir(File.join(File.dirname(__FILE__), '..', '..'))
 
 require 'optparse'
 require 'compile/core'
@@ -22,23 +30,24 @@ include Compile::Core
 ##########################################################
 # Default Options
 #
-ANSIBLE_URL = 'git@github.com:ansible/ansible.git'
-MAGICIAN_GIT = 'git@github.com:modular-magician/ansible.git'
+ANSIBLE_URL = 'git@github.com:ansible/ansible.git'.freeze
+MAGICIAN_GIT = 'git@github.com:modular-magician/ansible.git'.freeze
 
 IGNORED_MODULES = [
   'lib/ansible/modules/cloud/google/gcp_backend_service.py',
+  'lib/ansible/modules/cloud/google/gcp_forwarding_rule.py',
   'lib/ansible/modules/cloud/google/gcp_healthcheck.py',
   'lib/ansible/modules/cloud/google/gcp_target_proxy.py',
-  'lib/ansible/modules/cloud/google/gcp_url_map.py',
-]
+  'lib/ansible/modules/cloud/google/gcp_url_map.py'
+].freeze
 
 ADDITIONAL_FILES = [
   'lib/ansible/module_utils/gcp_utils.py',
-  'lib/ansible/utils/module_docs_fragments/gcp.py',
-]
+  'lib/ansible/utils/module_docs_fragments/gcp.py'
+].freeze
 
 @options = {
-  directory: "build/ansible/",
+  directory: 'build/ansible/',
   ansible_version: '2.7',
   dry_run: false
 }
@@ -53,19 +62,19 @@ end
 # Check that remotes are in order
 def check_remotes(opts = @options)
   # Check git remotes
-  remotes = git_run("git remote -v", false, opts)
+  remotes = git_run('git remote -v', false, opts)
   remotes = remotes.split("\n")
                    .map { |line| line.split("\t") }
-                   .map { |line| { line[0] => line[1].split(" ").first } }
+                   .map { |line| { line[0] => line[1].split(' ').first } }
                    .reduce({}, :merge)
-  raise "Origin git remote should be set" unless remotes["origin"]
-  raise "Upstream git remote should be #{ANSIBLE_URL}" unless remotes["upstream"] == ANSIBLE_URL
+  raise 'Origin git remote should be set' unless remotes['origin']
+  raise "Upstream git remote should be #{ANSIBLE_URL}" unless remotes['upstream'] == ANSIBLE_URL
 end
 
 def get_all_modules(remote)
   git_run("git fetch #{remote} devel", true)
   git_run("git checkout #{remote}/devel", true)
-  files = git_run("git ls-files -- lib/ansible/modules/cloud/google/gcp_*")
+  files = git_run('git ls-files -- lib/ansible/modules/cloud/google/gcp_*')
   files.split("\n")
        .reject { |line| IGNORED_MODULES.include?(line) }
 end
@@ -94,34 +103,34 @@ end
 #############################################################
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: run [options]"
+  opts.banner = 'Usage: run [options]'
 
-  opts.on("--dir", "--directory [DIRECTORY]", "Ansible repo location") do |v|
+  opts.on('--dir', '--directory [DIRECTORY]', 'Ansible repo location') do |v|
     @options[:directory] = v
   end
 
-  opts.on("-v", "--version [VERSION]", "Ansible version") do |v|
+  opts.on('-v', '--version [VERSION]', 'Ansible version') do |v|
     @options[:ansible_version] = v
   end
 
-  opts.on("-d", "--dry-run", "Dry run") do |v|
+  opts.on('-d', '--dry-run', 'Dry run') do |_v|
     @options[:dry_run] = true
   end
 end.parse!
 
 # Check if everything is installed properly.
-raise "Please install the hub CLI" unless `hub`
+raise 'Please install the hub CLI' unless `hub`
 check_remotes
 
 # Add Magician Git repo
 git_run("git remote add magician #{MAGICIAN_GIT}", true)
-git_run("git fetch upstream devel", true)
+git_run('git fetch upstream devel', true)
 
-puts "Everything is setup properly"
+puts 'Everything is setup properly'
 
 # Check to see which additional files need to be placed in new PRs.
 changed_files = []
-ADDITIONAL_FILES.each { |file| changed_files << file if check_if_different(file, "magician", "upstream") }
+ADDITIONAL_FILES.each { |file| changed_files << file if check_if_different(file, 'magician', 'upstream') }
 
 puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 
@@ -133,7 +142,7 @@ files.each do |mod|
   mod_name = /lib\/ansible\/modules\/cloud\/google\/([a-z_]*)\.py/.match(mod.strip)[1]
   puts "Building PR for #{mod_name}"
 
-  git_run("git checkout upstream/devel", true)
+  git_run('git checkout upstream/devel', true)
   git_run("git branch -D #{mod_name}", true)
   git_run("git checkout -b #{mod_name}", true)
 
@@ -145,21 +154,27 @@ files.each do |mod|
   # Make a commit
   message = commit_message(mod_name)
   git_run("git commit -m \"#{message}\"", true)
-  puts "PR built for #{mod_name}"
 
   # Create PR message.
   File.write("tools/ansible-pr/templates/#{mod_name}",
              lines(compile_file({
-    mod_name: mod_name,
-    new: message.include?("New GCP"),
-    ansible_version: @options[:ansible_version],
-    commit_msg: message
-  }, 'tools/ansible-pr/template.md.erb')))
+                                  mod_name: mod_name,
+                                  new: message.include?('New GCP'),
+                                  ansible_version: @options[:ansible_version],
+                                  commit_msg: message
+                                }, 'tools/ansible-pr/template.md.erb')))
 
   # Create PR
-  git_run("git push origin HEAD")
+  git_run('git push origin HEAD --force')
   output = git_run("hub pull-request -b ansible/ansible:devel -F ../../tools/ansible-pr/templates/#{mod_name}") unless @options[:dry_run]
   puts output
-
-  exit 0
+  puts "PR built for #{mod_name}"
 end
+
+# rubocop:enable Style/MixinUsage
+# rubocop:enable Style/CommandLiteral
+# rubocop:enable Lint/LiteralAsCondition
+# rubocop:enable Lint/UnneededDisable
+# rubocop:enable Style/CommandLiteral
+# rubocop:enable Style/RegexpLiteral
+# rubocop:enable Metrics/LineLength
