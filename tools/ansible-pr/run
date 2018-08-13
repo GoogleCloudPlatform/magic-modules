@@ -96,16 +96,12 @@ end
 OptionParser.new do |opts|
   opts.banner = "Usage: run [options]"
 
-  opts.on("--dir", "--directory", "Ansible repo location") do |v|
+  opts.on("--dir", "--directory [DIRECTORY]", "Ansible repo location") do |v|
     @options[:directory] = v
   end
 
-  opts.on("-v", "--version", "Ansible version") do |v|
+  opts.on("-v", "--version [VERSION]", "Ansible version") do |v|
     @options[:ansible_version] = v
-  end
-
-  opts.on("-u", "--user", "Github username") do |v|
-    @options[:user] = v
   end
 
   opts.on("-d", "--dry-run", "Dry run") do |v|
@@ -113,7 +109,6 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-raise "Please select user" unless @options[:user]
 # Check if everything is installed properly.
 raise "Please install the hub CLI" unless `hub`
 check_remotes
@@ -162,5 +157,9 @@ files.each do |mod|
   }, 'tools/ansible-pr/template.md.erb')))
 
   # Create PR
-  git_run("hub pull-request -b #{@options[:user]}/ansible:devel -F tools/ansible-pr/templates/#{mod_name}") unless @options[:dry_run]
+  git_run("git push origin HEAD")
+  output = git_run("hub pull-request -b ansible/ansible:devel -F ../../tools/ansible-pr/templates/#{mod_name}") unless @options[:dry_run]
+  puts output
+
+  exit 0
 end
