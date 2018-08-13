@@ -45,8 +45,8 @@ ADDITIONAL_FILES = [
 # Functions
 
 def git_run(cmd, silent = false, opts = @options)
-  silent_cmd = silent ? '>/dev/null 2>&1' : ''
-  `pushd #{opts[:directory]} >/dev/null; #{cmd}#{silent_cmd}; popd #{opts[:directory]} > /dev/null`
+  silent_cmd = silent ? '>/dev/null' : ''
+  `pushd #{opts[:directory]} >/dev/null; #{cmd}#{silent_cmd} 2>&1; popd #{opts[:directory]} > /dev/null`
 end
 
 # Check that remotes are in order
@@ -81,10 +81,11 @@ end
 
 def commit_message(mod_name)
   file = "lib/ansible/modules/cloud/google/#{mod_name}.py"
-  if git_run("git cat-file -e upstream/devel:#{file}")
-    "Bug fixes for #{mod_name}"
-  else
+  status = git_run("git cat-file -e upstream/devel:#{file}")
+  if status.include?('fatal')
     "New GCP Module: #{mod_name}"
+  else
+    "Bug fixes for #{mod_name}"
   end
 end
 #############################################################
