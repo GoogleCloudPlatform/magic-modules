@@ -22,30 +22,22 @@ overrides: !ruby/object:Provider::ResourceOverrides
     examples: |
       ### Basic Usage
       ```hcl
-      resource "google_monitoring" "test" {
-        name           = "%s"
-        memory_size_gb = 1
+      resource "google_monitoring_alert_policy" "test" {
+        display_name = "Test Policy"
+        conditions = []
       }
       ```
 
       ### Full Usage
       ```hcl
-      resource "google_compute_network" "test" {
-        name = "%s"
-      }
+      resource "google_monitoring_alert_policy" "test" {
+        display_name = "Test Policy"
 
-      resource "google_monitoring" "test" {
-        name           = "%s"
-        tier           = "STANDARD_HA"
-        memory_size_gb = 1
-
-        region                  = "us-central1"
-        location_id             = "us-central1-a"
-        alternative_location_id = "us-central1-f"
-
-        monitoring_version     = "MONITORING_3_2"
-        display_name      = "Terraform Test monitoring"
-        reserved_ip_range = "192.168.0.0/29"
+        conditions = [
+          {
+              display_name = "First Condition"
+          }
+        ]
 
         labels {
           my_key    = "my_val"
@@ -63,6 +55,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       # name: !ruby/object:Provider::Terraform::PropertyOverride
       #   custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_name.erb'
       #   custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      conditions: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_conditions.erb'
       conditions.conditionThreshold: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_condition_threshold.erb'
       conditions.conditionAbsent: !ruby/object:Provider::Terraform::PropertyOverride
@@ -76,6 +70,36 @@ overrides: !ruby/object:Provider::ResourceOverrides
       #   default_from_api: true
       # reservedIpRange: !ruby/object:Provider::Terraform::PropertyOverride
       #   default_from_api: true
+
+  Group: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: false
+    id_format: "{{project}}/{{name}}"
+    examples: |
+      ### Basic Usage
+      ```hcl
+      resource "google_monitoring_group" "test" {
+        display_name = "Test Group"
+        conditions = []
+      }
+      ```
+
+      ### Full Usage
+      ```hcl
+      resource "google_monitoring_group" "test" {
+        display_name = "Test Group"
+
+        conditions = [
+          {
+              display_name = "First Condition"
+          }
+        ]
+
+        labels {
+          my_key    = "my_val"
+          other_key = "other_val"
+        }
+      }
+      ```
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
 #   # All of these files will be copied verbatim.
