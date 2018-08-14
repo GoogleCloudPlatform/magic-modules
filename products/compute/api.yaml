@@ -1767,6 +1767,7 @@ objects:
       use an instance template. Unlike managed instance groups, you must create
       and add instances to an instance group manually.
 <%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    input: true
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
