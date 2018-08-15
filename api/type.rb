@@ -463,21 +463,31 @@ module Api
       module Fields
         attr_reader :key_type
         attr_reader :value_type
+
+        # Not all providers support the concept of a String->Object map. In
+        # those cases, treat the map as an Array of NestedObjects, in which each
+        # object has an extra property to act as the map key. This attr
+        # represents the name that key should be called in the downstream
+        # schema.
+        attr_reader :key_name
       end
       include Fields
 
       def validate
         super
         default_value_property :key_type, Api::Type::String.to_s
+        default_value_property :key_name, 'key'
         check_property :key_type, ::String
-        check_property :value_type, ::String
+        check_property :key_name, ::String
+        raise "Missing 'value_type' on #{object_display_name}" if @value_type.nil?
+        @value_type.validate if @value_type.is_a?(NestedObject)
         raise "Invalid type #{@key_type}" unless type?(@key_type)
         raise "Invalid type #{@value_type}" unless type?(@value_type)
       end
     end
 
     def type?(type)
-      !get_type(type).nil?
+      type.is_a?(Type) || !get_type(type).nil?
     end
 
     def get_type(type)

@@ -45,6 +45,22 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     })
   }
   return transformed
+<% elsif string_to_object_map?(property) -%>
+  if v == nil {
+    return v
+  }
+  l := v.(map[string]interface{})
+  transformed := make([]interface{}, 0, len(l))
+  for k, raw := range l {
+    original := raw.(map[string]interface{})
+    transformed = append(transformed, map[string]interface{}{
+      "<%= property.key_name -%>": k,
+    <% property.value_type.properties.each do |prop| -%>
+      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
+    <% end -%>
+    })
+  }
+  return transformed
 <% elsif property.is_a?(Api::Type::Integer) -%>
 	// Handles the string fixed64 format
 	if strVal, ok := v.(string); ok {
@@ -63,6 +79,16 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     return v
   }
   return ConvertSelfLinkToV1(v.(string))
+<% elsif property.is_set -%>
+  if v == nil {
+    return v
+  }
+  <% if !property.set_hash_func.nil? -%>
+  return schema.NewSet(<%= property.set_hash_func -%>, v.([]interface{}))
+  <% elsif property.item_type.is_a?(String) -%>
+  return schema.NewSet(schema.HashString, v.([]interface{}))
+  <% else raise 'Unknown hash function for property #{property.name}' -%>
+  <% end -%>
 <% else -%>
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
