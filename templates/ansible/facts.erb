@@ -55,8 +55,13 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
+items:
+    description: List of items
+    returned: always
+    type: complex
+    contains:
 <% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(return_property_yaml(prop, 4), 4)) -%>
+<%= lines(indent(return_property_yaml(prop, 8), 8)) -%>
 <% end -%>
 '''
 
