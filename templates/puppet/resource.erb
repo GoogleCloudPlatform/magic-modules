@@ -321,9 +321,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     <%= props.first.name.downcase -%>_update(@resource) if <%=  prop_statement %>
 <% end # update_props.each -%>
 <% if object&.handlers&.flush.nil? -%>
-<% if object.input -%>
+<% if object.input && update_props.empty?-%>
     raise '<%= object.name -%> cannot be edited.'
-<% else # if object.input -%>
+<% elsif !object.input -%>
 <%
   put_new = ["Google::#{product_ns}::Network",
              "#{object.update_verb.to_s.capitalize}.new"
@@ -345,6 +345,21 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
+<% else -%>
+<%=
+  lines(format(
+    [
+      ('return fetch_resource(resource, self_link(resource))' \
+       unless object.kind?),
+      ['return fetch_resource(resource, self_link(resource),',
+       "'#{object.kind}')"].join(' '),
+      [
+        'return fetch_resource(resource, self_link(resource),',
+        indent("'#{object.kind}')", 23) # 23 = align previous until (
+      ]
+    ].compact, 4
+  ))
+-%>
 <% end # object.input -%>
 <% else # object&.handlers&.flush.nil? -%>
 <%= lines(indent(object.handlers.flush, 4)) -%>
