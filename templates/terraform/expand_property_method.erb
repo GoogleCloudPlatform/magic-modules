@@ -17,7 +17,36 @@
                            prefix: prefix,
                            property: property)) -%>
 <% else -%>
-<%   if property.is_a?(Api::Type::NameValues) -%>
+<%   if string_to_object_map?(property) -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
+  if v == nil {
+    return map[string]interface{}{}, nil
+  }
+  m := make(map[string]interface{})
+  for _, raw := range v.(*schema.Set).List() {
+    original := raw.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+<%     nested_properties(property.value_type).each do |prop| -%>
+<%       next if prop.name == property.key_name -%>
+    transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+    if err != nil {
+      return nil, err
+    }
+    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+
+<%   end -%>
+
+    m[original["<%= property.key_name -%>"].(string)] = transformed
+  }
+  return m, nil
+}
+
+<%   nested_properties(property.value_type).each do |prop| -%>
+<%     next if prop.name == property.key_name -%>
+<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%   end -%>
+<%   elsif property.is_a?(Api::Type::NameValues) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
