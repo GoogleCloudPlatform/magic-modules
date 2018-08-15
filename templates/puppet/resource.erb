@@ -281,11 +281,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     @deleted = true
 <% if object&.handlers&.delete.nil? -%>
 <%
-     if object.delete_verb.nil? || object.delete_verb == :DELETE
-       request_new = "Google::#{product_ns}::Network::Delete.new"
-     elsif object.delete_verb == :POST
-       request_new = "Google::#{product_ns}::Network::Post.new"
-     end
+     request_new = ["Google::#{product_ns}::Network",
+                    "#{object.delete_verb.to_s.capitalize}.new"
+                   ].join('::')
      if object.delete_url.nil?
         body_new = 'self_link(@resource)'
      else
