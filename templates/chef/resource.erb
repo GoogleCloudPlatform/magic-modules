@@ -309,10 +309,9 @@ module Google
 -%>
 <% if object&.handlers&.delete.nil? -%>
 <%
-     request_new = "::Google::#{product_ns}::Network::Delete"
-     if object.delete_verb == :POST
-       request_new = "::Google::#{product_ns}::Network::Post"
-     end
+     request_new = ["Google::#{product_ns}::Network",
+                    "#{object.delete_verb.to_s.capitalize}.new"
+                   ].join('::')
 
      if object.delete_url.nil?
         body_new = 'self_link(@new_resource)'
