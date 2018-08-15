@@ -23,24 +23,24 @@ objects:
   - !ruby/object:Api::Resource
     name: 'AlertPolicy'
     base_url: projects/{{project}}/alertPolicies
-    self_link: projects/{{project}}/alertPolicies/{{name}}
     update_verb: :PATCH
     input: true
     description: |
       A description of the conditions under which some aspect of your system is
       considered to be "unhealthy" and the ways to notify people or services
       about this state.
+    exports:
+      - name
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
           'https://cloud.google.com/monitoring/docs/'
       api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/'
-
     properties:
       - !ruby/object:Api::Type::String
         name: name
         description: |
-          Required if the policy exists.
+          The resource name for this policy.
         output: true
       - !ruby/object:Api::Type::String
         name: 'displayName'
@@ -717,7 +717,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Group'
     base_url: projects/{{project}}/groups
-    self_link: pprojects/{{project}}/groups/{{name}}
+    self_link: projects/{{project}}/groups/{{name}}
     update_verb: :PATCH
     input: true
     description: |
@@ -725,6 +725,9 @@ objects:
       has a filter that is matched against monitored resources and their
       associated metadata. If a group's filter matches an available monitored
       resource, then that resource is a member of that group.
+    exports:
+      - !ruby/object:Api::Type::FetchedExternal
+        name: name
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':

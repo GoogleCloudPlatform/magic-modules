@@ -14,7 +14,7 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   AlertPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
-    id_format: "{{project}}/{{name}}"
+    id_format: "{{name}}"
     # custom_code: !ruby/object:Provider::Terraform::CustomCode
     #   decoder: 'templates/terraform/decoders/monitoring.erb'
     #   encoder: 'templates/terraform/encoders/monitoring.erb'
@@ -52,15 +52,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       #   diff_suppress_func: 'compareSelfLinkRelativePaths'
       # locationId: !ruby/object:Provider::Terraform::PropertyOverride
       #   default_from_api: true
-      # name: !ruby/object:Provider::Terraform::PropertyOverride
-      #   custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_name.erb'
-      #   custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       conditions: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_conditions.erb'
-      conditions.conditionThreshold: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_condition_threshold.erb'
-      conditions.conditionAbsent: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_condition_absent.erb'
         # properties:
         #   condition_threshold: !ruby/object:Provider::Terraform::PropertyOverride
       # monitoringVersion: !ruby/object:Provider::Terraform::PropertyOverride
@@ -73,7 +66,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
 
   Group: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
-    id_format: "{{project}}/{{name}}"
+    id_format: "{{name}}"
     examples: |
       ### Basic Usage
       ```hcl
@@ -100,6 +93,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         }
       }
       ```
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/group.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
 #   # All of these files will be copied verbatim.
