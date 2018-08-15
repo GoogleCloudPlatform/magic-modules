@@ -152,13 +152,9 @@ def main():
   method = method_call('update', [
                                    'module', 'self_link(module)',
                                    ('kind' if object.kind?),
-                                   ('fetch' if object.access_api_results)
+                                   ('fetch' if object.access_api_results || !update_props.empty?)
                                  ])
 -%>
-<% unless update_props.empty? -%>
-                update_fields(module, resource_to_request(module),
-                              response_to_hash(module, fetch))
-<% end -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
                 changed = True
         else:
@@ -246,10 +242,13 @@ def main():
                    end
 -%>
 <% if object.update.nil? -%>
+<% unless update_props.empty? -%>
+    update_fields(module, resource_to_request(module),
+                  response_to_hash(module, fetch))
+<% end -%>
 <%   if object.input && update_props.empty? -%>
     module.fail_json(msg="<%= object.name -%> cannot be edited")
-<%   else # object.input -%>
-<%   if object.editable || !update_props.empty? -%>
+<%   elsif  !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   update_verb = object.update_verb.to_s.downcase
@@ -262,6 +261,13 @@ def main():
      ('kind' if !object.async && object.kind?)
    ]
   )
+-%>
+    return <%= method %>
+<% else # non-updatable, but has per-field updates -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
 -%>
     return <%= method %>
 <%   end # if object.input -%>
