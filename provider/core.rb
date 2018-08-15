@@ -40,6 +40,7 @@ module Provider
     include Compile::Core
     include Provider::Properties
     include Provider::End2End::Core
+    include Api::Object::ObjectUtils
 
     attr_reader :test_data
 
