@@ -270,10 +270,7 @@ def main():
 <% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  delete_verb = 'delete'
-  unless object.delete_verb.nil?
-    delete_verb = object.delete_verb.to_s.downcase
-  end
+  delete_verb = object.delete_verb.to_s.downcase
 
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
