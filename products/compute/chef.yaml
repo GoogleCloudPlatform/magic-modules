@@ -51,6 +51,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
+  RegionDiskType: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
   SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
 examples: !ruby/object:Api::Resource::HashArray
