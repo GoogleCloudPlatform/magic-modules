@@ -32,7 +32,11 @@
 #
 # TODO(nelsona): Add support gcloud's beta "app default credential"
 
-require 'googleauth'
+begin
+  require 'googleauth'
+rescue LoadError
+  raise 'Please install the googleauth gem'
+end
 require 'json'
 require 'net/http'
 
@@ -50,8 +54,11 @@ module Google
     end
   end
 
-  require 'google/api_client/client_secrets' if Google::Ruby.two?
-
+  begin
+    require 'google/api_client/client_secrets' if Google::Ruby.two?
+  rescue LoadError
+    raise 'Please install the google-api-client gem'
+  end
   # A class to aquire credentials and authorize Google API calls.
   class Authorization
     def initialize

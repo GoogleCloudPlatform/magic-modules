@@ -24,7 +24,7 @@ $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 
   inside_indent = 8
 
-  requires = generate_requires(object.all_user_properties)
+  requires = generate_requires(object.all_user_properties) + (object.requires || [])
   requires << 'chef/resource'
   requires << 'google/hash_utils'
   requires << emit_google_lib(binding, Compile::Libraries::NETWORK, 'get')
@@ -132,12 +132,16 @@ module Google
 
 <% end -%>
 <% if object.self_link_query.nil? -%>
+<% if object&.handlers&.prefetch  -%>
+<%= lines(indent(object.handlers.prefetch, 8)) -%>
+<% else # object.handlers -%>
 <% if object.kind? -%>
         fetch = fetch_resource(@new_resource, self_link(@new_resource),
                                '<%= object.kind -%>')
 <% else # object.kind? -%>
         fetch = fetch_resource(@new_resource, self_link(@new_resource))
 <% end # object.kind? -%>
+<% end # object.handlers.prefetch -%>
 <% else # object.self_link_query.nil? -%>
         fetch = fetch_wrapped_resource(@new_resource, '<%= object.kind -%>',
                                        '<%= object.self_link_query.kind -%>',
@@ -305,10 +309,9 @@ module Google
 -%>
 <% if object&.handlers&.delete.nil? -%>
 <%
-     request_new = "::Google::#{product_ns}::Network::Delete"
-     if object.delete_verb == :POST
-       request_new = "::Google::#{product_ns}::Network::Post"
-     end
+     request_new = ["::Google::#{product_ns}::Network",
+                    "#{object.delete_verb.to_s.capitalize}"
+                   ].join('::')
 
      if object.delete_url.nil?
         body_new = 'self_link(@new_resource)'
@@ -431,6 +434,11 @@ module Google
             # TODO(nelsonjr): Check w/ Chef... can we print this in red?
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
+<% if object.input -%>
+            message = '<%= object.name -%> cannot be edited'
+            Chef::Log.fatal message
+            raise message
+<% else # if object.input -%>
 <% if object&.handlers&.update.nil? -%>
 <% 
   put_new = ["::Google::#{product_ns}::Network",
@@ -461,6 +469,7 @@ module Google
 <% else # object&.handlers&.update.nil? -%>
 <%= lines(indent(object.handlers.update, 12)) -%>
 <% end # object&.handlers&.update.nil? -%>
+<% end # if object.input -%>
           end
         end
 <% unless object.all_resourcerefs.empty? -%>

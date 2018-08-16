@@ -16,7 +16,6 @@ require 'google/string_utils'
 
 module Api
   # Represents a property type
-  # rubocop:disable Metrics/ClassLength
   class Type < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
@@ -131,39 +130,6 @@ module Api
 
     private
 
-    # Shrinks a long composite type name into something that can barely be
-    # read by humans.
-    #
-    # E.g.: Google::Compute::Property::AutoscalerCustomMetricUtilizationsArray
-    #   --> Google::Compute::Property::Autos.....Custo.Metri.Utili.......Arr..
-    #   --> Google::Compute::Property::AutosCustoMetriUtiliArr
-    def shrink_type_name(type)
-      name_parts = shrink_type_name_parts(type)
-
-      # Isolate the Google common prefix
-      name_parts = name_parts.drop(property_ns_prefix.size)
-      num_parts = name_parts.flatten.size
-      shrunk_names = recurse_shrink_name(name_parts,
-                                         (1.0 * MAX_NAME / num_parts).round)
-      type_name = shrunk_names.flatten.join('_').camelize(:upper)
-      property_ns_prefix.concat([type_name])
-    end
-
-    def recurse_shrink_name(name, max_size)
-      return name[0, max_size] unless name.is_a?(::Array)
-      name.map { |part| recurse_shrink_name(part, max_size) }
-    end
-
-    def shrink_type_name_parts(type)
-      type.map do |t|
-        if t.is_a?(::Array)
-          t.map { |u| u.underscore.split('_') }
-        else
-          t.underscore.split('_')
-        end
-      end
-    end
-
     # A constant value to be provided as field
     class Constant < Type
       attr_reader :value
@@ -269,9 +235,8 @@ module Api
           type = property_ns_prefix
           type << get_type(@item_type).new(@name).type
         end
-        type = shrink_type_name(type)
-        class_name = type.pop
-        type << "#{class_name}Array"
+        type[-1] = "#{type[-1].camelize(:upper)}Array"
+        type
       end
 
       def property_type
@@ -367,8 +332,12 @@ module Api
     class ResourceRef < Type
       ALLOWED_WITHOUT_PROPERTY = [SelfLink::EXPORT_KEY].freeze
 
-      attr_reader :resource
-      attr_reader :imports
+      # The fields which can be overridden in provider.yaml.
+      module Fields
+        attr_reader :resource
+        attr_reader :imports
+      end
+      include Fields
 
       def out_type
         resource_ref.out_name
@@ -405,7 +374,8 @@ module Api
       def property_class
         type = property_ns_prefix
         type << [@resource, @imports, 'Ref']
-        shrink_type_name(type)
+        type[-1] = type[-1].join('_').camelize(:upper)
+        type
       end
 
       def property_type
@@ -457,7 +427,8 @@ module Api
       def property_class
         type = property_ns_prefix
         type << [@__resource.name, @name]
-        shrink_type_name(type)
+        type[-1] = type[-1].join('_').camelize(:upper)
+        type
       end
 
       def property_type
@@ -488,21 +459,35 @@ module Api
 
     # Represents an array of name=value pairs, and stores its items' type
     class NameValues < Composite
-      attr_reader :key_type
-      attr_reader :value_type
+      # The fields which can be overridden in provider.yaml.
+      module Fields
+        attr_reader :key_type
+        attr_reader :value_type
+
+        # Not all providers support the concept of a String->Object map. In
+        # those cases, treat the map as an Array of NestedObjects, in which each
+        # object has an extra property to act as the map key. This attr
+        # represents the name that key should be called in the downstream
+        # schema.
+        attr_reader :key_name
+      end
+      include Fields
 
       def validate
         super
         default_value_property :key_type, Api::Type::String.to_s
+        default_value_property :key_name, 'key'
         check_property :key_type, ::String
-        check_property :value_type, ::String
+        check_property :key_name, ::String
+        raise "Missing 'value_type' on #{object_display_name}" if @value_type.nil?
+        @value_type.validate if @value_type.is_a?(NestedObject)
         raise "Invalid type #{@key_type}" unless type?(@key_type)
         raise "Invalid type #{@value_type}" unless type?(@value_type)
       end
     end
 
     def type?(type)
-      !get_type(type).nil?
+      type.is_a?(Type) || !get_type(type).nil?
     end
 
     def get_type(type)
@@ -517,5 +502,4 @@ module Api
       ]
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

@@ -36,6 +36,11 @@ module Provider
         properties.select(&:output).sort_by(&:name)
     end
 
+    def tf_type(property)
+      return 'schema.TypeSet' if string_to_object_map?(property)
+      tf_types[property.class]
+    end
+
     # Converts between the Magic Modules type of an object and its type in the
     # TF schema
     def tf_types
@@ -103,6 +108,8 @@ module Provider
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
         property.item_type.properties
+      elsif string_to_object_map?(property)
+        property.value_type.properties
       else
         []
       end

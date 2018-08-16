@@ -17,7 +17,7 @@
   <% if property.is_set -%>
   Type: schema.TypeSet,
   <% else -%>
-  Type: <%= tf_types[property.class] %>,
+  Type: <%= tf_type(property) %>,
   <% end -%>
 <%	if property.default_from_api -%>
 	Computed: true,
@@ -103,9 +103,29 @@
   <% end -%>
 	<% end -%>
 <% elsif property.is_a?(Api::Type::NameValues) -%>
+  <% if property.key_type == 'Api::Type::String' && property.value_type == 'Api::Type::String' -%>
   Elem: &schema.Schema{Type: schema.TypeString},
-  <% if not (property.key_type == 'Api::Type::String' and property.value_type == 'Api::Type::String') -%>
+  <% elsif string_to_object_map?(property) -%>
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      "<%= property.key_name -%>": {
+        Type:     schema.TypeString,
+        Required: true,
+        <% if force_new?(property, object) -%>
+        ForceNew: true,
+        <% end -%>
+      },
+      <% order_properties(property.value_type.properties).each do |prop| -%>
+        <%= lines(build_schema_property(prop, object)) -%>
+      <% end -%>
+    },
+  },
+  <% if !property.set_hash_func.nil? -%>
+  Set: <%= property.set_hash_func -%>,
+  <% end -%>
+  <% else -%>
     // TODO(magic-modules): Handle this map specially - Terraform maps are String->String only,
+    // and support has been added for the String->Object case,
     // but this map is marked as being <%= property.key_type -%>-><%= property.value_type -%>.
   <% end -%>
 <% end -%>

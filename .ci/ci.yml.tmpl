@@ -1,5 +1,5 @@
-{% set chef_modules = ['auth', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns'] %}
-{% set puppet_modules = ['auth', 'bigquery', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'pubsub', 'resourcemanager'] %}
+{% set chef_modules = ['_bundle', 'auth', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'iam'] %}
+{% set puppet_modules = ['_bundle', 'auth', 'bigquery', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'pubsub', 'resourcemanager'] %}
 {% set terraform_enabled = true %}
 {% set ansible_enabled = true %}
 {% macro names_as_list(repo, names) -%}
@@ -15,7 +15,13 @@ build/{{repo}}/{{name}}
      (['build/ansible'] if ansible_enabled else [])
 %}
 {% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
-{% set chef_test_excludes = {} %}
+{% set chef_test_excludes = {
+    'iam': [
+      'spec/service_account_key_spec.rb',
+      'spec/service_account_spec.rb'
+    ]
+  }
+%}
 {% set puppet_test_excludes = {
   'compute': [
       'spec/gcompute_instance_group_manager_provider_spec.rb',
@@ -96,7 +102,11 @@ resources:
     - name: puppet-{{module}}-intermediate
       type: git-branch
       source:
+{% if module == '_bundle' %}
+        uri: git@github.com:((github-account.username))/puppet-google.git
+{% else %}
         uri: git@github.com:((github-account.username))/puppet-google-{{module}}.git
+{% endif %}
         private_key: ((repo-key.private_key))
 {% endfor %}
 
@@ -104,7 +114,11 @@ resources:
     - name: chef-{{module}}-intermediate
       type: git-branch
       source:
+{% if module == '_bundle' %}
+        uri: git@github.com:((github-account.username))/chef-google.git
+{% else %}
         uri: git@github.com:((github-account.username))/chef-google-{{module}}.git
+{% endif %}
         private_key: ((repo-key.private_key))
 {% endfor %}
 

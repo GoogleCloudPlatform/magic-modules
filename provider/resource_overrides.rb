@@ -149,6 +149,8 @@ module Provider
       elsif api_entity.is_a?(Api::Type::Array) &&
             api_entity.item_type.is_a?(Api::Type::NestedObject)
         api_entity.item_type.all_properties
+      elsif ObjectUtils.string_to_object_map?(api_entity)
+        api_entity.value_type.all_properties
       end
     end
 

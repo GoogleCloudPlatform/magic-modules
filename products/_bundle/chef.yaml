@@ -21,9 +21,7 @@ manifest: !ruby/object:Provider::ChefBundle::Manifest
     This cookbook provides the built-in types and services for Chef to manage
     Google Cloud Engine resources.
   depends:
-    - !ruby/object:Provider::Config::Requirements
-      name: 'google-gauth'
-      versions: '< 0.2.0'
+<%= indent(compile('provider/chef/common~depends.yaml'), 4) %>
     - !ruby/object:Provider::Config::Requirements
       name: 'google-glogging'
       versions: '< 0.2.0'
@@ -36,21 +34,12 @@ manifest: !ruby/object:Provider::ChefBundle::Manifest
         manage Google Cloud Stackdriver Logging Agent resources, as native Chef
         types.
       source: 'https://github.com/GoogleCloudPlatform/chef-google-logging'
-  releases:
-    auth: 0.1.1
-    compute: 0.1.1
-    container: 0.1.0
-    dns: 0.1.0
-    # TODO(nelsonjr): Release: iam: 0.1.0
-    # TODO(nelsonjr): Release: pubsub: 0.1.0
-    # TODO(nelsonjr): Release: resourcemanager: 0.1.0
-    sql: 0.2.0
-    storage: 0.1.0
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 files: !ruby/object:Provider::Config::Files
   copy:
     'LICENSE': 'templates/LICENSE'
+    'spec/': 'products/_bundle/files/spec/'
   compile:
     'README.md': 'products/_bundle/templates/chef/README.md.erb'
     '.gitignore': 'templates/dot~gitignore'
