@@ -349,12 +349,12 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%=
   lines(format(
     [
-      ('return fetch_resource(resource, self_link(resource))' \
+      ('return fetch_resource(@resource, self_link(@resource))' \
        unless object.kind?),
-      ['return fetch_resource(resource, self_link(resource),',
+      ['return fetch_resource(@resource, self_link(@resource),',
        "'#{object.kind}')"].join(' '),
       [
-        'return fetch_resource(resource, self_link(resource),',
+        'return fetch_resource(@resource, self_link(@resource),',
         indent("'#{object.kind}')", 23) # 23 = align previous until (
       ]
     ].compact, 4
@@ -374,6 +374,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     }
   end
 
+<% provider = 'puppet' -%>
 <%= lines(indent(compile('templates/puppetchef/update_props.erb'), 2)) -%>
 <% unless object.exports.nil? -%>
 <%

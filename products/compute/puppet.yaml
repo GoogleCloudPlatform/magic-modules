@@ -40,10 +40,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
           request = JSON.parse(request.to_json)
           request['fingerprint'] = @fetched['fingerprint']
         end
-  Disk: !ruby/object:Provider::Puppet::ResourceOverride
-    # TODO(nelsonjr): Implement specific actions, such as resize and setLabels.
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'Disk cannot be edited'
   DiskType: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true
     # TODO(nelsonjr): Make sure that attempts to create a disk fails
