@@ -442,7 +442,10 @@ module Google
 <% else # if object.input -%>
 <% if object&.handlers&.update.nil? -%>
 <% update_props.each do |key, props| -%>
-<% prop_statement = props.map { |prop| "(@current_resource.#{prop.name.underscore} != @new_resource.#{prop.name.underscore})" }.join(' || ') -%>
+<%
+  prop_statement = props.reject { |prop| prop.is_a? Api::Type::Fingerprint }
+                        .map { |prop| "(@current_resource.#{prop.name.underscore} != @new_resource.#{prop.name.underscore})" }.join(' || ')
+-%>
             if <%= prop_statement %>
               <%= props.first.name.downcase -%>_update(@current_resource)
             end
@@ -526,6 +529,7 @@ module Google
 <%= lines(indent(emit_method('self.resource_to_hash', %w[resource], r2h_code,
                              file_relative), 8)) -%>
 
+<% provider = 'chef' -%>
 <%= lines(indent(compile('templates/puppetchef/update_props.erb'), 2)) -%>
         # Copied from Chef > Provider > #converge_if_changed
         def compute_changes

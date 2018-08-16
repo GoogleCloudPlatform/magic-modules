@@ -183,6 +183,24 @@ module Api
         super
         @output = true if @output.nil?
       end
+
+      def requires
+        File.join(
+          'google',
+          @__resource.__product.prefix[1..-1],
+          'property',
+          'string'
+        ).downcase
+      end
+
+      def property_type
+        [
+          'Google',
+          @__resource.__product.prefix[1..-1].camelize(:upper),
+          'Property',
+          'String'
+        ].join('::')
+      end
     end
 
     # Represents a timestamp
