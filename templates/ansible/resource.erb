@@ -232,7 +232,7 @@ def main():
 
 <%=
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
-                               ('fetch' if object.access_api_results)]))
+                               ('fetch' if object.access_api_results || !update_props.empty?)]))
 -%>
 <%
   update_request = if object.custom_update_resource
@@ -278,10 +278,13 @@ def main():
 
 <% unless update_props.empty? -%>
 def update_fields(module, request, response):
-    difference = GcpRequest(request).difference(GcpRequest(response))
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <% update_props.each do |key, props| -%>
-    if <%= props.map { |prop| "difference.get(#{quote_string(prop.name.underscore)})" }.join(' || ') -%>:
+<%
+  props_statement = props.reject { |p| p.is_a?(Api::Type::FetchedExternal) }
+  .map { |prop| "response.get(#{quote_string(prop.api_name)}) != request.get(#{quote_string(prop.api_name)})" }.join(' or ')
+-%>
+    if <%= props_statement -%>:
         auth.<%= key[:update_verb].downcase -%>(
             ''.join([
                 "<%= object.__product.base_url -%>",
