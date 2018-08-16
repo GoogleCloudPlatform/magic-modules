@@ -97,7 +97,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
-  RegionDisk: !ruby/object:Provider::Puppet::ResourceOverride
+  RegionDiskType: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true

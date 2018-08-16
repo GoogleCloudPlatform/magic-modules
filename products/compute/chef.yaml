@@ -51,7 +51,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
-  RegionDisk: !ruby/object:Provider::Chef::ResourceOverride
+  RegionDiskType: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
