@@ -12,14 +12,4 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 <% end -%>
-obj = map[string]interface{}{
-	"admissionWhitelistPatterns": []interface{}{
-		map[string]interface{}{
-			"namePattern": "gcr.io/google_containers/*",
-		},
-	},
-	"defaultAdmissionRule": map[string]interface{}{
-		"evaluationMode": "ALWAYS_ALLOW",
-		"enforcementMode": "ENFORCED_BLOCK_AND_AUDIT_LOG",
-	},
-}
+obj = defaultBinaryAuthorizationPolicy(d.Get("project").(string))
