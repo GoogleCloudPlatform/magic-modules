@@ -103,6 +103,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  RegionDiskType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides

@@ -499,6 +499,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         replica_zones = ["us-central1-a", "us-central1-f"]
       }
       ```
+  RegionDiskType: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
