@@ -2268,9 +2268,6 @@ objects:
     name: 'RegionDiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/regions/{{region}}/diskTypes
-    # TODO(nelsonjr): Search all documentation for references of using URL (like
-    # the description below) and replace with the proper reference to the
-    # corresponding type.
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
       the type of disk to use, such as a pd-ssd or pd-standard. To reference a
