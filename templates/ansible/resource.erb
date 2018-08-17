@@ -278,7 +278,10 @@ def main():
 
 <% unless update_props.empty? -%>
 def update_fields(module, request, response):
-    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% empty = update_props.values.flatten.reject { |p| p.is_a? Api::Type::FetchedExternal }.empty? -%>
+<% if empty -%>
+    pass
+<% else -%>
 <% update_props.each do |key, props| -%>
 <%
   props_statement = props.reject { |p| p.is_a?(Api::Type::FetchedExternal) }
@@ -286,19 +289,27 @@ def update_fields(module, request, response):
 -%>
 <% unless props_statement.empty? -%>
     if <%= props_statement -%>:
-        auth.<%= key[:update_verb].downcase -%>(
-            ''.join([
-                "<%= object.__product.base_url -%>",
-                "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
-            ]).format(**module.params),
-            {
-<%= lines(request_properties(props, 16)) -%>
-            }
-        )
+        <%= props.first.name.downcase -%>_update(module, request, response)
 <% end # unless props_statement.empty? -%>
 <% end # update_props.each -%>
+<% end # if empty -%>
 
 
+<% update_props.each do |key, props| -%>
+def <%= props.first.name.downcase -%>_update(module, request, response):
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    auth.<%= key[:update_verb].downcase -%>(
+        ''.join([
+            "<%= object.__product.base_url -%>",
+            "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
+        ]).format(**module.params),
+        {
+<%= lines(request_properties(props, 12)) -%>
+        }
+    )
+
+
+<% end -%>
 <% end # unless update_props.empty? -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
