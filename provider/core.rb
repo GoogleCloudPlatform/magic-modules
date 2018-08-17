@@ -464,6 +464,18 @@ module Provider
       ["def #{name}", ("(#{args.join(', ')})" unless args.empty?)].compact.join
     end
 
+    def method_call(name, args, indent = 0)
+      format([
+        [
+          ["#{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
+        ],
+        [
+          ["#{name}", ("(#{args.compact.drop(1).join(', ')}" unless args.empty?)].compact.join,
+           "#{indent(args.last, indent + name.length + 2)})"
+        ],
+      ], 0, indent)
+    end
+
     def emit_rubo_pair(file_name, name, opts = {})
       [
         emit_rubo_item(file_name, name, :disabled, opts),

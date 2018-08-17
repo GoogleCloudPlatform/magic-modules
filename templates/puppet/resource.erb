@@ -74,20 +74,10 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       debug("prefetch #{name}") if project.nil?
       debug("prefetch #{name} @ #{project}") unless project.nil?
 <%   if object.self_link_query.nil? -%>
-<%=
-  lines(format(
-    [
-      ('fetch = fetch_resource(resource, self_link(resource))' \
-       unless object.kind?),
-      ['fetch = fetch_resource(resource, self_link(resource),',
-       "'#{object.kind}')"].join(' '),
-      [
-        'fetch = fetch_resource(resource, self_link(resource),',
-        indent("'#{object.kind}')", 23) # 23 = align previous until (
-      ]
-    ].compact, 6
-  ))
--%>
+      fetch = <%= method_call('fetch_resource', ['resource',
+                                                 'self_link(resource)',
+                                                 ("'#{object.kind}'" if object.kind?)
+      ], 14) %>
 <%   else # object.self_link_query.nil? -%>
 <%
   self_link_kind = !object.self_link_query.kind.nil? ? \
