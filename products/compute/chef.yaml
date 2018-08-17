@@ -30,42 +30,13 @@ manifest: !ruby/object:Provider::Chef::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'DiskType cannot be edited'
-        Chef::Log.fatal message
-        raise message
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_disk_type.rb'
-  Disk: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Disk cannot be edited'
-        Chef::Log.fatal message
-        raise message
-  Instance: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Instance cannot be edited'
-        Chef::Log.fatal message
-        raise message
   Network: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      # TODO(alexstephen): Better editing from auto to custom
-      # This should mimic Puppet.
-      update: |
-        message = 'Network cannot be edited'
-        Chef::Log.fatal message
-        raise message
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_network.rb'
   Region: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Region cannot be edited'
-        Chef::Log.fatal message
-        raise message
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_target_pool.rb'
@@ -79,6 +50,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Autoscaler: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  RegionDiskType: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true

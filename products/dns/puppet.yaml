@@ -27,9 +27,6 @@ manifest: !ruby/object:Provider::Puppet::Manifest
   operating_systems:
 <%= indent(include('provider/puppet/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
-  ManagedZone: !ruby/object:Provider::Puppet::ResourceOverride
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'DNS Managed Zone cannot be edited' if @dirty
   ResourceRecordSet: !ruby/object:Provider::Puppet::ResourceOverride
     access_api_results: true
     handlers: !ruby/object:Provider::Puppet::Handlers
@@ -62,8 +59,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     unwrap_resource: false
   Project: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'DNS Project cannot be edited' if @dirty
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
 examples: !ruby/object:Api::Resource::HashArray

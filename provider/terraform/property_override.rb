@@ -124,9 +124,11 @@ module Provider
                                        api_property.description)
         end
 
-        unless api_property.is_a?(Api::Type::Array)
+        unless api_property.is_a?(Api::Type::Array) ||
+               ObjectUtils.string_to_object_map?(api_property)
           if @is_set
-            raise 'Set can only be specified for Api::Type::Array. ' \
+            raise 'Set can only be specified for Api::Type::Array ' \
+                  'or Api::Type::NameValues<String, NestedObject>. ' \
                   "Type is #{api_property.class} for property "\
                   "'#{api_property.name}'"
           end

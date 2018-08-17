@@ -43,5 +43,16 @@ module Api
     def out_name
       @name.underscore
     end
+
+    # Utility class for Objects
+    module ObjectUtils
+      module_function
+
+      def string_to_object_map?(property)
+        property.is_a?(Api::Type::NameValues) &&
+          property.key_type == 'Api::Type::String' &&
+          property.value_type.is_a?(Api::Type::NestedObject)
+      end
+    end
   end
 end

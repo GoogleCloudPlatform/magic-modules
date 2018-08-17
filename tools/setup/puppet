@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Puppet Setup Script
+# This script replaces all modules in your Puppet module path with the modules
+# in this instance of Magic Modules
+
+# This script should be run from MM root.
+MODPATH="$HOME/.puppetlabs/etc/code/modules"
+
+for mod in "`pwd`/build/puppet/"*; do
+  shortname="$(basename $mod)"
+  mod_name="g$shortname"
+  new_path="$MODPATH/$mod_name"
+  rm $new_path
+  ln -s "$mod" "$new_path"
+done

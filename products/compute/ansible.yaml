@@ -103,6 +103,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  RegionDiskType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides
@@ -214,8 +216,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
-  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
-    editable: false
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
@@ -265,6 +265,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   MachineType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  RegionDiskType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'

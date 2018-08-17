@@ -59,7 +59,7 @@ EXAMPLES = '''
 <% res_readable_name = object.name.uncombine -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', object, false)) -%>
+<%= lines(depend.build_test('present', object, false), 1) -%>
 <%   end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
 <%= lines(example.task.build_example('present', object)) -%>
@@ -240,7 +240,9 @@ def main():
                    end
 -%>
 <% if object.update.nil? -%>
-<%   if !false?(object.editable) -%>
+<%   if object.input -%>
+    module.fail_json(msg="<%= object.name -%> cannot be edited")
+<%   else # object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   update_verb = object.update_verb.to_s.downcase
@@ -255,9 +257,7 @@ def main():
   )
 -%>
     return <%= method %>
-<%   else # !false?(object.editable) -%>
-    module.fail_json(msg="<%= object.name -%> cannot be edited")
-<%   end # !false?(object.editable) -%>
+<%   end # if object.input -%>
 <% else # object.update.nil? -%>
 <%= lines(indent(object.update, 4)) -%>
 <% end # object.update.nil? -%>
@@ -270,10 +270,7 @@ def main():
 <% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  delete_verb = 'delete'
-  unless object.delete_verb.nil?
-    delete_verb = object.delete_verb.to_s.downcase
-  end
+  delete_verb = object.delete_verb.to_s.downcase
 
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
@@ -301,7 +298,7 @@ def resource_to_request(module):
 <% if object.kind? -%>
         u'kind': <%= quote_string(object.kind) -%>,
 <% end # if object.kind? -%>
-<%= lines(indent(request_properties(properties_in_request), 4)) -%>
+<%= lines(indent(request_properties(properties_in_request, 4), 4)) -%>
     }
 <% if object.encoder? -%>
     request = <%= object.transport.encoder -%>(request, module)
@@ -414,7 +411,7 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return {
-<%= lines(response_properties(object.properties)) -%>
+<%= lines(response_properties(object.properties, 8)) -%>
     }
 <% readonly_selflink_rrefs.each do |resource| -%>
 

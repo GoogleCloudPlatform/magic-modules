@@ -30,9 +30,6 @@ manifest: !ruby/object:Provider::Puppet::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   Subscription: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
-      flush:
-        # TODO(nelsonjr): Implement calling custom methods to update pushConfig.
-        raise 'Subscription cannot be edited.'
       # TODO(alexstephen): Remove when b/66233673 fixed.
       self_link: |
         URI.join(
