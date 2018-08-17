@@ -119,6 +119,7 @@ func testAccCheckBinaryAuthorizationPolicyDefault(pid string) resource.TestCheck
 		if err != nil {
 			return err
 		}
+		delete(pol, "updateTime")
 
 		defaultPol := defaultBinaryAuthorizationPolicy(pid)
 		if !reflect.DeepEqual(pol, defaultPol) {
