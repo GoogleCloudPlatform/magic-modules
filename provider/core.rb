@@ -480,8 +480,7 @@ module Provider
                # All on separate lines.
                [
                  "#{name}(#{args.first},",
-                 indent_list(args.slice(1..-2), indent + name.length + 1,
-                             args.slice(1..-2).length <= 1),
+                 indent_list(args.slice(1..-2), indent + name.length + 1, true),
                  indent("#{args.last})", indent + name.length + 1)
                ]
              ], 0, indent)
