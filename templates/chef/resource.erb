@@ -450,7 +450,7 @@ module Google
                         .map { |prop| "(@current_resource.#{prop.name.underscore} != @new_resource.#{prop.name.underscore})" }.join(' || ')
 -%>
             if <%= prop_statement %>
-              <%= props.first.name.downcase -%>_update(@current_resource)
+              <%= props.first.name.underscore -%>_update(@current_resource)
             end
 <% end # update_props.each -%>
 <% if !object.input -%>
