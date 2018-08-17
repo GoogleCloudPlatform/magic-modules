@@ -45,7 +45,8 @@ ADDITIONAL_FILES = [
 @options = {
   directory: "#{Dir.pwd}/build/ansible/",
   ansible_version: '2.7',
-  dry_run: false
+  dry_run: false,
+  only_facts: false
 }
 ###########################################################
 # Functions
@@ -117,6 +118,10 @@ OptionParser.new do |opts|
   opts.on('-d', '--dry-run', 'Dry run') do |_v|
     @options[:dry_run] = true
   end
+
+  opts.on('-f', '--only-facts', 'Only facts') do |_v|
+    @options[:only_facts] = true
+  end
 end.parse!
 
 # rubocop:disable Style/SpecialGlobalVars
@@ -147,6 +152,7 @@ files = get_all_modules('magician')
 # rubocop:disable Metrics/BlockLength
 files.each do |mod|
   mod_name = %r{lib/ansible/modules/cloud/google/([a-z_]*)\.py}.match(mod.strip)[1]
+  next if @options[:only_facts] and !mod_name.include?('facts')
   puts "Building PR for #{mod_name}"
 
   # Create a new branch
