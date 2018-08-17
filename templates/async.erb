@@ -2,26 +2,17 @@ def expand_variables(template, var_data, extra_data = {})
   self.class.expand_variables(template, var_data, extra_data)
 end
 
-<% if object.kind? -%>
-def fetch_resource(resource, self_link, kind)
-  self.class.fetch_resource(resource, self_link, kind)
+<%= method_decl('fetch_resource', ['resource', 'self_link',
+                                   ('kind' if object.kind?)]) %>
+<%= indent(method_call('self.class.fetch_resource', ['resource', 'self_link',
+                                              ('kind' if object.kind?)]), 2) %>
 end
-<% else # object.kind? -%>
-def fetch_resource(resource, self_link)
-  self.class.fetch_resource(resource, self_link)
-end
-<% end # object.kind? -%>
 
 <%= lines(emit_link('async_op_url', build_url(object.async_operation_url, true), false,
                     true)) -%>
 
 def wait_for_operation(response, resource)
-<% if object.kind? -%>
-<%   op_kind = object.async.operation.kind -%>
-  op_result = return_if_object(response, '<%= op_kind -%>')
-<% else # object.kind? -%>
-  op_result = return_if_object(response)
-<% end # object.kind? -%>
+  op_result = <%= method_call('return_if_object', ['response', ("'#{object.async.operation.kind}'" if object.kind?)]) %>
   return if op_result.nil?
 <%   stat_path = Google::HashUtils.path2navigate(object.async.status.path) -%>
   status = ::Google::HashUtils.navigate(op_result, <%= stat_path -%>)
@@ -105,7 +96,7 @@ def wait_for_completion(status, op_result, resource)
     raise "Invalid result '#{status}' on <%= object.out_name -%>." \
       unless %w[<%= allowed_states.join(' ') -%>].include?(status)
 <% if object.kind? -%>
-    op_result = fetch_resource(resource, op_uri, '<%= op_kind -%>')
+    op_result = fetch_resource(resource, op_uri, '<%= object.async.operation.kind -%>')
 <% else # object.kind? -%>
     op_result = fetch_resource(resource, op_uri)
 <% end # object.kind? -%>
