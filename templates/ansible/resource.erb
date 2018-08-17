@@ -190,7 +190,8 @@ def main():
 -%>
             fetch = <%= method %>
 <% if object.post_create -%>
-<% lines(indent(object.post_create, 12)) -%>
+<%= lines(indent(object.post_create, 12)) -%>
+<% end # ifobject.post_create -%>
             changed = True
         else:
             fetch = {}
