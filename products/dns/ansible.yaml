@@ -38,7 +38,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
         name: dnsName
         description: Restricts the list to return only zones with this domain name.
       list_key: 'managedZones'
-
+      query_options: false
+      filter_api_param: dnsName
 overrides: !ruby/object:Provider::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false

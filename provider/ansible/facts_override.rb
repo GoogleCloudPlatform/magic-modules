@@ -20,16 +20,22 @@ module Provider
       attr_reader :list_key
       attr_reader :has_filters
       attr_reader :filter
+      attr_reader :query_options
+      attr_reader :filter_api_param
 
       def validate
         super
         default_value_property :list_key, 'items'
         default_value_property :has_filters, true
         default_value_property :filter, FilterProp.new
+        default_value_property :query_options, true
+        default_value_property :filter_api_param, 'filter'
 
         check_property :list_key, ::String
         check_property :has_filters, :boolean
         check_property :filter, Api::Object
+        check_property :query_options, :boolean
+        check_property :filter_api_param, ::String
       end
     end
   end

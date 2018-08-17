@@ -91,8 +91,17 @@ def main():
     if 'scopes' not in module.params:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
 
-    items = <%= method_call('fetch_list', ['module', 'collection(module)',
-                                          ('query_options(module.params[\'filters\'])' if object.facts.has_filters)]) %>
+<%
+  query_param = nil
+  if object.facts.has_filters
+    if object.facts.query_options
+      query_param = "query_options(module.params['#{object.facts.filter.name}'])"
+    else
+      query_param = "module.params['#{object.facts.filter.name}']"
+    end
+  end
+-%>
+    items = <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
     if items.get(<%= quote_string(object.facts.list_key) -%>):
         items = items.get(<%= quote_string(object.facts.list_key) -%>)
     else:
@@ -109,11 +118,11 @@ def main():
 <%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
 <% prod_name = object.__product.prefix[1..-1] -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    response = <%= method_call('auth.get', ['link', ('params={\'filter\': query}' if object.facts.has_filters)]) %>
+    response = <%= method_call('auth.get', ['link', ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
     return return_if_object(module, response)
 
 
-<% if object.facts.has_filters -%>
+<% if object.facts.has_filters && object.facts.query_options -%>
 def query_options(filters):
     if not filters:
         return ''
