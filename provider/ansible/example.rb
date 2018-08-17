@@ -329,7 +329,14 @@ module Provider
                      .map { |para| { para => sample_code[para] } }
                      .reduce({}, :merge)
 
-        code['filters'] = ["name = #{hash[:name]}"] if object.facts.has_filters
+        if object.facts.has_filters
+          if object.facts.filter.name != 'filters'
+            underscore_name = object.facts.filter.name.underscore
+            code[underscore_name] = sample_code[underscore_name]
+          else
+            code['filters'] = ["name = #{hash[:name]}"]
+          end
+        end
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code
       end
