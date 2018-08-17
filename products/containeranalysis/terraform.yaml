@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+name: ContainerAnalysis
 overrides: !ruby/object:Provider::ResourceOverrides
   Note: !ruby/object:Provider::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/notes/{{name}}"]

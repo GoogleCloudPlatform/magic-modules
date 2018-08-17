@@ -161,6 +161,10 @@ EOF
 `, name, name, armoredPubKey)
 }
 
+// Generated key using instructions from
+// https://cloud.google.com/binary-authorization/docs/creating-attestors#generate_pgp_key_pairs.
+// This key has no real meaning and was generated in order to have a valid key
+// for testing.
 const armoredPubKey = `mQENBFtP0doBCADF+joTiXWKVuP8kJt3fgpBSjT9h8ezMfKA4aXZctYLx5wslWQl
 bB7Iu2ezkECNzoEeU7WxUe8a61pMCh9cisS9H5mB2K2uM4Jnf8tgFeXn3akJDVo0
 oR1IC+Dp9mXbRSK3MAvKkOwWlG99sx3uEdvmeBRHBOO+grchLx24EThXFOyP9Fk6

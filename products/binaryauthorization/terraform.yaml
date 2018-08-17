@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+name: BinaryAuthorization
 overrides: !ruby/object:Provider::ResourceOverrides
   Attestor: !ruby/object:Provider::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/attestors/{{name}}"]
