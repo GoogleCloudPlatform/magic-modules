@@ -461,25 +461,27 @@ module Provider
     end
 
     def method_decl(name, args)
-      ["def #{name}", ("(#{args.join(', ')})" unless args.empty?)].compact.join
+      ["def #{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
     end
 
     def method_call(name, args, indent = 0)
+      args = args.compact
       format([
         # All on one line.
         [
-          ["#{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
+          ["#{name}", ("(#{args.join(', ')})" unless args.empty?)].compact.join
         ],
         # All but first on one line.
         [
-          ["#{name}", ("(#{args.compact[0..-1].join(', ')}" unless args.empty?)].compact.join,
+          ["#{name}", ("(#{args[0..-1].join(', ')}" unless args.empty?)].compact.join,
           "#{indent(args.last, indent + name.length + 2)})"
         ],
-        # All but first two on one line.
+        # All on separate lines.
         [
-          ["#{name}", ("(#{args.compact[0..-3].join(', ')}" unless args.empty?)].compact.join,
-          "#{indent(args.compact[-2..args.length].join(', '), indent + name.length + 1)})"
-        ],
+          "#{name}(#{args.first},",
+          indent_list(args.slice(1..-2), indent + name.length + 1),
+          indent("#{args.last})", indent + name.length + 1)
+        ]
       ], 0, indent)
     end
 
