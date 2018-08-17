@@ -120,8 +120,9 @@ func testAccCheckBinaryAuthorizationPolicyDefault(pid string) resource.TestCheck
 			return err
 		}
 
-		if !reflect.DeepEqual(pol, defaultBinaryAuthorizationPolicy) {
-			return fmt.Errorf("Policy for project %s was %v, expected default policy %v", pid, pol, defaultBinaryAuthorizationPolicy)
+		defaultPol := defaultBinaryAuthorizationPolicy(pid)
+		if !reflect.DeepEqual(pol, defaultPol) {
+			return fmt.Errorf("Policy for project %s was %v, expected default policy %v", pid, pol, defaultPol)
 		}
 		return nil
 	}
