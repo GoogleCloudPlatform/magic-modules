@@ -35,8 +35,8 @@ requirements:
 <% @config.manifest.get('requirements', object).each do |line| -%>
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
-options:
 <% if object.facts.has_filters -%>
+options:
     filters:
        description:
            A list of filter value pairs. Available filters are listed here
