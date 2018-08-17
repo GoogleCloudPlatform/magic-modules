@@ -23,7 +23,7 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 				Config: testAccBinaryAuthorizationPolicyBasic(pid, pname, org),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_policy.policy",
+				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -52,7 +52,7 @@ func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, note, attestor),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_policy.policy",
+				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -81,7 +81,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				Config: testAccBinaryAuthorizationPolicyBasic(pid, pname, org),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_policy.policy",
+				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -89,7 +89,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, note, attestor),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_policy.policy",
+				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -97,7 +97,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				Config: testAccBinaryAuthorizationPolicyBasic(pid, pname, org),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_policy.policy",
+				ResourceName:      "google_binary_authorization_policy.policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -147,7 +147,7 @@ resource "google_project" "project" {
   org_id          = "%s"
 }
 
-resource "google_binaryauthorization_policy" "policy" {
+resource "google_binary_authorization_policy" "policy" {
   project = "${google_project.project.project_id}"
 
   admission_whitelist_patterns {
@@ -171,7 +171,7 @@ resource "google_project" "project" {
   org_id          = "%s"
 }
 
-resource "google_containeranalysis_note" "note" {
+resource "google_container_analysis_note" "note" {
   project = "${google_project.project.project_id}"
 
   name = "tf-test-%s"
@@ -182,17 +182,17 @@ resource "google_containeranalysis_note" "note" {
   }
 }
 
-resource "google_binaryauthorization_attestor" "attestor" {
+resource "google_binary_authorization_attestor" "attestor" {
   project = "${google_project.project.project_id}"
 
   name = "tf-test-%s"
   description = "my description"
   attestation_authority_note {
-    note_reference = "${google_containeranalysis_note.note.name}"
+    note_reference = "${google_container_analysis_note.note.name}"
   }
 }
 
-resource "google_binaryauthorization_policy" "policy" {
+resource "google_binary_authorization_policy" "policy" {
   project = "${google_project.project.project_id}"
 
   admission_whitelist_patterns {
@@ -208,7 +208,7 @@ resource "google_binaryauthorization_policy" "policy" {
     cluster = "us-central1-a.prod-cluster"
     evaluation_mode = "REQUIRE_ATTESTATION"
     enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    require_attestations_by = ["${google_binaryauthorization_attestor.attestor.name}"]
+    require_attestations_by = ["${google_binary_authorization_attestor.attestor.name}"]
   }
 }
 `, pid, pname, org, note, attestor)

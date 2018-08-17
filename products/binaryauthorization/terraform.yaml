@@ -18,7 +18,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     import_format: ["projects/{{project}}/attestors/{{name}}"]
     examples: |
       ```hcl
-      resource "google_containeranalysis_note" "note" {
+      resource "google_container_analysis_note" "note" {
         name = "test-attestor-note"
         attestation_authority {
           hint {
@@ -27,10 +27,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         }
       }
 
-      resource "google_binaryauthorization_attestor" "attestor" {
+      resource "google_binary_authorization_attestor" "attestor" {
         name = "test-attestor"
         attestation_authority_note {
-          note_reference = "${google_containeranalysis_note.note.name}"
+          note_reference = "${google_container_analysis_note.note.name}"
           public_keys {
             ascii_armored_pgp_public_key = <<EOF
       mQENBFtP0doBCADF+joTiXWKVuP8kJt3fgpBSjT9h8ezMfKA4aXZctYLx5wslWQl
@@ -75,7 +75,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.erb'
     examples: |
       ```hcl
-      resource "google_containeranalysis_note" "note" {
+      resource "google_container_analysis_note" "note" {
         name = "test-attestor-note"
         attestation_authority {
           hint {
@@ -84,14 +84,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
         }
       }
 
-      resource "google_binaryauthorization_attestor" "attestor" {
+      resource "google_binary_authorization_attestor" "attestor" {
         name = "test-attestor"
         attestation_authority_note {
-          note_reference = "${google_containeranalysis_note.note.name}"
+          note_reference = "${google_container_analysis_note.note.name}"
         }
       }
 
-      resource "google_binaryauthorization_policy" "policy" {
+      resource "google_binary_authorization_policy" "policy" {
         admission_whitelist_patterns {
           name_pattern= "gcr.io/google_containers/*"
         }
@@ -105,7 +105,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           cluster = "us-central1-a.prod-cluster"
           evaluation_mode = "REQUIRE_ATTESTATION"
           enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-          require_attestations_by = ["${google_binaryauthorization_attestor.attestor.name}"]
+          require_attestations_by = ["${google_binary_authorization_attestor.attestor.name}"]
         }
       }
       ```
@@ -126,7 +126,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
               raw["require_attestations_by"] = schema.NewSet(selfLinkNameHash, convertStringArrToInterface(t))
             }
             var buf bytes.Buffer
-            schema.SerializeResourceForHash(&buf, raw, resourceBinaryauthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
+            schema.SerializeResourceForHash(&buf, raw, resourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
             return hashcode.String(buf.String())
           }
       clusterAdmissionRules.requireAttestationsBy: !ruby/object:Provider::Terraform::PropertyOverride

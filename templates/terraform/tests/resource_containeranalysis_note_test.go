@@ -23,7 +23,7 @@ func TestAccContainerAnalysisNote_basic(t *testing.T) {
 				Config: testAccContainerAnalysisNoteBasic(name, readableName),
 			},
 			{
-				ResourceName:      "google_containeranalysis_note.note",
+				ResourceName:      "google_container_analysis_note.note",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -46,7 +46,7 @@ func TestAccContainerAnalysisNote_update(t *testing.T) {
 				Config: testAccContainerAnalysisNoteBasic(name, readableName),
 			},
 			{
-				ResourceName:      "google_containeranalysis_note.note",
+				ResourceName:      "google_container_analysis_note.note",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -54,7 +54,7 @@ func TestAccContainerAnalysisNote_update(t *testing.T) {
 				Config: testAccContainerAnalysisNoteBasic(name, readableName2),
 			},
 			{
-				ResourceName:      "google_containeranalysis_note.note",
+				ResourceName:      "google_container_analysis_note.note",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -66,7 +66,7 @@ func testAccCheckContainerAnalysisNoteDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_containeranalysis_note" {
+		if rs.Type != "google_container_analysis_note" {
 			continue
 		}
 
@@ -90,7 +90,7 @@ func testAccCheckContainerAnalysisNoteDestroy(s *terraform.State) error {
 
 func testAccContainerAnalysisNoteBasic(name, readableName string) string {
 	return fmt.Sprintf(`
-resource "google_containeranalysis_note" "note" {
+resource "google_container_analysis_note" "note" {
   name = "tf-test-%s"
   attestation_authority {
     hint {

@@ -20,7 +20,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
     examples: |
       ```hcl
-      resource "google_containeranalysis_note" "note" {
+      resource "google_container_analysis_note" "note" {
         name = "test-attestor-note"
         attestation_authority {
           hint {

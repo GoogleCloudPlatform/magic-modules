@@ -22,7 +22,7 @@ func TestAccBinaryAuthorizationAttestor_basic(t *testing.T) {
 				Config: testAccBinaryAuthorizationAttestorBasic(name),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_attestor.attestor",
+				ResourceName:      "google_binary_authorization_attestor.attestor",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -43,7 +43,7 @@ func TestAccBinaryAuthorizationAttestor_full(t *testing.T) {
 				Config: testAccBinaryAuthorizationAttestorFull(name),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_attestor.attestor",
+				ResourceName:      "google_binary_authorization_attestor.attestor",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -64,7 +64,7 @@ func TestAccBinaryAuthorizationAttestor_update(t *testing.T) {
 				Config: testAccBinaryAuthorizationAttestorBasic(name),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_attestor.attestor",
+				ResourceName:      "google_binary_authorization_attestor.attestor",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -72,7 +72,7 @@ func TestAccBinaryAuthorizationAttestor_update(t *testing.T) {
 				Config: testAccBinaryAuthorizationAttestorFull(name),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_attestor.attestor",
+				ResourceName:      "google_binary_authorization_attestor.attestor",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -80,7 +80,7 @@ func TestAccBinaryAuthorizationAttestor_update(t *testing.T) {
 				Config: testAccBinaryAuthorizationAttestorBasic(name),
 			},
 			{
-				ResourceName:      "google_binaryauthorization_attestor.attestor",
+				ResourceName:      "google_binary_authorization_attestor.attestor",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -92,7 +92,7 @@ func testAccCheckBinaryAuthorizationAttestorDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_binaryauthorization_attestor" {
+		if rs.Type != "google_binary_authorization_attestor" {
 			continue
 		}
 
@@ -116,7 +116,7 @@ func testAccCheckBinaryAuthorizationAttestorDestroy(s *terraform.State) error {
 
 func testAccBinaryAuthorizationAttestorBasic(name string) string {
 	return fmt.Sprintf(`
-resource "google_containeranalysis_note" "note" {
+resource "google_container_analysis_note" "note" {
   name = "tf-test-%s"
   attestation_authority {
     hint {
@@ -125,10 +125,10 @@ resource "google_containeranalysis_note" "note" {
   }
 }
 
-resource "google_binaryauthorization_attestor" "attestor" {
+resource "google_binary_authorization_attestor" "attestor" {
   name = "tf-test-%s"
   attestation_authority_note {
-    note_reference = "${google_containeranalysis_note.note.name}"
+    note_reference = "${google_container_analysis_note.note.name}"
   }
 }
 `, name, name)
@@ -136,7 +136,7 @@ resource "google_binaryauthorization_attestor" "attestor" {
 
 func testAccBinaryAuthorizationAttestorFull(name string) string {
 	return fmt.Sprintf(`
-resource "google_containeranalysis_note" "note" {
+resource "google_container_analysis_note" "note" {
   name = "tf-test-%s"
   attestation_authority {
     hint {
@@ -145,11 +145,11 @@ resource "google_containeranalysis_note" "note" {
   }
 }
 
-resource "google_binaryauthorization_attestor" "attestor" {
+resource "google_binary_authorization_attestor" "attestor" {
   name = "tf-test-%s"
   description = "my description"
   attestation_authority_note {
-    note_reference = "${google_containeranalysis_note.note.name}"
+    note_reference = "${google_container_analysis_note.note.name}"
     public_keys {
       ascii_armored_pgp_public_key = <<EOF
 %s
