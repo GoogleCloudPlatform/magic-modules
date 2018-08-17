@@ -470,8 +470,12 @@ module Provider
           ["#{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
         ],
         [
-          ["#{name}", ("(#{args.compact.drop(1).join(', ')}" unless args.empty?)].compact.join,
-           "#{indent(args.last, indent + name.length + 2)})"
+          ["#{name}", ("(#{args.compact[0..-1].join(', ')}" unless args.empty?)].compact.join,
+          "#{indent(args.last, indent + name.length + 2)})"
+        ],
+        [
+          ["#{name}", ("(#{args.compact[0..-3].join(', ')}" unless args.empty?)].compact.join,
+          "#{indent(args.compact[-2..args.length].join(', '), indent + name.length + 1)})"
         ],
       ], 0, indent)
     end
