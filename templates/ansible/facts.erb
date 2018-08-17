@@ -97,7 +97,7 @@ def main():
     if object.facts.query_options
       query_param = "query_options(module.params['#{object.facts.filter.name}'])"
     else
-      query_param = "module.params['#{object.facts.filter.name}']"
+      query_param = "module.params['#{object.facts.filter.name.underscore}']"
     end
   end
 -%>

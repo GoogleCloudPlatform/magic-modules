@@ -5,7 +5,7 @@
 -%>
 - name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
-<% if object.facts.has_filters -%>
+<% if object.facts.has_filters && object.facts.filter.name == 'filters' -%>
       filters:
          - name = <%= name_parameter %>
 <% end #if object.facts.has_filters -%>
