@@ -210,11 +210,18 @@ module Provider
                           .map(&:name)
                           .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        object.all_user_properties
+        parameters = object.all_user_properties
               .map(&:name)
               .select { |para| url_parts.include? para }
               .map { |para| { para => sample_code[para] } }
               .reduce({}, :merge)
+
+        # Grab values for filters.
+        underscore_name = object.facts.filter.name.underscore
+        if sample_code[underscore_name]
+          parameters[underscore_name] = sample_code[underscore_name]
+        end
+        parameters.compact
       end
 
       def name_parameter
