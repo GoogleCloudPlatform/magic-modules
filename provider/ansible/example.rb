@@ -315,6 +315,8 @@ module Provider
       # rubocop:disable Metrics/AbcSize
       def build_code(object, hash)
         sample_code = @__example.task.code
+        return '' unless sample_code
+
         ignored_props = %w[project name]
 
         url_parts = object.uri_properties

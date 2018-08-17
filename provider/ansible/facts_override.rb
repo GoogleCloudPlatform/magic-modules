@@ -11,22 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'api/object'
+
 module Provider
   module Ansible
     # Ansible specific properties to be added to Api::Resource
     class FactsOverride < Api::Object
       attr_reader :list_key
       attr_reader :has_filters
+      attr_reader :filter
 
       def validate
         super
-
         default_value_property :list_key, 'items'
         default_value_property :has_filters, true
+        default_value_property :filter, FilterProp.new
 
         check_property :list_key, ::String
         check_property :has_filters, :boolean
+        check_property :filter, Api::Object
       end
     end
+  end
+end
+
+# This is a property exclusive to Ansible filters.
+# This is the default property used for filter information on Ansible.
+# By using Api::Types, we get more flexibility and a lot for free.
+class FilterProp < Api::Type::Array
+  def validate
+    @item_type ||= 'Api::Type::String'
+    @name ||= 'filters'
+    @description ||= <<-STRING
+    A list of filter value pairs. Available filters are listed here
+            U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
+            Each additional filter in the list will act be added as an AND condition
+            (filter1 and filter2)
+    STRING
   end
 end

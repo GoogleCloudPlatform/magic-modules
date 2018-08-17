@@ -37,12 +37,9 @@ requirements:
 <% end -%>
 <% if object.facts.has_filters -%>
 options:
-    filters:
+    <%= object.facts.filter.name.underscore -%>:
        description:
-           A list of filter value pairs. Available filters are listed here
-           U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
-           Each additional filter in the list will act be added as an AND condition
-           (filter1 and filter2)
+<%= lines(indent(wrap_field(object.facts.filter.description, 11), 11)) -%>
 <% end -%>
 <% uri_props.each do |prop| -%>
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
