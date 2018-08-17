@@ -94,6 +94,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.7'
   VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
+    post_create: |
+      labels_update(module, module.params, fetch)
   # Readonly resources.
   DiskType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
