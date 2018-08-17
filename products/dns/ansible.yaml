@@ -29,13 +29,16 @@ datasources: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Project: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
     facts: !ruby/object:Provider::Ansible::FactsOverride
-      filter_key: dnsName
-      filter_description: Restricts the list to return only zones with this domain name.
-  ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+      filter: !ruby/object:Api::Type::String
+        name: dnsName
+        description: Restricts the list to return only zones with this domain name.
+      list_key: 'managedZones'
+
 overrides: !ruby/object:Provider::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
