@@ -77,15 +77,13 @@ import json
 
 def main():
 <%
-  mod_props = uri_props.map do |prop|
+  mod_props = object.facts.has_filters ? [python_dict_for_property(object.facts.filter, object)] : []
+  mod_props += uri_props.map do |prop|
     python_dict_for_property(prop, object)
   end
 -%>
     module = GcpModule(
         argument_spec=dict(
-<% if object.facts.has_filters -%>
-            filters=dict(type='list', elements='str'),
-<% end #if object.facts.has_filters -%>
 <%= lines(indent_list(mod_props, 12)) -%>
         )
     )
