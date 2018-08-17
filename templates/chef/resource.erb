@@ -205,6 +205,9 @@ module Google
 <% else # object&.handlers&.create.nil? -%>
 <%= lines(indent(object.handlers.create, 12)) -%>
 <% end -%>
+<% if object&.handlers&.post_create -%>
+<%= lines(indent(object.handlers.post_create, 12)) -%>
+<% end #if object&.handlers&.post_create -%>
           end
         else
           @current_resource = @new_resource.clone

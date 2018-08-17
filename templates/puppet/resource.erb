@@ -274,6 +274,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%= lines(indent(object.handlers.create, 4)) -%>
 <% end # object&.handlers&.create.nil? -%>
     @property_hash[:ensure] = :present
+<% if object&.handlers&.post_create -%>
+<%= lines(indent(object.handlers.post_create, 4)) -%>
+<% end -%>
   end
 
   def destroy

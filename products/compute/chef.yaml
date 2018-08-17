@@ -44,6 +44,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_target_pool.rb'
+  VpnTunnel: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      post_create: |
+        labels_update(@new_resource)
   Zone: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
   MachineType: !ruby/object:Provider::Chef::ResourceOverride
