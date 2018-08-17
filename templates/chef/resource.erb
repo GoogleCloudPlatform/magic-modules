@@ -282,10 +282,9 @@ module Google
         fetch = <%= method_call('fetch_resource', ['@new_resource', 'self_link(@new_resource)',
                                                    ("'#{object.kind}'" if object.kind?)], 16) %>
 <% else # object.self_link_query.nil? -%>
-<% obj_kind = object.kind? ? "'#{object.kind}'," : '' -%>
         fetch = <%= method_call('fetch_wrapped_resource', ['@new_resource', ("'#{object.kind}'" if object.kind?),
-                                                           ("'#{object.self_link_query.kind}'" if object.self_link_query.kind.nil?),
-                                                           "'#{object.self_link_query.items}'"], 8) %>
+                                                           "'#{object.self_link_query.kind}'",
+                                                           "'#{object.self_link_query.items}'"], 16) %>
 <% end # object.self_link_query.nil? -%>
         unless fetch.nil?
 <%=
@@ -603,7 +602,7 @@ module Google
                   .authorization
         end
 
-<%= indent(method_decl('fetch_resource', ['resource', 'self_link', ('kind' if object.kind?)], 8), 8) %>
+<%= indent(method_decl('fetch_resource', ['resource', 'self_link', ('kind' if object.kind?)]), 8) %>
 <%= indent(method_call('self.class.fetch_resource', ['resource', 'self_link', ('kind' if object.kind?)], 10), 10) %>
         end
 
