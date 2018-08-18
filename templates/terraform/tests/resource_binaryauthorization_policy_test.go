@@ -173,6 +173,11 @@ resource "google_project" "project" {
   org_id          = "%s"
 }
 
+resource "google_project_service" "binauthz" {
+  project = "${google_project.project.project_id}"
+  service = "binaryauthorization.googleapis.com"
+}
+
 resource "google_container_analysis_note" "note" {
   project = "${google_project.project.project_id}"
 
@@ -182,6 +187,8 @@ resource "google_container_analysis_note" "note" {
       human_readable_name = "My attestor"
     }
   }
+
+  depends_on = ["google_project_service.binauthz"]
 }
 
 resource "google_binary_authorization_attestor" "attestor" {
@@ -192,6 +199,8 @@ resource "google_binary_authorization_attestor" "attestor" {
   attestation_authority_note {
     note_reference = "${google_container_analysis_note.note.name}"
   }
+
+  depends_on = ["google_project_service.binauthz"]
 }
 
 resource "google_binary_authorization_policy" "policy" {
