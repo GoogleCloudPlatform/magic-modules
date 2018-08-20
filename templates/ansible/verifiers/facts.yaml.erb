@@ -10,7 +10,14 @@
          - name = <%= name_parameter %>
 <% end #if object.facts.has_filters -%>
 <% @parameters.each do |k, v| -%>
-      <%= k -%>: <%= lines(v) -%>
+<%
+  value = if @parameters.keys.first == k && v.include?('{{')
+            "\"#{v}\""
+          else
+            v
+          end
+-%>
+      <%= k -%>: <%= lines(value) -%>
 <% end -%>
       project: "{{ gcp_project }}"
       auth_kind: "{{ gcp_cred_kind }}"
