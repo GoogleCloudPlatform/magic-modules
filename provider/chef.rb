@@ -105,6 +105,9 @@ module Provider
       return "[Hash, ::#{prop.property_type}]" \
         if prop.is_a? Api::Type::NameValues
 
+      return "[String, ::#{prop.property_type}]" \
+        if prop.is_a?(Api::Type::Fingerprint)
+
       return ['::', prop.property_type].join \
         unless prop.is_a?(Api::Type::Primitive)
 

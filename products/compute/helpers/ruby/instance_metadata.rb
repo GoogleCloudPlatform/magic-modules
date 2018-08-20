@@ -13,8 +13,6 @@
 # Mask the fact healthChecks array is actually a single object of type
 # HttpHealthCheck.
 
-# TODO(nelsonjr): Implement updating metadata on exsiting resources.
-
 # Expose instance 'metadata' as a simple name/value pair hash. However the API
 # defines metadata as a NestedObject with the following layout:
 #

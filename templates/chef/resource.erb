@@ -205,6 +205,9 @@ module Google
 <% else # object&.handlers&.create.nil? -%>
 <%= lines(indent(object.handlers.create, 12)) -%>
 <% end -%>
+<% if object&.handlers&.post_create -%>
+<%= lines(indent(object.handlers.post_create, 12)) -%>
+<% end #if object&.handlers&.post_create -%>
           end
         else
           @current_resource = @new_resource.clone
@@ -434,13 +437,24 @@ module Google
             # TODO(nelsonjr): Check w/ Chef... can we print this in red?
             puts # making a newline until we find a better way TODO: find!
             compute_changes.each { |log| puts "    - #{log.strip}\n" }
-<% if object.input -%>
+<% update_props = properties_by_custom_update(object.all_user_properties) -%>
+<% if object.input && update_props.empty? -%>
             message = '<%= object.name -%> cannot be edited'
             Chef::Log.fatal message
             raise message
 <% else # if object.input -%>
 <% if object&.handlers&.update.nil? -%>
-<% 
+<% update_props.each do |key, props| -%>
+<%
+  prop_statement = props.reject { |prop| prop.is_a? Api::Type::Fingerprint }
+                        .map { |prop| "(@current_resource.#{prop.name.underscore} != @new_resource.#{prop.name.underscore})" }.join(' || ')
+-%>
+            if <%= prop_statement %>
+              <%= props.first.name.underscore -%>_update(@current_resource)
+            end
+<% end # update_props.each -%>
+<% if !object.input -%>
+<%
   put_new = ["::Google::#{product_ns}::Network",
              "#{object.update_verb.to_s.capitalize}.new"
             ].join('::')
@@ -466,6 +480,14 @@ module Google
 <%   else # object.async -%>
             return_if_object update_req.send, '<%= object.kind -%>'
 <%   end # object.async -%>
+<% else #!object.input -%>
+<% if object.kind? -%>
+            return fetch_resource(@new_resource, self_link(@new_resource),
+                                  '<%= object.kind -%>')
+<% else # object.kind? -%>
+            return fetch_resource(@new_resource, self_link(@new_resource))
+<% end # object.kind? -%>
+<% end -%>
 <% else # object&.handlers&.update.nil? -%>
 <%= lines(indent(object.handlers.update, 12)) -%>
 <% end # object&.handlers&.update.nil? -%>
@@ -510,6 +532,8 @@ module Google
 <%= lines(indent(emit_method('self.resource_to_hash', %w[resource], r2h_code,
                              file_relative), 8)) -%>
 
+<% provider = 'chef' -%>
+<%= lines(indent(compile('templates/puppetchef/update_props.erb'), 2)) -%>
         # Copied from Chef > Provider > #converge_if_changed
         def compute_changes
           properties = @new_resource.class.state_properties.map(&:name)

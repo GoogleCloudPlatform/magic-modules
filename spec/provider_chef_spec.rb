@@ -234,6 +234,7 @@ describe Provider::Chef do
     allow_open 'templates/resourceref_mocks.erb'
     allow_open 'templates/return_if_object.erb'
     allow_open 'templates/transport.erb'
+    allow_open 'templates/puppetchef/update_props.erb'
 
     allow_open_real_tests
 

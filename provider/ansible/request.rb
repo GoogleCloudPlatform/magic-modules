@@ -135,6 +135,9 @@ module Provider
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       def request_output(prop, hash_name, module_name)
+        return "response.get(#{quote_string(prop.name)})" \
+          if prop.is_a? Api::Type::FetchedExternal
+
         if prop.is_a? Api::Type::NestedObject
           [
             "#{prop.property_class[-1]}(",
