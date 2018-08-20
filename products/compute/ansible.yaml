@@ -144,8 +144,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       target: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
-      allPorts: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
       IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
         description: |
           The IP address that this forwarding rule is serving on behalf of.
