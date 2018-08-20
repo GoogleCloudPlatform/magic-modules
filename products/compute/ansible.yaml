@@ -124,6 +124,20 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.7'
       type: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
+  Firewall: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      denied: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      destinationRanges: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      direction: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      priority: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      sourceServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      targetServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       target: !ruby/object:Provider::Ansible::PropertyOverride
