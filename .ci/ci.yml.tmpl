@@ -19,6 +19,9 @@ build/{{repo}}/{{name}}
     'iam': [
       'spec/service_account_key_spec.rb',
       'spec/service_account_spec.rb'
+    ],
+    'compute': [
+      'spec/vpn_tunnel_spec.rb'
     ]
   }
 %}
@@ -29,6 +32,7 @@ build/{{repo}}/{{name}}
       'spec/gcompute_instance_template_provider_spec.rb',
       'spec/gcompute_target_https_proxy_provider_spec.rb',
       'spec/gcompute_target_ssl_proxy_provider_spec.rb',
+      'spec/gcompute_vpn_tunnel_provider_spec.rb',
       'spec/puppetlint_spec.rb']
   }
 %}

@@ -26,6 +26,7 @@ module Provider
       attr_reader :editable
       attr_reader :hidden
       attr_reader :imports
+      attr_reader :post_create
       attr_reader :provider_helpers
       attr_reader :return_if_object
       attr_reader :unwrap_resource
@@ -58,6 +59,7 @@ module Provider
         check_property :editable, :boolean
         check_optional_property :hidden, ::Array
         check_property :imports, ::Array
+        check_optional_property :post_create, ::String
         check_property :provider_helpers, ::Array
         check_optional_property :return_if_object, ::String
         check_optional_property :update, ::String

@@ -38,6 +38,7 @@ module Provider
       attr_reader :create
       attr_reader :delete
       attr_reader :flush
+      attr_reader :post_create
       attr_reader :prefetch
       attr_reader :request_to_query
       attr_reader :resource_to_request_patch
@@ -51,6 +52,7 @@ module Provider
         check_optional_property :create, String
         check_optional_property :delete, String
         check_optional_property :flush, String
+        check_optional_property :post_create, String
         check_optional_property :prefetch, String
         check_optional_property :request_to_query, String
         check_optional_property :resource_to_request_patch, String

@@ -569,6 +569,22 @@ module Provider
       Pathname.new(target).relative_path_from(Pathname.new(base))
     end
 
+    # Filter the properties to keep only the ones requiring custom update
+    # method and group them by update url & verb.
+    def properties_by_custom_update(properties)
+      update_props = properties.reject do |p|
+        p.update_url.nil? || p.update_verb.nil?
+      end
+      update_props.group_by do |p|
+        { update_url: p.update_url, update_verb: p.update_verb }
+      end
+    end
+
+    def update_url(resource, url_part)
+      return build_url(resource.self_link_url) if url_part.nil?
+      [resource.__product.base_url, url_part].flatten.join
+    end
+
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.
     private

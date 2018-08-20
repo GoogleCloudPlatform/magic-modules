@@ -274,6 +274,9 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <%= lines(indent(object.handlers.create, 4)) -%>
 <% end # object&.handlers&.create.nil? -%>
     @property_hash[:ensure] = :present
+<% if object&.handlers&.post_create -%>
+<%= lines(indent(object.handlers.post_create, 4)) -%>
+<% end -%>
   end
 
   def destroy
@@ -315,10 +318,15 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% # TODO(nelsonjr): Remove @dirty or SQL does not do idempotent updates. -%>
     # return on !@dirty is for aiding testing (puppet already guarantees that)
     return if @created || @deleted || !@dirty
+<% update_props = properties_by_custom_update(object.all_user_properties) -%>
+<% update_props.each do |key, props| -%>
+<% prop_statement = props.map { |prop| "@dirty[:#{prop.name.underscore}]" }.join(' || ') -%>
+    <%= props.first.name.underscore -%>_update(@resource) if <%=  prop_statement %>
+<% end # update_props.each -%>
 <% if object&.handlers&.flush.nil? -%>
-<% if object.input -%>
+<% if object.input && update_props.empty?-%>
     raise '<%= object.name -%> cannot be edited.'
-<% else # if object.input -%>
+<% elsif !object.input -%>
 <%
   put_new = ["Google::#{product_ns}::Network",
              "#{object.update_verb.to_s.capitalize}.new"
@@ -340,6 +348,21 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   <% obj_kind = object.kind? ? ", '#{object.kind}'" : '' -%>
   <%= fetch_assign -%>return_if_object update_req.send<%= obj_kind %>
 <%   end # object.async -%>
+<% else -%>
+<%=
+  lines(format(
+    [
+      ('return fetch_resource(@resource, self_link(@resource))' \
+       unless object.kind?),
+      ['return fetch_resource(@resource, self_link(@resource),',
+       "'#{object.kind}')"].join(' '),
+      [
+        'return fetch_resource(@resource, self_link(@resource),',
+        indent("'#{object.kind}')", 23) # 23 = align previous until (
+      ]
+    ].compact, 4
+  ))
+-%>
 <% end # object.input -%>
 <% else # object&.handlers&.flush.nil? -%>
 <%= lines(indent(object.handlers.flush, 4)) -%>
@@ -354,6 +377,8 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
     }
   end
 
+<% provider = 'puppet' -%>
+<%= lines(indent(compile('templates/puppetchef/update_props.erb'), 2)) -%>
 <% unless object.exports.nil? -%>
 <%
   exp_list = [

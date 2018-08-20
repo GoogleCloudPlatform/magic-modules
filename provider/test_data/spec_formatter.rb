@@ -129,6 +129,7 @@ module Provider
             ->(v) { v.is_a?(Symbol) ? v.id2name : v.to_s },
           Api::Type::Integer => ->(v) { v },
           Api::Type::String => ->(v) { v },
+          Api::Type::Fingerprint => ->(v) { v },
           Api::Type::Time => ->(v) { v.iso8601 },
           Api::Type::Array => ->(v) { v },
           Api::Type::NestedObject => ->(v) { v },

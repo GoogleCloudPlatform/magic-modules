@@ -1,0 +1,31 @@
+<% update_props = properties_by_custom_update(object.all_user_properties) -%>
+<% update_props.each do |key, props| -%>
+def <%= props[0].name.underscore -%>_update(data)
+  ::Google::<%= product_ns -%>::Network::<%= key[:update_verb].capitalize -%>.new(
+<%= indent(build_url([object.__product.base_url, key[:update_url]]), 4) -%>,
+<% if provider == 'puppet' -%>
+    fetch_auth(@resource),
+<% else -%>
+    fetch_auth(@new_resource),
+<% end -%>
+    'application/json',
+    {
+<%
+  update_prop_statements = props.map do |prop|
+    if prop.is_a? Api::Type::FetchedExternal and provider == 'puppet'
+      "#{prop.api_name}: @fetched['#{prop.api_name}']"
+    elsif prop.is_a? Api::Type::FetchedExternal and provider == 'chef'
+      "#{prop.api_name}: @new_resource.__fetched['#{prop.api_name}']"
+    elsif provider == 'puppet'
+      "#{prop.api_name}: @resource[:#{prop.out_name}]"
+    else
+      "#{prop.api_name}: @new_resource.#{prop.out_name}"
+    end
+  end
+-%>
+<%= lines(indent_list(update_prop_statements, 6)) -%>
+    }.to_json
+  ).send
+end
+
+<% end # update_props.each -%>

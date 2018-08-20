@@ -166,15 +166,40 @@ module Api
       NAME = Api::Type::String.new('name')
     end
 
+    # Properties that are fetched externally
+    class FetchedExternal < Type
+      attr_writer :resource
+
+      def api_name
+        name
+      end
+    end
+
     # Represents a fingerprint.  A fingerprint is an output-only
     # field used for optimistic locking during updates.
-    class Fingerprint < String
+    # They are fetched from the GCP response.
+    class Fingerprint < FetchedExternal
       def validate
         super
         @output = true if @output.nil?
-        # TODO(ndmckinley): This doesn't work in puppet, chef, or ansible.
-        # Consequently we exclude it by default and override it in Terraform.
-        @exclude ||= true
+      end
+
+      def requires
+        File.join(
+          'google',
+          @__resource.__product.prefix[1..-1],
+          'property',
+          'string'
+        ).downcase
+      end
+
+      def property_type
+        [
+          'Google',
+          @__resource.__product.prefix[1..-1].camelize(:upper),
+          'Property',
+          'String'
+        ].join('::')
       end
     end
 
@@ -301,15 +326,6 @@ module Api
       def validate
         super
         check_property :values, ::Array
-      end
-    end
-
-    # Properties that are fetched externally
-    class FetchedExternal < Type
-      attr_writer :resource
-
-      def api_name
-        name
       end
     end
 
