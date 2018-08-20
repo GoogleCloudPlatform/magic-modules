@@ -214,18 +214,6 @@ module Provider
         "[#{path.split('/').map { |x| "'#{x}'" }.join(', ')}]"
       end
 
-      # Generates a method declaration with function name `name` and args `args`
-      # Arguments may have nils and will be ignored.
-      def method_decl(name, args)
-        "def #{name}(#{args.compact.join(', ')}):"
-      end
-
-      # Generates a method call to function name `name` and args `args`
-      # Arguments may have nils and will be ignored.
-      def method_call(name, args)
-        "#{name}(#{args.compact.join(', ')})"
-      end
-
       # TODO(alexstephen): Standardize on one version and move to provider/core
       # https://github.com/GoogleCloudPlatform/magic-modules/issues/30
       def wrap_field(field, spaces)
