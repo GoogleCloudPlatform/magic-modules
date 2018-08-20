@@ -53,7 +53,7 @@ module Provider
         field_markers -= ['{{project}}', '{{region}}', '{{zone}}']
         short_id_default_format = field_markers.join('/')
 
-        (id_formats + [short_id_format, short_id_default_format]).uniq
+        (id_formats + [short_id_format, short_id_default_format]).uniq.reject(&:empty?)
       end
       # rubocop:enable Metrics/AbcSize
     end
