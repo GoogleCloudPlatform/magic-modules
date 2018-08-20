@@ -36,20 +36,19 @@
     directly inserted from YAML.
 -%>
 <%
-  api_name_lower = product_ns.downcase
-  resource_name = object.name.underscore
+  resource_name = product_ns.underscore.downcase + '_' + object.name.underscore
   properties = object.all_user_properties
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
 layout: "google"
-page_title: "Google: google_<%= api_name_lower -%>_<%= resource_name -%>"
-sidebar_current: "docs-google-<%= api_name_lower -%>-<%= resource_name.gsub("_", "-") -%>"
+page_title: "Google: google_<%= resource_name -%>"
+sidebar_current: "docs-google-<%= resource_name.gsub("_", "-") -%>"
 description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# google\_<%= api_name_lower -%>\_<%= resource_name.gsub("_", "\\_") %>
+# google\_<%= resource_name.gsub("_", "\\_") %>
 
 <%= lines(object.description) -%>
 
@@ -83,6 +82,7 @@ The following arguments are supported:
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
+
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
@@ -107,6 +107,7 @@ The following arguments are supported:
 <%= "\n" + object.docs.optional_properties -%>
 <% end -%>
 
+<% unless properties.select(&:output).empty? && object.docs.attributes.nil? -%>
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -123,6 +124,7 @@ In addition to the arguments listed above, the following computed attributes are
 <% end -%>
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>
+<% end -%>
 <% end -%>
 
 <% unless object.async.nil? -%>
@@ -144,6 +146,6 @@ This resource provides the following
 
 ```
 <% import_id_formats(object).each do |id_format| -%>
-$ terraform import google_<%= api_name_lower -%>_<%= resource_name -%>.default <%= id_format %>
+$ terraform import google_<%= resource_name -%>.default <%= id_format %>
 <% end -%>
 ```
