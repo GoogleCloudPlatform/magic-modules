@@ -18,14 +18,11 @@ package google
 
 import "github.com/hashicorp/terraform/helper/schema"
 
+<% api_name = @config.name || product_ns -%>
 
-<% if product_ns == 'Resourcemanager'
-		product_ns = 'ResourceManager'
-end -%>
-
-var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
+var Generated<%= api_name -%>ResourcesMap = map[string]*schema.Resource{
 <% product.objects.reject { |r| r.exclude }.each do |object| -%>
-<% resource_name = product_ns + object.name -%>
+<% resource_name = api_name + object.name -%>
 	"google_<%= resource_name.underscore -%>": resource<%= resource_name -%>(),
 <% end -%>
 }
