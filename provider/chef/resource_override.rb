@@ -37,6 +37,7 @@ module Provider
       attr_reader :create
       attr_reader :delete
       attr_reader :update
+      attr_reader :post_create
       attr_reader :prefetch
       attr_reader :resource_to_request_patch
       attr_reader :return_if_object
@@ -49,6 +50,7 @@ module Provider
         check_optional_property :create, String
         check_optional_property :delete, String
         check_optional_property :update, String
+        check_optional_property :post_create, String
         check_optional_property :prefetch, String
         check_optional_property :resource_to_request_patch, String
         check_optional_property :return_if_object, String

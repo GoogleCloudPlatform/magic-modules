@@ -270,6 +270,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
+    post_create: |
+      labels_update(module, module.params, fetch)
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 examples: !ruby/object:Api::Resource::HashArray
