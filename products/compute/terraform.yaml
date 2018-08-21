@@ -294,6 +294,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         conflicts_with:
           - source_tags
           - target_tags
+      targetTags: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
