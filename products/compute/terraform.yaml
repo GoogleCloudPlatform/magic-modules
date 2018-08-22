@@ -218,7 +218,84 @@ overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_network" "default" {
+        name = "test-network"
+      }
+
+      resource "google_compute_firewall" "default" {
+        name    = "test-firewall"
+        network = "${google_compute_network.default.name}"
+
+        allow {
+          protocol = "icmp"
+        }
+
+        allow {
+          protocol = "tcp"
+          ports    = ["80", "8080", "1000-2000"]
+        }
+
+        source_tags = ["web"]
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/firewall.erb
+      resource_definition: templates/terraform/resource_definition/firewall.erb
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      allowed: !ruby/object:Provider::Terraform::PropertyOverride     
+        name: 'allow'
+        is_set: true
+        set_hash_func: 'resourceComputeFirewallRuleHash'
+        conflicts_with:
+          - 'deny'
+      allowed.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+        name: 'protocol'
+      denied: !ruby/object:Provider::Terraform::PropertyOverride     
+        name: 'deny'
+        is_set: true
+        set_hash_func: 'resourceComputeFirewallRuleHash'
+        conflicts_with:
+            - 'allow'
+      denied.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+        name: 'protocol'
+      destinationRanges: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        default_from_api: true
+        conflicts_with:
+          - source_ranges
+          - source_tags
+      direction: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        description: |
+          The name or self_link of the network to attach this firewall to.
+      priority: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 65535)'
+      sourceRanges: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        default_from_api: true
+      sourceTags: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+      sourceServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        conflicts_with:
+          - source_tags
+          - target_tags
+      targetServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        conflicts_with:
+          - source_tags
+          - target_tags
+      targetTags: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl

@@ -659,6 +659,14 @@ objects:
     name: 'Firewall'
     kind: 'compute#firewall'
     base_url: projects/{{project}}/global/firewalls
+    update_verb: :PATCH
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/vpc/docs/firewalls'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/firewalls'
     description: |
       Each network has its own firewall controlling access to and from the
       instances.
@@ -712,17 +720,74 @@ objects:
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'denied'
+        description: |
+          The list of DENY rules specified by this firewall. Each rule specifies
+          a protocol and port-range tuple that describes a denied connection.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            # IPProtocol has to be string, instead of Enum because user can
+            # specify the protocol by number as well.
+            - !ruby/object:Api::Type::String
+              name: 'ip_protocol'
+              description: |
+                The IP protocol to which this rule applies. The protocol type is
+                required when creating a firewall rule. This value can either be
+                one of the following well known protocol strings (tcp, udp,
+                icmp, esp, ah, sctp), or the IP protocol number.
+              api_name: 'IPProtocol'
+              required: true
+            - !ruby/object:Api::Type::Array
+              item_type: Api::Type::String
+              name: 'ports'
+              description: |
+                An optional list of ports to which this rule applies. This field
+                is only applicable for UDP or TCP protocol. Each entry must be
+                either an integer or a range. If not specified, this rule
+                applies to connections through any port.
+
+                Example inputs include: ["22"], ["80","443"], and
+                ["12345-12349"].
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+      - !ruby/object:Api::Type::Array
+        name: 'destinationRanges'
+        description: |
+          If destination ranges are specified, the firewall will apply only to
+          traffic that has destination IP address in these ranges. These ranges
+          must be expressed in CIDR format. Only IPv4 is supported.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Enum
+        name: 'direction'
+        description: |
+          Direction of traffic to which this firewall applies; default is
+          INGRESS. Note: For INGRESS traffic, it is NOT supported to specify
+          destinationRanges; For EGRESS traffic, it is NOT supported to specify
+          sourceRanges OR sourceTags.
+        values:
+          - :INGRESS
+          - :EGRESS
+      - !ruby/object:Api::Type::Boolean
+        name: 'disabled'
+        description: |
+          Denotes whether the firewall rule is disabled, i.e not applied to the
+          network it is associated with. When set to true, the firewall rule is
+          not enforced and the network behaves as if it did not exist. If this
+          is unspecified, the firewall rule will be enabled.
+        min_version: beta
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -731,9 +796,11 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
-      # TODO(nelsonjr): Convert this to a ResourceRef.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        required: true
         description: |
           URL of the network resource for this firewall rule. If not specified
           when creating a firewall rule, the default network is used:
@@ -747,6 +814,16 @@ objects:
                 networks/my-network
             projects/myproject/global/networks/my-network
             global/networks/default
+      - !ruby/object:Api::Type::Integer
+        name: 'priority'
+        description: |
+          Priority for this rule. This is an integer between 0 and 65535, both
+          inclusive. When not specified, the value assumed is 1000. Relative
+          priorities determine precedence of conflicting rules. Lower value of
+          priority implies higher precedence (eg, a rule with priority 0 has
+          higher precedence than a rule with priority 1). DENY rules take
+          precedence over ALLOW rules having equal priority.
+        default_value: 1000
       - !ruby/object:Api::Type::Array
         name: 'sourceRanges'
         description: |
@@ -760,6 +837,22 @@ objects:
           apply. Only IPv4 is supported.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
+        name: 'sourceServiceAccounts'
+        description: |
+          If source service accounts are specified, the firewall will apply only
+          to traffic originating from an instance with a service account in this
+          list. Source service accounts cannot be used to control traffic to an
+          instance's external IP address because service accounts are associated
+          with an instance, not an IP address. sourceRanges can be set at the
+          same time as sourceServiceAccounts. If both are set, the firewall will
+          apply to traffic that has source IP address within sourceRanges OR the
+          source IP belongs to an instance with service account listed in
+          sourceServiceAccount. The connection does not need to match both
+          properties for the firewall to apply. sourceServiceAccounts cannot be
+          used at the same time as sourceTags or targetTags.
+        item_type: Api::Type::String
+        max_size: 1
+      - !ruby/object:Api::Type::Array
         name: 'sourceTags'
         description: |
           If source tags are specified, the firewall will apply only to traffic
@@ -772,6 +865,17 @@ objects:
           a tag listed in the sourceTags property. The connection does not need
           to match both properties for the firewall to apply.
         item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'targetServiceAccounts'
+        description: |
+          A list of service accounts indicating sets of instances located in the
+          network that may make network connections as specified in allowed[].
+          targetServiceAccounts cannot be used at the same time as targetTags or
+          sourceTags. If neither targetServiceAccounts nor targetTags are
+          specified, the firewall rule applies to all instances on the specified
+          network.
+        item_type: Api::Type::String
+        max_size: 1
       - !ruby/object:Api::Type::Array
         name: 'targetTags'
         description: |
