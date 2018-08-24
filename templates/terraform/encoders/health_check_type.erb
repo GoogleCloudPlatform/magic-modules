@@ -1,0 +1,18 @@
+if _, ok := d.GetOk("http_health_check"); ok {
+	obj["type"] = "HTTP"
+  return obj, nil
+}
+if _, ok := d.GetOk("https_health_check"); ok {
+	obj["type"] = "HTTPS"
+  return obj, nil
+}
+if _, ok := d.GetOk("tcp_health_check"); ok {
+	obj["type"] = "TCP"
+  return obj, nil
+}
+if _, ok := d.GetOk("ssl_health_check"); ok {
+	obj["type"] = "SSL"
+  return obj, nil
+}
+
+return nil, fmt.Errorf("error in HealthCheck %s: No health check block specified.", d.Get("name").(string))
