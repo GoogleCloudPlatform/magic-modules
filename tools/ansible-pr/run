@@ -122,6 +122,10 @@ OptionParser.new do |opts|
   opts.on('-f', '--only-facts', 'Only facts') do |_v|
     @options[:only_facts] = true
   end
+
+  opts.on('--files x,y,z', Array, "Only pick these files") do |list|
+    @options[:files] = list
+  end
 end.parse!
 
 # rubocop:disable Style/SpecialGlobalVars
@@ -146,7 +150,11 @@ end
 puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 
 # Find list of all modules.
-files = get_all_modules('magician')
+files = if @options[:files]
+          @options[:files]
+        else
+          get_all_modules('magician')
+        end
 
 # Create a PR for each file.
 # rubocop:disable Metrics/BlockLength
