@@ -1267,7 +1267,7 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/latest/healthChecks'
     description: |
       Health Checks determine whether instances are responsive and able to do work.
-      They are an important part of a comprehensive load balancing infrastructure,
+      They are an important part of a comprehensive load balancing configuration,
       as they enable monitoring instances behind load balancers.
 
       Health Checks poll instances at a specified interval. Instances that
