@@ -460,10 +460,6 @@ module Provider
       ].compact.join("\n")
     end
 
-    def method_decl(name, args)
-      ["def #{name}", ("(#{args.join(', ')})" unless args.empty?)].compact.join
-    end
-
     def emit_rubo_pair(file_name, name, opts = {})
       [
         emit_rubo_item(file_name, name, :disabled, opts),
