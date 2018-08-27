@@ -232,7 +232,6 @@ resource "google_compute_instance_template" "foobar" {
 	can_ip_forward = false
 	tags = ["foo", "bar"]
 
-
 	disk {
 		source_image = "${data.google_compute_image.my_image.self_link}"
 		auto_delete = true
