@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'compile/core'
 require 'provider/abstract_core'
 require 'provider/property_override'
 
@@ -39,6 +40,38 @@ module Provider
         check_optional_property :required_properties, String
         check_optional_property :optional_properties, String
         check_optional_property :attributes, String
+      end
+    end
+
+    # Generates configs to be shown as examples in docs from a template
+    class Examples < Api::Object
+      include Compile::Core
+
+      # The name of the example in lowercase with underscores separating words.
+      # Generally takes the form of the resource name followed by some detail
+      # about the specific test. For example, "address_with_subnetwork".
+      # The template for the example is expected at the path
+      # "templates/terraform/examples/{{name}}.tf.erb"
+      attr_reader :name
+
+      # vars_documentation is a Hash from template variable names to output variable names
+      attr_reader :vars_documentation
+
+      def config_documentation
+        body = lines(compile_file(
+                       vars_documentation,
+                       "templates/terraform/examples/#{name}.tf.erb"
+        ))
+        lines(compile_file(
+                { content: body },
+                'templates/terraform/examples/base_configs/documentation.tf.erb'
+        ))
+      end
+
+      def validate
+        super
+        check_property :name, String
+        check_property :vars_documentation, Hash
       end
     end
 
