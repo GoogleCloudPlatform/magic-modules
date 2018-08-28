@@ -428,10 +428,6 @@ def unwrap_resource(result, module):
 <% end -%>
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-<% if object.kind? -%>
-    if result['kind'] != kind:
-        module.fail_json(msg="Incorrect result: {kind}".format(**result))
-<% end # object.kind? -%>
 
     return result
 <% end # if object.return_if_object -%>
