@@ -123,7 +123,7 @@ OptionParser.new do |opts|
     @options[:only_facts] = true
   end
 
-  opts.on('--files x,y,z', Array, "Only pick these files") do |list|
+  opts.on('--files x,y,z', Array, 'Only pick these files') do |list|
     @options[:files] = list
   end
 end.parse!
@@ -137,6 +137,7 @@ check_remotes
 
 # Add Magician Git repo
 git_run("git remote add magician #{MAGICIAN_GIT}", true)
+git_run('git fetch magician devel', true)
 git_run('git fetch upstream devel', true)
 
 puts 'Everything is setup properly'
@@ -160,7 +161,7 @@ files = if @options[:files]
 # rubocop:disable Metrics/BlockLength
 files.each do |mod|
   mod_name = %r{lib/ansible/modules/cloud/google/([a-z_]*)\.py}.match(mod.strip)[1]
-  next if @options[:only_facts] and !mod_name.include?('facts')
+  next if @options[:only_facts] && !mod_name.include?('facts')
   puts "Building PR for #{mod_name}"
 
   # Create a new branch
