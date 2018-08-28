@@ -448,9 +448,32 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
-      # 'loadBalancingScheme' is undefined: string? enum? ref? http://b/63215956
-      # | - !ruby/object:Api::Type::???
-      # |   name: 'loadBalancingScheme'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'iap'
+        description: Settings for enabling Cloud Identity Aware Proxy
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Enables IAP.
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientId'
+            description: OAuth2 Client ID for IAP
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientSecret'
+            description: OAuth2 Client Secret for IAP
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientSecretSha256'
+            description: OAuth2 Client Secret SHA-256 for IAP
+            output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'loadBalancingScheme'
+        description: |
+          Indicates whether the backend service will be used with internal or
+          external load balancing. A backend service created for one type of
+          load balancing cannot be used with the other.
+        values:
+          - :INTERNAL
+          - :EXTERNAL
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
