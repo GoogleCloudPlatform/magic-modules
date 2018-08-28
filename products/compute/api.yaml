@@ -1258,10 +1258,25 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
-    description:
-      An HealthCheck resource. This resource defines a template for how
-      individual virtual machines should be checked for health, via one of the
-      supported protocols.
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/health-checks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/latest/healthChecks'
+    description: |
+      Health Checks determine whether instances are responsive and able to do work.
+      They are an important part of a comprehensive load balancing configuration,
+      as they enable monitoring instances behind load balancers.
+
+      Health Checks poll instances at a specified interval. Instances that
+      do not respond successfully to some number of probes in a row are marked
+      as unhealthy. No new connections are sent to unhealthy instances,
+      though existing connections will continue. The health check will
+      continue to poll unhealthy instances. If an instance later responds
+      successfully to some number of consecutive probes, it is marked
+      healthy again and can receive new connections.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
@@ -1284,6 +1299,7 @@ objects:
         description: |
           A so-far unhealthy instance will be marked healthy after this many
           consecutive successes. The default value is 2.
+        default_value: 2
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
@@ -1292,6 +1308,8 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -1324,6 +1342,7 @@ objects:
           - :TCP
           - :SSL
           - :HTTP
+          - :HTTPS
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
         properties:
