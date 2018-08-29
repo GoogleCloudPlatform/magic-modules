@@ -1285,6 +1285,8 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_address_test.go'
     'google/resource_compute_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_autoscaler_test.go'
+    'google/resource_compute_firewall_test.go':
+      'templates/terraform/tests/resource_compute_firewall_test.go'
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
     'google/resource_compute_health_check_test.go':

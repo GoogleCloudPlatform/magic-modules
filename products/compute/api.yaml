@@ -803,6 +803,14 @@ objects:
           is unspecified, the firewall rule will be enabled.
         min_version: beta
         send_empty_value: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableLogging'
+        description: |
+          This field denotes whether to enable logging for a particular
+          firewall rule. If logging is enabled, logs will be exported to
+          Stackdriver.
+        min_version: beta
+        send_empty_value: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
