@@ -230,6 +230,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    provider_helpers:
+      - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
