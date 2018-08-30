@@ -196,6 +196,9 @@ def main():
         else:
             fetch = {}
 
+<% if object.post_action -%>
+<%= lines(indent(object.post_action, 4)) -%>
+<% end # ifobject.post_create -%>
     fetch.update({'changed': changed})
 <% end # object.readonly -%>
 
