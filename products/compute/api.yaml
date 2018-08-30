@@ -1866,6 +1866,20 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the instance group resides.'
         required: true
+      - !ruby/object:Api::Type::Array
+        name: 'instances'
+        description: |
+          The list of instances associated with this InstanceGroup.
+          All instances must be created before being added to an InstanceGroup.
+          All instances not in this list will be removed from the InstanceGroup
+          and will not be deleted.
+          Only the full identifier of the instance will be returned.
+        exclude: true
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'instance'
+          description: 'An instance being added to the InstanceGroup'
+          resource: 'Instance'
+          imports: 'selfLink'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'

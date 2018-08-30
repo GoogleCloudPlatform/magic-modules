@@ -231,6 +231,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
         aliases:
           - timeout_seconds
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      instances: !ruby/object:Provider::Ansible::PropertyOverride
+        exclude: false
+    update: |
+      instance = InstanceLogic(module)
+      instance.run()
+    post_action: |
+      if fetch:
+          instance = InstanceLogic(module)
+          instance.run()
+          fetch.update({'instances': instance.list_instances()})
     provider_helpers:
       - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Provider::Ansible::ResourceOverride

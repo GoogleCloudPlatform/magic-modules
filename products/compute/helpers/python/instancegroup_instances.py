@@ -9,23 +9,30 @@ class InstanceLogic(object):
         self.module = module
         self.current_instances = self.list_instances()
         self.module_instances = []
-        for instance in self.module.params.get('instances', []):
-            self.module_instances.append(replace_resource_dict(instance, 'selfLink'))
+
+        # Transform module list of instances (dicts of instance responses) into a list of selfLinks.
+        instances = self.module.params.get('instances')
+        if instances:
+            for instance in instances:
+                self.module_instances.append(replace_resource_dict(instance, 'selfLink'))
 
     def run(self):
-        # Find all instances to add
+        # Find all instances to add and add them
         instances_to_add = list(set(self.module_instances) - set(self.current_instances))
         if instances_to_add:
             self.add_instances(instances_to_add)
 
-        # Find all instances to remove
+        # Find all instances to remove and remove them
         instances_to_remove = list(set(self.current_instances) - set(self.module_instances))
         if instances_to_remove:
             self.remove_instances(instances_to_remove)
 
     def list_instances(self):
         auth = GcpSession(self.module, 'compute')
-        response = return_if_object(self.module, auth.post(self._list_instances_url(), { 'instanceState': 'ALL' }))
+        response = return_if_object(self.module, auth.post(self._list_instances_url(), {'instanceState': 'ALL'}),
+                                    'compute#instanceGroupsListInstances')
+
+        # Transform instance list into a list of selfLinks for diffing with module parameters
         instances = []
         for instance in response.get('items', []):
             instances.append(instance['instance'])
@@ -53,5 +60,5 @@ class InstanceLogic(object):
             'instances': []
         }
         for instance in instances:
-            request['instances'].append({ 'instance': instance })
+            request['instances'].append({'instance': instance})
         return request
