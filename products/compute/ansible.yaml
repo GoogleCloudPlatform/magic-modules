@@ -233,6 +233,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       instances: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
         exclude: false
     update: |
       instance = InstanceLogic(module)
