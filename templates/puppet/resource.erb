@@ -74,56 +74,22 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
       debug("prefetch #{name}") if project.nil?
       debug("prefetch #{name} @ #{project}") unless project.nil?
 <%   if object.self_link_query.nil? -%>
-<%=
-  lines(format(
-    [
-      ('fetch = fetch_resource(resource, self_link(resource))' \
-       unless object.kind?),
-      ['fetch = fetch_resource(resource, self_link(resource),',
-       "'#{object.kind}')"].join(' '),
-      [
-        'fetch = fetch_resource(resource, self_link(resource),',
-        indent("'#{object.kind}')", 23) # 23 = align previous until (
-      ]
-    ].compact, 6
-  ))
--%>
+      fetch = <%= method_call('fetch_resource', ['resource',
+                                                 'self_link(resource)',
+                                                 ("'#{object.kind}'" if object.kind?)
+                                                ], 14) %>
 <%   else # object.self_link_query.nil? -%>
-<%
-  self_link_kind = !object.self_link_query.kind.nil? ? \
-  "'#{object.self_link_query.kind}'," : ''
-
-  obj_kind = object.kind? ? "'#{object.kind}'," : ''
--%>
-<%=
-  lines(format(
-    [
-      ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
-       "#{self_link_kind}",
-       "'#{object.self_link_query.items}')"].join(' '),
-      [
-        ["fetch = fetch_wrapped_resource(resource, #{obj_kind}",
-         "#{self_link_kind}"].join(' '),
-        indent([
-          "'#{object.self_link_query.items}')"
-        ], 31) # 31 = align with ( previous line
-      ],
-      [
-        "fetch = fetch_wrapped_resource(resource, #{obj_kind}",
-        indent([
-          "#{self_link_kind}",
-          "'#{object.self_link_query.items}')"
-        ], 31) # 31 = align with ( previous line
-      ]
-    ], 6
-  ))
--%>
+      fetch = <%= method_call('fetch_wrapped_resource', ['resource',
+                                                        ("'#{object.kind}'" if object.kind?),
+                                                        ("'#{object.self_link_query.kind}'" \
+                                                          unless object.self_link_query.kind.nil?),
+                                                        "'#{object.self_link_query.items}'"
+                                                       ], 14) %>
 <%   end # object.self_link_query.nil? -%>
-<%   if has_input -%>
-      resource.provider = present(name, fetch, resource) unless fetch.nil?
-<%   else # has_input -%>
-      resource.provider = present(name, fetch) unless fetch.nil?
-<%   end # has_input -%>
+      resource.provider = <%= method_call('present', ['name',
+                                                      'fetch',
+                                                      ('resource' if has_input)
+      ]) -%> unless fetch.nil?
 <%   unless object.exports.nil? -%>
       Google::ObjectStore.instance.add(:<%= object.out_name -%>, resource)
 <%   end # object.exports.nil? -%>

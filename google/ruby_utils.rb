@@ -33,5 +33,32 @@ module Google
         raise "Unsupported Ruby literal #{value}"
       end
     end
+
+    def method_decl(name, args)
+      ["def #{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
+    end
+
+    # rubocop:disable Metrics/AbcSize
+    def method_call(name, args, indent = 0)
+      args = args.compact
+      format([
+               # All on one line.
+               [
+                 [name.to_s, ("(#{args.join(', ')})" unless args.empty?)].compact.join
+               ],
+               # All but first on one line.
+               [
+                 [name.to_s, ("(#{args[0..-1].join(', ')}" unless args.empty?)].compact.join,
+                 "#{indent(args.last, indent + name.length + 2)})"
+               ],
+               # All on separate lines.
+               [
+                 "#{name}(#{args.first},",
+                 indent_list(args.slice(1..-2), indent + name.length + 1, true),
+                 indent("#{args.last})", indent + name.length + 1)
+               ]
+             ], 0, indent)
+    end
+    # rubocop:enable Metrics/AbcSize
   end
 end

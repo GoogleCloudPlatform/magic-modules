@@ -434,7 +434,63 @@ overrides: !ruby/object:Provider::ResourceOverrides
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
         default_value: 2
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_health_check" "internal-health-check" {
+       name = "internal-service-health-check"
+
+       timeout_sec        = 1
+       check_interval_sec = 1
+
+       tcp_health_check {
+         port = "80"
+       }
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/health_check_type.erb
+    properties:
+     id: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     type: !ruby/object:Provider::Terraform::PropertyOverride
+       output: true
+       description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
+     httpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'https_health_check'
+         - 'tcp_health_check'
+         - 'ssl_health_check'
+     httpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     httpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 80
+     httpsHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'http_health_check'
+         - 'tcp_health_check'
+         - 'ssl_health_check'
+     httpsHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     httpsHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 443
+     tcpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'http_health_check'
+         - 'https_health_check'
+         - 'ssl_health_check'
+     tcpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     tcpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 80
+     sslHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'http_health_check'
+         - 'https_health_check'
+         - 'tcp_health_check'
+     sslHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     sslHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 443
   Image: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
     properties:
@@ -1229,8 +1285,12 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_address_test.go'
     'google/resource_compute_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_autoscaler_test.go'
+    'google/resource_compute_firewall_test.go':
+      'templates/terraform/tests/resource_compute_firewall_test.go'
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
+    'google/resource_compute_health_check_test.go':
+      'templates/terraform/tests/resource_compute_health_check_test.go'
     'google/resource_compute_region_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
     'google/resource_compute_region_disk_test.go':

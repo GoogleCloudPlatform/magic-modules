@@ -448,9 +448,32 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
-      # 'loadBalancingScheme' is undefined: string? enum? ref? http://b/63215956
-      # | - !ruby/object:Api::Type::???
-      # |   name: 'loadBalancingScheme'
+      - !ruby/object:Api::Type::NestedObject
+        name: 'iap'
+        description: Settings for enabling Cloud Identity Aware Proxy
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Enables IAP.
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientId'
+            description: OAuth2 Client ID for IAP
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientSecret'
+            description: OAuth2 Client Secret for IAP
+          - !ruby/object:Api::Type::String
+            name: 'oauth2ClientSecretSha256'
+            description: OAuth2 Client Secret SHA-256 for IAP
+            output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'loadBalancingScheme'
+        description: |
+          Indicates whether the backend service will be used with internal or
+          external load balancing. A backend service created for one type of
+          load balancing cannot be used with the other.
+        values:
+          - :INTERNAL
+          - :EXTERNAL
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -778,6 +801,14 @@ objects:
           network it is associated with. When set to true, the firewall rule is
           not enforced and the network behaves as if it did not exist. If this
           is unspecified, the firewall rule will be enabled.
+        min_version: beta
+        send_empty_value: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableLogging'
+        description: |
+          This field denotes whether to enable logging for a particular
+          firewall rule. If logging is enabled, logs will be exported to
+          Stackdriver.
         min_version: beta
         send_empty_value: true
       - !ruby/object:Api::Type::Integer
@@ -1258,10 +1289,25 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
-    description:
-      An HealthCheck resource. This resource defines a template for how
-      individual virtual machines should be checked for health, via one of the
-      supported protocols.
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/health-checks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/latest/healthChecks'
+    description: |
+      Health Checks determine whether instances are responsive and able to do work.
+      They are an important part of a comprehensive load balancing configuration,
+      as they enable monitoring instances behind load balancers.
+
+      Health Checks poll instances at a specified interval. Instances that
+      do not respond successfully to some number of probes in a row are marked
+      as unhealthy. No new connections are sent to unhealthy instances,
+      though existing connections will continue. The health check will
+      continue to poll unhealthy instances. If an instance later responds
+      successfully to some number of consecutive probes, it is marked
+      healthy again and can receive new connections.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
@@ -1284,6 +1330,7 @@ objects:
         description: |
           A so-far unhealthy instance will be marked healthy after this many
           consecutive successes. The default value is 2.
+        default_value: 2
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
@@ -1292,6 +1339,8 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -1324,6 +1373,7 @@ objects:
           - :TCP
           - :SSL
           - :HTTP
+          - :HTTPS
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
         properties:
@@ -1816,6 +1866,20 @@ objects:
         imports: 'name'
         description: 'A reference to the zone where the instance group resides.'
         required: true
+      - !ruby/object:Api::Type::Array
+        name: 'instances'
+        description: |
+          The list of instances associated with this InstanceGroup.
+          All instances must be created before being added to an InstanceGroup.
+          All instances not in this list will be removed from the InstanceGroup
+          and will not be deleted.
+          Only the full identifier of the instance will be returned.
+        exclude: true
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'instance'
+          description: 'An instance being added to the InstanceGroup'
+          resource: 'Instance'
+          imports: 'selfLink'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'

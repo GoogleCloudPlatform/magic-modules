@@ -135,12 +135,8 @@ module Google
 <% if object&.handlers&.prefetch  -%>
 <%= lines(indent(object.handlers.prefetch, 8)) -%>
 <% else # object.handlers -%>
-<% if object.kind? -%>
-        fetch = fetch_resource(@new_resource, self_link(@new_resource),
-                               '<%= object.kind -%>')
-<% else # object.kind? -%>
-        fetch = fetch_resource(@new_resource, self_link(@new_resource))
-<% end # object.kind? -%>
+        fetch = <%= method_call('fetch_resource', ['@new_resource', 'self_link(@new_resource)',
+                                                   ("'#{object.kind}'" if object.kind?)], 16) %>
 <% end # object.handlers.prefetch -%>
 <% else # object.self_link_query.nil? -%>
         fetch = fetch_wrapped_resource(@new_resource, '<%= object.kind -%>',
@@ -283,22 +279,12 @@ module Google
 
       action :delete do
 <% if object.self_link_query.nil? -%>
-<% if object.kind? -%>
-        fetch = fetch_resource(@new_resource, self_link(@new_resource),
-                               '<%= object.kind -%>')
-<% else # object.kind? -%>
-        fetch = fetch_resource(@new_resource, self_link(@new_resource))
-<% end # object.kind? -%>
+        fetch = <%= method_call('fetch_resource', ['@new_resource', 'self_link(@new_resource)',
+                                                   ("'#{object.kind}'" if object.kind?)], 16) %>
 <% else # object.self_link_query.nil? -%>
-<% obj_kind = object.kind? ? "'#{object.kind}'," : '' -%>
-<% if object.self_link_query.kind.nil? -%>
-        fetch = fetch_wrapped_resource(@new_resource, <%= obj_kind %>
-                                       '<%= object.self_link_query.items -%>')
-<% else #object.self_link_query.kind.nil? -%>
-        fetch = fetch_wrapped_resource(@new_resource, <%= obj_kind %>
-                                       '<%= object.self_link_query.kind -%>',
-                                       '<%= object.self_link_query.items -%>')
-<% end #object.self_link_query.kind.nil? -%>
+        fetch = <%= method_call('fetch_wrapped_resource', ['@new_resource', ("'#{object.kind}'" if object.kind?),
+                                                           "'#{object.self_link_query.kind}'",
+                                                           "'#{object.self_link_query.items}'"], 16) %>
 <% end # object.self_link_query.nil? -%>
         unless fetch.nil?
 <%=
@@ -616,15 +602,9 @@ module Google
                   .authorization
         end
 
-<% if object.kind? -%>
-        def fetch_resource(resource, self_link, kind)
-          self.class.fetch_resource(resource, self_link, kind)
+<%= indent(method_decl('fetch_resource', ['resource', 'self_link', ('kind' if object.kind?)]), 8) %>
+<%= indent(method_call('self.class.fetch_resource', ['resource', 'self_link', ('kind' if object.kind?)], 10), 10) %>
         end
-<% else -%>
-        def fetch_resource(resource, self_link)
-          self.class.fetch_resource(resource, self_link)
-        end
-<% end -%>
 
         def debug(message)
           Chef::Log.debug(message)

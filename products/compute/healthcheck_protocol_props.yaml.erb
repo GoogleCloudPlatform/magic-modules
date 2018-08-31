@@ -10,6 +10,7 @@
   description: |
     The request path of the <%= protocol -%> health check request.
     The default value is /.
+  default_value: "/"
 <% elsif ['SSL', 'TCP'].include?(protocol) -%>
 - !ruby/object:Api::Type::String
   name: 'request'
@@ -47,3 +48,4 @@
   values:
     - :NONE
     - :PROXY_V1
+  default_value: :NONE

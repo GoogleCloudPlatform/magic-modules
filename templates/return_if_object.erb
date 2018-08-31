@@ -16,19 +16,11 @@ def self.return_if_object(response)
 <% if !object.decoder? -%>
   result = JSON.parse(response.body)
 <% else # !object.decoder? -%>
-<%   if object.kind? -%>
-  result = <%= object.transport.decoder -%>(response, kind)
-<%   else # object.kind? -%>
-  result = <%= object.transport.decoder -%>(response)
-<%   end # object.kind? -%>
+  result = <%= method_call(object.transport.decoder, ['response', ('kind' if object.kind?)]) %>
 <% end # !object.decoder? -%>
 <% end # object.transport.nil? -%>
   raise_if_errors result, %w[error errors], 'message'
   raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
-<% if object.kind? -%>
-  raise "Incorrect result: #{result['kind']} (expected '#{kind}')" \
-    unless result['kind'] == kind
-<% end # object.kind? -%>
   result
 end
 <% if object.kind? -%>
