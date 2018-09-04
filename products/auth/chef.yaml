@@ -16,7 +16,7 @@
 # edit InstanceGroup
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.1'
+  version: '0.2.0'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-auth'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-auth/issues'
   summary: 'Installs/Configures gauth'
@@ -48,6 +48,11 @@ files: !ruby/object:Provider::Config::Files
     'metadata.rb': 'templates/chef/metadata.rb.erb'
     'CONTRIBUTING.md': 'templates/CONTRIBUTING.md.erb'
 changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.2.0'
+    date: 2018-09-04T09:00:00-0700
+    features:
+      - Update version for supermarket release.
   - !ruby/object:Provider::Config::Changelog
     version: '0.1.1'
     date: 2017-10-16T18:30:00-0700
