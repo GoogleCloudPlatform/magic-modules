@@ -116,6 +116,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.7'
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
+      loadBalancingScheme: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      iap: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
@@ -226,6 +230,21 @@ overrides: !ruby/object:Provider::ResourceOverrides
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      instances: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+        exclude: false
+    update: |
+      instance = InstanceLogic(module)
+      instance.run()
+    post_action: |
+      if fetch:
+          instance = InstanceLogic(module)
+          instance.run()
+          fetch.update({'instances': instance.list_instances()})
+    provider_helpers:
+      - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
