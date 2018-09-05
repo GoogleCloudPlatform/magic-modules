@@ -20,12 +20,8 @@ require 'google/authorization'
 module Google
   # Module that holds gauth_credential_serviceaccount_for_function
   module Functions
-    def self.gauth_credential_serviceaccount_for_function(path, scopes)
-      ::Google::Authorization.new.for!(scopes).from_service_account_json!(path)
-    end
-
     def gauth_credential_serviceaccount_for_function(path, scopes)
-      self.class.gauth_credential_serviceaccount_for_function(path, scopes)
+      ::Google::Authorization.new.for!(scopes).from_service_account_json!(path)
     end
   end
 end
