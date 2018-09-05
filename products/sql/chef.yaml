@@ -96,11 +96,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
           self.class.return_if_object(response, kind)
         end
       resource_to_request_patch: |
-        unless @__fetched.nil?
+        unless @current_resource.nil?
           # Convert to pure JSON
           request = JSON.parse(request.to_json)
           request['settings']['settingsVersion'] =
-            @__fetched['settings']['settingsVersion']
+            @current_resource.settings.settings_version
         end
   SslCert: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true

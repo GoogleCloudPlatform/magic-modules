@@ -321,6 +321,14 @@ objects:
               example db-n1-standard-1. For MySQL instances, this field
               determines whether the instance is Second Generation (recommended)
               or First Generation.
+          - !ruby/object:Api::Type::Integer
+            name: 'settingsVersion'
+            output: true
+            description: |
+              The version of instance settings. This is a required field for 
+              update method to make sure concurrent updates are handled properly. 
+              During update, use the most recent settingsVersion value for this 
+              instance and do not try to update this value.
       # TODO(nelsonjr): Add missing properties such as state.
   - !ruby/object:Api::Resource
     name: 'Database'
