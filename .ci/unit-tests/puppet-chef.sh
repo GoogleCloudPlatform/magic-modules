@@ -10,11 +10,13 @@ if [ $PROVIDER = "chef" ]; then
     # Re-enable chef tests by deleting this if block once the tests are fixed.
     echo "Skipping tests... See issue #236"
 elif [ -z "$EXCLUDE_PATTERN" ]; then
-    DISABLE_COVERAGE=true bundle exec parallel_rspec spec/
+  if ls spec/g$PRODUCT* > /dev/null 2&>1; then
+    DISABLE_COVERAGE=true bundle exec parallel_rspec spec/g$PRODUCT*
+  fi
 else
     # parallel_rspec doesn't support --exclude_pattern
     IFS="," read -ra excluded <<< "$EXCLUDE_PATTERN"
-    filtered=$(find spec -name '*_spec.rb' $(printf "! -wholename %s " ${excluded[@]}))
+    filtered=$(find spec -name "g$PRODUCT*_spec.rb" $(printf "! -wholename %s " ${excluded[@]}))
     DISABLE_COVERAGE=true bundle exec parallel_rspec ${filtered[@]}
 fi
 
