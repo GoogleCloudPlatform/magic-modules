@@ -105,7 +105,6 @@ VCR.configure do |c|
 end
 
 describe '<%= Google::StringUtils.underscore(obj.name) -%>.create', vcr: true do
-  mods = [File.expand_path('.'), File.expand_path('./spec/fixtures/modules/')]
   it 'creates and destroys non-existent <%= Google::StringUtils.underscore(obj.name) -%>' do
     puts 'pre-destroying <%= Google::StringUtils.underscore(obj.name) -%>'
     VCR.use_cassette('pre_destroy_<%= Google::StringUtils.underscore(obj.name) -%>') do

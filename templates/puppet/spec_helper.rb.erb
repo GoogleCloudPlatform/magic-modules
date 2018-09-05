@@ -122,6 +122,7 @@ def run_example(example_name)
   # compiling the example, catching the failure, then
   # compiling it again within the context of the failure,
   # and then applies it.
+  mods = [File.expand_path('.'), File.expand_path('./spec/fixtures/modules/')]
   example = get_example(example_name)
   test = Puppet::Node::Environment.create(:test, mods)
   loaders = Puppet::Pops::Loaders.new(test, true)
@@ -139,6 +140,7 @@ def validate_no_flush_calls(example_name)
   # that it also validates that no POST calls are made to a
   # google API during the 'flush' step (i.e. 'update if
   # necessary' step).
+  mods = [File.expand_path('.'), File.expand_path('./spec/fixtures/modules/')]
   example = get_example(example_name)
   test = Puppet::Node::Environment.create(:test, mods)
   loaders = Puppet::Pops::Loaders.new(test, true)
