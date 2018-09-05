@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::ChefBundle::Config
 manifest: !ruby/object:Provider::ChefBundle::Manifest
-  version: '0.2.0'
+  version: '0.4.0'
   source: 'https://github.com/GoogleCloudPlatform/chef-google'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google/issues'
   summary: 'Bundle cookbook to install all Chef GCP cookbooks.'
@@ -49,6 +49,11 @@ files: !ruby/object:Provider::Config::Files
     'CONTRIBUTING.md': 'templates/CONTRIBUTING.md.erb'
     # CONTRIBUTING.md has to be the last file to be compiled.
 changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.4.0'
+    date: 2018-09-04T09:00:00-0700
+    features:
+      - Update dependencies, version for supermarket release.
   - !ruby/object:Provider::Config::Changelog
     version: '0.2.0'
     date: 2018-03-16T09:00:00-0700

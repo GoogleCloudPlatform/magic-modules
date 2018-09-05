@@ -16,7 +16,7 @@
 # edit InstanceGroup
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.0'
+  version: '0.2.0'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-storage'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-storage/issues'
   summary: 'A Chef cookbook to manage Google Cloud Storage resources'
@@ -71,3 +71,10 @@ style:
       - class: Google::GSTORAGE::BucketAccessControl
         exceptions:
           - Metrics/ClassLength
+
+changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.2.0'
+    date: 2018-09-04T09:00:00-0700
+    features:
+      - Update version for supermarket release.
