@@ -90,6 +90,13 @@ RSpec.configure do |c|
 end
 
 def get_example(example_name)
+  # This is a little nutty, but we actually put a mocked up
+  # version of the ruby function for healthchecks at the top
+  # of the manifest.  Any other function which gets used in an
+  # example is going to need the same treatment.  This *IS*
+  # limiting, not everything that can be expressed in a ruby
+  # function can be expressed in a puppet function - but see comment
+  # in integration_spec.rb.  We haven't figured out a better way yet.
   ex = read_example(example_name)
   healthcheck_fn = File.open('spec/fixtures/mock_hc_fn.pp').read
   healthcheck_fn + "\n\n" + ex
@@ -104,6 +111,50 @@ def read_example(example_name)
       .gsub('$cred_path', "\"#{ENV['GOOGLE_CREDENTIALS_PATH']}\"")
 end
 
+def run_example(example_name)
+  # This function runs an example specified by name (not
+  # including '.pp'.  It generates a puppet environment,
+  # tricks puppet into feeling semi-initialized by
+  # compiling the example, catching the failure, then
+  # compiling it again within the context of the failure,
+  # and then applies it.
+  example = get_example(example_name)
+  test = Puppet::Node::Environment.create(:test, mods)
+  loaders = Puppet::Pops::Loaders.new(test, true)
+  Puppet.override(current_environment: test, loaders: loaders) do
+    begin
+      compile_to_ral(example)
+    rescue
+      apply_with_error_check(example)
+    end
+  end
+end
+
+def validate_no_flush_calls(example_name)
+  # This function is very much like run_example, above, except
+  # that it also validates that no POST calls are made to a
+  # google API during the 'flush' step (i.e. 'update if
+  # necessary' step).
+  example = get_example(example_name)
+  test = Puppet::Node::Environment.create(:test, mods)
+  loaders = Puppet::Pops::Loaders.new(test, true)
+  Puppet.override(current_environment: test, loaders: loaders) do
+    begin
+      compile_to_ral(example)
+    rescue
+      apply_compiled_manifest(example) do |res|
+        if res.provider&.respond_to? 'flush'
+          # Any request to Google APIs during a flush is not
+          # acceptable - that means that a diff was detected.
+          omnistub = stub_request(:any, /google/)
+                     .to_raise("Shouldn't have made network call.")
+          res.provider.flush
+          remove_request_stub(omnistub)
+        end
+      end
+    end
+  end
+end
 
 require 'mocha/test_unit'
 

@@ -54,13 +54,16 @@ the way that `puppet apply` does, we need to substitute in our own project
 name and credential path (which all our examples use).  Hence the
 get_example() function - it does more than just read the file.
 
+You can see all this stuff in spec_helper.rb.erb.
+
 There's also the issue of the begin/rescue pattern you'll see here.  It's
 ugly!  It's also necessary.  compile_to_ral() calls out to our mocked up
 loader, but fails to successfully compile the manifest due to some
 initialization which is mandatory, but isn't possible to complete from
 outside puppet.  HOWEVER!  We're in luck!  In calling some cleanup code,
 in reporting on the failure, compile_to_ral actually *performs* the
-initialization we need.
+initialization we need.  So, if we try it twice, it works the second
+time.  Lucky.
 
 So!  We *can* successfully apply a manifest from
 under webmock, as long as we:
@@ -106,89 +109,23 @@ describe '<%= Google::StringUtils.underscore(obj.name) -%>.create', vcr: true do
   it 'creates and destroys non-existent <%= Google::StringUtils.underscore(obj.name) -%>' do
     puts 'pre-destroying <%= Google::StringUtils.underscore(obj.name) -%>'
     VCR.use_cassette('pre_destroy_<%= Google::StringUtils.underscore(obj.name) -%>') do
-      example = get_example('delete_<%= Google::StringUtils.underscore(obj.name) -%>')
-      test = Puppet::Node::Environment.create(:test, mods)
-      loaders = Puppet::Pops::Loaders.new(test, true)
-      Puppet.override(current_environment: test, loaders: loaders) do
-        begin
-          compile_to_ral(example)
-        rescue
-          apply_with_error_check(example)
-        end
-      end
+      run_example('delete_<%= Google::StringUtils.underscore(obj.name) -%>')
     end
-
     puts 'creating <%= Google::StringUtils.underscore(obj.name) -%>'
     VCR.use_cassette('create_<%= Google::StringUtils.underscore(obj.name) -%>') do
-      example = get_example('<%= Google::StringUtils.underscore(obj.name) -%>')
-      test = Puppet::Node::Environment.create(:test, mods)
-      loaders = Puppet::Pops::Loaders.new(test, true)
-      Puppet.override(current_environment: test, loaders: loaders) do
-        begin
-          compile_to_ral(example)
-        rescue
-          apply_with_error_check(example)
-        end
-      end
+      run_example('<%= Google::StringUtils.underscore(obj.name) -%>')
     end
     puts 'checking that <%= Google::StringUtils.underscore(obj.name) -%> is created'
     VCR.use_cassette('check_<%= Google::StringUtils.underscore(obj.name) -%>') do
-      example = get_example('<%= Google::StringUtils.underscore(obj.name) -%>')
-      test = Puppet::Node::Environment.create(:test, mods)
-      loaders = Puppet::Pops::Loaders.new(test, true)
-      Puppet.override(current_environment: test, loaders: loaders) do
-        begin
-          compile_to_ral(example)
-        rescue
-          apply_compiled_manifest(example) do |res|
-            if res.provider&.respond_to? 'flush'
-              # Any request to Google APIs during a flush is not
-              # acceptable - that means that a diff was detected.
-              omnistub = stub_request(:any, /google/)
-                         .to_raise("Shouldn't have made network call.")
-              res.provider.flush
-              remove_request_stub(omnistub)
-            end
-          end
-        end
-      end
+      validate_no_flush_calls('<%= Google::StringUtils.underscore(obj.name) -%>')
     end
     puts 'destroying <%= Google::StringUtils.underscore(obj.name) -%>'
     VCR.use_cassette('destroy_<%= Google::StringUtils.underscore(obj.name) -%>') do
-      example = get_example('delete_<%= Google::StringUtils.underscore(obj.name) -%>')
-      test = Puppet::Node::Environment.create(:test, mods)
-      loaders = Puppet::Pops::Loaders.new(test, true)
-      Puppet.override(current_environment: test, loaders: loaders) do
-        begin
-          compile_to_ral(example)
-        rescue
-          apply_with_error_check(example)
-        end
-      end
+      run_example('delete_<%= Google::StringUtils.underscore(obj.name) -%>')
     end
     puts 'confirming <%= Google::StringUtils.underscore(obj.name) -%> destroyed'
     VCR.use_cassette('check_destroy_<%= Google::StringUtils.underscore(obj.name) -%>') do
-      example = get_example('delete_<%= Google::StringUtils.underscore(obj.name) -%>')
-      test = Puppet::Node::Environment.create(:test, mods)
-      loaders = Puppet::Pops::Loaders.new(test, true)
-      Puppet.override(current_environment: test, loaders: loaders) do
-        begin
-          compile_to_ral(example)
-        rescue
-          apply_compiled_manifest(example) do |res|
-            if res.provider&.respond_to? 'flush'
-              # Any request to Google APIs during a flush is not
-              # acceptable - that means that the object still needs
-              # to be deleted.
-              omnistub = stub_request(:any, /google/)
-                         .to_raise("Shouldn't have made network call.")
-              res.provider.flush
-              remove_request_stub(omnistub)
-              expect(res.provider.instance_variable_get(:@deleted)).to eq(nil)
-            end
-          end
-        end
-      end
+      validate_no_flush_calls('delete_<%= Google::StringUtils.underscore(obj.name) -%>')
     end
   end
 end
