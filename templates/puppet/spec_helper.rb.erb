@@ -69,6 +69,10 @@ RSpec.configure do |c|
     Puppet::Test::TestHelper.after_all_tests
   end
 
+  c.mock_with :rspec do |conf|
+    conf.syntax = [:should, :expect]
+  end
+
   c.before :each do
     base = PuppetSpec::Files.tmpdir('tmp_settings')
     Puppet[:vardir] = File.join(base, 'var')

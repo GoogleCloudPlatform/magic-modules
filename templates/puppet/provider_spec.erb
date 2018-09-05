@@ -17,6 +17,11 @@
 <%= lines(autogen_notice :puppet) -%>
 
 require 'spec_helper'
+require 'network_blocker'
+require 'spec/bundle.rb'
+require 'spec/copyright.rb'
+require 'spec/fake_auth.rb'
+require 'spec/test_constants.rb'
 
 <%
 if object.readonly
