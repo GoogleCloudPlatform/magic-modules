@@ -29,7 +29,7 @@ end
 gpubsub_subscription <%= example_resource_name('subscription-1') -%> do
   action :create
   topic <%= example_resource_name('conversation-1') %>
-  push_config (
+  push_config(
     push_endpoint: 'https://myapp.graphite.cloudnativeapp.com/webhook/sub1'
   )
   ack_deadline_seconds 300
