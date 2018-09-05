@@ -100,8 +100,8 @@ def read_example(example_name)
   # these facts-as-variables, so we have to do these
   # substitutions ourselves.
   File.open("examples/#{example_name}.pp", 'rb').read\
-      .gsub('$project', '"personal-graphite-testing"')\
-      .gsub('$cred_path', '"/home/nmckinley/.gcloud/Terraform.json"')
+      .gsub('$project', "\"#{ENV['GOOGLE_PROJECT']}\"")\
+      .gsub('$cred_path', "\"#{ENV['GOOGLE_CREDENTIALS_PATH']}\"")
 end
 
 
