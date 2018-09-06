@@ -28,4 +28,8 @@
 - name: verify that command succeeded
   assert:
     that:
+<% if object.facts.test -%>
+      - <%= lines(object.facts.test) -%>
+<% else # object.facts.test -%>
       - results['items'] | length == <%= _state == 'present' ? 1 : 0 %>
+<% end # object.facts.test -%>

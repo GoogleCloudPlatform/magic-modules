@@ -22,6 +22,7 @@ module Provider
       attr_reader :filter
       attr_reader :query_options
       attr_reader :filter_api_param
+      attr_reader :test
 
       def validate
         super
@@ -36,6 +37,7 @@ module Provider
         check_property :filter, Api::Object
         check_property :query_options, :boolean
         check_property :filter_api_param, ::String
+        check_optional_property :test, ::String
       end
     end
   end
