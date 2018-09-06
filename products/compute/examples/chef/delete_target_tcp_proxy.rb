@@ -42,7 +42,7 @@ gcompute_backend_service <%= example_resource_name('my-tcp-backend') -%> do
     { group: <%= example_resource_name('my-chef-servers') -%> }
   ]
   health_checks [
-    gcompute_health_check_ref('another-hc', ENV['PROJECT'] # ex: 'my-test-project')
+    gcompute_health_check_ref('another-hc', ENV['PROJECT']) # ex: 'my-test-project'
   ]
   protocol 'TCP'
   project ENV['PROJECT'] # ex: 'my-test-project'
