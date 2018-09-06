@@ -129,7 +129,7 @@ class GcpSession(object):
             credentials, project_id = google.auth.default()
             return credentials
         elif cred_type == 'serviceaccount':
-            path = os.path.expanduser(self.module.params['service_account_file'])
+            path = os.path.realpath(os.path.expanduser(self.module.params['service_account_file']))
             return service_account.Credentials.from_service_account_file(path)
         elif cred_type == 'machineaccount':
             return google.auth.compute_engine.Credentials(
