@@ -51,7 +51,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.10
+          tag: v0.1.11
 
     - name: gcs-resource
       type: docker-image
@@ -85,6 +85,7 @@ resources:
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
           authorship_restriction: true
+          no_label: automerged
 
 {% if terraform_enabled %}
     - name: terraform-intermediate
@@ -521,6 +522,11 @@ jobs:
           - get: mm-approved-prs
             params:
               fetch_merge: true
+          - put: mm-approved-prs
+            params:
+              path: mm-approved-prs
+              status: success
+              label: automerged
           - task: merge-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
@@ -534,6 +540,10 @@ jobs:
                 repository: mm-output
                 branch_file: mm-approved-prs/.git/branch
                 only_if_diff: true
+          - put: mm-approved-prs
+            params:
+                path: mm-output
+                status: success
           - put: mm-approved-prs
             params:
                 path: mm-output
