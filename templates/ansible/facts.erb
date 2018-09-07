@@ -35,8 +35,10 @@ requirements:
 <% @config.manifest.get('requirements', object).each do |line| -%>
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
-<% if object.facts.has_filters -%>
+<% if object.facts.has_filters || !uri_props.empty? -%>
 options:
+<% end -%>
+<% if object.facts.has_filters -%>
     <%= object.facts.filter.name.underscore -%>:
        description:
 <%= lines(indent(wrap_field(object.facts.filter.description, 11), 11)) -%>
