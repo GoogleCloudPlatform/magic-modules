@@ -13,6 +13,9 @@
 	# limitations under the License.
 <% end -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+  if v == nil || v.(string) == "" {
+    return "", nil
+  }
   f, err := <%= build_expand_resource_ref('v.(string)', property) %>
   if err != nil {
     return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
