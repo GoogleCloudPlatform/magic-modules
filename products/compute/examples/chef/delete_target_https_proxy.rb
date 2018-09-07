@@ -43,7 +43,7 @@ gcompute_backend_service <%= example_resource_name('my-app-backend') -%> do
   ]
   enable_cdn true
   health_checks [
-    gcompute_health_check_ref('another-hc', ENV['PROJECT'] # ex: 'my-test-project')
+    gcompute_health_check_ref('another-hc', ENV['PROJECT']) # ex: 'my-test-project'
   ]
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
