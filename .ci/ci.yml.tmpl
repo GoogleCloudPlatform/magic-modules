@@ -527,6 +527,8 @@ jobs:
               path: mm-approved-prs
               status: success
               label: automerged
+            get_params:
+              fetch_merge: true
           - task: merge-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
@@ -544,6 +546,8 @@ jobs:
             params:
                 path: mm-output
                 status: success
+            get_params:
+                fetch_merge: true
           - put: mm-approved-prs
             params:
                 path: mm-output
