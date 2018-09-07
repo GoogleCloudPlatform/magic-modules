@@ -47,14 +47,15 @@ module Provider
     class Examples < Api::Object
       include Compile::Core
 
-      # The name of the example in lowercase with underscores separating words.
+      # The name of the example in lower snake_case.
       # Generally takes the form of the resource name followed by some detail
       # about the specific test. For example, "address_with_subnetwork".
       # The template for the example is expected at the path
       # "templates/terraform/examples/{{name}}.tf.erb"
       attr_reader :name
 
-      # vars_documentation is a Hash from template variable names to output variable names
+      # vars_documentation is a Hash from template variable names to output
+      # variable names
       attr_reader :vars_documentation
 
       def config_documentation
