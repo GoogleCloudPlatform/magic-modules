@@ -15,32 +15,17 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
-    examples: |
-      ```hcl
-      resource "google_compute_address" "default" {
-        name = "my-address"
-      }
-      ```
-      ```hcl
-      resource "google_compute_network" "default" {
-        name = "my-network"
-      }
-
-      resource "google_compute_subnetwork" "default" {
-        name          = "my-subnet"
-        ip_cidr_range = "10.0.0.0/16"
-        region        = "us-central1"
-        network       = "${google_compute_network.default.self_link}"
-      }
-
-      resource "google_compute_address" "internal_with_subnet_and_address" {
-        name         = "my-internal-address"
-        subnetwork   = "${google_compute_subnetwork.default.self_link}"
-        address_type = "INTERNAL"
-        address      = "10.0.42.42"
-        region       = "us-central1"
-      }
-      ```
+    example:
+     - !ruby/object:Provider::Terraform::Examples
+      name: "address_basic"
+      vars_documentation:
+        address_name: "my-address"
+     - !ruby/object:Provider::Terraform::Examples
+      name: "address_with_subnetwork"
+      vars_documentation:
+        address_name: "my-internal-address"
+        network_name: "my-network"
+        subnetwork_name: "my-subnet"
     properties:
       address: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
