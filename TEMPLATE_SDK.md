@@ -761,7 +761,7 @@ line #1 by compiling the license template:
 To ensure no doubts exist on the readers' minds, we recommend that you mark the
 copyright notice on the template with a ERB block:
 
-    <% if false # the license inside this if block assertains to this file -%>
+    <% if false # the license inside this if block pertains to this file -%>
     # Copyright 2017 Google Inc.
     ...
     ...
