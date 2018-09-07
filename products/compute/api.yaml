@@ -3868,11 +3868,12 @@ objects:
         imports: 'selfLink'
         input: true
         required: true
-      # TODO(ndmckinley): Make this a resource refefence
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'router'
         description: |
           URL of router resource to be used for dynamic routing.
+        resource: 'Router'
+        imports: 'selfLink'
         input: true
       - !ruby/object:Api::Type::String
         name: 'peerIp'
