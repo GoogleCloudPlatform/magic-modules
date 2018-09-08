@@ -2893,13 +2893,18 @@ objects:
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/global/sslCertificates
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
     description: |
-      An SslCertificate resource. This resource provides a mechanism to upload
-      an SSL key and certificate to the load balancer to serve secure
-      connections from the user.
+      An SslCertificate resource, used for HTTPS load balancing. This resource
+      provides a mechanism to upload an SSL key and certificate to
+      the load balancer to serve secure connections from the user.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -2908,6 +2913,7 @@ objects:
           The certificate in PEM format.
           The certificate chain must be no greater than 5 certs long.
           The chain must include at least one intermediate cert.
+        required: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -2931,7 +2937,8 @@ objects:
           character, which cannot be a dash.
       - !ruby/object:Api::Type::String
         name: 'privateKey'
-        description: 'The private key in PEM format.'
+        description: 'The write-only private key in PEM format.'
+        required: true
         input: true
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
