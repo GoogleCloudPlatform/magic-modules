@@ -170,8 +170,6 @@ module Provider
       )
     end
     # rubocop:enable Metrics/AbcSize
-
   end
   # rubocop:enable Metrics/ClassLength
-
 end
