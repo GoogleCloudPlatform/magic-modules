@@ -149,6 +149,8 @@ objects:
     description: >
       A Table that belongs to a Dataset
     parameters:
+      # TODO(alexstephen): Remove once we have support for placing
+      # nested object fields in URL
       - !ruby/object:Api::Type::String
         name: 'dataset'
         description: Name of the dataset
