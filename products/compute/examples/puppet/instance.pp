@@ -50,15 +50,6 @@ gcompute_region { 'us-central1':
   credential => 'mycred',
 }
 
-# Defines the machine type to be used by the VM. This definition is required
-# only once per catalog as it is shared to any objects that use the
-# 'n1-standard-1' defined below.
-gcompute_machine_type { 'n1-standard-1':
-  zone       => 'us-central1-a',
-  project    => $project, # e.g. 'my-test-project'
-  credential => 'mycred',
-}
-
 # Ensures the 'instance-test-ip' external IP address exists. If it does not
 # exist it will allocate an ephemeral one.
 gcompute_address { <%= example_resource_name('instance-test-ip') -%>:
