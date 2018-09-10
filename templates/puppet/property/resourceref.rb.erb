@@ -60,8 +60,9 @@ module Google
                             :disabled), 6))
 -%>
       class <%= class_name %>Catalog < <%= class_name %>
-        def initialize(title)
+        def initialize(title, resource)
           @title = title
+          @resource = resource
         end
 
         # Puppet requires the title for autorequiring
@@ -98,21 +99,18 @@ module Google
           unless /<%= property.resource_ref.regex_url.gsub('/', '\/') -%>/.match(@title)
             # We'll asssmble the self_link for the user.
             # We need to get the project name to assemble the self_link
-            projects = Google::ObjectStore.instance
-                                          .resources
-                                          .reject { |name, _a| name == :gauth_credential }
-                                          .map { |_name, array| array.map(&:exports) }
-                                          .flatten
-                                          .map { |x| x[:project] }
-                                          .compact
-                                          .uniq
-            return "<%= property.resource_ref.self_link_url.join.gsub('{{name}}', '#{@title}').gsub('{{project}}', '#{projects[0]}') -%>" \
-              if projects.length == 1
-            raise ["Your Puppet manifest contains multiple projects.",
-                   "We cannot determine which project you wish to use.",
-                   "Please replace #{@title} with a full URL of the form:",
-                   "<%= property.resource_ref.self_link_url.join -%>"
-                  ].join(' ')
+<%
+  # We need to grab values from the @resource.
+  # This substitution will grab the values from @resource and convert to String (in case it's an object)
+  # Convert {{name}} -> #{@title}
+  # Convert {{foo}} -> #{@resource.parameters[:foo].value}
+  url = property.resource_ref.self_link_url.join
+                .gsub('{{name}}', '#{@title}')
+                .gsub('}}', '].value}')
+                .gsub('{{', '#{@resource.parameters[:')
+-%>
+
+            return "<%= url -%>"
           end
 
 <% end # if resource_ref.readonly && selfLink -%>
@@ -155,12 +153,15 @@ module Google
       class <%= class_name %> < Puppet::Property
         # Used for catalog values
         def unsafe_munge(value)
-          self.class.unsafe_munge(value)
+          self.class.unsafe_munge(value, @resource)
         end
 
-        def self.unsafe_munge(value)
+<%# resource = nil because unsafe_munge is called by our nested object/array resources. No need to
+    have the resource go all the way through
+-%>
+        def self.unsafe_munge(value, resource = nil)
           return if value.nil?
-          Data::<%= class_name %>Catalog.new(value)
+          Data::<%= class_name %>Catalog.new(value, resource)
         end
 
         # Used for fetched JSON values
@@ -175,15 +176,15 @@ module Google
       class <%= class_name %>Array < Google::<%= product_ns -%>::Property::Array
         # Used for parsing Puppet catalog
         def unsafe_munge(value)
-          self.class.unsafe_munge(value)
+          self.class.unsafe_munge(value, @resource)
         end
 
         # Used for parsing Puppet catalog
-        def self.unsafe_munge(value)
+        def self.unsafe_munge(value, resource = nil)
           return if value.nil?
           return <%= class_name %>.unsafe_munge(value) \
             unless value.is_a?(::Array)
-          value.map { |v| <%= class_name %>.unsafe_munge(v) }
+          value.map { |v| <%= class_name %>.unsafe_munge(v, resource) }
         end
 
         # Used for parsing GCP API responses
