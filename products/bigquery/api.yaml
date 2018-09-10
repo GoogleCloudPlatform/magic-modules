@@ -146,15 +146,26 @@ objects:
     name: 'Table'
     kind: 'bigquery#table'
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
-    exclude: true
     description: >
       A Table that belongs to a Dataset
     parameters:
-      # TODO: Convert to ResourceRef when multi-layered exports exist
       - !ruby/object:Api::Type::String
         name: 'dataset'
-        description: The dataset this table belongs to.
+        description: Name of the dataset
     properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: tableReference
+        description: Reference describing the ID of this table
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'datasetId'
+            description: The ID of the dataset containing this table
+          - !ruby/object:Api::Type::String
+            name: 'projectid'
+            description: The ID of the project containing this table
+          - !ruby/object:Api::Type::String
+            name: 'tableId'
+            description: The ID of the the table
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
         output: true
