@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 <% end -%>
-<% if emit_array -%>
-require 'google/<%= prop_ns_dir -%>/property/array'
-<% end -%>
 <%# Requires: resource - name of resource being fetched -%>
 <%#           imports - name of property being fetched -%>
 <%= compile('templates/license.erb') -%>
 
 <%= lines(autogen_notice :ruby) -%>
+
+<% if emit_array -%>
+require 'google/<%= prop_ns_dir -%>/property/array'
+<% end -%>
 
 module Google
   module <%= product_ns %>
@@ -61,8 +62,9 @@ module Google
                             :disabled), 6))
 -%>
       class <%= class_name %>Catalog < <%= class_name %>
-        def initialize(title)
+        def initialize(title, parent)
           @title = title
+          @parent = parent
         end
 
         # Chef requires the title for autorequiring
@@ -84,6 +86,26 @@ module Google
           Chef.run_context.resource_collection.each do |entry|
             return entry.exports[:<%= imports -%>] if entry.name == @title
           end
+
+<%# Readonly ResourceRefs should regex check + assemble from shortnames for selflinks -%>
+<% if property.resource_ref.readonly && property.imports == 'selfLink' -%>
+
+          unless /<%= property.resource_ref.regex_url.gsub('/', '\/') -%>/.match(@title)
+            # We'll asssmble the self_link for the user.
+            # We need to get the project name to assemble the self_link
+            parent_resource = Chef.run_context.resource_collection
+                                          .find { |resource| resource.name == @parent_resource.name }
+            raise if parent_resource.nil? "Cannot find resource with name #{@parent_resource.name}"
+
+            return "<%= property.resource_ref.self_link_url.join.gsub('{{name}}', '#{@title}').gsub('{{project}}', '#{parent_resource.project}').gsub('{{zone}}', '#{parent_resource.zone}') -%>" \
+              if projects.length == 1
+            raise ["Your Chef cookbook contains multiple projects.",
+                   "We cannot determine which project you wish to use.",
+                   "Please replace #{@title} with a full URL of the form:",
+                   "<%= property.resource_ref.self_link_url.join -%>"
+                  ].join(' ')
+          end
+<% end # if resource_ref.readonly && selfLink -%>
 <% if property.resource_ref.readonly -%>
           @title
 <% else -%>
@@ -121,15 +143,15 @@ module Google
       # A class to manage fetching <%= imports -%> from a <%= resource %>
       class <%= class_name %>
 <%= emit_coerce(product_ns, class_name, 8) -%>
-        def catalog_parse(value)
+        def catalog_parse(value, res)
           return if value.nil?
-          self.class.catalog_parse(value)
+          self.class.catalog_parse(value, res)
         end
 
-        def self.catalog_parse(value)
+        def self.catalog_parse(value, res)
           return if value.nil?
           return value if value.is_a? Data::<%= class_name %>
-          Data::<%= class_name %>Catalog.new(value)
+          Data::<%= class_name %>Catalog.new(value, res)
         end
 
         # Used for fetched JSON values
@@ -145,11 +167,11 @@ module Google
       class <%= class_name %>Array < Google::<%= product_ns -%>::Property::Array
 <%= emit_coerce(product_ns, "#{class_name}Array", 8) -%>
         # Used for parsing Chef catalog
-        def self.catalog_parse(value)
+        def self.catalog_parse(value, res)
           return if value.nil?
-          return <%= class_name %>.catalog_parse(value) \
+          return <%= class_name %>.catalog_parse(value, res) \
             unless value.is_a?(::Array)
-          value.map { |v| <%= class_name %>.catalog_parse(v) }
+          value.map { |v| <%= class_name %>.catalog_parse(v, res) }
         end
 
         # Used for parsing GCP API responses
