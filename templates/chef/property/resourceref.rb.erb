@@ -62,9 +62,9 @@ module Google
                             :disabled), 6))
 -%>
       class <%= class_name %>Catalog < <%= class_name %>
-        def initialize(title, parent)
+        def initialize(title, parent_resource)
           @title = title
-          @parent = parent
+          @parent_resource = parent_resource
         end
 
         # Chef requires the title for autorequiring
@@ -92,18 +92,15 @@ module Google
 
           unless /<%= property.resource_ref.regex_url.gsub('/', '\/') -%>/.match(@title)
             # We'll asssmble the self_link for the user.
-            # We need to get the project name to assemble the self_link
-            parent_resource = Chef.run_context.resource_collection
-                                          .find { |resource| resource.name == @parent_resource.name }
-            raise if parent_resource.nil? "Cannot find resource with name #{@parent_resource.name}"
-
-            return "<%= property.resource_ref.self_link_url.join.gsub('{{name}}', '#{@title}').gsub('{{project}}', '#{parent_resource.project}').gsub('{{zone}}', '#{parent_resource.zone}') -%>" \
-              if projects.length == 1
-            raise ["Your Chef cookbook contains multiple projects.",
-                   "We cannot determine which project you wish to use.",
-                   "Please replace #{@title} with a full URL of the form:",
-                   "<%= property.resource_ref.self_link_url.join -%>"
-                  ].join(' ')
+            # We need to get the project name and possibly the zone to assemble the self_link
+            if @parent_resource.nil?
+              raise "Cannot find parent resource for resource #{title}"
+            end
+            return "<%= property.resource_ref.self_link_url.join
+              .gsub('{{name}}', '#{@title}')
+              .gsub('{{project}}', '#{@parent_resource.project}')
+              .gsub('{{zone}}', '#{@parent_resource.zone}') 
+              -%>"
           end
 <% end # if resource_ref.readonly && selfLink -%>
 <% if property.resource_ref.readonly -%>
@@ -142,16 +139,19 @@ module Google
     module Property
       # A class to manage fetching <%= imports -%> from a <%= resource %>
       class <%= class_name %>
-<%= emit_coerce(product_ns, class_name, 8) -%>
-        def catalog_parse(value, res)
-          return if value.nil?
-          self.class.catalog_parse(value, res)
+        def self.coerce
+          ->(parent_resource, value) { <%= "::Google::#{product_ns}::Property::#{class_name}"%>.catalog_parse(value, parent_resource) }
         end
 
-        def self.catalog_parse(value, res)
+        def catalog_parse(value, parent_resource = nil)
+          return if value.nil?
+          self.class.catalog_parse(value, parent_resource)
+        end
+
+        def self.catalog_parse(value, parent_resource = nil)
           return if value.nil?
           return value if value.is_a? Data::<%= class_name %>
-          Data::<%= class_name %>Catalog.new(value, res)
+          Data::<%= class_name %>Catalog.new(value, parent_resource)
         end
 
         # Used for fetched JSON values
@@ -167,11 +167,11 @@ module Google
       class <%= class_name %>Array < Google::<%= product_ns -%>::Property::Array
 <%= emit_coerce(product_ns, "#{class_name}Array", 8) -%>
         # Used for parsing Chef catalog
-        def self.catalog_parse(value, res)
+        def self.catalog_parse(value, parent_resource = nil)
           return if value.nil?
-          return <%= class_name %>.catalog_parse(value, res) \
+          return <%= class_name %>.catalog_parse(value, parent_resource) \
             unless value.is_a?(::Array)
-          value.map { |v| <%= class_name %>.catalog_parse(v, res) }
+          value.map { |v| <%= class_name %>.catalog_parse(v, parent_resource) }
         end
 
         # Used for parsing GCP API responses
