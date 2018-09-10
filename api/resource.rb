@@ -424,6 +424,7 @@ module Api
     def regex_url
       self_link_url.join.gsub('{{project}}', '.*')
                    .gsub('{{name}}', '[a-z1-9\-]*')
+                   .gsub('{{zone}}', '[a-z1-9\-]*')
     end
 
     private
