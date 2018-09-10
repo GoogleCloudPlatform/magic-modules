@@ -87,12 +87,14 @@ module Google
             return entry.exports[:<%= imports -%>] if entry.name == @title
           end
 
-<%# Readonly ResourceRefs should regex check + assemble from shortnames for selflinks -%>
+<%# Readonly ResourceRefs should regex check + assemble from shortnames for selflinks
+If the user inputs a shortname e.g. 'n1-standard-1' we can assemble that into a full URL
+based off of the parent's project and zone. -%>
 <% if property.resource_ref.readonly && property.imports == 'selfLink' -%>
 
           unless /<%= property.resource_ref.regex_url.gsub('/', '\/') -%>/.match(@title)
-            # We'll asssmble the self_link for the user.
-            # We need to get the project name and possibly the zone to assemble the self_link
+            # We'll assemble the self_link for the user if a full URL was not specified
+            # We need to retrieve attributes from the parent resource to qualify the URL
             if @parent_resource.nil?
               raise "Cannot find parent resource for resource #{@title}"
             end
