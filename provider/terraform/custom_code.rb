@@ -77,21 +77,13 @@ module Provider
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
 
-        # Generation here is... a little weird. We don't have access
-        # to the product name because we are in overrides, so we fill out *part*
-        # of the config's function header here, the test case name.
-        # Eg: "address_with_subnetwork" becomes
-        # addressWithSubnetworkExample(prefix string) string {
-        # Later, in the Terraform provider's generate_resource_tests func,
-        # we have the product name so we are able to fill that in inside
-        # templates/terraform/examples/base_configs/test_file.go.erb.
+
         lines(compile_file(
                 {
                   content: body,
                   count: vars_test.length,
-                  name: name.camelize
                 },
-                'templates/terraform/examples/base_configs/test.go.erb'
+                'templates/terraform/examples/base_configs/test_body.go.erb'
         ))
       end
 
