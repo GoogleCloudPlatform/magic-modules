@@ -102,9 +102,11 @@ module Google
 <%
   # We need to grab values from the @resource.
   # This substitution will grab the values from @resource and convert to String (in case it's an object)
+  # Convert {{name}} -> #{@title}
+  # Convert {{foo}} -> #{@resource.parameters[:foo].value}
   url = property.resource_ref.self_link_url.join
                 .gsub('{{name}}', '#{@title}')
-                .gsub('}}', '].value.to_s}')
+                .gsub('}}', '].value}')
                 .gsub('{{', '#{@resource.parameters[:')
 -%>
 
