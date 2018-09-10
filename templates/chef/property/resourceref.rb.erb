@@ -94,7 +94,7 @@ module Google
             # We'll asssmble the self_link for the user.
             # We need to get the project name and possibly the zone to assemble the self_link
             if @parent_resource.nil?
-              raise "Cannot find parent resource for resource #{title}"
+              raise "Cannot find parent resource for resource #{@title}"
             end
             return "<%= property.resource_ref.self_link_url.join
               .gsub('{{name}}', '#{@title}')
