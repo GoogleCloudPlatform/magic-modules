@@ -144,5 +144,28 @@ module Provider
         out_file: filepath
       )
     end
+
+    # This function currently only generates Terraform configurations
+    # that accompany manually defined test files.
+    def generate_resource_tests(data)
+      return if data[:object].example.nil?
+
+      target_folder = data[:output_folder]
+      target_folder = File.join(target_folder, 'google')
+      FileUtils.mkpath target_folder
+      name = data[:object].name.underscore
+      product_name = data[:product_name].underscore
+      filepath =
+        File.join(
+          target_folder,
+          "resource_#{product_name}_#{name}_test_configs.go"
+        )
+      generate_resource_file data.clone.merge(
+        product: data[:product_name].camelize(:upper),
+        resource_name: data[:object].name.camelize(:upper),
+        default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
+        out_file: filepath
+      )
+    end
   end
 end

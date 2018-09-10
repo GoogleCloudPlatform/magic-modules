@@ -1,0 +1,6 @@
+<%= ctx[:name] -%>Example(prefix string) string {
+	return fmt.Sprintf(`
+<%= ctx[:content] -%>
+`,<% i = 0; loop do %><% break if i >= ctx[:count] %> prefix,<% i += 1 %><% end %>
+	)
+}

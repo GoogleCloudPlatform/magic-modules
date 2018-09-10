@@ -43,7 +43,8 @@ module Provider
       end
     end
 
-    # Generates configs to be shown as examples in docs from a template
+    # Generates configs to be shown as examples in docs and outputted as tests
+    # from a shared template
     class Examples < Api::Object
       include Compile::Core
 
@@ -54,9 +55,10 @@ module Provider
       # "templates/terraform/examples/{{name}}.tf.erb"
       attr_reader :name
 
-      # vars_documentation is a Hash from template variable names to output
+      # vars_ variables are a Hash from template variable names to output
       # variable names
       attr_reader :vars_documentation
+      attr_reader :vars_test
 
       def config_documentation
         body = lines(compile_file(
@@ -69,10 +71,35 @@ module Provider
         ))
       end
 
+      def config_test
+        body = lines(compile_file(
+                       vars_test,
+                       "templates/terraform/examples/#{name}.tf.erb"
+        ))
+
+        # Generation here is... a little weird. We don't have access
+        # to the product name because we are in overrides, so we fill out *part*
+        # of the config's function header here, the test case name.
+        # Eg: "address_with_subnetwork" becomes
+        # addressWithSubnetworkExample(prefix string) string {
+        # Later, in the Terraform provider's generate_resource_tests func,
+        # we have the product name so we are able to fill that in inside
+        # templates/terraform/examples/base_configs/test_file.go.erb.
+        lines(compile_file(
+                {
+                  content: body,
+                  count: vars_test.length,
+                  name: name.camelize
+                },
+                'templates/terraform/examples/base_configs/test.go.erb'
+        ))
+      end
+
       def validate
         super
         check_property :name, String
         check_property :vars_documentation, Hash
+        check_property :vars_test, Hash
       end
     end
 

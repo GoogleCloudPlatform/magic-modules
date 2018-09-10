@@ -20,12 +20,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: "address_basic"
       vars_documentation:
         address_name: "my-address"
+      vars_test:
+        address_name: "%s-address"
      - !ruby/object:Provider::Terraform::Examples
       name: "address_with_subnetwork"
       vars_documentation:
         address_name: "my-internal-address"
         network_name: "my-network"
         subnetwork_name: "my-subnet"
+      vars_test:
+        address_name: "%s-address"
+        network_name: "%s-network"
+        subnetwork_name: "%s-subnetwork"
     properties:
       address: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
