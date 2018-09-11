@@ -11,6 +11,8 @@ for mod in "`pwd`/build/puppet/"*; do
   shortname="$(basename $mod)"
   mod_name="g$shortname"
   new_path="$MODPATH/$mod_name"
-  rm $new_path
+  if [ -d "$new_path" ]; then
+    rm $new_path
+  fi
   ln -s "$mod" "$new_path"
 done
