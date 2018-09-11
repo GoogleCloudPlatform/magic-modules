@@ -37,7 +37,7 @@ gcompute_subnetwork <%= example_resource_name('servers') -%> do
   action :create
   ip_cidr_range '172.16.0.0/16'
   network <%= example_resource_name('mynetwork-subnetwork') %>
-  region <%= example_resource_name('some-region') %>
+  region 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

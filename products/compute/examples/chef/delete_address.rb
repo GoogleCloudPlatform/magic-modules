@@ -23,7 +23,7 @@
 <% end -%>
 gcompute_address <%= example_resource_name('test1') -%> do
   action :delete
-  region <%= example_resource_name('some-region') %>
+  region 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

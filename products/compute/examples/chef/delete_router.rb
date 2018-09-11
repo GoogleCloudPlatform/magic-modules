@@ -26,7 +26,7 @@
 <% end # name == README.md -%>
 gcompute_router <%= example_resource_name('my-router') -%> do
   action :delete
-  region <%= example_resource_name('some-region') %>
+  region 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -32,5 +32,5 @@ gcompute_target_vpn_gateway <%= example_resource_name('mygateway') -%> do
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
   network <%= example_resource_name('mynetwork') %>
-  region <%= example_resource_name('some-region') %>
+  region 'us-west1'
 end
