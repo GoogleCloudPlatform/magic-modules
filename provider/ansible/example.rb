@@ -208,10 +208,8 @@ module Provider
         ignored_props = %w[project name]
 
         # Grab all code values for parameters
-        parameters = 
         parameters = handwritten_vals_for_properties(object,
-          uri_properties(ignored_props)
-        )
+                                                     uri_properties(ignored_props))
 
         # Grab values for filters.
         underscore_name = object.facts.filter.name.underscore
@@ -321,11 +319,10 @@ module Provider
 
         ignored_props = %w[project name]
         code = handwritten_vals_for_properties(object,
-          uri_properties(ignored_props)
-        )
+                                               uri_properties(ignored_props))
 
         if object.facts.has_filters
-          if object.facts.filter.name != 'filters'
+          if object.facts.filter.gce?
             underscore_name = object.facts.filter.name.underscore
             code[underscore_name] = sample_code[underscore_name]
           else
@@ -357,11 +354,10 @@ module Provider
       def handwritten_vals_for_properties(object, properties)
         object.all_user_properties
               .map(&:name)
-              .select { |para| url_parts.include? para }
+              .select { |para| properties.include? para }
               .map { |para| { para => handwritten_example[para] } }
               .reduce({}, :merge)
       end
-
     end
   end
 end

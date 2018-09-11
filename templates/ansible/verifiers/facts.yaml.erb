@@ -6,7 +6,7 @@
 - name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
 <%# GCE filters use the filters: notation and are different than most other filters -%>
-<% if object.facts.has_filters && object.facts.filter.is_gce? -%>
+<% if object.facts.has_filters && object.facts.filter.gce? -%>
       filters:
          - name = <%= name_parameter %>
 <% end #if object.facts.has_filters -%>

@@ -60,7 +60,7 @@ class FilterProp < Api::Type::Array
     STRING
   end
 
-  def is_gce?
+  def gce?
     @name == 'filters'
   end
 end
