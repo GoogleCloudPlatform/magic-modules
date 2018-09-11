@@ -75,12 +75,14 @@ For complete details of the authentication cookbook, visit the
 <% end # object.references.guides -%>
 <% end # if object.references -%>
 
+<% unless object.readonly -%>
 #### Example
 
 ```ruby
 <%= compile ["products/#{@api.prefix[1..-1]}/examples/chef/",
              "#{object.name.underscore}.rb"].join('') %>
 ```
+<% end # unless object.readonly -%>
 
 #### Reference
 
@@ -88,7 +90,7 @@ For complete details of the authentication cookbook, visit the
 <% outline = Provider::ChefOutline.new(self) -%>
 <%= lines(outline.generate(object)) -%>
 ```
-
+<% unless object.readonly -%>
 #### Actions
 
 * `create` -
@@ -98,6 +100,7 @@ attempt to create it.", 0)) -%>
 * `delete` -
 <%= lines(wrap_field("Ensures the `#{object.out_name}` resource is not present.
 If the resource already exists Chef will attempt to delete it.", 0)) -%>
+<% end # unless object.readonly -%>
 
 #### Properties
 
