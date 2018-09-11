@@ -20,20 +20,13 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_region <%= example_resource_name('some-region') -%> do
-  action :create
-  r_label 'us-west1'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 <% else # name == README.md -%>
-# Router requires a network and a region, so define them in your recipe:
-#   - gcompute_region 'some-region' do ... end
+# Router requires a network so define one in your recipe:
+#   - gcompute_network 'my-network' do ... end
 <% end # name == README.md -%>
 gcompute_router <%= example_resource_name('my-router') -%> do
   action :delete
-  region <%= example_resource_name('some-region') %>
+  region <%= example_resource_name('us-west1') %>
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

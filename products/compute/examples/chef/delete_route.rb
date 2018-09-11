@@ -22,19 +22,11 @@
 
 <% end -%>
 <% if name == "README.md" -%>
-# Subnetwork requires a network and a region, so define them in your recipe:
+# Subnetwork requires a network so define one in your recipe:
 #   - gcompute_network 'my-network' do ... end
-#   - gcompute_region 'some-region' do ... end
 <% else # name == README.md -%>
 gcompute_network <%= example_resource_name('my-network') -%> do
   action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_region <%= example_resource_name('some-region') -%> do
-  action :create
-  r_label 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
