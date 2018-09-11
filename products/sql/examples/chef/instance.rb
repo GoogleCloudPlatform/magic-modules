@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<% if false # the license inside this if block pertains to this file -%>
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
