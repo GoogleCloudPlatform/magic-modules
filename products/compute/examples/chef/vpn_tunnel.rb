@@ -32,7 +32,7 @@ gcompute_target_vpn_gateway <%= example_resource_name('mygateway') -%> do
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
   network <%= example_resource_name('mynetwork') %>
-  region <%= example_resource_name('us-west1') %>
+  region <%= example_resource_name('some-region') %>
 end
 
 gcompute_vpn_tunnel <%= example_resource_name('mytunnel') -%> do
@@ -40,5 +40,5 @@ gcompute_vpn_tunnel <%= example_resource_name('mytunnel') -%> do
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
   target_vpn_gateway <%= example_resource_name('mygateway') %>
-  region <%= example_resource_name('us-west1') %>
+  region <%= example_resource_name('some-region') %>
 end
