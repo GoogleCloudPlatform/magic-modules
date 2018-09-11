@@ -117,8 +117,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - instance_template.rb
   License:
     - license.rb
-  MachineType:
-    - machine_type.rb
   Network:
     - delete_network.rb
     - network~auto.rb
@@ -345,15 +343,6 @@ style:
       - class: Google::GCOMPUTE::License
         exceptions:
           - Metrics/ClassLength
-  - !ruby/object:Provider::Config::StyleException
-    name: resources/machine_type.rb
-    pinpoints:
-      - class: Google::GCOMPUTE::MachineType
-        exceptions:
-          - Metrics/ClassLength
-      - function: self.resource_to_hash
-        exceptions:
-          - Metrics/MethodLength
   - !ruby/object:Provider::Config::StyleException
     name: resources/network.rb
     pinpoints:
