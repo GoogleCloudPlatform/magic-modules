@@ -20,14 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-west1-a' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-<% else -%>
-# Tip: Remember to define gcompute_zone to match the 'zone' property.
 <% end -%>
 gcompute_instance <%= example_resource_name('instance-test') -%> do
   action :delete
