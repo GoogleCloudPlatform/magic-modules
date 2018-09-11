@@ -40,27 +40,26 @@ module Provider
         check_optional_property :test, ::String
       end
     end
-  end
-end
+    # This is a property exclusive to Ansible filters.
+    # This is the default property used for filter information on Ansible.
+    # By using Api::Types, we get more flexibility and a lot for free.
+    class FilterProp < Api::Type::Array
+      def validate
+        @item_type ||= 'Api::Type::String'
+        # GCE (and some others) uses the 'filters' property by default.
+        # By default, assume that these are for GCE.
+        @name ||= 'filters'
+        @description ||= <<-STRING
+        A list of filter value pairs. Available filters are listed here
+                U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
+                Each additional filter in the list will act be added as an AND condition
+                (filter1 and filter2)
+        STRING
+      end
 
-# This is a property exclusive to Ansible filters.
-# This is the default property used for filter information on Ansible.
-# By using Api::Types, we get more flexibility and a lot for free.
-class FilterProp < Api::Type::Array
-  def validate
-    @item_type ||= 'Api::Type::String'
-    # GCE (and some others) uses the 'filters' property by default.
-    # By default, assume that these are for GCE.
-    @name ||= 'filters'
-    @description ||= <<-STRING
-    A list of filter value pairs. Available filters are listed here
-            U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
-            Each additional filter in the list will act be added as an AND condition
-            (filter1 and filter2)
-    STRING
-  end
-
-  def gce?
-    @name == 'filters'
+      def gce?
+        @name == 'filters'
+      end
+    end
   end
 end

@@ -39,7 +39,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
     facts: !ruby/object:Provider::Ansible::FactsOverride
-      filter: !ruby/object:Api::Type::String
+      filter: !ruby/object:Provider::Ansible::FilterProp
         name: dnsName
         description: Restricts the list to return only zones with this domain name.
       list_key: 'managedZones'
