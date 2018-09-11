@@ -348,7 +348,7 @@ module Provider
                                                uri_properties(object, ignored_props))
 
         if object.facts.has_filters
-          if object.facts.filter.gce?
+          if !object.facts.filter.gce?
             underscore_name = object.facts.filter.name.underscore
             code[underscore_name] = handwritten_example[underscore_name]
           else
