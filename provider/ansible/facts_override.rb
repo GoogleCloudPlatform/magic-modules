@@ -49,6 +49,8 @@ end
 class FilterProp < Api::Type::Array
   def validate
     @item_type ||= 'Api::Type::String'
+    # GCE (and some others) uses the 'filters' property by default.
+    # By default, assume that these are for GCE.
     @name ||= 'filters'
     @description ||= <<-STRING
     A list of filter value pairs. Available filters are listed here
@@ -56,5 +58,9 @@ class FilterProp < Api::Type::Array
             Each additional filter in the list will act be added as an AND condition
             (filter1 and filter2)
     STRING
+  end
+
+  def is_gce?
+    @name == 'filters'
   end
 end

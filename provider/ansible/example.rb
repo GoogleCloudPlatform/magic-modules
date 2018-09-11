@@ -183,6 +183,7 @@ module Provider
 
       attr_reader :__example
       include Compile::Core
+      include HandwrittenValuesFromExample
 
       def validate
         @failure ||= FailureCondition.new
@@ -202,27 +203,21 @@ module Provider
         }
       end
 
-      # rubocop:disable Metrics/AbcSize
       def build_parameters(object)
         sample_code = @__example.task.code
         ignored_props = %w[project name]
 
-        url_parts = object.uri_properties
-                          .map(&:name)
-                          .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        parameters = object.all_user_properties
-                           .map(&:name)
-                           .select { |para| url_parts.include? para }
-                           .map { |para| { para => sample_code[para] } }
-                           .reduce({}, :merge)
+        parameters = 
+        parameters = handwritten_vals_for_properties(object,
+          uri_properties(ignored_props)
+        )
 
         # Grab values for filters.
         underscore_name = object.facts.filter.name.underscore
         parameters[underscore_name] = sample_code[underscore_name] if sample_code[underscore_name]
         parameters.compact
       end
-      # rubocop:enable Metrics/AbcSize
 
       def name_parameter
         compile_string(INTEGRATION_TEST_DEFAULTS, @__example.task.code['name']).join
@@ -299,6 +294,8 @@ module Provider
 
       attr_reader :__example
 
+      include HandwrittenValuesFromExample
+
       def validate; end
 
       def build_test(state, object, noop = false)
@@ -319,22 +316,13 @@ module Provider
 
       private
 
-      # rubocop:disable Metrics/AbcSize
       def build_code(object, hash)
-        sample_code = @__example.task.code
-        return '' unless sample_code
+        return '' unless handwritten_example
 
         ignored_props = %w[project name]
-
-        url_parts = object.uri_properties
-                          .map(&:name)
-                          .reject { |x| ignored_props.include? x }
-        # Grab all code values for parameters
-        code = object.all_user_properties
-                     .map(&:name)
-                     .select { |para| url_parts.include? para }
-                     .map { |para| { para => sample_code[para] } }
-                     .reduce({}, :merge)
+        code = handwritten_vals_for_properties(object,
+          uri_properties(ignored_props)
+        )
 
         if object.facts.has_filters
           if object.facts.filter.name != 'filters'
@@ -347,7 +335,33 @@ module Provider
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code
       end
-      # rubocop:enable Metrics/AbcSize
+    end
+
+    # Finds a list of wanted parameters and grabs
+    # the handwritten values of those parameters
+    # from the handwritten example.
+    module HandwrittenValuesFromExample
+      def handwritten_example
+        @__example.task.code
+      end
+
+      # Returns all URI properties minus those ignored.
+      def uri_properties(ignored_props = [])
+        object.uri_properties
+              .map(&:name)
+              .reject { |x| ignored_props.include? x }
+      end
+
+      # Grab handwritten values for a set of properties.
+      # Returns a hash where { parameter_name => handwritten_value }
+      def handwritten_vals_for_properties(object, properties)
+        object.all_user_properties
+              .map(&:name)
+              .select { |para| url_parts.include? para }
+              .map { |para| { para => handwritten_example[para] } }
+              .reduce({}, :merge)
+      end
+
     end
   end
 end

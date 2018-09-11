@@ -222,11 +222,7 @@ module Provider
       end
 
       def generate_resource(data)
-        # Add facts from datasources to non-datasource if they exist.
-        # Some values from datasources.facts may be necessary for building integration
-        # tests, which is done before datasource building.
-        # We don't want to duplicate those .facts values though.
-        datasource_info(data)
+        add_datasource_info_to_data(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = module_name(data[:object])
@@ -278,7 +274,13 @@ module Provider
         )
       end
 
-      def datasource_info(data)
+      def add_datasource_info_to_data(data)
+        # We have two sets of overrides - one for regular modules, one for
+        # datasources.
+        # When building regular modules, we will potentially need some
+        # information from the datasource overrides.
+        # This method will give the regular module data access to the
+        # datasource module overrides.
         name = "@#{data[:object].name}".to_sym
         facts_info = @config&.datasources&.instance_variable_get(name)&.facts
         facts_info ||= Provider::Ansible::FactsOverride.new
