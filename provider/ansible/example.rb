@@ -348,11 +348,11 @@ module Provider
                                                uri_properties(object, ignored_props))
 
         if object.facts.has_filters
-          if !object.facts.filter.gce?
+          if object.facts.filter.gce?
+            code['filters'] = ["name = #{hash[:name]}"]
+          else
             underscore_name = object.facts.filter.name.underscore
             code[underscore_name] = handwritten_example[underscore_name]
-          else
-            code['filters'] = ["name = #{hash[:name]}"]
           end
         end
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
