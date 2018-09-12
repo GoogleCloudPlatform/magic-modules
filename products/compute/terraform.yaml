@@ -727,14 +727,93 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `name_prefix` - (Optional) Creates a unique name beginning with the
+         specified prefix. Conflicts with `name`.
+    examples: |
+      ```hcl
+      resource "google_compute_ssl_certificate" "default" {
+        name_prefix = "my-certificate-"
+        description = "a description"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+
+        lifecycle {
+          create_before_destroy = true
+        }
+      }
+
+      # You may also want to control name generation explicitly:
+
+      resource "random_id" "certificate" {
+        byte_length = 4
+        prefix      = "my-certificate-"
+
+        # For security, do not expose raw certificate values in the output
+        keepers {
+          private_key = "${base64sha256(file("path/to/private.key"))}"
+          certificate = "${base64sha256(file("path/to/certificate.crt"))}"
+        }
+      }
+
+      resource "google_compute_ssl_certificate" "default" {
+        # The name will contain 8 random hex digits,
+        # e.g. "my-certificate-48ab27cd2a"
+        name        = "${random_id.certificate.hex}"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+
+        lifecycle {
+          create_before_destroy = true
+        }
+      }
+      ```
+      ```hcl
+      // Using with Target HTTPS Proxies
+      //
+      // SSL certificates cannot be updated after creation. In order to apply
+      // the specified configuration, Terraform will destroy the existing
+      // resource and create a replacement. To effectively use an SSL
+      // certificate resource with a Target HTTPS Proxy resource, it's
+      // recommended to specify create_before_destroy in a lifecycle block.
+      // Either omit the Instance Template name attribute, specify a partial
+      // name with name_prefix, or use random_id resource. Example:
+
+      resource "google_compute_ssl_certificate" "default" {
+        name_prefix = "my-certificate-"
+        description = "a description"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+
+        lifecycle {
+          create_before_destroy = true
+        }
+      }
+
+      resource "google_compute_target_https_proxy" "my_proxy" {
+        name             = "public-proxy"
+        url_map          = # ...
+        ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
+        conflicts_with:
+        - 'name_prefix'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
       id: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
+        name: 'certificate_id'
       certificate: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
       privateKey: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
+        ignore_read: true
   SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
     examples: |
@@ -1281,6 +1360,8 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_region_disk_test.go'
     'google/resource_compute_router_test.go':
       'templates/terraform/tests/resource_compute_router_test.go'
+    'google/resource_compute_ssl_certificate_test.go':
+      'templates/terraform/tests/resource_compute_ssl_certificate_test.go'
     'google/resource_compute_target_https_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
     'google/resource_compute_target_ssl_proxy_test.go':
