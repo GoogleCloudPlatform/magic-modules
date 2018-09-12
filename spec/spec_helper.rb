@@ -14,8 +14,18 @@
 require 'simplecov'
 SimpleCov.start unless ENV['DISABLE_COVERAGE']
 
+require 'factory_bot'
+
 RSpec.configure do |config|
+  # Mocha configuration
   config.mock_with :mocha
+
+  # FactoryBot configuration
+  config.include FactoryBot::Syntax::Methods
+
+  config.before(:suite) do
+    FactoryBot.find_definitions
+  end
 end
 
 $LOAD_PATH.unshift(File.expand_path('.'))
