@@ -77,11 +77,10 @@ module Provider
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
 
-
         lines(compile_file(
                 {
                   content: body,
-                  count: vars_test.length,
+                  count: vars_test.length
                 },
                 'templates/terraform/examples/base_configs/test_body.go.erb'
         ))
