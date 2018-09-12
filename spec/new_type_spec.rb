@@ -16,7 +16,7 @@ require 'spec_helper'
 context Api::Type::String do
   context 'requires' do
     subject(:string) { build(:string) }
-    
+
     it 'should have the proper requires filename' do
       expect(string.requires).to eq('google/spec/property/string')
     end

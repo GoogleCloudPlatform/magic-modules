@@ -17,21 +17,21 @@ FactoryBot.define do
   # objects just appear post-YAML parsing with
   # all of the correct values.
   #
-  # FactoryBot should create its test objects in the 
+  # FactoryBot should create its test objects in the
   # same manner.
   initialize_with do
     obj = new
     attributes.each { |k, v| obj.instance_variable_set("@#{k.id2name}", v) }
     # TODO(alexstephen): Build out a better default factory that can successfully
     # validate.
-    #obj.validate
+    # obj.validate
     obj
   end
   to_create {}
-  
+
   factory :product, class: Api::Product do
-    name { "Google TestSpec Engine" }
-    prefix { "gspec" }
+    name { 'Google TestSpec Engine' }
+    prefix { 'gspec' }
     objects { [] }
     scopes { [] }
   end
@@ -41,8 +41,8 @@ FactoryBot.define do
   end
 
   factory :string, class: Api::Type::String do
-    name { "string-property" }
-    description { "Description for a test property" }
+    name { 'string-property' }
+    description { 'Description for a test property' }
     output { false }
     required { false }
     input { false }
