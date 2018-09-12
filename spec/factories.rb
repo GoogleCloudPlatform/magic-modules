@@ -27,6 +27,9 @@ FactoryBot.define do
     # obj.validate
     obj
   end
+
+  # FactoryBot tries to call .save! on all objects, which is a Rails
+  # paradigm. This seems to be the best way to turn that off.
   to_create {}
 
   factory :product, class: Api::Product do
