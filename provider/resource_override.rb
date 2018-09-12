@@ -26,6 +26,8 @@ module Provider
     # - 'foo.bar': Property 'bar' nested under property 'foo'
     attr_reader :properties
 
+    attr_reader :__original
+
     # Apply this override to the given instance of Api::Resource
     def apply(api_resource)
       ensure_resource_properties
@@ -36,10 +38,15 @@ module Provider
       # | api_resource.validate # check if we did not break the object
     end
 
+    def revert(api_resource)
+      revert_overriden_properties(api_resource)
+    end
+
     def validate
       super
 
       @properties ||= {}
+      @__original = {}
 
       check_property :properties, Hash
     end
@@ -64,12 +71,22 @@ module Provider
     def update_overriden_properties(api_resource)
       our_override_modules.each do |mod|
         mod.instance_methods.each do |method|
-          # If we have a variable for it, copy it.
+          # Copy all variables from overrides directly into object.
           prop_name = "@#{method.id2name}".to_sym
-          var_value = instance_variable_get(prop_name)
-          api_resource.instance_variable_set(prop_name, var_value) \
-            unless var_value.nil?
+          new_value = instance_variable_get(prop_name)
+          old_value = api_resource.instance_variable_get(prop_name)
+
+          # Copy over old value to a __original tracker.
+          @__original[prop_name] = old_value unless @old_value.nil?
+          api_resource.instance_variable_set(prop_name, new_value) \
+            unless new_value.nil?
         end
+      end
+    end
+
+    def revert_overriden_properties(api_resource)
+      @__original.each do |prop_name, old_value|
+        api_resource.instance_variable_set(prop_name, old_value)
       end
     end
 

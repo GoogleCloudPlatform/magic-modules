@@ -249,7 +249,9 @@ module Provider
     # rubocop:disable Metrics/PerceivedComplexity
     def generate_datasources(output_folder, types, version)
       # We need to apply overrides for datasources
+      @config.overrides.revert
       @config.datasources.validate
+      @config.datasources.apply
 
       @api.set_properties_based_on_version(version)
       @api.objects.each do |object|

@@ -54,6 +54,10 @@ module Provider
       override_objects
     end
 
+    def revert
+      revert_objects
+    end
+
     def [](index)
       @__objects[index]
     end
@@ -128,6 +132,13 @@ module Provider
       end
     end
 
+    def revert_objects
+      @__objects.each do |name, override|
+        api_object = @__api.objects.find { |o| o.name == name }
+        override.revert api_object
+      end
+    end
+
     def find_property(api_entity, property_path)
       property_name = property_path[0]
       properties = get_properties api_entity
@@ -157,6 +168,9 @@ module Provider
       end
     end
 
+    # All resources need an override object, even if it was
+    # not specificed in provider.yaml
+    # This is because of default values.
     def populate_nonoverridden_objects
       (@__api.objects || []).each do |object|
         var_name = "@#{object.name}".to_sym
@@ -165,6 +179,9 @@ module Provider
       end
     end
 
+    # All resources need an override object, even if it was
+    # not specificed in provider.yaml
+    # This is because of default values.
     def populate_nonoverridden_properties(api_entity, override)
       api_entity.all_user_properties.each do |prop|
         override.properties[prop.name] = @__config.property_override.new \
@@ -173,6 +190,9 @@ module Provider
       end
     end
 
+    # All resources on nested objects need an override object, even if it was
+    # not specificed in provider.yaml
+    # This is because of default values.
     def populate_nonoverriden_nested_properties(prefix, property, override)
       nested_properties = get_properties(property)
       return if nested_properties.nil?
