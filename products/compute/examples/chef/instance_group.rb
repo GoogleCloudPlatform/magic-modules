@@ -22,17 +22,11 @@
 
 <% end -%>
 <% if name == "README.md" -%>
-# Instance group requires a network and a region, so define them in your recipe:
+# Instance group requires a network so define one in your recipe:
 #   - gcompute_network 'my-network' do ... end
-#   - gcompute_zone 'my-zone' do ... end
 <% else # name == README.md -%>
 gcompute_network <%= example_resource_name('my-network') -%> do
   action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_zone 'us-central1-a' do
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

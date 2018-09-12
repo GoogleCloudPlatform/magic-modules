@@ -20,11 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-central1-a' do
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 <% end -%>
 gcompute_disk <%= example_resource_name('data-disk-1') -%> do
   action :delete

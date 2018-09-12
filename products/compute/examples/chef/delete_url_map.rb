@@ -20,10 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-central1-a' do
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
 
 gcompute_instance_group <%= example_resource_name('my-chef-servers') -%> do
   action :create
