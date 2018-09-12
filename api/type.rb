@@ -16,6 +16,7 @@ require 'google/string_utils'
 
 module Api
   # Represents a property type
+  # rubocop:disable Metrics/ClassLength
   class Type < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
@@ -40,7 +41,6 @@ module Api
 
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
-
     end
 
     include Fields
@@ -137,7 +137,7 @@ module Api
     # thing.
     def is_a?(clazz)
       return Module.const_get(@new_type).new.is_a?(clazz) if @new_type
-      return super(clazz)
+      super(clazz)
     end
 
     # Overriding class to enable class overrides.
@@ -538,4 +538,5 @@ module Api
       ]
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end
