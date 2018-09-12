@@ -20,17 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-west1-a' do
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_machine_type 'n1-standard-1' do
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  zone 'us-west1-a'
-  credential 'mycred'
-end
-
 gcompute_network 'mynetwork-test' do
   action :create
   project ENV['PROJECT'] # ex: 'my-test-project'

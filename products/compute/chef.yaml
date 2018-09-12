@@ -117,16 +117,12 @@ examples: !ruby/object:Api::Resource::HashArray
     - instance_template.rb
   License:
     - license.rb
-  MachineType:
-    - machine_type.rb
   Network:
     - delete_network.rb
     - network~auto.rb
     - network~convert_to_custom.rb
     - network~custom.rb
     - network~legacy.rb
-  Region:
-    - region.rb
   Route:
     - delete_route.rb
     - route.rb
@@ -158,8 +154,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - url_map.rb
   VpnTunnel:
     - vpn_tunnel.rb
-  Zone:
-    - zone.rb
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/chef/common~copy.yaml'), 4) %>
@@ -350,24 +344,9 @@ style:
         exceptions:
           - Metrics/ClassLength
   - !ruby/object:Provider::Config::StyleException
-    name: resources/machine_type.rb
-    pinpoints:
-      - class: Google::GCOMPUTE::MachineType
-        exceptions:
-          - Metrics/ClassLength
-      - function: self.resource_to_hash
-        exceptions:
-          - Metrics/MethodLength
-  - !ruby/object:Provider::Config::StyleException
     name: resources/network.rb
     pinpoints:
       - class: Google::GCOMPUTE::Network
-        exceptions:
-          - Metrics/ClassLength
-  - !ruby/object:Provider::Config::StyleException
-    name: resources/region.rb
-    pinpoints:
-      - class: Google::GCOMPUTE::Region
         exceptions:
           - Metrics/ClassLength
   - !ruby/object:Provider::Config::StyleException

@@ -20,19 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-west1-a' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_machine_type 'n1-standard-1' do
-  action :create
-  zone 'us-west1-a'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 # TODO(nelsonjr): Reactiveate example based on disk once http://b/66871792 is
 # resolved.
 #gcompute_disk <%= example_resource_name('os-disk-1') -%> do
@@ -57,10 +44,9 @@ end
 # Power Tips:
 #   1) Remember to define the resources needed to allocate the VM:
 #      a) gcompute_disk_type (to be used in 'diskType' property)
-#      b) gcompute_machine_type (to be used in 'machine_type' property)
-#      c) gcompute_network (to be used in 'network_interfaces' property)
-#      d) gcompute_subnetwork (to be used in the 'subnetwork' property)
-#      e) gcompute_disk (to be used in the 'sourceDisk' property)
+#      b) gcompute_network (to be used in 'network_interfaces' property)
+#      c) gcompute_subnetwork (to be used in the 'subnetwork' property)
+#      d) gcompute_disk (to be used in the 'sourceDisk' property)
 #   2) Don't forget to define a source_image for the OS of the boot disk
 <% end -%>
 <% res_name = example_resource_name('instance-template-test') -%>
