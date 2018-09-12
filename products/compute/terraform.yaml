@@ -813,11 +813,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
       }
       ```
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      extra_schema_entry: templates/terraform/extra_schema_entry/sslCertificate.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
-        custom_expand: 'templates/terraform/custom_expand/compute_ssl_certificate_name_name_prefix.go.erb'
+        custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         conflicts_with:
         - 'name_prefix'
         validation: !ruby/object:Provider::Terraform::Validation
