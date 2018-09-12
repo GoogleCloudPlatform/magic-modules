@@ -54,7 +54,7 @@ For complete details of the authentication cookbook, visit the
 
 ## Resources
 
-<% objects = product.objects.select { |o| !o.exclude } -%>
+<% objects = product.objects.select { |o| !o.exclude }.reject { |o| o.readonly } -%>
 <% objects.each do |object| -%>
 * [`<%= object.out_name -%>`](#<%= object.out_name -%>) -
 <%= lines(indent(wrap_field(object.description, 6), 2)) -%>

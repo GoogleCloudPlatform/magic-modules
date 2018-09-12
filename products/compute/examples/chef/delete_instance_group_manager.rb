@@ -20,11 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-west1-a' do
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 <% end # name == README.md -%>
 gcompute_instance_group_manager 'test1' do
   action :delete

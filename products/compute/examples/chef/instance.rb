@@ -20,12 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_zone 'us-west1-a' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 # Google::Functions must be included at runtime to ensure that the
 # gcompute_image_family function can be used in gcompute_disk blocks.
 ::Chef::Resource.send(:include, Google::Functions)
@@ -44,22 +38,9 @@ gcompute_network <%= example_resource_name('mynetwork-test') -%> do
   credential 'mycred'
 end
 
-gcompute_region 'us-west1' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 gcompute_address <%= example_resource_name('instance-test-ip') -%> do
   action :create
   region 'us-west1'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_machine_type 'n1-standard-1' do
-  action :create
-  zone 'us-west1-a'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
@@ -71,8 +52,6 @@ end
 #      b) gcompute_network (to be used in 'network' property)
 #      c) gcompute_address (to be used in 'access_configs', if your machine
 #         needs external ingress access)
-#      d) gcompute_zone (to determine where the VM will be allocated)
-#      e) gcompute_machine_type (to determine the kind of machine to be created)
 #   2) Don't forget to define a source_image for the OS of the boot disk
 #      a) You can use the provided gcompute_image_family function to specify the
 #         latest version of an operating system of a given family
