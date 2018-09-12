@@ -47,8 +47,11 @@ module Provider
       return if @__api.nil?
       populate_nonoverridden_objects
       convert_findings_to_hash
-      override_objects
       super
+    end
+
+    def apply
+      override_objects
     end
 
     def [](index)

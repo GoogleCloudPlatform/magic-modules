@@ -211,6 +211,7 @@ module Provider
       config.default_overrides
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
+      config.overrides.apply
       config
     end
 
