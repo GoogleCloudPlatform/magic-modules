@@ -37,6 +37,7 @@ require 'provider/terraform'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 product_names = nil
+all_products = false
 output_path = nil
 provider_name = nil
 types_to_generate = []
@@ -48,6 +49,9 @@ Google::LOGGER.level = Logger::INFO
 OptionParser.new do |opt|
   opt.on('-p', '--products PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
     product_names = p
+  end
+  opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
+    all_products = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
     output_path = o
@@ -70,9 +74,19 @@ OptionParser.new do |opt|
   end
 end.parse!
 
-raise 'Option -p/--products is a required parameter' if product_names.nil?
+raise 'Cannt use -p/--products and -a/--all simultaneously' if product_names && all_products
+raise 'Either -p/--products OR -a/--all must be present' if product_names.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
+
+if all_products
+  product_names = []
+  Dir["products/**/#{provider_name}.yaml"].each do |file_path|
+    product_names.push(File.dirname(file_path))
+  end
+
+  raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
+end
 
 product_names.each do |product_name|
   product_yaml_path = File.join(product_name, 'api.yaml')
