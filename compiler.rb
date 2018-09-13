@@ -47,7 +47,7 @@ ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
 
 OptionParser.new do |opt|
-  opt.on('-p', '--products PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
+  opt.on('-p', '--product PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
     product_names = p
   end
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
@@ -96,7 +96,6 @@ product_names.each do |product_name|
   provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
   raise "Product '#{product_name}' does not have a #{provider_name}.yaml file" \
     unless File.exist?(provider_yaml_path)
-
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
