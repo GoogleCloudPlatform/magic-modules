@@ -24,9 +24,10 @@ module Provider
       attr_reader :create
       attr_reader :delete
       attr_reader :editable
-      attr_reader :filter_url
       attr_reader :hidden
       attr_reader :imports
+      attr_reader :post_create
+      attr_reader :post_action
       attr_reader :provider_helpers
       attr_reader :return_if_object
       attr_reader :unwrap_resource
@@ -46,7 +47,6 @@ module Provider
         default_value_property :custom_update_resource, false
         default_value_property :exclude, false
         default_value_property :editable, true
-        default_value_property :filter_url, ''
         default_value_property :imports, []
         default_value_property :provider_helpers, []
         default_value_property :unwrap_resource, false
@@ -58,9 +58,10 @@ module Provider
         check_optional_property :create, ::String
         check_optional_property :delete, ::String
         check_property :editable, :boolean
-        check_property :filter_url, ::String
         check_optional_property :hidden, ::Array
         check_property :imports, ::Array
+        check_optional_property :post_create, ::String
+        check_optional_property :post_action, ::String
         check_property :provider_helpers, ::Array
         check_optional_property :return_if_object, ::String
         check_optional_property :update, ::String

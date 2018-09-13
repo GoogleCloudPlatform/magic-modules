@@ -22,7 +22,7 @@ if instances, ok := d.Get("users").([]interface{}); ok {
 		for _, disk := range i.Disks {
 			if disk.Source == self {
 				detachCalls = append(detachCalls, detachArgs{
-					project:    project,
+					project:    instanceProject,
 					zone:       GetResourceNameFromSelfLink(i.Zone),
 					instance:   i.Name,
 					deviceName: disk.DeviceName,

@@ -23,6 +23,9 @@ module Provider
       attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
       attr_reader :state_func # Adds a StateFunc to the schema
       attr_reader :sensitive # Adds `Sensitive: true` to the schema
+      # Does not set this value to the returned API value.  Useful for fields
+      # like secrets where the returned API value is not helpful.
+      attr_reader :ignore_read
       attr_reader :validation # Adds a ValidateFunc to the schema
       # Indicates that this is an Array that should have Set diff semantics.
       attr_reader :unordered_list
@@ -37,6 +40,9 @@ module Provider
       # is set in the terraform configuration for this field.
       # It translates to setting the field to Computed & Optional in the schema.
       attr_reader :default_from_api
+
+      # Names of attributes that can't be set alongside this one
+      attr_reader :conflicts_with
 
       # ===========
       # Custom code
@@ -96,10 +102,12 @@ module Provider
         @is_set ||= false
         @unordered_list ||= false
         @default_from_api ||= false
+        @conflicts_with ||= []
 
         check_property :sensitive, :boolean
         check_property :is_set, :boolean
         check_property :default_from_api, :boolean
+        check_property_list :conflicts_with, ::String
 
         check_optional_property :diff_suppress_func, String
         check_optional_property :state_func, String
@@ -121,9 +129,11 @@ module Provider
                                        api_property.description)
         end
 
-        unless api_property.is_a?(Api::Type::Array)
+        unless api_property.is_a?(Api::Type::Array) ||
+               ObjectUtils.string_to_object_map?(api_property)
           if @is_set
-            raise 'Set can only be specified for Api::Type::Array. ' \
+            raise 'Set can only be specified for Api::Type::Array ' \
+                  'or Api::Type::NameValues<String, NestedObject>. ' \
                   "Type is #{api_property.class} for property "\
                   "'#{api_property.name}'"
           end

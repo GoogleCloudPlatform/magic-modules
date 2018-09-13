@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.1'
+  version: '0.2.0'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-dns'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-dns/issues'
   summary: 'A Chef cookbook to manage Google Cloud DNS resources'
@@ -25,12 +25,6 @@ manifest: !ruby/object:Provider::Chef::Manifest
   operating_systems:
 <%= indent(include('provider/chef/common~operating_systems.yaml'), 4) %>
 overrides: !ruby/object:Provider::ResourceOverrides
-  ManagedZone: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'ManagedZone cannot be edited'
-        Chef::Log.fatal message
-        raise message
   ResourceRecordSet: !ruby/object:Provider::Chef::ResourceOverride
     handlers: !ruby/object:Provider::Chef::Handlers
       create: |
@@ -59,11 +53,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     unwrap_resource: false
   Project: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Project cannot be edited'
-        Chef::Log.fatal message
-        raise message
 tests: !ruby/object:Api::Resource::HashArray
 <%= indent(include('products/dns/test.yaml'), 2) %>
 properties:
@@ -115,6 +104,11 @@ style:
         exceptions:
           - Metrics/MethodLength
 changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.2.0'
+    date: 2018-09-04T09:00:00-0700
+    features:
+      - Update version for supermarket release.
   - !ruby/object:Provider::Config::Changelog
     version: '0.1.1'
     date: 2018-05-02T06:00:00-0700

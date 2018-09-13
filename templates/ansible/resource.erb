@@ -16,6 +16,8 @@ __metaclass__ = type
   metadata_version = quote_string(@config.manifest.get('metadata_version',
                                                        object))
   supported_by = quote_string(@config.manifest.get('supported_by', object))
+  supported_by = quote_string(@config.manifest.get('supported_by', config))
+  update_props = properties_by_custom_update(object.all_user_properties)
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.get('status', object) -%>,
@@ -59,7 +61,7 @@ EXAMPLES = '''
 <% res_readable_name = object.name.uncombine -%>
 <% if example.dependencies -%>
 <%   example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', object, false)) -%>
+<%= lines(depend.build_test('present', object, false), 1) -%>
 <%   end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
 <%= lines(example.task.build_example('present', object)) -%>
@@ -150,7 +152,7 @@ def main():
   method = method_call('update', [
                                    'module', 'self_link(module)',
                                    ('kind' if object.kind?),
-                                   ('fetch' if object.access_api_results)
+                                   ('fetch' if object.access_api_results || !update_props.empty?)
                                  ])
 -%>
 <%= lines(indent("fetch = #{method}", 16)) -%>
@@ -187,10 +189,16 @@ def main():
                                   ('kind' if object.kind?)])
 -%>
             fetch = <%= method %>
+<% if object.post_create -%>
+<%= lines(indent(object.post_create, 12)) -%>
+<% end # ifobject.post_create -%>
             changed = True
         else:
             fetch = {}
 
+<% if object.post_action -%>
+<%= lines(indent(object.post_action, 4)) -%>
+<% end # ifobject.post_create -%>
     fetch.update({'changed': changed})
 <% end # object.readonly -%>
 
@@ -230,7 +238,7 @@ def main():
 
 <%=
   lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
-                               ('fetch' if object.access_api_results)]))
+                               ('fetch' if object.access_api_results || !update_props.empty?)]))
 -%>
 <%
   update_request = if object.custom_update_resource
@@ -240,7 +248,13 @@ def main():
                    end
 -%>
 <% if object.update.nil? -%>
-<%   if !false?(object.editable) -%>
+<% unless update_props.empty? -%>
+    update_fields(module, resource_to_request(module),
+                  response_to_hash(module, fetch))
+<% end -%>
+<%   if object.input && update_props.empty? -%>
+    module.fail_json(msg="<%= object.name -%> cannot be edited")
+<%   elsif  !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
   update_verb = object.update_verb.to_s.downcase
@@ -255,14 +269,54 @@ def main():
   )
 -%>
     return <%= method %>
-<%   else # !false?(object.editable) -%>
-    module.fail_json(msg="<%= object.name -%> cannot be edited")
-<%   end # !false?(object.editable) -%>
+<% else # non-updatable, but has per-field updates -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+    return <%= method %>
+<%   end # if object.input -%>
 <% else # object.update.nil? -%>
 <%= lines(indent(object.update, 4)) -%>
 <% end # object.update.nil? -%>
 
 
+<% unless update_props.empty? -%>
+def update_fields(module, request, response):
+<% empty = update_props.values.flatten.reject { |p| p.is_a? Api::Type::FetchedExternal }.empty? -%>
+<% if empty -%>
+    pass
+<% else -%>
+<% update_props.each do |key, props| -%>
+<%
+  props_statement = props.reject { |p| p.is_a?(Api::Type::FetchedExternal) }
+  .map { |prop| "response.get(#{quote_string(prop.api_name)}) != request.get(#{quote_string(prop.api_name)})" }.join(' or ')
+-%>
+<% unless props_statement.empty? -%>
+    if <%= props_statement -%>:
+        <%= props.first.name.underscore -%>_update(module, request, response)
+<% end # unless props_statement.empty? -%>
+<% end # update_props.each -%>
+<% end # if empty -%>
+
+
+<% update_props.each do |key, props| -%>
+def <%= props.first.name.underscore -%>_update(module, request, response):
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    auth.<%= key[:update_verb].downcase -%>(
+        ''.join([
+            "<%= object.__product.base_url -%>",
+            "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
+        ]).format(**module.params),
+        {
+<%= lines(request_properties(props, 12)) -%>
+        }
+    )
+
+
+<% end -%>
+<% end # unless update_props.empty? -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.access_api_results)]))
@@ -270,10 +324,7 @@ def main():
 <% if object.delete.nil? -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <%
-  delete_verb = 'delete'
-  unless object.delete_verb.nil?
-    delete_verb = object.delete_verb.to_s.downcase
-  end
+  delete_verb = object.delete_verb.to_s.downcase
 
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
@@ -301,7 +352,7 @@ def resource_to_request(module):
 <% if object.kind? -%>
         u'kind': <%= quote_string(object.kind) -%>,
 <% end # if object.kind? -%>
-<%= lines(indent(request_properties(properties_in_request), 4)) -%>
+<%= lines(indent(request_properties(properties_in_request, 4), 4)) -%>
     }
 <% if object.encoder? -%>
     request = <%= object.transport.encoder -%>(request, module)
@@ -380,10 +431,6 @@ def unwrap_resource(result, module):
 <% end -%>
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-<% if object.kind? -%>
-    if result['kind'] != kind:
-        module.fail_json(msg="Incorrect result: {kind}".format(**result))
-<% end # object.kind? -%>
 
     return result
 <% end # if object.return_if_object -%>
@@ -414,7 +461,7 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return {
-<%= lines(response_properties(object.properties)) -%>
+<%= lines(response_properties(object.properties, 8)) -%>
     }
 <% readonly_selflink_rrefs.each do |resource| -%>
 

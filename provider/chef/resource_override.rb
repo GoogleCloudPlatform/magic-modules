@@ -26,6 +26,7 @@ module Provider
       attr_reader :manual
       attr_reader :provider_helpers
       attr_reader :resource_to_request
+      attr_reader :requires
       attr_reader :return_if_object
       attr_reader :unwrap_resource
     end
@@ -36,6 +37,8 @@ module Provider
       attr_reader :create
       attr_reader :delete
       attr_reader :update
+      attr_reader :post_create
+      attr_reader :prefetch
       attr_reader :resource_to_request_patch
       attr_reader :return_if_object
       attr_reader :self_link # A custom self_link function to use
@@ -47,6 +50,8 @@ module Provider
         check_optional_property :create, String
         check_optional_property :delete, String
         check_optional_property :update, String
+        check_optional_property :post_create, String
+        check_optional_property :prefetch, String
         check_optional_property :resource_to_request_patch, String
         check_optional_property :return_if_object, String
         check_optional_property :self_link, String
@@ -73,6 +78,7 @@ module Provider
         check_property :unwrap_resource, :boolean
 
         check_property_list :provider_helpers, String
+        check_property_list :requires, String
       end
 
       private
@@ -82,6 +88,7 @@ module Provider
         default_value_property :deprecated, false
         default_value_property :manual, false
         default_value_property :provider_helpers, []
+        default_value_property :requires, []
         default_value_property :resource_to_request, true
         default_value_property :return_if_object, true
         default_value_property :unwrap_resource, true

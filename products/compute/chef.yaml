@@ -16,7 +16,7 @@
 # edit InstanceGroup
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.1.1'
+  version: '0.3.0'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-compute'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-compute/issues'
   summary: 'A Chef cookbook to manage Google Cloud Compute resources'
@@ -30,45 +30,24 @@ manifest: !ruby/object:Provider::Chef::Manifest
 overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'DiskType cannot be edited'
-        Chef::Log.fatal message
-        raise message
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_disk_type.rb'
-  Disk: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Disk cannot be edited'
-        Chef::Log.fatal message
-        raise message
   Instance: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Instance cannot be edited'
-        Chef::Log.fatal message
-        raise message
+    provider_helpers:
+      - 'products/compute/helpers/ruby/provider_instance.rb'
+      - 'products/compute/helpers/ruby/instance_metadata.rb'
   Network: !ruby/object:Provider::Chef::ResourceOverride
-    handlers: !ruby/object:Provider::Chef::Handlers
-      # TODO(alexstephen): Better editing from auto to custom
-      # This should mimic Puppet.
-      update: |
-        message = 'Network cannot be edited'
-        Chef::Log.fatal message
-        raise message
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_network.rb'
   Region: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
-    handlers: !ruby/object:Provider::Chef::Handlers
-      update: |
-        message = 'Region cannot be edited'
-        Chef::Log.fatal message
-        raise message
   TargetPool: !ruby/object:Provider::Chef::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_target_pool.rb'
+  VpnTunnel: !ruby/object:Provider::Chef::ResourceOverride
+    handlers: !ruby/object:Provider::Chef::Handlers
+      post_create: |
+        labels_update(@new_resource)
   Zone: !ruby/object:Provider::Chef::ResourceOverride
     deprecated: true
   MachineType: !ruby/object:Provider::Chef::ResourceOverride
@@ -80,9 +59,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
-  SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
+  RegionDiskType: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
-  TargetVpnGateway: !ruby/object:Provider::Chef::ResourceOverride
+  SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
 examples: !ruby/object:Api::Resource::HashArray
   Address:
@@ -138,16 +117,12 @@ examples: !ruby/object:Api::Resource::HashArray
     - instance_template.rb
   License:
     - license.rb
-  MachineType:
-    - machine_type.rb
   Network:
     - delete_network.rb
     - network~auto.rb
     - network~convert_to_custom.rb
     - network~custom.rb
     - network~legacy.rb
-  Region:
-    - region.rb
   Route:
     - delete_route.rb
     - route.rb
@@ -172,11 +147,13 @@ examples: !ruby/object:Api::Resource::HashArray
   TargetTcpProxy:
     - delete_target_tcp_proxy.rb
     - target_tcp_proxy.rb
+  TargetVpnGateway:
+    - target_vpn_gateway.rb
   UrlMap:
     - delete_url_map.rb
     - url_map.rb
-  Zone:
-    - zone.rb
+  VpnTunnel:
+    - vpn_tunnel.rb
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= indent(include('provider/chef/common~copy.yaml'), 4) %>
@@ -367,24 +344,9 @@ style:
         exceptions:
           - Metrics/ClassLength
   - !ruby/object:Provider::Config::StyleException
-    name: resources/machine_type.rb
-    pinpoints:
-      - class: Google::GCOMPUTE::MachineType
-        exceptions:
-          - Metrics/ClassLength
-      - function: self.resource_to_hash
-        exceptions:
-          - Metrics/MethodLength
-  - !ruby/object:Provider::Config::StyleException
     name: resources/network.rb
     pinpoints:
       - class: Google::GCOMPUTE::Network
-        exceptions:
-          - Metrics/ClassLength
-  - !ruby/object:Provider::Config::StyleException
-    name: resources/region.rb
-    pinpoints:
-      - class: Google::GCOMPUTE::Region
         exceptions:
           - Metrics/ClassLength
   - !ruby/object:Provider::Config::StyleException
@@ -530,6 +492,11 @@ functions:
 
         gcloud compute images list
 changelog:
+  - !ruby/object:Provider::Config::Changelog
+    version: '0.3.0'
+    date: 2018-09-04T09:00:00-0700
+    features:
+      - Update version for supermarket release.
   - !ruby/object:Provider::Config::Changelog
     version: '0.2.0'
     date: 2018-04-20T22:00:00-0700

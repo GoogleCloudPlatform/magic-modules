@@ -1,4 +1,4 @@
-<% if false # the license inside this if block pertains to this file -%>
+<%- # the license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,21 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <%= lines(autogen_notice :go) -%>
 
 package google
 
 import "github.com/hashicorp/terraform/helper/schema"
 
+<% api_name = @config.name || product_ns -%>
 
-<% if product_ns == 'Resourcemanager'
-		product_ns = 'ResourceManager'
-end -%>
-
-var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
+var Generated<%= api_name -%>ResourcesMap = map[string]*schema.Resource{
 <% product.objects.reject { |r| r.exclude }.each do |object| -%>
-<% resource_name = product_ns + object.name -%>
+<% resource_name = api_name + object.name -%>
 	"google_<%= resource_name.underscore -%>": resource<%= resource_name -%>(),
 <% end -%>
 }

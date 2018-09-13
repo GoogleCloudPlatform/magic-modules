@@ -36,6 +36,11 @@ module Provider
         properties.select(&:output).sort_by(&:name)
     end
 
+    def tf_type(property)
+      return 'schema.TypeSet' if string_to_object_map?(property)
+      tf_types[property.class]
+    end
+
     # Converts between the Magic Modules type of an object and its type in the
     # TF schema
     def tf_types
@@ -71,11 +76,6 @@ module Provider
       url_parts.flatten.join
     end
 
-    def update_url(resource, url_part)
-      return build_url(resource.self_link_url) if url_part.nil?
-      [resource.__product.base_url, url_part].flatten.join
-    end
-
     # Transforms a format string with field markers to a regex string with
     # capture groups.
     #
@@ -103,19 +103,10 @@ module Provider
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
         property.item_type.properties
+      elsif string_to_object_map?(property)
+        property.value_type.properties
       else
         []
-      end
-    end
-
-    # Filter the properties to keep only the ones requiring custom update
-    # method and group them by update url & verb.
-    def properties_by_custom_update(properties)
-      update_props = properties.reject do |p|
-        p.update_url.nil? || p.update_verb.nil?
-      end
-      update_props.group_by do |p|
-        { update_url: p.update_url, update_verb: p.update_verb }
       end
     end
 

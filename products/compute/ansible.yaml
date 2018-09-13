@@ -28,67 +28,72 @@ datasources: !ruby/object:Provider::ResourceOverrides
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Address: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Autoscaler: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+    version_added: '2.7'
   BackendBucket: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Firewall: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   GlobalAddress: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   GlobalForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   HealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   HttpHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   HttpsHealthCheck: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Image: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   InstanceGroupManager: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Network: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+    version_added: '2.7'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Router: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Snapshot: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+    version_added: '2.7'
   SslCertificate: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   SslPolicy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   Subnetwork: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetHttpProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetHttpsProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetTcpProxy: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
   UrlMap: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    version_added: '2.7'
+  VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
   # Readonly resources.
   DiskType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
@@ -97,6 +102,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
   MachineType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  RegionDiskType: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
@@ -109,6 +116,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.7'
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
+      loadBalancingScheme: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      iap: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
@@ -118,6 +129,20 @@ overrides: !ruby/object:Provider::ResourceOverrides
       labels: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
       type: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+  Firewall: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      denied: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      destinationRanges: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      direction: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      priority: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      sourceServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+      targetServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
@@ -205,12 +230,25 @@ overrides: !ruby/object:Provider::ResourceOverrides
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      instances: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.7'
+        exclude: false
+    update: |
+      instance = InstanceLogic(module)
+      instance.run()
+    post_action: |
+      if fetch:
+          instance = InstanceLogic(module)
+          instance.run()
+          fetch.update({'instances': instance.list_instances()})
+    provider_helpers:
+      - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
-  InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
-    editable: false
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
@@ -261,6 +299,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Region: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  RegionDiskType: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  VpnTunnel: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
+    post_create: |
+      labels_update(module, module.params, fetch)
   Zone: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 examples: !ruby/object:Api::Resource::HashArray

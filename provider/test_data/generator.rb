@@ -33,6 +33,7 @@ module Provider
       end
 
       def value(for_type, property, seed)
+        return unless property
         return property.default_value if property.default_value
         for_type = [Api::Type::Array, property.item_type_class] if for_type == Api::Type::Array
         raise "Unknown property type: #{for_type} @ #{property}" \
@@ -76,6 +77,7 @@ module Provider
           Api::Type::Integer => method(:integer_value),
           Api::Type::SelfLink => method(:selflink_value),
           Api::Type::FetchedExternal => method(:string_value),
+          Api::Type::Fingerprint => method(:string_value),
           Api::Type::String => method(:string_value),
           Api::Type::Time => method(:time_value),
           Api::Type::Array::STRING_ARRAY_TYPE => method(:array_string),
@@ -94,6 +96,7 @@ module Provider
           Api::Type::Boolean => 'is',
           Api::Type::Double => 'eq',
           Api::Type::Enum => 'eq',
+          Api::Type::FetchedExternal => 'eq',
           Api::Type::Integer => 'eq',
           Api::Type::NameValues => 'eq',
           Api::Type::NestedObject => 'eq',

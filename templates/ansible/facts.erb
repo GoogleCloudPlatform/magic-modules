@@ -14,11 +14,13 @@ __metaclass__ = type
 
 <%
   metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       config))
-  supported_by = quote_string(@config.manifest.get('supported_by', config))
+                                                       object))
+  supported_by = quote_string(@config.manifest.get('supported_by', object))
+
+  uri_props = object.uri_properties.reject { |para| para.name == 'name' }
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', config) -%>,
+                    'status': <%= @config.manifest.get('status', object) -%>,
                     'supported_by': <%= supported_by -%>}
 
 DOCUMENTATION = '''
@@ -27,20 +29,20 @@ module: <%= module_name(object) %>_facts
 description:
   - Gather facts for GCP <%= object.name %>
 short_description: Gather facts for GCP <%= object.name  %>
-version_added: <%= lines(@config.manifest.get('version_added', config)) -%>
-author: <%= lines(@config.manifest.get('author', config)) -%>
+version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
+author: <%= lines(@config.manifest.get('author', object)) -%>
 requirements:
-<% @config.manifest.get('requirements', config).each do |line| -%>
+<% @config.manifest.get('requirements', object).each do |line| -%>
 <%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
 <% end -%>
 options:
     filters:
        description:
            A list of filter value pairs. Available filters are listed here
-           U(<%= object.filter_url -%>).
+           U(https://cloud.google.com/sdk/gcloud/reference/topic/filters).
            Each additional filter in the list will act be added as an AND condition
            (filter1 and filter2)
-<% object.parameters.each do |prop| -%>
+<% uri_props.each do |prop| -%>
 <%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
@@ -53,8 +55,13 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
+items:
+    description: List of items
+    returned: always
+    type: complex
+    contains:
 <% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(return_property_yaml(prop, 4), 4)) -%>
+<%= lines(indent(return_property_yaml(prop, 8), 8)) -%>
 <% end -%>
 '''
 
@@ -71,7 +78,7 @@ import json
 
 def main():
 <%
-  mod_props = object.parameters.map do |prop|
+  mod_props = uri_props.map do |prop|
     python_dict_for_property(prop, object)
   end
 -%>
@@ -107,10 +114,6 @@ def fetch_list(module, link, query):
 
 
 def query_options(filters):
-    '''
-        :param config_data: contents of the inventory config file
-        :return A fully built query string
-    '''
     if not filters:
         return ''
 
@@ -147,11 +150,9 @@ def query_options(filters):
 
     if navigate_hash(result, ['error', 'errors']):
         module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-<% if object.kind? -%>
-    if result['kind'] != <%= quote_string(list_kind(object)) %>:
-        module.fail_json(msg="Incorrect result: {kind}".format(**result))
-<% end # object.kind? -%>
 
     return result
+
+
 if __name__ == "__main__":
     main()

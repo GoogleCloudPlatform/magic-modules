@@ -40,10 +40,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
           request = JSON.parse(request.to_json)
           request['fingerprint'] = @fetched['fingerprint']
         end
-  Disk: !ruby/object:Provider::Puppet::ResourceOverride
-    # TODO(nelsonjr): Implement specific actions, such as resize and setLabels.
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'Disk cannot be edited'
   DiskType: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true
     # TODO(nelsonjr): Make sure that attempts to create a disk fails
@@ -59,11 +55,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_instance.rb'
       - 'products/compute/helpers/ruby/instance_metadata.rb'
-  InstanceGroup: !ruby/object:Provider::Puppet::ResourceOverride
-    # TODO(nelsonjr): Implement specific actions, such as addInstance and
-    # setNamedPorts.
-    handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'InstanceGroup cannot be edited.'
   InstanceTemplate: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_instance_template.rb'
@@ -97,16 +88,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetPool: !ruby/object:Provider::Puppet::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/ruby/provider_target_pool.rb'
-  Region: !ruby/object:Provider::Puppet::ResourceOverride
-    # TODO(nelsonjr): Make sure that attempts to create a region fails
+  VpnTunnel: !ruby/object:Provider::Puppet::ResourceOverride
     handlers: !ruby/object:Provider::Puppet::Handlers
-      flush: raise 'Region cannot be edited' if @dirty
+      post_create: |
+        labels_update(@resource)
   # Not yet implemented.
   Autoscaler: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
-  TargetVpnGateway: !ruby/object:Provider::Puppet::ResourceOverride
+  RegionDiskType: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
@@ -555,11 +546,13 @@ examples: !ruby/object:Api::Resource::HashArray
   TargetSslProxy:
     - delete_target_ssl_proxy.pp
     - target_ssl_proxy.pp
-  # TargetVpnGateway
+  TargetVpnGateway:
+    - target_vpn_gateway.pp
   UrlMap:
     - delete_url_map.pp
     - url_map.pp
-  # VpnTunnel
+  VpnTunnel:
+    - vpn_tunnel.pp
   # ZoneOperation -- not useful for state convergence
   Zone:
     - zone.pp

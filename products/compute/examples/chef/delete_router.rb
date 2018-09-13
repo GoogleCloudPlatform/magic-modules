@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<%# The license inside this applies to this file
 # Copyright 2018 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <% if name != 'README.md' -%>
 
 <%= compile 'templates/license.erb' -%>
@@ -20,20 +20,13 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_region <%= example_resource_name('some-region') -%> do
-  action :create
-  r_label 'us-west1'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 <% else # name == README.md -%>
-# Router requires a network and a region, so define them in your recipe:
-#   - gcompute_region 'some-region' do ... end
+# Router requires a network so define one in your recipe:
+#   - gcompute_network 'my-network' do ... end
 <% end # name == README.md -%>
 gcompute_router <%= example_resource_name('my-router') -%> do
   action :delete
-  region <%= example_resource_name('some-region') %>
+  region 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

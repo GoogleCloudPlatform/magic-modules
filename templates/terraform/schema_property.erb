@@ -1,4 +1,4 @@
-<% if false # the license inside this if block pertains to this file -%>
+<%# The license inside this block applies to this file.
   # Copyright 2017 Google Inc.
   # Licensed under the Apache License, Version 2.0 (the "License");
   # you may not use this file except in compliance with the License.
@@ -11,13 +11,13 @@
   # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   # See the License for the specific language governing permissions and
   # limitations under the License.
-<% end -%>
+-%>
 <% if tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
   <% if property.is_set -%>
   Type: schema.TypeSet,
   <% else -%>
-  Type: <%= tf_types[property.class] %>,
+  Type: <%= tf_type(property) %>,
   <% end -%>
 <%	if property.default_from_api -%>
 	Computed: true,
@@ -32,14 +32,14 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
-<% unless property.validation.nil? -%>
+<% unless property.validation.nil? || property.output -%>
 	<% if !property.validation.regex.nil? -%>
   ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
 	<% elsif !property.validation.function.nil? -%>
 	ValidateFunc: <%= property.validation.function -%>,
 	<% end # property.validation.nil?  -%>
 <% end # property.validation.nil?  -%>
-<% if property.is_a?(Api::Type::Enum) && property.validation.nil? -%>
+<% if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output -%>
 <%
 	enum_values = property.values
 	enum_values.push "" unless property.required
@@ -103,9 +103,29 @@
   <% end -%>
 	<% end -%>
 <% elsif property.is_a?(Api::Type::NameValues) -%>
+  <% if property.key_type == 'Api::Type::String' && property.value_type == 'Api::Type::String' -%>
   Elem: &schema.Schema{Type: schema.TypeString},
-  <% if not (property.key_type == 'Api::Type::String' and property.value_type == 'Api::Type::String') -%>
+  <% elsif string_to_object_map?(property) -%>
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      "<%= property.key_name -%>": {
+        Type:     schema.TypeString,
+        Required: true,
+        <% if force_new?(property, object) -%>
+        ForceNew: true,
+        <% end -%>
+      },
+      <% order_properties(property.value_type.properties).each do |prop| -%>
+        <%= lines(build_schema_property(prop, object)) -%>
+      <% end -%>
+    },
+  },
+  <% if !property.set_hash_func.nil? -%>
+  Set: <%= property.set_hash_func -%>,
+  <% end -%>
+  <% else -%>
     // TODO(magic-modules): Handle this map specially - Terraform maps are String->String only,
+    // and support has been added for the String->Object case,
     // but this map is marked as being <%= property.key_type -%>-><%= property.value_type -%>.
   <% end -%>
 <% end -%>
@@ -114,6 +134,9 @@
 <% end -%>
 <% unless property.default_value.nil? -%>
     Default: <%= go_literal(property.default_value) -%>,
+<% end -%>
+<% unless property.conflicts_with.empty? -%>
+    ConflictsWith: []string{<%= property.conflicts_with.map{ |p| go_literal(p) }.join(', ') -%>},
 <% end -%>
 },
 <% else -%>

@@ -250,7 +250,8 @@ module Api
       check_property :properties, Array unless @exclude
 
       check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
-      check_property_oneof_default :delete_verb, %i[POST DELETE], :DELETE, Symbol
+      check_property_oneof_default \
+        :delete_verb, %i[POST PUT PATCH DELETE], :DELETE, Symbol
       check_property_oneof_default \
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
@@ -423,6 +424,7 @@ module Api
     def regex_url
       self_link_url.join.gsub('{{project}}', '.*')
                    .gsub('{{name}}', '[a-z1-9\-]*')
+                   .gsub('{{zone}}', '[a-z1-9\-]*')
     end
 
     private

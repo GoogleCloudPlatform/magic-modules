@@ -694,6 +694,7 @@ describe Provider::Puppet do
     allow_open 'templates/network_spec.yaml.erb'
     allow_open 'templates/return_if_object.erb'
     allow_open 'templates/transport.erb'
+    allow_open 'templates/puppetchef/update_props.erb'
 
     allow_open_real_tests
     allow_open_real_resourceref

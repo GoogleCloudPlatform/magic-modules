@@ -29,7 +29,7 @@ module Provider
     EXAMPLE_DEFAULTS = {
       name: 'test_object',
       project: 'test_project',
-      auth_kind: 'service_account',
+      auth_kind: 'serviceaccount',
       service_account_file: '/tmp/auth.pem'
     }.freeze
 
@@ -48,6 +48,9 @@ module Provider
 
       def validate
         super
+        default_value_property :facts, FactsTask.new
+        default_value_property :verifier, FactsVerifier.new
+
         check_property :task, Task
         check_optional_property :verifier, Verifier
         check_optional_property_list :dependencies, Task
@@ -149,6 +152,26 @@ module Provider
       end
     end
 
+    # A Verifier that doesn't build anything.
+    class NoVerifier < Verifier
+      attr_reader :reason
+      def validate() end
+
+      def build_task(_state, _object)
+        ''
+      end
+    end
+
+    # A Task that doesn't build anything.
+    class NoTask < Task
+      attr_reader :reason
+      def validate() end
+
+      def build_task(_state, _hash, _object, _noop = false)
+        ''
+      end
+    end
+
     # Holds all information necessary to run a facts module and verify the
     # creation / deletion of a resource.
     # FactsVerifiers are verifiers in the sense that they verify GCP status.
@@ -181,10 +204,21 @@ module Provider
 
       def build_parameters(object)
         sample_code = @__example.task.code
+        ignored_props = %w[project name]
+
+        url_parts = object.uri_properties
+                          .map(&:name)
+                          .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        object.parameters.map(&:name)
+        object.all_user_properties
+              .map(&:name)
+              .select { |para| url_parts.include? para }
               .map { |para| { para => sample_code[para] } }
               .reduce({}, :merge)
+      end
+
+      def name_parameter
+        compile_string(INTEGRATION_TEST_DEFAULTS, @__example.task.code['name']).join
       end
     end
 
@@ -280,10 +314,18 @@ module Provider
 
       def build_code(object, hash)
         sample_code = @__example.task.code
+        ignored_props = %w[project name]
+
+        url_parts = object.uri_properties
+                          .map(&:name)
+                          .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        code = object.parameters.map(&:name)
+        code = object.all_user_properties
+                     .map(&:name)
+                     .select { |para| url_parts.include? para }
                      .map { |para| { para => sample_code[para] } }
                      .reduce({}, :merge)
+
         code['filters'] = ["name = #{hash[:name]}"]
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code

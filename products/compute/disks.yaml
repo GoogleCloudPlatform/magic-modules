@@ -74,13 +74,6 @@
     or the size of the snapshot.
   update_verb: :POST
   update_url: 'projects/{{project}}/<%= ctx[:location] -%>s/{{<%= ctx[:location] -%>}}/disks/{{name}}/resize'
-- !ruby/object:Api::Type::ResourceRef
-  name: 'type'
-  resource: 'DiskType'
-  imports: 'selfLink'
-  description: |
-    URL of the disk type resource describing which disk type to use to
-    create the disk. Provide this when creating the disk.
 - !ruby/object:Api::Type::Array
   name: 'users'
   description: |

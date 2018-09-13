@@ -15,32 +15,17 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   Address: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
-    examples: |
-      ```hcl
-      resource "google_compute_address" "default" {
-        name = "my-address"
-      }
-      ```
-      ```hcl
-      resource "google_compute_network" "default" {
-        name = "my-network"
-      }
-
-      resource "google_compute_subnetwork" "default" {
-        name          = "my-subnet"
-        ip_cidr_range = "10.0.0.0/16"
-        region        = "us-central1"
-        network       = "${google_compute_network.default.self_link}"
-      }
-
-      resource "google_compute_address" "internal_with_subnet_and_address" {
-        name         = "my-internal-address"
-        subnetwork   = "${google_compute_subnetwork.default.self_link}"
-        address_type = "INTERNAL"
-        address      = "10.0.42.42"
-        region       = "us-central1"
-      }
-      ```
+    example:
+     - !ruby/object:Provider::Terraform::Examples
+      name: "address_basic"
+      vars_documentation:
+        address_name: "my-address"
+     - !ruby/object:Provider::Terraform::Examples
+      name: "address_with_subnetwork"
+      vars_documentation:
+        address_name: "my-internal-address"
+        network_name: "my-network"
+        subnetwork_name: "my-subnet"
     properties:
       address: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
@@ -66,7 +51,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         default_from_api: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
-          * `address`: The IP of the created resource.
+          * `address` - The IP of the created resource.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Provider::Terraform::ResourceOverride
@@ -218,7 +203,84 @@ overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_network" "default" {
+        name = "test-network"
+      }
+
+      resource "google_compute_firewall" "default" {
+        name    = "test-firewall"
+        network = "${google_compute_network.default.name}"
+
+        allow {
+          protocol = "icmp"
+        }
+
+        allow {
+          protocol = "tcp"
+          ports    = ["80", "8080", "1000-2000"]
+        }
+
+        source_tags = ["web"]
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/firewall.erb
+      resource_definition: templates/terraform/resource_definition/firewall.erb
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      allowed: !ruby/object:Provider::Terraform::PropertyOverride     
+        name: 'allow'
+        is_set: true
+        set_hash_func: 'resourceComputeFirewallRuleHash'
+        conflicts_with:
+          - 'deny'
+      allowed.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+        name: 'protocol'
+      denied: !ruby/object:Provider::Terraform::PropertyOverride     
+        name: 'deny'
+        is_set: true
+        set_hash_func: 'resourceComputeFirewallRuleHash'
+        conflicts_with:
+            - 'allow'
+      denied.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+        name: 'protocol'
+      destinationRanges: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        default_from_api: true
+        conflicts_with:
+          - source_ranges
+          - source_tags
+      direction: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        description: |
+          The name or self_link of the network to attach this firewall to.
+      priority: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(0, 65535)'
+      sourceRanges: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        default_from_api: true
+      sourceTags: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+      sourceServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        conflicts_with:
+          - source_tags
+          - target_tags
+      targetServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true 
+        conflicts_with:
+          - source_tags
+          - target_tags
+      targetTags: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -357,7 +419,63 @@ overrides: !ruby/object:Provider::ResourceOverrides
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
         default_value: 2
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    examples: |
+      ```hcl
+      resource "google_compute_health_check" "internal-health-check" {
+       name = "internal-service-health-check"
+
+       timeout_sec        = 1
+       check_interval_sec = 1
+
+       tcp_health_check {
+         port = "80"
+       }
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/health_check_type.erb
+    properties:
+     id: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     type: !ruby/object:Provider::Terraform::PropertyOverride
+       output: true
+       description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
+     httpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'https_health_check'
+         - 'tcp_health_check'
+         - 'ssl_health_check'
+     httpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     httpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 80
+     httpsHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'http_health_check'
+         - 'tcp_health_check'
+         - 'ssl_health_check'
+     httpsHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     httpsHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 443
+     tcpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'http_health_check'
+         - 'https_health_check'
+         - 'ssl_health_check'
+     tcpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     tcpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 80
+     sslHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
+       conflicts_with:
+         - 'http_health_check'
+         - 'https_health_check'
+         - 'tcp_health_check'
+     sslHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+       exclude: true
+     sslHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+       default_value: 443
   Image: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
     properties:
@@ -499,6 +617,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         replica_zones = ["us-central1-a", "us-central1-f"]
       }
       ```
+  RegionDiskType: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
@@ -607,14 +727,93 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `name_prefix` - (Optional) Creates a unique name beginning with the
+         specified prefix. Conflicts with `name`.
+    examples: |
+      ```hcl
+      resource "google_compute_ssl_certificate" "default" {
+        name_prefix = "my-certificate-"
+        description = "a description"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+
+        lifecycle {
+          create_before_destroy = true
+        }
+      }
+
+      # You may also want to control name generation explicitly:
+
+      resource "random_id" "certificate" {
+        byte_length = 4
+        prefix      = "my-certificate-"
+
+        # For security, do not expose raw certificate values in the output
+        keepers {
+          private_key = "${base64sha256(file("path/to/private.key"))}"
+          certificate = "${base64sha256(file("path/to/certificate.crt"))}"
+        }
+      }
+
+      resource "google_compute_ssl_certificate" "default" {
+        # The name will contain 8 random hex digits,
+        # e.g. "my-certificate-48ab27cd2a"
+        name        = "${random_id.certificate.hex}"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+
+        lifecycle {
+          create_before_destroy = true
+        }
+      }
+      ```
+      ```hcl
+      // Using with Target HTTPS Proxies
+      //
+      // SSL certificates cannot be updated after creation. In order to apply
+      // the specified configuration, Terraform will destroy the existing
+      // resource and create a replacement. To effectively use an SSL
+      // certificate resource with a Target HTTPS Proxy resource, it's
+      // recommended to specify create_before_destroy in a lifecycle block.
+      // Either omit the Instance Template name attribute, specify a partial
+      // name with name_prefix, or use random_id resource. Example:
+
+      resource "google_compute_ssl_certificate" "default" {
+        name_prefix = "my-certificate-"
+        description = "a description"
+        private_key = "${file("path/to/private.key")}"
+        certificate = "${file("path/to/certificate.crt")}"
+
+        lifecycle {
+          create_before_destroy = true
+        }
+      }
+
+      resource "google_compute_target_https_proxy" "my_proxy" {
+        name             = "public-proxy"
+        url_map          = # ...
+        ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
+      }
+      ```
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+        custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
+        conflicts_with:
+        - 'name_prefix'
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
       id: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
+        name: 'certificate_id'
       certificate: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
       privateKey: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
+        ignore_read: true
   SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
     examples: |
@@ -1024,6 +1223,112 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: true
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  VpnTunnel: !ruby/object:Provider::Terraform::ResourceOverride
+    examples: |
+      ```hcl
+      resource "google_compute_network" "network1" {
+        name = "network1"
+      }
+
+      resource "google_compute_subnetwork" "subnet1" {
+        name          = "subnet1"
+        network       = "${google_compute_network.network1.self_link}"
+        ip_cidr_range = "10.120.0.0/16"
+        region        = "us-central1"
+      }
+
+      resource "google_compute_vpn_gateway" "target_gateway" {
+        name    = "vpn1"
+        network = "${google_compute_network.network1.self_link}"
+        region  = "${google_compute_subnetwork.subnet1.region}"
+      }
+
+      resource "google_compute_address" "vpn_static_ip" {
+        name   = "vpn-static-ip"
+        region = "${google_compute_subnetwork.subnet1.region}"
+      }
+
+      resource "google_compute_forwarding_rule" "fr_esp" {
+        name        = "fr-esp"
+        ip_protocol = "ESP"
+        ip_address  = "${google_compute_address.vpn_static_ip.address}"
+        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
+      }
+
+      resource "google_compute_forwarding_rule" "fr_udp500" {
+        name        = "fr-udp500"
+        ip_protocol = "UDP"
+        port_range  = "500-500"
+        ip_address  = "${google_compute_address.vpn_static_ip.address}"
+        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
+      }
+
+      resource "google_compute_forwarding_rule" "fr_udp4500" {
+        name        = "fr-udp4500"
+        ip_protocol = "UDP"
+        port_range  = "4500-4500"
+        ip_address  = "${google_compute_address.vpn_static_ip.address}"
+        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
+      }
+
+      resource "google_compute_vpn_tunnel" "tunnel1" {
+        name          = "tunnel1"
+        peer_ip       = "15.0.0.120"
+        shared_secret = "a secret message"
+
+        target_vpn_gateway = "${google_compute_vpn_gateway.target_gateway.self_link}"
+
+        local_traffic_selector  = ["${google_compute_subnetwork.subnet1.ip_cidr_range}"]
+        remote_traffic_selector = ["172.16.0.0/12"]
+
+        depends_on = [
+          "google_compute_forwarding_rule.fr_esp",
+          "google_compute_forwarding_rule.fr_udp500",
+          "google_compute_forwarding_rule.fr_udp4500",
+        ]
+      }
+
+      resource "google_compute_route" "route1" {
+        name       = "route1"
+        network    = "${google_compute_network.network1.name}"
+        dest_range = "15.0.0.0/24"
+        priority   = 1000
+
+        next_hop_vpn_tunnel = "${google_compute_vpn_tunnel.tunnel1.self_link}"
+      }
+      ```
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the shared secret will be stored in the raw
+        state as plain-text.
+        [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+    properties:
+      targetVpnGateway: !ruby/object:Provider::Terraform::PropertyOverride
+        resource: 'VpnGateway'
+      peerIp: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validatePeerAddr'
+      sharedSecret: !ruby/object:Provider::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      localTrafficSelector: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        default_from_api: true
+      remoteTrafficSelector: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+        default_from_api: true
+      detailedStatus: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
+      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: false
+      router: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/vpn_tunnel.erb
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
 # This is for a list of example files.
@@ -1043,18 +1348,26 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_address_test.go'
     'google/resource_compute_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_autoscaler_test.go'
+    'google/resource_compute_firewall_test.go':
+      'templates/terraform/tests/resource_compute_firewall_test.go'
     'google/resource_compute_global_address_test.go':
       'templates/terraform/tests/resource_compute_global_address_test.go'
+    'google/resource_compute_health_check_test.go':
+      'templates/terraform/tests/resource_compute_health_check_test.go'
     'google/resource_compute_region_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
     'google/resource_compute_region_disk_test.go':
       'templates/terraform/tests/resource_compute_region_disk_test.go'
     'google/resource_compute_router_test.go':
       'templates/terraform/tests/resource_compute_router_test.go'
+    'google/resource_compute_ssl_certificate_test.go':
+      'templates/terraform/tests/resource_compute_ssl_certificate_test.go'
     'google/resource_compute_target_https_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
     'google/resource_compute_target_ssl_proxy_test.go':
       'templates/terraform/tests/resource_compute_target_ssl_proxy_test.go'
+    'google/resource_compute_vpn_tunnel_test.go':
+      'templates/terraform/tests/resource_compute_vpn_tunnel_test.go'
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:

@@ -6,7 +6,7 @@
 - name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:
       filters:
-         - name = "{{ resource_name }}"
+         - name = <%= name_parameter %>
 <% @parameters.each do |k, v| -%>
       <%= k -%>: <%= lines(v) -%>
 <% end -%>

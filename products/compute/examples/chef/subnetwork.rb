@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<%# The license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <% unless name == 'README.md' -%>
 
 <%= compile 'templates/license.erb' -%>
@@ -22,20 +22,12 @@
 
 <% end -%>
 <% if name == "README.md" -%>
-# Subnetwork requires a network and a region, so define them in your recipe:
+# Subnetwork requires a network so define one in your recipe:
 #   - gcompute_network 'my-network' do ... end
-#   - gcompute_region 'some-region' do ... end
 <% else # name == README.md -%>
 gcompute_network <%= example_resource_name('mynetwork-subnetwork') -%> do
   action :create
   auto_create_subnetworks false
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_region <%= example_resource_name('some-region') -%> do
-  action :create
-  r_label 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
@@ -45,7 +37,7 @@ gcompute_subnetwork <%= example_resource_name('servers') -%> do
   action :create
   ip_cidr_range '172.16.0.0/16'
   network <%= example_resource_name('mynetwork-subnetwork') %>
-  region <%= example_resource_name('some-region') %>
+  region 'us-west1'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end
