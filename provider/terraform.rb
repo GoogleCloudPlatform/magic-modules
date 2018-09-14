@@ -146,8 +146,6 @@ module Provider
       )
     end
 
-    # This function currently only generates Terraform configurations
-    # that accompany manually defined test files.
     # rubocop:disable Metrics/AbcSize
     def generate_resource_tests(data)
       return if data[:object].example.nil?
