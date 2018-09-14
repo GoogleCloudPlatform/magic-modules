@@ -55,14 +55,23 @@ module Provider
       # "templates/terraform/examples/{{name}}.tf.erb"
       attr_reader :name
 
-      # vars_ variables are a Hash from template variable names to output
-      # variable names
-      attr_reader :vars_documentation
-      attr_reader :vars_test
+      # The id of the "primary" resource in an example. Used in import tests.
+      # This is the value that will appear in the Terraform config url. For
+      # example:
+      # resource "google_compute_address" {{primary_resource_id}} {
+      #   ...
+      # }
+      attr_reader :primary_resource_id
+
+      # vars is a Hash from template variable names to output variable names
+      attr_reader :vars
 
       def config_documentation
         body = lines(compile_file(
-                       vars_documentation,
+                       {
+                         vars: vars,
+                         primary_resource_id: primary_resource_id
+                       },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
         lines(compile_file(
@@ -73,14 +82,17 @@ module Provider
 
       def config_test
         body = lines(compile_file(
-                       vars_test,
+                       {
+                         vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
+                         primary_resource_id: primary_resource_id
+                       },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
 
         lines(compile_file(
                 {
                   content: body,
-                  count: vars_test.length
+                  count: vars.length
                 },
                 'templates/terraform/examples/base_configs/test_body.go.erb'
         ))
@@ -89,8 +101,8 @@ module Provider
       def validate
         super
         check_property :name, String
-        check_property :vars_documentation, Hash
-        check_property :vars_test, Hash
+        check_property :primary_resource_id, String
+        check_property :vars, Hash
       end
     end
 

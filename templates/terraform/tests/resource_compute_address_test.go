@@ -79,46 +79,6 @@ func TestAccComputeAddress_internal(t *testing.T) {
 	})
 }
 
-func TestAccComputeAddress_addressBasicExample(t *testing.T) {
-	t.Parallel()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeAddress_addressBasicExample(acctest.RandString(10)),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_address.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccComputeAddress_addressWithSubnetworkExample(t *testing.T) {
-	t.Parallel()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeAddressDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeAddress_addressWithSubnetworkExample(acctest.RandString(10)),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_address.internal_with_subnet_and_address",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccCheckComputeAddressDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
