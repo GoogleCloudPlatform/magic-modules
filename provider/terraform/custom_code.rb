@@ -43,7 +43,8 @@ module Provider
       end
     end
 
-    # Generates configs to be shown as examples in docs from a template
+    # Generates configs to be shown as examples in docs and outputted as tests
+    # from a shared template
     class Examples < Api::Object
       include Compile::Core
 
@@ -54,13 +55,23 @@ module Provider
       # "templates/terraform/examples/{{name}}.tf.erb"
       attr_reader :name
 
-      # vars_documentation is a Hash from template variable names to output
-      # variable names
-      attr_reader :vars_documentation
+      # The id of the "primary" resource in an example. Used in import tests.
+      # This is the value that will appear in the Terraform config url. For
+      # example:
+      # resource "google_compute_address" {{primary_resource_id}} {
+      #   ...
+      # }
+      attr_reader :primary_resource_id
+
+      # vars is a Hash from template variable names to output variable names
+      attr_reader :vars
 
       def config_documentation
         body = lines(compile_file(
-                       vars_documentation,
+                       {
+                         vars: vars,
+                         primary_resource_id: primary_resource_id
+                       },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
         lines(compile_file(
@@ -69,10 +80,29 @@ module Provider
         ))
       end
 
+      def config_test
+        body = lines(compile_file(
+                       {
+                         vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
+                         primary_resource_id: primary_resource_id
+                       },
+                       "templates/terraform/examples/#{name}.tf.erb"
+        ))
+
+        lines(compile_file(
+                {
+                  content: body,
+                  count: vars.length
+                },
+                'templates/terraform/examples/base_configs/test_body.go.erb'
+        ))
+      end
+
       def validate
         super
         check_property :name, String
-        check_property :vars_documentation, Hash
+        check_property :primary_resource_id, String
+        check_property :vars, Hash
       end
     end
 
