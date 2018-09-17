@@ -16,7 +16,7 @@
 # edit InstanceGroup
 --- !ruby/object:Provider::Chef::Config
 manifest: !ruby/object:Provider::Chef::Manifest
-  version: '0.3.0'
+  version: '0.3.1'
   source: 'https://github.com/GoogleCloudPlatform/chef-google-compute'
   issues: 'https://github.com/GoogleCloudPlatform/chef-google-compute/issues'
   summary: 'A Chef cookbook to manage Google Cloud Compute resources'
