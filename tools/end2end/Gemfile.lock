@@ -82,7 +82,6 @@ GEM
     iniparse (1.4.4)
     ipaddress (0.8.3)
     iso8601 (0.11.0)
-    jaro_winkler (1.5.1)
     jwt (2.1.0)
     libyajl2 (1.2.0)
     locale (2.1.2)
@@ -163,10 +162,9 @@ GEM
     rspec_junit_formatter (0.2.3)
       builder (< 4)
       rspec-core (>= 2, < 4, != 2.12.0)
-    rubocop (0.59.1)
-      jaro_winkler (~> 1.5.1)
+    rubocop (0.52.1)
       parallel (~> 1.10)
-      parser (>= 2.5, != 2.5.1.1)
+      parser (>= 2.4.0.2, < 3.0)
       powerpack (~> 0.1)
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
@@ -204,7 +202,7 @@ DEPENDENCIES
   google-api-client
   googleauth
   puppet (>= 4.10.0)
-  rubocop
+  rubocop (~> 0.52.1)
 
 BUNDLED WITH
    1.16.2

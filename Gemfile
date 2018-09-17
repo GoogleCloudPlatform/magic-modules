@@ -7,6 +7,6 @@ group :test do
   gem 'mocha'
   gem 'parallel_tests'
   gem 'rspec'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.52.1'
   gem 'simplecov'
 end

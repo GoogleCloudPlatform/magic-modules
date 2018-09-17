@@ -9,7 +9,6 @@ GEM
     facter (2.5.1)
     fast_gettext (1.1.2)
     hiera (3.4.4)
-    jaro_winkler (1.5.1)
     json (2.1.0)
     json-schema (2.8.0)
       addressable (>= 2.4)
@@ -61,10 +60,9 @@ GEM
     rspec-puppet (2.6.15)
       rspec
     rspec-support (3.8.0)
-    rubocop (0.59.1)
-      jaro_winkler (~> 1.5.1)
+    rubocop (0.52.1)
       parallel (~> 1.10)
-      parser (>= 2.5, != 2.5.1.1)
+      parser (>= 2.4.0.2, < 3.0)
       powerpack (~> 0.1)
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
@@ -93,7 +91,7 @@ DEPENDENCIES
   rspec
   rspec-mocks
   rspec-puppet
-  rubocop
+  rubocop (~> 0.52.1)
   simplecov
 
 BUNDLED WITH

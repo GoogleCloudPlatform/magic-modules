@@ -29,7 +29,6 @@ GEM
       signet (~> 0.7)
     hiera (3.4.4)
     httpclient (2.8.3)
-    jaro_winkler (1.5.1)
     json (2.1.0)
     json_pure (2.1.0)
     jwt (2.1.0)
@@ -86,10 +85,9 @@ GEM
     rspec-puppet (2.6.15)
       rspec
     rspec-support (3.8.0)
-    rubocop (0.59.1)
-      jaro_winkler (~> 1.5.1)
+    rubocop (0.52.1)
       parallel (~> 1.10)
-      parser (>= 2.5, != 2.5.1.1)
+      parser (>= 2.4.0.2, < 3.0)
       powerpack (~> 0.1)
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
@@ -125,7 +123,7 @@ DEPENDENCIES
   rspec
   rspec-mocks
   rspec-puppet
-  rubocop
+  rubocop (~> 0.52.1)
   simplecov
 
 BUNDLED WITH
