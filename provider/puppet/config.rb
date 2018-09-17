@@ -14,7 +14,7 @@
 require 'provider/config'
 
 module Provider
-    class Puppet < Provider::Core
+  class Puppet < Provider::Core
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
