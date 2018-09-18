@@ -145,6 +145,12 @@ objects:
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
     description: >
       A Table that belongs to a Dataset
+    parameters:
+      # TODO(alexstephen): Remove once we have support for placing
+      # nested object fields in URL
+      - !ruby/object:Api::Type::String
+        name: 'dataset'
+        description: Name of the dataset
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: tableReference

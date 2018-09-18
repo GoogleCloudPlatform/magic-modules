@@ -32,10 +32,10 @@ end
 
 gbigquery_table <%= example_resource_name('example_table') -%> do
   action :create
-  # dataset <%= example_resource_name('example_dataset') -%>
+  dataset <%= example_resource_name('example_dataset') -%>
   table_reference ({
     dataset_id: <%= example_resource_name('example_dataset') -%>,
-    project_id: 'sam-tutorial-6',
+    project_id: ENV['PROJECT'],
     table_id: <%= example_resource_name('example_table') -%>
   })
   project ENV['PROJECT'] # e.g. 'my-test-project'
