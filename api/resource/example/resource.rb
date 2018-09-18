@@ -14,7 +14,6 @@
 module Api
   class Resource < Api::Object::Named
     class Example < Api::Object
-
       # An Example Resource is a resource block that will appear in an example
       # config alongside product documentation
       #

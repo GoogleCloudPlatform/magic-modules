@@ -105,13 +105,13 @@ module Provider
       end
 
       # Turns a property key, value into the right shape for Terraform.
-      # Keys (fieldName) are underscored properly
+      # Keys (field_name) are underscored properly
       #
       # Values starting with @ are turned into interpolation
       # For example:
       # "@gcompute/Subnetwork/default/selfLink"
       # "${google_compute_network.vpc_network.self_link}"
-      def terraformify_property(fieldName, value)
+      def terraformify_property(field_name, value)
         if value.start_with?('@')
           parts = value.split('/')
 
@@ -123,7 +123,7 @@ module Provider
 
           value = "${google_#{product}_#{resource}.#{uri}.#{field}}"
         end
-        [fieldName.underscore, value]
+        [field_name.underscore, value]
       end
 
       # Turns a resource type into it's name in Terraform
