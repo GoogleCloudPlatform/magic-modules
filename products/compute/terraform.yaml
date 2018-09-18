@@ -348,6 +348,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: false
       region: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      addressType: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
+      network: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
