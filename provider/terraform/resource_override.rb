@@ -34,10 +34,6 @@ module Provider
       # Deprecated - examples in documentation
       # TODO(rileykarson): Remove examples and replace them with new examples
       attr_reader :examples
-
-      # New examples in documentation - will take the "examples" name when
-      # old-style examples are gone.
-      attr_reader :example
     end
 
     # A class to control overridden properties on terraform.yaml in lieu of
@@ -56,8 +52,6 @@ module Provider
         check_property :id_format, String
 
         check_optional_property :examples, String
-        check_optional_property :example, Array
-
         check_optional_property :custom_code, Provider::Terraform::CustomCode
         check_optional_property :docs, Provider::Terraform::Docs
         check_property :import_format, Array

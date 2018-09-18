@@ -37,6 +37,47 @@ objects:
       - !ruby/object:Api::Type::SelfLink
         name: selfLink
     input: true
+    doc_examples:
+      - !ruby/object:Api::Resource::Example
+        name: "address_basic"
+        vars:
+          address_name: "my-address"
+        primary_resource:
+          !ruby/object:Api::Resource::Example::Resource
+            name: "ip_address"
+            type: "gcompute/Address"
+            properties:
+                name: "{{address_name}}"
+      - !ruby/object:Api::Resource::Example
+        name: "address_with_subnetwork"
+        vars:
+          address_name: "my-internal-address"
+          network_name: "my-network"
+          subnetwork_name: "my-subnet"
+        primary_resource:
+          !ruby/object:Api::Resource::Example::Resource
+            name: "internal_with_subnet_and_address"
+            type: "gcompute/Address"
+            properties:
+              name: "{{address_name}}"
+              subnetwork: "@gcompute/Subnetwork/default/selfLink"
+              addressType: "INTERNAL"
+              address: "10.0.42.42"
+              region: "us-central1"
+        resources:
+          - !ruby/object:Api::Resource::Example::Resource
+            name: "default"
+            type: "$gcompute/Subnetwork"
+            properties:
+              name: "{{subnetwork_name}}"
+              network: "@gcompute/Network/default/selfLink"
+              ipCidrRange: "10.0.0.0/16"
+              region: "us-central1"
+          - !ruby/object:Api::Resource::Example::Resource
+            name: "default"
+            type: "$gcompute/Network"
+            properties:
+              name: "{{network_name}}"
     description: |
       Represents an Address resource.
 

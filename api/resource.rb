@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'api/resource/example'
 require 'google/string_utils'
 
 module Api
@@ -54,6 +55,10 @@ module Api
       attr_reader :exports
       attr_reader :transport
       attr_reader :references
+      # :examples conflicts with overrides examples.
+      # TODO(rileykarson): We can take over that namespace if every example is
+      # converted.
+      attr_reader :doc_examples
       attr_reader :create_verb
       attr_reader :delete_verb
       attr_reader :update_verb
@@ -246,6 +251,9 @@ module Api
       check_optional_property :readonly, :boolean
       check_optional_property :transport, Transport
       check_optional_property :references, ReferenceLinks
+
+      # Api::Resource::Example
+      check_optional_property :doc_examples, Array
 
       check_property :properties, Array unless @exclude
 

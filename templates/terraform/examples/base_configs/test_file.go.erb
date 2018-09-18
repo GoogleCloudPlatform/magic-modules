@@ -9,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 )
-<% object.example.each do |example| -%>
+<% examples.each do |example| -%>
 <%
 	# {Compute}{Address}_{addressBasic}
-	test_slug = "#{product}#{resource_name}_#{example.name.camelize}Example"
+	test_slug = "#{product}#{resource_name}_#{example[:name].camelize}Example"
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
@@ -27,7 +27,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
 			},
 			{
-				ResourceName:      "<%= "google_#{product.downcase}_#{resource_name.downcase}" -%>.<%= example.primary_resource_id -%>",
+				ResourceName:      "<%= "google_#{product.downcase}_#{resource_name.downcase}" -%>.<%= example[:primary_resource_id] -%>",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -36,6 +36,6 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 }
 
 func testAcc<%= test_slug -%>(val string) string {
-<%= example.config_test -%>
+<%= example[:example] -%>
 }
 <%- end %>

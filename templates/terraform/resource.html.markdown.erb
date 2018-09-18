@@ -75,11 +75,11 @@ To get more information about <%= object.name -%>, see:
 <%= "\n" + object.examples -%>
 
 <% end -%>
-<% unless object.example.nil? -%>
+<% unless examples.nil? -%>
 ## Example Usage
 
-<% object.example.each do |example| -%>
-<%= example.config_documentation -%>
+<% examples.each do |example| -%>
+<%= example[:example] -%>
 <%- end %>
 <%- end -%>
 ## Argument Reference
