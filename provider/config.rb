@@ -198,6 +198,7 @@ module Provider
 
     def self.parse(cfg_file, api = nil, _version_name = nil)
       # Compile step #1: compile with generic class to instantiate target class
+      puts cfg_file
       source = compile(cfg_file)
       config = Google::YamlValidator.parse(source)
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \

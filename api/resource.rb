@@ -42,6 +42,8 @@ module Api
       # GET/DELETE requests only.  In particular, this is often used
       # to add query parameters.
       attr_reader :self_link_query
+      attr_reader :list_link
+      attr_reader :list_link_query
       # This is an array with items that uniquely identify the resource.
       # This is useful in case an API returns a list result and we need
       # to fetch the particular resource we're interested in from that

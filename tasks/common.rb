@@ -16,7 +16,8 @@ PROVIDER_FOLDERS = {
   ansible_facts: 'build/ansible',
   puppet: 'build/puppet/%s',
   chef: 'build/chef/%s',
-  terraform: 'build/terraform'
+  terraform: 'build/terraform',
+  inspec: 'build/inspec/%s'
 }.freeze
 
 # Give a list of all providers served by MM
