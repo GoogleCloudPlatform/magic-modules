@@ -22,11 +22,6 @@ module Provider
     # Responsible for building out YAML documentation blocks.
     # rubocop:disable Metrics/ModuleLength
     module Documentation
-      # This is not a comprehensive list of unsafe characters.
-      # Ansible's YAML linter is more forgiving than Ruby's.
-      # A more restricted list of unsafe characters allows for more
-      # human readable YAML.
-      UNSAFE_CHARS = %w[: & #].freeze
       # Takes a long string and divides each string into multiple paragraphs,
       # where each paragraph is a properly indented multi-line bullet point.
       #
@@ -166,7 +161,9 @@ module Provider
                  'choices:',
                  "[#{prop.values.map { |x| quote_string(x.to_s) }.join(', ')}]"
                ].join(' ')
-             end)
+             end),
+              (indent(bullet_lines(resourceref_description(prop), spaces + 8), 4) \
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
           ].compact, 4)
         ]
       end
@@ -202,6 +199,17 @@ module Provider
       def autogen_notice_contrib
         ['Please read more about how to change this file at',
          'https://www.github.com/GoogleCloudPlatform/magic-modules']
+      end
+
+      def resourceref_description(prop)
+        [
+          "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
+          "This field uses the `#{prop.imports}` field from a #{prop.resource_ref.name}",
+          "that already exists.",
+          "This field takes in a dictionary that contains at least a `#{prop.imports}` key.",
+          "You can make this dictionary manually, or use the output of a",
+          "`#{module_name(prop.resource_ref)}` task directly."
+        ].join(" ")
       end
     end
     # rubocop:enable Metrics/ModuleLength
