@@ -18,7 +18,6 @@ module Provider
     # This module converts a generic (api.yaml) example config definition into
     # the shape of a Terraform config.
     module Examples
-
       # Params:
       #   - a generic example config
       # Return a list of Hash's with:
@@ -36,7 +35,7 @@ module Provider
                                 'templates/terraform/examples/base_configs/documentation.tf.erb'
           ))
           new_examples << {
-            example: new_example,
+            example: new_example
           }
         end
         new_examples
@@ -79,9 +78,9 @@ module Provider
       # Turns a single Api::Resource::Example into a tf config
       def generic_example_to_config(example)
         lines(compile_file(
-                  terraformify_example(example),
-                  'templates/terraform/examples/base_configs/config.tf.erb'
-              ))
+                terraformify_example(example),
+                'templates/terraform/examples/base_configs/config.tf.erb'
+        ))
       end
 
       # Turns an Api::Resource::Example into a similarly shaped Hash with
@@ -113,11 +112,11 @@ module Provider
       # "@gcompute/Subnetwork/default/selfLink"
       # "${google_compute_network.vpc_network.self_link}"
       def terraformify_property(fieldName, value)
-        if value.start_with?("@")
-          parts = value.split("/")
+        if value.start_with?('@')
+          parts = value.split('/')
 
           # TODO(rileykarson): actually infer product here
-          product = "compute"
+          product = 'compute'
           resource = parts[1].underscore
           uri = parts[2]
           field = parts[3].underscore
@@ -132,10 +131,10 @@ module Provider
       # "gcompute/Address"
       # "compute_address"
       def generic_type_to_terraform_type(type)
-        parts = type.split("/")
+        parts = type.split('/')
 
         # TODO(rileykarson): actually infer product here
-        product = "compute"
+        product = 'compute'
         resource = parts[1].underscore
         "#{product}_#{resource}"
       end
