@@ -266,9 +266,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
     post_action: |
       if fetch:
-        instance = InstancePower(module, fetch)
-        instance.run()
-        fetch.update({'status': module.params['status']})
+          instance = InstancePower(module, fetch.get('status'))
+          instance.run()
+          if module.params.get('status'):
+              fetch.update({'status': module.params['status']})
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'

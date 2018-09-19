@@ -10,11 +10,12 @@ class InstancePower(object):
         self.desired_status = self.module.params.get('status')
 
     def run(self):
-        if to_text(self.current_status) == to_text(self.desired_status):
+        # GcpRequest handles unicode text handling
+        if GcpRequest({'status': self.current_status}) == GcpRequest({'status': self.desired_status}):
             return
         elif self.desired_status == 'RUNNING':
             self.start()
-        elif self.desired_status == 'TERMINATED' or self.desired_status == 'SUSPENDED'
+        elif self.desired_status == 'TERMINATED' or self.desired_status == 'SUSPENDED':
             self.stop()
 
     def start(self):
