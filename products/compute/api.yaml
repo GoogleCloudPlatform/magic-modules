@@ -1945,13 +1945,23 @@ objects:
 %>
 <%= indent(compile('products/compute/instance_scheduling.yaml'), 6) %>
 <%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 6) %>
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
           The status of the instance. One of the following values:
           PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED,
           and TERMINATED.
-        output: true
+
+          As a user, use RUNNING to keep a machine "on" and TERMINATED to
+          turn a machine off
+        values:
+          - :PROVISIONING
+          - :STAGING
+          - :RUNNING
+          - :STOPPING
+          - :SUSPENDING
+          - :SUSPENDED
+          - :TERMINATED
       - !ruby/object:Api::Type::String
         name: 'statusMessage'
         description: An optional, human-readable explanation of the status.
