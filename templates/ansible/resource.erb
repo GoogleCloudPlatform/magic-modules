@@ -155,7 +155,13 @@ def main():
                                    ('fetch' if object.access_api_results || !update_props.empty?)
                                  ])
 -%>
-<%= lines(indent("fetch = #{method}", 16)) -%>
+<%= lines(indent("#{method}", 16)) -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+                fetch = <%= method %>
                 changed = True
         else:
 <%
@@ -193,8 +199,6 @@ def main():
 <%= lines(indent(object.post_create, 12)) -%>
 <% end # ifobject.post_create -%>
             changed = True
-        else:
-            fetch = {}
 
 <% if object.post_action -%>
 <%= lines(indent(object.post_action, 4)) -%>
