@@ -200,6 +200,9 @@ objects:
           The geographic location where the table resides. This value is
           inherited from the dataset.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the table'
       - !ruby/object:Api::Type::Integer
         name: 'numBytes'
         description: >
