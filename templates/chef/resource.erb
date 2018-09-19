@@ -186,9 +186,9 @@ module Google
 -%>
 <%     if object.save_api_results? -%>
             @new_resource.__fetched =
-              return_if_object create_req.send<%= kind_param %>
+              return_if_object create_req.send<%= kind_param %>, false
 <%     else # object.save_api_results? -%>
-            return_if_object create_req.send<%= kind_param %>
+            return_if_object create_req.send<%= kind_param %>, false
 <%     end # object.save_api_results? -%>
 <%   else # object.async -%>
 <%     if object.save_api_results? -%>
