@@ -14,9 +14,11 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_bigquery_dataset
   code:
-    name: <%= ctx[:name] %>
+    name: 'my_example_dataset'
     dataset_reference:
-      dataset_id: 'example-dataset'
+      dataset_id: 'my_example_dataset'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
+verifier: !ruby/object:Provider::Ansible::NoVerifier
+  reason: 'test'

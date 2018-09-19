@@ -25,6 +25,10 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Provider::ResourceOverrides
+  Table: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
+  Dataset: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
 overrides: !ruby/object:Provider::ResourceOverrides
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files

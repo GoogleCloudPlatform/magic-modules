@@ -162,7 +162,7 @@ objects:
             name: 'datasetId'
             description: The ID of the dataset containing this table
           - !ruby/object:Api::Type::String
-            name: 'projectid'
+            name: 'projectId'
             description: The ID of the project containing this table
           - !ruby/object:Api::Type::String
             name: 'tableId'

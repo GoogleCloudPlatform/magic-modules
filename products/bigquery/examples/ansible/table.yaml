@@ -15,9 +15,9 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_bigquery_dataset
     code:
-      name: <%= ctx[:name] %>
+      name: 'example_dataset'
       dataset_reference:
-        dataset_id: 'example-dataset'
+        dataset_id: 'example_dataset'
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
@@ -25,12 +25,14 @@ dependencies:
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_bigquery_table
   code:
-    name: <%= ctx[:name] %>
-    dataset: "{{ dataset }}"
+    name: 'example_table'
+    dataset: 'example_dataset'
     table_reference:
-      dataset_id: "{{ dataset }}"
+      dataset_id: 'example_dataset'
       project_id: <%= ctx[:project] %>
-      table_id: <%= ctx[:name] %>
+      table_id: 'example_table'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
+verifier: !ruby/object:Provider::Ansible::NoVerifier
+  reason: 'test'
