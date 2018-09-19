@@ -43,69 +43,6 @@ module Provider
       end
     end
 
-    # Generates configs to be shown as examples in docs and outputted as tests
-    # from a shared template
-    class Examples < Api::Object
-      include Compile::Core
-
-      # The name of the example in lower snake_case.
-      # Generally takes the form of the resource name followed by some detail
-      # about the specific test. For example, "address_with_subnetwork".
-      # The template for the example is expected at the path
-      # "templates/terraform/examples/{{name}}.tf.erb"
-      attr_reader :name
-
-      # The id of the "primary" resource in an example. Used in import tests.
-      # This is the value that will appear in the Terraform config url. For
-      # example:
-      # resource "google_compute_address" {{primary_resource_id}} {
-      #   ...
-      # }
-      attr_reader :primary_resource_id
-
-      # vars is a Hash from template variable names to output variable names
-      attr_reader :vars
-
-      def config_documentation
-        body = lines(compile_file(
-                       {
-                         vars: vars,
-                         primary_resource_id: primary_resource_id
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-        ))
-        lines(compile_file(
-                { content: body },
-                'templates/terraform/examples/base_configs/documentation.tf.erb'
-        ))
-      end
-
-      def config_test
-        body = lines(compile_file(
-                       {
-                         vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
-                         primary_resource_id: primary_resource_id
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-        ))
-
-        lines(compile_file(
-                {
-                  content: body,
-                  count: vars.length
-                },
-                'templates/terraform/examples/base_configs/test_body.go.erb'
-        ))
-      end
-
-      def validate
-        super
-        check_property :name, String
-        check_property :primary_resource_id, String
-        check_property :vars, Hash
-      end
-    end
-
     # Inserts custom code into terraform resources.
     class CustomCode < Api::Object
       # Collection of fields allowed in the CustomCode section for

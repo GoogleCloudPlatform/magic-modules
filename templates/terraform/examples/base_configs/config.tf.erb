@@ -1,0 +1,12 @@
+resource "google_<%= ctx[:primary_resource][:type] -%>" "<%= ctx[:primary_resource][:name] %>" {
+  <%-ctx[:primary_resource][:properties]&.each do |k, v| -%>
+  <%=k -%> = "<%= v -%>"
+  <%- end -%>}
+
+<% ctx[:resources]&.each do |resource| -%>
+resource "google_<%= resource[:type] -%>" "<%= resource[:name] %>" {
+  <%-resource[:properties]&.each do |k, v| -%>
+  <%=k -%> = "<%= v -%>"
+  <%- end -%>}
+
+<%- end %>

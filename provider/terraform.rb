@@ -13,6 +13,7 @@
 
 require 'provider/abstract_core'
 require 'provider/terraform/config'
+require 'provider/terraform/examples'
 require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
 require 'provider/terraform/property_override'
@@ -27,6 +28,7 @@ module Provider
   class Terraform < Provider::AbstractCore
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
+    include Provider::Terraform::Examples
     include Google::GolangUtils
 
     # Sorts properties in the order they should appear in the TF schema:
@@ -140,7 +142,10 @@ module Provider
       product_name = data[:product_name].underscore
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+      examples = config_documentation(data[:object].doc_examples) \
+        unless data[:object].doc_examples.nil?
       generate_resource_file data.clone.merge(
+        examples: examples,
         default_template: 'templates/terraform/resource.html.markdown.erb',
         out_file: filepath
       )
@@ -148,7 +153,7 @@ module Provider
 
     # rubocop:disable Metrics/AbcSize
     def generate_resource_tests(data)
-      return if data[:object].example.nil?
+      return if data[:object].doc_examples.nil?
 
       target_folder = File.join(data[:output_folder], 'google')
       FileUtils.mkpath target_folder
@@ -159,7 +164,10 @@ module Provider
           target_folder,
           "resource_#{product_name}_#{name}_generated_test.go"
         )
+      examples = config_test(data[:object].doc_examples) \
+        unless data[:object].doc_examples.nil?
       generate_resource_file data.clone.merge(
+        examples: examples,
         product: data[:product_name].camelize(:upper),
         resource_name: data[:object].name.camelize(:upper),
         default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
