@@ -15,10 +15,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   AlertPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
     id_format: "{{name}}"
-    # custom_code: !ruby/object:Provider::Terraform::CustomCode
-    #   decoder: 'templates/terraform/decoders/monitoring.erb'
-    #   encoder: 'templates/terraform/encoders/monitoring.erb'
-    #   pre_update: 'templates/terraform/pre_update/monitoring.erb'
     examples: |
       ### Basic Usage
       ```hcl
@@ -32,54 +28,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       ```hcl
       resource "google_monitoring_alert_policy" "test" {
         display_name = "Test Policy"
-
-        conditions = [
-          {
-              display_name = "First Condition"
-          }
-        ]
-
-        labels {
-          my_key    = "my_val"
-          other_key = "other_val"
-        }
-      }
-      ```
-    properties:
-      # authorizedNetwork: !ruby/object:Provider::Terraform::PropertyOverride
-      #   default_from_api: true
-      #   custom_expand: 'templates/terraform/custom_expand/monitoring_authorized_network.erb'
-      #   diff_suppress_func: 'compareSelfLinkRelativePaths'
-      # locationId: !ruby/object:Provider::Terraform::PropertyOverride
-      #   default_from_api: true
-      conditions: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_conditions.erb'
-        # properties:
-        #   condition_threshold: !ruby/object:Provider::Terraform::PropertyOverride
-      # monitoringVersion: !ruby/object:Provider::Terraform::PropertyOverride
-        # default_from_api: true
-      # region: !ruby/object:Provider::Terraform::PropertyOverride
-      #   required: false
-      #   default_from_api: true
-      # reservedIpRange: !ruby/object:Provider::Terraform::PropertyOverride
-      #   default_from_api: true
-
-  Group: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
-    id_format: "{{name}}"
-    examples: |
-      ### Basic Usage
-      ```hcl
-      resource "google_monitoring_group" "test" {
-        display_name = "Test Group"
-        conditions = []
-      }
-      ```
-
-      ### Full Usage
-      ```hcl
-      resource "google_monitoring_group" "test" {
-        display_name = "Test Group"
 
         conditions = [
           {
@@ -95,25 +43,53 @@ overrides: !ruby/object:Provider::ResourceOverrides
       ```
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_name.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      conditions: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_conditions.erb'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/alert_policy.erb
+
+  Group: !ruby/object:Provider::Terraform::ResourceOverride
+    exclude: false
+    id_format: "{{name}}"
+    examples: |
+      ### Basic Usage
+      ```hcl
+      resource "google_monitoring_group" "test" {
+        display_name = "New Group"
+        filter = "resource.metadata.region=\"europe-west2\""
+      }
+      ```
+
+      ### Full Usage
+      ```hcl
+      resource "google_monitoring_group" "parent_group" {
+        display_name = "Parent Group"
+        filter = "resource.metadata.region=\"europe-west2\""
+        is_cluster = true
+      }
+
+      resource "google_monitoring_group" "child_group" {
+        display_name = "Child Group"
+        parent_name = "${google_monitoring_group.parent_group.name}"
+        filter = "resource.metadata.region=\"europe-west2\""
+      }
+
+      output "parent_group_name" {
+        value = "${google_monitoring_group.parent_group.name}"
+      }
+      ```
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       parentName: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/group.erb
-# This is for copying files over
+
 files: !ruby/object:Provider::Config::Files
-#   # All of these files will be copied verbatim.
-#   copy:
-#     'google/transport.go': 'templates/terraform/transport.go'
-#     'google/transport_test.go': 'templates/terraform/transport_test.go'
-#     'google/import.go': 'templates/terraform/import.go'
-#     'google/import_test.go': 'templates/terraform/import_test.go'
-#     # Handwritten acceptance tests for autogenerated resources.
-#     # Adding them here allows updating the tests as part of a MM pull request.
-#     'google/resource_monitoring_alert_policy_test.go':
-#       'templates/terraform/tests/resource_monitoring_alert_policy_test.go'
-#   # These files have templating (ERB) code that will be run.
-#   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
     'google/provider_{{product_name}}_gen.go': 'templates/terraform/provider_gen.erb'

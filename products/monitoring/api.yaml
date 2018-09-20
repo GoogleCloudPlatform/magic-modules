@@ -23,6 +23,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'AlertPolicy'
     base_url: projects/{{project}}/alertPolicies
+    self_link: projects/{{project}}/alertPolicies/{{name}}
     update_verb: :PATCH
     input: true
     description: |
@@ -66,6 +67,7 @@ objects:
           A read-only record of the creation of the alerting policy.
           If provided in a call to create or update, this field will
           be ignored.
+        output: true
         properties:
          - !ruby/object:Api::Type::String
            name: mutateTime
@@ -311,6 +313,7 @@ objects:
                or trigger values. Otherwise, treat the change as
                a new condition and let the existing condition be
                deleted.
+             output: true
            - !ruby/object:Api::Type::NestedObject
              name: conditionThreshold
              description: |
