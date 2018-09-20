@@ -17,7 +17,7 @@
                                  'allow_not_found=True'])
 %>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    return <%= method_call('return_if_object', ['module', 'link',
+    return <%= method_call('return_if_object', ['module', 'auth.get(link)',
                                                 ('kind' if object.kind?),
                                                 'allow_not_found']) %>
 
