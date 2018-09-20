@@ -1,5 +1,5 @@
 <% if false # the license inside this if block pertains to this file  -%>
-  # Copyright 2018 Google Inc.
+  # Copyright 2017 Google Inc.
   # Licensed under the Apache License, Version 2.0 (the "License");
   # you may not use this file except in compliance with the License.
   # You may obtain a copy of the License at
@@ -17,10 +17,5 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   if err != nil {
     return nil, err
   }
-
-  if v.(string) == "" {
-    return "", nil
-  }
-
-  return fmt.Sprintf("projects/%s/groups/%s", project, v.(string)), nil
+  return fmt.Sprintf("projects/%s/alertPolicies/%s", project, v.(string)), nil
 }
