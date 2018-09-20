@@ -33,7 +33,7 @@ module Provider
     # Required, Optional, Computed
     def order_properties(properties)
       properties.select(&:required).sort_by(&:name) +
-        properties.reject(&:required).reject(&:output) +
+        properties.reject(&:required).reject(&:output).sort_by(&:name) +
         properties.select(&:output).sort_by(&:name)
     end
 
