@@ -1120,9 +1120,12 @@ objects:
           * GCE_ENDPOINT - VM internal IP, VM alias IP, Internal LB service IP.
           
           This field is not applicable to external addresses.
+
+          * DNS_RESOLVER - Used for DNS forwarding
         values:
         - :VPC_PEERING
         - :GCE_ENDPOINT
+        - :DNS_RESOLVER
         min_version: beta
       - !ruby/object:Api::Type::String
         name: 'network'
