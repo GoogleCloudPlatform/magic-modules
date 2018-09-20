@@ -509,7 +509,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      autoCreateSubnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: True
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
