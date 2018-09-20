@@ -218,6 +218,13 @@ module Provider
     # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/AbcSize
     def generate_objects(output_folder, types, version)
+      # When generating a version in advance of the resource's default version
+      # we should not generate every resource by default. eg: if generating beta
+      # resources for products/compute we should only generate the resources
+      # that are explicitly marked as beta
+      types = @api.objects_by_version(version) \
+        if types.empty? && version > @api.default_version
+
       @api.set_properties_based_on_version(version)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)

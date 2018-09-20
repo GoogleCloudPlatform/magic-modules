@@ -91,6 +91,20 @@ module Api
     end
     # rubocop:enable Naming/AccessorMethodName
 
+    # Checks if the resource or any of its properties or paramters has been
+    # flagged for a specific version and returns only those that match.
+    def objects_by_version(version)
+      filtered_objects = @objects.select do |o|
+        obj_is_version = o.min_version == version
+        obj_is_version ||= o.parameters.any? { |p| p.min_version == version }
+        obj_is_version ||= o.properties.any? { |p| p.min_version == version }
+
+        obj_is_version
+      end
+
+      filtered_objects
+    end
+
     private
 
     def check_versions
