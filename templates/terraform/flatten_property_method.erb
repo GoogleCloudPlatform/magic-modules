@@ -39,7 +39,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   for _, raw := range l {
     original := raw.(map[string]interface{})
     transformed = append(transformed, map[string]interface{}{
-    <% property.item_type.properties.each do |prop| -%>
+    <% property.item_type.properties.reject(&:ignore_read).each do |prop| -%>
       "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
     <% end -%>
     })
