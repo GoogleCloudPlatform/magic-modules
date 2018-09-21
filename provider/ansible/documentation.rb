@@ -147,7 +147,14 @@ module Provider
       def minimal_doc_block(prop, _object, spaces)
         required = prop.required && !prop.default_value ? 'true' : 'false'
         [
-          minimal_yaml(prop, spaces),
+          "#{prop.name.underscore}:",
+          indent(
+            [
+              'description:',
+              # + 8 to compensate for name + description.
+              indent(bullet_lines(prop.description, spaces + 8), 4)
+            ], 4
+          ),
           indent([
             "required: #{required}",
             ("default: #{prop.default_value}" if prop.default_value),
@@ -177,27 +184,18 @@ module Provider
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
         [
-          minimal_yaml(prop, spaces),
-          indent([
-                   'returned: success',
-                   "type: #{type}"
-                 ], 4)
-        ]
-      end
-
-      # Builds out the minimal YAML block necessary for a property.
-      # This block will need to have additional information appened
-      # at the end.
-      def minimal_yaml(prop, spaces)
-        [
-          "#{prop.name.underscore}:",
+          "#{prop.name}:",
           indent(
             [
               'description:',
               # + 8 to compensate for name + description.
               indent(bullet_lines(prop.description, spaces + 8), 4)
             ], 4
-          )
+          ),
+          indent([
+                   'returned: success',
+                   "type: #{type}"
+                 ], 4)
         ]
       end
 
