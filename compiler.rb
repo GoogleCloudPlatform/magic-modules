@@ -43,7 +43,7 @@ types_to_generate = []
 version = nil
 
 ARGV << '-h' if ARGV.empty?
-Google::LOGGER.level = Logger::WARN
+Google::LOGGER.level = Logger::INFO
 
 OptionParser.new do |opt|
   opt.on('-p', '--product PRODUCT', 'Folder with product catalog') do |p|
@@ -66,7 +66,7 @@ OptionParser.new do |opt|
     exit
   end
   opt.on('-d', '--debug', 'Show all debug logs') do |_debug|
-    Google::LOGGER.level = Logger::INFO
+    Google::LOGGER.level = Logger::DEBUG
   end
 end.parse!
 
