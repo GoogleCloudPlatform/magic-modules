@@ -18,6 +18,7 @@ require 'google/string_utils'
 require 'provider/config'
 require 'provider/core'
 require 'provider/puppet/codegen'
+require 'provider/puppet/config'
 require 'provider/puppet/manifest'
 require 'provider/puppet/resource_override'
 require 'provider/puppet/property_override'
@@ -33,33 +34,6 @@ module Provider
 
     include Provider::Puppet::Codegen
     include Google::RubyUtils
-
-    # Settings for the provider
-    class Config < Provider::Config
-      attr_reader :manifest
-      attr_reader :functions
-      attr_reader :bolt_tasks
-
-      def provider
-        Provider::Puppet
-      end
-
-      def resource_override
-        Provider::Puppet::ResourceOverride
-      end
-
-      def property_override
-        Provider::Puppet::PropertyOverride
-      end
-
-      def validate
-        super
-
-        check_optional_property :manifest, Provider::Puppet::Manifest
-        check_property_list :functions, Provider::Config::Function
-        check_property_list :bolt_tasks, Provider::Puppet::BoltTask
-      end
-    end
 
     # A Bolt task
     class BoltTask < Provider::Config::Function
