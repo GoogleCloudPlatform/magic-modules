@@ -147,8 +147,10 @@ module Provider
             [
               'description:',
               # + 8 to compensate for name + description.
-              indent(bullet_lines(prop.description, spaces + 8), 4)
-            ], 4
+              indent(bullet_lines(prop.description, spaces + 8), 4),
+              (indent(bullet_lines(resourceref_description(prop), spaces + 8), 4) \
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+            ].compact, 4
           ),
           indent([
             "required: #{required}",
@@ -162,8 +164,6 @@ module Provider
                  "[#{prop.values.map { |x| quote_string(x.to_s) }.join(', ')}]"
                ].join(' ')
              end),
-              (indent(bullet_lines(resourceref_description(prop), spaces + 8), 4) \
-               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
           ].compact, 4)
         ]
       end
