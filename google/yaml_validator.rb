@@ -33,12 +33,12 @@ module Google
     end
 
     def validate
-      Google::LOGGER.info "Validating #{self.class} '#{@name}'"
+      Google::LOGGER.debug "Validating #{self.class} '#{@name}'"
       check_extraneous_properties
     end
 
     def set_variable(value, property)
-      Google::LOGGER.info "Setting variable of #{value} to #{self}"
+      Google::LOGGER.debug "Setting variable of #{value} to #{self}"
       ensure_property_does_not_exist property
       instance_variable_set("@#{property}", value)
     end
@@ -66,9 +66,9 @@ module Google
 
     def log_check_type(object)
       if object.respond_to?(:name)
-        Google::LOGGER.info "Checking object #{object.name}"
+        Google::LOGGER.debug "Checking object #{object.name}"
       else
-        Google::LOGGER.info "Checking object #{object}"
+        Google::LOGGER.debug "Checking object #{object}"
       end
     end
 
@@ -83,7 +83,7 @@ module Google
     end
 
     def check_property_value(property, prop_value, type)
-      Google::LOGGER.info "Checking '#{property}' on #{object_display_name}"
+      Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
       raise "Missing '#{property}' on #{object_display_name}" if prop_value.nil?
       check_type property, prop_value, type unless type.nil?
       prop_value.validate if prop_value.is_a?(Api::Object)
@@ -98,7 +98,7 @@ module Google
       instance_variables.each do |variable|
         var_name = variable.id2name[1..-1]
         next if var_name.start_with?('__')
-        Google::LOGGER.info "Validating '#{var_name}' on #{object_display_name}"
+        Google::LOGGER.debug "Validating '#{var_name}' on #{object_display_name}"
         raise "Extraneous variable '#{var_name}' in #{object_display_name}" \
           unless methods.include?(var_name.intern)
       end
@@ -107,9 +107,9 @@ module Google
     def check_property_list(name, type = nil)
       obj_list = instance_variable_get("@#{name}")
       if obj_list.nil?
-        Google::LOGGER.info "No next level @ #{object_display_name}: #{name}"
+        Google::LOGGER.debug "No next level @ #{object_display_name}: #{name}"
       else
-        Google::LOGGER.info \
+        Google::LOGGER.debug \
           "Checking next level for #{object_display_name}: #{name}"
         obj_list.each { |o| check_property_value "#{name}:item", o, type }
       end
