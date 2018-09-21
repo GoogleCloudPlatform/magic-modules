@@ -22,6 +22,8 @@ require 'provider/ansible/property_override'
 require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
 require 'provider/ansible/resource_override'
+require 'provider/ansible/property_override'
+require 'provider/ansible/facts_override'
 
 module Provider
   module Ansible
@@ -35,7 +37,8 @@ module Provider
         'Api::Type::Array' => 'list',
         'Api::Type::Boolean' => 'bool',
         'Api::Type::Integer' => 'int',
-        'Api::Type::NameValues' => 'dict'
+        'Api::Type::NameValues' => 'dict',
+        'Provider::Ansible::FilterProp' => 'list'
       }.freeze
 
       include Provider::Ansible::Documentation
@@ -219,6 +222,7 @@ module Provider
       end
 
       def generate_resource(data)
+        add_datasource_info_to_data(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = module_name(data[:object])
@@ -268,6 +272,20 @@ module Provider
           out_file: File.join(target_folder,
                               "lib/ansible/modules/cloud/google/#{name}.py")
         )
+      end
+
+      def add_datasource_info_to_data(data)
+        # We have two sets of overrides - one for regular modules, one for
+        # datasources.
+        # When building regular modules, we will potentially need some
+        # information from the datasource overrides.
+        # This method will give the regular module data access to the
+        # datasource module overrides.
+        name = "@#{data[:object].name}".to_sym
+        facts_info = @config&.datasources&.instance_variable_get(name)&.facts
+        facts_info ||= Provider::Ansible::FactsOverride.new
+        facts_info.validate
+        data[:object].instance_variable_set(:@facts, facts_info)
       end
 
       def generate_network_datas(data, object) end
