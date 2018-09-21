@@ -163,7 +163,7 @@ module Provider
                  'choices:',
                  "[#{prop.values.map { |x| quote_string(x.to_s) }.join(', ')}]"
                ].join(' ')
-             end),
+             end)
           ].compact, 4)
         ]
       end
@@ -205,11 +205,11 @@ module Provider
         [
           "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
           "This field uses the `#{prop.imports}` field from a #{prop.resource_ref.name}",
-          "that already exists.",
+          'that already exists.',
           "This field takes in a dictionary that contains at least a `#{prop.imports}` key.",
-          "You can make this dictionary manually, or use the output of a",
+          'You can make this dictionary manually, or use the output of a',
           "`#{module_name(prop.resource_ref)}` task directly."
-        ].join(" ")
+        ].join(' ')
       end
     end
     # rubocop:enable Metrics/ModuleLength
