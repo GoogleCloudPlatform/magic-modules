@@ -204,11 +204,12 @@ module Provider
       def resourceref_description(prop)
         [
           "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
-          "This field uses the `#{prop.imports}` field from a #{prop.resource_ref.name}",
-          'that already exists.',
-          "This field takes in a dictionary that contains at least a `#{prop.imports}` key.",
-          'You can make this dictionary manually, or use the output of a',
-          "`#{module_name(prop.resource_ref)}` task directly."
+          'It can be specified in two ways.',
+          "You can add `register: name-of-resource` to a #{module_name(prop.resource_ref)} task",
+          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\"",
+          "Alternatively, you can set this #{prop.name.underscore} to a dictionary",
+          "with the #{prop.imports} key",
+          "where the value is the #{prop.imports} of your #{prop.resource_ref.name}"
         ].join(' ')
       end
     end
