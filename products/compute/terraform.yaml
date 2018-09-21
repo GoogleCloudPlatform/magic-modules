@@ -258,12 +258,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
   GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_global_address" "default" {
-        name = "global-appserver-ip"
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_address_basic"
+        primary_resource_id: "default"
+        vars:
+          global_address_name: "global-appserver-ip"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -288,16 +288,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    examples: |
-      ```hcl
-      resource "google_compute_http_health_check" "default" {
-        name         = "authentication-health-check"
-        request_path = "/health_check"
-
-        timeout_sec        = 1
-        check_interval_sec = 1
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "http_health_check_basic"
+        primary_resource_id: "default"
+        vars:
+          http_health_check_name: "authentication-health-check"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -322,16 +318,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    examples: |
-      ```hcl
-      resource "google_compute_https_health_check" "default" {
-        name         = "test"
-        request_path = "/health_check"
-
-        timeout_sec        = 1
-        check_interval_sec = 1
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "https_health_check_basic"
+        primary_resource_id: "default"
+        vars:
+          https_health_check_name: "authentication-health-check"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -348,19 +340,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
       unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
         default_value: 2
   HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_health_check" "internal-health-check" {
-       name = "internal-service-health-check"
-
-       timeout_sec        = 1
-       check_interval_sec = 1
-
-       tcp_health_check {
-         port = "80"
-       }
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "health_check_basic"
+        primary_resource_id: "internal-health-check"
+        vars:
+          health_check_name: "internal-service-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
     properties:
@@ -444,61 +429,15 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
-    examples: |
-      ```hcl
-      resource "google_compute_instance_template" "foobar" {
-        name           = "foobar"
-        machine_type   = "n1-standard-1"
-        can_ip_forward = false
-
-        tags = ["foo", "bar"]
-
-        disk {
-          source_image = "debian-cloud/debian-8"
-        }
-
-        network_interface {
-          network = "default"
-        }
-
-        metadata {
-          foo = "bar"
-        }
-
-        service_account {
-          scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-        }
-      }
-
-      resource "google_compute_target_pool" "foobar" {
-        name = "foobar"
-      }
-
-      resource "google_compute_region_instance_group_manager" "foobar" {
-        name   = "foobar"
-        region = "us-central1"
-
-        instance_template  = "${google_compute_instance_template.foobar.self_link}"
-        target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
-        base_instance_name = "foobar"
-      }
-
-      resource "google_compute_region_autoscaler" "foobar" {
-        name   = "scaler"
-        region = "us-central1"
-        target = "${google_compute_region_instance_group_manager.foobar.self_link}"
-
-        autoscaling_policy = {
-          max_replicas    = 5
-          min_replicas    = 1
-          cooldown_period = 60
-
-          cpu_utilization {
-            target = 0.5
-          }
-        }
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_autoscaler_basic"
+        primary_resource_id: "foobar"
+        vars:
+          region_autoscaler_name: "my-region-autoscaler"
+          instance_template_name: "my-instance-template"
+          target_pool_name: "my-target-pool"
+          rigm_name: "my-region-igm"
     properties:
 <%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
       region: !ruby/object:Provider::Terraform::PropertyOverride
