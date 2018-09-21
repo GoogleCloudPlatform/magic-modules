@@ -24,6 +24,27 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.5'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
+datasources: !ruby/object:Provider::ResourceOverrides
+  Change: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  Project: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
+  ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
+      list_key: 'rrsets'
+      test: results['items'] | length >= 2
+    collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
+  ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      filter: !ruby/object:Provider::Ansible::FilterProp
+        name: dnsName
+        description: Restricts the list to return only zones with this domain name.
+      list_key: 'managedZones'
+      query_options: false
+      filter_api_param: dnsName
 overrides: !ruby/object:Provider::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
