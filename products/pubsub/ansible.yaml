@@ -25,12 +25,12 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 datasources: !ruby/object:Provider::ResourceOverrides
   Topic: !ruby/object:Provider::Ansible::ResourceOverride
-    version_added: '2.7'
+    version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       list_key: 'topics'
       has_filters: false
   Subscription: !ruby/object:Provider::Ansible::ResourceOverride
-    version_added: '2.7'
+    version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       list_key: 'subscriptions'
       has_filters: false
