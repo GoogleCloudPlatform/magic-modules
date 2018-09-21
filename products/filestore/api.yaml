@@ -13,7 +13,13 @@
 
 --- !ruby/object:Api::Product
 name: Google Cloud Filestore
-prefix: gfile
+# There is a problem here - the generated api is called 'file', and that's
+# a bad name for the library.  So we set the name to gfilestore, and
+# that means that Terraform in particular is going to try to import
+# 'filestore'.  But the library is called 'file', so instead we need to
+# include a small hack to rename the library - see
+# templates/terraform/constants/filestore.erb.
+prefix: gfilestore
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
@@ -33,8 +39,12 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/memorystore/docs/redis/'
-      api: 'https://cloud.google.com/memorystore/docs/redis/reference/rest/'
+          'https://cloud.google.com/filestore/docs/creating-instances'
+        'Use with Kubernetes':
+          'https://cloud.google.com/filestore/docs/accessing-fileshares'
+        'Copying Data In/Out':
+          'https://cloud.google.com/filestore/docs/copying-data'
+      api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
 <%=
   indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
                       'templates/zonal_async.yaml.erb'), 4)
@@ -51,8 +61,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
-          The resource name of the instance, in the format
-          `projects/{project_id}/locations/{locationId}/instances/{instanceId}`.
+          The resource name of the instance.
         required: true
         url_param_only: true
       - !ruby/object:Api::Type::String
@@ -73,7 +82,7 @@ objects:
         exclude: true
       - !ruby/object:Api::Type::Time
         name: 'createTime'
-        description: 'Creation timestamp in RFC3339 text format.'
+        description: Creation timestamp in RFC3339 text format.
         output: true
       - !ruby/object:Api::Type::Enum
         name: 'tier'
@@ -97,6 +106,7 @@ objects:
         description: |
           File system shares on the instance. For this version, only a
           single file share is supported.
+        max_size: 1
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -116,6 +126,7 @@ objects:
           VPC networks to which the instance is connected. For this version,
           only a single network is supported.
         required: true
+        min_size: 1
         input: true
         item_type: !ruby/object:Api::Type::NestedObject
           properties:

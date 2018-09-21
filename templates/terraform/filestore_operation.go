@@ -36,11 +36,11 @@ func (w *FilestoreOperationWaiter) Conf() *resource.StateChangeConf {
 	}
 }
 
-func fileOperationWait(service *file.Service, op *file.Operation, project, activity string) error {
-	return fileOperationWaitTime(service, op, project, activity, 4)
+func filestoreOperationWait(service *file.Service, op *file.Operation, project, activity string) error {
+	return filestoreOperationWaitTime(service, op, project, activity, 4)
 }
 
-func fileOperationWaitTime(service *file.Service, op *file.Operation, project, activity string, timeoutMin int) error {
+func filestoreOperationWaitTime(service *file.Service, op *file.Operation, project, activity string, timeoutMin int) error {
 	if op.Done {
 		if op.Error != nil {
 			return fmt.Errorf("Error code %v, message: %s", op.Error.Code, op.Error.Message)
