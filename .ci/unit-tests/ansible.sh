@@ -4,8 +4,8 @@ set -e
 set -x
 
 apt-get update
-apt-get install man
 pushd "magic-modules/build/ansible"
+apt-get install -y man
 pip install tox
 
 
