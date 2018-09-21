@@ -96,7 +96,7 @@ module Provider
         target_file = File.join(output_folder, target)
         target_dir = File.dirname(target_file)
         @sourced << relative_path(target_file, output_folder)
-        Google::LOGGER.info "Copying #{source} => #{target}"
+        Google::LOGGER.debug "Copying #{source} => #{target}"
         FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
         FileUtils.copy_entry source, target_file
       end
@@ -183,7 +183,7 @@ module Provider
     # rubocop:disable Metrics/AbcSize
     def compile_file_list(output_folder, files, data = {})
       files.each do |target, source|
-        Google::LOGGER.info "Compiling #{source} => #{target}"
+        Google::LOGGER.debug "Compiling #{source} => #{target}"
         target_file = File.join(output_folder, target)
                           .gsub('{{product_name}}', @api.prefix[1..-1])
 
@@ -632,7 +632,7 @@ module Provider
 
     def generate_file_write(ctx, data)
       enforce_file_expectations data[:out_file] do
-        Google::LOGGER.info "Generating #{data[:name]} #{data[:type]}"
+        Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
         write_file data[:out_file], compile_file(ctx, data[:template])
       end
     end

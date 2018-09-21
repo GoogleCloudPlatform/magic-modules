@@ -13,39 +13,18 @@
 
 require 'provider/config'
 require 'provider/core'
-require 'provider/ansible/manifest'
-require 'provider/ansible/example'
+require 'provider/ansible/config'
 require 'provider/ansible/documentation'
+require 'provider/ansible/example'
+require 'provider/ansible/manifest'
 require 'provider/ansible/module'
+require 'provider/ansible/property_override'
 require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
 require 'provider/ansible/resource_override'
-require 'provider/ansible/property_override'
 
 module Provider
   module Ansible
-    # Settings for the Ansible provider
-    class Config < Provider::Config
-      attr_reader :manifest
-
-      def provider
-        Provider::Ansible::Core
-      end
-
-      def resource_override
-        Provider::Ansible::ResourceOverride
-      end
-
-      def property_override
-        Provider::Ansible::PropertyOverride
-      end
-
-      def validate
-        super
-        check_optional_property :manifest, Provider::Ansible::Manifest
-      end
-    end
-
     # Code generator for Ansible Cookbooks that manage Google Cloud Platform
     # resources.
     # TODO(alexstephen): Split up class into multiple modules.
