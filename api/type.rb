@@ -39,6 +39,9 @@ module Api
       attr_reader :send_empty_value
       attr_reader :min_version
 
+      # A list of properties that conflict with this property.
+      attr_reader :conflicts
+
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
     end
@@ -70,6 +73,7 @@ module Api
       check_optional_property :update_url, ::String
 
       check_default_value_property
+      check_conflicts
     end
 
     def check_default_value_property
@@ -90,6 +94,19 @@ module Api
       end
 
       check_optional_property :default_value, clazz
+    end
+
+    # Checks that all conflicting properties actually exist.
+    def check_conflicts
+      default_value_property :conflicts, []
+      check_property :conflicts, ::Array
+
+      unless @conflicts.empty?
+        names = @__resource.all_user_properties.map(&:name)
+        @conflicts.each do |p|
+          raise "#{p} does not exist" unless names.include?(p) 
+        end
+      end
     end
 
     def type

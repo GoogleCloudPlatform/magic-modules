@@ -739,6 +739,8 @@ objects:
           The list of ALLOW rules specified by this firewall. Each rule
           specifies a protocol and port-range tuple that describes a permitted
           connection.
+        conflicts:
+          - denied
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # IPProtocol has to be string, instead of Enum because user can
