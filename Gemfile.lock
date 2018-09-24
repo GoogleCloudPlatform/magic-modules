@@ -6,32 +6,32 @@ GEM
       debug_inspector (>= 0.0.1)
     debug_inspector (0.0.3)
     diff-lcs (1.3)
-    docile (1.1.5)
+    docile (1.3.1)
     json (2.1.0)
     metaclass (0.0.4)
     mocha (1.3.0)
       metaclass (~> 0.0.1)
     parallel (1.12.1)
-    parallel_tests (2.21.3)
+    parallel_tests (2.23.0)
       parallel
-    parser (2.4.0.2)
-      ast (~> 2.3)
-    powerpack (0.1.1)
+    parser (2.5.1.2)
+      ast (~> 2.4.0)
+    powerpack (0.1.2)
     rainbow (3.0.0)
-    rake (12.3.0)
-    rspec (3.7.0)
-      rspec-core (~> 3.7.0)
-      rspec-expectations (~> 3.7.0)
-      rspec-mocks (~> 3.7.0)
-    rspec-core (3.7.1)
-      rspec-support (~> 3.7.0)
-    rspec-expectations (3.7.0)
+    rake (12.3.1)
+    rspec (3.8.0)
+      rspec-core (~> 3.8.0)
+      rspec-expectations (~> 3.8.0)
+      rspec-mocks (~> 3.8.0)
+    rspec-core (3.8.0)
+      rspec-support (~> 3.8.0)
+    rspec-expectations (3.8.1)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.7.0)
-    rspec-mocks (3.7.0)
+      rspec-support (~> 3.8.0)
+    rspec-mocks (3.8.0)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.7.0)
-    rspec-support (3.7.0)
+      rspec-support (~> 3.8.0)
+    rspec-support (3.8.0)
     rubocop (0.52.1)
       parallel (~> 1.10)
       parser (>= 2.4.0.2, < 3.0)
@@ -39,25 +39,25 @@ GEM
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
-    ruby-progressbar (1.9.0)
-    simplecov (0.15.1)
-      docile (~> 1.1.0)
+    ruby-progressbar (1.10.0)
+    simplecov (0.16.1)
+      docile (~> 1.1)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
     simplecov-html (0.10.2)
-    unicode-display_width (1.3.0)
+    unicode-display_width (1.4.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   binding_of_caller
-  mocha
+  mocha (~> 1.3.0)
   parallel_tests
   rake
   rspec
-  rubocop
+  rubocop (~> 0.52.1)
   simplecov
 
 BUNDLED WITH
-   1.16.1
+   1.16.2
