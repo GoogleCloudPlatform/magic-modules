@@ -460,55 +460,25 @@ overrides: !ruby/object:Provider::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-    examples: |
-      ```hcl
-      resource "google_compute_disk" "disk" {
-        name = "my-disk"
-        image = "debian-cloud/debian-9"
-        size = 50
-        type = "pd-ssd"
-        zone = "us-central1-a"
-      }
-
-      resource "google_compute_snapshot" "snapdisk" {
-        name = "my-disk-snapshot"
-        source_disk = "${google_compute_disk.disk.name}"
-        zone = "us-central1-a"
-      }
-
-      resource "google_compute_region_disk" "regiondisk" {
-        name = "my-regional-disk"
-        snapshot = "${google_compute_snapshot.snapdisk.self_link}"
-        type = "pd-ssd"
-        region = "us-central1"
-
-        replica_zones = ["us-central1-a", "us-central1-f"]
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_disk_basic"
+        primary_resource_id: "regiondisk"
+        vars:
+          region_disk_name: "my-region-disk"
+          disk_name: "my-disk"
+          snapshot_name: "my-snapshot"
   RegionDiskType: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Route: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_network" "default" {
-        name = "compute-network"
-      }
-
-      resource "google_compute_subnetwork" "default" {
-        name          = "compute-subnetwork"
-        ip_cidr_range = "10.0.0.0/16"
-        network       = "${google_compute_network.default.self_link}"
-        region        = "us-central1"
-      }
-
-      resource "google_compute_route" "default" {
-        name        = "network-route"
-        dest_range  = "15.0.0.0/24"
-        network     = "${google_compute_network.foobar.name}"
-        next_hop_ip = "10.0.1.5"
-        priority    = 100
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "route_basic"
+        primary_resource_id: "default"
+        vars:
+          route_name: "network-route"
+          network_name: "compute-network"
+          subnetwork_name: "compute-subnetwork"
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -530,7 +500,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
           * `projects/project/global/gateways/default-internet-gateway`
           * `global/gateways/default-internet-gateway`
           * The string `default-internet-gateway`.
-          
       nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_instance.erb
@@ -559,29 +528,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Router: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     mutex: router/{{region}}/{{name}}
-    examples: |
-      ```hcl
-      resource "google_compute_network" "foobar" {
-        name                    = "my-network"
-        auto_create_subnetworks = false
-      }
-
-      resource "google_compute_router" "foobar" {
-        name    = "my-router"
-        network = "${google_compute_network.foobar.name}"
-        bgp {
-          asn               = 64514
-          advertise_mode    = "CUSTOM"
-          advertised_groups = ["ALL_SUBNETS"]
-          advertised_ip_ranges {
-            range = "1.2.3.4"
-          }
-          advertised_ip_ranges {
-            range = "6.7.0.0/16"
-          }
-        }
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "router_basic"
+        primary_resource_id: "foobar"
+        vars:
+          router_name: "my-router"
+          network_name: "my-network"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -684,26 +637,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ignore_read: true
   SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
-    examples: |
-      ```hcl
-      resource "google_compute_ssl_policy" "prod-ssl-policy" {
-        name    = "production-ssl-policy"
-        profile = "MODERN"
-      }
-
-      resource "google_compute_ssl_policy" "nonprod-ssl-policy" {
-        name            = "nonprod-ssl-policy"
-        profile         = "MODERN"
-        min_tls_version = "TLS_1_2"
-      }
-
-      resource "google_compute_ssl_policy" "custom-ssl-policy" {
-        name            = "custom-ssl-policy"
-        min_tls_version = "TLS_1_2"
-        profile         = "CUSTOM"
-        custom_features = ["TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"]
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ssl_policy_basic"
+        primary_resource_id: "prod-ssl-policy"
+        vars:
+          production_ssl_policy_name: "production-ssl-policy"
+          nonprod_ssl_policy_name: "nonprod-ssl-policy"
+          custom_ssl_policy_name: "custom-ssl-policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants:  'templates/terraform/constants/ssl_policy.erb'
       resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'
@@ -773,24 +714,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb
       resource_definition: templates/terraform/resource_definition/subnetwork.erb
-    examples: |
-      ```hcl
-        resource "google_compute_network" "custom-test" {
-          name                    = "test-network"
-          auto_create_subnetworks = false
-        }
-
-        resource "google_compute_subnetwork" "network-with-private-secondary-ip-ranges" {
-          name          = "test-subnetwork"
-          ip_cidr_range = "10.2.0.0/16"
-          region        = "us-central1"
-          network       = "${google_compute_network.custom-test.self_link}"
-          secondary_ip_range {
-            range_name    = "tf-test-secondary-range-update1"
-            ip_cidr_range = "192.168.10.0/24"
-          }
-        }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_basic"
+        primary_resource_id: "network-with-private-secondary-ip-ranges"
+        vars:
+          subnetwork_name: "test-subnetwork"
+          network_name: "test-network"
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
     examples: |
       ```hcl
