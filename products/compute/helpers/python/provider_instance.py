@@ -20,6 +20,6 @@ def encode_request(request, module):
 
 
 def decode_response(response, module):
-    if 'metadata' in response and request['metadata'] is not None:
+    if 'metadata' in response and response['metadata'] is not None:
         response['metadata'] = metadata_decoder(response['metadata'])
     return response
