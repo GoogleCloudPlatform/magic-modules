@@ -109,6 +109,14 @@ module Api
       end
     end
 
+    # Returns list of properties that are in conflict with this property.
+    def conflicted_properties
+      (@__resource.all_user_properties.select { |p| @conflicts.include?(p) } +
+       @__resource.all_user_properties.select { |p| p.conflicts.include?(@name) }).uniq
+        
+    end
+
+
     def type
       self.class.name.split('::').last
     end
