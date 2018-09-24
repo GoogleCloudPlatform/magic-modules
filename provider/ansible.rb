@@ -204,15 +204,15 @@ module Provider
       # any duplicates.
       def conflicted_property_batches(object)
         sets = object.all_user_properties.map do |p|
-          if !p.conflicted_properties().empty?
-            p.conflicted_properties().map(&:name).map(&:underscore) + [p.name.underscore]
+          if !p.conflicted_properties.empty?
+            p.conflicted_properties.map(&:name).map(&:underscore) + [p.name.underscore]
           else
             []
           end
         end
-        sets.map { |p| p.sort }
+        sets.map(&:sort)
             .uniq
-            .reject { |p| p.empty? }
+            .reject(&:empty?)
       end
 
       private

@@ -101,11 +101,10 @@ module Api
       default_value_property :conflicts, []
       check_property :conflicts, ::Array
 
-      unless @conflicts.empty?
-        names = @__resource.all_user_properties.map(&:name)
-        @conflicts.each do |p|
-          raise "#{p} does not exist" unless names.include?(p) 
-        end
+      return if @conflicts.empty?
+      names = @__resource.all_user_properties.map(&:name)
+      @conflicts.each do |p|
+        raise "#{p} does not exist" unless names.include?(p)
       end
     end
 
@@ -115,7 +114,6 @@ module Api
       (@__resource.all_user_properties.select { |p| @conflicts.include?(p.api_name) } +
        @__resource.all_user_properties.select { |p| p.conflicts.include?(@api_name) }).uniq
     end
-
 
     def type
       self.class.name.split('::').last
