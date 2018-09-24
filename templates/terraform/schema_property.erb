@@ -129,8 +129,8 @@
 <% unless property.default_value.nil? -%>
     Default: <%= go_literal(property.default_value) -%>,
 <% end -%>
-<% unless property.conflicted_properties().empty? -%>
-<% conflicted_props = property.conflicted_properties().map(&:name) + property.conflicts_with -%>
+<% unless property.conflicted_properties().empty? && property.conflicts_with.empty? -%>
+<% conflicted_props = property.conflicted_properties().map(&:name).map(&:underscore) + property.conflicts_with -%>
     ConflictsWith: []string{<%= conflicted_props.map{ |p| go_literal(p) }.join(', ') -%>},
 <% end -%>
 },

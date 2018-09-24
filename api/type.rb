@@ -111,8 +111,9 @@ module Api
 
     # Returns list of properties that are in conflict with this property.
     def conflicted_properties
-      (@__resource.all_user_properties.select { |p| @conflicts.include?(p) } +
-       @__resource.all_user_properties.select { |p| p.conflicts.include?(@name) }).uniq
+      return [] unless @__resource
+      (@__resource.all_user_properties.select { |p| @conflicts.include?(p.api_name) } +
+       @__resource.all_user_properties.select { |p| p.conflicts.include?(@api_name) }).uniq
     end
 
 
