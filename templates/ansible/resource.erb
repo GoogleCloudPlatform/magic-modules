@@ -105,11 +105,17 @@ def main():
     python_dict_for_property(prop, object)
   end
 -%>
+<% conflicts = conflicted_property_batches(object) -%>
     module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
 <%= lines(indent_list(mod_props, 12)) -%>
+<% unless conflicts.empty? -%>
+        ),
+        mutually_exclusive=<%= python_literal(conflicts) %>
+<% else -%>
         )
+<% end -%>
     )
 
     if not module.params['scopes']:
