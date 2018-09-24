@@ -17,14 +17,14 @@ def self.fetch_resource(resource, self_link, kind)
   get_request = ::Google::<%= product_ns -%>::Network::Get.new(
     self_link, fetch_auth(resource)
   )
-  return_if_object get_request.send, kind
+  return_if_object get_request.send, kind, true
 end
 <% else # object.kind? -%>
 def self.fetch_resource(resource, self_link)
   get_request = ::Google::<%= product_ns -%>::Network::Get.new(
     self_link, fetch_auth(resource)
   )
-  return_if_object get_request.send
+  return_if_object get_request.send, true
 end
 <% end # object.kind? -%>
 
