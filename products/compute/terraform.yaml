@@ -18,11 +18,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
     example:
      - !ruby/object:Provider::Terraform::Examples
       name: "address_basic"
-      vars_documentation:
+      primary_resource_id: "ip_address"
+      vars:
         address_name: "my-address"
      - !ruby/object:Provider::Terraform::Examples
       name: "address_with_subnetwork"
-      vars_documentation:
+      primary_resource_id: "internal_with_subnet_and_address"
+      vars:
         address_name: "my-internal-address"
         network_name: "my-network"
         subnetwork_name: "my-subnet"
@@ -346,6 +348,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         exclude: false
       region: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      addressType: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride

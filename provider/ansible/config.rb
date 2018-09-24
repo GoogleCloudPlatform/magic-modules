@@ -10,11 +10,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
---- !ruby/object:Provider::Ansible::Example
-task: !ruby/object:Provider::Ansible::Task
-  name: gcp_pubsub_topic
-  code:
-    name: 'test-topic1'
-    project: <%= ctx[:project] %>
-    auth_kind: <%= ctx[:auth_kind] %>
-    service_account_file: <%= ctx[:service_account_file] %>
+
+require 'provider/config'
+require 'provider/core'
+
+module Provider
+  module Ansible
+    # Settings for the Ansible provider
+    class Config < Provider::Config
+      attr_reader :manifest
+
+      def provider
+        Provider::Ansible::Core
+      end
+
+      def resource_override
+        Provider::Ansible::ResourceOverride
+      end
+
+      def property_override
+        Provider::Ansible::PropertyOverride
+      end
+
+      def validate
+        super
+        check_optional_property :manifest, Provider::Ansible::Manifest
+      end
+    end
+  end
+end

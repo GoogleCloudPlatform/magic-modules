@@ -36,18 +36,22 @@ require 'provider/puppet/bundle'
 require 'provider/terraform'
 require 'pp' if ENV['COMPILER_DEBUG']
 
-product_name = nil
+product_names = nil
+all_products = false
 output_path = nil
 provider_name = nil
 types_to_generate = []
 version = nil
 
 ARGV << '-h' if ARGV.empty?
-Google::LOGGER.level = Logger::WARN
+Google::LOGGER.level = Logger::INFO
 
 OptionParser.new do |opt|
-  opt.on('-p', '--product PRODUCT', 'Folder with product catalog') do |p|
-    product_name = p
+  opt.on('-p', '--product PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
+    product_names = p
+  end
+  opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
+    all_products = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
     output_path = o
@@ -66,35 +70,47 @@ OptionParser.new do |opt|
     exit
   end
   opt.on('-d', '--debug', 'Show all debug logs') do |_debug|
-    Google::LOGGER.level = Logger::INFO
+    Google::LOGGER.level = Logger::DEBUG
   end
 end.parse!
 
-raise 'Option -p/--product is a required parameter' if product_name.nil?
+raise 'Cannt use -p/--products and -a/--all simultaneously' if product_names && all_products
+raise 'Either -p/--products OR -a/--all must be present' if product_names.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
-product_yaml_path = File.join(product_name, 'api.yaml')
-raise "Product '#{product_name}' does not have an api.yaml file" \
-  unless File.exist?(product_yaml_path)
+if all_products
+  product_names = []
+  Dir["products/**/#{provider_name}.yaml"].each do |file_path|
+    product_names.push(File.dirname(file_path))
+  end
 
-provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
-raise "Product '#{product_name}' does not have a #{provider_name}.yaml file" \
-  unless File.exist?(provider_yaml_path)
+  raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
+end
 
-raise "Output path '#{output_path}' does not exist or is not a directory" \
-  unless Dir.exist?(output_path)
+product_names.each do |product_name|
+  product_yaml_path = File.join(product_name, 'api.yaml')
+  raise "Product '#{product_name}' does not have an api.yaml file" \
+    unless File.exist?(product_yaml_path)
 
-Google::LOGGER.info "Compiling '#{product_name}' output to '#{output_path}'"
-Google::LOGGER.info \
-  "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
+  provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
+  raise "Product '#{product_name}' does not have a #{provider_name}.yaml file" \
+    unless File.exist?(provider_yaml_path)
 
-product_api = Api::Compiler.new(product_yaml_path).run
-product_api.validate
-pp product_api if ENV['COMPILER_DEBUG']
+  raise "Output path '#{output_path}' does not exist or is not a directory" \
+    unless Dir.exist?(output_path)
 
-provider_config = Provider::Config.parse(provider_yaml_path, product_api, version)
-pp provider_config if ENV['COMPILER_DEBUG']
+  Google::LOGGER.info "Compiling '#{product_name}' output to '#{output_path}'"
+  Google::LOGGER.info \
+    "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
 
-provider = provider_config.provider.new(provider_config, product_api)
-provider.generate output_path, types_to_generate, version
+  product_api = Api::Compiler.new(product_yaml_path).run
+  product_api.validate
+  pp product_api if ENV['COMPILER_DEBUG']
+
+  provider_config = Provider::Config.parse(provider_yaml_path, product_api, version)
+  pp provider_config if ENV['COMPILER_DEBUG']
+
+  provider = provider_config.provider.new(provider_config, product_api)
+  provider.generate output_path, types_to_generate, version
+end
