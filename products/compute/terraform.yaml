@@ -191,24 +191,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
         name: 'allow'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
-        conflicts_with:
-          - 'deny'
       allowed.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
         name: 'protocol'
       denied: !ruby/object:Provider::Terraform::PropertyOverride     
         name: 'deny'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
-        conflicts_with:
-            - 'allow'
       denied.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
         name: 'protocol'
       destinationRanges: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true 
         default_from_api: true
-        conflicts_with:
-          - source_ranges
-          - source_tags
       direction: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
       name: !ruby/object:Provider::Terraform::PropertyOverride
@@ -227,14 +220,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         is_set: true 
       sourceServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true 
-        conflicts_with:
-          - source_tags
-          - target_tags
       targetServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true 
-        conflicts_with:
-          - source_tags
-          - target_tags
       targetTags: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true
   ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
@@ -387,38 +374,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
      type: !ruby/object:Provider::Terraform::PropertyOverride
        output: true
        description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
-     httpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'https_health_check'
-         - 'tcp_health_check'
-         - 'ssl_health_check'
      httpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
        exclude: true
      httpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
        default_value: 80
-     httpsHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'http_health_check'
-         - 'tcp_health_check'
-         - 'ssl_health_check'
      httpsHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
        exclude: true
      httpsHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
        default_value: 443
      tcpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'http_health_check'
-         - 'https_health_check'
-         - 'ssl_health_check'
      tcpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
        exclude: true
      tcpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
        default_value: 80
-     sslHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'http_health_check'
-         - 'https_health_check'
-         - 'tcp_health_check'
      sslHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
        exclude: true
      sslHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
