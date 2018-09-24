@@ -382,7 +382,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
        exclude: true
      httpsHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
        default_value: 443
-     tcpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
      tcpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
        exclude: true
      tcpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride

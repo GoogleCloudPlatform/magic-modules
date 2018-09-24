@@ -113,7 +113,6 @@ module Api
     def conflicted_properties
       (@__resource.all_user_properties.select { |p| @conflicts.include?(p) } +
        @__resource.all_user_properties.select { |p| p.conflicts.include?(@name) }).uniq
-        
     end
 
 
