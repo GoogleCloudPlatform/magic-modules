@@ -27,7 +27,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
 			},
 			{
-				ResourceName:      "<%= "google_#{product.downcase}_#{resource_name.downcase}" -%>.<%= example.primary_resource_id -%>",
+				ResourceName:      "<%= "google_#{product.downcase}_#{resource_name.underscore}" -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
