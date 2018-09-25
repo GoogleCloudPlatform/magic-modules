@@ -13,6 +13,7 @@
 
 require 'api/object'
 require 'compile/core'
+require 'google/golang_utils'
 require 'provider/abstract_core'
 require 'provider/property_override'
 
@@ -47,6 +48,7 @@ module Provider
     # from a shared template
     class Examples < Api::Object
       include Compile::Core
+      include Google::GolangUtils
 
       # The name of the example in lower snake_case.
       # Generally takes the form of the resource name followed by some detail
@@ -117,7 +119,7 @@ module Provider
 
       def ignore_read_extras
         @ignore_read_extra ||= []
-        ignore_read_extra.map { |i| "\"#{i}\"" }
+        ignore_read_extra.map(&method(:go_literal))
       end
 
       def substitute_test_paths(config)
