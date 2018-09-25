@@ -66,6 +66,10 @@ module Provider
       # vars is a Hash from template variable names to output variable names
       attr_reader :vars
 
+      # Extra properties to ignore read on during import.
+      # These properties will likely be custom code.
+      attr_reader :ignore_read_extra
+
       def config_documentation
         body = lines(compile_file(
                        {
@@ -81,6 +85,7 @@ module Provider
       end
 
       def config_test
+        @vars ||= []
         body = lines(compile_file(
                        {
                          vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
@@ -88,6 +93,8 @@ module Provider
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
+
+        body = substitute_test_paths body
 
         lines(compile_file(
                 {
@@ -108,11 +115,22 @@ module Provider
         ))
       end
 
+      def ignore_read_extras
+        @ignore_read_extra ||= []
+        ignore_read_extra.map { |i| "\"#{i}\"" }
+      end
+
+      def substitute_test_paths(config)
+        config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
+        config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
+      end
+
       def validate
         super
         check_property :name, String
         check_property :primary_resource_id, String
         check_property :vars, Hash
+        check_property :ignore_read_extra, String
       end
     end
 

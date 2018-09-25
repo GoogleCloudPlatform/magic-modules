@@ -154,6 +154,9 @@ module Provider
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       product_name = data[:product_name].underscore
+      ignore_read = data[:object].all_user_properties
+                                 .select(&:ignore_read)
+                                 .map { |p| "\"#{p.name.underscore}\"" }
       filepath =
         File.join(
           target_folder,
@@ -163,6 +166,7 @@ module Provider
         product: data[:product_name].camelize(:upper),
         resource_name: data[:object].name.camelize(:upper),
         default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
+        ignore_read: ignore_read,
         out_file: filepath
       )
     end
