@@ -26,15 +26,14 @@ gcompute_region 'us-central1' do
 end
 
 <% else -%>
-# Tip: Be sure to include a valid gcompute_disk object
 <% end # name == README.md -%>
 gcompute_interconnect_attachment <%= example_resource_name('test-interconnect') -%> do
   action       :create
   project      'google.com:graphite-playground'
   region       'us-central1'
-  name         '<%= example_resource_name('test-interconnect') -%>'
-  interconnect 'https://googleapis.com/compute/v1/projects/...global/interconnects/...'
-  router       'https://googleapis.com/compute/v1/projects/...regions/.../routers/...'
+  name         <%= example_resource_name('test-interconnect') -%>
+  interconnect 'projects/$project/global/interconnects/$interconnect'
+  router       'projects/$project/regions/$region/routers/$router'
 
   credential 'mycred'
 end
