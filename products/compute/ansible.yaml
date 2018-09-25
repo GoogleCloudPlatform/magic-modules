@@ -61,7 +61,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   InterconnectAttachment: !ruby/object:Provider::Ansible::ResourceOverride
-    version_added: '2.7'
+    version_added: '2.8'
   Network: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
@@ -256,7 +256,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
   InterconnectAttachment: !ruby/object:Provider::Ansible::ResourceOverride
-    version_added: '2.7'
+    version_added: '2.8'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       description: !ruby/object:Provider::Ansible::PropertyOverride
