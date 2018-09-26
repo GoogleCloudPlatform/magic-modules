@@ -53,12 +53,12 @@ describe Google::GolangUtils do
     end
 
     describe 'string_array_multiple' do
-      subject { golang.go_literal(['abc', 'def']) }
+      subject { golang.go_literal(%w[abc def]) }
       it { is_expected.to eq '[]string{"abc", "def"}' }
     end
 
     describe 'int_array' do
-      subject { -> { golang.go_literal([1,2]) } }
+      subject { -> { golang.go_literal([1, 2]) } }
       it { is_expected.to raise_error(/Unsupported/) }
     end
 
