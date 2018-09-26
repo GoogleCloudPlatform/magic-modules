@@ -102,7 +102,6 @@ module Provider
       # * extra_data is a dict of extra information.
       # * extra_url will have a URL chunk to be appended after the URL.
       # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/AbcSize
       def emit_link(name, url, object, has_extra_data = false)
         params = emit_link_var_args(url, has_extra_data)
         if rrefs_in_link(url, object)

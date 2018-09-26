@@ -614,7 +614,7 @@ module Provider
                              .join(', ')]
     end
 
-    def emit_link_var_args_list(url, extra_data, args_list)
+    def emit_link_var_args_list(_url, extra_data, args_list)
       [args_list[0],
        (args_list[2] if extra_data)]
     end
