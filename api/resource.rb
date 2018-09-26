@@ -247,8 +247,6 @@ module Api
       check_optional_property :transport, Transport
       check_optional_property :references, ReferenceLinks
 
-      check_property :properties, Array unless @exclude
-
       check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
       check_property_oneof_default \
         :delete_verb, %i[POST PUT PATCH DELETE], :DELETE, Symbol
@@ -261,6 +259,8 @@ module Api
       set_variables(@properties, :__resource)
 
       check_property_list :parameters, Api::Type
+
+      check_property :properties, Array unless @exclude
       check_property_list :properties, Api::Type
 
       check_identity unless @identity.nil?
@@ -322,6 +322,7 @@ module Api
 
     def check_identity
       check_property :identity, Array
+      check_property_list :identity, Api::Type
 
       # Ensures we have all properties defined
       @identity.each do |i|
