@@ -83,4 +83,4 @@
 	url = git@github.com:GoogleCloudPlatform/chef-google-iam.git
 [submodule "build/terraform-beta"]
 	path = build/terraform-beta
-	url = https://github.com/terraform-providers/terraform-provider-google-beta
+	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
