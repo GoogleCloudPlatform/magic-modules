@@ -322,7 +322,7 @@ module Api
 
     def check_identity
       check_property :identity, Array
-      check_property_list :identity, Api::Type
+      check_property_list :identity, String
 
       # Ensures we have all properties defined
       @identity.each do |i|
