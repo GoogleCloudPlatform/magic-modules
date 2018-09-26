@@ -81,6 +81,3 @@
 [submodule "build/chef/iam"]
 	path = build/chef/iam
 	url = git@github.com:GoogleCloudPlatform/chef-google-iam.git
-[submodule "build/terraform-provider-google-beta"]
-	path = build/terraform-provider-google-beta
-	url = https://github.com/terraform-providers/terraform-provider-google-beta
