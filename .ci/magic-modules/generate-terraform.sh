@@ -15,12 +15,14 @@ export GOPATH="${PWD}/go"
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 
 PROVIDER_NAME="terraform-provider-google"
+SUBMODULE_DIR="terraform"
 if [ -n "$VERSION" ]; then
 	PROVIDER_NAME="terraform-provider-google-$VERSION"
+	SUBMODULE_DIR="terraform-$VERSION"
 fi
 
 pushd magic-modules-branched
-ln -s "${PWD}/build/terraform/" "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
+ln -s "${PWD}/build/$SUBMODULE_DIR/" "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 popd
 
 pushd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
@@ -45,7 +47,7 @@ if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
   TERRAFORM_COMMIT_MSG="Magic Modules changes."
 fi
 
-pushd "build/terraform"
+pushd "build/$SUBMODULE_DIR"
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
@@ -60,4 +62,4 @@ apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT
 popd
 popd
 
-git clone magic-modules-branched/build/terraform ./terraform-generated
+git clone magic-modules-branched/build/$SUBMODULE_DIR ./terraform-generated
