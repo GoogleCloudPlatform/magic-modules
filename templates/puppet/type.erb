@@ -48,10 +48,10 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
 <%=
   lines(format(
     [
-      ["raise \"\#{ref} required property '#{param.out_name}' is missing\"",
+      ["raise \"\#{ref} required paramerty '#{param.out_name}' is missing\"",
        'if reference.nil?'].join(' '),
       [
-        "raise \"\#{ref} required property '#{param.out_name}' is missing\" \\",
+        "raise \"\#{ref} required paramerty '#{param.out_name}' is missing\" \\",
         indent('if reference.nil?', 2)
       ]
     ], 4
@@ -62,6 +62,65 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
     reference.autorequires unless reference.nil?
 <% end # param.required -%>
   end
+
+
+<%
+  unless object.properties.nil?
+    object.properties.each do |prop|
+      if prop.class <= Api::Type::ResourceRef
+        Google::LOGGER.info \
+          "Generating autorequire #{object.name}.#{prop.name}: #{prop.type}"
+-%>
+  autorequire(:<%= prop.out_type -%>) do
+    if self[:ensure] == :present
+      reference = self[:<%= prop.out_name -%>]
+<% if prop.required -%>
+<%=
+  lines(format(
+    [
+      ["raise \"\#{ref} required property '#{prop.out_name}' is missing\"",
+       'if reference.nil?'].join(' '),
+      [
+        "raise \"\#{ref} required property '#{prop.out_name}' is missing\" \\",
+        indent('if reference.nil?', 2)
+      ]
+    ], 6
+  ))
+-%>
+      reference.autorequires
+<% else # prop.required -%>
+      reference.autorequires unless reference.nil?
+<% end # prop.required -%>
+    else
+      []
+    end
+  end
+
+  autobefore(:<%= prop.out_type -%>) do
+    if self[:ensure] == :absent
+      reference = self[:<%= prop.out_name -%>]
+<% if prop.required -%>
+<%=
+  lines(format(
+    [
+      ["raise \"\#{ref} required property '#{prop.out_name}' is missing\"",
+       'if reference.nil?'].join(' '),
+      [
+        "raise \"\#{ref} required property '#{prop.out_name}' is missing\" \\",
+        indent('if reference.nil?', 2)
+      ]
+    ], 6
+  ))
+-%>
+      reference.autorequires
+<% else # prop.required -%>
+      reference.autorequires unless reference.nil?
+<% end # prop.required -%>
+    else
+      []
+    end
+  end
+
 
 <%
       end
