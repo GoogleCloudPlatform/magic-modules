@@ -117,11 +117,6 @@ module Provider
         ))
       end
 
-      def ignore_read_extras
-        @ignore_read_extra ||= []
-        ignore_read_extra
-      end
-
       def substitute_test_paths(config)
         config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
         config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
@@ -129,10 +124,13 @@ module Provider
 
       def validate
         super
+        @ignore_read_extra ||= []
+
         check_property :name, String
         check_property :primary_resource_id, String
-        check_property :vars, Hash
-        check_property :ignore_read_extra, String
+
+        check_optional_property :vars, Hash
+        check_optional_property_list :ignore_read_extra, String
       end
     end
 
