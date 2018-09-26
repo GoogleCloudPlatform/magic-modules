@@ -11,7 +11,7 @@ build/{{repo}}/{{name}}
 {% set chef_submodules = names_as_list('chef', chef_modules).split() %}
 {%
   set all_submodules = puppet_submodules + chef_submodules +
-     (['build/terraform'] if terraform_enabled else []) +
+     (['build/terraform', 'build/terraform-beta'] if terraform_enabled else []) +
      (['build/ansible'] if ansible_enabled else [])
 %}
 {% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
@@ -96,6 +96,11 @@ resources:
       type: git-branch
       source:
           uri: git@github.com:((github-account.username))/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
+    - name: terraform-beta-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/terraform-provider-google-beta.git
           private_key: ((repo-key.private_key))
 {% endif %}
 
@@ -211,6 +216,18 @@ jobs:
               - put: terraform-intermediate
                 params:
                     repository: terraform-generated
+                    branch_file: magic-modules-branched/branchname
+                    only_if_diff: true
+                    force: true
+            - do:
+                # consumes: magic-modules-branched
+                # produces: terraform-beta-generated
+              - task: generate-terraform-beta
+                file: magic-modules-branched/.ci/magic-modules/generate-terraform-beta.yml
+              # Puts 'terraform-beta-generated' into the robot's fork.
+              - put: terraform-beta-intermediate
+                params:
+                    repository: terraform-beta-generated
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
@@ -474,6 +491,13 @@ jobs:
                 # magic-modules PR.  With this 'only_if_diff' feature, if the change to the
                 # magic-modules PR does not require an update to the terraform PR, this will
                 # not push the update even though the commit hashes are different.
+                only_if_diff: true
+                force: true
+            - put: terraform-beta-intermediate
+              params:
+                repository: magic-modules-with-comment/build/terraform-beta
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
           {% endif %}

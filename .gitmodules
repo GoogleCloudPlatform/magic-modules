@@ -72,6 +72,10 @@
 	path = build/terraform
 	url = git@github.com:terraform-providers/terraform-provider-google.git
 	branch = master
+[submodule "build/terraform-beta"]
+	path = build/terraform-beta
+	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
+	branch = master
 [submodule "build/puppet/bigquery"]
 	path = build/puppet/bigquery
 	url = git@github.com:GoogleCloudPlatform/puppet-google-bigquery.git
