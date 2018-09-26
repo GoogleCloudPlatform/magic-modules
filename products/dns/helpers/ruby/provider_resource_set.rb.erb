@@ -73,7 +73,7 @@ end
 
 def get_change_status(change_id, resource)
   change_req = ::Google::<%= product_ns -%>::Network::Get.new(
-    collection(resource, '/{{id}}', id: change_id), fetch_auth(resource)
+    "#{collection(resource)}/#{change_id}", fetch_auth(resource)
   )
   return_if_change_object(change_req.send)['status']
 end
