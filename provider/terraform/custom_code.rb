@@ -119,7 +119,7 @@ module Provider
 
       def ignore_read_extras
         @ignore_read_extra ||= []
-        ignore_read_extra.map(&method(:go_literal))
+        ignore_read_extra
       end
 
       def substitute_test_paths(config)
