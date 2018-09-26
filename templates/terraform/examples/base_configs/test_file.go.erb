@@ -35,7 +35,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				<%- unless ignore_read.empty? -%>
-				ImportStateVerifyIgnore: <%= go_literal_string_array(ignore_read) %>,
+				ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
 				<%- end -%>
 			},
 		},

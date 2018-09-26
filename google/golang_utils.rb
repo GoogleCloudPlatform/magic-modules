@@ -29,19 +29,11 @@ module Google
         "\"#{value}\""
       elsif value.is_a?(Numeric)
         value.to_s
+      elsif value.is_a?(Array) && value.all? { |v| v.is_a?(String) || v.is_a?(Symbol) }
+        "[]string{#{value.map(&method(:go_literal)).join(', ')}}"
       else
         raise "Unsupported go literal #{value}"
       end
-    end
-
-    # Turns an array of strings into an array of string literals.
-    def go_literal_string_array(value)
-      unless value&.select { |v| !(v.is_a?(String) || v.is_a?(Symbol)) }.empty?
-        raise "Unsupported go literal: not an array of strings. #{value}"
-      end
-
-      formatted_body = value.map(&method(:go_literal)).join(', ')
-      "[]string{#{formatted_body}}"
     end
   end
 end
