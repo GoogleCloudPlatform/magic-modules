@@ -26,7 +26,7 @@ module Provider
       prop_map << generate_array_properties(data, properties)
       prop_map << generate_nested_object_properties(data, properties)
       prop_map << generate_resourceref_properties(data, properties)
-      prop_map << generate_namevalues_properties(data, properties)
+      prop_map << generate_keyvaluepairs_properties(data, properties)
       prop_map << generate_enum_properties(data, properties)
 
       generate_property_files(prop_map, data)
@@ -82,8 +82,8 @@ module Provider
     end
     # rubocop:enable Metrics/AbcSize
 
-    def generate_namevalues_properties(data, properties)
-      properties.select { |p| p.is_a?(Api::Type::NameValues) }
+    def generate_keyvaluepairs_properties(data, properties)
+      properties.select { |p| p.is_a?(Api::Type::KeyValuePairs) }
                 .map { |p| generate_simple_property p.type.downcase, data }
     end
 

@@ -22,7 +22,7 @@ module Google
   module <%= product_ns %>
     module Property
       # A Puppet property that holds a string
-      class NameValues < Google::<%= product_ns %>::Property::Base
+      class KeyValuePairs < Google::<%= product_ns %>::Property::Base
         def self.api_munge(value)
           return if value.nil?
           value

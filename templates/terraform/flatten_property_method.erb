@@ -45,7 +45,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     })
   }
   return transformed
-<% elsif string_to_object_map?(property) -%>
+<% elsif property.is_a?(Api::Type::Map) -%>
   if v == nil {
     return v
   }

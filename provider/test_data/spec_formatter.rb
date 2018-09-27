@@ -104,7 +104,7 @@ module Provider
 
       # Emits a name value
       # Should be a standard Hash, unlike other formatters.
-      def emit_namevalues(prop, seed, _ctx)
+      def emit_keyvaluepairs(prop, seed, _ctx)
         @datagen.value(prop.class, prop, seed)
       end
 
@@ -138,7 +138,8 @@ module Provider
             ->(v) { v.map { |e| e } },
           Api::Type::Array::RREF_ARRAY_TYPE =>
             ->(v) { v.call(exported_values: true) },
-          Api::Type::NameValues => ->(v) { v }
+          Api::Type::KeyValuePairs => ->(v) { v },
+          Api::Type::Map => ->(v) { v }
         }.freeze
       end
       # rubocop:enable Metrics/AbcSize

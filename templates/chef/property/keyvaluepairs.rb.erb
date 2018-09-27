@@ -19,9 +19,9 @@
 module Google
   module <%= product_ns %>
     module Property
-      # A class to handle serialization of NameValues items.
-      class NameValues
-<%= emit_coerce(product_ns, 'NameValues', 8) -%>
+      # A class to handle serialization of KeyValuePairs items.
+      class KeyValuePairs
+<%= emit_coerce(product_ns, 'KeyValuePairs', 8) -%>
         def self.api_parse(value)
           value
         end

@@ -65,9 +65,8 @@ objects:
         name: 'createTime'
         description: 'Time of creation'
         output: true
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        value_type: Api::Type::String
         description: |
           The labels associated with this Project.
 

@@ -132,7 +132,8 @@ module Provider
         Api::Type::Time => ->(v) { quote_string(v.iso8601) },
         Api::Type::Array => ->(v) { format_values('[', v, ']') },
         Api::Type::NestedObject => ->(v) { format_values('{', v, '}') },
-        Api::Type::NameValues => ->(v) { format_values('{', v, '}') },
+        Api::Type::KeyValuePairs => ->(v) { format_values('{', v, '}') },
+        Api::Type::Map => ->(v) { format_values('{', v, '}') },
         Api::Type::ResourceRef => ->(v) { quote_string(v) },
         Api::Type::Array::STRING_ARRAY_TYPE =>
           ->(v) { ['[', v.map { |e| quote_string(e) }.join(', '), ']'].join },

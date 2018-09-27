@@ -38,7 +38,6 @@ module Provider
     end
 
     def tf_type(property)
-      return 'schema.TypeSet' if string_to_object_map?(property)
       tf_types[property.class]
     end
 
@@ -57,7 +56,8 @@ module Provider
         Api::Type::ResourceRef => 'schema.TypeString',
         Api::Type::NestedObject => 'schema.TypeList',
         Api::Type::Array => 'schema.TypeList',
-        Api::Type::NameValues => 'schema.TypeMap',
+        Api::Type::KeyValuePairs => 'schema.TypeMap',
+        Api::Type::Map => 'schema.TypeSet',
         Api::Type::Fingerprint => 'schema.TypeString'
       }
     end
@@ -104,7 +104,7 @@ module Provider
       elsif property.is_a?(Api::Type::Array) &&
             property.item_type.is_a?(Api::Type::NestedObject)
         property.item_type.properties
-      elsif string_to_object_map?(property)
+      elsif property.is_a?(Api::Type::Map)
         property.value_type.properties
       else
         []

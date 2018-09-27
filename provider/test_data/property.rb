@@ -36,15 +36,15 @@ module Provider
 
         if prop.class <= Api::Type::ResourceRef
           resourceref_property(prop, value, name_override)
-        elsif prop.class <= Api::Type::NameValues
-          namevalues_property(prop, value, name_override)
+        elsif prop.class <= Api::Type::KeyValuePairs
+          keyvaluepairs_property(prop, value, name_override)
+        elsif prop.class <= Api::Type::Map
+          map_property(prop, value, name_override)
         elsif prop.class <= Api::Type::NestedObject
           nested_property(prop, value, name_override)
         elsif prop.class <= Api::Type::Array \
           && prop.item_type != 'Api::Type::String'
           array_property(prop, value, name_override)
-        elsif prop.class <= Api::Type::NameValues
-          namevalue_property(prop, value, name_override)
         else
           single_property(prop, value, start_indent, name_override)
         end
@@ -130,16 +130,6 @@ module Provider
         ]
       end
 
-      def namevalues_property(prop, _value, name_override)
-        name = name_override || prop.name
-        [
-          '# TODO(nelsonjr): Implement complex namevalues property test.',
-          "# it '#{name}' do",
-          '#   # Add test code here',
-          '# end'
-        ]
-      end
-
       def nested_property(prop, _value, name_override)
         name = name_override || prop.name
         [
@@ -160,10 +150,20 @@ module Provider
         ]
       end
 
-      def namevalue_property(prop, _value, name_override)
+      def keyvaluepairs_property(prop, _value, name_override)
         name = name_override || prop.name
         [
-          '# TODO(alexstephen): Implement name values test.',
+          '# TODO(alexstephen): Implement keyvaluepairs test.',
+          "# it '#{name}' do",
+          '#   # Add test code here',
+          '# end'
+        ]
+      end
+
+      def map_property(prop, _value, name_override)
+        name = name_override || prop.name
+        [
+          '# TODO(alexstephen): Implement map test.',
           "# it '#{name}' do",
           '#   # Add test code here',
           '# end'

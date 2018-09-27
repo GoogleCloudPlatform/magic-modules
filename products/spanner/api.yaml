@@ -79,9 +79,8 @@ objects:
         name: 'nodeCount'
         description: 'The number of nodes allocated to this instance.'
       # 'state' not suitable for state convergeance.
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        value_type: Api::Type::String
         description: |
           Cloud Labels are a flexible and lightweight mechanism for organizing
           cloud resources into groups that reflect a customer's organizational

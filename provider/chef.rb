@@ -76,7 +76,7 @@ module Provider
       end
 
       return "[Hash, ::#{prop.property_type}]" \
-        if prop.is_a? Api::Type::NameValues
+        if prop.is_a?(Api::Type::KeyValuePairs) || prop.is_a?(Api::Type::Map)
 
       return "[String, ::#{prop.property_type}]" \
         if prop.is_a?(Api::Type::Fingerprint)

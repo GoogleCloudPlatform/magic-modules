@@ -83,8 +83,8 @@ module Provider
           else
             [name, formatter(type, emit_resource(prop, seed, ctx))]
           end
-        elsif prop.is_a?(Api::Type::NameValues)
-          [name, formatter(type, emit_namevalues(prop, seed, ctx))]
+        elsif prop.is_a?(Api::Type::KeyValuePairs)
+          [name, formatter(type, emit_keyvaluepairs(prop, seed, ctx))]
         else
           raise "Unknown property type: #{prop.class}"
         end
@@ -133,7 +133,7 @@ module Provider
                        seed % MAX_ARRAY_SIZE)
       end
 
-      def emit_namevalues(prop, seed, _ctx)
+      def emit_keyvaluepairs(prop, seed, _ctx)
         values = @datagen.value(prop.class, prop, seed)
         max_key = values.max_by { |k, _v| k }.first.length
         values.map do |k, v|

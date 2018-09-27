@@ -512,36 +512,42 @@ module Api
       end
     end
 
-    # Represents an array of name=value pairs, and stores its items' type
-    class NameValues < Composite
-      # The fields which can be overridden in provider.yaml.
+    # An array of string -> string key -> value pairs, such as labels.
+    # While this is technically a map, it's split out because it's a much
+    # simpler property to generate and means we can avoid conditional logic
+    # in Map.
+    class KeyValuePairs < Composite
+    end
+
+    # Map from string keys -> nested object entries
+    class Map < Composite
+      # The list of properties (attr_reader) that can be overridden in
+      # <provider>.yaml.
       module Fields
-        attr_reader :key_type
+        # The type definition of the contents of the map.
         attr_reader :value_type
 
-        # Not all providers support the concept of a String->Object map. In
-        # those cases, treat the map as an Array of NestedObjects, in which each
-        # object has an extra property to act as the map key. This attr
-        # represents the name that key should be called in the downstream
-        # schema.
+        # While the API doesn't give keys an explicit name, we specify one
+        # because in Terraform the key has to be a property of the object.
+        #
+        # The name of the key. Used in the Terraform schema as a field name.
         attr_reader :key_name
+
+        # A description of the key's format. Used in Terraform to describe
+        # the field in documentation.
+        attr_reader :key_description
       end
       include Fields
 
       def validate
         super
-        default_value_property :key_type, Api::Type::String.to_s
-        default_value_property :key_name, 'key'
-        check_property :key_type, ::String
         check_property :key_name, ::String
-        raise "Missing 'value_type' on #{object_display_name}" if @value_type.nil?
-        if @value_type.is_a?(NestedObject)
-          @value_type.set_variable(@name, :__name)
-          @value_type.set_variable(@__resource, :__resource)
-          @value_type.set_variable(self, :__parent)
-          @value_type.validate
-        end
-        raise "Invalid type #{@key_type}" unless type?(@key_type)
+        check_optional_property :key_description, ::String
+
+        @value_type.set_variable(@name, :__name)
+        @value_type.set_variable(@__resource, :__resource)
+        @value_type.set_variable(self, :__parent)
+        check_property :value_type, Api::Type::NestedObject
         raise "Invalid type #{@value_type}" unless type?(@value_type)
       end
     end

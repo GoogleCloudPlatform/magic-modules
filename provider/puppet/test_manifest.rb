@@ -121,7 +121,8 @@ module Provider
           ->(v) { ['[', v.map { |e| quote_string(e) }.join(', '), ']'].join },
         Api::Type::Array::RREF_ARRAY_TYPE =>
           ->(v) { ['[', v.call(exported_values: false).join(', '), ']'].join },
-        Api::Type::NameValues => ->(v) { format_values('{', v, '}') }
+        Api::Type::KeyValuePairs => ->(v) { format_values('{', v, '}') },
+        Api::Type::Map => ->(v) { format_values('{', v, '}') }
       }.freeze
     end
     # rubocop:enable Metrics/MethodLength

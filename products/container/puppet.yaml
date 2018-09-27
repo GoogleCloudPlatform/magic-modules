@@ -94,7 +94,7 @@ bolt_tasks:
       end
 properties:
   - array
-  - namevalues
+  - keyvaluepairs
   - enum
   - integer
   - string

@@ -41,7 +41,7 @@ module Provider
         values[for_type].call(property, seed)
       end
 
-      # NameValues and Arrays require a size.
+      # KeyValuePairs and Arrays require a size.
       # This function returns the size of a property of arbitrary size.
       # Use inside_array to manually specify that this object is being created
       # inside of an array (for resourceref counting purposes)
@@ -83,7 +83,7 @@ module Provider
           Api::Type::Array::STRING_ARRAY_TYPE => method(:array_string),
           Api::Type::Array::NESTED_ARRAY_TYPE => method(:array_nested_cb),
           Api::Type::Array::RREF_ARRAY_TYPE => method(:array_rref_cb),
-          Api::Type::NameValues => method(:name_values),
+          Api::Type::KeyValuePairs => method(:key_value_pairs),
           Api::Type::ResourceRef => method(:resource_value),
           Api::Type::NestedObject => method(:nested_value)
         }
@@ -98,7 +98,7 @@ module Provider
           Api::Type::Enum => 'eq',
           Api::Type::FetchedExternal => 'eq',
           Api::Type::Integer => 'eq',
-          Api::Type::NameValues => 'eq',
+          Api::Type::KeyValuePairs => 'eq',
           Api::Type::NestedObject => 'eq',
           Api::Type::ResourceRef => 'eq',
           Api::Type::String => 'eq',
@@ -159,7 +159,7 @@ module Provider
         "'resource(#{name},#{seed})'"
       end
 
-      def name_values(prop, seed)
+      def key_value_pairs(prop, seed)
         size = object_size(prop, seed)
         Hash[(1..size).map do |i|
                [string_value(prop, seed + i),
