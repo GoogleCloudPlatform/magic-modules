@@ -478,7 +478,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         vars:
           route_name: "network-route"
           network_name: "compute-network"
-          subnetwork_name: "compute-subnetwork"
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
