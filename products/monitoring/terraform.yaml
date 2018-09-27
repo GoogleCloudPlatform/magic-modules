@@ -18,9 +18,25 @@ overrides: !ruby/object:Provider::ResourceOverrides
     examples: |
       ### Basic Usage
       ```hcl
-      resource "google_monitoring_alert_policy" "test" {
-        display_name = "Test Policy"
-        conditions = []
+      resource "google_monitoring_alert_policy" "basic" {
+        display_name = "Test Policy Basic"
+        combiner = "OR"
+        conditions = [
+          {
+            display_name = "test condition"
+            condition_threshold {
+              filter = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+              duration = "60s"
+              comparison = "COMPARISON_GT"
+              aggregations = [
+                {
+                  alignment_period = "60s"
+                  per_series_aligner = "ALIGN_RATE"
+                }
+              ]
+            }
+          }
+        ]
       }
       ```
 
@@ -45,8 +61,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      conditions: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_conditions.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/alert_policy.erb
 
@@ -91,5 +105,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_create: templates/terraform/post_create/group.erb
 
 files: !ruby/object:Provider::Config::Files
+  copy:
+    'google/resource_monitoring_alert_policy_test.go':
+      'templates/terraform/tests/resource_monitoring_alert_policy_test.go'
   compile:
     'google/provider_{{product_name}}_gen.go': 'templates/terraform/provider_gen.erb'

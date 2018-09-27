@@ -57,10 +57,10 @@ objects:
           How to combine the results of multiple conditions to
           determine if an incident should be opened.
         values:
-          - :COMBINE_UNSPECIFIED
           - :AND
           - :OR
           - :AND_WITH_MATCHING_RESOURCE
+        required: true
       - !ruby/object:Api::Type::NestedObject
         name: creationRecord
         description: |
@@ -79,6 +79,9 @@ objects:
              The email address of the user making the change.
       - !ruby/object:Api::Type::Boolean
         name: enabled
+        # TODO fix MM to accept default boolean values
+        # default_value: true
+        required: true
         description: |
           Whether or not the policy is enabled. On write, the default
           interpretation if unset is that the policy is enabled. On
@@ -487,6 +490,7 @@ objects:
                        - :REDUCE_PERCENTILE_05
               - !ruby/object:Api::Type::String
                 name: duration
+                required: true
                 description: |
                   The amount of time that a time series must
                   violate the threshold to be considered
@@ -515,7 +519,6 @@ objects:
                   right-hand side. Only COMPARISON_LT and
                   COMPARISON_GT are supported currently.
                 values:
-                  - :COMPARISON_UNSPECIFIED
                   - :COMPARISON_GT
                   - :COMPARISON_GE
                   - :COMPARISON_LT
@@ -703,6 +706,7 @@ objects:
                   in length.
            - !ruby/object:Api::Type::String
              name: displayName
+             required: true
              description: |
                A short name or phrase used to identify the
                condition in dashboards, notifications, and
@@ -711,10 +715,20 @@ objects:
                policy.
         required: true
       - !ruby/object:Api::Type::Array
+        name: 'notificationChannels'
+        description: |
+          Identifies the notification channels to which notifications should be
+          sent when incidents are opened or closed or when new violations occur
+          on an already opened incident. Each element of this array corresponds
+          to the name field in each of the NotificationChannel objects that are
+          returned from the notificationChannels.list method. The syntax of the
+          entries in this field is
+          `projects/[PROJECT_ID]/notificationChannels/[CHANNEL_ID]`
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
         name: 'labels'
         description: 'User-supplied key/value data to be used for organizing AlertPolicy objects.'
         item_type: Api::Type::String
-
 
 
   - !ruby/object:Api::Resource
