@@ -47,7 +47,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_create: templates/terraform/post_create/alert_policy.erb
 
   Group: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
+    exclude: true
     id_format: "{{name}}"
     examples: |
       ### Basic Usage
