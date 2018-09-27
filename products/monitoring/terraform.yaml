@@ -39,24 +39,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ]
       }
       ```
-
-      ### Full Usage
-      ```hcl
-      resource "google_monitoring_alert_policy" "test" {
-        display_name = "Test Policy"
-
-        conditions = [
-          {
-              display_name = "First Condition"
-          }
-        ]
-
-        labels {
-          my_key    = "my_val"
-          other_key = "other_val"
-        }
-      }
-      ```
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_name.erb'
