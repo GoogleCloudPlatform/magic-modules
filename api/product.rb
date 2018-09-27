@@ -91,6 +91,15 @@ module Api
     end
     # rubocop:enable Naming/AccessorMethodName
 
+    def exists_at_version(name)
+      return true if name.nil?
+      @versions.each do |v|
+        return true if v.name == name
+      end
+
+      false
+    end
+
     private
 
     def check_versions
