@@ -41,8 +41,6 @@ module Provider
       # It translates to setting the field to Computed & Optional in the schema.
       attr_reader :default_from_api
 
-      # Names of attributes that can't be set alongside this one
-      attr_reader :conflicts_with
 
       # ===========
       # Custom code
@@ -102,12 +100,10 @@ module Provider
         @is_set ||= false
         @unordered_list ||= false
         @default_from_api ||= false
-        @conflicts_with ||= []
 
         check_property :sensitive, :boolean
         check_property :is_set, :boolean
         check_property :default_from_api, :boolean
-        check_property_list :conflicts_with, ::String
 
         check_optional_property :diff_suppress_func, String
         check_optional_property :state_func, String
