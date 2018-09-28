@@ -10,9 +10,8 @@ class Discovery
   end
 
   def resource(name)
-    DiscoveryObject.new(
-      @results['schemas'][name]
-    )
+    schema = @results['schemas'][name]
+    DiscoveryObject.new(schema)
   end
 
   private
@@ -25,7 +24,11 @@ end
 class DiscoveryObject
   attr_reader :schema
 
-  def initialize(schema, methods)
+  def initialize(schema)
     @schema = schema
+  end
+
+  def exists?
+    !@schema.nil?
   end
 end
