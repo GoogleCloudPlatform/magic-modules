@@ -34,12 +34,14 @@ require 'provider/example'
 require 'provider/puppet'
 require 'provider/puppet/bundle'
 require 'provider/terraform'
+require 'provider/terraform_example'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 product_names = nil
 all_products = false
 output_path = nil
 provider_name = nil
+force_provider = nil
 types_to_generate = []
 version = nil
 
@@ -58,6 +60,9 @@ OptionParser.new do |opt|
   end
   opt.on('-e', '--engine ENGINE', 'Provider ("engine") to build') do |e|
     provider_name = e
+  end
+  opt.on('-f', '--force PROVIDER', 'Force using a non-default provider') do |e|
+    force_provider = e
   end
   opt.on('-t', '--type TYPE[,TYPE...]', Array, 'Types to generate') do |t|
     types_to_generate = t
@@ -111,6 +116,19 @@ product_names.each do |product_name|
   provider_config = Provider::Config.parse(provider_yaml_path, product_api, version)
   pp provider_config if ENV['COMPILER_DEBUG']
 
-  provider = provider_config.provider.new(provider_config, product_api)
+  if force_provider.nil?
+    provider = provider_config.provider.new(provider_config, product_api)
+
+  else
+    override_providers = {
+      "examples" => Provider::TerraformExample
+    }
+
+    provider_class = override_providers[force_provider]
+    raise "Invalid force provider option #{force_provider}" \
+      if provider_class.nil?
+
+    provider = override_providers[force_provider].new(provider_config, product_api)
+  end
   provider.generate output_path, types_to_generate, version
 end
