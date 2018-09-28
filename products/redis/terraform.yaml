@@ -70,6 +70,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       redisVersion: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
       region: !ruby/object:Provider::Terraform::PropertyOverride
+        ignore_read: true
         required: false
         default_from_api: true
       reservedIpRange: !ruby/object:Provider::Terraform::PropertyOverride
