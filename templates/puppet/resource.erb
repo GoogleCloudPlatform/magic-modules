@@ -348,6 +348,7 @@ Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
 <% unless object.exports.nil? -%>
 <%
   exp_list = [
+    'raise "Must fetch before accessing exported values." if @fetched.nil?',
     '{',
     indent_list(object.exported_properties.map do |p|
       if p.is_a?(Api::Type::FetchedExternal)
