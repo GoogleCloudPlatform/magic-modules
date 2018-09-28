@@ -13,8 +13,8 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Provider::ResourceOverrides
   AlertPolicy: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
     id_format: "{{name}}"
+    mutex: alertPolicy/{{project}}
     examples: |
       ### Basic Usage
       ```hcl

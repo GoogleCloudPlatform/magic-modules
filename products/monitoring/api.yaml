@@ -25,18 +25,15 @@ objects:
     base_url: projects/{{project}}/alertPolicies
     self_link: projects/{{project}}/alertPolicies/{{name}}
     update_verb: :PATCH
-    input: true
     description: |
       A description of the conditions under which some aspect of your system is
       considered to be "unhealthy" and the ways to notify people or services
       about this state.
-    exports:
-      - name
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/monitoring/docs/'
-      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/'
+          'https://cloud.google.com/monitoring/alerts/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.alertPolicies'
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -71,9 +68,11 @@ objects:
         properties:
          - !ruby/object:Api::Type::String
            name: mutateTime
+           output: true
            description: |
              When the change occurred.
          - !ruby/object:Api::Type::String
+           output: true
            name: mutatedBy
            description: |
              The email address of the user making the change.
@@ -83,12 +82,7 @@ objects:
         # default_value: true
         required: true
         description: |
-          Whether or not the policy is enabled. On write, the default
-          interpretation if unset is that the policy is enabled. On
-          read, clients should not make any assumption about the state
-          if it has not been populated. The field should always be
-          populated on List and Get operations, unless a field
-          projection has been specified that strips it out.
+          Whether or not the policy is enabled.
       - !ruby/object:Api::Type::Array
         name: 'conditions'
         description: |
@@ -115,11 +109,7 @@ objects:
                   resource or when aggregating streams across
                   all members of a group of resrouces).
                   Multiple aggregations are applied in the
-                  order specified.This field is similar to the
-                  one in the MetricService.ListTimeSeries
-                  request. It is advisable to use the
-                  ListTimeSeries method when debugging this
-                  field.
+                  order specified.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                    - !ruby/object:Api::Type::Enum
@@ -271,10 +261,8 @@ objects:
                   The amount of time that a time series must
                   fail to report new data to be considered
                   failing. Currently, only values that are a
-                  multiple of a minute--e.g. 60, 120, or 300
-                  seconds--are supported. If an invalid value
-                  is given, an error will be returned. The
-                  Duration.nanos field is ignored.
+                  multiple of a minute--e.g. 60s, 120s, or 300s
+                  --are supported.
                 required: true
               - !ruby/object:Api::Type::String
                 name: filter
@@ -294,28 +282,12 @@ objects:
            - !ruby/object:Api::Type::String
              name: name
              description: |
-               Required if the condition exists. The unique
-               resource name for this condition. Its syntax is: p
-               rojects/[PROJECT_ID]/alertPolicies/[POLICY_ID]/con
+               The unique resource name for this condition.
+               Its syntax is: projects/[PROJECT_ID]/alertPolicies/[POLICY_ID]/con
                ditions/[CONDITION_ID] [CONDITION_ID] is assigned
                by Stackdriver Monitoring when the condition is
                created as part of a new or updated alerting
-               policy.When calling the alertPolicies.create
-               method, do not include the name field in the
-               conditions of the requested alerting policy.
-               Stackdriver Monitoring creates the condition
-               identifiers and includes them in the new
-               policy.When calling the alertPolicies.update
-               method to update a policy, including a condition
-               name causes the existing condition to be updated.
-               Conditions without names are added to the updated
-               policy. Existing conditions are deleted if they
-               are not updated.Best practice is to preserve
-               [CONDITION_ID] if you make only small changes,
-               such as those to condition thresholds, durations,
-               or trigger values. Otherwise, treat the change as
-               a new condition and let the existing condition be
-               deleted.
+               policy.
              output: true
            - !ruby/object:Api::Type::NestedObject
              name: conditionThreshold
@@ -716,6 +688,7 @@ objects:
         required: true
       - !ruby/object:Api::Type::Array
         name: 'notificationChannels'
+        # TODO chrisst - turn this into a resource ref
         description: |
           Identifies the notification channels to which notifications should be
           sent when incidents are opened or closed or when new violations occur
@@ -736,23 +709,21 @@ objects:
     base_url: projects/{{project}}/groups
     self_link: projects/{{project}}/groups/{{name}}
     update_verb: :PATCH
-    input: true
     description: |
       The description of a dynamic collection of monitored resources. Each group
       has a filter that is matched against monitored resources and their
       associated metadata. If a group's filter matches an available monitored
       resource, then that resource is a member of that group.
-    exports:
-      - !ruby/object:Api::Type::FetchedExternal
-        name: name
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/monitoring/docs/'
-      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/'
+          'https://cloud.google.com/monitoring/groups/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.groups'
     properties:
       - !ruby/object:Api::Type::String
         name: parentName
+        # TODO chrisst - turn into self-reference if possible.
+        # if not, turn into {groupId} and expand
         description: |
           The name of the group's parent, if it has one. The format is
           "projects/{project_id_or_number}/groups/{group_id}". For
@@ -760,12 +731,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: name
         description: |
-          The name of this group. The format is
-          "projects/{project_id_or_number}/groups/{group_id}". When
-          creating a group, this field is ignored and a new name is
-          created consisting of the project specified in the call to
-          CreateGroup and a unique {group_id} that is generated
-          automatically.
+          A unique identifier for this group. The format is
+          "projects/{project_id_or_number}/groups/{group_id}".
         output: true
       - !ruby/object:Api::Type::Boolean
         name: isCluster
@@ -775,6 +742,7 @@ objects:
           groups that are clusters.
       - !ruby/object:Api::Type::String
         name: displayName
+        required: true
         description: |
           A user-assigned name for this group, used only for display
           purposes.
