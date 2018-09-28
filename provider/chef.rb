@@ -14,6 +14,7 @@
 require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
+require 'provider/chef/config'
 require 'provider/chef/manifest'
 require 'provider/chef/property_override'
 require 'provider/chef/resource_override'
@@ -29,34 +30,6 @@ module Provider
 
     RESERVED_WORDS = %w[deprecated updated].freeze
     TEST_FOLDER = 'recipes'.freeze
-
-    # Settings for the provider
-    class Config < Provider::Config
-      attr_reader :manifest
-      attr_reader :operating_systems
-      # TODO(alexstephen): Convert this to a regular function generator
-      # like Puppet.
-      attr_reader :functions
-
-      def provider
-        Provider::Chef
-      end
-
-      def resource_override
-        Provider::Chef::ResourceOverride
-      end
-
-      def property_override
-        Provider::Chef::PropertyOverride
-      end
-
-      def validate
-        super
-        check_optional_property :manifest, Provider::Chef::Manifest
-        check_property_list \
-          :operating_systems, Provider::Config::OperatingSystem
-      end
-    end
 
     # A custom client side function for Chef
     class Function < Provider::Config::Function

@@ -22,11 +22,6 @@ module Provider
     # Responsible for building out YAML documentation blocks.
     # rubocop:disable Metrics/ModuleLength
     module Documentation
-      # This is not a comprehensive list of unsafe characters.
-      # Ansible's YAML linter is more forgiving than Ruby's.
-      # A more restricted list of unsafe characters allows for more
-      # human readable YAML.
-      UNSAFE_CHARS = %w[: & #].freeze
       # Takes a long string and divides each string into multiple paragraphs,
       # where each paragraph is a properly indented multi-line bullet point.
       #
@@ -147,7 +142,16 @@ module Provider
       def minimal_doc_block(prop, _object, spaces)
         required = prop.required && !prop.default_value ? 'true' : 'false'
         [
-          minimal_yaml(prop, spaces),
+          "#{prop.name.underscore}:",
+          indent(
+            [
+              'description:',
+              # + 8 to compensate for name + description.
+              indent(bullet_lines(prop.description, spaces + 8), 4),
+              (indent(bullet_lines(resourceref_description(prop), spaces + 8), 4) \
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+            ].compact, 4
+          ),
           indent([
             "required: #{required}",
             ("default: #{prop.default_value}" if prop.default_value),
@@ -177,7 +181,14 @@ module Provider
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
         [
-          minimal_yaml(prop, spaces),
+          "#{prop.name}:",
+          indent(
+            [
+              'description:',
+              # + 8 to compensate for name + description.
+              indent(bullet_lines(prop.description, spaces + 8), 4)
+            ], 4
+          ),
           indent([
                    'returned: success',
                    "type: #{type}"
@@ -185,25 +196,21 @@ module Provider
         ]
       end
 
-      # Builds out the minimal YAML block necessary for a property.
-      # This block will need to have additional information appened
-      # at the end.
-      def minimal_yaml(prop, spaces)
-        [
-          "#{prop.name.underscore}:",
-          indent(
-            [
-              'description:',
-              # + 8 to compensate for name + description.
-              indent(bullet_lines(prop.description, spaces + 8), 4)
-            ], 4
-          )
-        ]
-      end
-
       def autogen_notice_contrib
         ['Please read more about how to change this file at',
          'https://www.github.com/GoogleCloudPlatform/magic-modules']
+      end
+
+      def resourceref_description(prop)
+        [
+          "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
+          'It can be specified in two ways.',
+          "You can add `register: name-of-resource` to a #{module_name(prop.resource_ref)} task",
+          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\"",
+          "Alternatively, you can set this #{prop.name.underscore} to a dictionary",
+          "with the #{prop.imports} key",
+          "where the value is the #{prop.imports} of your #{prop.resource_ref.name}"
+        ].join(' ')
       end
     end
     # rubocop:enable Metrics/ModuleLength

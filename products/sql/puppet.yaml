@@ -33,18 +33,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
       # TODO(nelsonjr): Once bugs in the body are resolved remove this override.
       return_if_object: |
         # rubocop:disable Metrics/CyclomaticComplexity
-        def self.return_if_object(response, kind)
+        def self.return_if_object(response, kind, allow_not_found = false)
           raise "Bad response: #{response}" \
             unless response.is_a?(Net::HTTPResponse)
-          return if response.is_a?(Net::HTTPNotFound)
           return if response.is_a?(Net::HTTPNoContent)
+          return if response.is_a?(Net::HTTPNotFound) && allow_not_found
           # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
           # return_if_object once Cloud SQL bug http://b/62635365 is resolved.
           # Currently the API returns 403 for objects that do not exist, even
           # when the user has access to the project. This is being changed to
           # return 404 as it is supposed to be.  Once 404 is the correct
           # response the temporary workaround should be removed.
-          return if response.is_a?(Net::HTTPForbidden)
+          return if response.is_a?(Net::HTTPForbidden) && allow_not_found
           result = JSON.parse(response.body)
           raise_if_errors result, %w[error errors], 'message'
           raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
@@ -60,8 +60,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         end
         # rubocop:enable Metrics/CyclomaticComplexity
 
-        def return_if_object(response, kind)
-          self.class.return_if_object(response, kind)
+        def return_if_object(response, kind, allow_not_found = false)
+          self.class.return_if_object(response, kind, allow_not_found)
         end
   Flag: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true
@@ -75,18 +75,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
       # TODO(nelsonjr): Once bugs in the body are resolved remove this override.
       return_if_object: |
         # rubocop:disable Metrics/CyclomaticComplexity
-        def self.return_if_object(response, kind)
+        def self.return_if_object(response, kind, allow_not_found = false)
           raise "Bad response: #{response}" \
             unless response.is_a?(Net::HTTPResponse)
-          return if response.is_a?(Net::HTTPNotFound)
           return if response.is_a?(Net::HTTPNoContent)
+          return if response.is_a?(Net::HTTPNotFound) && allow_not_found
           # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
           # return_if_object once Cloud SQL Bug http://b/62635365 is resolved.
           # Currently the API returns 403 for objects that do not exist, even
           # when the user has access to the project. This is being changed to
           # return 404 as it is supposed to be.  Once 404 is the correct
           # response the temporary workaround should be removed.
-          return if response.is_a?(Net::HTTPForbidden)
+          return if response.is_a?(Net::HTTPForbidden) && allow_not_found
           result = JSON.parse(response.body)
           raise_if_errors result, %w[error errors], 'message'
           raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
@@ -96,8 +96,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         end
         # rubocop:enable Metrics/CyclomaticComplexity
 
-        def return_if_object(response, kind)
-          self.class.return_if_object(response, kind)
+        def return_if_object(response, kind, allow_not_found = false)
+          self.class.return_if_object(response, kind, allow_not_found)
         end
       resource_to_request_patch: |
         unless @fetched.nil?

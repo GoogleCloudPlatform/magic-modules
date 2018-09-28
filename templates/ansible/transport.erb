@@ -12,16 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<% if object.kind? -%>
-def fetch_resource(module, link, kind):
+<%=
+  method_decl('fetch_resource', ['module', 'link', ('kind' if object.kind?),
+                                 'allow_not_found=True'])
+%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    return return_if_object(module, auth.get(link), kind)
-<% else # object.kind? -%>
-def fetch_resource(module, link):
-    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    return return_if_object(module, auth.get(link))
-
-<% end # object.kind? -%>
+    return <%= method_call('return_if_object', ['module', 'auth.get(link)',
+                                                ('kind' if object.kind?),
+                                                'allow_not_found']) %>
 
 <% unless object.self_link_query.nil? -%>
 

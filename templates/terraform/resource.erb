@@ -21,7 +21,7 @@ package google
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
-    settable_properties = properties.reject(&:output)
+	  settable_properties = properties.reject(&:output).reject(&:url_param_only)
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
     has_project = object.base_url.include?("{{project}}")

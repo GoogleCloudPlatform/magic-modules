@@ -28,6 +28,6 @@ group :test do
   gem 'rspec'
   gem 'rspec-mocks'
   gem 'rspec-puppet'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.52.1'
   gem 'simplecov'
 end
