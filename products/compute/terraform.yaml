@@ -610,8 +610,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
-        conflicts_with:
-        - 'name_prefix'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
       id: !ruby/object:Provider::Terraform::PropertyOverride
