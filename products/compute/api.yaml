@@ -1054,22 +1054,6 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
         required: true
-      - !ruby/object:Api::Type::NameValues
-        name: 'labels'
-        description: |
-          Labels to apply to this address.  A list of key->value pairs.
-        key_type: Api::Type::String
-        value_type: Api::Type::String
-        update_verb: :POST
-        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
-        min_version: beta
-      - !ruby/object:Api::Type::Fingerprint
-        name: 'labelFingerprint'
-        description: |
-          The fingerprint used for optimistic locking of this resource.  Used
-          internally during updates.
-        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
-        update_verb: :POST
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
@@ -1162,6 +1146,8 @@ objects:
           traffic must be of a type appropriate to the target object.
 
           Valid types: HTTP_PROXY, HTTPS_PROXY, SSL_PROXY, TCP_PROXY
+        update_verb: :POST
+        update_url: products/{{product}}/global/forwardingRules/{{name}}/setTarget
   - !ruby/object:Api::Resource
     name: 'HttpHealthCheck'
     kind: 'compute#httpHealthCheck'
@@ -1553,6 +1539,7 @@ objects:
     name: 'Image'
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
+    input: true
     description: |
       Represents an Image resource.
 
@@ -1674,6 +1661,20 @@ objects:
                 features.
               values:
                 - :VIRTIO_SCSI_MULTIQUEUE
+      - !ruby/object:Api::Type::NameValues
+        name: 'labels'
+        description: Labels to apply to this VpnTunnel.
+        key_type: Api::Type::String
+        value_type: Api::Type::String
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+        update_verb: :POST
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
@@ -1988,6 +1989,7 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2118,6 +2120,8 @@ objects:
           group. The group uses this template to create all new instances in the
           managed instance group.
         required: true
+        update_verb: :POST
+        update_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers/{{name}}/setInstanceTemplate
       # kind is internal transport detail
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -2846,6 +2850,7 @@ objects:
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    input: true
     description: |
       Represents a Persistent Disk Snapshot resource.
 
@@ -2967,6 +2972,15 @@ objects:
         name: 'labels'
         description: 'Labels to apply to this snapshot.'
         item_type: Api::Type::String
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
+        update_verb: :POST
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
+        update_verb: :POST
   - !ruby/object:Api::Resource
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
