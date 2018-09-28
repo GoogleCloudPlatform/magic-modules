@@ -71,8 +71,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
     if raw == nil {
-			continue
-		}
+      continue
+    }
 <%       else -%>
   if len(l) == 0 {
     return nil, nil
