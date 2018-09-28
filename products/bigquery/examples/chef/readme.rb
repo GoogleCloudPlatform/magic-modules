@@ -21,11 +21,11 @@
 <% end -%>
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gbigquery_dataset { <%= example_resource_name('example_dataset') -%>:
+gbigquery_dataset <%= example_resource_name('example_dataset') -%> do
   action :create
-  dataset_reference {
+  dataset_reference ({
     dataset_id: 'example_dataset'
-  }
+  })
   project ENV['PROJECT'] # e.g. 'my-test-project'
   credential 'mycred'
-}
+end
