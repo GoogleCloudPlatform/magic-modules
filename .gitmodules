@@ -81,3 +81,6 @@
 [submodule "build/chef/iam"]
 	path = build/chef/iam
 	url = git@github.com:GoogleCloudPlatform/chef-google-iam.git
+[submodule "build/chef/bigquery"]
+	path = build/chef/bigquery
+	url = https://github.com/GoogleCloudPlatform/chef-google-bigquery
