@@ -1,0 +1,13 @@
+resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]["instance_name"] %>"
+  zone = "us-central1-b"
+  file_shares {
+    capacity_gb = 2660
+    name = "share1"
+  }
+  networks {
+    network = "default"
+    modes = ["MODE_IPV4"]
+  }
+  tier = "PREMIUM"
+}
