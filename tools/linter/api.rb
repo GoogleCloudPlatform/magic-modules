@@ -23,7 +23,7 @@ class ProductApi
 
   private
 
-  def get_api
+  def get_api(product_name)
     Api::Compiler.new("products/#{product_name}/api.yaml").run 
   end
 end
