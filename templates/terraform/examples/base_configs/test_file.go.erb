@@ -3,43 +3,43 @@
 package google
 
 import (
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+  "github.com/hashicorp/terraform/helper/acctest"
+  "github.com/hashicorp/terraform/helper/resource"
 )
 <% object.example.each do |example| -%>
 <%
-	# {Compute}{Address}_{addressBasic}
-	test_slug = "#{product}#{resource_name}_#{example.name.camelize}Example"
-	ignore_read = data[:object].all_user_properties
-							   .select(&:ignore_read)
-							   .map { |p| p.name.underscore }
-							   .concat(example.ignore_read_extra)
+  # {Compute}{Address}_{addressBasic}
+  test_slug = "#{product}#{resource_name}_#{example.name.camelize}Example"
+  ignore_read = data[:object].all_user_properties
+                 .select(&:ignore_read)
+                 .map { |p| p.name.underscore }
+                 .concat(example.ignore_read_extra)
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheck<%= "#{product}#{resource_name}" -%>Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
-			},
-			{
-				ResourceName:            "<%= "google_#{product.downcase}_#{resource_name.underscore}" -%>.<%= example.primary_resource_id -%>",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				<%- unless ignore_read.empty? -%>
-				ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
-				<%- end -%>
-			},
-		},
-	})
+  resource.Test(t, resource.TestCase{
+    PreCheck:     func() { testAccPreCheck(t) },
+    Providers:    testAccProviders,
+    CheckDestroy: testAccCheck<%= "#{product}#{resource_name}" -%>Destroy,
+    Steps: []resource.TestStep{
+      {
+        Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
+      },
+      {
+        ResourceName:            "<%= "google_#{product.downcase}_#{resource_name.underscore}" -%>.<%= example.primary_resource_id -%>",
+        ImportState:             true,
+        ImportStateVerify:       true,
+        <%- unless ignore_read.empty? -%>
+        ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
+        <%- end -%>
+      },
+    },
+  })
 }
 
 func testAcc<%= test_slug -%>(val string) string {
