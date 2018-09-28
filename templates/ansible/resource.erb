@@ -199,6 +199,8 @@ def main():
 <%= lines(indent(object.post_create, 12)) -%>
 <% end # ifobject.post_create -%>
             changed = True
+        else:
+            fetch = {}
 
 <% if object.post_action -%>
 <%= lines(indent(object.post_action, 4)) -%>
