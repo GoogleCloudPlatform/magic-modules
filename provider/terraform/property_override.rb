@@ -41,7 +41,6 @@ module Provider
       # It translates to setting the field to Computed & Optional in the schema.
       attr_reader :default_from_api
 
-
       # ===========
       # Custom code
       # ===========
