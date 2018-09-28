@@ -16,6 +16,7 @@ func TestAccMonitoringAlertPolicy_basic(t *testing.T) {
 
 	alertName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 	conditionName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	filter := `metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\"`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -23,7 +24,41 @@ func TestAccMonitoringAlertPolicy_basic(t *testing.T) {
 		CheckDestroy: testAccCheckAlertPolicyDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName),
+				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName, "ALIGN_RATE", filter),
+			},
+			resource.TestStep{
+				ResourceName:      "google_monitoring_alert_policy.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccMonitoringAlertPolicy_update(t *testing.T) {
+
+	alertName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	conditionName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	filter1 := `metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\"`
+	aligner1 := "ALIGN_RATE"
+	filter2 := `metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\"`
+	aligner2 := "ALIGN_MAX"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlertPolicyDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName, aligner1, filter1),
+			},
+			resource.TestStep{
+				ResourceName:      "google_monitoring_alert_policy.basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName, aligner2, filter2),
 			},
 			resource.TestStep{
 				ResourceName:      "google_monitoring_alert_policy.basic",
@@ -83,7 +118,7 @@ func testAccCheckAlertPolicyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccMonitoringAlertPolicy_basic(alertName, conditionName string) string {
+func testAccMonitoringAlertPolicy_basic(alertName, conditionName, aligner, filter string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_alert_policy" "basic" {
   display_name = "%s"
@@ -98,18 +133,18 @@ resource "google_monitoring_alert_policy" "basic" {
         aggregations = [
           {
             alignment_period   = "60s"
-            per_series_aligner = "ALIGN_RATE"
+            per_series_aligner = "%s"
           },
         ]
 
         duration   = "60s"
         comparison = "COMPARISON_GT"
-        filter     = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+        filter     = "%s"
       }
     },
   ]
 }
-`, alertName, conditionName)
+`, alertName, conditionName, aligner, filter)
 }
 
 func testAccMonitoringAlertPolicy_full(alertName, conditionName1, conditionName2 string) string {
