@@ -48,6 +48,7 @@ version = nil
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
 
+# rubocop:disable Metrics/BlockLength
 OptionParser.new do |opt|
   opt.on('-p', '--product PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
     product_names = p
@@ -78,6 +79,7 @@ OptionParser.new do |opt|
     Google::LOGGER.level = Logger::DEBUG
   end
 end.parse!
+# rubocop:enable Metrics/BlockLength
 
 raise 'Cannt use -p/--products and -a/--all simultaneously' if product_names && all_products
 raise 'Either -p/--products OR -a/--all must be present' if product_names.nil? && !all_products
@@ -93,6 +95,7 @@ if all_products
   raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
 end
 
+# rubocop:disable Metrics/BlockLength
 product_names.each do |product_name|
   product_yaml_path = File.join(product_name, 'api.yaml')
   raise "Product '#{product_name}' does not have an api.yaml file" \
@@ -113,7 +116,8 @@ product_names.each do |product_name|
   product_api.validate
   pp product_api if ENV['COMPILER_DEBUG']
 
-  provider_config = Provider::Config.parse(provider_yaml_path, product_api, version)
+  provider_config = \
+    Provider::Config.parse(provider_yaml_path, product_api, version)
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
@@ -121,14 +125,16 @@ product_names.each do |product_name|
 
   else
     override_providers = {
-      "examples" => Provider::TerraformExample
+      'examples' => Provider::TerraformExample
     }
 
     provider_class = override_providers[force_provider]
     raise "Invalid force provider option #{force_provider}" \
       if provider_class.nil?
 
-    provider = override_providers[force_provider].new(provider_config, product_api)
+    provider = \
+      override_providers[force_provider].new(provider_config, product_api)
   end
   provider.generate output_path, types_to_generate, version
 end
+# rubocop:enable Metrics/BlockLength
