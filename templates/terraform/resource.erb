@@ -206,7 +206,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 
-<%  properties.select { |p| !p.ignore_read }.each do |prop| -%>
+<%  properties.reject(&:ignore_read).each do |prop| -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
@@ -479,7 +479,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <% end -%>
 }
 
-<% properties.each do |prop| -%>
+<% properties.reject(&:ignore_read).each do |prop| -%>
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>
 <% end -%>
 
