@@ -80,7 +80,7 @@ To get more information about <%= object.name -%>, see:
 <%= "\n" + object.examples -%>
 
 <% end -%>
-<% unless object.example.nil? -%>
+<% unless object.example.empty? -%>
 ## Example Usage
 
 <% object.example.each do |example| -%>

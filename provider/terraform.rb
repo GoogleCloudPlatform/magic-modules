@@ -148,7 +148,7 @@ module Provider
 
     # rubocop:disable Metrics/AbcSize
     def generate_resource_tests(data)
-      return if data[:object].example.nil?
+      return if data[:object].example.empty?
 
       target_folder = File.join(data[:output_folder], 'google')
       FileUtils.mkpath target_folder
