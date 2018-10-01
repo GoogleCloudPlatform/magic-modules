@@ -7,7 +7,7 @@ data "google_compute_image" "debian_image" {
 	project = "debian-cloud"
 }
 
-resource "google_compute_instance" "foobar" {
+resource "google_compute_instance" "instance_with_ip" {
 	name         = "<%= ctx[:vars]['instance_name'] %>"
 	machine_type = "f1-micro"
 	zone         = "us-central1-a"
