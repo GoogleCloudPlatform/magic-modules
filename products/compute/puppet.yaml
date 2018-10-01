@@ -101,6 +101,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
+  BackendBucketSignedUrlKey: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
   # Deprecated readonly resources
   License: !ruby/object:Provider::Puppet::ResourceOverride
     deprecated: true

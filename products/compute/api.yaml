@@ -189,6 +189,7 @@ objects:
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
     exports:
+      - 'name'
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
     description: |
@@ -209,6 +210,31 @@ objects:
         name: 'bucketName'
         description: 'Cloud Storage bucket name.'
         required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cdnPolicy'
+        description: 'Cloud CDN configuration for this Backend Bucket.'
+        properties:
+        - !ruby/object:Api::Type::Array
+          name: 'signedUrlKeyNames'
+          output: true
+          description: |
+            Names of the keys for signing request URLs.
+            Output only. To change, use the BackendBucketSignedUrlKey
+            resource instead.
+          item_type: Api::Type::String
+        - !ruby/object:Api::Type::Integer
+          name: 'signedUrlCacheMaxAgeSec'
+          default_value: 3600
+          description: |
+            Maximum number of seconds the response to a signed URL request will
+            be considered fresh. Defaults to 1hr (3600s).
+
+            After this time period, the response will be revalidated before
+            being served. When serving responses to signed URL requests,
+            Cloud CDN will internally behave as though
+            all responses from this backend had a "Cache-Control: public,
+            max-age=[TTL]" header, regardless of any existing Cache-Control
+            header. The actual headers served in responses will not be altered.
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -237,6 +263,54 @@ objects:
           last character, which cannot be a dash.
         input: true
         required: true
+  - !ruby/object:Api::Resource
+    name: 'BackendBucketSignedUrlKey'
+    kind: 'compute#backendBucketUrlKey'
+    input: true
+    base_url: projects/{{project}}/global/backendBuckets/{{backend_name}}
+    create_url: projects/{{project}}/global/backendBuckets/{{backend_name}}/addSignedUrlKey
+    create_verb: :POST
+    delete_url: projects/{{project}}/global/backendBuckets/{{backend_name}}/deleteSignedUrlKey?keyName={{name}}
+    delete_verb: :POST
+    self_link: projects/{{project}}/global/backendBuckets/{{backend_name}}
+    description: |
+      Represents a key used to sign Cloud CDN signed URLs for a BackendBucket 
+      resource.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Using Signed URLs': 'https://cloud.google.com/cdn/docs/using-signed-urls/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendBuckets'
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    transport: !ruby/object:Api::Resource::Transport
+      decoder: decode_response
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'backendName'
+        resource: 'BackendBucket'
+        imports: 'name'
+        description: |
+          The backend bucket this signed URL key belongs.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        api_name: 'keyName'
+        description: |
+          Name of the signed URL key. The name must be 1-63 characters long, and
+          comply with RFC1035. Specifically, the name must be 1-63 characters
+          long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+          which means the first character must be a lowercase letter, and all
+          following characters must be a dash, lowercase letter, or digit,
+          except the last character, which cannot be a dash.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'keyValue'
+        description: |
+          128-bit key value used for signing the URL. The key value must be a
+          valid RFC 4648 Section 5 base64url encoded string.
+        required: true
+        input: true
   - !ruby/object:Api::Resource
     name: 'BackendService'
     kind: 'compute#backendService'

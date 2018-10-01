@@ -26,6 +26,7 @@ package google
     api_name_lower[0] = api_name_lower[0].downcase
     has_project = object.base_url.include?("{{project}}")
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
+    add_imports = object.importable
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -38,17 +39,19 @@ func resource<%= resource_name -%>() *schema.Resource {
         Delete: resource<%= resource_name -%>Delete,
 <%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
         CustomizeDiff: customdiff.All(
-<%=         
+<%=
             settable_properties.select { |p| p.unordered_list }
                                .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
                                .join(",\n")
 -%>
         ),
 <%      end -%>
+<% if object.importable -%>
 
         Importer: &schema.ResourceImporter{
             State: resource<%= resource_name -%>Import,
         },
+<% end %>
 
 <%      unless object.async.nil? -%>
         Timeouts: &schema.ResourceTimeout {
@@ -460,6 +463,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     return nil
 }
 
+<% if object.importable -%>
 func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <% if object.custom_code.custom_import -%>
 <%= lines(compile(object.custom_code.custom_import)) -%>
@@ -478,6 +482,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     return []*schema.ResourceData{d}, nil
 <% end -%>
 }
+<% end -%>
 
 <% properties.reject(&:ignore_read).each do |prop| -%>
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>

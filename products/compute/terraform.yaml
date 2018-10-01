@@ -88,6 +88,60 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      cdnPolicy: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        Due to limitations of the API, there are a few unexpected behaviors
+        for `cdn_policy` attributes.
+
+        `cdn_policy.signed_url_key_names` is readonly. Please use the seperate
+        resource type [`google_compute_backend_bucket_signed_url_key`](/docs/providers/google/r/compute_backend_bucket_signed_url_key.html)
+        to actually manage CDN signed URL keys for backend buckets.
+        This attribute may also include unexpected key names or reference
+        different key values if keys have been modified outside of Terraform.
+
+        If `cdn_policy` is omitted, it will be computed from the API value.
+        Whatever value was set for `cdn_policy.signed_url_cache_max_age_sec`
+        prior to removing the cdn_policy will still be in effect. To set
+        `signed_url_cache_max_age_sec` back to default, leave a empty
+        `cdn_policy { }` in your config.
+  BackendBucketSignedUrlKey: !ruby/object:Provider::Terraform::ResourceOverride
+    importable: false
+    examples: |
+      ```hcl
+      resource "google_compute_backend_bucket_signed_url_key" "image_signed_url_key" {
+        name         = "my-key"
+        key_value    = "..."
+        backend_name = "${google_compute_backend_bucket.image_backend.name}"
+      }
+
+      resource "google_compute_backend_bucket" "image_backend" {
+        name        = "image-backend-bucket"
+        description = "Contains beautiful images"
+        bucket_name = "${google_storage_bucket.image_bucket.name}"
+        enable_cdn  = true
+      }
+
+      resource "google_storage_bucket" "image_bucket" {
+        name     = "image-store-bucket"
+        location = "EU"
+      }
+      ```
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      keyValue: !ruby/object:Provider::Terraform::PropertyOverride
+        sensitive: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/backend_bucket_signed_url_key.go.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+       All arguments including the key's value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        However, because the API does not return the sensitive key value,
+        we cannot confirm if a key has been changed outside of Terraform.
   BackendService: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
@@ -1145,6 +1199,10 @@ files: !ruby/object:Provider::Config::Files
       'templates/terraform/tests/resource_compute_address_test.go'
     'google/resource_compute_autoscaler_test.go':
       'templates/terraform/tests/resource_compute_autoscaler_test.go'
+    'google/resource_compute_backend_bucket_signed_url_key_test.go':
+      'templates/terraform/tests/resource_compute_backend_bucket_signed_url_key_test.go'
+    'google/resource_compute_backend_bucket_test.go':
+      'templates/terraform/tests/resource_compute_backend_bucket_test.go'
     'google/resource_compute_firewall_test.go':
       'templates/terraform/tests/resource_compute_firewall_test.go'
     'google/resource_compute_global_address_test.go':

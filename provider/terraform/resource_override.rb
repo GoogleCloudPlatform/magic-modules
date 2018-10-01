@@ -24,6 +24,7 @@ module Provider
       # For instance, `{{name}}` means the id will be the resource name.
       attr_reader :id_format
       attr_reader :import_format
+      attr_reader :importable
       attr_reader :custom_code
       attr_reader :docs
 
@@ -52,15 +53,16 @@ module Provider
         @import_format ||= []
         @custom_code ||= Provider::Terraform::CustomCode.new
         @docs ||= Provider::Terraform::Docs.new
+        @importable = true if @importable.nil?
 
         check_property :id_format, String
-
         check_optional_property :examples, String
         check_optional_property :example, Array
 
         check_optional_property :custom_code, Provider::Terraform::CustomCode
         check_optional_property :docs, Provider::Terraform::Docs
         check_property :import_format, Array
+        check_property :importable, :boolean
       end
 
       def apply(resource)

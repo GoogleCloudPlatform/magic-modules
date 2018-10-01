@@ -1,0 +1,35 @@
+config := meta.(*Config)
+
+if _, ok := res["name"]; !ok {
+	return nil, errors.New("could not get owner backend of signed URL keys, invalid name")
+}
+
+policyRaw, ok := res["cdnPolicy"]
+if !ok {
+	return nil, nil
+}
+
+policy := policyRaw.(map[string]interface{})
+keyNames, ok := policy["signedUrlKeyNames"]
+if !ok {
+	return nil, nil
+}
+
+// Because the sensitive key value is not returned, all we can do is verify a
+// key with this name exists and assume the same key value.
+keyName := d.Get("name").(string)
+project, err := getProject(d, config)
+if err != nil {
+	return nil, err
+}
+for _, kName := range keyNames.([]interface{}) {
+	if keyName == kName.(string) {
+		return map[string]interface{}{
+			"keyName":     keyName,
+			"backendName": res["name"],
+			"keyValue":    d.Get("key_value"),
+			"project":     project,
+		}, nil
+	}
+}
+return nil, nil
