@@ -32,6 +32,14 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
+<%
+  beta_version = object.__product.version_obj('beta')
+  if object.min_version == beta_version
+-%>
+  Deprecated: "This resource is in beta and will be removed from this provider. Use terraform-provider-google-beta to continue using it.",
+<% elsif property.min_version == beta_version -%>
+  Deprecated: "This field is in beta and will be removed from this provider. Use terraform-provider-google-beta to continue using it.",
+<% end -%>
 <% unless property.validation.nil? || property.output -%>
 	<% if !property.validation.regex.nil? -%>
   ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
