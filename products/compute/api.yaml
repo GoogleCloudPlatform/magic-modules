@@ -2282,9 +2282,14 @@ objects:
     name: 'Network'
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
+    update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
       Represents a Network resource.
 
@@ -2308,6 +2313,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        input: true
       - !ruby/object:Api::Type::String
         name: 'gateway_ipv4'
         description: |
@@ -2315,6 +2321,7 @@ objects:
           read only and is selected by the Google Compute Engine, typically as
           the first usable address in the IPv4Range.
         api_name: 'gatewayIPv4'
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2326,6 +2333,7 @@ objects:
           range is a CIDR specification, for example: 192.168.0.0/16. Provided
           by the client when the network is created.
         api_name: 'IPv4Range'
+        input: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2336,6 +2344,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       - !ruby/object:Api::Type::Array
         # TODO: Change subnetworks to ResourceRef
         name: 'subnetworks'
@@ -2353,10 +2363,33 @@ objects:
           In "auto subnet mode", a newly created network is assigned the default
           CIDR of 10.128.0.0/9 and it automatically creates one subnetwork per
           region.
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'routingConfig'
+        description: |
+          The network-level routing configuration for this network. Used by Cloud
+          Router to determine what type of network-wide routing behavior to
+          enforce.
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'routingMode'
+            required: true
+            description: |
+              The network-wide routing mode to use. If set to REGIONAL, this
+              network's cloud routers will only advertise routes with subnetworks
+              of this network in the same region as the router. If set to GLOBAL,
+              this network's cloud routers will advertise routes with all
+              subnetworks of this network, across regions.
+            values:
+              - :REGIONAL
+              - :GLOBAL
   - !ruby/object:Api::Resource
     name: 'Region'
     kind: 'compute#region'
