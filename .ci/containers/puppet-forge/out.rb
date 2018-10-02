@@ -17,14 +17,13 @@ require 'puppet_blacksmith'
 require 'json'
 
 config = JSON.parse(STDIN.read)
-unless config['source'].key? 'module_name'
-  raise 'You need to define `module_name`'
-end
-raise 'This is being called without an output directory.' if ARGV.empty?
+
+raise 'You need to define `module_name`' unless config['source'].key? 'module_name'
+raise 'Define the source repo.' unless config['params'].key? 'repo'
 
 module_name = config['source']['module_name']
 release = PuppetForge::Module.find(module_name).releases.first.version
-major, minor, patch = release.split('.')
+major, minor, patch = release.split('.').map(&:to_i)
 
 if major.nil? || minor.nil? || patch.nil?
   raise "Cowardly refusing to work with non-semver release ID #{release}"
@@ -37,7 +36,8 @@ else
   minor += 1
 end
 
-output_folder = ARGV[0]
+input_folder = ARGV[0]
+output_folder = input_folder + '/' + config['params']['repo']
 metadata = JSON.parse(File.open(File.join(output_folder, 'metadata.json')).read)
 unless metadata['name'] == module_name
   raise "Cowardly refusing to push #{metadata['name']} to #{module_name}"
@@ -47,11 +47,11 @@ File.write(File.join(output_folder, 'metadata.json'), JSON.dump(metadata))
 
 Dir.chdir(output_folder) { %x(puppet module build) }
 
-Blacksmith::Forge.initialize(config['source']['username'],
-                             config['source']['password'])
-Blacksmith::Forge.push!(metadata['name'].split('-').last,
-                        File.join(output_folder,
-                                  'pkg',
-                                  "#{metadata['name']}-#{metadata['version']}" \
-                                  '.tar.gz'))
+forge = Blacksmith::Forge.new(config['source']['username'],
+                              config['source']['password'])
+forge.push!(metadata['name'].split('-').last,
+            File.join(output_folder,
+                      'pkg',
+                      "#{metadata['name']}-#{metadata['version']}" \
+                      '.tar.gz'))
 puts JSON.dump('version' => { 'release' => metadata['version'] })

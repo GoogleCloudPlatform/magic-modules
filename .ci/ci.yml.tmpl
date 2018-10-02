@@ -58,6 +58,12 @@ resource_types:
       source:
         repository: frodenas/gcs-resource
 
+    - name: puppet-forge
+      type: docker-image
+      source:
+        repository: nmckinley/concourse-puppet-forge-resource
+        tag: v0.0.9
+
 resources:
     - name: magic-modules
       type: git-branch
@@ -113,7 +119,27 @@ resources:
         uri: git@github.com:((github-account.username))/puppet-google-{{module}}.git
 {% endif %}
         private_key: ((repo-key.private_key))
+
+{% if module != "bigquery" %}
+    - name: puppet-{{module}}-forge
+      type: puppet-forge
+      source:
+        username: ((puppet-forge.username))
+        password: ((puppet-forge.password))
+{% if module == '_bundle' %}
+        module_name: google-cloud
+{% else %}
+        module_name: google-g{{module}}
+{% endif %}
+{% endif %}
 {% endfor %}
+
+    - name: puppet-logging-forge
+      type: puppet-forge
+      source:
+        username: ((puppet-forge.username))
+        password: ((puppet-forge.password))
+        module_name: google-glogging
 
 {% for module in chef_modules %}
     - name: chef-{{module}}-intermediate
@@ -159,6 +185,56 @@ resources:
         location: America/Los_Angeles
 
 jobs:
+    - name: test-puppet
+      plan:
+        - get: magic-modules
+          resource: magic-modules-gcp
+        - get: night-trigger
+          trigger: true
+        - aggregate:
+          {% for module in puppet_modules %}
+          {% if module != "bigquery" %}
+          - task: test-{{module}}
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: {{module}}
+            {%- if puppet_test_excludes.get(module) %}
+              EXCLUDE_PATTERN: {{','.join(puppet_test_excludes[module])}}
+            {%- endif %}
+          {% endif %}
+          {% endfor %}
+
+    - name: release-puppet-patch
+      plan:
+        - get: magic-modules-gcp
+          passed: ['test-puppet']
+          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
+          trigger: false
+        {% for module in puppet_modules + ["logging"]  %}
+          {% if module != "bigquery" %}
+        - put: puppet-{{module}}-forge
+          params:
+            patch_bump: true
+            repo: magic-modules-gcp/build/puppet/{{module}}
+          {% endif %}
+        {% endfor %}
+
+    - name: release-puppet-minor
+      plan:
+        - get: magic-modules-gcp
+          passed: ['test-puppet']
+          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
+          trigger: false
+        {% for module in puppet_modules + ["logging"] %}
+          {% if module != "bigquery" %}
+        - put: puppet-{{module}}-forge
+          params:
+            patch_bump: false
+            repo: magic-modules-gcp/build/puppet/{{module}}
+          {% endif %}
+        {% endfor %}
+
     - name: authorize-single-rev
       plan:
           - get: magic-modules-external-prs
@@ -535,6 +611,8 @@ jobs:
           # TODO(ndmckinley): This will work to update the magic-modules PR *if* the original PR
           # was opened from the magic-modules repository.  That's not always going to be
           # true - figure out what to do if, for instance, we can't modify the PR.
+          # Update: right now, we just require everyone to push to the GCP repo.  That's not
+          # been a problem yet.
           - put: magic-modules-gcp
             params:
                 repository: mm-output
