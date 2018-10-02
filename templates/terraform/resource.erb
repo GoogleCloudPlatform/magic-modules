@@ -1,4 +1,4 @@
-<% if false # the license inside this if block pertains to this file -%>
+<%- # the license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <%= lines(autogen_notice :go) -%>
 
 package google
@@ -21,7 +21,7 @@ package google
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
-    settable_properties = properties.reject(&:output)
+	  settable_properties = properties.reject(&:output).reject(&:url_param_only)
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
     has_project = object.base_url.include?("{{project}}")
@@ -206,7 +206,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 
-<%  properties.select { |p| !p.ignore_read }.each do |prop| -%>
+<%  properties.reject(&:ignore_read).each do |prop| -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
@@ -479,7 +479,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <% end -%>
 }
 
-<% properties.each do |prop| -%>
+<% properties.reject(&:ignore_read).each do |prop| -%>
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>
 <% end -%>
 

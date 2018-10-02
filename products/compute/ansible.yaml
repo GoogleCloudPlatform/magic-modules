@@ -133,17 +133,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Firewall: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       denied: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
       destinationRanges: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
       direction: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
       priority: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
       sourceServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
       targetServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       target: !ruby/object:Provider::Ansible::PropertyOverride
@@ -233,7 +233,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       instances: !ruby/object:Provider::Ansible::PropertyOverride
-        version_added: '2.7'
+        version_added: '2.8'
         exclude: false
     update: |
       instance = InstanceLogic(module)
@@ -253,6 +253,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
+  Network: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      routingConfig: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       description: !ruby/object:Provider::Ansible::PropertyOverride

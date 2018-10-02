@@ -36,24 +36,28 @@ require 'provider/puppet/bundle'
 require 'provider/terraform'
 require 'pp' if ENV['COMPILER_DEBUG']
 
-catalog = nil
-output = nil
-provider = nil
+product_names = nil
+all_products = false
+output_path = nil
+provider_name = nil
 types_to_generate = []
 version = nil
 
 ARGV << '-h' if ARGV.empty?
-Google::LOGGER.level = Logger::WARN
+Google::LOGGER.level = Logger::INFO
 
 OptionParser.new do |opt|
-  opt.on('-p', '--product PRODUCT', 'Folder with product catalog') do |p|
-    catalog = p
+  opt.on('-p', '--product PRODUCT', Array, 'Folder[,Folder...] with product catalog') do |p|
+    product_names = p
+  end
+  opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
+    all_products = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
-    output = o
+    output_path = o
   end
-  opt.on('-e', '--engine ENGINE', 'Technology to build for') do |e|
-    provider = "#{e}.yaml"
+  opt.on('-e', '--engine ENGINE', 'Provider ("engine") to build') do |e|
+    provider_name = e
   end
   opt.on('-t', '--type TYPE[,TYPE...]', Array, 'Types to generate') do |t|
     types_to_generate = t
@@ -66,31 +70,47 @@ OptionParser.new do |opt|
     exit
   end
   opt.on('-d', '--debug', 'Show all debug logs') do |_debug|
-    Google::LOGGER.level = Logger::INFO
+    Google::LOGGER.level = Logger::DEBUG
   end
 end.parse!
 
-raise 'Option -p/--product is a required parameter' if catalog.nil?
-raise 'Option -o/--output is a required parameter' if output.nil?
-raise 'Option -e/--engine is a required parameter' if provider.nil?
+raise 'Cannt use -p/--products and -a/--all simultaneously' if product_names && all_products
+raise 'Either -p/--products OR -a/--all must be present' if product_names.nil? && !all_products
+raise 'Option -o/--output is a required parameter' if output_path.nil?
+raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
-raise "Product '#{catalog}' does not have api.yaml" \
-  unless File.exist?(File.join(catalog, 'api.yaml'))
-raise "Product '#{catalog}' does not have #{provider} settings" \
-  unless File.exist?(File.join(catalog, provider))
+if all_products
+  product_names = []
+  Dir["products/**/#{provider_name}.yaml"].each do |file_path|
+    product_names.push(File.dirname(file_path))
+  end
 
-raise "Output '#{output}' is not a directory" unless Dir.exist?(output)
+  raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
+end
 
-Google::LOGGER.info "Compiling '#{catalog}' output to '#{output}'"
-Google::LOGGER.info \
-  "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
+product_names.each do |product_name|
+  product_yaml_path = File.join(product_name, 'api.yaml')
+  raise "Product '#{product_name}' does not have an api.yaml file" \
+    unless File.exist?(product_yaml_path)
 
-api = Api::Compiler.new(File.join(catalog, 'api.yaml')).run
-api.validate
-pp api if ENV['COMPILER_DEBUG']
+  provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
+  raise "Product '#{product_name}' does not have a #{provider_name}.yaml file" \
+    unless File.exist?(provider_yaml_path)
 
-config = Provider::Config.parse(File.join(catalog, provider), api, version)
-pp config if ENV['COMPILER_DEBUG']
+  raise "Output path '#{output_path}' does not exist or is not a directory" \
+    unless Dir.exist?(output_path)
 
-provider = config.provider.new(config, api)
-provider.generate output, types_to_generate, version
+  Google::LOGGER.info "Compiling '#{product_name}' output to '#{output_path}'"
+  Google::LOGGER.info \
+    "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
+
+  product_api = Api::Compiler.new(product_yaml_path).run
+  product_api.validate
+  pp product_api if ENV['COMPILER_DEBUG']
+
+  provider_config = Provider::Config.parse(provider_yaml_path, product_api, version)
+  pp provider_config if ENV['COMPILER_DEBUG']
+
+  provider = provider_config.provider.new(provider_config, product_api)
+  provider.generate output_path, types_to_generate, version
+end

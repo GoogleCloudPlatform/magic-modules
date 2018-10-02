@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<%# The license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <% if name != "README.md" -%>
 <%= compile 'templates/license.erb' -%>
 
@@ -46,15 +46,6 @@ gcompute_network { <%= example_resource_name('default') -%>:
 }
 
 gcompute_region { 'us-central1':
-  project    => $project, # e.g. 'my-test-project'
-  credential => 'mycred',
-}
-
-# Defines the machine type to be used by the VM. This definition is required
-# only once per catalog as it is shared to any objects that use the
-# 'n1-standard-1' defined below.
-gcompute_machine_type { 'n1-standard-1':
-  zone       => 'us-central1-a',
   project    => $project, # e.g. 'my-test-project'
   credential => 'mycred',
 }

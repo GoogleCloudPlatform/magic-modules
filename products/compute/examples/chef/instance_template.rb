@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<%# The license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <% if name != 'README.md' -%>
 
 <%= compile 'templates/license.erb' -%>
@@ -19,19 +19,6 @@
 <%= lines(autogen_notice :chef) -%>
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
-
-gcompute_zone 'us-west1-a' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_machine_type 'n1-standard-1' do
-  action :create
-  zone 'us-west1-a'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
 
 # TODO(nelsonjr): Reactiveate example based on disk once http://b/66871792 is
 # resolved.
@@ -57,10 +44,9 @@ end
 # Power Tips:
 #   1) Remember to define the resources needed to allocate the VM:
 #      a) gcompute_disk_type (to be used in 'diskType' property)
-#      b) gcompute_machine_type (to be used in 'machine_type' property)
-#      c) gcompute_network (to be used in 'network_interfaces' property)
-#      d) gcompute_subnetwork (to be used in the 'subnetwork' property)
-#      e) gcompute_disk (to be used in the 'sourceDisk' property)
+#      b) gcompute_network (to be used in 'network_interfaces' property)
+#      c) gcompute_subnetwork (to be used in the 'subnetwork' property)
+#      d) gcompute_disk (to be used in the 'sourceDisk' property)
 #   2) Don't forget to define a source_image for the OS of the boot disk
 <% end -%>
 <% res_name = example_resource_name('instance-template-test') -%>

@@ -29,9 +29,35 @@ module Provider
     EXAMPLE_DEFAULTS = {
       name: 'test_object',
       project: 'test_project',
-      auth_kind: 'service_account',
+      auth_kind: 'serviceaccount',
       service_account_file: '/tmp/auth.pem'
     }.freeze
+
+    # Finds a list of wanted parameters and grabs
+    # the handwritten values of those parameters
+    # from the handwritten example.
+    module HandwrittenValuesFromExample
+      def handwritten_example
+        @__example.task.code
+      end
+
+      # Returns all URI properties minus those ignored.
+      def uri_properties(object, ignored_props = [])
+        object.uri_properties
+              .map(&:name)
+              .reject { |x| ignored_props.include? x }
+      end
+
+      # Grab handwritten values for a set of properties.
+      # Returns a hash where { parameter_name => handwritten_value }
+      def handwritten_vals_for_properties(object, properties)
+        object.all_user_properties
+              .map(&:name)
+              .select { |para| properties.include? para }
+              .map { |para| { para => handwritten_example[para] } }
+              .reduce({}, :merge)
+      end
+    end
 
     # Examples are used to generate the EXAMPLES block of Ansible documentation
     # and the integration tests.
@@ -183,6 +209,7 @@ module Provider
 
       attr_reader :__example
       include Compile::Core
+      include Provider::Ansible::HandwrittenValuesFromExample
 
       def validate
         @failure ||= FailureCondition.new
@@ -206,15 +233,14 @@ module Provider
         sample_code = @__example.task.code
         ignored_props = %w[project name]
 
-        url_parts = object.uri_properties
-                          .map(&:name)
-                          .reject { |x| ignored_props.include? x }
         # Grab all code values for parameters
-        object.all_user_properties
-              .map(&:name)
-              .select { |para| url_parts.include? para }
-              .map { |para| { para => sample_code[para] } }
-              .reduce({}, :merge)
+        parameters = handwritten_vals_for_properties(object,
+                                                     uri_properties(object, ignored_props))
+
+        # Grab values for filters.
+        underscore_name = object.facts.filter.name.underscore
+        parameters[underscore_name] = sample_code[underscore_name] if sample_code[underscore_name]
+        parameters.compact
       end
 
       def name_parameter
@@ -292,6 +318,8 @@ module Provider
 
       attr_reader :__example
 
+      include Provider::Ansible::HandwrittenValuesFromExample
+
       def validate; end
 
       def build_test(state, object, noop = false)
@@ -313,20 +341,20 @@ module Provider
       private
 
       def build_code(object, hash)
-        sample_code = @__example.task.code
+        return '' unless handwritten_example
+
         ignored_props = %w[project name]
+        code = handwritten_vals_for_properties(object,
+                                               uri_properties(object, ignored_props))
 
-        url_parts = object.uri_properties
-                          .map(&:name)
-                          .reject { |x| ignored_props.include? x }
-        # Grab all code values for parameters
-        code = object.all_user_properties
-                     .map(&:name)
-                     .select { |para| url_parts.include? para }
-                     .map { |para| { para => sample_code[para] } }
-                     .reduce({}, :merge)
-
-        code['filters'] = ["name = #{hash[:name]}"]
+        if object.facts.has_filters
+          if object.facts.filter.gce?
+            code['filters'] = ["name = #{hash[:name]}"]
+          else
+            underscore_name = object.facts.filter.name.underscore
+            code[underscore_name] = handwritten_example[underscore_name]
+          end
+        end
         hash.each { |k, v| code[k.to_s] = v unless k == :name }
         code
       end

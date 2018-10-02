@@ -33,10 +33,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
     handlers: !ruby/object:Provider::Puppet::Handlers
       return_if_object: |
         # rubocop:disable Metrics/CyclomaticComplexity
-        def self.return_if_object(response)
+        def self.return_if_object(response, allow_not_found = false)
           raise "Bad response: #{response}" \
             unless response.is_a?(Net::HTTPResponse)
-          return if response.is_a?(Net::HTTPNotFound)
+          return if response.is_a?(Net::HTTPNotFound) && allow_not_found
           return if response.is_a?(Net::HTTPNoContent)
           # TODO(nelsonjr): Remove return of Net::HTTPForbidden from
           # return_if_object once Cloud SQL bug http://b/62635365 is resolved.
@@ -44,7 +44,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           # when the user has access to the project. This is being changed to
           # return 404 as it is supposed to be.  Once 404 is the correct
           # response the temporary workaround should be removed.
-          return if response.is_a?(Net::HTTPForbidden)
+          return if response.is_a?(Net::HTTPForbidden) && allow_not_found
           result = JSON.parse(response.body)
           raise_if_errors result, %w[error errors], 'message'
           raise "Bad response: #{response}" unless response.is_a?(Net::HTTPOK)
@@ -52,8 +52,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         end
         # rubocop:enable Metrics/CyclomaticComplexity
 
-        def return_if_object(response)
-          self.class.return_if_object(response)
+        def return_if_object(response, allow_not_found = false)
+          self.class.return_if_object(response, allow_not_found)
         end
 examples: !ruby/object:Api::Resource::HashArray
   Project:

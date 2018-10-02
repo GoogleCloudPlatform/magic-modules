@@ -1088,6 +1088,48 @@ objects:
         description: |
           A reference to the region where the regional address resides.
         output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'prefixLength'
+        description: |
+          The prefix length of the IP range. If not present, it means the
+          address field is a single IP address.
+          
+          This field is not applicable to addresses with addressType=EXTERNAL.
+        min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: 'addressType'
+        description: |
+          The type of the address to reserve, default is EXTERNAL.
+
+          * EXTERNAL indicates public/external single IP address.
+          * INTERNAL indicates internal IP ranges belonging to some network.
+        values:
+        - :EXTERNAL
+        - :INTERNAL
+        default_value: :EXTERNAL
+        min_version: beta
+      - !ruby/object:Api::Type::Enum
+        name: 'purpose'
+        description: |
+          The purpose of the resource. For global internal addresses it can be
+          
+          * VPC_PEERING - for peer networks
+
+          This should only be set when using an Internal address.
+        values:
+        - :VPC_PEERING
+        min_version: beta
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          The URL of the network in which to reserve the IP range. The IP range
+          must be in RFC1918 space. The network cannot be deleted if there are
+          any reserved IP ranges referring to it.
+
+          This should only be set when using an Internal address.
+        min_version: beta
       # status is not useful for state convergence
       # users[] is not useful for state convergence
   - !ruby/object:Api::Resource
@@ -2240,9 +2282,14 @@ objects:
     name: 'Network'
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
+    update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
       Represents a Network resource.
 
@@ -2266,6 +2313,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        input: true
       - !ruby/object:Api::Type::String
         name: 'gateway_ipv4'
         description: |
@@ -2273,6 +2321,7 @@ objects:
           read only and is selected by the Google Compute Engine, typically as
           the first usable address in the IPv4Range.
         api_name: 'gatewayIPv4'
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2284,6 +2333,7 @@ objects:
           range is a CIDR specification, for example: 192.168.0.0/16. Provided
           by the client when the network is created.
         api_name: 'IPv4Range'
+        input: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2294,6 +2344,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       - !ruby/object:Api::Type::Array
         # TODO: Change subnetworks to ResourceRef
         name: 'subnetworks'
@@ -2311,10 +2363,33 @@ objects:
           In "auto subnet mode", a newly created network is assigned the default
           CIDR of 10.128.0.0/9 and it automatically creates one subnetwork per
           region.
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'routingConfig'
+        description: |
+          The network-level routing configuration for this network. Used by Cloud
+          Router to determine what type of network-wide routing behavior to
+          enforce.
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'routingMode'
+            required: true
+            description: |
+              The network-wide routing mode to use. If set to REGIONAL, this
+              network's cloud routers will only advertise routes with subnetworks
+              of this network in the same region as the router. If set to GLOBAL,
+              this network's cloud routers will advertise routes with all
+              subnetworks of this network, across regions.
+            values:
+              - :REGIONAL
+              - :GLOBAL
   - !ruby/object:Api::Resource
     name: 'Region'
     kind: 'compute#region'
@@ -2893,13 +2968,18 @@ objects:
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/global/sslCertificates
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
     description: |
-      An SslCertificate resource. This resource provides a mechanism to upload
-      an SSL key and certificate to the load balancer to serve secure
-      connections from the user.
+      An SslCertificate resource, used for HTTPS load balancing. This resource
+      provides a mechanism to upload an SSL key and certificate to
+      the load balancer to serve secure connections from the user.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -2908,6 +2988,7 @@ objects:
           The certificate in PEM format.
           The certificate chain must be no greater than 5 certs long.
           The chain must include at least one intermediate cert.
+        required: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -2931,7 +3012,8 @@ objects:
           character, which cannot be a dash.
       - !ruby/object:Api::Type::String
         name: 'privateKey'
-        description: 'The private key in PEM format.'
+        description: 'The write-only private key in PEM format.'
+        required: true
         input: true
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
@@ -3868,11 +3950,12 @@ objects:
         imports: 'selfLink'
         input: true
         required: true
-      # TODO(ndmckinley): Make this a resource refefence
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'router'
         description: |
           URL of router resource to be used for dynamic routing.
+        resource: 'Router'
+        imports: 'selfLink'
         input: true
       - !ruby/object:Api::Type::String
         name: 'peerIp'

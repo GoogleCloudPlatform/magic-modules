@@ -1,4 +1,3 @@
-<% if false # the license inside this if block assertains to this file -%>
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,25 +10,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
-<% unless name == 'README.md' -%>
 
-<%= compile 'templates/license.erb' -%>
+require 'provider/config'
+require 'provider/core'
 
-<%= lines(autogen_notice :chef) -%>
+module Provider
+  module Ansible
+    # Settings for the Ansible provider
+    class Config < Provider::Config
+      attr_reader :manifest
 
-<%= compile 'templates/chef/example~auth.rb.erb' -%>
+      def provider
+        Provider::Ansible::Core
+      end
 
-gcompute_zone 'us-west1-a' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
+      def resource_override
+        Provider::Ansible::ResourceOverride
+      end
 
-<% end -%>
-gcompute_machine_type 'n1-standard-1' do
-  action :create
-  zone 'us-west1-a'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
+      def property_override
+        Provider::Ansible::PropertyOverride
+      end
+
+      def validate
+        super
+        check_optional_property :manifest, Provider::Ansible::Manifest
+      end
+    end
+  end
 end

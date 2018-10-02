@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<%# The license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <% unless name == 'README.md' -%>
 
 <%= compile 'templates/license.erb' -%>
@@ -20,12 +20,6 @@
 
 <% end -%>
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
-
-gcompute_zone 'us-west1-a' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
 
 gcompute_disk 'instance-test-os-1' do
   action :create
@@ -41,22 +35,9 @@ gcompute_network 'mynetwork-test' do
   credential 'mycred'
 end
 
-gcompute_region 'us-west1' do
-  action :create
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
 gcompute_address 'instance-test-ip' do
   action :create
   region 'us-west1'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-gcompute_machine_type 'n1-standard-1' do
-  action :create
-  zone 'us-west1-a'
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
 end

@@ -18,10 +18,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud beta pubsub topics list
-      --project="{{ gcp_project}}"
-    | grep 'topic: projects/.*/test-topic1'
-  failure: !ruby/object:Provider::Ansible::FailureCondition
-    enabled: false

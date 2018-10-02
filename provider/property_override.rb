@@ -18,6 +18,8 @@ module Provider
   # Override a resource property (Api::Type) in api.yaml
   # TODO(rosbo): Shared common logic with ResourceOverride via a base class.
   class PropertyOverride < Api::Object
+    attr_reader :new_type
+
     include Api::Type::Fields
     # To allow overrides for type-specific fields, include those type's
     # fields with an 'include' directive here.

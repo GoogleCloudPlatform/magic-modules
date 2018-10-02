@@ -1,4 +1,4 @@
-<% if false # the license inside this if block assertains to this file -%>
+<%# The license inside this block applies to this file
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<% end -%>
+-%>
 <%= compile 'templates/license.erb' -%>
 
 <%= lines(autogen_notice :puppet) -%>
 
 source 'https://rubygems.org'
 group :test do
+  gem 'mocha', '~> 1.3.0'
   gem 'metadata-json-lint'
   gem 'puppet', ENV['PUPPET_GEM_VERSION'] || '>= 4.2.0'
   gem 'puppet-lint'
@@ -29,6 +30,6 @@ group :test do
   gem 'rspec-mocks'
   gem 'rspec-puppet'
   gem 'parallel_tests'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.52.1'
   gem 'simplecov'
 end

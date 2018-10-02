@@ -31,11 +31,3 @@ dependencies:
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud beta pubsub subscriptions list
-      --project="{{ gcp_project}}"
-      | grep "{{ resource_name }}"
-      | grep 'test-topic1'
-  failure: !ruby/object:Provider::Ansible::FailureCondition
-    enabled: false

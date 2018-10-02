@@ -155,7 +155,13 @@ def main():
                                    ('fetch' if object.access_api_results || !update_props.empty?)
                                  ])
 -%>
-<%= lines(indent("fetch = #{method}", 16)) -%>
+<%= lines(indent("#{method}", 16)) -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+                fetch = <%= method %>
                 changed = True
         else:
 <%
@@ -406,13 +412,14 @@ def unwrap_resource(result, module):
 <% end -%>
 <%=
   lines(method_decl('return_if_object', ['module', 'response',
-                                         ('kind' if object.kind?)]))
+                                         ('kind' if object.kind?),
+                                         'allow_not_found=False']))
 -%>
 <% if object.return_if_object -%>
 <%= lines(indent(object.return_if_object, 4)) -%>
 <% else # if object.return_if_object -%>
     # If not found, return nothing.
-    if response.status_code == 404:
+    if allow_not_found and response.status_code == 404:
         return None
 
     # If no content, return nothing.
