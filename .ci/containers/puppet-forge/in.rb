@@ -16,9 +16,7 @@ require 'puppet_forge'
 require 'json'
 
 config = JSON.parse(STDIN.read)
-unless config['source'].key? 'module_name'
-  raise 'You need to define `module_name`'
-end
+raise 'You need to define `module_name`' unless config['source'].key? 'module_name'
 raise 'Surprised by lack of directory.' if ARGV.empty?
 
 release_slug = "#{config['source']['module_name']}-" \
@@ -27,6 +25,7 @@ release = PuppetForge::Release.find(release_slug)
 release_tarball = release_slug + '.tar.gz'
 release.download(Pathname(release_tarball))
 release.verify(Pathname(release_tarball))
-PuppetForge::Unpacker.unpack(release_tarball, ARGV[0], '/tmp/resource_download')
+PuppetForge::Unpacker.unpack(release_tarball, '/tmp/resource_unpack', '/tmp/resource_download')
+FileUtils.cp_r('/tmp/resource_unpack/.', ARGV[0])
 
 puts JSON.dump('version' => { 'release' => release.version })

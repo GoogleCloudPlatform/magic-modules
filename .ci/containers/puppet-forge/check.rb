@@ -21,7 +21,10 @@ m = PuppetForge::Module.find(config['source']['module_name'])
 releases = m.releases.map! { |r| { 'release' => r.version } }
 
 if config.key? 'version'
-  releases = releases[0..releases.index(config['version'])]
+  idx = releases.index(config['version'])
+  unless idx.nil?
+    releases = releases[0..idx]
+  end
 end
 
 puts JSON.dump(releases)
