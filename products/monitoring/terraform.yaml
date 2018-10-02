@@ -14,7 +14,6 @@
 overrides: !ruby/object:Provider::ResourceOverrides
   AlertPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
-    import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
     examples: |
       ### Basic Usage
@@ -40,9 +39,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ]
       }
       ```
-
+    properties:
+    # The upstream API expects name to be `projects/[PROJECT_ID]/alertPolicies/[POLICY_ID]` but
+    # we are storing just the {POLICY_ID} as the id/name in terraform state. This is because 
+    # import logic constructs a url from the id as isn't currently tolerant of id's that are
+    # also full self links. So instead we must translate between the 2 formats in expanders
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/monitoring_alert_policy_name.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/set_computed_name.erb
+      post_create: templates/terraform/post_create/alert_policy.erb
 
   Group: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
