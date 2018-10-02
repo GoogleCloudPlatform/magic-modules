@@ -1,43 +1,4 @@
-{% set chef_modules = ['_bundle', 'auth', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'iam'] %}
-{% set puppet_modules = ['_bundle', 'auth', 'bigquery', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'pubsub', 'resourcemanager'] %}
-{% set terraform_enabled = true %}
-{% set ansible_enabled = true %}
-{% macro names_as_list(repo, names) -%}
-{% for name in names %}
-build/{{repo}}/{{name}} 
-{%- endfor %}
-{% endmacro -%}
-{% set puppet_submodules = names_as_list('puppet', puppet_modules).split() %}
-{% set chef_submodules = names_as_list('chef', chef_modules).split() %}
-{%
-  set all_submodules = puppet_submodules + chef_submodules +
-     (['build/terraform'] if terraform_enabled else []) +
-     (['build/ansible'] if ansible_enabled else [])
-%}
-{% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
-{% set chef_test_excludes = {
-    'iam': [
-      'spec/service_account_key_spec.rb',
-      'spec/service_account_spec.rb'
-    ],
-    'compute': [
-      'spec/vpn_tunnel_spec.rb'
-    ]
-  }
-%}
-{% set puppet_test_excludes = {
-  'compute': [
-      'spec/gcompute_instance_group_manager_provider_spec.rb',
-      'spec/gcompute_instance_provider_spec.rb',
-      'spec/gcompute_instance_template_provider_spec.rb',
-      'spec/gcompute_target_https_proxy_provider_spec.rb',
-      'spec/gcompute_target_ssl_proxy_provider_spec.rb',
-      'spec/gcompute_vpn_tunnel_provider_spec.rb',
-      'spec/puppetlint_spec.rb']
-  }
-%}
-
-
+{% import "vars.tmpl" as vars %}
 # These resource types are here until the PRs get merged in upstream.  :)
 resource_types:
     - name: git-branch
@@ -57,12 +18,6 @@ resource_types:
       type: docker-image
       source:
         repository: frodenas/gcs-resource
-
-    - name: puppet-forge
-      type: docker-image
-      source:
-        repository: nmckinley/concourse-puppet-forge-resource
-        tag: v0.0.9
 
 resources:
     - name: magic-modules
@@ -93,23 +48,19 @@ resources:
           authorship_restriction: true
           no_label: automerged
 
-{% if terraform_enabled %}
     - name: terraform-intermediate
       type: git-branch
       source:
           uri: git@github.com:((github-account.username))/terraform-provider-google.git
           private_key: ((repo-key.private_key))
-{% endif %}
 
-{% if ansible_enabled %}
     - name: ansible-intermediate
       type: git-branch
       source:
           uri: git@github.com:((github-account.username))/ansible.git
           private_key: ((repo-key.private_key))
-{% endif %}
 
-{% for module in puppet_modules %}
+{% for module in vars.puppet_modules %}
     - name: puppet-{{module}}-intermediate
       type: git-branch
       source:
@@ -119,29 +70,9 @@ resources:
         uri: git@github.com:((github-account.username))/puppet-google-{{module}}.git
 {% endif %}
         private_key: ((repo-key.private_key))
-
-{% if module != "bigquery" %}
-    - name: puppet-{{module}}-forge
-      type: puppet-forge
-      source:
-        username: ((puppet-forge.username))
-        password: ((puppet-forge.password))
-{% if module == '_bundle' %}
-        module_name: google-cloud
-{% else %}
-        module_name: google-g{{module}}
-{% endif %}
-{% endif %}
 {% endfor %}
 
-    - name: puppet-logging-forge
-      type: puppet-forge
-      source:
-        username: ((puppet-forge.username))
-        password: ((puppet-forge.password))
-        module_name: google-glogging
-
-{% for module in chef_modules %}
+{% for module in vars.chef_modules %}
     - name: chef-{{module}}-intermediate
       type: git-branch
       source:
@@ -192,48 +123,18 @@ jobs:
         - get: night-trigger
           trigger: true
         - aggregate:
-          {% for module in puppet_modules %}
+          {% for module in vars.puppet_modules %}
           {% if module != "bigquery" %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/puppet.yml
             timeout: 30m
             params:
               PRODUCT: {{module}}
-            {%- if puppet_test_excludes.get(module) %}
-              EXCLUDE_PATTERN: {{','.join(puppet_test_excludes[module])}}
+            {%- if vars.puppet_test_excludes.get(module) %}
+              EXCLUDE_PATTERN: {{','.join(vars.puppet_test_excludes[module])}}
             {%- endif %}
           {% endif %}
           {% endfor %}
-
-    - name: release-puppet-patch
-      plan:
-        - get: magic-modules-gcp
-          passed: ['test-puppet']
-          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
-          trigger: false
-        {% for module in puppet_modules + ["logging"]  %}
-          {% if module != "bigquery" %}
-        - put: puppet-{{module}}-forge
-          params:
-            patch_bump: true
-            repo: magic-modules-gcp/build/puppet/{{module}}
-          {% endif %}
-        {% endfor %}
-
-    - name: release-puppet-minor
-      plan:
-        - get: magic-modules-gcp
-          passed: ['test-puppet']
-          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
-          trigger: false
-        {% for module in puppet_modules + ["logging"] %}
-          {% if module != "bigquery" %}
-        - put: puppet-{{module}}-forge
-          params:
-            patch_bump: false
-            repo: magic-modules-gcp/build/puppet/{{module}}
-          {% endif %}
-        {% endfor %}
 
     - name: authorize-single-rev
       plan:
@@ -267,13 +168,12 @@ jobs:
               params:
                 GH_TOKEN: ((github-account.password))
                 CREDS: ((repo-key.private_key))
-                ALL_SUBMODULES: {{' '.join(all_submodules)}}
+                ALL_SUBMODULES: {{' '.join(vars.all_submodules)}}
             - put: magic-modules-new-prs
               params:
                 status: pending
                 path: magic-modules
           - aggregate:
-          {% if terraform_enabled %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: terraform-generated
@@ -286,8 +186,6 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
-          {% endif %}
-          {% if ansible_enabled %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: ansible-generated
@@ -300,17 +198,16 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
-          {% endif %}
-          {% if puppet_modules %}
+          {% if vars.puppet_modules %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: puppet-generated
               - task: generate-puppet
                 file: magic-modules-branched/.ci/magic-modules/generate-puppet.yml
                 params:
-                  PRODUCTS: {{','.join(puppet_modules)}}
+                  PRODUCTS: {{','.join(vars.puppet_modules)}}
               - aggregate:
-                {% for module in puppet_modules %}
+                {% for module in vars.puppet_modules %}
                 - put: puppet-{{module}}-intermediate
                   params:
                       repository: puppet-generated/{{module}}
@@ -320,16 +217,16 @@ jobs:
                 {% endfor %}
           {% endif %}
 
-          {% if chef_modules %}
+          {% if vars.chef_modules %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: chef-generated
               - task: generate-chef
                 file: magic-modules-branched/.ci/magic-modules/generate-chef.yml
                 params:
-                  PRODUCTS: {{','.join(chef_modules)}}
+                  PRODUCTS: {{','.join(vars.chef_modules)}}
               - aggregate:
-                {% for module in chef_modules %}
+                {% for module in vars.chef_modules %}
                 - put: chef-{{module}}-intermediate
                   params:
                       repository: chef-generated/{{module}}
@@ -353,10 +250,10 @@ jobs:
                 # This needs to match the username for the 'intermediate' resources.
                 GH_USERNAME: ((github-account.username))
                 CREDS: ((repo-key.private_key))
-                PUPPET_MODULES: {{','.join(puppet_modules)}}
-                CHEF_MODULES: {{','.join(chef_modules)}}
-                TERRAFORM_ENABLED: {{terraform_enabled}}
-                ANSIBLE_ENABLED: {{ansible_enabled}}
+                PUPPET_MODULES: {{','.join(vars.puppet_modules)}}
+                CHEF_MODULES: {{','.join(vars.chef_modules)}}
+                TERRAFORM_ENABLED: true
+                ANSIBLE_ENABLED: true
 
           # Push the magic modules branch that contains the updated submodules.
           - put: magic-modules
@@ -365,7 +262,6 @@ jobs:
                 branch_file: magic-modules-branched/branchname
                 force: true
 
-{% if terraform_enabled %}
     - name: terraform-test
       plan:
         - get: magic-modules
@@ -386,8 +282,7 @@ jobs:
                   status: failure
                   context: terraform-tests
                   path: magic-modules-new-prs
-{% endif %}
-{% if ansible_enabled %}
+
     - name: ansible-test
       plan:
         - get: magic-modules
@@ -408,7 +303,7 @@ jobs:
                   status: failure
                   context: ansible-tests
                   path: magic-modules-new-prs
-{% endif %}
+
     - name: puppet-test
       plan:
         - get: magic-modules
@@ -416,19 +311,19 @@ jobs:
           trigger: true
           params:
               submodules:
-              {% for module in puppet_submodules %}
+              {% for module in vars.puppet_submodules %}
                 - {{module}}
               {% endfor %}
           passed: [mm-generate]
         - aggregate:
-          {% for module in puppet_modules %}
+          {% for module in vars.puppet_modules %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/puppet.yml
             timeout: 30m
             params:
               PRODUCT: {{module}}
-            {%- if puppet_test_excludes.get(module) %}
-              EXCLUDE_PATTERN: {{','.join(puppet_test_excludes[module])}}
+            {%- if vars.puppet_test_excludes.get(module) %}
+              EXCLUDE_PATTERN: {{','.join(vars.puppet_test_excludes[module])}}
             {%- endif %}
           {% endfor %}
           on_failure:
@@ -448,19 +343,19 @@ jobs:
           trigger: true
           params:
               submodules:
-              {% for module in chef_submodules %}
+              {% for module in vars.chef_submodules %}
                 - {{module}}
               {% endfor %}
           passed: [mm-generate]
         - aggregate:
-          {% for module in chef_modules %}
+          {% for module in vars.chef_modules %}
           - task: test-{{module}}
             file: magic-modules/.ci/unit-tests/chef.yml
             timeout: 30m
             params:
               PRODUCT: {{module}}
-            {%- if chef_test_excludes.get(module) %}
-              EXCLUDE_PATTERN: {{','.join(chef_test_excludes[module])}}
+            {%- if vars.chef_test_excludes.get(module) %}
+              EXCLUDE_PATTERN: {{','.join(vars.chef_test_excludes[module])}}
             {%- endif %}
           {% endfor %}
           on_failure:
@@ -479,21 +374,17 @@ jobs:
             version: every
             trigger: true
             params:
-                submodules: {{all_submodules_yaml_format}}
+                submodules: {{vars.all_submodules_yaml_format}}
             passed:
               - mm-generate
-              {%- if chef_modules %}
+              {%- if vars.chef_modules %}
               - chef-test
               {%- endif -%}
-              {%- if puppet_modules %}
+              {%- if vars.puppet_modules %}
               - puppet-test
-              {%- endif -%}
-              {%- if terraform_enabled %}
+              {%- endif %}
               - terraform-test
-              {%- endif %}
-              {%- if ansible_enabled %}
               - ansible-test
-              {%- endif %}
           - get: mm-initial-pr
             resource: magic-modules-new-prs
             passed: [mm-generate]
@@ -508,19 +399,15 @@ jobs:
                 GITHUB_TOKEN: ((github-account.password))
                 # This is what tells us which terraform repo to write PRs against - this
                 # is what you change if you want to test this in a non-live environment.
-                {%- if terraform_enabled %}
                 TERRAFORM_REPO_USER: terraform-providers
-                {%- endif %}
-                {%- if ansible_enabled %}
                 ANSIBLE_REPO_USER: modular-magician
-                {%- endif %}
-                {%- if puppet_modules %}
+                {%- if vars.puppet_modules %}
                 PUPPET_REPO_USER: GoogleCloudPlatform
-                PUPPET_MODULES: {{','.join(puppet_modules)}}
+                PUPPET_MODULES: {{','.join(vars.puppet_modules)}}
                 {%- endif %}
-                {%- if chef_modules %}
+                {%- if vars.chef_modules %}
                 CHEF_REPO_USER: GoogleCloudPlatform
-                CHEF_MODULES: {{','.join(chef_modules)}}
+                CHEF_MODULES: {{','.join(vars.chef_modules)}}
                 {%- endif %}
             on_failure:
               put: magic-modules-new-prs
@@ -535,7 +422,6 @@ jobs:
           # the pipeline (when a PR needs to be updated), this does that updating by pushing
           # the new code to the repository/branch from which a pull request is already open.
           - aggregate:
-          {% if terraform_enabled %}
             - put: terraform-intermediate
               params:
                 repository: magic-modules-with-comment/build/terraform
@@ -548,8 +434,6 @@ jobs:
                 # not push the update even though the commit hashes are different.
                 only_if_diff: true
                 force: true
-          {% endif %}
-          {% if ansible_enabled %}
             - put: ansible-intermediate
               params:
                 repository: magic-modules-with-comment/build/ansible
@@ -557,8 +441,7 @@ jobs:
                 # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
-          {% endif %}
-          {% for module in puppet_modules %}
+          {% for module in vars.puppet_modules %}
             - put: puppet-{{module}}-intermediate
               params:
                 repository: magic-modules-with-comment/build/puppet/{{module}}
@@ -567,7 +450,7 @@ jobs:
                 force: true
           {% endfor %}
 
-          {% for module in chef_modules %}
+          {% for module in vars.chef_modules %}
             - put: chef-{{module}}-intermediate
               params:
                 repository: magic-modules-with-comment/build/chef/{{module}}
@@ -607,7 +490,7 @@ jobs:
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
                 CREDS: ((repo-key.private_key))
-                ALL_SUBMODULES: "{{' '.join(all_submodules)}}"
+                ALL_SUBMODULES: "{{' '.join(vars.all_submodules)}}"
           # TODO(ndmckinley): This will work to update the magic-modules PR *if* the original PR
           # was opened from the magic-modules repository.  That's not always going to be
           # true - figure out what to do if, for instance, we can't modify the PR.
