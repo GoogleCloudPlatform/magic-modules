@@ -15,11 +15,6 @@ resource_types:
           repository: nmckinley/concourse-github-pr-resource
           tag: v0.1.11
 
-    - name: gcs-resource
-      type: docker-image
-      source:
-        repository: frodenas/gcs-resource
-
 resources:
     - name: magic-modules
       type: git-branch
@@ -85,12 +80,6 @@ resources:
         private_key: ((repo-key.private_key))
 {% endfor %}
 
-    - name: terraform-head
-      type: git-branch
-      source:
-          uri: git@github.com:terraform-providers/terraform-provider-google.git
-          private_key: ((repo-key.private_key))
-
     - name: mm-approved-prs
       type: github-pull-request
       source:
@@ -102,41 +91,7 @@ resources:
           check_dependent_prs: true
           label: downstream-generated
 
-    - name: gcp-bucket
-      type: gcs-resource
-      source:
-        bucket: ((gcp-bucket))
-        json_key: ((gcp-bucket-json-key))
-        regexp: dist/terraform-provider-google.*
-
-    - name: night-trigger
-      type: time
-      source:
-        start: 11:00 PM
-        stop: 11:59 PM
-        location: America/Los_Angeles
-
 jobs:
-    - name: test-puppet
-      plan:
-        - get: magic-modules
-          resource: magic-modules-gcp
-        - get: night-trigger
-          trigger: true
-        - aggregate:
-          {% for module in vars.puppet_modules %}
-          {% if module != "bigquery" %}
-          - task: test-{{module}}
-            file: magic-modules/.ci/unit-tests/puppet.yml
-            timeout: 30m
-            params:
-              PRODUCT: {{module}}
-            {%- if vars.puppet_test_excludes.get(module) %}
-              EXCLUDE_PATTERN: {{','.join(vars.puppet_test_excludes[module])}}
-            {%- endif %}
-          {% endif %}
-          {% endfor %}
-
     - name: authorize-single-rev
       plan:
           - get: magic-modules-external-prs
@@ -517,21 +472,3 @@ jobs:
                 merge:
                     method: squash
                     commit_msg: mm-output/commit_message
-
-    - name: nightly-build
-      plan:
-          - get: night-trigger
-            trigger: true
-          - get: magic-modules-gcp
-          - get: terraform-head
-
-          - task: build
-            file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
-
-          {% for arch in ['darwin_amd64', 'freebsd_386', 'freebsd_amd64', 'freebsd_arm',
-          'linux_386', 'linux_amd64', 'linux_arm', 'openbsd_386', 'openbsd_amd64',
-          'solaris_amd64', 'windows_386.exe', 'windows_amd64.exe'] %}
-          - put: gcp-bucket
-            params:
-              file: dist/terraform-provider-google.{{arch}}
-          {% endfor %}

@@ -20,12 +20,6 @@ resource_types:
         tag: v0.0.9
 
 resources:
-    - name: magic-modules
-      type: git-branch
-      source:
-          uri: git@github.com:((github-account.username))/magic-modules.git
-          private_key: ((repo-key.private_key))
-
     - name: magic-modules-gcp
       type: git-branch
       source:
@@ -69,6 +63,12 @@ resources:
         start: 11:00 PM
         stop: 11:59 PM
         location: America/Los_Angeles
+
+    - name: terraform-head
+      type: git-branch
+      source:
+          uri: git@github.com:terraform-providers/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
 
 jobs:
     - name: test-puppet
