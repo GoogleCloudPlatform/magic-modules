@@ -14,14 +14,14 @@
 # HttpHealthCheck.
 
 def encode_request(request, module):
-    if 'metadata' in request:
-        if 'properties' in request['metadata']:
+    if 'metadata' in request and request['metadata'] is not None:
+        if 'properties' in request['metadata'] and request['metadata']['properties'] is not None:
             request['metadata']['properties'] = metadata_encoder(request['metadata']['properties'])
     return request
 
 
 def decode_response(response, module):
-    if 'metadata' in response:
-        if 'properties' in response['metadata']:
+    if 'metadata' in request and request['metadata'] is not None:
+        if 'properties' in request['metadata'] and request['metadata']['properties'] is not None:
             response['metadata']['properties'] = metadata_encoder(response['metadata']['properties'])
     return response
