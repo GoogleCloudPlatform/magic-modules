@@ -107,7 +107,7 @@ func testAccCheckAlertPolicyDestroy(s *terraform.State) error {
 
 		name := rs.Primary.Attributes["name"]
 
-		url := fmt.Sprintf("hthttps://monitoring.googleapis.com/v3/projects/%s/alertPolicies/%s", project, name)
+		url := fmt.Sprintf("https://monitoring.googleapis.com/v3/projects/%s/alertPolicies/%s", project, name)
 		_, err = sendRequest(config, "GET", url, nil)
 
 		if err == nil {

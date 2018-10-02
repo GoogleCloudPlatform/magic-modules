@@ -284,10 +284,10 @@ objects:
              name: name
              description: |
                The unique resource name for this condition.
-               Its syntax is: projects/[PROJECT_ID]/alertPolicies/[POLICY_ID]/con
-               ditions/[CONDITION_ID] [CONDITION_ID] is assigned
-               by Stackdriver Monitoring when the condition is
-               created as part of a new or updated alerting
+               Its syntax is:
+               projects/[PROJECT_ID]/alertPolicies/[POLICY_ID]/conditions/[CONDITION_ID]
+               [CONDITION_ID] is assigned by Stackdriver Monitoring when
+               the condition is created as part of a new or updated alerting
                policy.
              output: true
            - !ruby/object:Api::Type::NestedObject
@@ -707,6 +707,8 @@ objects:
 
   - !ruby/object:Api::Resource
     name: 'Group'
+    exclude: true
+    # TODO - chrisst this resource is tested well enough to be release yet.
     base_url: projects/{{project}}/groups
     self_link: projects/{{project}}/groups/{{name}}
     update_verb: :PATCH
