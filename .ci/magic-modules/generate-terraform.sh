@@ -68,4 +68,4 @@ apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT
 popd
 popd
 
-git clone magic-modules-branched/build/$SUBMODULE_DIR ./terraform-generated
+git clone magic-modules-branched/build/$SUBMODULE_DIR ./$SUBMODULE_DIR-generated
