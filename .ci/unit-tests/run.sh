@@ -7,12 +7,13 @@ export GOPATH=${PWD}/go
 
 set -x
 
-PROVIDER_NAME="terraform-provider-google"
-SUBMODULE_DIR="terraform"
 
 if [ -n "$VERSION" ]; then
   PROVIDER_NAME="terraform-provider-google-$VERSION"
   SUBMODULE_DIR="terraform-$VERSION"
+else
+  PROVIDER_NAME="terraform-provider-google"
+  SUBMODULE_DIR="terraform"
 fi
 
 # Create GOPATH structure

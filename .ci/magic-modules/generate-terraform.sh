@@ -14,13 +14,14 @@ PATCH_DIR="$(pwd)/patches"
 export GOPATH="${PWD}/go"
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
 
-PROVIDER_NAME="terraform-provider-google"
-SUBMODULE_DIR="terraform"
-VERSION_FLAG=""
 if [ -n "$VERSION" ]; then
   PROVIDER_NAME="terraform-provider-google-$VERSION"
   SUBMODULE_DIR="terraform-$VERSION"
   VERSION_FLAG="-v $VERSION"
+else
+  PROVIDER_NAME="terraform-provider-google"
+  SUBMODULE_DIR="terraform"
+  VERSION_FLAG=""
 fi
 
 pushd magic-modules-branched
