@@ -35,11 +35,11 @@
 <%
   begin
     beta_version = object.__product.version_obj('beta')
-    if object.min_version == beta_version
+    if property.min_version == beta_version && object.min_version != beta_version
 -%>
-  Deprecated: "This resource is in beta and will be removed from this provider. Use terraform-provider-google-beta to continue using it.",
-<%  elsif property.min_version == beta_version -%>
-  Deprecated: "This field is in beta and will be removed from this provider. Use terraform-provider-google-beta to continue using it.",
+  Deprecated: `This field is in beta and will be removed from this provider.
+Use the terraform-provider-google-beta provider to continue using it.
+See http://terraform.io/docs/provider/google/provider_versions.html for more details on beta fields.`,
 <%
     end
     rescue
