@@ -70,6 +70,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <%       if property.is_a?(Api::Type::Array) -%>
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
+    if raw == nil {
+      continue
+    }
 <%       else -%>
   if len(l) == 0 {
     return nil, nil
