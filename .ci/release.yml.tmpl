@@ -1,0 +1,140 @@
+{% import "vars.tmpl" as vars %}
+# These resource types are here until the PRs get merged in upstream.  :)
+resource_types:
+    - name: git-branch
+      type: docker-image
+      source:
+          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
+          repository: nmckinley/concourse-git-resource
+          tag: v0.1.7
+
+    - name: gcs-resource
+      type: docker-image
+      source:
+        repository: frodenas/gcs-resource
+
+    - name: puppet-forge
+      type: docker-image
+      source:
+        repository: nmckinley/concourse-puppet-forge-resource
+        tag: v0.0.9
+
+resources:
+    - name: magic-modules-gcp
+      type: git-branch
+      source:
+          uri: git@github.com:GoogleCloudPlatform/magic-modules.git
+          private_key: ((repo-key.private_key))
+
+{% for module in vars.puppet_modules %}
+{% if module not in vars.puppet_no_release %}
+    - name: puppet-{{module}}-forge
+      type: puppet-forge
+      source:
+        username: ((puppet-forge.username))
+        password: ((puppet-forge.password))
+{% if module == '_bundle' %}
+        module_name: google-cloud
+{% else %}
+        module_name: google-g{{module}}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+    # Logging is not generated, but it still needs to be released with the rest of the
+    # modules.
+    - name: puppet-logging-forge
+      type: puppet-forge
+      source:
+        username: ((puppet-forge.username))
+        password: ((puppet-forge.password))
+        module_name: google-glogging
+
+    - name: gcp-bucket
+      type: gcs-resource
+      source:
+        bucket: ((gcp-bucket))
+        json_key: ((gcp-bucket-json-key))
+        regexp: dist/terraform-provider-google.*
+
+    - name: night-trigger
+      type: time
+      source:
+        start: 11:00 PM
+        stop: 11:59 PM
+        location: America/Los_Angeles
+
+    - name: terraform-head
+      type: git-branch
+      source:
+          uri: git@github.com:terraform-providers/terraform-provider-google.git
+          private_key: ((repo-key.private_key))
+
+jobs:
+    - name: test-puppet
+      plan:
+        - get: magic-modules
+          resource: magic-modules-gcp
+        - get: night-trigger
+          trigger: true
+        - aggregate:
+          {% for module in vars.puppet_modules %}
+          {% if module != "bigquery" %}
+          - task: test-{{module}}
+            file: magic-modules/.ci/unit-tests/puppet.yml
+            timeout: 30m
+            params:
+              PRODUCT: {{module}}
+            {%- if vars.puppet_test_excludes.get(module) %}
+              EXCLUDE_PATTERN: {{','.join(vars.puppet_test_excludes[module])}}
+            {%- endif %}
+          {% endif %}
+          {% endfor %}
+
+    - name: release-puppet-patch
+      plan:
+        - get: magic-modules-gcp
+          passed: ['test-puppet']
+          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
+          trigger: false
+        {% for module in vars.puppet_modules + ["logging"]  %}
+          {% if module not in vars.puppet_no_release %}
+        - put: puppet-{{module}}-forge
+          params:
+            patch_bump: true
+            repo: magic-modules-gcp/build/puppet/{{module}}
+          {% endif %}
+        {% endfor %}
+
+    - name: release-puppet-minor
+      plan:
+        - get: magic-modules-gcp
+          passed: ['test-puppet']
+          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
+          trigger: false
+        {% for module in vars.puppet_modules + ["logging"] %}
+          {% if module not in vars.puppet_no_release %}
+        - put: puppet-{{module}}-forge
+          params:
+            patch_bump: false
+            repo: magic-modules-gcp/build/puppet/{{module}}
+          {% endif %}
+        {% endfor %}
+
+    - name: nightly-build
+      plan:
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+          - get: terraform-head
+
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
+
+          {% for arch in ['darwin_amd64', 'freebsd_386', 'freebsd_amd64', 'freebsd_arm',
+          'linux_386', 'linux_amd64', 'linux_arm', 'openbsd_386', 'openbsd_amd64',
+          'solaris_amd64', 'windows_386.exe', 'windows_amd64.exe'] %}
+          - put: gcp-bucket
+            params:
+              file: dist/terraform-provider-google.{{arch}}
+          {% endfor %}

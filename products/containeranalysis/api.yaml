@@ -16,8 +16,8 @@ name: Container Analysis
 prefix: gcontaineranalysis
 versions:
   - !ruby/object:Api::Product::Version
-    name: alpha
-    base_url: https://containeranalysis.googleapis.com/v1alpha1/
+    name: beta
+    base_url: https://containeranalysis.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
