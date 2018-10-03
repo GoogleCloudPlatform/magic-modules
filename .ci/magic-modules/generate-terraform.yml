@@ -16,6 +16,7 @@ inputs:
 
 outputs:
     - name: terraform-generated
+    - name: terraform-beta-generated
 
 run:
     path: magic-modules-branched/.ci/magic-modules/generate-terraform.sh
