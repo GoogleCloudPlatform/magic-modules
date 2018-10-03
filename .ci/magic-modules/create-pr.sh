@@ -31,11 +31,10 @@ git checkout -b "$BRANCH_NAME"
 if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   DEPENDENCIES=""
   NEWLINE=$'\n'
-
   # There is no existing PR - this is the first pass through the pipeline and
   # we will need to create a PR using 'hub'.
   if [ -n "$TERRAFORM_REPO_USER" ]; then
-    for VERSION in ('' 'beta'); do
+    for VERSION in '' 'beta'; do
       if [ -n "$VERSION" ]; then
         PROVIDER_NAME="terraform-provider-google-$VERSION"
         SUBMODULE_DIR="terraform-$VERSION"
