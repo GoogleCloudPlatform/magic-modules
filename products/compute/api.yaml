@@ -2768,6 +2768,7 @@ objects:
         name: description
         description: |
           An optional description of this resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::ResourceRef
         name: network
         resource: Network
@@ -2817,6 +2818,7 @@ objects:
 
               This enum field has the one valid value: ALL_SUBNETS
             item_type: Api::Type::String # TODO(#324): enum?
+            send_empty_value: true
           - !ruby/object:Api::Type::Array
             name: advertisedIpRanges
             description: |
@@ -2825,6 +2827,7 @@ objects:
               is CUSTOM and is advertised to all peers of the router. These IP
               ranges will be advertised in addition to any specified groups.
               Leave this field blank to advertise no custom IP ranges.
+            send_empty_value: true
             item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
@@ -2832,10 +2835,12 @@ objects:
                     description: |
                       The IP range to advertise. The value must be a
                       CIDR-formatted string.
+                    send_empty_value: true
                   - !ruby/object:Api::Type::String
                     name: description
                     description: |
                       User-specified description for the IP range.
+                    send_empty_value: true
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
