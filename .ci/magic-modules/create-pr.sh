@@ -26,6 +26,8 @@ echo "$ORIGINAL_PR_BRANCH" > ./original_pr_branch_name
 BRANCH_NAME="$(git config -f .gitmodules --get submodule.build/terraform.branch)"
 IFS="," read -ra PUPPET_PRODUCTS <<< "$PUPPET_MODULES"
 IFS="," read -ra CHEF_PRODUCTS <<< "$CHEF_MODULES"
+IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
+
 git checkout -b "$BRANCH_NAME"
 
 if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
@@ -34,7 +36,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   # There is no existing PR - this is the first pass through the pipeline and
   # we will need to create a PR using 'hub'.
   if [ -n "$TERRAFORM_REPO_USER" ]; then
-    for VERSION in '' 'beta'; do
+    for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
       if [ -n "$VERSION" ]; then
         PROVIDER_NAME="terraform-provider-google-$VERSION"
         SUBMODULE_DIR="terraform-$VERSION"
@@ -154,13 +156,15 @@ else
   git branch -f "$ORIGINAL_PR_BRANCH"
 
   if [ -n "$TERRAFORM_REPO_USER" ]; then
-    pushd build/terraform
-    git branch -f "$ORIGINAL_PR_BRANCH"
-    popd
-
-    pushd build/terraform-beta
-    git branch -f "$ORIGINAL_PR_BRANCH"
-    popd
+    for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
+      if [ -n "$VERSION" ]; then
+        pushd "build/terraform-$VERSION"
+      else
+        pushd build/terraform
+      fi
+      git branch -f "$ORIGINAL_PR_BRANCH"
+      popd
+    done
   fi
 
   for PRD in "${PUPPET_PRODUCTS[@]}"; do

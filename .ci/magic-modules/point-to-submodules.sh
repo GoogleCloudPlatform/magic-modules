@@ -44,7 +44,8 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
 done
 
 if [ "$TERRAFORM_ENABLED" = "true" ]; then
-  for VERSION in '' 'beta'; do
+  IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
+  for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
     if [ -n "$VERSION" ]; then
       PROVIDER_NAME="terraform-provider-google-$VERSION"
       SUBMODULE_DIR="terraform-$VERSION"

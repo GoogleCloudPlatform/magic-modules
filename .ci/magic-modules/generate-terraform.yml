@@ -19,3 +19,6 @@ outputs:
 
 run:
     path: magic-modules-branched/.ci/magic-modules/generate-terraform.sh
+
+params:
+  VERSIONS: ""
