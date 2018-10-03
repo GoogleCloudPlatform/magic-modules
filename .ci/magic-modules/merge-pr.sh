@@ -56,7 +56,7 @@ set +e
 if [ "$REPO" != "GoogleCloudPlatform/magic-modules" ]; then
   git remote add non-gcp-push-target "git@github.com:$REPO"
   # We know we have a commit, so all the machinery of the git resources is
-  # unnecessary.  We can just try to push directly, without forcing.
+  # unnecessary.  We can just try to push directly.
   ssh-agent bash -c "ssh-add ~/github_private_key; git push -f non-gcp-push-target $BRANCH"
 fi
 set -e
