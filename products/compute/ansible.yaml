@@ -66,7 +66,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
     exclude: true
     version_added: '2.7'
   RegionDisk: !ruby/object:Provider::Ansible::ResourceOverride
-    version_added: '2.7'
+    version_added: '2.8'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Router: !ruby/object:Provider::Ansible::ResourceOverride
@@ -269,6 +269,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       routingConfig: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
+  RegionDisk: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.8'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       description: !ruby/object:Provider::Ansible::PropertyOverride
