@@ -27,7 +27,7 @@ gcompute_region_disk <%= example_resource_name('data-disk-1') -%> do
   disk_encryption_key(
     raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
   )
-  region us-central1
+  region 'us-central1'
   replica_zones ['us-central1-a', 'us-central1-f']
   project ENV['PROJECT'] # ex: 'my-test-project'
   credential 'mycred'
