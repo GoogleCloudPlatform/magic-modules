@@ -65,6 +65,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
   RegionAutoscaler: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
     version_added: '2.7'
+  RegionDisk: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.7'
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.7'
   Router: !ruby/object:Provider::Ansible::ResourceOverride
@@ -112,6 +114,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       addressType: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
+      networkTier: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
       subnetwork: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
   BackendService: !ruby/object:Provider::Ansible::ResourceOverride
@@ -138,6 +142,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.8'
       direction: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
+      disabled: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
       priority: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
       sourceServiceAccounts: !ruby/object:Provider::Ansible::PropertyOverride
@@ -146,6 +152,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.8'
   ForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
+      networkTier: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
       target: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
       IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
@@ -179,6 +187,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
           * regions/region/addresses/address
           * global/addresses/address
           * address
+  GlobalAddress: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      addressType: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   GlobalForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride
@@ -276,6 +288,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
   SslPolicy: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
     version_added: '2.7'
+  Subnetwork: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      enableFlowLogs: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
+      secondaryIpRanges: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   TargetPool: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
