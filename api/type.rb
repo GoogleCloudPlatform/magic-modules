@@ -522,7 +522,12 @@ module Api
         check_property :key_type, ::String
         check_property :key_name, ::String
         raise "Missing 'value_type' on #{object_display_name}" if @value_type.nil?
-        @value_type.validate if @value_type.is_a?(NestedObject)
+        if @value_type.is_a?(NestedObject)
+          @value_type.set_variable(@name, :__name)
+          @value_type.set_variable(@__resource, :__resource)
+          @value_type.set_variable(self, :__parent)
+          @value_type.validate
+        end
         raise "Invalid type #{@key_type}" unless type?(@key_type)
         raise "Invalid type #{@value_type}" unless type?(@value_type)
       end

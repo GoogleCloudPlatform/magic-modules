@@ -97,14 +97,22 @@ jobs:
           passed: ['test-puppet']
           # EXPLICITLY TRIGGER = FALSE - this is manual-only.
           trigger: false
-        {% for module in vars.puppet_modules + ["logging"]  %}
-          {% if module not in vars.puppet_no_release %}
+
+
+    {% for module in vars.puppet_modules + ["logging"]  %}
+      {% if module not in vars.puppet_no_release %}
+    - name: release-{{module}}-patch
+      plan:
+        - get: magic-modules-gcp
+          passed: ['test-puppet', 'release-puppet-patch']
+          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
+          trigger: false
         - put: puppet-{{module}}-forge
           params:
             patch_bump: true
             repo: magic-modules-gcp/build/puppet/{{module}}
-          {% endif %}
-        {% endfor %}
+      {% endif %}
+    {% endfor %}
 
     - name: release-puppet-minor
       plan:
@@ -112,14 +120,21 @@ jobs:
           passed: ['test-puppet']
           # EXPLICITLY TRIGGER = FALSE - this is manual-only.
           trigger: false
-        {% for module in vars.puppet_modules + ["logging"] %}
-          {% if module not in vars.puppet_no_release %}
+
+    {% for module in vars.puppet_modules + ["logging"] %}
+      {% if module not in vars.puppet_no_release %}
+    - name: release-{{module}}-minor
+      plan:
+        - get: magic-modules-gcp
+          passed: ['test-puppet', 'release-puppet-minor']
+          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
+          trigger: false
         - put: puppet-{{module}}-forge
           params:
             patch_bump: false
             repo: magic-modules-gcp/build/puppet/{{module}}
-          {% endif %}
-        {% endfor %}
+      {% endif %}
+    {% endfor %}
 
     - name: nightly-build
       plan:

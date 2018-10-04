@@ -70,6 +70,9 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <%       if property.is_a?(Api::Type::Array) -%>
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
+    if raw == nil {
+      continue
+    }
 <%       else -%>
   if len(l) == 0 {
     return nil, nil
@@ -83,8 +86,13 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
       transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name.underscore -%>"], d, config)
       if err != nil {
         return nil, err
+<%         unless prop.send_empty_value -%>
       } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
         transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%         else -%>
+      } else {
+        transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%         end -%>
       }
 
 <%       end -%>
