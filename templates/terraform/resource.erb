@@ -49,22 +49,11 @@ func resource<%= resource_name -%>() *schema.Resource {
         Importer: &schema.ResourceImporter{
             State: resource<%= resource_name -%>Import,
         },
-<%
-  begin
-    beta_version = object.__product.version_obj('beta')
-    if object.min_version == beta_version
--%>
+<%      if object.min_version.name == 'beta' -%>
   DeprecationMessage: `This resource is in beta and will be removed from this provider.
 Use the <%= resource_name -%> resource in terraform-provider-google-beta provider to continue using it.
 See http://terraform.io/docs/provider/google/provider_versions.html for more details on beta resources.`,
-<%
-    end
-    rescue
-      # Catch exception if the API doesn't have a beta version. This is not the
-      # best way to handle this, but since this code is temporary, it doesn't
-      # really matter.
-  end
--%>
+<%      end -%>
 <%      unless object.async.nil? -%>
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
