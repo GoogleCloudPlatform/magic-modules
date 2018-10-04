@@ -51,9 +51,10 @@ func resource<%= resource_name -%>() *schema.Resource {
         },
 <%      if object.min_version.name == 'beta' -%>
   DeprecationMessage: `This resource is in beta and will be removed from this provider.
-Use the <%= resource_name -%> resource in terraform-provider-google-beta provider to continue using it.
-See http://terraform.io/docs/provider/google/provider_versions.html for more details on beta resources.`,
+Use the <%= resource_name -%> resource in the terraform-provider-google-beta provider to continue using it.
+See https://terraform.io/docs/provider/google/provider_versions.html for more details on beta resources.`,
 <%      end -%>
+
 <%      unless object.async.nil? -%>
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
