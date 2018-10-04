@@ -98,6 +98,16 @@ module Provider
         ))
       end
 
+      def config_example
+        lines(compile_file(
+                {
+                  vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
+                  primary_resource_id: primary_resource_id
+                },
+                "templates/terraform/examples/#{name}.tf.erb"
+        ))
+      end
+
       def validate
         super
         check_property :name, String
