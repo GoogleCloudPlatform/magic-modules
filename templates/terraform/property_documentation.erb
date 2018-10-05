@@ -9,3 +9,7 @@
 <% if property.is_a?(Api::Type::NestedObject) || string_to_object_map?(property) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
   Structure is documented below.
 <% end -%>
+<% if property.min_version.name == 'beta' && property.__resource.min_version.name != 'beta' -%>
+  This property is in beta, and should be used with the terraform-provider-google-beta provider.
+  See [Provider Versions](https://terraform.io/docs/provider/google/provider_versions.html) for more details on beta fields.
+<% end -%>
