@@ -28,6 +28,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
         address_name: "my-internal-address"
         network_name: "my-network"
         subnetwork_name: "my-subnet"
+    # TODO(rileykarson): Remove this example when instance is supported
+     - !ruby/object:Provider::Terraform::Examples
+       name: "instance_with_ip"
+       primary_resource_id: "static"
+       vars:
+         address_name: "ipv4-address"
+         instance_name: "vm-instance"
     properties:
       address: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
