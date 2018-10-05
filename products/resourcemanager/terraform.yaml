@@ -19,24 +19,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Lien: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
     import_format: ["{{parent}}/{{name}}"]
-    examples: |
-      ```hcl
-      resource "random_id" "r" {
-        byte_length = 8
-      }
-
-      resource "google_project" "project" {
-        project_id = "project-${random_id.r.hex}"
-        name = "A very important project!"
-      }
-
-      resource "google_resource_manager_lien" "lien" {
-        parent = "projects/${google_project.project.number}"
-        restrictions = ["resourcemanager.projects.delete"]
-        origin = "machine-readable-explanation"
-        reason = "This project is very important to me!"
-      }
-      ```
+    example:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "resource_manager_lien"
+      skip_test: true
+      primary_resource_id: "lien"
+      vars:
+        project_id: "staging-project"
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb

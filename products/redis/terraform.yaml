@@ -19,42 +19,18 @@ overrides: !ruby/object:Provider::ResourceOverrides
     import_format: ["projects/{{project}}/locations/{{region}}/instances/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: 'templates/terraform/pre_update/redis_instance.erb'
-    examples: |
-      ### Basic Usage
-      ```hcl
-      resource "google_redis_instance" "test" {
-        name           = "%s"
-        memory_size_gb = 1
-      }
-      ```
-
-      ### Full Usage
-      ```hcl
-      resource "google_compute_network" "test" {
-        name = "%s"
-      }
-
-      resource "google_redis_instance" "test" {
-        name           = "%s"
-        tier           = "STANDARD_HA"
-        memory_size_gb = 1
-
-        region                  = "us-central1"
-        location_id             = "us-central1-a"
-        alternative_location_id = "us-central1-f"
-        
-        authorized_network = "${google_compute_network.test.self_link}"
-
-        redis_version     = "REDIS_3_2"
-        display_name      = "Terraform Test Instance"
-        reserved_ip_range = "192.168.0.0/29"
-
-        labels {
-          my_key    = "my_val"
-          other_key = "other_val"
-        }
-      }
-      ```
+    example:
+     - !ruby/object:Provider::Terraform::Examples
+      name: "redis_instance_basic"
+      primary_resource_id: "cache"
+      vars:
+        instance_name: "memory-cache"
+     - !ruby/object:Provider::Terraform::Examples
+      name: "redis_instance_full"
+      primary_resource_id: "cache"
+      vars:
+        instance_name: "ha-memory-cache"
+        network_name: "authorized-network"
     properties:
       alternativeLocationId: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
