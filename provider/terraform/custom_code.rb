@@ -72,6 +72,9 @@ module Provider
       # These properties will likely be custom code.
       attr_reader :ignore_read_extra
 
+      # Whether to skip generating tests for this resource
+      attr_reader :skip_test
+
       def config_documentation
         body = lines(compile_file(
                        {
@@ -128,9 +131,9 @@ module Provider
 
         check_property :name, String
         check_property :primary_resource_id, String
-
         check_optional_property :vars, Hash
         check_optional_property_list :ignore_read_extra, String
+        check_optional_property :skip_test, TrueClass
       end
     end
 
