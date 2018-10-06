@@ -11,9 +11,11 @@ set -x
 if [ -n "$VERSION" ]; then
   PROVIDER_NAME="terraform-provider-google-$VERSION"
   SUBMODULE_DIR="terraform-$VERSION"
+  TEST_DIR="google-$VERSION"
 else
   PROVIDER_NAME="terraform-provider-google"
   SUBMODULE_DIR="terraform"
+  TEST_DIR="google"
 fi
 
 # Create GOPATH structure
@@ -22,4 +24,4 @@ ln -s "${PWD}/magic-modules/build/$SUBMODULE_DIR" "${GOPATH}/src/github.com/terr
 
 cd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
-go test -v ./google -parallel 16 -run '^Test' -timeout 1m
+go test -v ./$TEST_DIR -parallel 16 -run '^Test' -timeout 1m
