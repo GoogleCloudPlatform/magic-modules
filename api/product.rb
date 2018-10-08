@@ -92,6 +92,7 @@ module Api
     # rubocop:enable Naming/AccessorMethodName
 
     def exists_at_version_or_lower(name)
+      return true if @versions.nil?
       name ||= 'ga'
       return false unless Version::ORDER.include?(name)
       (0..Version::ORDER.index(name)).each do |i|
