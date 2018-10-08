@@ -81,7 +81,7 @@ module Api
     end
 
     def version_obj_or_default(name)
-      name.nil? ? default_version : version_obj(name)
+      exists_at_version(name) ? version_obj(name) : default_version
     end
 
     # Not a conventional setter, so ignore rubocop's warning
@@ -91,8 +91,16 @@ module Api
     end
     # rubocop:enable Naming/AccessorMethodName
 
+    def exists_at_version_or_lower(name)
+      name ||= 'ga'
+      return false if !Version::ORDER.include?(name)
+      for i in 0..Version::ORDER.index(name) do
+        return true if exists_at_version(Version::ORDER[i])
+      end
+      false
+    end
+
     def exists_at_version(name)
-      return true if name.nil?
       @versions.each do |v|
         return true if v.name == name
       end

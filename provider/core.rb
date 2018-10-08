@@ -65,8 +65,7 @@ module Provider
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     def generate(output_folder, types, version_name)
-      version = @api.version_obj_or_default(version_name)
-      generate_objects(output_folder, types, version)
+      generate_objects(output_folder, types, version_name)
       generate_client_functions(output_folder) unless @config.functions.nil?
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
@@ -81,7 +80,7 @@ module Provider
       compile_files(output_folder) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      generate_datasources(output_folder, types, version) \
+      generate_datasources(output_folder, types, version_name) \
         unless @config.datasources.nil?
       apply_file_acls(output_folder) \
         unless @config.files.nil? || @config.files.permissions.nil?
@@ -217,7 +216,8 @@ module Provider
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/AbcSize
-    def generate_objects(output_folder, types, version)
+    def generate_objects(output_folder, types, version_name)
+      version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
@@ -227,7 +227,11 @@ module Provider
         elsif types.empty? && object.exclude_if_not_in_version(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
-          generate_object object, output_folder, version
+          # version_name will differ from version.name if the resource is being
+          # generated at its default version instead of the one that was passed
+          # in to the compiler. Terraform needs to know which version was passed
+          # in so it can name its output directories correctly.
+          generate_object object, output_folder, version_name
         end
       end
     end
@@ -235,8 +239,8 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/AbcSize
 
-    def generate_object(object, output_folder, version)
-      data = build_object_data(object, output_folder, version)
+    def generate_object(object, output_folder, version_name)
+      data = build_object_data(object, output_folder, version_name)
 
       generate_resource data
       generate_resource_tests data
@@ -251,6 +255,7 @@ module Provider
       # We need to apply overrides for datasources
       @config.datasources.validate
 
+      version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
@@ -266,7 +271,7 @@ module Provider
             "Excluding #{object.name} datasource per API version"
           )
         else
-          generate_datasource object, output_folder, version
+          generate_datasource object, output_folder, version_name
         end
       end
     end
@@ -274,8 +279,8 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/AbcSize
 
-    def generate_datasource(object, output_folder, version)
-      data = build_object_data(object, output_folder, version)
+    def generate_datasource(object, output_folder, versio_name)
+      data = build_object_data(object, output_folder, version_name)
 
       compile_datasource data
     end

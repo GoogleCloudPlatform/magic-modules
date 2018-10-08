@@ -116,7 +116,7 @@ product_names.each do |product_name|
   product_api.validate
   pp product_api if ENV['COMPILER_DEBUG']
 
-  unless product_api.exists_at_version(version)
+  unless product_api.exists_at_version_or_lower(version)
     Google::LOGGER.info \
       "'#{product_name}' does not have a '#{version}' version, skipping"
     next
