@@ -101,6 +101,7 @@ module Api
     end
 
     def exists_at_version(name)
+      return true if @versions.nil?
       @versions.each do |v|
         return true if v.name == name
       end
