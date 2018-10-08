@@ -251,7 +251,7 @@ module Provider
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def generate_datasources(output_folder, types, version)
+    def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
       @config.datasources.validate
 
@@ -279,7 +279,7 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/AbcSize
 
-    def generate_datasource(object, output_folder, versio_name)
+    def generate_datasource(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
 
       compile_datasource data

@@ -93,8 +93,8 @@ module Api
 
     def exists_at_version_or_lower(name)
       name ||= 'ga'
-      return false if !Version::ORDER.include?(name)
-      for i in 0..Version::ORDER.index(name) do
+      return false unless Version::ORDER.include?(name)
+      (0..Version::ORDER.index(name)).each do |i|
         return true if exists_at_version(Version::ORDER[i])
       end
       false
