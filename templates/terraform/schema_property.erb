@@ -32,11 +32,6 @@
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>
-<% if property.min_version.name == 'beta' && property.__resource.min_version.name != 'beta' -%>
-  Deprecated: `This field is in beta and will be removed from this provider.
-Use the terraform-provider-google-beta provider to continue using it.
-See https://terraform.io/docs/provider/google/provider_versions.html for more details on beta fields.`,
-<% end -%>
 <% unless property.validation.nil? || property.output -%>
 	<% if !property.validation.regex.nil? -%>
   ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
