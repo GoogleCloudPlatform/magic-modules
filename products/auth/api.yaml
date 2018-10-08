@@ -16,6 +16,6 @@ name: Google Cloud Auth
 prefix: gauth
 versions:
   - !ruby/object:Api::Product::Version
-    name: v1
+    name: ga
     base_url: 'dummy_url'
     default: true
