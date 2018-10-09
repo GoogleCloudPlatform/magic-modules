@@ -972,6 +972,7 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -1070,6 +1071,7 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
         update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
