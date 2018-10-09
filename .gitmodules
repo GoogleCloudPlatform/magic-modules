@@ -84,3 +84,4 @@
 [submodule "build/terraform-beta"]
 	path = build/terraform-beta
 	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
+	branch = 2.0.0
