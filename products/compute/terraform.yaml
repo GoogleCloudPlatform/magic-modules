@@ -104,9 +104,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func:  diskEncryptionKeyDiffSuppress
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
       sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
@@ -126,7 +123,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_import: templates/terraform/post_import/disk.erb
       constants: templates/terraform/constants/disk.erb
       encoder: templates/terraform/encoders/disk.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
     docs: !ruby/object:Provider::Terraform::Docs
@@ -134,16 +130,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-      optional_properties: |
-        * (Deprecated) `disk_encryption_key_raw`:  This is an alias for
-          `disk_encryption_key.raw_key`.  It is deprecated to enhance
-          consistency with `source_image_encryption_key` and
-          `source_snapshot_encryption_key`.
-      attributes: |
-        * (Deprecated) `disk_encryption_key_sha256`: This is an alias for
-          `disk_encryption_key.sha256`.  It is deprecated to enhance
-          consistency with `source_image_encryption_key` and
-          `source_snapshot_encryption_key`.
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
