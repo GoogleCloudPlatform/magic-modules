@@ -791,7 +791,41 @@ overrides: !ruby/object:Provider::ResourceOverrides
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_basic"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          login_backend_service_name: "login"
+          home_backend_service_name: "home"
+          http_health_check_name: "health-check"
+          backend_bucket_name: "static-asset-backend-bucket"
+          storage_bucket_name: "static-asset-bucket"
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "map_id"
+      defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use when none of the given rules match.
+      hostRules: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "host_rule"
+        is_set: true
+      pathMatchers: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "path_matcher"
+      pathMatchers.defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use when none of the given paths match.
+      pathMatchers.pathRules: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "path_rule"
+      pathMatchers.pathRules.service: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use if any of the given paths match.
+      tests.service: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket link that should be matched by this test.
+      tests: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "test"
   VpnTunnel: !ruby/object:Provider::Terraform::ResourceOverride
     example:
       - !ruby/object:Provider::Terraform::Examples

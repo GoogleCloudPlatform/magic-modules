@@ -3802,7 +3802,7 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'description'
               description: |
-                An optional description of this resource. Provide this property
+                An optional description of this HostRule. Provide this property
                 when you create the resource.
             - !ruby/object:Api::Type::Array
               name: 'hosts'
@@ -3887,7 +3887,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'tests'
         description: |
-          The list of expected URL mappings. Request to update this UrlMap will
+          The list of expected URL mappings. Requests to update this UrlMap will
           succeed only if all of the test cases pass.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
