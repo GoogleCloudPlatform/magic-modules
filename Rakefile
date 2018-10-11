@@ -60,6 +60,8 @@ class Providers
 end
 
 # Test Tasks
+desc 'Run all of the MM tests (rubocop, rspec)'
+multitask test: %w[rubocop spec]
 
 # Compiling Tasks
 compile_list = Providers.provider_list.map do |x|
