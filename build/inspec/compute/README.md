@@ -362,6 +362,7 @@ gcompute_address 'id-for-resource' do
   description        string
   id                 integer
   name               string
+  network_tier       'PREMIUM' or 'STANDARD'
   region             reference to gcompute_region
   subnetwork         reference to gcompute_subnetwork
   users              [
@@ -411,6 +412,11 @@ end
   which means the first character must be a lowercase letter, and all
   following characters must be a dash, lowercase letter, or digit,
   except the last character, which cannot be a dash.
+
+* `network_tier` -
+  The networking tier used for configuring this address. This field can
+  take the following values: PREMIUM or STANDARD. If this field is not
+  specified, it is assumed to be PREMIUM.
 
 * `subnetwork` -
   The URL of the subnetwork in which to reserve the address. If an IP
@@ -1235,6 +1241,7 @@ gcompute_firewall 'id-for-resource' do
     ...
   ]
   direction               'INGRESS' or 'EGRESS'
+  disabled                boolean
   id                      integer
   name                    string
   network                 reference to gcompute_network
@@ -1330,6 +1337,12 @@ end
   INGRESS. Note: For INGRESS traffic, it is NOT supported to specify
   destinationRanges; For EGRESS traffic, it is NOT supported to specify
   sourceRanges OR sourceTags.
+
+* `disabled` -
+  Denotes whether the firewall rule is disabled, i.e not applied to the
+  network it is associated with. When set to true, the firewall rule is
+  not enforced and the network behaves as if it did not exist. If this
+  is unspecified, the firewall rule will be enabled.
 
 * `id` -
   Output only. The unique identifier for the resource.
@@ -1443,6 +1456,7 @@ gcompute_forwarding_rule 'id-for-resource' do
   load_balancing_scheme 'INTERNAL' or 'EXTERNAL'
   name                  string
   network               reference to gcompute_network
+  network_tier          'PREMIUM' or 'STANDARD'
   port_range            string
   ports                 [
     string,
@@ -1591,6 +1605,11 @@ end
   Output only. The fingerprint used for optimistic locking of this resource.  Used
   internally during updates.
 
+* `network_tier` -
+  The networking tier used for configuring this address. This field can
+  take the following values: PREMIUM or STANDARD. If this field is not
+  specified, it is assumed to be PREMIUM.
+
 * `region` -
   Required. A reference to the region where the regional forwarding rule resides.
   This field is not applicable to global forwarding rules.
@@ -1617,6 +1636,7 @@ HTTP(S) load balancing.
 ```ruby
 gcompute_global_address 'id-for-resource' do
   address            string
+  address_type       'EXTERNAL' or 'INTERNAL'
   creation_timestamp time
   description        string
   id                 integer
@@ -1674,6 +1694,11 @@ end
 
 * `region` -
   Output only. A reference to the region where the regional address resides.
+
+* `address_type` -
+  The type of the address to reserve, default is EXTERNAL.
+  * EXTERNAL indicates public/external single IP address.
+  * INTERNAL indicates internal IP ranges belonging to some network.
 
 #### Label
 Set the `ga_label` property when attempting to set primary key
@@ -3678,6 +3703,9 @@ to one network. All Compute Engine networks use the IPv4 protocol. Compute
 Engine currently does not support IPv6. However, Google is a major
 advocate of IPv6 and it is an important future direction.
 
+#### Reference Guides
+* [API Reference](https://cloud.google.com/compute/docs/reference/rest/v1/networks)
+* [Official Documentation](https://cloud.google.com/vpc/docs/vpc)
 
 #### Example
 
@@ -3694,6 +3722,12 @@ gcompute_network 'id-for-resource' do
   id                      integer
   ipv4_range              string
   name                    string
+  routing_config          [
+    {
+      routing_mode 'REGIONAL' or 'GLOBAL',
+    },
+    ...
+  ]
   subnetworks             [
     string,
     ...
@@ -3720,7 +3754,7 @@ end
   you create the resource.
 
 * `gateway_ipv4` -
-  A gateway address for default routing to other networks. This value is
+  Output only. A gateway address for default routing to other networks. This value is
   read only and is selected by the Google Compute Engine, typically as
   the first usable address in the IPv4Range.
 
@@ -3733,7 +3767,7 @@ end
   by the client when the network is created.
 
 * `name` -
-  Name of the resource. Provided by the client when the resource is
+  Required. Name of the resource. Provided by the client when the resource is
   created. The name must be 1-63 characters long, and comply with
   RFC1035. Specifically, the name must be 1-63 characters long and match
   the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
@@ -3754,6 +3788,18 @@ end
 
 * `creation_timestamp` -
   Output only. Creation timestamp in RFC3339 text format.
+
+* `routing_config` -
+  The network-level routing configuration for this network. Used by Cloud
+  Router to determine what type of network-wide routing behavior to
+  enforce.
+
+* `routing_config[]/routing_mode`
+  Required. The network-wide routing mode to use. If set to REGIONAL, this
+  network's cloud routers will only advertise routes with subnetworks
+  of this network in the same region as the router. If set to GLOBAL,
+  this network's cloud routers will advertise routes with all
+  subnetworks of this network, across regions.
 
 #### Label
 Set the `n_label` property when attempting to set primary key
@@ -4529,6 +4575,8 @@ of the network, even entire subnets, using firewall rules.
 gcompute_subnetwork 'id-for-resource' do
   creation_timestamp       time
   description              string
+  enable_flow_logs         boolean
+  fingerprint              fingerprint
   gateway_address          string
   id                       integer
   ip_cidr_range            string
@@ -4536,6 +4584,13 @@ gcompute_subnetwork 'id-for-resource' do
   network                  reference to gcompute_network
   private_ip_google_access boolean
   region                   reference to gcompute_region
+  secondary_ip_ranges      [
+    {
+      ip_cidr_range string,
+      range_name    string,
+    },
+    ...
+  ]
   project                  string
   credential               reference to gauth_credential
 end
@@ -4586,6 +4641,31 @@ end
 * `network` -
   Required. The network this subnet belongs to.
   Only networks that are in the distributed mode can have subnetworks.
+
+* `enable_flow_logs` -
+  Whether to enable flow logging for this subnetwork.
+
+* `fingerprint` -
+  Output only. Fingerprint of this resource. This field is used internally during
+  updates of this resource.
+
+* `secondary_ip_ranges` -
+  An array of configurations for secondary IP ranges for VM instances
+  contained in this subnetwork. The primary IP of such VM must belong
+  to the primary ipCidrRange of the subnetwork. The alias IPs may belong
+  to either primary or secondary ranges.
+
+* `secondary_ip_ranges[]/range_name`
+  Required. The name associated with this subnetwork secondary range, used
+  when adding an alias IP range to a VM instance. The name must
+  be 1-63 characters long, and comply with RFC1035. The name
+  must be unique within the subnetwork.
+
+* `secondary_ip_ranges[]/ip_cidr_range`
+  Required. The range of IP addresses belonging to this subnetwork secondary
+  range. Provide this property when you create the subnetwork.
+  Ranges must be unique and non-overlapping with all primary and
+  secondary IP ranges within a network. Only IPv4 is supported.
 
 * `private_ip_google_access` -
   Whether the VMs in this subnet can access Google services without
@@ -5113,6 +5193,7 @@ gcompute_url_map 'id-for-resource' do
   creation_timestamp time
   default_service    reference to gcompute_backend_service
   description        string
+  fingerprint        fingerprint
   host_rules         [
     {
       description  string,
@@ -5188,20 +5269,24 @@ end
   when you create the resource.
 
 * `host_rules[]/hosts`
-  The list of host patterns to match. They must be valid
+  Required. The list of host patterns to match. They must be valid
   hostnames, except * will match any string of ([a-z0-9-.]*). In
   that case, * must be the first character and must be followed in
   the pattern by either - or ..
 
 * `host_rules[]/path_matcher`
-  The name of the PathMatcher to use to match the path portion of
+  Required. The name of the PathMatcher to use to match the path portion of
   the URL if the hostRule matches the URL's host portion.
 
 * `id` -
   Output only. The unique identifier for the resource.
 
+* `fingerprint` -
+  Output only. Fingerprint of this resource. This field is used internally during
+  updates of this resource.
+
 * `name` -
-  Name of the resource. Provided by the client when the resource is
+  Required. Name of the resource. Provided by the client when the resource is
   created. The name must be 1-63 characters long, and comply with
   RFC1035. Specifically, the name must be 1-63 characters long and match
   the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
@@ -5213,7 +5298,7 @@ end
   The list of named PathMatchers to use against the URL.
 
 * `path_matchers[]/default_service`
-  A reference to a BackendService resource. This will be used if
+  Required. A reference to a BackendService resource. This will be used if
   none of the pathRules defined by this PathMatcher is matched by
   the URL's path portion.
 
@@ -5221,7 +5306,7 @@ end
   An optional description of this resource.
 
 * `path_matchers[]/name`
-  The name to which this PathMatcher is referred by the HostRule.
+  Required. The name to which this PathMatcher is referred by the HostRule.
 
 * `path_matchers[]/path_rules`
   The list of path rules.
@@ -5234,7 +5319,7 @@ end
   allowed here.
 
 * `path_matchers[]/path_rules[]/service`
-  A reference to the BackendService resource if this rule is
+  Required. A reference to the BackendService resource if this rule is
   matched.
 
 * `tests` -
@@ -5245,13 +5330,13 @@ end
   Description of this test case.
 
 * `tests[]/host`
-  Host portion of the URL.
+  Required. Host portion of the URL.
 
 * `tests[]/path`
-  Path portion of the URL.
+  Required. Path portion of the URL.
 
 * `tests[]/service`
-  A reference to expected BackendService resource the given URL should be mapped to.
+  Required. A reference to expected BackendService resource the given URL should be mapped to.
 
 #### Label
 Set the `um_label` property when attempting to set primary key

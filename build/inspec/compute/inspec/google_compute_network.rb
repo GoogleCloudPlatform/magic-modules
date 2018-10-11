@@ -28,6 +28,7 @@
 # Add our google/ lib
 $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 
+require 'google/compute/property/network_routing_config'
 require 'google/hash_utils'
 require 'inspec/resource'
 
@@ -38,14 +39,11 @@ class Network < Inspec.resource(1)
   desc 'Network'
   supports platform: 'gcp2'
 
-  attr_reader :description
   attr_reader :gateway_ipv4
   attr_reader :id
-  attr_reader :ipv4_range
-  attr_reader :name
   attr_reader :subnetworks
-  attr_reader :auto_create_subnetworks
   attr_reader :creation_timestamp
+  attr_reader :routing_config
 
   def base
     'https://www.googleapis.com/compute/v1/'
@@ -61,14 +59,11 @@ class Network < Inspec.resource(1)
   end  
 
   def parse
-    @description = @fetched['description']
     @gateway_ipv4 = @fetched['gatewayIPv4']
     @id = @fetched['id']
-    @ipv4_range = @fetched['IPv4Range']
-    @name = @fetched['name']
     @subnetworks = @fetched['subnetworks']
-    @auto_create_subnetworks = @fetched['autoCreateSubnetworks']
     @creation_timestamp = @fetched['creationTimestamp']
+    @routing_config = Google::Compute::Property::NetworkRoutingConfigArray.parse(@fetched['routingConfig'])
   end
 
   def exists?

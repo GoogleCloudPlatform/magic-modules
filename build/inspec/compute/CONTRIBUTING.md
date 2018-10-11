@@ -218,6 +218,7 @@ inspec-codegen:
   * libraries/google/compute/property/instancetemplate_source_image_encryption_key.rb
   * libraries/google/compute/property/instancetemplate_tags.rb
   * libraries/google/compute/property/machinetype_deprecated.rb
+  * libraries/google/compute/property/network_routing_config.rb
   * libraries/google/compute/property/region_deprecated.rb
   * libraries/google/compute/property/regionautoscaler_autoscaling_policy.rb
   * libraries/google/compute/property/regionautoscaler_cpu_utilization.rb
@@ -229,6 +230,7 @@ inspec-codegen:
   * libraries/google/compute/property/snapshot_snapshot_encryption_key.rb
   * libraries/google/compute/property/snapshot_source_disk_encryption_key.rb
   * libraries/google/compute/property/sslpolicy_warnings.rb
+  * libraries/google/compute/property/subnetwork_secondary_ip_ranges.rb
   * libraries/google/compute/property/urlmap_host_rules.rb
   * libraries/google/compute/property/urlmap_path_matchers.rb
   * libraries/google/compute/property/urlmap_path_rules.rb

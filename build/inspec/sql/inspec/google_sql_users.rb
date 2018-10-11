@@ -29,7 +29,6 @@
 $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 
 require 'google/hash_utils'
-require 'google/sql/property/instance_name'
 require 'inspec/resource'
 
 

@@ -40,14 +40,11 @@ class Networks < Inspec.resource(1)
   supports platform: 'gcp2'
 
   filter_table_config = FilterTable.create
-  filter_table_config.add(:descriptions, field: :description)
   filter_table_config.add(:gateway_ipv4s, field: :gateway_ipv4)
   filter_table_config.add(:ids, field: :id)
-  filter_table_config.add(:ipv4_ranges, field: :ipv4_range)
-  filter_table_config.add(:names, field: :name)
   filter_table_config.add(:subnetworks, field: :subnetworks)
-  filter_table_config.add(:auto_create_subnetworks, field: :auto_create_subnetworks)
   filter_table_config.add(:creation_timestamps, field: :creation_timestamp)
+  filter_table_config.add(:routing_configs, field: :routing_config)
   filter_table_config.connect(self, :fetch_data)
 
 

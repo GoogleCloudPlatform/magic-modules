@@ -44,6 +44,7 @@ class Address < Inspec.resource(1)
   attr_reader :description
   attr_reader :id
   attr_reader :name
+  attr_reader :network_tier
   attr_reader :subnetwork
   attr_reader :users
 
@@ -67,6 +68,7 @@ class Address < Inspec.resource(1)
     @description = @fetched['description']
     @id = @fetched['id']
     @name = @fetched['name']
+    @network_tier = @fetched['networkTier']
     @subnetwork = @fetched['subnetwork']
     @users = @fetched['users']
   end

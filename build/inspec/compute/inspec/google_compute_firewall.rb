@@ -46,6 +46,7 @@ class Firewall < Inspec.resource(1)
   attr_reader :description
   attr_reader :destination_ranges
   attr_reader :direction
+  attr_reader :disabled
   attr_reader :id
   attr_reader :network
   attr_reader :priority
@@ -75,6 +76,7 @@ class Firewall < Inspec.resource(1)
     @description = @fetched['description']
     @destination_ranges = @fetched['destinationRanges']
     @direction = @fetched['direction']
+    @disabled = @fetched['disabled']
     @id = @fetched['id']
     @network = @fetched['network']
     @priority = @fetched['priority']

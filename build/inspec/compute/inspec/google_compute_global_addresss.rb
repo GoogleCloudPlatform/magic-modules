@@ -48,6 +48,7 @@ class GlobalAddresss < Inspec.resource(1)
   filter_table_config.add(:label_fingerprints, field: :label_fingerprint)
   filter_table_config.add(:ip_versions, field: :ip_version)
   filter_table_config.add(:regions, field: :region)
+  filter_table_config.add(:address_types, field: :address_type)
   filter_table_config.connect(self, :fetch_data)
 
 

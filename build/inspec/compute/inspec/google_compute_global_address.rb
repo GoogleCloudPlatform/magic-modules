@@ -46,6 +46,7 @@ class GlobalAddress < Inspec.resource(1)
   attr_reader :label_fingerprint
   attr_reader :ip_version
   attr_reader :region
+  attr_reader :address_type
 
   def base
     'https://www.googleapis.com/compute/v1/'
@@ -69,6 +70,7 @@ class GlobalAddress < Inspec.resource(1)
     @label_fingerprint = Google::Compute::Property::String.new(@fetched['labelFingerprint'])
     @ip_version = @fetched['ipVersion']
     @region = @fetched['region']
+    @address_type = @fetched['addressType']
   end
 
   def exists?

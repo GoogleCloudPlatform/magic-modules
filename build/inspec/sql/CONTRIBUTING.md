@@ -88,11 +88,6 @@ inspec-codegen:
   * CHANGELOG.md
   * CONTRIBUTING.md
   * Gemfile
-  * inspec/google/property/boolean.rb
-  * inspec/google/property/enum.rb
-  * inspec/google/property/integer.rb
-  * inspec/google/property/string.rb
-  * inspec/google/property/time.rb
   * inspec/google_sql_database.rb
   * inspec/google_sql_databases.rb
   * inspec/google_sql_flag.rb
@@ -113,7 +108,6 @@ inspec-codegen:
   * libraries/google/sql/property/instance_ip_addresses.rb
   * libraries/google/sql/property/instance_ip_configuration.rb
   * libraries/google/sql/property/instance_mysql_replica_configuration.rb
-  * libraries/google/sql/property/instance_name.rb
   * libraries/google/sql/property/instance_replica_configuration.rb
   * libraries/google/sql/property/instance_settings.rb
   * README.md

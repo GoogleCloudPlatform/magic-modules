@@ -28,6 +28,7 @@
 # Add our google/ lib
 $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 
+require 'google/compute/property/subnetwork_secondary_ip_ranges'
 require 'google/hash_utils'
 require 'inspec/resource'
 
@@ -44,6 +45,9 @@ class Subnetwork < Inspec.resource(1)
   attr_reader :id
   attr_reader :ip_cidr_range
   attr_reader :name
+  attr_reader :enable_flow_logs
+  attr_reader :fingerprint
+  attr_reader :secondary_ip_ranges
   attr_reader :private_ip_google_access
 
   def base
@@ -66,6 +70,9 @@ class Subnetwork < Inspec.resource(1)
     @id = @fetched['id']
     @ip_cidr_range = @fetched['ipCidrRange']
     @name = @fetched['name']
+    @enable_flow_logs = @fetched['enableFlowLogs']
+    @fingerprint = Google::Compute::Property::String.new(@fetched['fingerprint'])
+    @secondary_ip_ranges = Google::Compute::Property::SubnetworkSecondaryIpRangesArray.parse(@fetched['secondaryIpRanges'])
     @private_ip_google_access = @fetched['privateIpGoogleAccess']
   end
 

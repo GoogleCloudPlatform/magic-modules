@@ -29,13 +29,6 @@
 $LOAD_PATH.unshift ::File.expand_path('../libraries', ::File.dirname(__FILE__))
 
 require 'google/hash_utils'
-require 'google/sql/property/instance_authorized_networks'
-require 'google/sql/property/instance_failover_replica'
-require 'google/sql/property/instance_ip_addresses'
-require 'google/sql/property/instance_ip_configuration'
-require 'google/sql/property/instance_mysql_replica_configuration'
-require 'google/sql/property/instance_replica_configuration'
-require 'google/sql/property/instance_settings'
 require 'inspec/resource'
 
 

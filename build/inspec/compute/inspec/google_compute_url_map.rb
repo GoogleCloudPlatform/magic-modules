@@ -48,7 +48,7 @@ class UrlMap < Inspec.resource(1)
   attr_reader :description
   attr_reader :host_rules
   attr_reader :id
-  attr_reader :name
+  attr_reader :fingerprint
   attr_reader :path_matchers
   attr_reader :tests
 
@@ -71,7 +71,7 @@ class UrlMap < Inspec.resource(1)
     @description = @fetched['description']
     @host_rules = Google::Compute::Property::UrlMapHostRulesArray.parse(@fetched['hostRules'])
     @id = @fetched['id']
-    @name = @fetched['name']
+    @fingerprint = Google::Compute::Property::String.new(@fetched['fingerprint'])
     @path_matchers = Google::Compute::Property::UrlMapPathMatchersArray.parse(@fetched['pathMatchers'])
     @tests = Google::Compute::Property::UrlMapTestsArray.parse(@fetched['tests'])
   end

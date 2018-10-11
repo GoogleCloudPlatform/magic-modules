@@ -88,28 +88,7 @@ common configuration and management tasks.
 
 #### Example
 
-```ruby
-gsql_instance "sql-test-#{ENV['sql_instance_suffix']}" do
-  action :create
-  database_version 'MYSQL_5_7'
-  settings({
-    tier: 'db-n1-standard-1',
-    ip_configuration:  {
-      authorized_networks: [
-        # The ACL below is for example only. (do NOT use in production as-is)
-        {
-          name: 'google dns server',
-          value: '8.8.8.8/32'
-        }
-      ]
-    }
-  })
-  region 'us-central1'
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-```
+#TODO
 
 #### Reference
 
@@ -389,17 +368,7 @@ Google's cloud.
 
 #### Example
 
-```ruby
-# Tip: Remember to define gsql_instance to match the 'instance' property.
-gsql_database 'webstore' do
-  action :create
-  charset 'utf8'
-  instance "sql-test-#{ENV['sql_instance_suffix']}"
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-```
+#TODO
 
 #### Reference
 
@@ -451,18 +420,7 @@ The Users resource represents a database user in a Cloud SQL instance.
 
 #### Example
 
-```ruby
-# Tip: Remember to define gsql_instance to match the 'instance' property.
-gsql_user 'john.doe' do
-  action :create
-  password 'secret-password'
-  host '10.1.2.3'
-  instance "sql-test-#{ENV['sql_instance_suffix']}"
-  project ENV['PROJECT'] # ex: 'my-test-project'
-  credential 'mycred'
-end
-
-```
+#TODO
 
 #### Reference
 
