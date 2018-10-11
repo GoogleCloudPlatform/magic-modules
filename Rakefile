@@ -25,13 +25,47 @@ PROVIDER_FOLDERS = {
 # Requires
 require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
+require 'tempfile'
+
+# Requires for YAML linting.
+require 'api/async'
+require 'api/bundle'
+require 'api/product'
+require 'api/resource'
+require 'api/type'
+require 'compile/core'
+require 'google/yaml_validator'
+
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
+
+# YAML Linting
+class YamlLinter
+  include Compile::Core 
+
+  def yaml_contents(file)
+    source = compile(file)
+    config = Google::YamlValidator.parse(source)
+    unless config.class <= Api::Product
+      raise StandardError, "#{file} is #{config.class}"\
+        ' instead of Api::Product' \
+    end
+    # Compile step #2: Now that we have the target class, compile with that
+    # class features
+    config.compile(file, 0)
+  end
+end
 
 # Handles finding the list of products for a given provider.
 class Providers
   def self.provider_list
     PROVIDER_FOLDERS.keys
+  end
+
+  # All possible products that exist.
+  def self.all_products
+    products = File.join(File.dirname(__FILE__), 'products')
+    Dir.glob("#{products}/**/api.yaml")
   end
 
   def initialize(name)
@@ -62,6 +96,21 @@ end
 # Test Tasks
 desc 'Run all of the MM tests (rubocop, rspec)'
 multitask test: %w[rubocop spec]
+
+desc 'Lints all of the compiled YAML files'
+task :yamllint do
+  Providers.all_products.each do |file|
+    begin
+      tempfile = Tempfile.new
+      tempfile.write(YamlLinter.new.yaml_contents(file))
+      tempfile.rewind
+      puts `yamllint -c #{File.join(File.dirname(__FILE__), '.yamllint')} #{tempfile.path}`
+    ensure
+      tempfile.close
+      tempfile.unlink
+    end
+  end
+end
 
 # Compiling Tasks
 compile_list = Providers.provider_list.map do |x|
