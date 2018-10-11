@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
 require 'provider/inspec/manifest'
@@ -23,7 +22,6 @@ module Provider
   # resources.
   class Inspec < Provider::Core
 
-  	include Google::RubyUtils
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -58,18 +56,21 @@ module Provider
     end
 
     # TODO?
-    def generate_resource_tests(data) end
+    def generate_resource_tests(data)
+    end
 
-    def generate_base_property(data) end
+    def generate_base_property(data)
+    end
 
-    def generate_simple_property(type, data) end
+    def generate_simple_property(type, data) 
+    end
 
     def generate_typed_array(data, prop)
-    
     end
 
-        def emit_resourceref_object(data)
+    def emit_resourceref_object(data)
     end
+    
     def emit_nested_object(data)
     end
   end

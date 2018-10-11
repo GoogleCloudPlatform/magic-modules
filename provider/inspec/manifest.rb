@@ -17,28 +17,7 @@ module Provider
   class Inspec < Provider::Core
     # Metadata for manifest.json
     class Manifest < Api::Object
-      attr_reader :additional_info
-      attr_reader :depends
-      attr_reader :description
-      attr_reader :issues
-      attr_reader :operating_systems
-      attr_reader :requires
-      attr_reader :source
-      attr_reader :summary
-      attr_reader :version
-
       def validate
-        check_optional_property :additional_info, Array
-        check_optional_property :depends, Array
-        check_property :description, String
-        check_property :issues, String
-        check_property :operating_systems, Array
-        check_property :source, String
-        check_property :summary, String
-        check_property :version, String
-        check_property_list :depends, Provider::Config::Requirements
-        check_property_list \
-          :operating_systems, Provider::Config::OperatingSystem
         super
       end
     end
