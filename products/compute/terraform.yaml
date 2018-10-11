@@ -412,6 +412,33 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   InstanceTemplate: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  InterconnectAttachment: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      router: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      interconnect: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+    examples: |
+      ```hcl
+      resource "google_compute_router" "foobar" {
+        name    = "my-router"
+        network = "${google_compute_network.foobar.name}"
+      }
+
+      resource "google_compute_interconnect_attachment" "default" {
+        name         = "test-interconnect"
+        interconnect = "my-interconnect-id"
+        router       = "${google_compute_router.foobar.self_link}"
+      }
+      ```
   License: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Provider::Terraform::ResourceOverride
