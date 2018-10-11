@@ -1,5 +1,5 @@
 resource "google_compute_region_disk" "regiondisk" {
-  name = "<%= ctx[:vars]["region_disk_name"] %>"
+  name = "<%= ctx[:vars]['region_disk_name'] %>"
   snapshot = "${google_compute_snapshot.snapdisk.self_link}"
   type = "pd-ssd"
   region = "us-central1"
@@ -8,7 +8,7 @@ resource "google_compute_region_disk" "regiondisk" {
 }
 
 resource "google_compute_disk" "disk" {
-  name = "<%= ctx[:vars]["disk_name"] %>"
+  name = "<%= ctx[:vars]['disk_name'] %>"
   image = "debian-cloud/debian-9"
   size = 50
   type = "pd-ssd"
@@ -16,7 +16,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_snapshot" "snapdisk" {
-  name = "<%= ctx[:vars]["snapshot_name"] %>"
+  name = "<%= ctx[:vars]['snapshot_name'] %>"
   source_disk = "${google_compute_disk.disk.name}"
   zone = "us-central1-a"
 }

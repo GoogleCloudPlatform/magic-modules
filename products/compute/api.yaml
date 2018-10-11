@@ -113,7 +113,6 @@ objects:
         values:
           - :PREMIUM
           - :STANDARD
-        min_version: beta
       # TODO(alexstephen): Add in status with exclude attribute. What does this
       # mean?
       - !ruby/object:Api::Type::ResourceRef
@@ -801,7 +800,6 @@ objects:
           network it is associated with. When set to true, the firewall rule is
           not enforced and the network behaves as if it did not exist. If this
           is unspecified, the firewall rule will be enabled.
-        min_version: beta
         send_empty_value: true
       - !ruby/object:Api::Type::Boolean
         name: 'enableLogging'
@@ -983,7 +981,6 @@ objects:
         values:
           - :PREMIUM
           - :STANDARD
-        min_version: beta
         input: true
       - !ruby/object:Api::Type::String
         name: 'serviceLabel'
@@ -1107,7 +1104,6 @@ objects:
         - :EXTERNAL
         - :INTERNAL
         default_value: :EXTERNAL
-        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         description: |
@@ -1788,6 +1784,7 @@ objects:
     name: 'Instance'
     kind: 'compute#instance'
     base_url: projects/{{project}}/zones/{{zone}}/instances
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1853,6 +1850,8 @@ objects:
         resource: 'MachineType'
         imports: 'selfLink'
         description: 'A reference to a machine type which defines VM kind.'
+        update_url: projdcts/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
+        update_verb: :POST
       # TODO(alexstephen): Add metatdata
       - !ruby/object:Api::Type::String
         name: 'minCpuPlatform'
@@ -2531,7 +2530,6 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/disks
-    min_version: beta
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -3215,7 +3213,6 @@ objects:
         name: 'enableFlowLogs'
         description: |
           Whether to enable flow logging for this subnetwork.
-        min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         send_empty_value: true
@@ -3224,7 +3221,6 @@ objects:
         description: |
           Fingerprint of this resource. This field is used internally during
           updates of this resource.
-        min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Array
@@ -3234,7 +3230,6 @@ objects:
           contained in this subnetwork. The primary IP of such VM must belong
           to the primary ipCidrRange of the subnetwork. The alias IPs may belong
           to either primary or secondary ranges.
-        min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         item_type: !ruby/object:Api::Type::NestedObject
@@ -3814,14 +3809,16 @@ objects:
                 when you create the resource.
             - !ruby/object:Api::Type::Array
               name: 'hosts'
+              required: true
+              item_type: Api::Type::String
               description: |
                 The list of host patterns to match. They must be valid
                 hostnames, except * will match any string of ([a-z0-9-.]*). In
                 that case, * must be the first character and must be followed in
                 the pattern by either - or ..
-              item_type: Api::Type::String
             - !ruby/object:Api::Type::String
               name: 'pathMatcher'
+              required: true
               description: |
                 The name of the PathMatcher to use to match the path portion of
                 the URL if the hostRule matches the URL's host portion.
@@ -3829,8 +3826,15 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -3846,6 +3850,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
+              required: true
               resource: 'BackendService'
               imports: 'selfLink'
               description: |
@@ -3857,6 +3862,7 @@ objects:
               description: 'An optional description of this resource.'
             - !ruby/object:Api::Type::String
               name: 'name'
+              required: true
               description: |
                 The name to which this PathMatcher is referred by the HostRule.
             - !ruby/object:Api::Type::Array
@@ -3866,15 +3872,16 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: 'paths'
+                    item_type: Api::Type::String
                     description: |
                       The list of path patterns to match. Each must start with /
                       and the only place a * is allowed is at the end following
                       a /. The string fed to the path matcher does not include
                       any text after the first ? or #, and those chars are not
                       allowed here.
-                    item_type: Api::Type::String
                   - !ruby/object:Api::Type::ResourceRef
                     name: 'service'
+                    required: true
                     resource: 'BackendService'
                     imports: 'selfLink'
                     description: |
@@ -3892,12 +3899,15 @@ objects:
               description: 'Description of this test case.'
             - !ruby/object:Api::Type::String
               name: 'host'
+              required: true
               description: 'Host portion of the URL.'
             - !ruby/object:Api::Type::String
               name: 'path'
+              required: true
               description: 'Path portion of the URL.'
             - !ruby/object:Api::Type::ResourceRef
               name: 'service'
+              required: true
               resource: 'BackendService'
               imports: 'selfLink'
               description:

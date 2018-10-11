@@ -18,17 +18,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
     import_format: ["projects/{{project}}/notes/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
-    examples: |
-      ```hcl
-      resource "google_container_analysis_note" "note" {
-        name = "test-attestor-note"
-        attestation_authority {
-          hint {
-            human_readable_name = "Attestor Note"
-          }
-        }
-      }
-      ```
+    example:
+     - !ruby/object:Provider::Terraform::Examples
+      name: "container_analysis_note_basic"
+      primary_resource_id: "note"
+      vars:
+        note_name: "test-attestor-note"
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'

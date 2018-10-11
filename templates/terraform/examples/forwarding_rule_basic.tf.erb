@@ -1,9 +1,9 @@
 resource "google_compute_forwarding_rule" "default" {
-  name       = "<%= ctx[:vars]["forwarding_rule_name"] %>"
+  name       = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   target     = "${google_compute_target_pool.default.self_link}"
   port_range = "80"
 }
 
 resource "google_compute_target_pool" "default" {
-  name = "<%= ctx[:vars]["target_pool_name"] %>"
+  name = "<%= ctx[:vars]['target_pool_name'] %>"
 }
