@@ -44,7 +44,7 @@ RuboCop::RakeTask.new
 # compiled YAML. We run the linter on this printed version (so, no embedded
 # ERB)
 class YamlLinter
-  include Compile::Core 
+  include Compile::Core
 
   def yaml_contents(file)
     source = compile(file)
@@ -103,15 +103,12 @@ multitask test: %w[rubocop spec]
 desc 'Lints all of the compiled YAML files'
 task :yamllint do
   Providers.all_products.each do |file|
-    begin
-      tempfile = Tempfile.new
-      tempfile.write(YamlLinter.new.yaml_contents(file))
-      tempfile.rewind
-      puts `yamllint -c #{File.join(File.dirname(__FILE__), '.yamllint')} #{tempfile.path}`
-    ensure
-      tempfile.close
-      tempfile.unlink
-    end
+    tempfile = Tempfile.new
+    tempfile.write(YamlLinter.new.yaml_contents(file))
+    tempfile.rewind
+    puts %x(yamllint -c #{File.join(File.dirname(__FILE__), '.yamllint')} #{tempfile.path})
+    tempfile.close
+    tempfile.unlink
   end
 end
 
