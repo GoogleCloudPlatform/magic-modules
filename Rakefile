@@ -40,6 +40,9 @@ RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
 
 # YAML Linting
+# This class calls our provider code to get the printed contents of the
+# compiled YAML. We run the linter on this printed version (so, no embedded
+# ERB)
 class YamlLinter
   include Compile::Core 
 
