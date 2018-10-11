@@ -20,11 +20,6 @@
 
 <%= compile 'templates/chef/example~auth.rb.erb' -%>
 
-gcompute_region 'us-central1' do
- project 'google.com:graphite-playground'
- credential 'mycred'
-end
-
 <% else -%>
 <% end # name == README.md -%>
 gcompute_interconnect_attachment <%= example_resource_name('test-interconnect') -%> do
