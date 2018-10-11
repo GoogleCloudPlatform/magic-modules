@@ -1,0 +1,47 @@
+<%# The license inside this block applies to this file.
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%= compile 'templates/license.erb' -%>
+
+<%= lines(autogen_notice :ruby) -%>
+
+name 'google-<%= product.prefix -%>'
+maintainer 'Google'
+maintainer_email 'chef-on-gcp@google.com'
+license 'Apache-2.0'
+chef_version '>= 12.5' if respond_to?(:chef_version)
+description '<%= manifest.summary -%>'
+long_description '
+<%= indent(wrap_field(manifest.description, 4), 2) -%>'
+version '<%= manifest.version -%>'
+<% (manifest.depends || []).each do |dep| -%>
+depends '<%= dep.name -%>', '<%= dep.versions -%>'
+<% end -%>
+<%= lines(emit_rubocop(binding, :attribute, 'issues_url', :disabled)) -%>
+issues_url '<%= manifest.issues -%>' \
+  if respond_to?(:issues_url)
+<%= lines(emit_rubocop(binding, :attribute, 'issues_url', :enabled)) -%>
+source_url '<%= manifest.source -%>' \
+  if respond_to?(:source_url)
+<%= lines(manifest.additional_info) if manifest.additional_info -%>
+
+supports 'centos'
+supports 'debian'
+supports 'fedora'
+supports 'freebsd'
+supports 'opensuse'
+supports 'redhat'
+supports 'suse'
+supports 'ubuntu'
+supports 'windows'

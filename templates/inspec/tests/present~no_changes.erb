@@ -1,0 +1,151 @@
+<%
+  title_name = 'title_eq_name'
+  title_name = 'title_and_name' if has_name
+  config_path = if has_name
+                  %w[present exist success title_and_name before]
+                else
+                  %w[present exist success title_eq_name before]
+                end
+  cust_before = get_code_multiline(tests, config_path)
+
+  def expt(id, has_name, object, space_used, prop_data)
+    line = "expect_network_get_success"
+    prop_data.create_expectation(line, has_name, object, space_used, [], id)
+  end
+
+  # Build out a graph of objects.
+  # This graph, including the current object, will be stored in a
+  # TestObjects instance.
+  # Build out a graph of objects.
+  collector = Dependencies::DependencyGraph.new(@data_gen)
+  (0..2).each do |index|
+    collector.add(object, index, (name ? :name : :title), action: ':create')
+  end
+
+  # Generate the Chef catalog using the graph of objects above.
+  # This manifest will be ordered by dependencies.
+  resources = catalogger.generate_all_objects(collector, object.name,
+                                              has_name ? :name : :title,
+                                              action: ':create')
+
+  # Creates the expect_network_* statements required for this test.
+  # This includes the expect statements for all referenced resources.
+  expectations = [
+    # Generate network expectations for 3 objects
+    (1..3).map do |idx|
+      prop_data.create_expectation('expect_network_get_success', has_name,
+                                   object, (test_matrix.level + 2) * 2,
+                                   [], idx)
+    end,
+    prop_data.create_resource_ref_get_success(object, collector,
+                                              (test_matrix.level + 2) * 2)
+  ].flatten.compact.uniq
+
+  # TODO(nelsonjr): Fix test when object references itself as a ResourceRef,
+  # e.g. a bucket ACL points back to a bucket as a resource ref. When generating
+  # the references the code it oblivious to that fact and attempt to have
+  # various objects created to satisfy the dependency. That leads to collision
+  # of object seed==0, as well as not having objects being tested created to
+  # satisty dependency.
+  references_self_type = false
+  collector.each do |obj|
+    references_self_type = true if obj.parent && \
+      obj.parent.__resource == obj.object
+  end
+
+  resource_block = resources.flatten(1).uniq.map { |r| lines(r) }.join("\n")
+-%>
+<% if !cust_before.nil? -%>
+before do
+<%= lines(indent(cust_before, 2))  -%>
+end
+<% else -%>
+before do
+  allow(Time).to receive(:now).and_return(
+    Time.new(2017, 1, 2, 3, 4, 5)
+  )
+<%= lines(indent(expectations, 2)) -%>
+end
+<% end # if !cust_before.nil? -%>
+
+let(:runner) do
+  # This path ensures that the current cookbook is
+  # loaded for testing.
+  # This path will load all other cookbooks in the
+  # parent directory.
+  # Under most circumstances, this will include the
+  # real google-gauth cookbook.
+  parent_dir = File.join(File.dirname(__FILE__), '..', '..')
+  cookbook_paths = [parent_dir]
+
+  # If there's no real version of the google-gauth ,
+  # add in the mocked version so that the tests do not fail.
+  # Since cookbooks can have any name, we assume that
+  # any directory with the word auth is the google-gauth cookbook.
+  cookbook_paths << File.join(File.dirname(__FILE__), 'cookbooks')
+
+  ChefSpec::SoloRunner.new(
+<%= lines(step_into_list(object, 4, 10)) -%>
+    cookbook_path: cookbook_paths,
+    platform: 'ubuntu',
+    version: '16.04'
+  )
+end
+
+let(:chef_run) do
+  apply_recipe(
+    <<-MANIFEST
+<%= lines(indent(resource_block, 6)) -%>
+    MANIFEST
+  ) do |recipe_name|
+    runner.converge(recipe_name) do
+      cred = Google::CredentialResourceMock.new('mycred',
+                                                runner.run_context)
+      runner.resource_collection.insert(cred)
+    end
+  end
+end
+<% 3.times.each do |index| -%>
+
+<% if references_self_type -%>
+context '<%= object.out_name -%>[title<%= index -%>]', broken: true do
+  pending('Implement tests where object references its own type')
+<% else -%>
+context '<%= object.out_name -%>[title<%= index -%>]' do
+  subject do
+<%
+  find_lines = [
+    "chef_run.find_resource(:#{object.out_name},",
+    "'title#{index}')"
+  ]
+-%>
+<%=
+  lines(format([
+          [find_lines.join(' ')],
+          [
+           find_lines[0],
+           indent(find_lines[1], 23)
+          ]
+        ], 4, (test_matrix.level + 2) * 2))
+-%>
+  end
+<%
+object.all_user_properties.select { |p| !p.output }
+                          .each do |p|
+-%>
+<%
+  value = @data_gen.value(p.class, p, index)
+  value = "\'title#{index}\'" if p.name == 'name' && !has_name
+  name_override = label_name(object) if p.name == 'name'
+-%>
+
+<%=
+  lines(indent(@property.property(p, index, @data_gen.comparator(p),
+                                   value,
+                                   (test_matrix.level + 2) * 2,
+                                   name_override), 2))
+-%>
+<% end # all_user_props.each -%>
+<% end # references_self_type -%>
+end
+<% end # 3.times -%>
