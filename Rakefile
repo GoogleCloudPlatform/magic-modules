@@ -17,11 +17,18 @@ Dir.chdir(File.dirname(__FILE__))
 
 PROVIDER_FOLDERS = {
   ansible: 'build/ansible',
-  puppet: 'build/puppet/%s',
-  chef: 'build/chef/%s',
+  puppet: 'build/puppet/%<mod>s',
+  chef: 'build/chef/%<mod>s',
   terraform: 'build/terraform'
 }.freeze
 
+# Requires
+require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
+RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+# Handles finding the list of products for a given provider.
 class Providers
   def self.provider_list
     PROVIDER_FOLDERS.keys
@@ -41,27 +48,33 @@ class Providers
   end
 
   def compile_module(mod)
-    folder = PROVIDER_FOLDERS[@name.to_sym] % mod
+    folder = format(PROVIDER_FOLDERS[@name.to_sym], mod: mod)
     flag = "COMPILER_#{folder.gsub('build/', '').tr('/', '_').upcase}_OUTPUT"
-    output = ENV[flag] || (PROVIDER_FOLDERS[@name.to_sym] % mod)
+    output = ENV[flag] || format(PROVIDER_FOLDERS[@name.to_sym], mod: mod)
     %x(bundle exec compiler -p products/#{mod} -e #{@name} -o #{output})
+  end
+
+  def compilation_targets
+    products.map { |prod| "compile:#{@name}:#{prod}" }
   end
 end
 
 # Test Tasks
 
 # Compiling Tasks
+compile_list = Providers.provider_list.map do |x|
+  Providers.new(x).compilation_targets
+end.flatten
+
 desc 'Compile all modules'
-multitask compile: (Providers.provider_list.map do |x|
-  Providers.new(x).products.map { |y| "compile:#{x}:#{y}" }
-end.flatten)
+multitask compile: compile_list
 
 namespace :compile do
   Providers.provider_list.each do |provider|
     # Each provider should default to compiling everything.
     desc "Compile all modules for #{provider.capitalize}"
     prov = Providers.new(provider)
-    multitask provider.to_sym => prov.products.map { |m| "compile:#{provider}:#{m}" }
+    multitask provider.to_sym => prov.compilation_targets
 
     namespace provider.to_sym do
       prov.products.each do |mod|
