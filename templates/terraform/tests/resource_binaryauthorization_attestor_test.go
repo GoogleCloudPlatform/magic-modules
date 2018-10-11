@@ -1,3 +1,8 @@
+// ----------------
+//      NOTE
+// ----------------
+// This test lives in magic-modules and any changes to it should be made there.
+
 package google
 
 import (
