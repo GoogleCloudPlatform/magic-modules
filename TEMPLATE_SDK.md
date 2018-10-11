@@ -167,8 +167,6 @@ Arguments:
 -   `name`: the name of the function to generate
 -   `url`: the URL of the resource
 -   `emit_self`: if `true` the function is static
--   `extra_data`: if specified provides extra arguments for the link, specified
-    by the marker `<|extra|>` in the URL
 
 Example (excerpt from `templates/ansible/resource.erb`):
 
