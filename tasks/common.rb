@@ -16,6 +16,7 @@ PROVIDER_FOLDERS = {
   ansible_facts: 'build/ansible',
   puppet: 'build/puppet/%s',
   chef: 'build/chef/%s',
+  inspec: 'build/inspec',
   terraform: 'build/terraform'
 }.freeze
 
