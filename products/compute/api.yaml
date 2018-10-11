@@ -1055,22 +1055,22 @@ objects:
           character, which cannot be a dash.
         required: true
       - !ruby/object:Api::Type::NameValues
-        name: 'labels'	
-        description: |	
-          Labels to apply to this address.  A list of key->value pairs.	
-        key_type: Api::Type::String	
-        value_type: Api::Type::String	
-        update_verb: :POST	
-        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'	
-        min_version: beta	
-      - !ruby/object:Api::Type::Fingerprint	
-        name: 'labelFingerprint'	
-        description: |	
-          The fingerprint used for optimistic locking of this resource.  Used	
-          internally during updates.	
-        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'	
+        name: 'labels'
+        description: |
+          Labels to apply to this address.  A list of key->value pairs.
+        key_type: Api::Type::String
+        value_type: Api::Type::String
         update_verb: :POST
-        min_version: beta	
+        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
+        min_version: beta
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
+        update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
