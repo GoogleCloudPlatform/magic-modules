@@ -1,0 +1,383 @@
+<%# The license inside this block applies to this file.
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%= compile 'templates/license.erb' -%>
+
+<%= lines(autogen_notice :chef) -%>
+
+require 'spec_helper'
+
+# TODO(alexstephen): Reformat tests to use nested describe blocks
+# TODO(alexstephen): Add title == name tests
+# Test Matrix:
+#
+# +--------------------------------------------------------+
+# | Action  | Exists | Changes | Success | Result          |
+# +--------------------------------------------------------+
+# | create  | Y      | Y       | Y       | Edit            |
+# | create  | Y      | Y       | N       | Fail            |
+# | create  | Y      | N       | Y       | Fetch (no-op)   |
+# | create  | Y      | N       | N       | Fail            |
+# | create  | N      | Y       | Y       | Create          |
+# | create  | N      | Y       | N       | Fail            |
+# +--------------------------------------------------------+
+# | delete  | Y      | Y       | Y       | Delete          |
+# | delete  | Y      | Y       | N       | Fail            |
+# | delete  | N      | Y       | Y       | Fail (no delete)|
+# | delete  | N      | Y       | N       | Fail            |
+# +--------------------------------------------------------+
+# TODO(alexstephen): Add tests for manage
+# TODO(alexstephen): Add tests for modify
+<%
+if object.readonly
+  test_matrix = Provider::TestMatrix.new(template, object, self,
+    exists: {
+      changes: [ # read-only object mistmatch
+        [:no_name, :fail],
+        [:has_name, :fail]
+      ],
+      no_change: [
+        [:no_name, :pass],
+        [:has_name, :pass]
+      ],
+    },
+    missing: [
+      [:no_name, :fail],
+      [:has_name, :fail]
+    ]
+  )
+else
+  test_matrix = Provider::TestMatrix.new(template, object, self,
+    present: {
+      exists: {
+        changes: { # converge
+          no_name: [:pass, :fail],
+          has_name: [:pass, :fail]
+        },
+        no_change: { # no action
+          no_name: [:pass, :fail],
+          has_name: [:pass, :fail]
+        }
+      },
+      missing: { # create
+        # changes == ignore
+        no_name: [:pass, :fail],
+        has_name: [:pass, :fail]
+      }
+    },
+    absent: {
+      exists: { # delete
+        # changes == ignore
+        no_name: [:pass, :fail],
+        has_name: [:pass, :fail]
+      },
+      missing: { # no action
+        # changes == ignore
+        no_name: [:pass, :fail],
+        has_name: [:pass, :fail]
+      }
+    }
+  )
+end
+
+prop_data = Provider::TestData::Expectations.new(self, @data_gen)
+catalogger = Provider::ChefTestCatalogFormatter.new self
+-%>
+context '<%= object.out_name -%>' do
+<% if object.readonly -%>
+<% # Object does NOT provides 'ensure' parameter -%>
+<%= test_matrix.push(:ignore, :exists) -%>
+<%= test_matrix.push(:ignore, :exists, :no_change) -%>
+<%= test_matrix.push(:ignore, :exists, :no_change, [:no_name, :pass]) -%>
+        # TODO(alexstephen): Implement new test format.
+<%= test_matrix.pop(:ignore, :exists, :no_change, [:no_name, :pass]) -%>
+
+<%= test_matrix.push(:ignore, :exists, :no_change, [:has_name, :pass]) -%>
+        # TODO(alexstephen): Implement new test format.
+<%= test_matrix.pop(:ignore, :exists, :no_change, [:has_name, :pass]) -%>
+<%= test_matrix.pop(:ignore, :exists, :no_change) -%>
+
+<%= test_matrix.push(:ignore, :exists, :changes) -%>
+<%= test_matrix.push(:ignore, :exists, :changes, [:no_name, :fail]) -%>
+        # TODO(alexstephen): Implement new test format.
+        subject { -> { raise '[placeholder] This should fail.' } }
+        it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :exists, :changes, [:no_name, :fail]) -%>
+
+<%= test_matrix.push(:ignore, :exists, :changes, [:has_name, :fail]) -%>
+        # TODO(alexstephen): Implement new test format.
+        subject { -> { raise '[placeholder] This should fail.' } }
+        it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :exists, :changes, [:has_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :exists, :changes) -%>
+<%= test_matrix.pop(:ignore, :exists) -%>
+
+<%= test_matrix.push(:ignore, :missing) -%>
+<%= test_matrix.push(:ignore, :missing, :ignore, [:no_name, :fail]) -%>
+      # TODO(alexstephen): Implement new test format.
+      subject { -> { raise '[placeholder] This should fail.' } }
+      it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :missing, :ignore, [:no_name, :fail]) -%>
+
+<%= test_matrix.push(:ignore, :missing, :ignore, [:has_name, :fail]) -%>
+      # TODO(alexstephen): Implement new test format.
+      subject { -> { raise '[placeholder] This should fail.' } }
+      it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:ignore, :missing, :ignore, [:has_name, :fail]) -%>
+<%= test_matrix.pop(:ignore, :missing) -%>
+<% else -%>
+<% # Object that provides 'ensure' parameter -%>
+<%= test_matrix.push(:present) -%>
+<%= test_matrix.push(:present, :exists) -%>
+<%= test_matrix.push(:present, :exists, :no_change) -%>
+<%= test_matrix.push(:present, :exists, :no_change, :no_name) -%>
+<%= test_matrix.push(:present, :exists, :no_change, :no_name, :pass) -%>
+<%=
+  has_name = false
+  indent(compile('templates/chef/tests/present~no_changes.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:present, :exists, :no_change, :no_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :no_change, :no_name, :fail) -%>
+            # TODO(alexstephen): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :no_change, :no_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :no_change, :no_name) -%>
+
+<%= test_matrix.push(:present, :exists, :no_change, :has_name) -%>
+<%= test_matrix.push(:present, :exists, :no_change, :has_name, :pass) -%>
+<%=
+  has_name = true
+  indent(compile('templates/chef/tests/present~no_changes.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:present, :exists, :no_change, :has_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :no_change, :has_name, :fail) -%>
+            # TODO(alexstephen): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :no_change, :has_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :no_change, :has_name) -%>
+<%= test_matrix.pop(:present, :exists, :no_change) -%>
+
+<%= test_matrix.push(:present, :exists, :changes) -%>
+<%= test_matrix.push(:present, :exists, :changes, :no_name) -%>
+<%= test_matrix.push(:present, :exists, :changes, :no_name, :pass) -%>
+            # TODO(alexstephen): Implement new test format.
+<%= test_matrix.pop(:present, :exists, :changes, :no_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :changes, :no_name, :fail) -%>
+            # TODO(alexstephen): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :changes, :no_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :changes, :no_name) -%>
+
+<%= test_matrix.push(:present, :exists, :changes, :has_name) -%>
+<%= test_matrix.push(:present, :exists, :changes, :has_name, :pass) -%>
+            # TODO(alexstephen): Implement new test format
+<%= test_matrix.pop(:present, :exists, :changes, :has_name, :pass) -%>
+
+<%= test_matrix.push(:present, :exists, :changes, :has_name, :fail) -%>
+            # TODO(alexstephen): Implement new test format.
+            subject { -> { raise '[placeholder] This should fail.' } }
+            it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :exists, :changes, :has_name, :fail) -%>
+<%= test_matrix.pop(:present, :exists, :changes, :has_name) -%>
+<%= test_matrix.pop(:present, :exists, :changes) -%>
+<%= test_matrix.pop(:present, :exists) -%>
+
+<%= test_matrix.push(:present, :missing) -%>
+<%= test_matrix.push(:present, :missing, :ignore, :no_name) -%>
+<%= test_matrix.push(:present, :missing, :ignore, :no_name, :pass) -%>
+<%=
+  # Creates the resource
+  has_name = false
+  indent(compile('templates/chef/tests/present~create.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:present, :missing, :ignore, :no_name, :pass) -%>
+
+<%= test_matrix.push(:present, :missing, :ignore, :no_name, :fail) -%>
+          # TODO(alexstephen): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :missing, :ignore, :no_name, :fail) -%>
+<%= test_matrix.pop(:present, :missing, :ignore, :no_name) -%>
+
+<%= test_matrix.push(:present, :missing, :ignore, :has_name) -%>
+<%= test_matrix.push(:present, :missing, :ignore, :has_name, :pass) -%>
+<%=
+  # Creates the resource
+  has_name = true
+  indent(compile('templates/chef/tests/present~create.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:present, :missing, :ignore, :has_name, :pass) -%>
+
+<%= test_matrix.push(:present, :missing, :ignore, :has_name, :fail) -%>
+          # TODO(alexstephen): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:present, :missing, :ignore, :has_name, :fail) -%>
+<%= test_matrix.pop(:present, :missing, :ignore, :has_name) -%>
+<%= test_matrix.pop(:present, :missing) -%>
+<%= test_matrix.pop(:present) -%>
+
+<%= test_matrix.push(:absent) -%>
+<%= test_matrix.push(:absent, :missing) -%>
+<%= test_matrix.push(:absent, :missing, :ignore, :no_name) -%>
+<%= test_matrix.push(:absent, :missing, :ignore, :no_name, :pass) -%>
+<%=
+  has_name = false
+  indent(compile('templates/chef/tests/absent~no_action.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :no_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :missing, :ignore, :no_name, :fail) -%>
+          # TODO(alexstephen): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :missing, :ignore, :no_name, :fail) -%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :no_name) -%>
+
+<%= test_matrix.push(:absent, :missing, :ignore, :has_name) -%>
+<%= test_matrix.push(:absent, :missing, :ignore, :has_name, :pass) -%>
+<%=
+  has_name = true
+  indent(compile('templates/chef/tests/absent~no_action.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :has_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :missing, :ignore, :has_name, :fail) -%>
+          # TODO(alexstephen): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :missing, :ignore, :has_name, :fail) -%>
+<%= test_matrix.pop(:absent, :missing, :ignore, :has_name) -%>
+<%= test_matrix.pop(:absent, :missing) -%>
+
+<%= test_matrix.push(:absent, :exists) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :no_name) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :no_name, :pass) -%>
+<%=
+  # Delete the resource
+  has_name = false
+  indent(compile('templates/chef/tests/absent~delete.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :no_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :exists, :ignore, :no_name, :fail) -%>
+          # TODO(alexstephen): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :exists, :ignore, :no_name, :fail) -%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :no_name) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :has_name) -%>
+<%= test_matrix.push(:absent, :exists, :ignore, :has_name, :pass) -%>
+<%=
+  # Delete the resource
+  has_name = true
+  indent(compile('templates/chef/tests/absent~delete.erb'),
+         (test_matrix.level + 1) * 2)
+%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :has_name, :pass) -%>
+
+<%= test_matrix.push(:absent, :exists, :ignore, :has_name, :fail) -%>
+          # TODO(alexstephen): Implement new test format.
+          subject { -> { raise '[placeholder] This should fail.' } }
+          it { is_expected.to raise_error(RuntimeError, /placeholder/) }
+<%= test_matrix.pop(:absent, :exists, :ignore, :has_name, :fail) -%>
+<%= test_matrix.pop(:absent, :exists, :ignore, :has_name) -%>
+<%= test_matrix.pop(:absent, :exists) -%>
+<%= test_matrix.pop(:absent) -%>
+<% end -%>
+
+  def expand_variables(template, data, extra_data = {})
+<% prefix = object.__product.prefix.upcase -%>
+    Google::<%= prefix -%>::<%= object.name %>
+      .action_class.expand_variables(template, data, extra_data)
+  end
+<% if object.encoder? -%>
+
+  def <%= object.transport.encoder -%>(resource)
+    Google::<%= prefix -%>::<%= object.name %>
+      .action_class.<%= object.transport.encoder -%>(resource)
+  end
+<% end # object.encoder? -%>
+
+<%= lines(indent(compile('templates/network_mocks.erb'), 2), 1) -%>
+<%=
+  lines(indent(compile('templates/chef/resourceref_expandvars.erb'), 2), 1)
+-%>
+<%= lines(indent(compile_if(tests, %w[expectation_helpers]), 2), 1) -%>
+<%= lines(indent(emit_link('collection', build_url(object.collection_url), false), 2)) %>
+<%= lines(indent(emit_link('self_link', build_url(object.self_link_url), false), 2)) -%>
+
+<% uri_data = @constants.value_assign(object) -%>
+<% if uri_data.empty? -%>
+  # Creates variable test data to comply with self_link URI parameters
+  def uri_data(_id)
+    {}
+  end
+<% else # value.keys.empty? -%>
+  # Creates variable test data to comply with self_link URI parameters
+  def uri_data(id)
+    {
+<%= lines(indent_list(uri_data, 6)) -%>
+    }
+  end
+<% end # value.keys.empty? -%>
+
+  def build_cred
+    <<-CRED
+    gauth_credential 'mycred' do
+      action :serviceaccount
+      path '/home'
+      scopes [
+        'test_path'
+      ]
+    end
+    CRED
+  end
+
+  # Creates a test recipe file and runs a block before destroying the file
+  def apply_recipe(recipe)
+    # Creates a random string name
+    recipe_name = "recipe~test~#{(0...8).map { (65 + rand(26)).chr }.join}"
+    recipe_loc = File.join(File.dirname(__FILE__), '..', 'recipes',
+                           "#{recipe_name}.rb")
+
+    File.open(recipe_loc, 'w') do |file|
+      file.write([build_cred, recipe].join("\n"))
+    end
+<%=
+  lines(indent(format([
+    ["recipe_path = \"google-#{object.__product.prefix.downcase}",
+     "::\#{recipe_name}\""].join
+  ]), 4))
+-%>
+    begin
+      yield recipe_path
+    ensure
+      File.delete(recipe_loc)
+    end
+  end
+end

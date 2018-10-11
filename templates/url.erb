@@ -1,0 +1,17 @@
+<%
+base = "'#{object.self_link_url[0].join}'"
+url = object.self_link_url[1]
+if url.is_a?(Array)
+  url = url.join('')
+else
+  url = url.split("\n").join('')
+end
+url = "'#{url}'"
+-%>
+def base
+	<%= base %>
+end
+
+def url
+	<%= url %>
+end

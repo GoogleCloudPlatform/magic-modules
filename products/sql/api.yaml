@@ -30,6 +30,11 @@ objects:
     name: 'Instance'
     kind: 'sql#instance'
     base_url: projects/{{project}}/instances
+    list_link: |
+      projects/{{project}}/instances/
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'sql#instancesList'
+      items: 'items'
     description: |
       Represents a Cloud SQL instance. Cloud SQL instances are SQL databases
       hosted in Google's cloud. The Instances resource provides methods for
@@ -334,6 +339,11 @@ objects:
     name: 'Database'
     kind: 'sql#database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
+    list_link: |
+      projects/{{project}}/instances/{{instance}}/databases
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'sql#databasesList'
+      items: 'items'
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
@@ -408,6 +418,9 @@ objects:
     self_link: |
       projects/{{project}}/instances/{{instance}}/sslCerts/
       {{sha1_fingerprint}}
+    self_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'sql#sslCertsList'
+      items: 'items'
     readonly: true # we're not enforcing state as it is all server-side driven.
     description: |
       Represents an SSL certificate created for a Cloud SQL instance. To use the

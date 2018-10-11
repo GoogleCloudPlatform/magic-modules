@@ -31,6 +31,11 @@ objects:
     name: 'Address'
     kind: 'compute#address'
     base_url: projects/{{project}}/regions/{{region}}/addresses
+    list_link: |
+      projects/{{project}}/regions/{{region}}/addresses
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#addressList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::FetchedExternal
         name: address
@@ -151,6 +156,11 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/zones/{{zone}}/autoscalers
     update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: selfLink
@@ -187,6 +197,11 @@ objects:
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -240,6 +255,11 @@ objects:
     name: 'BackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/global/backendServices
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -539,6 +559,11 @@ objects:
     name: 'DiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/zones/{{zone}}/diskTypes
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     # TODO(nelsonjr): Search all documentation for references of using URL (like
     # the description below) and replace with the proper reference to the
     # corresponding type.
@@ -572,6 +597,11 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -681,6 +711,11 @@ objects:
     name: 'Firewall'
     kind: 'compute#firewall'
     base_url: projects/{{project}}/global/firewalls
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -917,6 +952,11 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1009,6 +1049,11 @@ objects:
     name: 'GlobalAddress'
     kind: 'compute#address'
     base_url: projects/{{project}}/global/addresses
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1132,6 +1177,11 @@ objects:
     name: 'GlobalForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/global/forwardingRules
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     description: |
       Represents a GlobalForwardingRule resource. Global forwarding rules are
       used to forward traffic to the correct load balancer for HTTP load
@@ -1166,6 +1216,11 @@ objects:
     name: 'HttpHealthCheck'
     kind: 'compute#httpHealthCheck'
     base_url: projects/{{project}}/global/httpHealthChecks
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1247,6 +1302,11 @@ objects:
     name: 'HttpsHealthCheck'
     kind: 'compute#httpsHealthCheck'
     base_url: projects/{{project}}/global/httpsHealthChecks
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1327,6 +1387,11 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1447,6 +1512,11 @@ objects:
     kind: 'compute#instanceTemplate'
     input: true
     base_url: projects/{{project}}/global/instanceTemplates
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1528,6 +1598,11 @@ objects:
     name: 'License'
     kind: 'compute#license'
     base_url: /projects/{{project}}/global/licenses
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     readonly: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -1553,6 +1628,11 @@ objects:
     name: 'Image'
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     description: |
       Represents an Image resource.
 
@@ -1785,6 +1865,11 @@ objects:
     kind: 'compute#instance'
     base_url: projects/{{project}}/zones/{{zone}}/instances
     input: true
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1890,6 +1975,11 @@ objects:
     name: 'InstanceGroup'
     kind: 'compute#instanceGroup'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1988,6 +2078,11 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2171,6 +2266,11 @@ objects:
     name: 'MachineType'
     kind: 'compute#machineType'
     base_url: projects/{{project}}/zones/{{zone}}/machineTypes
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -2282,6 +2382,11 @@ objects:
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
     update_verb: :PATCH
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2393,6 +2498,11 @@ objects:
     name: 'Region'
     kind: 'compute#region'
     base_url: projects/{{project}}/regions
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - name
       - !ruby/object:Api::Type::SelfLink
@@ -2471,6 +2581,11 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/regions/{{region}}/autoscalers
     update_url: projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: selfLink
@@ -2508,6 +2623,11 @@ objects:
     name: 'RegionDiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/regions/{{region}}/diskTypes
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
       the type of disk to use, such as a pd-ssd or pd-standard. To reference a
@@ -2530,6 +2650,12 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/disks
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
+    min_version: beta
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -2596,6 +2722,11 @@ objects:
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -2720,6 +2851,11 @@ objects:
     name: 'Router'
     kind: 'compute#router'
     base_url: projects/{{project}}/regions/{{region}}/routers
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     # Since Terraform has separate resources for router, router interface, and
     # router peer, calling PUT on the router will delete the interface and peer.
     # Use patch instead.
@@ -2843,6 +2979,11 @@ objects:
     name: 'Snapshot'
     kind: 'compute#snapshot'
     base_url: projects/{{project}}/global/snapshots
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2971,6 +3112,11 @@ objects:
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/global/sslCertificates
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
@@ -3023,6 +3169,11 @@ objects:
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3122,6 +3273,11 @@ objects:
     name: 'Subnetwork'
     kind: 'compute#subnetwork'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3277,6 +3433,11 @@ objects:
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/global/targetHttpProxies
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3327,6 +3488,11 @@ objects:
     name: 'TargetHttpsProxy'
     kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/global/targetHttpsProxies
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3422,6 +3588,11 @@ objects:
     name: 'TargetPool'
     kind: 'compute#targetPool'
     base_url: projects/{{project}}/regions/{{region}}/targetPools
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     description: 'Represents a TargetPool resource, used for Load Balancing.'
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3546,6 +3717,11 @@ objects:
     name: 'TargetSslProxy'
     kind: 'compute#targetSslProxy'
     base_url: projects/{{project}}/global/targetSslProxies
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3635,6 +3811,11 @@ objects:
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
     base_url: projects/{{project}}/global/targetTcpProxies
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3697,6 +3878,11 @@ objects:
     name: 'TargetVpnGateway'
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3772,6 +3958,11 @@ objects:
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3919,6 +4110,11 @@ objects:
     description: 'VPN tunnel resource.'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -4034,6 +4230,11 @@ objects:
     name: 'Zone'
     kind: 'compute#zone'
     base_url: projects/{{project}}/zones
+    list_link: |
+      projects/{{project}}/zones/{{zone}}/autoscalers
+    list_link_query: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - name
       - !ruby/object:Api::Type::SelfLink
