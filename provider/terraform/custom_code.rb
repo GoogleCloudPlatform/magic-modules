@@ -13,6 +13,7 @@
 
 require 'api/object'
 require 'compile/core'
+require 'google/golang_utils'
 require 'provider/abstract_core'
 require 'provider/property_override'
 
@@ -47,6 +48,7 @@ module Provider
     # from a shared template
     class Examples < Api::Object
       include Compile::Core
+      include Google::GolangUtils
 
       # The name of the example in lower snake_case.
       # Generally takes the form of the resource name followed by some detail
@@ -66,6 +68,13 @@ module Provider
       # vars is a Hash from template variable names to output variable names
       attr_reader :vars
 
+      # Extra properties to ignore read on during import.
+      # These properties will likely be custom code.
+      attr_reader :ignore_read_extra
+
+      # Whether to skip generating tests for this resource
+      attr_reader :skip_test
+
       def config_documentation
         body = lines(compile_file(
                        {
@@ -81,6 +90,7 @@ module Provider
       end
 
       def config_test
+        @vars ||= []
         body = lines(compile_file(
                        {
                          vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
@@ -88,6 +98,8 @@ module Provider
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
+
+        body = substitute_test_paths body
 
         lines(compile_file(
                 {
@@ -98,11 +110,30 @@ module Provider
         ))
       end
 
+      def config_example
+        lines(compile_file(
+                {
+                  vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
+                  primary_resource_id: primary_resource_id
+                },
+                "templates/terraform/examples/#{name}.tf.erb"
+        ))
+      end
+
+      def substitute_test_paths(config)
+        config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
+        config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
+      end
+
       def validate
         super
+        @ignore_read_extra ||= []
+
         check_property :name, String
         check_property :primary_resource_id, String
-        check_property :vars, Hash
+        check_optional_property :vars, Hash
+        check_optional_property_list :ignore_read_extra, String
+        check_optional_property :skip_test, TrueClass
       end
     end
 

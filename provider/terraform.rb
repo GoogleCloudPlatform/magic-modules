@@ -128,7 +128,6 @@ module Provider
       )
       # TODO: error check goimports
       %x(goimports -w #{filepath})
-
       generate_documentation(data)
     end
 
@@ -138,6 +137,7 @@ module Provider
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       product_name = data[:product_name].underscore
+
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
       generate_resource_file data.clone.merge(
@@ -148,7 +148,7 @@ module Provider
 
     # rubocop:disable Metrics/AbcSize
     def generate_resource_tests(data)
-      return if data[:object].example.nil?
+      return if data[:object].example.reject(&:skip_test).empty?
 
       target_folder = File.join(data[:output_folder], 'google')
       FileUtils.mkpath target_folder
@@ -165,6 +165,8 @@ module Provider
         default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
         out_file: filepath
       )
+      # TODO: error check goimports
+      %x(goimports -w #{filepath})
     end
     # rubocop:enable Metrics/AbcSize
   end

@@ -28,6 +28,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
         address_name: "my-internal-address"
         network_name: "my-network"
         subnetwork_name: "my-subnet"
+    # TODO(rileykarson): Remove this example when instance is supported
+     - !ruby/object:Provider::Terraform::Examples
+       name: "instance_with_ip"
+       primary_resource_id: "static"
+       vars:
+         address_name: "ipv4-address"
+         instance_name: "vm-instance"
     properties:
       address: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
@@ -97,9 +104,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      diskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func:  diskEncryptionKeyDiffSuppress
-        custom_expand: templates/terraform/custom_expand/encryption_key_expand.erb
       sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
@@ -119,7 +123,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_import: templates/terraform/post_import/disk.erb
       constants: templates/terraform/constants/disk.erb
       encoder: templates/terraform/encoders/disk.erb
-      extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
     docs: !ruby/object:Provider::Terraform::Docs
@@ -127,16 +130,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-      optional_properties: |
-        * (Deprecated) `disk_encryption_key_raw`:  This is an alias for
-          `disk_encryption_key.raw_key`.  It is deprecated to enhance
-          consistency with `source_image_encryption_key` and
-          `source_snapshot_encryption_key`.
-      attributes: |
-        * (Deprecated) `disk_encryption_key_sha256`: This is an alias for
-          `disk_encryption_key.sha256`.  It is deprecated to enhance
-          consistency with `source_image_encryption_key` and
-          `source_snapshot_encryption_key`.
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
@@ -505,7 +498,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         vars:
           route_name: "network-route"
           network_name: "compute-network"
-          subnetwork_name: "compute-subnetwork"
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -579,72 +571,25 @@ overrides: !ruby/object:Provider::ResourceOverrides
       optional_properties: |
         * `name_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. Conflicts with `name`.
-    examples: |
-      ```hcl
-      resource "google_compute_ssl_certificate" "default" {
-        name_prefix = "my-certificate-"
-        description = "a description"
-        private_key = "${file("path/to/private.key")}"
-        certificate = "${file("path/to/certificate.crt")}"
-
-        lifecycle {
-          create_before_destroy = true
-        }
-      }
-
-      # You may also want to control name generation explicitly:
-
-      resource "random_id" "certificate" {
-        byte_length = 4
-        prefix      = "my-certificate-"
-
-        # For security, do not expose raw certificate values in the output
-        keepers {
-          private_key = "${base64sha256(file("path/to/private.key"))}"
-          certificate = "${base64sha256(file("path/to/certificate.crt"))}"
-        }
-      }
-
-      resource "google_compute_ssl_certificate" "default" {
-        # The name will contain 8 random hex digits,
-        # e.g. "my-certificate-48ab27cd2a"
-        name        = "${random_id.certificate.hex}"
-        private_key = "${file("path/to/private.key")}"
-        certificate = "${file("path/to/certificate.crt")}"
-
-        lifecycle {
-          create_before_destroy = true
-        }
-      }
-      ```
-      ```hcl
-      // Using with Target HTTPS Proxies
-      //
-      // SSL certificates cannot be updated after creation. In order to apply
-      // the specified configuration, Terraform will destroy the existing
-      // resource and create a replacement. To effectively use an SSL
-      // certificate resource with a Target HTTPS Proxy resource, it's
-      // recommended to specify create_before_destroy in a lifecycle block.
-      // Either omit the Instance Template name attribute, specify a partial
-      // name with name_prefix, or use random_id resource. Example:
-
-      resource "google_compute_ssl_certificate" "default" {
-        name_prefix = "my-certificate-"
-        description = "a description"
-        private_key = "${file("path/to/private.key")}"
-        certificate = "${file("path/to/certificate.crt")}"
-
-        lifecycle {
-          create_before_destroy = true
-        }
-      }
-
-      resource "google_compute_target_https_proxy" "my_proxy" {
-        name             = "public-proxy"
-        url_map          = # ...
-        ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ssl_certificate_basic"
+        primary_resource_id: "default"
+        ignore_read_extra:
+          - "name_prefix"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ssl_certificate_random_provider"
+        primary_resource_id: "default"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ssl_certificate_target_https_proxies"
+        primary_resource_id: "default"
+        vars:
+          target_https_proxy_name: "test-proxy"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
+          http_health_check_name: "http-health-check"
+        ignore_read_extra:
+          - "name_prefix"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
@@ -749,110 +694,29 @@ overrides: !ruby/object:Provider::ResourceOverrides
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
   TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_target_http_proxy" "default" {
-        name        = "test-proxy"
-        description = "a description"
-        url_map     = "${google_compute_url_map.default.self_link}"
-      }
-
-      resource "google_compute_url_map" "default" {
-        name        = "url-map"
-        description = "a description"
-
-        default_service = "${google_compute_backend_service.default.self_link}"
-
-        host_rule {
-          hosts        = ["mysite.com"]
-          path_matcher = "allpaths"
-        }
-
-        path_matcher {
-          name            = "allpaths"
-          default_service = "${google_compute_backend_service.default.self_link}"
-
-          path_rule {
-            paths   = ["/*"]
-            service = "${google_compute_backend_service.default.self_link}"
-          }
-        }
-      }
-
-      resource "google_compute_backend_service" "default" {
-        name        = "default-backend"
-        port_name   = "http"
-        protocol    = "HTTP"
-        timeout_sec = 10
-
-        health_checks = ["${google_compute_http_health_check.default.self_link}"]
-      }
-
-      resource "google_compute_http_health_check" "default" {
-        name               = "test"
-        request_path       = "/"
-        check_interval_sec = 1
-        timeout_sec        = 1
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_http_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          target_http_proxy_name: "test-proxy"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
+          http_health_check_name: "http-health-check"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
   TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_target_https_proxy" "default" {
-        name             = "test-proxy"
-        description      = "a description"
-        url_map          = "${google_compute_url_map.default.self_link}"
-        ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
-      }
-
-      resource "google_compute_ssl_certificate" "default" {
-        name        = "my-certificate"
-        description = "a description"
-        private_key = "${file("path/to/private.key")}"
-        certificate = "${file("path/to/certificate.crt")}"
-      }
-
-      resource "google_compute_url_map" "default" {
-        name        = "url-map"
-        description = "a description"
-
-        default_service = "${google_compute_backend_service.default.self_link}"
-
-        host_rule {
-          hosts        = ["mysite.com"]
-          path_matcher = "allpaths"
-        }
-
-        path_matcher {
-          name            = "allpaths"
-          default_service = "${google_compute_backend_service.default.self_link}"
-
-          path_rule {
-            paths   = ["/*"]
-            service = "${google_compute_backend_service.default.self_link}"
-          }
-        }
-      }
-
-      resource "google_compute_backend_service" "default" {
-        name        = "default-backend"
-        port_name   = "http"
-        protocol    = "HTTP"
-        timeout_sec = 10
-
-        health_checks = ["${google_compute_http_health_check.default.self_link}"]
-      }
-
-      resource "google_compute_http_health_check" "default" {
-        name               = "test"
-        request_path       = "/"
-        check_interval_sec = 1
-        timeout_sec        = 1
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_https_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          target_https_proxy_name: "test-proxy"
+          ssl_certificate_name: "my-certificate"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
+          http_health_check_name: "http-health-check"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
@@ -892,35 +756,15 @@ overrides: !ruby/object:Provider::ResourceOverrides
       # TODO: Custom code needed for updating `instances` and `healthCheck`.
       #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
   TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_target_ssl_proxy" "default" {
-        name = "test"
-        backend_service = "${google_compute_backend_service.default.self_link}"
-        ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
-      }
-
-      resource "google_compute_ssl_certificate" "default" {
-        name = "default-cert"
-        private_key = "${file("path/to/test.key")}"
-        certificate = "${file("path/to/test.crt")}"
-      }
-
-      resource "google_compute_backend_service" "default" {
-        name = "default-backend"
-        protocol    = "SSL"
-        health_checks = ["${google_compute_health_check.default.self_link}"]
-      }
-
-      resource "google_compute_health_check" "default" {
-        name = "default-health-check"
-        check_interval_sec = 1
-        timeout_sec = 1
-        tcp_health_check {
-          port = "443"
-        }
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_ssl_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          target_ssl_proxy_name: "test-proxy"
+          ssl_certificate_name: "default-cert"
+          backend_service_name: "backend-service"
+          health_check_name: "health-check"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
@@ -931,32 +775,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
       sslPolicy: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: false
   TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_target_tcp_proxy" "default" {
-        name = "test"
-        description = "test"
-        backend_service = "${google_compute_backend_service.default.self_link}"
-      }
-
-      resource "google_compute_backend_service" "default" {
-        name        = "default-backend"
-        protocol    = "TCP"
-        timeout_sec = 10
-
-        health_checks = ["${google_compute_health_check.default.self_link}"]
-      }
-
-      resource "google_compute_health_check" "default" {
-        name = "default"
-        timeout_sec        = 1
-        check_interval_sec = 1
-
-        tcp_health_check {
-          port = "443"
-        }
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_tcp_proxy_basic"
+        primary_resource_id: "default"
+        vars:
+          target_tcp_proxy_name: "test-proxy"
+          backend_service_name: "backend-service"
+          health_check_name: "health-check"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: proxyId
@@ -967,74 +793,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
   TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
     name: 'VpnGateway'
     exclude: false
-    examples: |
-      ```hcl
-      resource "google_compute_network" "network1" {
-        name       = "network1"
-        ipv4_range = "10.120.0.0/16"
-      }
-
-      resource "google_compute_vpn_gateway" "target_gateway" {
-        name    = "vpn1"
-        network = "${google_compute_network.network1.self_link}"
-        region  = "${var.region}"
-      }
-
-      resource "google_compute_address" "vpn_static_ip" {
-        name   = "vpn-static-ip"
-        region = "${var.region}"
-      }
-
-      resource "google_compute_forwarding_rule" "fr_esp" {
-        name        = "fr-esp"
-        region      = "${var.region}"
-        ip_protocol = "ESP"
-        ip_address  = "${google_compute_address.vpn_static_ip.address}"
-        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
-      }
-
-      resource "google_compute_forwarding_rule" "fr_udp500" {
-        name        = "fr-udp500"
-        region      = "${var.region}"
-        ip_protocol = "UDP"
-        port_range  = "500"
-        ip_address  = "${google_compute_address.vpn_static_ip.address}"
-        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
-      }
-
-      resource "google_compute_forwarding_rule" "fr_udp4500" {
-        name        = "fr-udp4500"
-        region      = "${var.region}"
-        ip_protocol = "UDP"
-        port_range  = "4500"
-        ip_address  = "${google_compute_address.vpn_static_ip.address}"
-        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
-      }
-
-      resource "google_compute_vpn_tunnel" "tunnel1" {
-        name          = "tunnel1"
-        region        = "${var.region}"
-        peer_ip       = "15.0.0.120"
-        shared_secret = "a secret message"
-
-        target_vpn_gateway = "${google_compute_vpn_gateway.target_gateway.self_link}"
-
-        depends_on = [
-          "google_compute_forwarding_rule.fr_esp",
-          "google_compute_forwarding_rule.fr_udp500",
-          "google_compute_forwarding_rule.fr_udp4500",
-        ]
-      }
-
-      resource "google_compute_route" "route1" {
-        name       = "route1"
-        network    = "${google_compute_network.network1.name}"
-        dest_range = "15.0.0.0/24"
-        priority   = 1000
-
-        next_hop_vpn_tunnel = "${google_compute_vpn_tunnel.tunnel1.self_link}"
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_vpn_gateway_basic"
+        primary_resource_id: "target_gateway"
+        vars:
+          target_vpn_gateway_name: "vpn1"
+          network_name: "network1"
+          address_name: "vpn-static-ip"
+          esp_forwarding_rule_name: "fr-esp"
+          udp500_forwarding_rule_name: "fr-udp500"
+          udp4500_forwarding_rule_name: "fr-udp4500"
+          vpn_tunnel_name: "tunnel1"
+          route_name: "route1"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -1049,79 +820,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_compute_network" "network1" {
-        name = "network1"
-      }
-
-      resource "google_compute_subnetwork" "subnet1" {
-        name          = "subnet1"
-        network       = "${google_compute_network.network1.self_link}"
-        ip_cidr_range = "10.120.0.0/16"
-        region        = "us-central1"
-      }
-
-      resource "google_compute_vpn_gateway" "target_gateway" {
-        name    = "vpn1"
-        network = "${google_compute_network.network1.self_link}"
-        region  = "${google_compute_subnetwork.subnet1.region}"
-      }
-
-      resource "google_compute_address" "vpn_static_ip" {
-        name   = "vpn-static-ip"
-        region = "${google_compute_subnetwork.subnet1.region}"
-      }
-
-      resource "google_compute_forwarding_rule" "fr_esp" {
-        name        = "fr-esp"
-        ip_protocol = "ESP"
-        ip_address  = "${google_compute_address.vpn_static_ip.address}"
-        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
-      }
-
-      resource "google_compute_forwarding_rule" "fr_udp500" {
-        name        = "fr-udp500"
-        ip_protocol = "UDP"
-        port_range  = "500-500"
-        ip_address  = "${google_compute_address.vpn_static_ip.address}"
-        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
-      }
-
-      resource "google_compute_forwarding_rule" "fr_udp4500" {
-        name        = "fr-udp4500"
-        ip_protocol = "UDP"
-        port_range  = "4500-4500"
-        ip_address  = "${google_compute_address.vpn_static_ip.address}"
-        target      = "${google_compute_vpn_gateway.target_gateway.self_link}"
-      }
-
-      resource "google_compute_vpn_tunnel" "tunnel1" {
-        name          = "tunnel1"
-        peer_ip       = "15.0.0.120"
-        shared_secret = "a secret message"
-
-        target_vpn_gateway = "${google_compute_vpn_gateway.target_gateway.self_link}"
-
-        local_traffic_selector  = ["${google_compute_subnetwork.subnet1.ip_cidr_range}"]
-        remote_traffic_selector = ["172.16.0.0/12"]
-
-        depends_on = [
-          "google_compute_forwarding_rule.fr_esp",
-          "google_compute_forwarding_rule.fr_udp500",
-          "google_compute_forwarding_rule.fr_udp4500",
-        ]
-      }
-
-      resource "google_compute_route" "route1" {
-        name       = "route1"
-        network    = "${google_compute_network.network1.name}"
-        dest_range = "15.0.0.0/24"
-        priority   = 1000
-
-        next_hop_vpn_tunnel = "${google_compute_vpn_tunnel.tunnel1.self_link}"
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vpn_tunnel_basic"
+        primary_resource_id: "tunnel1"
+        vars:
+          vpn_tunnel_name: "tunnel1"
+          target_vpn_gateway_name: "vpn1"
+          network_name: "network1"
+          address_name: "vpn-static-ip"
+          esp_forwarding_rule_name: "fr-esp"
+          udp500_forwarding_rule_name: "fr-udp500"
+          udp4500_forwarding_rule_name: "fr-udp4500"
+          route_name: "route1"
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         All arguments including the shared secret will be stored in the raw

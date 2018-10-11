@@ -23,11 +23,10 @@ automatically install this module, as it will be listed in their dependencies._
 
 ### Required gem (libraries)
 
-The authentication module depends on a gem released by Google. Puppet does not
-install gems automatically as it is to change the underlying system without
-administrator consent. To install it run:
+The authentication module depends on gems released by Google. Puppet does not
+install gems automatically as part of installing modules. To install, run:
 
-    gem install googleauth google-api-client
+    /opt/puppetlabs/puppet/bin/gem install googleauth google-api-client
 
 As everything related to system configuration, you can install the gem using
 Puppet itself ;-)...
@@ -38,31 +37,9 @@ package { [
     'google-api-client',
   ]:
     ensure   => present,
-    provider => gem,
+    provider => puppet_gem,
 }
 ```
-
-#### Installing gems for Puppet Agent/Master only
-
-In case you wish to use Google gems exclusively on Puppet you can install them
-into the Puppet Ruby sandbox. That will have less requirement burden, as it will
-not require to have `rubygems` and other Ruby packages to be installed on the
-host.
-
-    puppet resource package googleauth ensure=present provider=puppet_gem
-    puppet resource package google-api-client ensure=present provider=puppet_gem
-
-Once executed it will output the confirmation and version installed:
-
-    Notice: /Package[googleauth]/ensure: created
-    package { 'googleauth':
-      ensure => ['0.6.2'],
-    }
-
-    Notice: /Package[google-api-client]/ensure: created
-    package { 'google-api-client':
-      ensure => ['0.19.8'],
-    }
 
 ## Usage
 

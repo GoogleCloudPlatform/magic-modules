@@ -49,6 +49,21 @@ Puppet module installer:
 
     puppet module install google/cloud
 
+Since these modules depend on the `googleauth` and `google-api-client` gems,
+you will also need to install those, with
+
+    /opt/puppetlabs/puppet/bin/gem install googleauth google-api-client
+
+If you prefer, you could also add the following to your puppet manifest:
+
+		package { [
+				'googleauth',
+				'google-api-client',
+			]:
+				ensure   => present,
+				provider => puppet_gem,
+		}
+
 ### Upgrading pre-release versions
 
 If you already have pre-release modules installed (pre-release = modules with

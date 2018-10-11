@@ -44,7 +44,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if TF_PR=$(hub pull-request -b "$TERRAFORM_REPO_USER/terraform-provider-google:master" -F ./downstream_body); then
+    if TF_PR=$(hub pull-request -b "$TERRAFORM_REPO_USER/terraform-provider-google:2.0.0" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $TF_PR ${NEWLINE}"
     else
       echo "Terraform - did not generate a PR."

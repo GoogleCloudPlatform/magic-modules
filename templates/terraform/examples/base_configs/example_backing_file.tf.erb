@@ -1,0 +1,8 @@
+<% autogen_exception -%>
+locals {
+  name_suffix = "${random_pet.suffix.id}"
+}
+
+resource "random_pet" "suffix" {
+  length = 2
+}
