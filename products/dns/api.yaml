@@ -144,7 +144,6 @@ objects:
       CAA, MX, CNAME, NS, etc)
     base_url: |
       projects/{{project}}/managedZones/{{managed_zone}}/changes
-      <|extra|>
     self_link: |
       projects/{{project}}/managedZones/{{managed_zone}}/rrsets
       ?name={{name}}&type={{type}}
