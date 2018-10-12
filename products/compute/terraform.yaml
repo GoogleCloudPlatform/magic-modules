@@ -811,6 +811,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       hostRules: !ruby/object:Provider::Terraform::PropertyOverride
         name: "host_rule"
         is_set: true
+      hostRules.hosts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
       pathMatchers: !ruby/object:Provider::Terraform::PropertyOverride
         name: "path_matcher"
       pathMatchers.defaultService: !ruby/object:Provider::Terraform::PropertyOverride
@@ -818,6 +820,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         description: The backend service or backend bucket to use when none of the given paths match.
       pathMatchers.pathRules: !ruby/object:Provider::Terraform::PropertyOverride
         name: "path_rule"
+      pathMatchers.pathRules.paths: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
       pathMatchers.pathRules.service: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket to use if any of the given paths match.
