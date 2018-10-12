@@ -65,7 +65,6 @@ url = "'#{url}'"
   end
 <% end # object.self_link_query.nil? -%>
 
-  # TODO
   def parse
  <%
   fetch_code = object.properties.reject(&:input).map do |prop|
