@@ -21,6 +21,7 @@ module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
   class Inspec < Provider::Core
+    include Google::RubyUtils
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
