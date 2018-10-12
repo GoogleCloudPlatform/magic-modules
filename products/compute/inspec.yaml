@@ -11,9 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO(alexstephen): Match all objects w/ Puppet.
-# TODO(alexstephen): Match all special behavior Puppet <=> Chef, e.g. cannot
-# edit InstanceGroup
 --- !ruby/object:Provider::Inspec::Config
 manifest: !ruby/object:Provider::Inspec::Manifest
   version: '0.1.0'
