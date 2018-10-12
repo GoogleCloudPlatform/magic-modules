@@ -24,10 +24,16 @@
 <% end -%>
 # Copy all of the terraform resources that are still hand written
 <%
-  Dir["provider/terraform/resources/*#{api.prefix[1..-1]}*"].each do |file_path|
+  Dir["templates/terraform/resources/*#{api.prefix[1..-1]}*"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname -%>': 'provider/terraform/resources/<%= fname -%>'
+'<%= dir -%>/<%= fname -%>': 'templates/terraform/resources/<%= fname -%>'
+<% end -%>
+<%
+  Dir["templates/terraform/data_sources/*#{api.prefix[1..-1]}*"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname -%>': 'templates/terraform/data_sources/<%= fname -%>'
 <% end -%>
 
 '<%= dir -%>/transport.go': 'templates/terraform/transport.go'
