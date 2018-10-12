@@ -104,5 +104,17 @@ module Provider
     def typed_array? (property) 
       return property.is_a?(::Api::Type::Array)
     end
+
+    def nested_object? (property) 
+      return property.is_a?(::Api::Type::NestedObject)
+    end
+
+    def generate_requires(properties, requires = [])
+      nested_props = properties.select{ |type| nested_object?(type) }
+      requires.concat(properties.reject{ |type| primitive?(type) || resource_ref?(type) || nested_object?(type) }.collect(&:requires))
+      requires.concat(nested_props.map{|nested_prop| generate_requires(nested_prop.properties) } )
+      requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
+      requires
+    end
   end
 end

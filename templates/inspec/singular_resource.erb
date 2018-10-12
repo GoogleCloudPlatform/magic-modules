@@ -16,6 +16,17 @@
 
 <%= lines(autogen_notice :ruby) -%>
 
+<%
+  require 'google/string_utils'
+
+  inside_indent = 8
+
+  requires = generate_requires(object.all_user_properties)
+  requires << 'inspec/resource'
+  requires << 'google/hash_utils'
+-%>
+<%= lines(emit_requires(requires)) -%>
+
 # A provider to manage <%= @api.name -%> resources.
 <%= lines(indent(
   emit_rubocop(binding, :class,
