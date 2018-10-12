@@ -22,10 +22,23 @@ module Google
       class <%= class_name -%>
 
         def initialize(args = nil)
-          return nil
+          return nil if args.nil?
+<% nested_properties.each do |prop| -%>
+<%
+  if primitive?(prop)
+    init = "args['#{prop.api_name}']"
+  elsif typed_array?(prop)
+    init = "#{prop.property_type}.parse(args['#{prop.api_name}'])"
+  else 
+    init = "#{prop.property_type}.new(args['#{prop.api_name}'])"    
+  end
+  parse_code = "@#{prop.out_name} = #{init}"
+-%>
+<%= lines(indent(parse_code, 10)) -%>
+<% end # nested_properties.each -%>
         end
       end
-      
+
 <% if emit_array -%>
       class <%= class_name %>Array
         def self.parse(value)
