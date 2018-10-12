@@ -65,8 +65,44 @@ module Provider
 
     def emit_resourceref_object(data) end
 
-    def emit_nested_object(data) end
-
     def generate_network_datas(data, object) end
+
+    def emit_nested_object(data)
+      target = if data[:emit_array]
+                 data[:property].item_type.property_file
+               else
+                 data[:property].property_file
+               end
+      {
+        source: File.join('templates', 'inspec', 'nested_object.erb'),
+        target: "libraries/#{target}.rb",
+        overrides: emit_nested_object_overrides(data)
+      }
+    end
+
+    def emit_nested_object_overrides(data)
+      data.clone.merge(
+        api_name: data[:api_name].camelize(:upper),
+        object_type: data[:obj_name].camelize(:upper),
+        product_ns: data[:product_name].camelize(:upper),
+        class_name: if data[:emit_array]
+                      data[:property].item_type.property_class.last
+                    else
+                      data[:property].property_class.last
+                    end
+      )
+    end
+
+    def primitive? (property) 
+      return property.is_a?(::Api::Type::Primitive) || (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+    end
+
+    def resource_ref? (property) 
+      return property.is_a?(::Api::Type::ResourceRef)
+    end
+
+    def typed_array? (property) 
+      return property.is_a?(::Api::Type::Array)
+    end
   end
 end
