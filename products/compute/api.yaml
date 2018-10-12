@@ -3869,6 +3869,7 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: 'paths'
+                    required: true
                     item_type: Api::Type::String
                     description: |
                       The list of path patterns to match. Each must start with /
