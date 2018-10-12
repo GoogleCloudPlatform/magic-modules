@@ -82,7 +82,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if INSPEC_PR=$(hub pull-request -b "$INSPEC_REPO_USER/inspec:devel" -F ./downstream_body); then
+    if INSPEC_PR=$(hub pull-request -b "$INSPEC_REPO_USER/inspec:master" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $INSPEC_PR ${NEWLINE}"
     else
       echo "InSpec - did not generate a PR."
