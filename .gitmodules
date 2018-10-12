@@ -81,3 +81,6 @@
 [submodule "build/chef/iam"]
 	path = build/chef/iam
 	url = git@github.com:GoogleCloudPlatform/chef-google-iam.git
+[submodule "build/inspec"]
+	path = build/inspec
+	url = git@github.com:modular-magician/inspec-gcp.git
