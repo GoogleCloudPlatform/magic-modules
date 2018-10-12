@@ -972,6 +972,7 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -1785,6 +1786,7 @@ objects:
     name: 'Instance'
     kind: 'compute#instance'
     base_url: projects/{{project}}/zones/{{zone}}/instances
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1850,6 +1852,8 @@ objects:
         resource: 'MachineType'
         imports: 'selfLink'
         description: 'A reference to a machine type which defines VM kind.'
+        update_url: projdcts/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
+        update_verb: :POST
       # TODO(alexstephen): Add metatdata
       - !ruby/object:Api::Type::String
         name: 'minCpuPlatform'
@@ -2165,6 +2169,106 @@ objects:
           The target number of running instances for this managed instance
           group. Deleting or abandoning instances reduces this number. Resizing
           the group changes this number.
+  - !ruby/object:Api::Resource
+    name: 'InterconnectAttachment'
+    kind: 'compute#interconnectAttachment'
+    base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    input: true
+    description: |
+      Represents an InterconnectAttachment (VLAN attachment) resource. For more
+      information, see Creating VLAN Attachments.
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        required: true
+        description: |
+          Region where the regional interconnect attachment resides.
+    properties:
+      - !ruby/object:Api::Type::String 
+        name: 'cloudRouterIpAddress'
+        description: |
+          IPv4 address + prefix length to be configured on Cloud Router
+          Interface for this interconnect attachment.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'customerRouterIpAddress'
+        description: |
+          IPv4 address + prefix length to be configured on the customer
+          router subinterface for this interconnect attachment.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'interconnect'
+        description: |
+          URL of the underlying Interconnect object that this attachment's traffic will
+          traverse through.
+        required: true
+      - !ruby/object:Api::Type::String 
+        name: 'description'
+        description: |
+          An optional description of this resource. 
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateInterconnectInfo'
+        description: |
+          Information specific to an InterconnectAttachment. This property
+          is populated if the interconnect that this is attached to is of type DEDICATED.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: tag8021q
+            description: |
+              802.1q encapsulation tag to be used for traffic between
+              Google and the customer, going to and from this network and region.
+            output: true
+      - !ruby/object:Api::Type::String 
+        name: 'googleReferenceId'
+        description: |
+          Google reference ID, to be used when raising support tickets with
+          Google or otherwise to debug backend connectivity issues.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'operationalStatus'
+        description: |
+          The current status of whether or not this interconnect attachment
+          is functional.
+        output: true
+        exclude: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'router'
+        resource: 'Router'
+        imports: 'selfLink'
+        description: |
+          URL of the cloud router to be used for dynamic routing. This router must be in
+          the same region as this InterconnectAttachment. The InterconnectAttachment will
+          automatically connect the Interconnect to the network & region within which the
+          Cloud Router is configured.
+        required: true
+      - !ruby/object:Api::Type::Time 
+        name: 'creationTimestamp'
+        description: |
+          Creation timestamp in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'id'
+        description: |
+          The unique identifier for the resource. This identifier is
+          defined by the server.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is created. The
+          name must be 1-63 characters long, and comply with RFC1035. Specifically, the
+          name must be 1-63 characters long and match the regular expression
+          `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first character must be a
+          lowercase letter, and all following characters must be a dash, lowercase
+          letter, or digit, except the last character, which cannot be a dash.
+        required: true
   - !ruby/object:Api::Resource
     name: 'MachineType'
     kind: 'compute#machineType'

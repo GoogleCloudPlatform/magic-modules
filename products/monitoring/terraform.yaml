@@ -85,6 +85,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_create: templates/terraform/post_create/group.erb
 
 files: !ruby/object:Provider::Config::Files
+  # All of these files will be copied verbatim.
   copy:
 <%= lines(indent(compile('provider/terraform/common~copy.yaml'), 4)) -%>
   # These files have templating (ERB) code that will be run.

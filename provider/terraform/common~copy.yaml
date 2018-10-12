@@ -12,7 +12,6 @@
 # limitations under the License.
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
-
 <%
   dir = _version_name == 'beta' ? 'google-beta' : 'google'
   Dir["templates/terraform/tests/*#{api.prefix[1..-1]}*"].each do |file_path|
@@ -22,7 +21,6 @@
 # Adding them here allows updating the tests as part of a MM pull request.
 '<%= dir -%>/<%= fname -%>': 'templates/terraform/tests/<%= fname -%>'
 <% end -%>
-
 '<%= dir -%>/transport.go': 'templates/terraform/transport.go'
 '<%= dir -%>/transport_test.go': 'templates/terraform/transport_test.go'
 '<%= dir -%>/import.go': 'templates/terraform/import.go'

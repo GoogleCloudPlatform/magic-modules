@@ -33,6 +33,8 @@ module Google
         value.to_s
       elsif value.is_a?(Array) && value.all? { |v| v.is_a?(String) || v.is_a?(Symbol) }
         "[]string{#{value.map(&method(:go_literal)).join(', ')}}"
+      elsif value.is_a?(TrueClass) || value.is_a?(FalseClass)
+        value.to_s
       else
         raise "Unsupported go literal #{value}"
       end
