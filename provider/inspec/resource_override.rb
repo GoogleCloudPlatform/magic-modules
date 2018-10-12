@@ -23,7 +23,6 @@ module Provider
 
     # Custom inspec code to handle type convergence operations
     class Handlers < Api::Object
-
       def validate
         super
       end

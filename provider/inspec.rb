@@ -21,7 +21,6 @@ module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
   class Inspec < Provider::Core
-
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -36,7 +35,6 @@ module Provider
       def property_override
         Provider::Inspec::PropertyOverride
       end
-
     end
 
     # This function uses the resource templates to create singular and plural
@@ -56,22 +54,16 @@ module Provider
     end
 
     # TODO?
-    def generate_resource_tests(data)
-    end
+    def generate_resource_tests(data) end
 
-    def generate_base_property(data)
-    end
+    def generate_base_property(data) end
 
-    def generate_simple_property(type, data) 
-    end
+    def generate_simple_property(type, data) end
 
-    def generate_typed_array(data, prop)
-    end
+    def generate_typed_array(data, prop) end
 
-    def emit_resourceref_object(data)
-    end
+    def emit_resourceref_object(data) end
     
-    def emit_nested_object(data)
-    end
+    def emit_nested_object(data) end
   end
 end
