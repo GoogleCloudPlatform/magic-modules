@@ -10,5 +10,5 @@ run:
   path: magic-modules/.ci/unit-tests/inspec.sh
 params:
   PRODUCT: ""
-  PROVIDER: chef
+  PROVIDER: inspec
   EXCLUDE_PATTERN: ""
