@@ -40,3 +40,4 @@ this PR's changes from the commit messages for downstream commits.
 ### [chef-sql]
 ### [chef-storage]
 ## [ansible]
+## [inspec]
