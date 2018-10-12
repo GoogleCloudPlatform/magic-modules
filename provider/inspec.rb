@@ -63,7 +63,7 @@ module Provider
     def generate_typed_array(data, prop) end
 
     def emit_resourceref_object(data) end
-    
+
     def emit_nested_object(data) end
   end
 end
