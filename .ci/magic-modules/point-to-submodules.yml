@@ -24,6 +24,7 @@ params:
   CREDS: ""
   TERRAFORM_ENABLED: false
   ANSIBLE_ENABLED: false
+  INSPEC_ENABLED: false
   PUPPET_MODULES: ""
   CHEF_MODULES: ""
 
