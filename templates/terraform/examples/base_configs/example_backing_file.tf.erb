@@ -1,4 +1,7 @@
 <% autogen_exception -%>
+# This file has some scaffolding to make sure that names are unique when you
+# try to create your Terraform resources.
+
 locals {
   name_suffix = "${random_pet.suffix.id}"
 }

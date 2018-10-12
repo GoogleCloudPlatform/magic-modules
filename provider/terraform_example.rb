@@ -47,7 +47,7 @@ module Provider
 
         generate_resource_file data.clone.merge(
           default_template: 'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-          out_file: File.join(target_folder, 'name_prefix.tf')
+          out_file: File.join(target_folder, 'name_suffix.tf')
         )
 
         generate_resource_file data.clone.merge(

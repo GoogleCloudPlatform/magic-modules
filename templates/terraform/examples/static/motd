@@ -1,11 +1,6 @@
 <% autogen_exception -%>
 ===
 
-Quickstart:
-1. Type 'export GOOGLE_CLOUD_PROJECT="{{PROJECT-NAME}}"' with your project name
-2. Run 'terraform init'
-3. Run 'terraform apply'!
-
 These examples use real resources that will be billed to the
 Google Cloud Platform project you use - so make sure that you
 run "terraform destroy" before quitting!
