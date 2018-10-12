@@ -79,12 +79,10 @@ objects:
              The email address of the user making the change.
       - !ruby/object:Api::Type::Boolean
         name: enabled
-        # TODO fix MM to accept default boolean values
-        # default_value: true
+        default_value: true
         send_empty_value: true
-        required: true
         description: |
-          Whether or not the policy is enabled.
+          Whether or not the policy is enabled. The default is true.
       - !ruby/object:Api::Type::Array
         name: 'conditions'
         description: |
