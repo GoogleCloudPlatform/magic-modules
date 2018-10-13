@@ -33,7 +33,7 @@ git add -A
 git commit -m "$INSPEC_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/modular-magician/inspec" "$INSPEC_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "devel"
+apply_patches "$PATCH_DIR/modular-magician/inspec-gcp" "$INSPEC_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
 popd
 popd
 
