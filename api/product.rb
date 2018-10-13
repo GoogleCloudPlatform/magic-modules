@@ -93,7 +93,7 @@ module Api
 
     def exists_at_version_or_lower(name)
       return true if @versions.nil?
-      name ||= 'ga'
+      name ||= Version::ORDER[0]
       return false unless Version::ORDER.include?(name)
       (0..Version::ORDER.index(name)).each do |i|
         return true if exists_at_version(Version::ORDER[i])
@@ -103,10 +103,7 @@ module Api
 
     def exists_at_version(name)
       return true if @versions.nil?
-      @versions.each do |v|
-        return true if v.name == name
-      end
-      false
+      @versions.any? { |v| v.name == name }
     end
 
     private
