@@ -9,6 +9,7 @@ source "$(dirname "$0")/helpers.sh"
 PATCH_DIR="$(pwd)/patches"
 pushd magic-modules-branched
 LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
+find build/inspec/ -type f -not -name '.git*' -not -name '.last_run.json' -print0 | xargs -0 rm -rf --
 bundle install
 for i in $(find products/ -name 'inspec.yaml' -printf '%h\n');
 do
