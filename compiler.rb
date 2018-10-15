@@ -117,6 +117,12 @@ product_names.each do |product_name|
   product_api.validate
   pp product_api if ENV['COMPILER_DEBUG']
 
+  unless product_api.exists_at_version_or_lower(version)
+    Google::LOGGER.info \
+      "'#{product_name}' does not have a '#{version}' version, skipping"
+    next
+  end
+
   provider_config = \
     Provider::Config.parse(provider_yaml_path, product_api, version)
   pp provider_config if ENV['COMPILER_DEBUG']

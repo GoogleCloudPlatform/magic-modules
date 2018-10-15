@@ -111,18 +111,26 @@ module Provider
       end
 
       def config_example
-        lines(compile_file(
-                {
-                  vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
-                  primary_resource_id: primary_resource_id
-                },
-                "templates/terraform/examples/#{name}.tf.erb"
+        @vars ||= []
+        body = lines(compile_file(
+                       {
+                         vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
+                         primary_resource_id: primary_resource_id
+                       },
+                       "templates/terraform/examples/#{name}.tf.erb"
         ))
+
+        substitute_example_paths body
       end
 
       def substitute_test_paths(config)
         config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
         config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
+      end
+
+      def substitute_example_paths(config)
+        config = config.gsub('path/to/private.key', '../static/ssl_cert/test.key')
+        config.gsub('path/to/certificate.crt', '../static/ssl_cert/test.crt')
       end
 
       def validate

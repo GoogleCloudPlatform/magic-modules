@@ -24,8 +24,9 @@ module Provider
     end
 
     # Create a directory of examples per resource
+    # rubocop:disable Metrics/AbcSize
     def generate_resource(data)
-      return if data[:object].example.nil?
+      return if data[:object].example.reject(&:skip_test).empty?
 
       data[:object].example.each do |example|
         target_folder = data[:output_folder]
@@ -39,11 +40,23 @@ module Provider
         )
 
         generate_resource_file data.clone.merge(
+          example: example,
+          default_template: 'templates/terraform/examples/base_configs/tutorial.md.erb',
+          out_file: File.join(target_folder, 'tutorial.md')
+        )
+
+        generate_resource_file data.clone.merge(
           default_template: 'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-          out_file: File.join(target_folder, 'name_prefix.tf')
+          out_file: File.join(target_folder, 'backing_file.tf')
+        )
+
+        generate_resource_file data.clone.merge(
+          default_template: 'templates/terraform/examples/static/motd',
+          out_file: File.join(target_folder, 'motd')
         )
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     # rubocop:disable Layout/EmptyLineBetweenDefs
     # We don't want to generate anything but the resource.
