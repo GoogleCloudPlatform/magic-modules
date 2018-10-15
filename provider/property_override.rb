@@ -20,6 +20,16 @@ module Provider
   class PropertyOverride < Api::Object
     attr_reader :new_type
 
+    # Ordering of overrides can be important so this property makes the
+    # ordering more deterministic. It supports positive or negative numbers
+    # with the lowest number getting imported first.
+    # The default is equal to the negative depth of the metric. This makes
+    # sure that more deeply nested fields happen first.
+    #   eg, for the compute.disk resource
+    # sourceSnapshotEncryptionKey.rawKey has an order of -2
+    # sourceSnapshotEncryptionKey has an order of -1
+    attr_reader :override_order
+
     include Api::Type::Fields
     # To allow overrides for type-specific fields, include those type's
     # fields with an 'include' directive here.

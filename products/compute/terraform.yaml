@@ -105,9 +105,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
+        # sourceImage must be overridden first because it creates the 'image' property
+        override_order: -1
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
       image: !ruby/object:Provider::Terraform::PropertyOverride
+        override_order: 5
         description: |
           The image from which to initialize this disk. This can be
           one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
@@ -123,6 +126,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_import: templates/terraform/post_import/disk.erb
       constants: templates/terraform/constants/disk.erb
       encoder: templates/terraform/encoders/disk.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
       decoder: templates/terraform/decoders/disk.erb
       resource_definition: templates/terraform/resource_definition/disk.erb
     docs: !ruby/object:Provider::Terraform::Docs
@@ -412,6 +416,33 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   InstanceTemplate: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
+  InterconnectAttachment: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      router: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      interconnect: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+    examples: |
+      ```hcl
+      resource "google_compute_router" "foobar" {
+        name    = "my-router"
+        network = "${google_compute_network.foobar.name}"
+      }
+
+      resource "google_compute_interconnect_attachment" "default" {
+        name         = "test-interconnect"
+        interconnect = "my-interconnect-id"
+        router       = "${google_compute_router.foobar.self_link}"
+      }
+      ```
   License: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Provider::Terraform::ResourceOverride
@@ -791,7 +822,45 @@ overrides: !ruby/object:Provider::ResourceOverrides
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_basic"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          login_backend_service_name: "login"
+          home_backend_service_name: "home"
+          http_health_check_name: "health-check"
+          backend_bucket_name: "static-asset-backend-bucket"
+          storage_bucket_name: "static-asset-bucket"
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "map_id"
+      defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use when none of the given rules match.
+      hostRules: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "host_rule"
+        is_set: true
+      hostRules.hosts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      pathMatchers: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "path_matcher"
+      pathMatchers.defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use when none of the given paths match.
+      pathMatchers.pathRules: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "path_rule"
+      pathMatchers.pathRules.paths: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      pathMatchers.pathRules.service: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use if any of the given paths match.
+      tests.service: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket link that should be matched by this test.
+      tests: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "test"
   VpnTunnel: !ruby/object:Provider::Terraform::ResourceOverride
     example:
       - !ruby/object:Provider::Terraform::Examples
@@ -840,55 +909,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
       constants: templates/terraform/constants/vpn_tunnel.erb
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
-# This is for a list of example files.
-examples: !ruby/object:Api::Resource::HashArray
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # All of these files will be copied verbatim.
   copy:
-    'google/transport.go': 'templates/terraform/transport.go'
-    'google/transport_test.go': 'templates/terraform/transport_test.go'
-    'google/import.go': 'templates/terraform/import.go'
-    'google/import_test.go': 'templates/terraform/import_test.go'
-    # Handwritten acceptance tests for autogenerated resources.
-    # Adding them here allows updating the tests as part of a MM pull request.
-    'google/resource_compute_address_test.go':
-      'templates/terraform/tests/resource_compute_address_test.go'
-    'google/resource_compute_autoscaler_test.go':
-      'templates/terraform/tests/resource_compute_autoscaler_test.go'
-    'google/resource_compute_firewall_test.go':
-      'templates/terraform/tests/resource_compute_firewall_test.go'
-    'google/resource_compute_global_address_test.go':
-      'templates/terraform/tests/resource_compute_global_address_test.go'
-    'google/resource_compute_health_check_test.go':
-      'templates/terraform/tests/resource_compute_health_check_test.go'
-    'google/resource_compute_region_autoscaler_test.go':
-      'templates/terraform/tests/resource_compute_region_autoscaler_test.go'
-    'google/resource_compute_region_disk_test.go':
-      'templates/terraform/tests/resource_compute_region_disk_test.go'
-    'google/resource_compute_router_test.go':
-      'templates/terraform/tests/resource_compute_router_test.go'
-    'google/resource_compute_ssl_certificate_test.go':
-      'templates/terraform/tests/resource_compute_ssl_certificate_test.go'
-    'google/resource_compute_target_https_proxy_test.go':
-      'templates/terraform/tests/resource_compute_target_https_proxy_test.go'
-    'google/resource_compute_target_ssl_proxy_test.go':
-      'templates/terraform/tests/resource_compute_target_ssl_proxy_test.go'
-    'google/resource_compute_vpn_tunnel_test.go':
-      'templates/terraform/tests/resource_compute_vpn_tunnel_test.go'
+<%= lines(indent(compile('provider/terraform/common~copy.yaml'), 4)) -%>
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
-    'google/provider_{{product_name}}_gen.go': 'templates/terraform/provider_gen.erb'
-
-# This is for custom testing code. All of our tests follow a specific pattern
-# that sometimes needs to be deviated from. We're working towards a world where
-# these handwritten tests would be unnecessary in many cases (custom types).
-tests: !ruby/object:Api::Resource::HashArray
-
-# This would be for custom network responses. Tests work by running some block
-# of autogenerated code and then verifying the network calls.
-# The network call verifications are automatically generated, but can be
-# overriden.
-test_data: !ruby/object:Provider::Config::TestData
+<%= lines(indent(compile('provider/terraform/common~compile.yaml'), 4)) -%>
