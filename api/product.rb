@@ -92,8 +92,10 @@ module Api
     # rubocop:enable Naming/AccessorMethodName
 
     def exists_at_version_or_lower(name)
+      # Versions aren't normally going to be empty since products need a
+      # base_url. This nil check exists for atypical products, like _bundle.
       return true if @versions.nil?
-      name ||= 'ga'
+      name ||= Version::ORDER[0]
       return false unless Version::ORDER.include?(name)
       (0..Version::ORDER.index(name)).each do |i|
         return true if exists_at_version(Version::ORDER[i])
@@ -102,12 +104,10 @@ module Api
     end
 
     def exists_at_version(name)
+      # Versions aren't normally going to be empty since products need a
+      # base_url. This nil check exists for atypical products, like _bundle.
       return true if @versions.nil?
-      @versions.each do |v|
-        return true if v.name == name
-      end
-
-      false
+      @versions.any? { |v| v.name == name }
     end
 
     private
