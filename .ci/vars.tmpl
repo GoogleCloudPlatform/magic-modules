@@ -10,7 +10,7 @@ build/{{repo}}/{{name}}
 {% set chef_submodules = names_as_list('chef', chef_modules).split() %}
 {%
   set all_submodules = puppet_submodules + chef_submodules +
-     (['build/terraform'] + ['build/ansible'])
+     (['build/terraform'] + ['build/ansible'] + ['build/inspec'])
 %}
 {% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
 {% set chef_test_excludes = {

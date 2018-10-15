@@ -56,6 +56,12 @@ resources:
           uri: git@github.com:((github-account.username))/ansible.git
           private_key: ((repo-key.private_key))
 
+    - name: inspec-intermediate
+      type: git-branch
+      source:
+          uri: git@github.com:((github-account.username))/inspec-gcp.git
+          private_key: ((repo-key.private_key))
+
 {% for module in vars.puppet_modules %}
     - name: puppet-{{module}}-intermediate
       type: git-branch
@@ -154,6 +160,18 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
+            - do:
+                # consumes: magic-modules-branched
+                # produces: inspec-generated
+              - task: generate-inspec
+                file: magic-modules-branched/.ci/magic-modules/generate-inspec.yml
+              # Puts 'inspec-generated' into the robot's fork.
+              - put: inspec-intermediate
+                params:
+                    repository: inspec-generated
+                    branch_file: magic-modules-branched/branchname
+                    only_if_diff: true
+                    force: true
           {% if vars.puppet_modules %}
             - do:
                 # consumes: magic-modules-branched
@@ -210,6 +228,7 @@ jobs:
                 CHEF_MODULES: {{','.join(vars.chef_modules)}}
                 TERRAFORM_ENABLED: true
                 ANSIBLE_ENABLED: true
+                INSPEC_ENABLED: true
 
           # Push the magic modules branch that contains the updated submodules.
           - put: magic-modules
@@ -258,6 +277,27 @@ jobs:
                 params:
                   status: failure
                   context: ansible-tests
+                  path: magic-modules-new-prs
+
+    - name: inspec-test
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [build/inspec]
+          passed: [mm-generate]
+        - task: test
+          file: magic-modules/.ci/unit-tests/inspec.yml
+          timeout: 30m
+          on_failure:
+              do:
+              - get: magic-modules-new-prs
+                passed: [mm-generate]
+              - put: magic-modules-new-prs
+                params:
+                  status: failure
+                  context: inspec-tests
                   path: magic-modules-new-prs
 
     - name: puppet-test
@@ -341,6 +381,7 @@ jobs:
               {%- endif %}
               - terraform-test
               - ansible-test
+              - inspec-test
           - get: mm-initial-pr
             resource: magic-modules-new-prs
             passed: [mm-generate]
@@ -357,6 +398,7 @@ jobs:
                 # is what you change if you want to test this in a non-live environment.
                 TERRAFORM_REPO_USER: terraform-providers
                 ANSIBLE_REPO_USER: modular-magician
+                INSPEC_REPO_USER: modular-magician
                 {%- if vars.puppet_modules %}
                 PUPPET_REPO_USER: GoogleCloudPlatform
                 PUPPET_MODULES: {{','.join(vars.puppet_modules)}}
@@ -393,6 +435,13 @@ jobs:
             - put: ansible-intermediate
               params:
                 repository: magic-modules-with-comment/build/ansible
+                branch_file: magic-modules-with-comment/original_pr_branch_name
+                # See comment on terraform-intermediate
+                only_if_diff: true
+                force: true
+            - put: inspec-intermediate
+              params:
+                repository: magic-modules-with-comment/build/inspec
                 branch_file: magic-modules-with-comment/original_pr_branch_name
                 # See comment on terraform-intermediate
                 only_if_diff: true
