@@ -65,5 +65,7 @@ module Provider
     def emit_resourceref_object(data) end
 
     def emit_nested_object(data) end
+
+    def generate_network_datas(data, object) end
   end
 end
