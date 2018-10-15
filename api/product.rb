@@ -92,6 +92,8 @@ module Api
     # rubocop:enable Naming/AccessorMethodName
 
     def exists_at_version_or_lower(name)
+      # Versions aren't normally going to be empty since products need a
+      # base_url. This nil check exists for atypical products, like _bundle.
       return true if @versions.nil?
       name ||= Version::ORDER[0]
       return false unless Version::ORDER.include?(name)
@@ -102,6 +104,8 @@ module Api
     end
 
     def exists_at_version(name)
+      # Versions aren't normally going to be empty since products need a
+      # base_url. This nil check exists for atypical products, like _bundle.
       return true if @versions.nil?
       @versions.any? { |v| v.name == name }
     end
