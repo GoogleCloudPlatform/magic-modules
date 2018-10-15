@@ -239,14 +239,15 @@ jobs:
               submodules: [build/terraform, build/terraform-beta]
           passed: [mm-generate]
         - aggregate:
-          - task: test-terraform
+          {% for version in vars.terraform_versions %}
+          - task: test-terraform{{ '-'+version if version else '' }}
             file: magic-modules/.ci/unit-tests/task.yml
             timeout: 30m
-          - task: test-terraform-beta
-            file: magic-modules/.ci/unit-tests/task.yml
-            timeout: 30m
+            {% if version %}
             params:
-              VERSION: beta
+              VERSION: {{ version }}
+            {% endif %}
+          {% endfor %}
           on_failure:
               do:
               - get: magic-modules-new-prs
