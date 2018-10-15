@@ -244,6 +244,7 @@ module Provider
         path = ["products/#{data[:product_name]}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
+        return unless data[:object].has_tests
         # Unlike other providers, all resources will not be built at once or
         # in close timing to each other (due to external PRs).
         # This means that examples might not be built out for every resource
