@@ -114,6 +114,30 @@ overrides: !ruby/object:Provider::ResourceOverrides
         override_order: -1
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
+      diskEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: "kms_key_self_link"
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. In order to use this additional
+          IAM permissions need to be set on the Compute Engine Service Agent. See
+          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      sourceSnapshotEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: "kms_key_self_link"
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. In order to use this additional
+          IAM permissions need to be set on the Compute Engine Service Agent. See
+          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      sourceImageEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: "kms_key_self_link"
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. In order to use this additional
+          IAM permissions need to be set on the Compute Engine Service Agent. See
+          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
       image: !ruby/object:Provider::Terraform::PropertyOverride
         override_order: 5
         description: |
