@@ -116,5 +116,16 @@ module Provider
       requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
       requires
     end
+
+    def plural(word)
+      # TODO use a real ruby gem for this? Pluralization is hard
+      if word[-1] == 's'
+        return word + 'es'
+      end
+      if word[-1] == 'y'
+        return word[0...-1] + 'ies'
+      end
+      return word + 's'
+    end
   end
 end
