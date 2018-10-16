@@ -26,15 +26,16 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   supports platform: 'gcp-mm'
 
   filter_table_config = FilterTable.create
-
 <% object.all_user_properties.each do |prop| -%>
 <% 	 unless prop.input -%>
 <% 
 out = plural(prop.out_name)
 -%>
+
   <%= "filter_table_config.add(:#{out}, field: :#{prop.out_name})" -%>
 <% 	 end # unless prop.input -%>
 <% end # object.all_user_properties.each do -%>
+
 
   filter_table_config.connect(self, :fetch_data)
 
@@ -67,7 +68,7 @@ end
 link_query = object.self_link_query || object.list_url_response
 -%>
   def fetch_data
-  	@data = fetch_wrapped_resource(<%= '#{link_query.kind}' -%>, <%= '#{link_query.items}' -%>)
+  	@data = fetch_wrapped_resource(<%= "'#{link_query.kind}'" -%>, <%= "'#{link_query.items}'" -%>)
   end
 
   def fetch_wrapped_resource(wrap_kind, wrap_path)
