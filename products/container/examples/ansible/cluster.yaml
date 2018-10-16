@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_container_cluster
   code:
-    name: <%= ctx[:name] %>
+    name: 'my-cluster'
     initial_node_count: 2
     master_auth:
       username: "cluster_admin"
@@ -26,12 +26,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud container clusters describe
-      --project="{{ gcp_project}}"
-      --zone=us-central1-a
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::FailureCondition
-    error: |
-      No cluster named '{{ resource_name }}' in {{ gcp_project }}.
