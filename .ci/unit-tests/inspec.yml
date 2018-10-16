@@ -1,0 +1,14 @@
+platform: linux
+inputs:
+  - name: magic-modules
+image_resource:
+  type: docker-image
+  source:
+    repository: ruby
+    tag: '2.5'
+run:
+  path: magic-modules/.ci/unit-tests/inspec.sh
+params:
+  PRODUCT: ""
+  PROVIDER: inspec
+  EXCLUDE_PATTERN: ""
