@@ -37,7 +37,7 @@ class <%= object.name -%> < Inspec.resource(1)
 
   name 'google_<%= product_ns.downcase -%>_<%= object.name.underscore -%>'
   desc '<%= object.name -%>'
-  supports platform: 'gcp-mm'
+  supports platform: 'gcp2'
 
 <% object.properties.reject(&:input).each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>

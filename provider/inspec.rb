@@ -94,7 +94,9 @@ module Provider
     end
 
     def primitive? (property) 
-      return property.is_a?(::Api::Type::Primitive) || (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+      array_nested = (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+      map = property.is_a?(::Api::Type::NameValues)
+      return property.is_a?(::Api::Type::Primitive) || array_nested || map
     end
 
     def resource_ref? (property) 
@@ -115,6 +117,12 @@ module Provider
       requires.concat(nested_props.map{|nested_prop| generate_requires(nested_prop.properties) } )
       requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
       requires
+    end
+
+    # InSpec doesn't need wrappers for primitives, so exclude them
+    def emit_requires(requires)
+      primitives = ['boolean', 'enum', 'string', 'time', 'integer', 'array', 'string_array', 'double']
+      requires.flatten.sort.uniq.reject{|r| primitives.include?(r.split('/').last)}.map { |r| "require '#{r}'" }.join("\n")
     end
 
     def plural(word)

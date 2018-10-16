@@ -23,7 +23,7 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
 -%>
   name '<%= plural(name) -%>'
   desc '<%= object.name -%> plural resource'
-  supports platform: 'gcp-mm'
+  supports platform: 'gcp2'
 
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
