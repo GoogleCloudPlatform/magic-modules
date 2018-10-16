@@ -269,6 +269,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - 'products/compute/helpers/python/instance_metadata.py'
   InterconnectAttachment: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
+    has_tests: false
   Network: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       routingConfig: !ruby/object:Provider::Ansible::PropertyOverride
