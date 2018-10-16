@@ -4,6 +4,7 @@ if v, ok := res["diskEncryptionKey"]; ok {
   // The raw key won't be returned, so we need to use the original.
   transformed["rawKey"] = d.Get("disk_encryption_key.0.raw_key")
   transformed["sha256"] = original["sha256"]
+  transformed["kmsKeyName"] = d.Get("disk_encryption_key.0.kms_key_self_link")
   res["diskEncryptionKey"] = transformed
 }
 
@@ -13,6 +14,7 @@ if v, ok := res["sourceImageEncryptionKey"]; ok {
   // The raw key won't be returned, so we need to use the original.
   transformed["rawKey"] = d.Get("source_image_encryption_key.0.raw_key")
   transformed["sha256"] = original["sha256"]
+  transformed["kmsKeyName"] = d.Get("disk_encryption_key.0.kms_key_self_link")
   res["sourceImageEncryptionKey"] = transformed
 }
 
@@ -22,6 +24,7 @@ if v, ok := res["sourceSnapshotEncryptionKey"]; ok {
   // The raw key won't be returned, so we need to use the original.
   transformed["rawKey"] = d.Get("source_snapshot_encryption_key.0.raw_key")
   transformed["sha256"] = original["sha256"]
+  transformed["kmsKeyName"] = d.Get("disk_encryption_key.0.kms_key_self_link")
   res["sourceSnapshotEncryptionKey"] = transformed
 }
 
