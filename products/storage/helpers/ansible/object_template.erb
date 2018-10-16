@@ -84,7 +84,7 @@ def upload_file(module):
 
 def download_file(module):
     auth = GcpSession(module, 'storage')
-    f = open(module.params['src']), 'r')
+    f = open(module.params['src'], 'r')
     src = f.read()
     results = return_if_object(module, auth.post(upload_link(module), src, headers=object_headers(module)))
     f.close()
