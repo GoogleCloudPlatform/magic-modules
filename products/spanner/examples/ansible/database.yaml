@@ -33,13 +33,3 @@ task: !ruby/object:Provider::Ansible::Task
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud spanner databases describe
-      --project="{{ gcp_project }}"
-      --instance="{{ instance.name }}"
-      "webstore"
-  failure: !ruby/object:Provider::Ansible::GrpcFailureCondition
-    single: Database
-    plural: instances/instance-database/databases
-    name: webstore

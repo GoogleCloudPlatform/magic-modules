@@ -11,19 +11,130 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Configuration
 $LOAD_PATH.unshift File.dirname(__FILE__)
 Dir.chdir(File.dirname(__FILE__))
 
-# Load all tasks from tasks/
-Dir[File.join('tasks', '*.rb')].reject { |p| File.directory? p }
-                               .each do |f|
-  require f
+PROVIDER_FOLDERS = {
+  ansible: 'build/ansible',
+  puppet: 'build/puppet/%<mod>s',
+  chef: 'build/chef/%<mod>s',
+  terraform: 'build/terraform'
+}.freeze
+
+# Requires
+require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
+require 'tempfile'
+
+# Requires for YAML linting.
+require 'api/async'
+require 'api/bundle'
+require 'api/product'
+require 'api/resource'
+require 'api/type'
+require 'compile/core'
+require 'google/yaml_validator'
+
+RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+# YAML Linting
+# This class calls our provider code to get the printed contents of the
+# compiled YAML. We run the linter on this printed version (so, no embedded
+# ERB)
+class YamlLinter
+  include Compile::Core
+
+  def yaml_contents(file)
+    source = compile(file)
+    config = Google::YamlValidator.parse(source)
+    unless config.class <= Api::Product
+      raise StandardError, "#{file} is #{config.class}"\
+        ' instead of Api::Product' \
+    end
+    # Compile step #2: Now that we have the target class, compile with that
+    # class features
+    config.compile(file, 0)
+  end
 end
 
-# Find all tasks under the test namespace
-# Ignore those with multiple levels like rubocop:auto_correct
-tests = Rake.application.tasks.select do |task|
-  /^test:[a-z]*$/ =~ task.name
-end.map(&:name)
+# Handles finding the list of products for a given provider.
+class Providers
+  def self.provider_list
+    PROVIDER_FOLDERS.keys
+  end
 
-multitask 'test' => tests
+  # All possible products that exist.
+  def self.all_products
+    products = File.join(File.dirname(__FILE__), 'products')
+    Dir.glob("#{products}/**/api.yaml")
+  end
+
+  def initialize(name)
+    @name = name
+  end
+
+  def products
+    products = File.join(File.dirname(__FILE__), 'products')
+    files = Dir.glob("#{products}/**/#{@name}.yaml")
+    files.map do |file|
+      match = file.match(%r{^.*products\/([_a-z]*)\/.*yaml.*})
+      match&.captures&.at(0)
+    end.compact
+  end
+
+  def compile_module(mod)
+    folder = format(PROVIDER_FOLDERS[@name.to_sym], mod: mod)
+    flag = "COMPILER_#{folder.gsub('build/', '').tr('/', '_').upcase}_OUTPUT"
+    output = ENV[flag] || format(PROVIDER_FOLDERS[@name.to_sym], mod: mod)
+    %x(bundle exec compiler -p products/#{mod} -e #{@name} -o #{output})
+  end
+
+  def compilation_targets
+    products.map { |prod| "compile:#{@name}:#{prod}" }
+  end
+end
+
+# Test Tasks
+desc 'Run all of the MM tests (rubocop, rspec)'
+multitask test: %w[rubocop spec]
+
+desc 'Lints all of the compiled YAML files'
+task :yamllint do
+  Providers.all_products.each do |file|
+    tempfile = Tempfile.new
+    tempfile.write(YamlLinter.new.yaml_contents(file))
+    tempfile.rewind
+    puts %x(yamllint -c #{File.join(File.dirname(__FILE__), '.yamllint')} #{tempfile.path})
+    tempfile.close
+    tempfile.unlink
+  end
+end
+
+# Compiling Tasks
+compile_list = Providers.provider_list.map do |x|
+  Providers.new(x).compilation_targets
+end.flatten
+
+desc 'Compile all modules'
+multitask compile: compile_list
+
+namespace :compile do
+  Providers.provider_list.each do |provider|
+    # Each provider should default to compiling everything.
+    desc "Compile all modules for #{provider.capitalize}"
+    prov = Providers.new(provider)
+    multitask provider.to_sym => prov.compilation_targets
+
+    namespace provider.to_sym do
+      prov.products.each do |mod|
+        # Each module should have its own task for compiling.
+        desc "Compile the #{mod} module for #{provider.capitalize}"
+        task mod.to_sym do
+          prov.compile_module(mod)
+        end
+      end
+    end
+  end
+end
