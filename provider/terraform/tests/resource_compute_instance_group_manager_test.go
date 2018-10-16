@@ -164,6 +164,7 @@ func TestAccInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 				Config: testAccInstanceGroupManager_rollingUpdatePolicy(igm),
 			},
 			// No import step because rolling updates are broken and the field will be removed in 2.0.0.
+			// TODO(danawillow): Remove this test once we've removed the field.
 			resource.TestStep{
 				Config: testAccInstanceGroupManager_rollingUpdatePolicy2(igm),
 			},
