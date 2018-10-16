@@ -76,7 +76,7 @@ def main():
 def upload_file(module):
     auth = GcpSession(module, 'storage')
     data = auth.get(media_link(module))
-    f = open(os.path.expanduser(module.params['dest']), 'w')
+    f = open(module.params['dest'], 'w')
     f.write(data.text.encode('utf8'))
     f.close()
     return fetch_resource(module, self_link(module))
@@ -84,7 +84,7 @@ def upload_file(module):
 
 def download_file(module):
     auth = GcpSession(module, 'storage')
-    f = open(os.path.expanduser(module.params['src']), 'r')
+    f = open(module.params['src']), 'r')
     src = f.read()
     results = return_if_object(module, auth.post(upload_link(module), src, headers=object_headers(module)))
     f.close()
