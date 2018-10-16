@@ -28,6 +28,8 @@ __metaclass__ = type
 -%>
 <%= lines(import) -%>
 import json
+import os
+import mimetypes
 <%
   imports = object.imports || []
   imports << 'time' if object.async
@@ -72,20 +74,23 @@ def main():
 
 
 def upload_file(module):
+    auth = GcpSession(module, 'storage')
     data = auth.get(media_link(module))
-    f = open(module.params['dest'], 'w')
+    f = open(os.path.expanduser(module.params['dest']), 'w')
     f.write(data.text.encode('utf8'))
     f.close()
     return fetch_resource(module, self_link(module))
 
+
 def download_file(module):
-    f = open(module.params['src'], 'r')
+    auth = GcpSession(module, 'storage')
+    f = open(os.path.expanduser(module.params['src']), 'r')
     src = f.read()
     results = return_if_object(module, auth.post(upload_link(module), src, headers=object_headers(module)))
     f.close()
     results['changed'] = True
     return results
-    
+
 
 def fetch_resource(module, link, allow_not_found=True):
     auth = GcpSession(module, 'storage')
@@ -98,11 +103,13 @@ def self_link(module):
     else:
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{dest}".format(**module.params)
 
+
 def media_link(module):
     if module.params['action'] == 'download':
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{src}?alt=media".format(**module.params)
     else:
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{dest}?alt=media".format(**module.params)
+
 
 def upload_link(module):
     return "https://www.googleapis.com/upload/storage/v1/b/{bucket}/o?uploadType=media&name={dest}".format(**module.params)
