@@ -123,6 +123,22 @@ module Provider
         substitute_example_paths body
       end
 
+      def oics_link
+        hash = {
+          cloudshell_git_repo: 'https://github.com/terraform-google-modules/docs-examples.git',
+          cloudshell_working_dir: @name,
+          cloudshell_image: 'gcr.io/graphite-cloud-shell-images/terraform:latest',
+          open_in_editor: 'main.tf',
+          cloudshell_print: './motd',
+          cloudshell_tutorial: './tutorial.md'
+        }
+        URI::HTTPS.build(
+          host: 'console.cloud.google.com',
+          path: '/cloudshell/open',
+          query: URI.encode_www_form(hash)
+        )
+      end
+
       def substitute_test_paths(config)
         config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
         config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
