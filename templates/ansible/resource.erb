@@ -8,65 +8,7 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-################################################################################
-# Documentation
-################################################################################
-
-<%
-  metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       object))
-  supported_by = quote_string(@config.manifest.get('supported_by', object))
-  update_props = properties_by_custom_update(object.all_user_properties)
--%>
-ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', object) -%>,
-                    'supported_by': <%= supported_by -%>}
-
-DOCUMENTATION = '''
----
-<%= to_yaml({
-  'module' => module_name(object),
-  'description' => format_description(object.description),
-  'short_description' => "Creates a GCP #{object.name}",
-  'version_added' => @config.manifest.get('version_added', object).to_f,
-  'author' => @config.manifest.get('author', object),
-  'requirements' => @config.manifest.get('requirements', object),
-  'options' => [
-    {
-      'state' => {
-        'description' => ['Whether the given object should exist in GCP'],
-        'choices' => ['present', 'absent'],
-        'default' => 'present'
-      },
-    },
-    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
-  ].flatten.compact.reduce({}, :merge),
-  'extends_documentation_fragment' => 'gcp',
-  'notes' => (
-    [
-      ("API Reference: U(#{object.references.api})" if object.references.api),
-      object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
-    ].flatten.compact if object.references
-  )
-})-%>
-'''
-
-<% if example -%>
-EXAMPLES = '''
-<% res_readable_name = object.name.uncombine -%>
-<% if example.dependencies -%>
-<%   example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', object, false), 1) -%>
-<%   end # example.dependencies.each -%>
-<% end # if example.dependencies -%>
-<%= lines(example.task.build_example('present', object)) -%>
-'''
-<% end -%>
-
-RETURN = '''
-<%= to_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
-'''
-
+<%= lines(compile('templates/ansible/documentation.erb'), 1) -%>
 ################################################################################
 # Imports
 ################################################################################
@@ -79,6 +21,7 @@ RETURN = '''
 -%>
 
 <%
+  update_props = properties_by_custom_update(object.all_user_properties)
   import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
   import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
   import += ', replace_resource_dict' if nonreadonly_rrefs(object)
