@@ -32,6 +32,7 @@ module Provider
       attr_reader :post_action
       attr_reader :provider_helpers
       attr_reader :return_if_object
+      attr_reader :template
       attr_reader :unwrap_resource
       attr_reader :update
       attr_reader :version_added
@@ -69,6 +70,7 @@ module Provider
         check_optional_property :post_action, ::String
         check_property :provider_helpers, ::Array
         check_optional_property :return_if_object, ::String
+        check_optional_property :template, ::String
         check_optional_property :update, ::String
         check_optional_property :unwrap_resource, :boolean
         check_optional_property :version_added, ::String
