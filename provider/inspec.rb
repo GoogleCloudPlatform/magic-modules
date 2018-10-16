@@ -96,7 +96,7 @@ module Provider
     def primitive? (property) 
       array_nested = (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
       map = property.is_a?(::Api::Type::NameValues)
-      return property.is_a?(::Api::Type::Primitive) || array_nested || map
+      return property.is_a?(::Api::Type::Primitive) || array_nested || map || property.is_a?(::Api::Type::Fingerprint)
     end
 
     def resource_ref? (property) 
@@ -113,10 +113,19 @@ module Provider
 
     def generate_requires(properties, requires = [])
       nested_props = properties.select{ |type| nested_object?(type) }
-      requires.concat(properties.reject{ |type| primitive?(type) || resource_ref?(type) || nested_object?(type) }.collect(&:requires))
+      requires.concat(properties.reject{ |type| primitive?(type) || resource_ref?(type) || nested_object?(type) }.collect{|type| easy_requires(type)})
       requires.concat(nested_props.map{|nested_prop| generate_requires(nested_prop.properties) } )
       requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
       requires
+    end
+
+    def easy_requires(type)
+      File.join(
+        'google',
+        'compute',
+        'property',
+        type.type
+      ).downcase
     end
 
     # InSpec doesn't need wrappers for primitives, so exclude them
