@@ -19,7 +19,7 @@
 class <%= object.name -%>s < Inspec.resource(1)
 
 <%
-name = 'google_#{product_ns.downcase}_#{object.name.downcase}'
+name = "google_#{product_ns.downcase}_#{object.name.underscore}"
 -%>
   name '<%= plural(name) -%>'
   desc '<%= object.name -%> plural resource'

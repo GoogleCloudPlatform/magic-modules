@@ -35,7 +35,7 @@
   4)) -%>
 class <%= object.name -%> < Inspec.resource(1)
 
-  name 'google_<%= product_ns.downcase -%>_<%= object.name.downcase -%>'
+  name 'google_<%= product_ns.downcase -%>_<%= object.name.underscore -%>'
   desc '<%= object.name -%>'
   supports platform: 'gcp-mm'
 
@@ -52,14 +52,13 @@ if url.is_a?(Array)
 else
   url = url.split("\n").join('')
 end
-url = "'#{url}'"
 -%>
   def base
     <%= base %>
   end
 
   def url
-    <%= url %>
+  	'<%= url %>'
   end
 
 <% if object.self_link_query.nil? -%>

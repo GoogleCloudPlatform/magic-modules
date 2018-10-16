@@ -50,7 +50,7 @@ module Provider
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
-        out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}s.rb")
+        out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + ".rb")
       )
     end
 
