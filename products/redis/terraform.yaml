@@ -20,17 +20,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: 'templates/terraform/pre_update/redis_instance.erb'
     example:
-     - !ruby/object:Provider::Terraform::Examples
-      name: "redis_instance_basic"
-      primary_resource_id: "cache"
-      vars:
-        instance_name: "memory-cache"
-     - !ruby/object:Provider::Terraform::Examples
-      name: "redis_instance_full"
-      primary_resource_id: "cache"
-      vars:
-        instance_name: "ha-memory-cache"
-        network_name: "authorized-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "redis_instance_basic"
+        primary_resource_id: "cache"
+          version: <%= _version_name %>
+        vars:
+          instance_name: "memory-cache"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "redis_instance_full"
+        primary_resource_id: "cache"
+          version: <%= _version_name %>
+        vars:
+          instance_name: "ha-memory-cache"
+          network_name: "authorized-network"
     properties:
       alternativeLocationId: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
