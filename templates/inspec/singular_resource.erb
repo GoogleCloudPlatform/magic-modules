@@ -39,9 +39,6 @@ class <%= object.name -%> < Inspec.resource(1)
 
 <% end -%>
 
-<%
-base = "''"
--%>
   def base
     '<%= object.self_link_url[0].join %>'
   end
