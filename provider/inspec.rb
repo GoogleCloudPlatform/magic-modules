@@ -54,6 +54,18 @@ module Provider
       )
     end
 
+    # Returns the url that this object can be retrieved from 
+    # based off of the self link
+    def url(object)
+      url = object.self_link_url[1]
+      if url.is_a?(Array)
+        url = url.join('')
+      else
+        url = url.split("\n").join('')
+      end
+      url
+    end
+
     # TODO?
     def generate_resource_tests(data) end
 
