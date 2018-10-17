@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// This function isn't a test of transpot.go; instead, it is used as an alternative
+// This function isn't a test of transport.go; instead, it is used as an alternative
 // to replaceVars inside tests.
-func replaceVarsTest(rs *terraform.ResourceState, linkTmpl string) (string, error) {
+func replaceVarsForTest(rs *terraform.ResourceState, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	var project, region, zone string
 
