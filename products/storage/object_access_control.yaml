@@ -30,21 +30,14 @@
   required: true
   description: |
     The entity holding the permission, in one of the following forms:
-      * user-userId
-      * user-email
-      * group-groupId
-      * group-email
-      * domain-domain
-      * project-team-projectId
+      * user-{{userId}}
+      * user-{{email}} (such as "user-liz@example.com")
+      * group-{{groupId}}
+      * group-{{email}} (such as "group-example@googlegroups.com")
+      * domain-{{domain}} (such as "domain-example.com")
+      * project-team-{{projectId}}
       * allUsers
       * allAuthenticatedUsers
-
-    Examples:
-      The user liz@example.com would be user-liz@example.com.
-      The group example@googlegroups.com would be
-      group-example@googlegroups.com.
-      To refer to all members of the Google Apps for Business domain
-      example.com, the entity would be domain-example.com.
 - !ruby/object:Api::Type::String
   name: 'entityId'
   output: true
