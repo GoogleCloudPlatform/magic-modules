@@ -120,11 +120,14 @@ module Provider
     end
 
     def easy_requires(type)
+      if typed_array?(type)
+        return File.join('google','compute', 'property', [type.__resource.name.downcase, type.item_type.name.underscore].join('_'))
+      end
       File.join(
         'google',
         'compute',
         'property',
-        type.type
+        type.property_file
       ).downcase
     end
 
