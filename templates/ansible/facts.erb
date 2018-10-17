@@ -25,28 +25,23 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-module: <%= module_name(object) %>_facts
-description:
-  - Gather facts for GCP <%= object.name %>
-short_description: Gather facts for GCP <%= object.name  %>
-version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
-author: <%= lines(@config.manifest.get('author', object)) -%>
-requirements:
-<% @config.manifest.get('requirements', object).each do |line| -%>
-    - <%= line %>
-<% end -%>
-<% if object.facts.has_filters || !uri_props.empty? -%>
-options:
-<% end -%>
-<% if object.facts.has_filters -%>
-    <%= object.facts.filter.name.underscore -%>:
-       description:
-<%= lines(indent(wrap_field(object.facts.filter.description, 11), 11)) -%>
-<% end -%>
-<% uri_props.each do |prop| -%>
-<%= lines(indent(to_yaml(documentation_for_property(prop)), 4)) -%>
-<% end -%>
-extends_documentation_fragment: gcp
+<%= to_yaml({
+  'module' => "#{module_name(object)}_facts",
+  'description' => ["Gather facts for GCP #{object.name}"],
+  'short_description' => "Gather facts for GCP #{object.name}",
+  'version_added' => @config.manifest.get('version_added', object).to_f,
+  'author' => @config.manifest.get('author', object),
+  'requirements' => @config.manifest.get('requirements', object),
+  'options' => [
+    ({
+      object.facts.filter.name.underscore => {
+        'description' => format_description(object.facts.filter.description)
+      }
+    } if object.facts.has_filters),
+    uri_props.map { |p| documentation_for_property(p) }
+  ].flatten.compact.reduce({}, :merge),
+  'extends_documentation_fragment' => 'gcp'
+})-%>
 '''
 
 <% if example and example.facts -%>
@@ -56,14 +51,14 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-items:
-    description: List of items
-    returned: always
-    type: complex
-    contains:
-<% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(to_yaml(returns_for_property(prop)), 8)) -%>
-<% end -%>
+<%= to_yaml({
+  'items' => {
+    'description' => 'List of items',
+    'returned' => 'always',
+    'type' => 'complex',
+    'contains' => object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
+  }
+})-%>
 '''
 
 ################################################################################

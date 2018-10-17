@@ -23,7 +23,11 @@ module Provider
     module Documentation
 
       def to_yaml(obj)
-        obj.to_yaml.sub("---\n", '')
+        if obj.is_a?(::Hash)
+          obj.reject { |_, v| v.nil? }.to_yaml.sub("---\n", '')
+        else
+          obj.to_yaml.sub("---\n", '')
+        end
       end
 
       # Builds out the DOCUMENTATION for a property.

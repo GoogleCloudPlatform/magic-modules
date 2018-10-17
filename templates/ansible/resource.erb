@@ -41,7 +41,7 @@ DOCUMENTATION = '''
       },
     },
     object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
-  ].flatten,
+  ].flatten.compact.reduce({}, :merge),
   'extends_documentation_fragment' => 'gcp',
   'notes' => (
     [
