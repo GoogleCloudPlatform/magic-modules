@@ -26,7 +26,7 @@ func TestAccStorageObjectAccessControl_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectAccessControlDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "READER", "allUsers"),
 			},
 			{
@@ -55,7 +55,7 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageObjectAccessControlDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "READER", "allUsers"),
 			},
 			{
@@ -63,7 +63,7 @@ func TestAccStorageObjectAccessControl_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testGoogleStorageObjectAccessControlBasic(bucketName, objectName, "OWNER", "allUsers"),
 			},
 			{
@@ -119,7 +119,7 @@ resource "google_storage_object_access_control" "default" {
 	object = "${google_storage_bucket_object.object.name}"
 	bucket = "${google_storage_bucket.bucket.name}"
 	role   = "%s"
-    entity = "%s"
+	entity = "%s"
 }
 `, bucketName, objectName, tfObjectAcl.Name(), role, entity)
 }

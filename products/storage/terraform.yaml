@@ -32,7 +32,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       bucket: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/set_resourceref_as_string.go.erb'
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
       object: !ruby/object:Provider::Terraform::PropertyOverride
         description: The name of the object to apply the access control to.
   DefaultObjectACL: !ruby/object:Provider::Terraform::ResourceOverride
