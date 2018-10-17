@@ -59,7 +59,7 @@ module Provider
     def url(object)
       url = object.self_link_url[1]
       return url.join('') if url.is_a?(Array)
-      return url.split("\n").join('')
+      url.split("\n").join('')
     end
 
     # TODO?
