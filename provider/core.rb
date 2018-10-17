@@ -102,7 +102,7 @@ module Provider
     end
 
     def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, {version: version_name})
+      compile_file_list(output_folder, @config.files.compile, version: version_name)
     end
 
     def compile_examples(output_folder)
