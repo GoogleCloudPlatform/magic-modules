@@ -254,7 +254,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:          schema.TypeInt,
 							Optional:      true,
 <% if version.nil? || version == 'ga' -%>
-							Default:       1,
+							Default:       0,
 							ConflictsWith: []string{"rolling_update_policy.0.max_surge_percent"},
 <% else -%>
 							Computed:      true,
@@ -277,7 +277,7 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 							Type:          schema.TypeInt,
 							Optional:      true,
 <% if version.nil? || version == 'ga' -%>
-							Default:       1,
+							Default:       0,
 							ConflictsWith: []string{"rolling_update_policy.0.max_unavailable_percent"},
 <% else -%>
 							Computed:      true,

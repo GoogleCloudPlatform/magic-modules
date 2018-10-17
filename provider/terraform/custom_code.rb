@@ -82,7 +82,8 @@ module Provider
         body = lines(compile_file(
                        {
                          vars: vars,
-                         primary_resource_id: primary_resource_id
+                         primary_resource_id: primary_resource_id,
+                         version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))
@@ -119,7 +120,8 @@ module Provider
         body = lines(compile_file(
                        {
                          vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
-                         primary_resource_id: primary_resource_id
+                         primary_resource_id: primary_resource_id,
+                         version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))

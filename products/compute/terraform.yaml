@@ -458,6 +458,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_autoscaler_basic"
         primary_resource_id: "foobar"
+        version: <%= _version_name %>
         vars:
           region_autoscaler_name: "my-region-autoscaler"
           instance_template_name: "my-instance-template"

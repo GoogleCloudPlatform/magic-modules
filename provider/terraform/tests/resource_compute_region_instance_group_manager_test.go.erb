@@ -696,10 +696,10 @@ func testAccRegionInstanceGroupManager_separateRegions(igm1, igm2 string) string
 		description = "Terraform test instance group manager"
 		name = "%s"
 <% if version.nil? || version == 'ga' -%>
-		instance_template = "${google_compute_instance_template.igm-update.self_link}"
+		instance_template = "${google_compute_instance_template.igm-basic.self_link}"
 <% else -%>
 		version {
-			instance_template = "${google_compute_instance_template.igm-update.self_link}"
+			instance_template = "${google_compute_instance_template.igm-basic.self_link}"
 			name = "primary"
 		}
 <% end -%>
@@ -1119,7 +1119,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 	distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
 	target_size                = 3
 <% if version.nil? || version == 'ga' -%>
-	update_strategy = "ROLLING_UPDATE"
+	update_strategy            = "ROLLING_UPDATE"
 
 	rolling_update_policy {
 <% else -%>
