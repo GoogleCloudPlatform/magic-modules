@@ -26,7 +26,7 @@ module Provider
       end
 
       def add(matrix, file, object)
-        Google::LOGGER.info \
+        Google::LOGGER.debug \
           "Registering test matrix for #{object.name} @ #{file}"
         @matrixes << matrix
       end
@@ -104,7 +104,7 @@ module Provider
 
     # Ensures that all test contexts are defined
     def verify
-      Google::LOGGER.info "Verifying test matrix for #{@object.name} @ #{@file}"
+      Google::LOGGER.debug "Verifying test matrix for #{@object.name} @ #{@file}"
       verify_topics
       verify_match_expectations
       fail_if_not_all_popped unless @hierarchy.empty?
