@@ -85,3 +85,6 @@
 	path = build/terraform-beta
 	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
 	branch = 2.0.0
+[submodule "build/inspec"]
+	path = build/inspec
+	url = git@github.com:modular-magician/inspec-gcp.git

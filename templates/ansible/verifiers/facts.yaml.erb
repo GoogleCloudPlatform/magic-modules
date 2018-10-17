@@ -36,5 +36,9 @@
 <% if object.facts.test -%>
       - <%= lines(object.facts.test) -%>
 <% else # object.facts.test -%>
+<% if object.facts.has_filters -%>
       - results['items'] | length == <%= _state == 'present' ? 1 : 0 %>
+<% else # object.has_filters -%>
+      - results['items'] | length <%= _state == 'present' ? '>= 1' : '== 0' %>
+<% end  # object.has_filters -%>
 <% end # object.facts.test -%>

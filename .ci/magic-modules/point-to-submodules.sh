@@ -69,6 +69,14 @@ if [ "$ANSIBLE_ENABLED" = "true" ]; then
   git add build/ansible
 fi
 
+if [ "$INSPEC_ENABLED" = "true" ]; then
+  git config -f .gitmodules submodule.build/inspec.branch "$BRANCH"
+  git config -f .gitmodules submodule.build/inspec.url "git@github.com:$GH_USERNAME/inspec-gcp.git"
+  git submodule sync build/inspec
+  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/inspec"
+  git add build/inspec
+fi
+
 # Commit those changes so that they can be tested in the next phase.
 git add .gitmodules
 git config --global user.email "magic-modules@google.com"

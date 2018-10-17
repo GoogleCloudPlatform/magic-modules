@@ -105,9 +105,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
+        # sourceImage must be overridden first because it creates the 'image' property
+        override_order: -1
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
       image: !ruby/object:Provider::Terraform::PropertyOverride
+        override_order: 5
         description: |
           The image from which to initialize this disk. This can be
           one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
@@ -819,7 +822,45 @@ overrides: !ruby/object:Provider::ResourceOverrides
       tunnels: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
   UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "url_map_basic"
+        primary_resource_id: "urlmap"
+        vars:
+          url_map_name: "urlmap"
+          login_backend_service_name: "login"
+          home_backend_service_name: "home"
+          http_health_check_name: "health-check"
+          backend_bucket_name: "static-asset-backend-bucket"
+          storage_bucket_name: "static-asset-bucket"
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "map_id"
+      defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use when none of the given rules match.
+      hostRules: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "host_rule"
+        is_set: true
+      hostRules.hosts: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      pathMatchers: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "path_matcher"
+      pathMatchers.defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use when none of the given paths match.
+      pathMatchers.pathRules: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "path_rule"
+      pathMatchers.pathRules.paths: !ruby/object:Provider::Terraform::PropertyOverride
+        is_set: true
+      pathMatchers.pathRules.service: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket to use if any of the given paths match.
+      tests.service: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
+        description: The backend service or backend bucket link that should be matched by this test.
+      tests: !ruby/object:Provider::Terraform::PropertyOverride
+        name: "test"
   VpnTunnel: !ruby/object:Provider::Terraform::ResourceOverride
     example:
       - !ruby/object:Provider::Terraform::Examples

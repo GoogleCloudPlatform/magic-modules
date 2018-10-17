@@ -112,7 +112,7 @@ module Provider
       # before we have applied the overrides to its child properties (and
       # therefore can no longer find the child property, since the
       # parent name has changed)
-      sorted_props = override.properties.sort_by { |path, _| -path.count('.') }
+      sorted_props = override.properties.sort_by { |path, p| p.override_order || -path.count('.') }
       sorted_props.each do |property_path, property_override|
         check_property_value "properties['#{property_path}']",
                              property_override, Provider::PropertyOverride
