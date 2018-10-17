@@ -68,6 +68,9 @@ module Provider
       # vars is a Hash from template variable names to output variable names
       attr_reader :vars
 
+      # the version (ga, beta, etc.) this example is being generated at
+      attr_reader :version
+
       # Extra properties to ignore read on during import.
       # These properties will likely be custom code.
       attr_reader :ignore_read_extra
@@ -94,7 +97,8 @@ module Provider
         body = lines(compile_file(
                        {
                          vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
-                         primary_resource_id: primary_resource_id
+                         primary_resource_id: primary_resource_id,
+                         version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
         ))

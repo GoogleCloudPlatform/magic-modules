@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -97,7 +98,9 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"region": {
+<% if version.nil? || version == 'ga' -%>
 				Deprecated:    "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
@@ -202,7 +205,9 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"enable_binary_authorization": {
+<% if version.nil? || version == 'ga' -%>
 				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
 				Type:       schema.TypeBool,
 				Optional:   true,
 				Default:    false,
@@ -216,7 +221,9 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"enable_tpu": {
+<% if version.nil? || version == 'ga' -%>
 				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
 				Type:       schema.TypeBool,
 				Optional:   true,
 				ForceNew:   true,
@@ -395,7 +402,9 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"pod_security_policy_config": {
+<% if version.nil? || version == 'ga' -%>
 				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
 				Type:       schema.TypeList,
 				Optional:   true,
 				MaxItems:   1,
@@ -505,15 +514,65 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"private_cluster": {
+<% if version.nil? || version == 'ga' -%>
 				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Default:    false,
+<% else -%>
+				Deprecated:    "Use private_cluster_config.enable_private_nodes instead.",
+				ConflictsWith: []string{"private_cluster_config"},
+				Computed:      true,
+<% end -%>
 				Type:       schema.TypeBool,
 				Optional:   true,
 				ForceNew:   true,
-				Default:    false,
 			},
 
+<% unless version.nil? || version == 'ga' -%>
+			"private_cluster_config": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				Computed:      true,
+				ConflictsWith: []string{"private_cluster", "master_ipv4_cidr_block"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_private_endpoint": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
+						"enable_private_nodes": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							ForceNew: true,
+						},
+						"master_ipv4_cidr_block": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.CIDRNetwork(28, 28),
+						},
+						"private_endpoint": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"public_endpoint": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+<% end -%>
+
 			"master_ipv4_cidr_block": {
-				Deprecated:   "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% if version.nil? || version == 'ga' -%>
+				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% else -%>
+				Deprecated:    "Use private_cluster_config.master_ipv4_cidr_block instead.",
+				ConflictsWith: []string{"private_cluster_config"},
+				Computed:      true,
+<% end -%>
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
@@ -651,6 +710,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
+<% unless version.nil? || version == 'ga' -%>
+	if v, ok := d.GetOk("private_cluster_config"); ok {
+		cluster.PrivateClusterConfig = expandPrivateClusterConfig(v)
+	}
+<% end -%>
+
 	req := &containerBeta.CreateClusterRequest{
 		Cluster: cluster,
 	}
@@ -772,6 +837,12 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("ip_allocation_policy", flattenIPAllocationPolicy(cluster.IpAllocationPolicy)); err != nil {
 		return err
 	}
+
+<% unless version.nil? || version == 'ga' -%>
+	if err := d.Set("private_cluster_config", flattenPrivateClusterConfig(cluster.PrivateClusterConfig)); err != nil {
+		return err
+	}
+<% end -%>
 
 	igUrls, err := getInstanceGroupUrlsFromManagerUrls(config, cluster.InstanceGroupUrls)
 	if err != nil {
@@ -1509,6 +1580,22 @@ func expandNetworkPolicy(configured interface{}) *containerBeta.NetworkPolicy {
 	return result
 }
 
+<% unless version.nil? || version == 'ga' -%>
+func expandPrivateClusterConfig(configured interface{}) *containerBeta.PrivateClusterConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &containerBeta.PrivateClusterConfig{
+		EnablePrivateEndpoint: config["enable_private_endpoint"].(bool),
+		EnablePrivateNodes:    config["enable_private_nodes"].(bool),
+		MasterIpv4CidrBlock:   config["master_ipv4_cidr_block"].(string),
+		ForceSendFields:       []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock"},
+	}
+}
+<% end -%>
+
 func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -1589,6 +1676,23 @@ func flattenClusterNodePools(d *schema.ResourceData, config *Config, c []*contai
 
 	return nodePools, nil
 }
+
+<% unless version.nil? || version == 'ga' -%>
+func flattenPrivateClusterConfig(c *containerBeta.PrivateClusterConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"enable_private_endpoint": c.EnablePrivateEndpoint,
+			"enable_private_nodes":    c.EnablePrivateNodes,
+			"master_ipv4_cidr_block":  c.MasterIpv4CidrBlock,
+			"private_endpoint":        c.PrivateEndpoint,
+			"public_endpoint":         c.PublicEndpoint,
+		},
+	}
+}
+<% end -%>
 
 func flattenIPAllocationPolicy(c *containerBeta.IPAllocationPolicy) []map[string]interface{} {
 	if c == nil {

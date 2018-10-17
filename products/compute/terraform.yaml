@@ -69,6 +69,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_basic"
         primary_resource_id: "foobar"
+        version: <%= _version_name %>
         vars:
           autoscaler_name: "my-autoscaler"
           instance_template_name: "my-instance-template"

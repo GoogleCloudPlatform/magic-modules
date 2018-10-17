@@ -77,7 +77,7 @@ module Provider
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
-      compile_files(output_folder) \
+      compile_files(output_folder, version_name) \
         unless @config.files.nil? || @config.files.compile.nil?
 
       generate_datasources(output_folder, types, version_name) \
@@ -101,8 +101,8 @@ module Provider
       end
     end
 
-    def compile_files(output_folder)
-      compile_file_list(output_folder, @config.files.compile)
+    def compile_files(output_folder, version_name)
+      compile_file_list(output_folder, @config.files.compile, {version: version_name})
     end
 
     def compile_examples(output_folder)
