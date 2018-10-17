@@ -59,6 +59,7 @@ module Provider
     def url(object)
       url = object.self_link_url[1]
       return url.join('') if url.is_a?(Array)
+
       url.split("\n").join('')
     end
 
@@ -101,31 +102,31 @@ module Provider
       )
     end
 
-    def primitive? (property) 
+    def primitive?(property)
       is_primitive = property.is_a?(::Api::Type::Primitive)
       is_primitive_array = (property.is_a?(Api::Type::Array)\
         && !property.item_type.is_a?(::Api::Type::NestedObject))
       is_primitive || is_primitive_array
     end
 
-    def resource_ref? (property) 
-      return property.is_a?(::Api::Type::ResourceRef)
+    def resource_ref?(property)
+      property.is_a?(::Api::Type::ResourceRef)
     end
 
-    def typed_array? (property) 
-      return property.is_a?(::Api::Type::Array)
+    def typed_array?(property)
+      property.is_a?(::Api::Type::Array)
     end
 
-    def nested_object? (property) 
-      return property.is_a?(::Api::Type::NestedObject)
+    def nested_object?(property)
+      property.is_a?(::Api::Type::NestedObject)
     end
 
     def generate_requires(properties, requires = [])
-      nested_props = properties.select{ |type| nested_object?(type) }
-      requires.concat(properties.reject{ |type| no_requires?(type) }\
-        .collect { |type| easy_requires(type) } )
-      requires.concat(nested_props.map { |nested_prop| generate_requires(nested_prop.properties) } )
-      requires.concat(nested_props.map { |nested_prop| nested_prop.property_file } )
+      nested_props = properties.select { |type| nested_object?(type) }
+      requires.concat(properties.reject { |type| no_requires?(type) }\
+        .collect { |type| easy_requires(type) })
+      requires.concat(nested_props.map { |nested_prop| generate_requires(nested_prop.properties) })
+      requires.concat(nested_props.map(&:property_file))
       requires
     end
 
