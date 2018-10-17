@@ -27,10 +27,6 @@ class <%= object.name -%> < Inspec.resource(1)
   <%= "attr_reader :#{prop.out_name}" -%>
 
 <% end -%>
-
-<%
-base = "''"
--%>
   def base
     '<%= object.self_link_url[0].join %>'
   end
