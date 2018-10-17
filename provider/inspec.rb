@@ -123,9 +123,9 @@ module Provider
     def generate_requires(properties, requires = [])
       nested_props = properties.select{ |type| nested_object?(type) }
       requires.concat(properties.reject{ |type| no_requires?(type) }\
-        .collect{|type| easy_requires(type)})
-      requires.concat(nested_props.map{|nested_prop| generate_requires(nested_prop.properties) } )
-      requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
+        .collect { |type| easy_requires(type) } )
+      requires.concat(nested_props.map { |nested_prop| generate_requires(nested_prop.properties) } )
+      requires.concat(nested_props.map { |nested_prop| nested_prop.property_file } )
       requires
     end
 
