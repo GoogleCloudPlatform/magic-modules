@@ -42,7 +42,7 @@
 -%>
 <%= lines(emit_requires(requires)) -%>
 
-<% Google::LOGGER.info "Generating #{object.name}: #{object.out_name}" -%>
+<% Google::LOGGER.debug "Generating #{object.name}: #{object.out_name}" -%>
 Puppet::Type.type(:<%= object.out_name -%>).provide(:google) do
   mk_resource_methods
 
