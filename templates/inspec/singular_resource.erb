@@ -46,20 +46,6 @@ class <%= object.name -%> < Inspec.resource(1)
     '<%= url(object) %>'
   end
 
-<% if object.self_link_query.nil? -%>
-  def initialize(params) 
-    @fetched = <%= method_call('fetch_resource', ['params', ("'#{object.kind}'" if object.kind?)], 2) %>
-    parse unless @fetched.nil?
-  end  
-<% else # object.self_link_query.nil? -%>
-  def initialize(params) 
-    @fetched = <%= method_call('fetch_wrapped_resource', ['params', ("'#{object.kind}'" if object.kind?),
-                                                           "'#{object.self_link_query.kind}'",
-                                                           "'#{object.self_link_query.items}'"], 2) %>
-    parse unless @fetched.nil?
-  end
-<% end # object.self_link_query.nil? -%>
-
   def parse
  <%
   fetch_code = object.properties.map do |prop|
