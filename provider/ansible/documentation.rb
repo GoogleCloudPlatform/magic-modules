@@ -81,13 +81,12 @@ module Provider
         block = minimal_doc_block(prop, object, spaces)
         # Ansible linter does not support nesting options this deep.
         if prop.is_a?(Api::Type::NestedObject)
-          block.concat(nested_doc(prop.properties, object, spaces))
+          block = block[prop.name.underscore].merge(nested_doc(prop.properties, object, spaces))
         elsif prop.is_a?(Api::Type::Array) &&
               prop.item_type.is_a?(Api::Type::NestedObject)
-          block.concat(nested_doc(prop.item_type.properties, object, spaces))
-        else
-          block
+          block = block[prop.name.underscore].merge(nested_doc(prop.item_type.properties, object, spaces))
         end
+        block.to_yaml.sub("---\n", '')
       end
 
       # Builds out a full YAML block for RETURNS
@@ -95,44 +94,27 @@ module Provider
       def return_property_yaml(prop, spaces)
         block = minimal_return_block(prop, spaces)
         if prop.is_a? Api::Type::NestedObject
-          block.concat(nested_return(prop.properties, spaces))
+          block = block[prop.name].merge(nested_return(prop.properties, spaces))
         elsif prop.is_a?(Api::Type::Array) &&
               prop.item_type.is_a?(Api::Type::NestedObject)
-          block.concat(nested_return(prop.item_type.properties, spaces))
-        else
-          block
+          block = block[prop.name].merge(nested_return(prop.item_type.properties, spaces))
         end
+        block.to_yaml.sub("---\n", '')
       end
 
       private
 
-      # Find URLs and surround with U()
-      def format_url(paragraph)
-        paragraph.gsub(%r{
-          https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
-          [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
-          [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
-          [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
-        }x, 'U(\\0)')
-      end
-
       # Returns formatted nested documentation for a set of properties.
       def nested_return(properties, spaces)
-        block = [indent('contains:', 4)]
-        block.concat(
-          properties.map do |p|
-            indent(return_property_yaml(p, spaces + 4), 8)
-          end
-        )
+        {
+          'contains' => properties.map { |p| return_property_yaml(p, spaces) }
+        }.reject { |_, v| v.nil? }
       end
 
       def nested_doc(properties, object, spaces)
-        block = [indent('suboptions:', 4)]
-        block.concat(
-          properties.map do |p|
-            indent(doc_property_yaml(p, object, spaces + 4), 8)
-          end
-        )
+        {
+          'suboptions' => properties.map { |p| doc_property_yaml(p, object, spaces) }
+        }.reject { |_, v| v.nil? }
       end
 
       # Builds out the minimal YAML block for DOCUMENTATION
@@ -140,32 +122,21 @@ module Provider
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/AbcSize
       def minimal_doc_block(prop, _object, spaces)
-        required = prop.required && !prop.default_value ? 'true' : 'false'
-        [
-          "#{prop.name.underscore}:",
-          indent(
-            [
-              'description:',
-              # + 8 to compensate for name + description.
-              indent(bullet_lines(prop.description, spaces + 8), 4),
-              (indent(bullet_lines(resourceref_description(prop), spaces + 8), 4) \
-               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
-            ].compact, 4
-          ),
-          indent([
-            "required: #{required}",
-            ("default: #{prop.default_value}" if prop.default_value),
-            ('type: bool' if prop.is_a? Api::Type::Boolean),
-            ("aliases: [#{prop.aliases.join(', ')}]" if prop.aliases),
-            ("version_added: #{prop.version_added}" if prop.version_added),
-            (if prop.is_a? Api::Type::Enum
-               [
-                 'choices:',
-                 "[#{prop.values.map { |x| quote_string(x.to_s) }.join(', ')}]"
-               ].join(' ')
-             end)
-          ].compact, 4)
-        ]
+        required = prop.required && !prop.default_value ? true : false
+        {
+          prop.name.underscore => {
+            'description' => [
+              format_description(prop.description),
+              (resourceref_description(prop) if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+            ].flatten.compact,
+            'required' => required,
+            'default' => (prop.default_value.to_s if prop.default_value),
+            'type' => ('bool' if prop.is_a? Api::Type::Boolean),
+            'aliases' => ("[#{prop.aliases.join(', ')}]" if prop.aliases),
+            'version_added' => (prop.version_added.to_f if prop.version_added),
+            'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum)
+          }.reject { |_, v| v.nil? }
+        }
       end
       # rubocop:enable Metrics/CyclomaticComplexity
       # rubocop:enable Metrics/AbcSize
@@ -180,20 +151,13 @@ module Provider
         type = 'complex' if prop.is_a?(Api::Type::NestedObject) \
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
-        [
-          "#{prop.name}:",
-          indent(
-            [
-              'description:',
-              # + 8 to compensate for name + description.
-              indent(bullet_lines(prop.description, spaces + 8), 4)
-            ], 4
-          ),
-          indent([
-                   'returned: success',
-                   "type: #{type}"
-                 ], 4)
-        ]
+        {
+          prop.name => {
+            'description' => format_description(prop.description),
+            'returned' => 'success',
+            'type' => type
+          }
+        }.reject { |_, v| v.nil? }
       end
 
       def autogen_notice_contrib
@@ -212,7 +176,41 @@ module Provider
           "where the value is the #{prop.imports} of your #{prop.resource_ref.name}"
         ].join(' ')
       end
+
+      # MM puts descriptions in a text block. Ansible needs it in bullets
+      def format_description(desc)
+        desc.split(".\n").map do |paragraph|
+          paragraph += '.' unless paragraph.end_with?('.')
+          paragraph = format_url(paragraph)
+          paragraph.gsub("\n", ' ').strip.squeeze(' ')
+          #paragraph = paragraph.tr("\n", ' ').strip
+
+          ## YAML isn't very smart about keeping line lengths sane.
+          ## We'll double check that the lengths will be reasonable
+          ## and if they aren't, use wrap_field to do it ourselves.
+          #yaml = [paragraph].to_yaml
+          #yaml = yaml.gsub("---\n", '') if yaml.include?("---\n")
+
+          #if yaml.split("\n").any? { |line| line.length > (149) }
+          #  wrap_field(
+          #    paragraph.tr("\n", ' ').gsub(/\s+/, ' '),
+          #    11
+          #  ).each_with_index.map { |x, i| i.zero? ? x : indent(x, 2) }
+          #else
+          #  paragraph
+          #end
+        end
+      end
+
+      # Find URLs and surround with U()
+      def format_url(paragraph)
+        paragraph.gsub(%r{
+          https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
+          [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
+          [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
+          [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
+        }x, 'U(\\0)')
+      end
     end
-    # rubocop:enable Metrics/ModuleLength
   end
 end
