@@ -62,7 +62,7 @@ class <%= object.name -%> < Inspec.resource(1)
 
   def parse
  <%
-  fetch_code = object.properties.reject(&:input).map do |prop|
+  fetch_code = object.properties.map do |prop|
     name = prop.out_name
 
     if primitive?(prop) || resource_ref?(prop)
