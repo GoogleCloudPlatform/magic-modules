@@ -102,7 +102,10 @@ module Provider
     end
 
     def primitive? (property) 
-      return property.is_a?(::Api::Type::Primitive) || (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+      is_primitive = property.is_a?(::Api::Type::Primitive)
+      is_primitive_array = (property.is_a?(Api::Type::Array)\
+        && !property.item_type.is_a?(::Api::Type::NestedObject))
+      is_primitive || is_primitive_array
     end
 
     def resource_ref? (property) 
@@ -119,10 +122,32 @@ module Provider
 
     def generate_requires(properties, requires = [])
       nested_props = properties.select{ |type| nested_object?(type) }
-      requires.concat(properties.reject{ |type| primitive?(type) || resource_ref?(type) || nested_object?(type) }.collect(&:requires))
+      requires.concat(properties.reject{ |type| no_requires?(type) }\
+        .collect{|type| easy_requires(type)})
       requires.concat(nested_props.map{|nested_prop| generate_requires(nested_prop.properties) } )
       requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
       requires
+    end
+
+    def no_requires?(type)
+      primitive?(type) || resource_ref?(type) || nested_object?(type)
+    end
+
+    def easy_requires(type)
+      if typed_array?(type)
+        return File.join(
+          'google',
+          'compute',
+          'property',
+          [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
+        )
+      end
+      File.join(
+        'google',
+        'compute',
+        'property',
+        type.property_file
+      ).downcase
     end
   end
 end
