@@ -735,31 +735,32 @@ func testAccComputeDisk_encryptionKMS(pid, pname, org, billing, diskName, keyRin
 resource "google_project" "project" {
   project_id      = "%s"
   name            = "%s"
-	org_id          = "%s"
-	billing_account = "%s"
+  org_id          = "%s"
+  billing_account = "%s"
 }
 
 data "google_compute_image" "my_image" {
-	family  = "debian-9"
-	project = "debian-cloud"
+  family  = "debian-9"
+  project = "debian-cloud"
 }
 
 resource "google_project_services" "apis" {
   project = "${google_project.project.project_id}"
+
   services = [
-		"oslogin.googleapis.com",
+    "oslogin.googleapis.com",
     "compute.googleapis.com",
     "cloudkms.googleapis.com",
-		"appengine.googleapis.com"
+    "appengine.googleapis.com",
   ]
 }
 
 resource "google_project_iam_member" "kms-project-binding" {
   project = "${google_project.project.project_id}"
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-	member  = "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com"
-	
-	depends_on = ["google_project_services.apis"]
+  member  = "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com"
+
+  depends_on = ["google_project_services.apis"]
 }
 
 resource "google_kms_crypto_key_iam_binding" "kms-key-binding" {
@@ -768,17 +769,17 @@ resource "google_kms_crypto_key_iam_binding" "kms-key-binding" {
 
   members = [
     "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com",
-	]
+  ]
 
-	depends_on = ["google_project_services.apis"]
+  depends_on = ["google_project_services.apis"]
 }
 
 resource "google_kms_key_ring" "my_key_ring" {
-	name     = "%s"
-	project  = "${google_project.project.project_id}"
-	location = "us-central1"
-	
-	depends_on = ["google_project_services.apis"]
+  name     = "%s"
+  project  = "${google_project.project.project_id}"
+  location = "us-central1"
+
+  depends_on = ["google_project_services.apis"]
 }
 
 resource "google_kms_crypto_key" "my_crypto_key" {
@@ -787,22 +788,23 @@ resource "google_kms_crypto_key" "my_crypto_key" {
 }
 
 resource "google_compute_disk" "foobar" {
-	name = "%s"
-	image = "${data.google_compute_image.my_image.self_link}"
-	size = 10
-	type = "pd-ssd"
-	zone = "us-central1-a"
-	project  = "${google_project.project.project_id}"
+  name    = "%s"
+  image   = "${data.google_compute_image.my_image.self_link}"
+  size    = 10
+  type    = "pd-ssd"
+  zone    = "us-central1-a"
+  project = "${google_project.project.project_id}"
 
-	disk_encryption_key {
+  disk_encryption_key {
     kms_key_self_link = "${google_kms_crypto_key.my_crypto_key.self_link}"
-	}
-	
-	depends_on = [
-		"google_kms_crypto_key_iam_binding.kms-key-binding",
-		"google_project_iam_member.kms-project-binding"
-	]
-}`, pid, pname, org, billing, keyRingName, keyName, diskName)
+  }
+
+  depends_on = [
+    "google_kms_crypto_key_iam_binding.kms-key-binding",
+    "google_project_iam_member.kms-project-binding",
+  ]
+}
+`, pid, pname, org, billing, keyRingName, keyName, diskName)
 }
 
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
