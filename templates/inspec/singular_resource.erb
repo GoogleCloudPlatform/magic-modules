@@ -15,3 +15,30 @@
 <%= compile 'templates/license.erb' -%>
 
 <%= lines(autogen_notice :ruby) -%>
+
+# A provider to manage <%= @api.name -%> resources.
+class <%= object.name -%> < Inspec.resource(1)
+
+  name 'google_<%= product_ns.downcase -%>_<%= object.name.downcase -%>'
+  desc '<%= object.name -%>'
+  supports platform: 'gcp-mm'
+
+<% object.properties.each do |prop| -%>
+  <%= "attr_reader :#{prop.out_name}" -%>
+
+<% end -%>
+  def base
+    '<%= object.self_link_url[0].join %>'
+  end
+
+  def url
+    '<%= url(object) %>'
+  end
+
+  # TODO
+  def parse end
+
+  def exists?
+    !@fetched.nil?
+  end
+end
