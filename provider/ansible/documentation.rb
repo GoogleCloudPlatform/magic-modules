@@ -16,12 +16,15 @@ require 'provider/config'
 require 'provider/core'
 require 'provider/ansible/manifest'
 
+# Rubocop doesn't like this file because the hashes are complicated.
+# Humans like this file because the hashes are explicit and easy to read.
+# rubocop:disable Metrics/AbcSize
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/PerceivedComplexity
 module Provider
   module Ansible
     # Responsible for building out YAML documentation blocks.
-    # rubocop:disable Metrics/ModuleLength
     module Documentation
-
       def to_yaml(obj)
         if obj.is_a?(::Hash)
           obj.reject { |_, v| v.nil? }.to_yaml.sub("---\n", '')
@@ -38,7 +41,8 @@ module Provider
           prop.name.underscore => {
             'description' => [
               format_description(prop.description),
-              (resourceref_description(prop) if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+              (resourceref_description(prop) \
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
             ].flatten.compact,
             'required' => required,
             'default' => (prop.default_value.to_s if prop.default_value),
@@ -50,7 +54,9 @@ module Provider
               if prop.is_a?(Api::Type::NestedObject)
                 prop.properties.map { |p| documentation_for_property(p) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| documentation_for_property(p) }.reduce({}, :merge)
+                prop.item_type.properties
+                              .map { |p| documentation_for_property(p) }
+                              .reduce({}, :merge)
               end
             )
           }.reject { |_, v| v.nil? }
@@ -105,7 +111,7 @@ module Provider
         desc.split(".\n").map do |paragraph|
           paragraph += '.' unless paragraph.end_with?('.')
           paragraph = format_url(paragraph)
-          paragraph.gsub("\n", ' ').strip.squeeze(' ')
+          paragraph.tr("\n", ' ').strip.squeeze(' ')
         end
       end
 
@@ -121,3 +127,6 @@ module Provider
     end
   end
 end
+# rubocop:enable Metrics/AbcSize
+# rubocop:enable Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/PerceivedComplexity
