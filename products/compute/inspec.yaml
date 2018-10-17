@@ -19,6 +19,87 @@ manifest: !ruby/object:Provider::Inspec::Manifest
   summary: 'InSpec resources for verifying GCP infrastructure'
   description: |
     InSpec resources for verifying GCP infrastructure
+overrides: !ruby/object:Provider::ResourceOverrides
+  Address: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Autoscaler: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  BackendBucket: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  BackendService: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Disk: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  DiskType: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Firewall: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  ForwardingRule: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  GlobalAddress: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  GlobalForwardingRule: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  HealthCheck: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  HttpHealthCheck: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  HttpsHealthCheck: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Image: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Instance: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  InstanceGroup: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  InstanceGroupManager: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  InstanceTemplate: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  InterconnectAttachment: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  License: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  MachineType: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Network: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Region: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  RegionDisk: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  RegionDiskType: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Route: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Router: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Snapshot: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  SslCertificate: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  SslPolicy: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  Subnetwork: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetHttpProxy: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetHttpsProxy: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetPool: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetTcpProxy: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetVpnGateway: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  TargetSslProxy: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  UrlMap: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
+  VpnTunnel: !ruby/object:Provider::Chef::ResourceOverride
+    exclude: true
 files: !ruby/object:Provider::Config::Files
 style:
 functions:

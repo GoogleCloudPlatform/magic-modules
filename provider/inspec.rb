@@ -21,6 +21,7 @@ module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
   class Inspec < Provider::Core
+    include Google::RubyUtils
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -51,6 +52,14 @@ module Provider
         default_template: 'templates/inspec/plural_resource.erb',
         out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}s.rb")
       )
+    end
+
+    # Returns the url that this object can be retrieved from
+    # based off of the self link
+    def url(object)
+      url = object.self_link_url[1]
+      return url.join('') if url.is_a?(Array)
+      url.split("\n").join('')
     end
 
     # TODO?
