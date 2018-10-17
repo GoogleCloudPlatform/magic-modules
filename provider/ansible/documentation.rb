@@ -103,14 +103,14 @@ module Provider
             'required' => required,
             'default' => (prop.default_value.to_s if prop.default_value),
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
-            'aliases' => ("[#{prop.aliases.join(', ')}]" if prop.aliases),
+            'aliases' => (prop.aliases if prop.aliases),
             'version_added' => (prop.version_added.to_f if prop.version_added),
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
               if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| minimal_doc_block(p) }
+                prop.properties.map { |p| minimal_doc_block(p) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| minimal_doc_block(p) }
+                prop.item_type.properties.map { |p| minimal_doc_block(p) }.reduce({}, :merge)
               end
             )
           }.reject { |_, v| v.nil? }
@@ -136,9 +136,9 @@ module Provider
             'type' => type,
             'contains' => (
               if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| minimal_return_block(p) }
+                prop.properties.map { |p| minimal_return_block(p) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| minimal_return_block(p) }
+                prop.item_type.properties.map { |p| minimal_return_block(p) }.reduce({}, :merge)
               end
             )
           }.reject { |_, v| v.nil? }
