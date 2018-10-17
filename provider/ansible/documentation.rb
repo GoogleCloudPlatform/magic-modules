@@ -21,78 +21,14 @@ module Provider
     # Responsible for building out YAML documentation blocks.
     # rubocop:disable Metrics/ModuleLength
     module Documentation
-      # Takes a long string and divides each string into multiple paragraphs,
-      # where each paragraph is a properly indented multi-line bullet point.
-      #
-      # Example:
-      #   - This is a paragraph
-      #     that wraps under
-      #     the bullet properly
-      #   - This is the second
-      #     paragraph.
-      def bullet_lines(line, spaces)
-        line.split(".\n").map { |paragraph| bullet_line(paragraph, spaces) }
+
+      def to_yaml(obj)
+        obj.to_yaml.sub("---\n", '')
       end
 
-      # Takes in a string (representing a paragraph) and returns a multi-line
-      # string, where each line is less than max_length characters long and all
-      # subsequent lines are indented in by spaces characters
-      #
-      # Example:
-      #   - This is a sentence
-      #     that wraps under
-      #     the bullet properly
-      #
-      #   - |
-      #     This is a sentence
-      #     that wraps under
-      #     the bullet properly
-      #     because of the :
-      #     character
-      # rubocop:disable Metrics/AbcSize
-      def bullet_line(paragraph, spaces, _multiline = true, add_period = true)
-        paragraph += '.' unless paragraph.end_with?('.') || !add_period
-        paragraph = format_url(paragraph)
-        paragraph = paragraph.tr("\n", ' ').strip
-
-        # Paragraph placed inside array to get bullet point.
-        yaml = [paragraph].to_yaml
-        # YAML documentation header is not necessary.
-        yaml = yaml.gsub("---\n", '') if yaml.include?("---\n")
-
-        # YAML dumper isn't very smart about line lengths.
-        # If any line is over 160 characters (with indents), build the YAML
-        # block using wrap_field.
-        # Using YAML.dump output ensures that all character escaping done
-        if yaml.split("\n").any? { |line| line.length > (160 - spaces) }
-          return wrap_field(
-            yaml.tr("\n", ' ').gsub(/\s+/, ' '),
-            spaces + 3
-          ).each_with_index.map { |x, i| i.zero? ? x : indent(x, 2) }
-        end
-        yaml
-      end
-      # rubocop:enable Metrics/AbcSize
-
-      # Builds out a full YAML block for DOCUMENTATION
-      # This includes the YAML for the property as well as any nested props
-      def doc_property_yaml(prop)
-        minimal_doc_block(prop).to_yaml.sub("---\n", '')
-      end
-
-      # Builds out a full YAML block for RETURNS
-      # This includes the YAML for the property as well as any nested props
-      def return_property_yaml(prop)
-        minimal_return_block(prop).to_yaml.sub("---\n", '')
-      end
-
-      private
-
-      # Builds out the minimal YAML block for DOCUMENTATION
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
-      # rubocop:disable Metrics/AbcSize
-      def minimal_doc_block(prop)
+      # Builds out the DOCUMENTATION for a property.
+      # This will eventually be converted to YAML
+      def documentation_for_property(prop)
         required = prop.required && !prop.default_value ? true : false
         {
           prop.name.underscore => {
@@ -108,20 +44,18 @@ module Provider
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
               if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| minimal_doc_block(p) }.reduce({}, :merge)
+                prop.properties.map { |p| documentation_for_property(p) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| minimal_doc_block(p) }.reduce({}, :merge)
+                prop.item_type.properties.map { |p| documentation_for_property(p) }.reduce({}, :merge)
               end
             )
           }.reject { |_, v| v.nil? }
         }
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/PerceivedComplexity
 
-      # Builds out the minimal YAML block for RETURNS
-      def minimal_return_block(prop)
+      # Builds out the RETURNS for a property.
+      # This will eventually be converted to YAML
+      def returns_for_property(prop)
         type = python_type(prop)
         # Complex types only mentioned in reference to RETURNS YAML block
         # Complex types are nested objects traditionally, but arrays of nested
@@ -136,13 +70,13 @@ module Provider
             'type' => type,
             'contains' => (
               if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| minimal_return_block(p) }.reduce({}, :merge)
+                prop.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| minimal_return_block(p) }.reduce({}, :merge)
+                prop.item_type.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
               end
             )
           }.reject { |_, v| v.nil? }
-        }.reject { |_, v| v.nil? }
+        }
       end
 
       def autogen_notice_contrib
@@ -168,22 +102,6 @@ module Provider
           paragraph += '.' unless paragraph.end_with?('.')
           paragraph = format_url(paragraph)
           paragraph.gsub("\n", ' ').strip.squeeze(' ')
-          #paragraph = paragraph.tr("\n", ' ').strip
-
-          ## YAML isn't very smart about keeping line lengths sane.
-          ## We'll double check that the lengths will be reasonable
-          ## and if they aren't, use wrap_field to do it ourselves.
-          #yaml = [paragraph].to_yaml
-          #yaml = yaml.gsub("---\n", '') if yaml.include?("---\n")
-
-          #if yaml.split("\n").any? { |line| line.length > (149) }
-          #  wrap_field(
-          #    paragraph.tr("\n", ' ').gsub(/\s+/, ' '),
-          #    11
-          #  ).each_with_index.map { |x, i| i.zero? ? x : indent(x, 2) }
-          #else
-          #  paragraph
-          #end
         end
       end
 

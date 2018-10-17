@@ -33,7 +33,7 @@ version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
 author: <%= lines(@config.manifest.get('author', object)) -%>
 requirements:
 <% @config.manifest.get('requirements', object).each do |line| -%>
-<%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
+    - <%= line %>
 <% end -%>
 <% if object.facts.has_filters || !uri_props.empty? -%>
 options:
@@ -44,7 +44,7 @@ options:
 <%= lines(indent(wrap_field(object.facts.filter.description, 11), 11)) -%>
 <% end -%>
 <% uri_props.each do |prop| -%>
-<%= lines(indent(doc_property_yaml(prop), 4)) -%>
+<%= lines(indent(to_yaml(documentation_for_property(prop)), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
 '''
@@ -62,7 +62,7 @@ items:
     type: complex
     contains:
 <% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(return_property_yaml(prop), 8)) -%>
+<%= lines(indent(to_yaml(returns_for_property(prop)), 8)) -%>
 <% end -%>
 '''
 

@@ -27,13 +27,13 @@ DOCUMENTATION = '''
 ---
 module: <%= module_name(object) %>
 description:
-<%= lines(indent(bullet_lines(object.description, 4), 4)) -%>
+<%= lines(indent(to_yaml(format_description(object.description)), 4)) -%>
 short_description: Creates a GCP <%= object.name %>
 version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
 author: <%= lines(@config.manifest.get('author', object)) -%>
 requirements:
 <% @config.manifest.get('requirements', object).each do |line| -%>
-<%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
+    - <%= line %>
 <% end -%>
 options:
     state:
@@ -42,7 +42,7 @@ options:
         choices: ['present', 'absent']
         default: 'present'
 <% object.all_user_properties.reject(&:output).each do |prop| -%>
-<%= lines(indent(doc_property_yaml(prop), 4)) -%>
+<%= lines(indent(to_yaml(documentation_for_property(prop)), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
 <% if object.references -%>
@@ -70,7 +70,7 @@ EXAMPLES = '''
 
 RETURN = '''
 <% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(return_property_yaml(prop), 4)) -%>
+<%= lines(indent(to_yaml(returns_for_property(prop)), 4)) -%>
 <% end -%>
 '''
 
