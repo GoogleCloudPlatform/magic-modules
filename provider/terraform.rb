@@ -167,6 +167,7 @@ module Provider
         default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
         out_file: filepath
       )
+
       # TODO: error check goimports
       %x(goimports -w #{filepath})
     end

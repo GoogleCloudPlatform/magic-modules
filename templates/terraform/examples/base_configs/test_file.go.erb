@@ -9,9 +9,13 @@ import (
   "github.com/hashicorp/terraform/helper/acctest"
   "github.com/hashicorp/terraform/helper/resource"
 )
+<%
+  api_name = @config.name || product_ns
+	resource_name = api_name + object.name
+  terraform_name = "google_" + resource_name.underscore
+%>
 <% object.example.reject(&:skip_test).each do |example| -%>
 <%
-	resource_name = product_ns + object.name
 	# {Compute}{Address}_{addressBasic}
 	test_slug = "#{resource_name}_#{example.name.camelize}Example"
 	  ignore_read = data[:object].all_user_properties
@@ -32,7 +36,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
 			},
 			{
-				ResourceName:      "<%= "google_#{resource_name.underscore}" -%>.<%= example.primary_resource_id -%>",
+				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
 				ImportStateVerify: true,
         <%- unless ignore_read.empty? -%>
@@ -47,3 +51,25 @@ func testAcc<%= test_slug -%>(val string) string {
 <%= example.config_test -%>
 }
 <%- end %>
+
+func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "<%= terraform_name -%>" {
+			continue
+		}
+
+	config := testAccProvider.Meta().(*Config)
+
+	url, err := replaceVarsTest(rs, "<%= build_url(object.self_link_url) -%>")
+	if err != nil {
+		return err
+	}
+
+	_, err = sendRequest(config, "GET", url, nil)
+	if err == nil {
+			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
+		}
+	}
+
+	return nil
+}
