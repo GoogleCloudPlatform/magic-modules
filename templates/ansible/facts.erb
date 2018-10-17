@@ -44,7 +44,7 @@ options:
 <%= lines(indent(wrap_field(object.facts.filter.description, 11), 11)) -%>
 <% end -%>
 <% uri_props.each do |prop| -%>
-<%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
+<%= lines(indent(doc_property_yaml(prop), 4)) -%>
 <% end -%>
 extends_documentation_fragment: gcp
 '''
@@ -62,7 +62,7 @@ items:
     type: complex
     contains:
 <% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(return_property_yaml(prop, 8), 8)) -%>
+<%= lines(indent(return_property_yaml(prop), 8)) -%>
 <% end -%>
 '''
 

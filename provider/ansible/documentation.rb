@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'api/object'
 require 'compile/core'
 require 'provider/config'
 require 'provider/core'
@@ -77,51 +76,23 @@ module Provider
 
       # Builds out a full YAML block for DOCUMENTATION
       # This includes the YAML for the property as well as any nested props
-      def doc_property_yaml(prop, object, spaces)
-        block = minimal_doc_block(prop, object, spaces)
-        # Ansible linter does not support nesting options this deep.
-        if prop.is_a?(Api::Type::NestedObject)
-          block = block[prop.name.underscore].merge(nested_doc(prop.properties, object, spaces))
-        elsif prop.is_a?(Api::Type::Array) &&
-              prop.item_type.is_a?(Api::Type::NestedObject)
-          block = block[prop.name.underscore].merge(nested_doc(prop.item_type.properties, object, spaces))
-        end
-        block.to_yaml.sub("---\n", '')
+      def doc_property_yaml(prop)
+        minimal_doc_block(prop).to_yaml.sub("---\n", '')
       end
 
       # Builds out a full YAML block for RETURNS
       # This includes the YAML for the property as well as any nested props
-      def return_property_yaml(prop, spaces)
-        block = minimal_return_block(prop, spaces)
-        if prop.is_a? Api::Type::NestedObject
-          block = block[prop.name].merge(nested_return(prop.properties, spaces))
-        elsif prop.is_a?(Api::Type::Array) &&
-              prop.item_type.is_a?(Api::Type::NestedObject)
-          block = block[prop.name].merge(nested_return(prop.item_type.properties, spaces))
-        end
-        block.to_yaml.sub("---\n", '')
+      def return_property_yaml(prop)
+        minimal_return_block(prop).to_yaml.sub("---\n", '')
       end
 
       private
-
-      # Returns formatted nested documentation for a set of properties.
-      def nested_return(properties, spaces)
-        {
-          'contains' => properties.map { |p| return_property_yaml(p, spaces) }
-        }.reject { |_, v| v.nil? }
-      end
-
-      def nested_doc(properties, object, spaces)
-        {
-          'suboptions' => properties.map { |p| doc_property_yaml(p, object, spaces) }
-        }.reject { |_, v| v.nil? }
-      end
 
       # Builds out the minimal YAML block for DOCUMENTATION
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/AbcSize
-      def minimal_doc_block(prop, _object, spaces)
+      def minimal_doc_block(prop)
         required = prop.required && !prop.default_value ? true : false
         {
           prop.name.underscore => {
@@ -134,7 +105,14 @@ module Provider
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => ("[#{prop.aliases.join(', ')}]" if prop.aliases),
             'version_added' => (prop.version_added.to_f if prop.version_added),
-            'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum)
+            'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
+            'suboptions' => (
+              if prop.is_a?(Api::Type::NestedObject)
+                prop.properties.map { |p| minimal_doc_block(p) }
+              elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
+                prop.item_type.properties.map { |p| minimal_doc_block(p) }
+              end
+            )
           }.reject { |_, v| v.nil? }
         }
       end
@@ -143,7 +121,7 @@ module Provider
       # rubocop:enable Metrics/PerceivedComplexity
 
       # Builds out the minimal YAML block for RETURNS
-      def minimal_return_block(prop, spaces)
+      def minimal_return_block(prop)
         type = python_type(prop)
         # Complex types only mentioned in reference to RETURNS YAML block
         # Complex types are nested objects traditionally, but arrays of nested
@@ -155,8 +133,15 @@ module Provider
           prop.name => {
             'description' => format_description(prop.description),
             'returned' => 'success',
-            'type' => type
-          }
+            'type' => type,
+            'contains' => (
+              if prop.is_a?(Api::Type::NestedObject)
+                prop.properties.map { |p| minimal_return_block(p) }
+              elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
+                prop.item_type.properties.map { |p| minimal_return_block(p) }
+              end
+            )
+          }.reject { |_, v| v.nil? }
         }.reject { |_, v| v.nil? }
       end
 
