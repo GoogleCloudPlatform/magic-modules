@@ -107,6 +107,10 @@ module Provider
       return property.is_a?(::Api::Type::Primitive) || array_nested || map || property.is_a?(::Api::Type::Fingerprint)
     end
 
+    def time?(property)
+      property.is_a?(::Api::Type::Time)
+    end
+
     def resource_ref? (property) 
       return property.is_a?(::Api::Type::ResourceRef)
     end

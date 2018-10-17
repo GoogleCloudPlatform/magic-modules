@@ -32,7 +32,9 @@ module Google
           return nil if args.nil?
 <% nested_properties.each do |prop| -%>
 <%
-  if primitive?(prop) || resource_ref?(prop)
+  if time?(prop)
+      init = "Time.new(@fetched['#{prop.api_name}'])"
+  elsif primitive?(prop) || resource_ref?(prop)
     init = "args['#{prop.api_name}']"
   elsif typed_array?(prop)
     init = "#{prop.property_type}.parse(args['#{prop.api_name}'])"
