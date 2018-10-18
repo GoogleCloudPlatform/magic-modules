@@ -122,6 +122,119 @@ func testAccCheckGoogleProjectIamPolicyExists(projectRes, policyRes, pid string)
 	}
 }
 
+func TestIamMergeBindings(t *testing.T) {
+	table := []struct {
+		input  []*cloudresourcemanager.Binding
+		expect []cloudresourcemanager.Binding
+	}{
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-1",
+						"member-2",
+					},
+				},
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-3",
+					},
+				},
+			},
+			expect: []cloudresourcemanager.Binding{
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-1",
+						"member-2",
+						"member-3",
+					},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-3",
+						"member-4",
+					},
+				},
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-2",
+						"member-1",
+					},
+				},
+				{
+					Role: "role-2",
+					Members: []string{
+						"member-1",
+					},
+				},
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-5",
+					},
+				},
+				{
+					Role: "role-3",
+					Members: []string{
+						"member-1",
+					},
+				},
+				{
+					Role: "role-2",
+					Members: []string{
+						"member-2",
+					},
+				},
+				{Role: "empty-role", Members: []string{}},
+			},
+			expect: []cloudresourcemanager.Binding{
+				{
+					Role: "role-1",
+					Members: []string{
+						"member-1",
+						"member-2",
+						"member-3",
+						"member-4",
+						"member-5",
+					},
+				},
+				{
+					Role: "role-2",
+					Members: []string{
+						"member-1",
+						"member-2",
+					},
+				},
+				{
+					Role: "role-3",
+					Members: []string{
+						"member-1",
+					},
+				},
+			},
+		},
+	}
+	for _, test := range table {
+		got := mergeBindings(test.input)
+		sort.Sort(sortableBindings(got))
+		for i, _ := range got {
+			sort.Strings(got[i].Members)
+		}
+		if !reflect.DeepEqual(derefBindings(got), test.expect) {
+			t.Errorf("\ngot %+v\nexpected %+v", derefBindings(got), test.expect)
+		}
+	}
+}
+
 func derefBindings(b []*cloudresourcemanager.Binding) []cloudresourcemanager.Binding {
 	db := make([]cloudresourcemanager.Binding, len(b))
 
