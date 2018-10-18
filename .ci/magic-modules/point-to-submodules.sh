@@ -46,13 +46,10 @@ done
 if [ "$TERRAFORM_ENABLED" = "true" ]; then
   IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
   for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
-    if [ -n "$VERSION" ]; then
-      PROVIDER_NAME="terraform-provider-google-$VERSION"
-      SUBMODULE_DIR="terraform-$VERSION"
-    else
-      PROVIDER_NAME="terraform-provider-google"
-      SUBMODULE_DIR="terraform"
-    fi
+    IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
+    PROVIDER_NAME="${TERRAFORM_DATA[0]}"
+    SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
+
     git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.branch" "$BRANCH"
     git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.url" "git@github.com:$GH_USERNAME/$PROVIDER_NAME.git"
     git submodule sync "build/$SUBMODULE_DIR"

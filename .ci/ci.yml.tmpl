@@ -235,7 +235,7 @@ jobs:
                 CREDS: ((repo-key.private_key))
                 PUPPET_MODULES: {{','.join(vars.puppet_modules)}}
                 CHEF_MODULES: {{','.join(vars.chef_modules)}}
-                TERRAFORM_VERSIONS: {{vars.terraform_v.values()|map(attribute='short_name')|join(',')}}
+                TERRAFORM_VERSIONS: "{{','.join(vars.terraform_properties_serialized)}}"
                 TERRAFORM_ENABLED: true
                 ANSIBLE_ENABLED: true
                 INSPEC_ENABLED: true
