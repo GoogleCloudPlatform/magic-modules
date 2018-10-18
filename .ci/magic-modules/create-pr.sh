@@ -37,13 +37,9 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   # we will need to create a PR using 'hub'.
   if [ -n "$TERRAFORM_REPO_USER" ]; then
     for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
-      if [ -n "$VERSION" ]; then
-        PROVIDER_NAME="terraform-provider-google-$VERSION"
-        SUBMODULE_DIR="terraform-$VERSION"
-      else
-        PROVIDER_NAME="terraform-provider-google"
-        SUBMODULE_DIR="terraform"
-      fi
+      IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
+      PROVIDER_NAME="${TERRAFORM_DATA[0]}"
+      SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
 
       pushd build/$SUBMODULE_DIR
 

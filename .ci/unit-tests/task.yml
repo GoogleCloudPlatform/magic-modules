@@ -9,4 +9,6 @@ image_resource:
 run:
   path: magic-modules/.ci/unit-tests/run.sh
 params:
-  VERSION: ""
+  PROVIDER_NAME: ""
+  SHORT_NAME: ""
+  TEST_DIR: ""

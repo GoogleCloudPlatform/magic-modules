@@ -44,17 +44,13 @@ resources:
           authorship_restriction: true
           no_label: automerged
 
-    - name: terraform-intermediate
+{% for v in vars.terraform_v.itervalues() %}
+    - name: {{ v.short_name }}-intermediate
       type: git-branch
       source:
-          uri: git@github.com:((github-account.username))/terraform-provider-google.git
+          uri: git@github.com:((github-account.username))/{{ v.provider_name }}.git
           private_key: ((repo-key.private_key))
-
-    - name: terraform-beta-intermediate
-      type: git-branch
-      source:
-          uri: git@github.com:((github-account.username))/terraform-provider-google-beta.git
-          private_key: ((repo-key.private_key))
+{% endfor %}
 
     - name: ansible-intermediate
       type: git-branch
@@ -142,23 +138,25 @@ jobs:
                 status: pending
                 path: magic-modules
           - aggregate:
+            {% for k, v in vars.terraform_v.iteritems() %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: terraform-generated
-              - task: generate-terraform
+              - task: generate-{{v.short_name}}
                 file: magic-modules-branched/.ci/magic-modules/generate-terraform.yml
                 params:
-                  VERSIONS: "{{','.join(vars.terraform_versions)}}"
+                  VERSION: {{k}}
+                  PROVIDER_NAME: {{v.provider_name}}
+                  SHORT_NAME: {{v.short_name}}
               # Puts 'terraform-generated' into the robot's fork.
               - aggregate:
-                {% for version in vars.terraform_versions %}
-                - put: terraform{{ '-'+version if version else '' }}-intermediate
+                - put: {{v.short_name}}-intermediate
                   params:
-                      repository: terraform{{ '-'+version if version else '' }}-generated
+                      repository: terraform-generated/{{k}}
                       branch_file: magic-modules-branched/branchname
                       only_if_diff: true
                       force: true
-                {% endfor %}
+            {% endfor %}
             - do:
                 # consumes: magic-modules-branched
                 # produces: ansible-generated
@@ -237,7 +235,7 @@ jobs:
                 CREDS: ((repo-key.private_key))
                 PUPPET_MODULES: {{','.join(vars.puppet_modules)}}
                 CHEF_MODULES: {{','.join(vars.chef_modules)}}
-                TERRAFORM_VERSIONS: "{{','.join(vars.terraform_versions)}}"
+                TERRAFORM_VERSIONS: {{vars.terraform_v.values()|map(attribute='short_name')|join(',')}}
                 TERRAFORM_ENABLED: true
                 ANSIBLE_ENABLED: true
                 INSPEC_ENABLED: true
@@ -255,17 +253,17 @@ jobs:
           version: every
           trigger: true
           params:
-              submodules: [build/terraform, build/terraform-beta]
+              submodules: [{{','.join(vars.terraform_submodules)}}]
           passed: [mm-generate]
         - aggregate:
-          {% for version in vars.terraform_versions %}
-          - task: test-terraform{{ '-'+version if version else '' }}
+          {% for v in vars.terraform_v.itervalues() %}
+          - task: test-{{v.short_name}}
             file: magic-modules/.ci/unit-tests/task.yml
             timeout: 30m
-            {% if version %}
             params:
-              VERSION: {{ version }}
-            {% endif %}
+              PROVIDER_NAME: {{v.provider_name}}
+              SHORT_NAME: {{v.short_name}}
+              TEST_DIR: {{v.test_dir}}
           {% endfor %}
           on_failure:
               do:
@@ -426,7 +424,7 @@ jobs:
                 CHEF_REPO_USER: GoogleCloudPlatform
                 CHEF_MODULES: {{','.join(vars.chef_modules)}}
                 {%- endif %}
-                TERRAFORM_VERSIONS: "{{','.join(vars.terraform_versions)}}"
+                TERRAFORM_VERSIONS: "{{','.join(vars.terraform_properties_serialized)}}"
             on_failure:
               put: magic-modules-new-prs
               params:
@@ -440,10 +438,10 @@ jobs:
           # the pipeline (when a PR needs to be updated), this does that updating by pushing
           # the new code to the repository/branch from which a pull request is already open.
           - aggregate:
-            {% for version in vars.terraform_versions %}
-            - put: terraform{{ '-'+version if version else '' }}-intermediate
+            {% for v in vars.terraform_v.itervalues() %}
+            - put: {{v.short_name}}-intermediate
               params:
-                repository: magic-modules-with-comment/build/terraform{{ '-'+version if version else '' }}
+                repository: magic-modules-with-comment/build/{{ v.short_name }}
                 branch_file: magic-modules-with-comment/original_pr_branch_name
                 # Every time a change runs through this pipeline, it will generate a commit with
                 # a different hash - the hash includes timestamps.  Therefore, even if there's no
