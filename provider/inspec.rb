@@ -101,17 +101,23 @@ module Provider
       )
     end
 
-    def primitive?(property)
-      is_primitive = property.is_a?(::Api::Type::Primitive)
-      is_primitive_array = (property.is_a?(Api::Type::Array)\
-        && !property.item_type.is_a?(::Api::Type::NestedObject))
-      is_primitive || is_primitive_array
+    # Figuring out if a property is a primitive ruby type is a hassle. But it is important
+    # Fingerprints are strings, NameValues are hashes, and arrays of primitives are arrays
+    # Arrays of NestedObjects need to have their contents parsed and returned in an array
+    def primitive? (property) 
+      array_primitive = (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+      property.is_a?(::Api::Type::Primitive)\
+        || array_primitive\
+        || property.is_a?(::Api::Type::NameValues)\
+        || property.is_a?(::Api::Type::Fingerprint)
     end
 
+    # ResourceRefs are strings
     def resource_ref?(property)
       property.is_a?(::Api::Type::ResourceRef)
     end
 
+    # Arrays need special requires statements
     def typed_array?(property)
       property.is_a?(::Api::Type::Array)
     end
@@ -123,38 +129,32 @@ module Provider
     def generate_requires(properties)
       requires = []
       nested_props = properties.select { |type| nested_object?(type) }
-      requires.concat(properties.reject { |type| no_requires?(type) }\
-        .collect { |type| easy_requires(type) })
+      requires.concat(properties.select { |type| typed_array?(type) && nested_object?(type.item_type) }\
+        .collect { |type| array_requires(type) })
       requires.concat(nested_props.map { |nested_prop| generate_requires(nested_prop.properties) })
       requires.concat(nested_props.map { |nested_object| nested_object_requires(nested_object) } )
       requires
     end
 
+    # Primitives don't need requires statements.
+    # Nested objects will have their requires statements handled separately
     def no_requires?(type)
-      primitive?(type) || resource_ref?(type) || nested_object?(type) || type.is_a?(::Api::Type::NameValues)
+      primitive?(type) || resource_ref?(type) || nested_object?(type)
     end
 
-    def easy_requires(type)
-      if typed_array?(type)
-        return File.join(
-          'google',
-          'compute',
-          'property',
-          [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
-        )
-      end
+    def array_requires(type)
       return File.join(
         'google',
-        'compute',
+        type.__resource.__product.prefix[1..-1],
         'property',
-        type.name.underscore
+        [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
       )
     end
 
     def nested_object_requires(nested_object_type)
       File.join(
         'google', 
-        nested_object_type.__resource.__product.prefix[1..-1], 
+        nested_object_type.__resource.__product.prefix[1..-1],
         'property',
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
