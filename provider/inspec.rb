@@ -104,8 +104,9 @@ module Provider
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
     # Fingerprints are strings, NameValues are hashes, and arrays of primitives are arrays
     # Arrays of NestedObjects need to have their contents parsed and returned in an array
-    def primitive? (property) 
-      array_primitive = (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
+    def primitive?(property)
+      array_primitive = (property.is_a?(Api::Type::Array)\
+        && !property.item_type.is_a?(::Api::Type::NestedObject))
       property.is_a?(::Api::Type::Primitive)\
         || array_primitive\
         || property.is_a?(::Api::Type::NameValues)\
@@ -127,13 +128,15 @@ module Provider
     end
 
     def generate_requires(properties)
-      requires = []
       nested_props = properties.select { |type| nested_object?(type) }
-      requires.concat(properties.select { |type| typed_array?(type) && nested_object?(type.item_type) }\
-        .collect { |type| array_requires(type) })
-      requires.concat(nested_props.map { |nested_prop| generate_requires(nested_prop.properties) })
-      requires.concat(nested_props.map { |nested_object| nested_object_requires(nested_object) } )
-      requires
+      nested_object_arrays = properties.select\
+        { |type| typed_array?(type) && nested_object?(type.item_type) }
+      nested_array_requires = nested_object_arrays.collect { |type| array_requires(type) }
+      nested_prop_requires = nested_props.map\
+        { |nested_prop| generate_requires(nested_prop.properties) }
+      nested_object_requires = nested_props.map\
+        { |nested_object| nested_object_requires(nested_object) }
+      nested_object_requires + nested_prop_requires + nested_array_requires
     end
 
     # Primitives don't need requires statements.
@@ -143,7 +146,7 @@ module Provider
     end
 
     def array_requires(type)
-      return File.join(
+      File.join(
         'google',
         type.__resource.__product.prefix[1..-1],
         'property',
@@ -153,7 +156,7 @@ module Provider
 
     def nested_object_requires(nested_object_type)
       File.join(
-        'google', 
+        'google',
         nested_object_type.__resource.__product.prefix[1..-1],
         'property',
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
