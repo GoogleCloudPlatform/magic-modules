@@ -59,7 +59,6 @@ module Provider
     def url(object)
       url = object.self_link_url[1]
       return url.join('') if url.is_a?(Array)
-
       url.split("\n").join('')
     end
 
@@ -121,17 +120,18 @@ module Provider
       property.is_a?(::Api::Type::NestedObject)
     end
 
-    def generate_requires(properties, requires = [])
+    def generate_requires(properties)
+      requires = []
       nested_props = properties.select { |type| nested_object?(type) }
       requires.concat(properties.reject { |type| no_requires?(type) }\
         .collect { |type| easy_requires(type) })
       requires.concat(nested_props.map { |nested_prop| generate_requires(nested_prop.properties) })
-      requires.concat(nested_props.map(&:property_file))
+      requires.concat(nested_props.map { |nested_object| nested_object_requires(nested_object) } )
       requires
     end
 
     def no_requires?(type)
-      primitive?(type) || resource_ref?(type) || nested_object?(type)
+      primitive?(type) || resource_ref?(type) || nested_object?(type) || type.is_a?(::Api::Type::NameValues)
     end
 
     def easy_requires(type)
@@ -143,11 +143,20 @@ module Provider
           [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
         )
       end
-      File.join(
+      return File.join(
         'google',
         'compute',
         'property',
-        type.property_file
+        type.name.underscore
+      )
+    end
+
+    def nested_object_requires(nested_object_type)
+      File.join(
+        'google', 
+        nested_object_type.__resource.__product.prefix[1..-1], 
+        'property',
+        [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
     end
   end
