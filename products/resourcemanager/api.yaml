@@ -90,7 +90,6 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'id'
             description: Id of the organization
-
   - !ruby/object:Api::Resource
     name: 'Lien'
     base_url: liens
