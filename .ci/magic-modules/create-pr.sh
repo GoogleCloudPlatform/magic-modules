@@ -172,11 +172,10 @@ else
 
   if [ -n "$TERRAFORM_REPO_USER" ]; then
     for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
-      if [ -n "$VERSION" ]; then
-        pushd "build/terraform-$VERSION"
-      else
-        pushd build/terraform
-      fi
+      IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
+      PROVIDER_NAME="${TERRAFORM_DATA[0]}"
+      SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
+      pushd "build/$SUBMODULE_DIR"
       git branch -f "$ORIGINAL_PR_BRANCH"
       popd
     done
