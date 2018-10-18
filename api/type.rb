@@ -310,6 +310,12 @@ module Api
         end
         [property_file]
       end
+
+      def exclude_if_not_in_version(version)
+        super
+        @item_type.exclude_if_not_in_version(version) \
+          if @item_type.is_a? NestedObject
+      end
     end
 
     # Represents an enum, and store is valid values
@@ -498,6 +504,11 @@ module Api
 
       def properties
         @properties.reject(&:exclude)
+      end
+
+      def exclude_if_not_in_version(version)
+        super
+        @properties.each { |p| p.exclude_if_not_in_version(version) }
       end
     end
 
