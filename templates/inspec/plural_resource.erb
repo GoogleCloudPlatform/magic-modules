@@ -27,13 +27,11 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
 
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
-<% 	 unless prop.input -%>
 <% 
 out = plural(prop.out_name)
 -%>
 
   <%= "filter_table_config.add(:#{out}, field: :#{prop.out_name})" -%>
-<% 	 end # unless prop.input -%>
 <% end # object.all_user_properties.each do -%>
 
 
