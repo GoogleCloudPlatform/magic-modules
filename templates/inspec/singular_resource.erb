@@ -41,10 +41,10 @@ class <%= object.name -%> < Inspec.resource(1)
     parse unless @fetched.nil?
   end
 <% else # object.self_link_query.nil? -%>
-    # TODO(slevenick) for other products
-    def initialize(params)
-      raise 'Not implemented'
-    end
+   # TODO(slevenick) for other products
+   def initialize(params)
+     raise 'Not implemented'
+   end
 <% end # object.self_link_query.nil? -%>
 
   def fetch_resource(params)
