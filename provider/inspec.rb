@@ -104,45 +104,40 @@ module Provider
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
     # Fingerprints are strings, NameValues are hashes, and arrays of primitives are arrays
     # Arrays of NestedObjects need to have their contents parsed and returned in an array
+    # ResourceRefs are strings
     def primitive?(property)
       array_primitive = (property.is_a?(Api::Type::Array)\
         && !property.item_type.is_a?(::Api::Type::NestedObject))
       property.is_a?(::Api::Type::Primitive)\
         || array_primitive\
         || property.is_a?(::Api::Type::NameValues)\
-        || property.is_a?(::Api::Type::Fingerprint)
+        || property.is_a?(::Api::Type::Fingerprint)\
+        || property.is_a?(::Api::Type::ResourceRef)
     end
 
-    # ResourceRefs are strings
-    def resource_ref?(property)
-      property.is_a?(::Api::Type::ResourceRef)
-    end
-
-    # Arrays need special requires statements
+    # Arrays of nested objects need special requires statements
     def typed_array?(property)
-      property.is_a?(::Api::Type::Array)
+      property.is_a?(::Api::Type::Array) && nested_object?(property.item_type)
     end
 
     def nested_object?(property)
       property.is_a?(::Api::Type::NestedObject)
     end
 
+    # Only arrays of nested objects and nested object properties need require statements
+    # for InSpec. Primitives are all handled natively
     def generate_requires(properties)
       nested_props = properties.select { |type| nested_object?(type) }
       nested_object_arrays = properties.select\
         { |type| typed_array?(type) && nested_object?(type.item_type) }
       nested_array_requires = nested_object_arrays.collect { |type| array_requires(type) }
+      # Need to include requires statements for the requirements of a nested object
+      # TODO is this needed? Not sure how ruby works so well
       nested_prop_requires = nested_props.map\
         { |nested_prop| generate_requires(nested_prop.properties) }
       nested_object_requires = nested_props.map\
         { |nested_object| nested_object_requires(nested_object) }
       nested_object_requires + nested_prop_requires + nested_array_requires
-    end
-
-    # Primitives don't need requires statements.
-    # Nested objects will have their requires statements handled separately
-    def no_requires?(type)
-      primitive?(type) || resource_ref?(type) || nested_object?(type)
     end
 
     def array_requires(type)

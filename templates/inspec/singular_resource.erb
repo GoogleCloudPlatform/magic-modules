@@ -47,11 +47,11 @@ class <%= object.name -%> < Inspec.resource(1)
   end
 
   def parse
- <%
+<%
   fetch_code = object.properties.map do |prop|
     name = prop.out_name
 
-    if primitive?(prop) || resource_ref?(prop)
+    if primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
       init = "#{prop.property_type}.parse(@fetched['#{prop.api_name}'])"
