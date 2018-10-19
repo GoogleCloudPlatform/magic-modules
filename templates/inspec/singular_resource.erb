@@ -35,6 +35,22 @@ class <%= object.name -%> < Inspec.resource(1)
     '<%= url(object) %>'
   end
 
+<% if object.self_link_query.nil? -%>
+  def initialize(params)
+    @fetched = fetch_resource(params)
+    parse unless @fetched.nil?
+  end
+<% else # object.self_link_query.nil? -%>
+    # TODO(slevenick) for other products
+    def initialize(params)
+      raise 'Not implemented'
+    end
+<% end # object.self_link_query.nil? -%>
+
+  def fetch_resource(params)
+    get_request = inspec.backend.fetch(base, url, params)
+  end
+
   # TODO
   def parse end
 
