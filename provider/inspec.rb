@@ -101,45 +101,64 @@ module Provider
       )
     end
 
-    def primitive? (property) 
-      array_nested = (property.is_a?(Api::Type::Array) && !property.item_type.is_a?(::Api::Type::NestedObject))
-      map = property.is_a?(::Api::Type::NameValues)
-      return property.is_a?(::Api::Type::Primitive) || array_nested || map || property.is_a?(::Api::Type::Fingerprint)
-    end
-
     def time?(property)
       property.is_a?(::Api::Type::Time)
     end
 
-    def resource_ref? (property) 
-      return property.is_a?(::Api::Type::ResourceRef)
+    # Figuring out if a property is a primitive ruby type is a hassle. But it is important
+    # Fingerprints are strings, NameValues are hashes, and arrays of primitives are arrays
+    # Arrays of NestedObjects need to have their contents parsed and returned in an array
+    # ResourceRefs are strings
+    def primitive?(property)
+      array_primitive = (property.is_a?(Api::Type::Array)\
+        && !property.item_type.is_a?(::Api::Type::NestedObject))
+      property.is_a?(::Api::Type::Primitive)\
+        || array_primitive\
+        || property.is_a?(::Api::Type::NameValues)\
+        || property.is_a?(::Api::Type::Fingerprint)\
+        || property.is_a?(::Api::Type::ResourceRef)
     end
 
-    def typed_array? (property) 
-      return property.is_a?(::Api::Type::Array)
+    # Arrays of nested objects need special requires statements
+    def typed_array?(property)
+      property.is_a?(::Api::Type::Array) && nested_object?(property.item_type)
     end
 
-    def nested_object? (property) 
-      return property.is_a?(::Api::Type::NestedObject)
+    def nested_object?(property)
+      property.is_a?(::Api::Type::NestedObject)
     end
 
-    def generate_requires(properties, requires = [])
-      nested_props = properties.select{ |type| nested_object?(type) }
-      requires.concat(properties.reject{ |type| primitive?(type) || resource_ref?(type) || nested_object?(type) }.collect{|type| easy_requires(type)})
-      requires.concat(nested_props.map{|nested_prop| generate_requires(nested_prop.properties) } )
-      requires.concat(nested_props.map{|nested_prop| nested_prop.property_file })
-      requires
+    # Only arrays of nested objects and nested object properties need require statements
+    # for InSpec. Primitives are all handled natively
+    def generate_requires(properties)
+      nested_props = properties.select { |type| nested_object?(type) }
+      nested_object_arrays = properties.select\
+        { |type| typed_array?(type) && nested_object?(type.item_type) }
+      nested_array_requires = nested_object_arrays.collect { |type| array_requires(type) }
+      # Need to include requires statements for the requirements of a nested object
+      # TODO is this needed? Not sure how ruby works so well
+      nested_prop_requires = nested_props.map\
+        { |nested_prop| generate_requires(nested_prop.properties) }
+      nested_object_requires = nested_props.map\
+        { |nested_object| nested_object_requires(nested_object) }
+      nested_object_requires + nested_prop_requires + nested_array_requires
     end
 
-    def easy_requires(type)
-      if typed_array?(type)
-        return File.join('google','compute', 'property', [type.__resource.name.downcase, type.item_type.name.underscore].join('_'))
-      end
+    def array_requires(type)
       File.join(
         'google',
-        'compute',
+        type.__resource.__product.prefix[1..-1],
         'property',
-        type.property_file
+        [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
+      )
+    end
+
+    def nested_object_requires(nested_object_type)
+      File.join(
+        'google',
+        nested_object_type.__resource.__product.prefix[1..-1],
+        'property',
+        [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
     end
 
