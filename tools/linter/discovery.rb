@@ -13,35 +13,45 @@
 
 require 'net/http'
 require 'json'
+require 'api/product'
+require 'api/resource'
+require 'api/type'
 
-# Responsible for grabbing Discovery Docs and getting resources from it
-class Discovery
-  attr_reader :results
+class DiscoveryProperty
+  attr_reader :schema
 
-  def initialize(url)
-    @url = url
-    @results = send_request(url)
+  def initialize(name, schema)
+    @name = name
+    @schema = schema
   end
 
-  def resource(name)
-    schema = @results['schemas'][name]
-    DiscoveryObject.new(schema)
-  end
-
-  def resources
-    @results['schemas'].keys
+  def get_property
+    prop = Module.const_get("Api::Type::#{type}").new
+    prop.name = @name
+    prop.description = @schema.dig('description')
+    prop.output = output?
+    prop
   end
 
   private
 
-  def send_request(url)
-    JSON.parse(Net::HTTP.get(URI(url)))
+  def type
+    type = @schema.dig('type')
+    type = 'string' unless type
+    type = type.capitalize
+    type = 'NestedObject' if type == 'Object'
+    type = 'Double' if type == 'Number'
+    type
+  end
+
+  def output?
+    (@schema.dig('description') || '').downcase.include?('output only')
   end
 end
 
 # Holds information about discovery objects
 # Two sections: schema (properties) and methods
-class DiscoveryObject
+class DiscoveryResource
   attr_reader :schema
 
   def initialize(schema)
@@ -51,4 +61,48 @@ class DiscoveryObject
   def exists?
     !@schema.nil?
   end
+
+  def resource
+    res = Api::Resource.new
+    res.name = @schema.dig('id')
+    res.kind = @schema.dig('properties', 'kind', 'default')
+    res.description = @schema.dig('description')
+    res.properties = @schema.dig('properties')
+                            .reject { |k, _| k == 'kind' }
+                            .map { |k, v| DiscoveryProperty.new(k, v).get_property }
+    res
+  end
 end
+
+# Responsible for grabbing Discovery Docs and getting resources from it
+class DiscoveryProduct
+  attr_reader :results
+
+  def initialize(url, values)
+    @url = url
+    @values = values
+    @results = send_request(url)
+  end
+
+  def get_resources
+    @results['schemas'].map do |_, schema|
+      DiscoveryResource.new(schema).resource
+    end
+  end
+
+  def get_product
+    product = Api::Product.new
+    product.name = @values[:name]
+    product.prefix = @values[:prefix]
+    product.scopes = @values[:scopes]
+    product.objects = get_resources
+    product
+  end
+
+  private
+
+  def send_request(url)
+    JSON.parse(Net::HTTP.get(URI(url)))
+  end
+end
+
