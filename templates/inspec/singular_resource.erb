@@ -30,7 +30,7 @@
 # A provider to manage <%= @api.name -%> resources.
 class <%= object.name -%> < Inspec.resource(1)
 
-  name 'google_<%= product_ns.downcase -%>_<%= object.name.underscore -%>'
+  name '<%= resource_name(object, product_ns) -%>'
   desc '<%= object.name -%>'
   supports platform: 'gcp2'
 

@@ -52,6 +52,10 @@ module Provider
         default_template: 'templates/inspec/plural_resource.erb',
         out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + ".rb")
       )
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/inspec/doc.md.erb',
+        out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}.md")
+      )
     end
 
     # Returns the url that this object can be retrieved from
@@ -162,12 +166,6 @@ module Provider
       ).downcase
     end
 
-    # InSpec doesn't need wrappers for primitives, so exclude them
-    def emit_requires(requires)
-      primitives = ['boolean', 'enum', 'string', 'time', 'integer', 'array', 'string_array', 'double']
-      requires.flatten.sort.uniq.reject{|r| primitives.include?(r.split('/').last)}.map { |r| "require '#{r}'" }.join("\n")
-    end
-
     def plural(word)
       # TODO use a real ruby gem for this? Pluralization is hard
       if word[-1] == 's'
@@ -177,6 +175,19 @@ module Provider
         return word[0...-1] + 'ies'
       end
       return word + 's'
+    end
+
+    def resource_name(object, product_ns)
+      "google_#{product_ns.downcase}_#{object.name.underscore}"
+    end
+
+    def sub_property_descriptions(property)
+      if nested_object?(property)
+        return property.properties.map { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
+      end
+      if typed_array?(property)
+        return property.item_type.properties.map { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
+      end
     end
   end
 end
