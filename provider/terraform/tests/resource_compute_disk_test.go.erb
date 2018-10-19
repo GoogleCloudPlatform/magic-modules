@@ -343,6 +343,7 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'beta' -%>
 func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
@@ -378,6 +379,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
@@ -729,7 +731,6 @@ resource "google_compute_disk" "foobar" {
 }`, diskName)
 }
 
-// TODO chrisst - exclude this test from the non-beta provider
 func testAccComputeDisk_encryptionKMS(pid, pname, org, billing, diskName, keyRingName, keyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
