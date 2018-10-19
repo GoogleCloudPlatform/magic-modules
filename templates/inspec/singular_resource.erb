@@ -47,25 +47,19 @@ class <%= object.name -%> < Inspec.resource(1)
   end
 
 <% if object.self_link_query.nil? -%>
-  def initialize(params) 
+  def initialize(params)
     @fetched = fetch_resource(params)
     parse unless @fetched.nil?
-  end  
-<% else # object.self_link_query.nil? -%>
-  def initialize(params) 
-    @fetched = <%= method_call('fetch_wrapped_resource', 
-    	[
-    		'params', 
-			"'#{object.kind}'",
-			"'#{object.self_link_query.kind}'",
-			"'#{object.self_link_query.items}'"
-		], 2) %>
-    parse unless @fetched.nil?
   end
+<% else # object.self_link_query.nil? -%>
+    # TODO(slevenick) for other products
+    def initialize(params)
+      raise 'Not implemented'
+    end
 <% end # object.self_link_query.nil? -%>
 
   def fetch_resource(params)
-  	get_request = inspec.backend.fetch(base, url, params)
+    get_request = inspec.backend.fetch(base, url, params)
   end
 
   def parse
@@ -92,46 +86,4 @@ class <%= object.name -%> < Inspec.resource(1)
   def exists?
     !@fetched.nil?
   end
-
-<% unless object.self_link_query.nil? -%>
-  def fetch_wrapped_resource(params, kind, wrap_kind, wrap_path)
-    result = fetch_resource(params, wrap_kind)
-    return if result.nil? || !result.key?(wrap_path)
-    result = unwrap_resource(result[wrap_path], params)
-    return if result.nil?
-    raise "Incorrect result: #{result['kind']} (expected #{kind})" \
-      unless result['kind'] == kind
-    result
-  end
-
-
-  def unwrap_resource(result, resource)
-    query_predicate = unwrap_resource_filter(resource)
-    matches = result.select do |entry|
-      query_predicate.all? do |k, v|
-        entry[k.id2name] == v
-      end
-    end
-    raise "More than 1 result found: #{matches}" if matches.size > 1
-    return if matches.empty?
-    matches.first
-  end
-
-<%
-  urf_code = [
-    '{',
-    indent_list(
-      Hash[object.identity.map { |i| [i, "resource[:#{property_out_name(i)}]"] }]
-        .map { |k, v| "#{k.out_name}: #{v}" }, 2
-    ),
-    '}'
-  ]
--%>
-  def unwrap_resource_filter(resource)
-    self.class.unwrap_resource_filter(resource)
-  end
-
-<%= lines(indent(emit_method('self.unwrap_resource_filter', %w[resource],
-                             urf_code, file_relative), 2), 1) -%>
-<% end # object.self_link_query.nil? -%>
 end
