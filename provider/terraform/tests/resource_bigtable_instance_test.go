@@ -86,12 +86,12 @@ func testAccCheckBigtableInstanceDestroy(s *terraform.State) error {
 			return fmt.Errorf("Error starting instance admin client. %s", err)
 		}
 
+		defer c.Close()
+
 		_, err = c.InstanceInfo(ctx, rs.Primary.Attributes["name"])
 		if err == nil {
 			return fmt.Errorf("Instance %s still exists.", rs.Primary.Attributes["name"])
 		}
-
-		c.Close()
 	}
 
 	return nil
@@ -114,12 +114,12 @@ func testAccBigtableInstanceExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("Error starting instance admin client. %s", err)
 		}
 
+		defer c.Close()
+
 		_, err = c.InstanceInfo(ctx, rs.Primary.Attributes["name"])
 		if err != nil {
 			return fmt.Errorf("Error retrieving instance %s.", rs.Primary.Attributes["name"])
 		}
-
-		c.Close()
 
 		return nil
 	}
