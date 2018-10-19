@@ -77,11 +77,19 @@ To get more information about <%= object.name -%>, see:
 
 <% end -%>
 <% unless object.example.empty? -%>
-## Example Usage
+  <%- object.example.each do |example| -%>
+    <%- unless example.skip_test -%>
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="<%= example.oics_link %>" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+    <%- end -%>
+## Example Usage - <%= example.name.camelize(:upper).uncombine %>
 
-<% object.example.each do |example| -%>
+
 <%= example.config_documentation -%>
-<%- end %>
+  <%- end %>
 <%- end -%>
 ## Argument Reference
 

@@ -25,7 +25,7 @@
 -%>
 <%= lines(emit_requires(requires)) -%>
 
-<% Google::LOGGER.info "Generating #{object.name}: #{object.out_name}" -%>
+<% Google::LOGGER.debug "Generating #{object.name}: #{object.out_name}" -%>
 Puppet::Type.newtype(:<%= object.out_name -%>) do
 <%= format_description(object, 2, '@doc =') %>
 
@@ -39,7 +39,7 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
   unless object.parameters.nil?
     object.parameters.each do |param|
       if param.class <= Api::Type::ResourceRef
-        Google::LOGGER.info \
+        Google::LOGGER.debug \
           "Generating autorequire #{object.name}.#{param.name}: #{param.type}"
 -%>
   autorequire(:<%= param.out_type -%>) do
@@ -103,7 +103,7 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
 <% unless object.parameters.nil? -%>
 <% object.parameters.each do |p| -%>
 
-<% Google::LOGGER.info "Generating param #{object.name}.#{p.name}:#{p.type}" -%>
+<% Google::LOGGER.debug "Generating param #{object.name}.#{p.name}:#{p.type}" -%>
 <%=
   namevar = identities.include?(p.name) ? 'namevar: true' : nil
 
@@ -132,7 +132,7 @@ Puppet::Type.newtype(:<%= object.out_name -%>) do
 <% end -%>
 <% end -%>
 <% object.properties.each do |p|
-      Google::LOGGER.info "Generating #{object.name}.#{p.name}: #{p.type}"
+      Google::LOGGER.debug "Generating #{object.name}.#{p.name}: #{p.type}"
 -%>
 
 <%=

@@ -8,5 +8,7 @@ image_resource:
     tag: '1.9.3'
 run:
   path: magic-modules/.ci/unit-tests/run.sh
-  args:
-    - magic-modules/build/terraform/
+params:
+  PROVIDER_NAME: ""
+  SHORT_NAME: ""
+  TEST_DIR: ""

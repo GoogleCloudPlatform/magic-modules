@@ -44,11 +44,18 @@ for PRD in "${PRODUCT_ARRAY[@]}"; do
 done
 
 if [ "$TERRAFORM_ENABLED" = "true" ]; then
-  git config -f .gitmodules submodule.build/terraform.branch "$BRANCH"
-  git config -f .gitmodules submodule.build/terraform.url "git@github.com:$GH_USERNAME/terraform-provider-google.git"
-  git submodule sync build/terraform
-  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform"
-  git add build/terraform
+  IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
+  for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
+    IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
+    PROVIDER_NAME="${TERRAFORM_DATA[0]}"
+    SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
+
+    git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.branch" "$BRANCH"
+    git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.url" "git@github.com:$GH_USERNAME/$PROVIDER_NAME.git"
+    git submodule sync "build/$SUBMODULE_DIR"
+    ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/$SUBMODULE_DIR"
+    git add "build/$SUBMODULE_DIR"
+  done
 fi
 
 if [ "$ANSIBLE_ENABLED" = "true" ]; then
