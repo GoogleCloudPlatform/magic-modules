@@ -14,3 +14,27 @@
 # the final module tree structure:
 <% dir = _version_name == 'beta' ? 'google-beta' : 'google' -%>
 '<%= dir -%>/provider_<%= api.prefix[1..-1] -%>_gen.go': 'templates/terraform/provider_gen.erb'
+
+<%  Dir["provider/terraform/tests/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/tests/<%= fname -%>'
+<% end -%>
+<%
+  Dir["provider/terraform/resources/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/resources/<%= fname -%>'
+<% end -%>
+<%
+  Dir["provider/terraform/data_sources/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/data_sources/<%= fname -%>'
+<% end -%>
+<%
+  Dir["provider/terraform/utils/*.go.erb"].each do |file_path|
+    fname = file_path.split('/')[-1]
+-%>
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/utils/<%= fname -%>'
+<% end -%>

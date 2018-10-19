@@ -21,6 +21,7 @@ this PR's changes from the commit messages for downstream commits.
 -----------------------------------------------------------------
 # [all]
 ## [terraform]
+### [terraform-beta]
 ## [puppet]
 ### [puppet-bigquery]
 ### [puppet-compute]

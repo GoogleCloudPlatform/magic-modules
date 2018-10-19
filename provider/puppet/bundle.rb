@@ -35,7 +35,7 @@ module Provider
       end
     end
 
-    def generate(output_folder, _types, _version_name)
+    def generate(output_folder, _types, version_name)
       # Let's build all the dependencies off of the products we found on our
       # path and has the corresponding provider.yaml file
       @config.manifest.releases = releases
@@ -48,7 +48,7 @@ module Provider
 
       compile_changelog(output_folder)
       copy_files(output_folder)
-      compile_files(output_folder)
+      compile_files(output_folder, version_name)
     end
 
     def products
