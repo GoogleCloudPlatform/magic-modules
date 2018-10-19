@@ -75,7 +75,7 @@ class <%= object.name -%> < Inspec.resource(1)
 
     if time?(prop)
       init = "Time.new(@fetched['#{prop.api_name}'])"
-    elsif primitive?(prop) || resource_ref?(prop)
+    elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
       init = "#{prop.property_type}.parse(@fetched['#{prop.api_name}'])"
