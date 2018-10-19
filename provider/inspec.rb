@@ -50,14 +50,12 @@ module Provider
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
-        out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + ".rb")
+        out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + '.rb')
       )
     end
 
-    # Returns the url that this object can be retrieved from
-    # based off of the self link
-    def url(object)
-      url = object.self_link_url[1]
+    # Format a url that may be include newlines into a single line
+    def format_url(url)
       return url.join('') if url.is_a?(Array)
       url.split("\n").join('')
     end
@@ -161,25 +159,12 @@ module Provider
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
     end
-<<<<<<< HEAD
-
-    # InSpec doesn't need wrappers for primitives, so exclude them
-    def emit_requires(requires)
-      primitives = ['boolean', 'enum', 'string', 'time', 'integer', 'array', 'string_array', 'double']
-      requires.flatten.sort.uniq.reject{|r| primitives.include?(r.split('/').last)}.map { |r| "require '#{r}'" }.join("\n")
-    end
 
     def plural(word)
-      # TODO use a real ruby gem for this? Pluralization is hard
-      if word[-1] == 's'
-        return word + 'es'
-      end
-      if word[-1] == 'y'
-        return word[0...-1] + 'ies'
-      end
-      return word + 's'
+      # TODO: use a real ruby gem for this? Pluralization is hard
+      return word + 'es' if word[-1] == 's'
+      return word[0...-1] + 'ies' if word[-1] == 'y'
+      word + 's'
     end
-=======
->>>>>>> master
   end
 end

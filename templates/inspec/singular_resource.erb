@@ -43,7 +43,7 @@ class <%= object.name -%> < Inspec.resource(1)
   end
 
   def url
-    '<%= url(object) %>'
+    '<%= format_url(object.self_link_url[1]) %>'
   end
 
 <% if object.self_link_query.nil? -%>
