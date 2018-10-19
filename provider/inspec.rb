@@ -161,6 +161,7 @@ module Provider
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
     end
+<<<<<<< HEAD
 
     # InSpec doesn't need wrappers for primitives, so exclude them
     def emit_requires(requires)
@@ -178,5 +179,7 @@ module Provider
       end
       return word + 's'
     end
+=======
+>>>>>>> master
   end
 end
