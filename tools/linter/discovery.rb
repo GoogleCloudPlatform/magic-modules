@@ -17,6 +17,15 @@ require 'api/product'
 require 'api/resource'
 require 'api/type'
 
+TYPES = {
+  'string': 'String',
+  'boolean': 'Boolean',
+  'object': 'NestedObject',
+  'integer': 'Integer',
+  'number': 'Double',
+  'array': 'Array'
+}
+
 class DiscoveryProperty
   attr_reader :schema
 
@@ -36,12 +45,8 @@ class DiscoveryProperty
   private
 
   def type
-    type = @schema.dig('type')
-    type = 'string' unless type
-    type = type.capitalize
-    type = 'NestedObject' if type == 'Object'
-    type = 'Double' if type == 'Number'
-    type
+    return "NestedObject" if @schema.dig('$ref')
+    TYPES[@schema.dig('type').to_sym]
   end
 
   def output?
