@@ -22,6 +22,8 @@ require 'api/product'
 require 'api/resource'
 require 'api/type'
 
+COMPUTE_DISCOVERY_URL = 'https://www.googleapis.com/discovery/v1/apis/compute/v1/rest'.freeze
+
 module Api
   class Object
     # Create a setter if the setter doesn't exist
@@ -40,5 +42,25 @@ module Api
 end
 
 product = Api::Product.new
-product.objects = ['test']
-puts YAML::dump(product)
+discovery = Discovery.new(COMPUTE_DISCOVERY_URL)
+
+product.name = 'Google Compute Engine'
+product.prefix = 'gcompute'
+product.scopes = ['https://www.googleapis.com/auth/compute']
+product.objects = []
+
+discovery.resources.map { |x| discovery.resource(x) }.each do |obj|
+  resource = Api::Resource.new
+  resource.name = obj.schema.dig('id')
+  resource.kind = obj.schema.dig('properties', 'kind', 'default')
+  resource.description = obj.schema.dig('description')
+  resource.properties = []
+  obj.schema.dig('properties').reject { |k, v| k == 'kind' }.each do |k, v|
+    prop = Api::Type::String.new
+    prop.name = k
+    resource.properties = resource.properties.append(prop)
+  end
+  product.objects.append(resource)
+end
+
+File.write('output.yaml', product.to_yaml)
