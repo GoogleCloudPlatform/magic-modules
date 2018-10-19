@@ -44,7 +44,7 @@ class DiscoveryProperty
     prop.name = @name
     prop.description = @schema.dig('description')
     prop.output = output?
-    prop.enum = enum if @schema.dig('enum')
+    prop.values = enum if @schema.dig('enum')
     prop.properties = nested if prop.is_a?(Api::Type::NestedObject)
     prop.item_type = array if prop.is_a?(Api::Type::Array)
     prop
@@ -72,7 +72,11 @@ class DiscoveryProperty
 
   def array
     schema_type = @schema.dig('items', 'type')
-    return "Api::Type::NestedObject" if !schema_type && @schema.dig('items', '$ref')
+    if !schema_type && @schema.dig('items', '$ref')
+      prop = Api::Type::NestedObject.new
+      prop.properties = @__product.get_resource(@schema.dig('items', '$ref')).properties
+      return prop
+    end
     return "Api::Type::#{TYPES[schema_type.to_sym]}" if schema_type != 'object'
   end
 end
