@@ -20,7 +20,7 @@ require 'api/type'
 TYPES = {
   'string': 'String',
   'boolean': 'Boolean',
-  'object': 'NestedObject',
+  'object': 'NameValues',
   'integer': 'Integer',
   'number': 'Double',
   'array': 'Array'
@@ -28,10 +28,15 @@ TYPES = {
 
 class DiscoveryProperty
   attr_reader :schema
+  attr_reader :name
 
-  def initialize(name, schema)
+  attr_reader :__product
+
+  def initialize(name, schema, product)
     @name = name
     @schema = schema
+
+    @__product = product
   end
 
   def get_property
@@ -40,6 +45,7 @@ class DiscoveryProperty
     prop.description = @schema.dig('description')
     prop.output = output?
     prop.enum = enum if @schema.dig('enum')
+    prop.properties = nested if prop.is_a?(Api::Type::NestedObject)
     prop
   end
 
@@ -58,6 +64,10 @@ class DiscoveryProperty
   def enum
     @schema.dig('enum').map { |val| val.to_sym }
   end
+
+  def nested
+    @__product.get_resource(@schema.dig('$ref')).properties
+  end
 end
 
 # Holds information about discovery objects
@@ -65,8 +75,12 @@ end
 class DiscoveryResource
   attr_reader :schema
 
-  def initialize(schema)
+  attr_reader :__product
+
+  def initialize(schema, product)
     @schema = schema
+
+    @__product = product
   end
 
   def exists?
@@ -78,10 +92,14 @@ class DiscoveryResource
     res.name = @schema.dig('id')
     res.kind = @schema.dig('properties', 'kind', 'default')
     res.description = @schema.dig('description')
-    res.properties = @schema.dig('properties')
-                            .reject { |k, _| k == 'kind' }
-                            .map { |k, v| DiscoveryProperty.new(k, v).get_property }
+    res.properties = properties
     res
+  end
+
+  def properties
+    @schema.dig('properties')
+           .reject { |k, _| k == 'kind' }
+           .map { |k, v| DiscoveryProperty.new(k, v, @__product).get_property }
   end
 end
 
@@ -95,10 +113,14 @@ class DiscoveryProduct
   end
 
   def get_resources
-    @results['schemas'].map do |name, schema|
+    @results['schemas'].map do |name, _|
       next unless @doc.objects.include?(name)
-      DiscoveryResource.new(schema).resource
+      get_resource(name).resource
     end.compact
+  end
+
+  def get_resource(resource)
+    DiscoveryResource.new(@results['schemas'][resource], self)
   end
 
   def get_product
