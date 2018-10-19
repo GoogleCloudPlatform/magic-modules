@@ -13,6 +13,7 @@
 
 require 'net/http'
 require 'json'
+require 'active_support/inflector'
 require 'api/product'
 require 'api/resource'
 require 'api/type'
@@ -90,8 +91,8 @@ class DiscoveryResource
 
   def initialize(schema, product)
     @schema = schema
-
     @__product = product
+
   end
 
   def exists?
@@ -99,9 +100,12 @@ class DiscoveryResource
   end
 
   def resource
+    @methods = @__product.get_methods_for_resource(@schema.dig('id'))
+
     res = Api::Resource.new
     res.name = @schema.dig('id')
     res.kind = @schema.dig('properties', 'kind', 'default')
+    res.base_url = @methods['list']['path']
     res.description = @schema.dig('description')
     res.properties = properties
     res
@@ -134,11 +138,17 @@ class DiscoveryProduct
     DiscoveryResource.new(@results['schemas'][resource], self)
   end
 
+  def get_methods_for_resource(resource)
+    return unless @results['resources'][resource.pluralize.camelize(:lower)]
+    @results['resources'][resource.pluralize.camelize(:lower)]['methods']
+  end
+
   def get_product
     product = Api::Product.new
     product.name = @doc.name
     product.prefix = @doc.prefix
     product.scopes = @doc.scopes
+    product.base_url = @results['baseUrl']
     product.objects = get_resources
     product
   end
