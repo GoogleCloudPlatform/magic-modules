@@ -46,6 +46,7 @@ class DiscoveryProperty
 
   def type
     return "NestedObject" if @schema.dig('$ref')
+    return "Enum" if @schema.dig('enum')
     TYPES[@schema.dig('type').to_sym]
   end
 
@@ -83,23 +84,23 @@ end
 class DiscoveryProduct
   attr_reader :results
 
-  def initialize(url, values)
-    @url = url
-    @values = values
-    @results = send_request(url)
+  def initialize(doc)
+    @doc = doc
+    @results = send_request(@doc.url)
   end
 
   def get_resources
-    @results['schemas'].map do |_, schema|
+    @results['schemas'].map do |name, schema|
+      next unless @doc.objects.include?(name)
       DiscoveryResource.new(schema).resource
-    end
+    end.compact
   end
 
   def get_product
     product = Api::Product.new
-    product.name = @values[:name]
-    product.prefix = @values[:prefix]
-    product.scopes = @values[:scopes]
+    product.name = @doc.name
+    product.prefix = @doc.prefix
+    product.scopes = @doc.scopes
     product.objects = get_resources
     product
   end

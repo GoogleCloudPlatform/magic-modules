@@ -1,0 +1,44 @@
+- !ruby/object:Docs
+  name: Google Compute Engine
+  prefix: gcompute
+  url: 'https://www.googleapis.com/discovery/v1/apis/compute/v1/rest'
+  scopes:
+    - 'https://www.googleapis.com/auth/compute'
+  output: output.yaml
+  objects:
+    - Address
+    - BackendBucket
+    - BackendService
+    - Disk
+    - DiskType
+    - Firewall
+    - ForwardingRule
+    - GlobalAddress
+    - GlobalForwardingRule
+    - HealthCheck
+    - HttpHealthCheck
+    - HttpsHealthCheck
+    - Image
+    - Instance
+    - InstanceGroupManager
+    - InstanceTemplate
+    - License
+    - MachineType
+    - Network
+    - Region
+    - Route
+    - Router
+    - Snapshot
+    - SslCertificate
+    - Subnetwork
+    - TargetHttpProxy
+    - TargetHttpsProxy
+    - TargetPool
+    - TargetSslProxy
+    - TargetTcpProxy
+    - TargetVpnGateway
+    - UrlMap
+    - VpnTunnel
+    - Zone
+
+
