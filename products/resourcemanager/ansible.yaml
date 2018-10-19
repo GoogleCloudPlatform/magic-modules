@@ -27,6 +27,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
   Project: !ruby/object:Provider::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      list_key: 'projects'
   Lien: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides
