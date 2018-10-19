@@ -28,6 +28,10 @@ class Discovery
     DiscoveryObject.new(schema)
   end
 
+  def resources
+    @results['schemas'].keys
+  end
+
   private
 
   def send_request(url)
