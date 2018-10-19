@@ -39,6 +39,7 @@ class DiscoveryProperty
     prop.name = @name
     prop.description = @schema.dig('description')
     prop.output = output?
+    prop.enum = enum if @schema.dig('enum')
     prop
   end
 
@@ -52,6 +53,10 @@ class DiscoveryProperty
 
   def output?
     (@schema.dig('description') || '').downcase.include?('output only')
+  end
+
+  def enum
+    @schema.dig('enum').map { |val| val.to_sym }
   end
 end
 
