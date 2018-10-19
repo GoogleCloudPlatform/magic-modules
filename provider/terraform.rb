@@ -117,7 +117,8 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(data)
-      target_folder = File.join(data[:output_folder], 'google')
+      dir = data[:version] == 'beta' ? 'google-beta' : 'google'
+      target_folder = File.join(data[:output_folder], dir)
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       product_name = data[:product_name].underscore
@@ -150,7 +151,8 @@ module Provider
     def generate_resource_tests(data)
       return if data[:object].example.reject(&:skip_test).empty?
 
-      target_folder = File.join(data[:output_folder], 'google')
+      dir = data[:version] == 'beta' ? 'google-beta' : 'google'
+      target_folder = File.join(data[:output_folder], dir)
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       product_name = data[:product_name].underscore
