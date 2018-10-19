@@ -16,8 +16,7 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../../')
 Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 
 require 'tools/linter/discovery'
-
-COMPUTE_DISCOVERY_URL = 'https://www.googleapis.com/discovery/v1/apis/compute/v1/rest'.freeze
+require 'tools/linter/docs'
 
 module Api
   class Object
@@ -36,11 +35,9 @@ module Api
   end
 end
 
-values = {
-  name: 'Google Compute Engine',
-  prefix: 'gcompute',
-  scopes: ['https://www.googleapis.com/auth/compute']
-}
+docs = YAML::load(File.read('tools/linter/docs.yaml'))
 
-product = DiscoveryProduct.new(COMPUTE_DISCOVERY_URL, values)
-File.write('output.yaml', product.get_product.to_yaml)
+docs.each do |doc|
+  product = DiscoveryProduct.new(doc)
+  File.write(doc.output, product.get_product.to_yaml)
+end
