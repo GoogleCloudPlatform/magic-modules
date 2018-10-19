@@ -50,8 +50,8 @@ resource "google_compute_region_instance_group_manager" "foobar" {
   instance_template  = "${google_compute_instance_template.foobar.self_link}"
 <% else -%>
   version {
-    instance_template = "${google_compute_instance_template.foobar.self_link}"
-    name              = "primary"
+    instance_template  = "${google_compute_instance_template.foobar.self_link}"
+    name               = "primary"
   }
 <% end -%>
   target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
