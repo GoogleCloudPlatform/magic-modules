@@ -105,7 +105,7 @@ class DiscoveryResource
     res = Api::Resource.new
     res.name = @schema.dig('id')
     res.kind = @schema.dig('properties', 'kind', 'default')
-    res.base_url = @methods['list']['path']
+    res.base_url = base_url_format(@methods['list']['path'])
     res.description = @schema.dig('description')
     res.properties = properties
     res
@@ -115,6 +115,12 @@ class DiscoveryResource
     @schema.dig('properties')
            .reject { |k, _| k == 'kind' }
            .map { |k, v| DiscoveryProperty.new(k, v, @__product).get_property }
+  end
+
+  private
+
+  def base_url_format(url)
+    "projects/#{url.gsub('{', '{{').gsub('}', '}}')}"
   end
 end
 
@@ -162,9 +168,13 @@ class DiscoveryProduct
   def version
     version = Api::Product::Version.new
     version.name = 'ga'
-    version.base_url = @results['baseUrl']
+    version.base_url = base_url_format(@results['baseUrl'])
     version.default = true
     version
+  end
+
+  def base_url_format(url)
+    url.gsub('projects/', '').gsub('{', '{{').gsub('}', '}}')
   end
 end
 
