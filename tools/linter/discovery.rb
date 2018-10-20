@@ -148,7 +148,7 @@ class DiscoveryProduct
     product.name = @doc.name
     product.prefix = @doc.prefix
     product.scopes = @doc.scopes
-    product.base_url = @results['baseUrl']
+    product.versions = [version]
     product.objects = get_resources
     product
   end
@@ -157,6 +157,14 @@ class DiscoveryProduct
 
   def send_request(url)
     JSON.parse(Net::HTTP.get(URI(url)))
+  end
+
+  def version
+    version = Api::Product::Version.new
+    version.name = 'ga'
+    version.base_url = @results['baseUrl']
+    version.default = true
+    version
   end
 end
 
