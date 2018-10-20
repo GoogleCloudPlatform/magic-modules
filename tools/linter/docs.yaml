@@ -46,5 +46,14 @@
     - UrlMap
     - VpnTunnel
     - Zone
-
+- !ruby/object:Docs
+  name: Google DNS
+  prefix: gdns
+  url: 'https://www.googleapis.com/discovery/v1/apis/dns/v1/rest'
+  scopes:
+    - 'https://www.googleapis.com/auth/dns'
+  output: output_dns.yaml
+  objects:
+    - ManagedZone
+    - ResourceRecordSet
 
