@@ -58,7 +58,7 @@ def diff_properties(new_api_props, old_api_props, prefix='')
 end
 
 def values_equal(old, new)
-  return true if old.nil? || new.nil?
+  return true if old.nil? && new == false
   return old.sort == new.sort if old.is_a?(::Array)
   return old == new
 end
