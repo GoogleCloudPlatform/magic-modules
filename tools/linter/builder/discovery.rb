@@ -57,6 +57,7 @@ class DiscoveryProperty
 
   def type
     return "NestedObject" if @schema.dig('$ref')
+    return "NestedObject" if @schema.dig('type') == 'object' && @schema.dig('properties')
     return "Enum" if @schema.dig('enum')
     TYPES[@schema.dig('type').to_sym]
   end
@@ -70,7 +71,11 @@ class DiscoveryProperty
   end
 
   def nested
-    @__product.get_resource(@schema.dig('$ref')).properties
+    if @schema.dig('$ref')
+      @__product.get_resource(@schema.dig('$ref')).properties
+    else
+      DiscoveryResource.new(@schema, @__product).properties
+    end
   end
 
   def array
