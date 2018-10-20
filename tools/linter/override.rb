@@ -37,7 +37,7 @@ module DiscoveryOverride
     end
 
     def properties
-      {}
+      @properties || {}
     end
 
     private
@@ -53,7 +53,7 @@ module DiscoveryOverride
     end
 
     def properties
-      {}
+      @properties || {}
     end
 
     private
