@@ -17,6 +17,7 @@ Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 
 require 'tools/linter/discovery'
 require 'tools/linter/docs'
+require 'tools/linter/override'
 
 module Api
   class Object
@@ -32,6 +33,9 @@ module Api
     def create_setter(variable)
       self.class.define_method("#{variable}=") { |val| instance_variable_set("@#{variable}", val) }
     end
+
+    def validate
+    end
   end
 end
 
@@ -39,5 +43,9 @@ docs = YAML::load(File.read('tools/linter/docs.yaml'))
 
 docs.each do |doc|
   product = DiscoveryProduct.new(doc)
-  File.write(doc.output, product.get_product.to_yaml)
+  product_obj = product.get_product
+  override = DiscoveryOverride::Runner.new(product_obj, doc.override)
+  override.run
+  product_obj = override.product
+  File.write(doc.output, product_obj.to_yaml)
 end

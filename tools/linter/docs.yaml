@@ -5,6 +5,7 @@
   scopes:
     - 'https://www.googleapis.com/auth/compute'
   output: output.yaml
+  override: tools/linter/override.yaml
   objects:
     - Address
     - Autoscaler

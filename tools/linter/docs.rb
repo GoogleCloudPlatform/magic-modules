@@ -4,5 +4,6 @@ class Docs
   attr_reader :url
   attr_reader :output
   attr_reader :scopes
+  attr_reader :override
   attr_reader :objects
 end
