@@ -17,6 +17,8 @@ require 'active_support/inflector'
 require 'api/product'
 require 'api/resource'
 require 'api/type'
+require 'api/compiler'
+require 'api/async'
 
 TYPES = {
   'string': 'String',
