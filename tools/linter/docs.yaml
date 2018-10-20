@@ -7,6 +7,7 @@
   output: output.yaml
   objects:
     - Address
+    - Autoscaler
     - BackendBucket
     - BackendService
     - Disk
