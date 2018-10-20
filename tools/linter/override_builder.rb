@@ -43,6 +43,7 @@ end
 # Takes a series of properties, does diffs between them and returns a list.
 def diff_properties(new_api_props, old_api_props, prefix='')
   old_api_props.map do |old_api_prop|
+    all_props = []
     override = DiscoveryOverride::PropertyOverride.new
     new_api_prop = new_api_props.select { |p| p.name == old_api_prop.name }.first
     # Compare the new prop values to the old prop values.
@@ -53,7 +54,14 @@ def diff_properties(new_api_props, old_api_props, prefix='')
       end
     end
 
-    {old_api_prop.name => override} if override.instance_variables.length > 0
+    if old_api_prop.is_a?(Api::Type::NestedObject)
+      require 'byebug'
+      byebug if !new_api_prop.is_a?(Api::Type::NestedObject)
+      all_props.append(diff_properties(new_api_prop.properties, old_api_prop.properties, "#{old_api_prop.name}."))
+    end
+
+    all_props.append({"#{prefix}#{old_api_prop.name}" => override}) if override.instance_variables.length > 0
+    all_props
   end.compact
 end
 
@@ -84,7 +92,7 @@ original_api.objects.each do |obj|
     end
   end
   properties = diff_properties(new_api_obj.properties, obj.properties)
-  override.properties = properties.reduce({}, :merge) if properties
+  override.properties = properties.flatten.reduce({}, :merge) if properties
   if override.instance_variables.length > 0
     overrides.instance_variable_set("@#{obj.name}", override)
   end
