@@ -39,6 +39,29 @@ module Api
     end
   end
 end
+
+# Takes a series of properties, does diffs between them and returns a list.
+def diff_properties(new_api_props, old_api_props, prefix='')
+  old_api_props.map do |old_api_prop|
+    override = DiscoveryOverride::PropertyOverride.new
+    new_api_prop = new_api_props.select { |p| p.name == old_api_prop.name }.first
+    # Compare the new prop values to the old prop values.
+    old_api_prop.instance_variables.reject { |o| o.to_s.include?('properties') }
+                                   .each do |var|
+      if !values_equal(old_api_prop.instance_variable_get(var), new_api_prop.instance_variable_get(var))
+        override.instance_variable_set(var, old_api_prop.instance_variable_get(var))
+      end
+    end
+
+    {old_api_prop.name => override} if override.instance_variables.length > 0
+  end.compact
+end
+
+def values_equal(old, new)
+  return true if old.nil? || new.nil?
+  return old.sort == new.sort if old.is_a?(::Array)
+  return old == new
+end
 raise "Must have 3 files" if ARGV.length < 3
 
 original_api_file = ARGV[0]
@@ -50,17 +73,22 @@ new_api = Api::Compiler.new(new_api_file).run
 
 overrides = Provider::ResourceOverrides.new
 original_api.objects.each do |obj|
+  # Grab all of the first level things and do a diff
   override = DiscoveryOverride::ResourceOverride.new
   new_api_obj = new_api.objects.select { |o| o.name == obj.name }.first
+  next unless new_api_obj
   obj.instance_variables.reject { |o| o.to_s.include?('properties') || o.to_s.include?('parameters') }
                         .each do |var|
     if obj.instance_variable_get(var) != new_api_obj.instance_variable_get(var)
       override.instance_variable_set(var, obj.instance_variable_get(var))
     end
   end
+  properties = diff_properties(new_api_obj.properties, obj.properties)
+  override.properties = properties.reduce({}, :merge) if properties
   if override.instance_variables.length > 0
     overrides.instance_variable_set("@#{obj.name}", override)
   end
 end
 
 File.write(output_file, YAML::dump(overrides))
+

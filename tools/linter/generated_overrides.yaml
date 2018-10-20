@@ -1,0 +1,1102 @@
+--- !ruby/object:Provider::ResourceOverrides
+Address: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::FetchedExternal
+    name: address
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents an Address resource.
+
+    Each virtual machine instance has an ephemeral internal IP address and,
+    optionally, an external IP address. To communicate between instances on
+    the same network, you can use an instance's internal IP address. To
+    communicate with the Internet and instances outside of the same network,
+    you must specify the instance's external IP address.
+
+    Internal IP addresses are ephemeral and only belong to an instance for
+    the lifetime of the instance; if the instance is deleted and recreated,
+    the instance is assigned a new internal IP address, either by Compute
+    Engine or by you. External IP addresses can be either ephemeral or
+    static.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Reserving a Static External IP Address: https://cloud.google.com/compute/docs/instances-and-network
+      Reserving a Static Internal IP Address: https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address
+    api: https://cloud.google.com/compute/docs/reference/beta/addresses
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+Autoscaler: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents an Autoscaler resource.
+
+    Autoscalers allow you to automatically scale virtual machine instances in
+    managed instance groups according to an autoscaling policy that you
+    define.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Autoscaling Groups of Instances: https://cloud.google.com/compute/docs/autoscaler/
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/zones/{{zone}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
+BackendBucket: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Backend buckets allow you to use Google Cloud Storage buckets with HTTP(S)
+    load balancing.
+
+    An HTTP(S) load balancer can direct traffic to specified URLs to a
+    backend bucket rather than a backend service. It can send requests for
+    static content to a Cloud Storage bucket and requests for dynamic content
+    a virtual machine instance.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Using a Cloud Storage bucket as a load balancer backend: https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket
+    api: https://cloud.google.com/compute/docs/reference/latest/backendBuckets
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+BackendService: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Creates a BackendService resource in the specified project using the data
+    included in the request.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+DiskType: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents a DiskType resource. A DiskType resource represents the type
+    of disk to use, such as a pd-ssd or pd-standard. To reference a disk
+    type, use the disk type's full or partial URL.
+  readonly: true
+Disk: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - name
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Persistent disks are durable storage devices that function similarly to
+    the physical disks in a desktop or a server. Compute Engine manages the
+    hardware behind these devices to ensure data redundancy and optimize
+    performance for you. Persistent disks are available as either standard
+    hard disk drives (HDD) or solid-state drives (SSD).
+
+    Persistent disks are located independently from your virtual machine
+    instances, so you can detach or move persistent disks to keep your data
+    even after you delete your instances. Persistent disk performance scales
+    automatically with size, so you can resize your existing persistent disks
+    or add more persistent disks to an instance to meet your performance and
+    storage space requirements.
+
+    Add a persistent disk to your instance when you need reliable and
+    affordable storage with consistent performance characteristics.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Adding a persistent disk: https://cloud.google.com/compute/docs/disks/add-persistent-disk
+    api: https://cloud.google.com/compute/docs/reference/latest/disks
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/zones/{{zone}}/operations/{{op_id}}
+      wait_ms: 1000
+      timeouts: !ruby/object:Api::Async::Operation::Timeouts
+        insert_sec: 300
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+Firewall: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Each network has its own firewall controlling access to and from the
+    instances.
+
+    All traffic to instances, even from other instances, is blocked by the
+    firewall unless firewall rules are created to allow it.
+
+    The default network has automatically created firewall rules that are
+    shown in default firewall rules. No manually created network has
+    automatically created firewall rules except for a default "allow" rule for
+    outgoing traffic and a default "deny" for incoming traffic. For all
+    networks except the default network, you must create any firewall rules
+    you need.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/vpc/docs/firewalls
+    api: https://cloud.google.com/compute/docs/reference/latest/firewalls
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  update_verb: :PATCH
+ForwardingRule: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    A ForwardingRule resource. A ForwardingRule resource specifies which pool
+    of target virtual machines to forward a packet to if it matches the given
+    [IPAddress, IPProtocol, portRange] tuple.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules
+    api: https://cloud.google.com/compute/docs/reference/latest/forwardingRule
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+HttpHealthCheck: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    An HttpHealthCheck resource. This resource defines a template for how
+    individual VMs should be checked for health, via HTTP.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Adding Health Checks: https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks
+    api: https://cloud.google.com/compute/docs/reference/latest/httpHealthChecks
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+HttpsHealthCheck: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    An HttpsHealthCheck resource. This resource defines a template for how
+    individual VMs should be checked for health, via HTTPS.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Adding Health Checks: https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks
+    api: https://cloud.google.com/compute/docs/reference/latest/httpsHealthChecks
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+HealthCheck: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Health Checks determine whether instances are responsive and able to do work.
+    They are an important part of a comprehensive load balancing configuration,
+    as they enable monitoring instances behind load balancers.
+
+    Health Checks poll instances at a specified interval. Instances that
+    do not respond successfully to some number of probes in a row are marked
+    as unhealthy. No new connections are sent to unhealthy instances,
+    though existing connections will continue. The health check will
+    continue to poll unhealthy instances. If an instance later responds
+    successfully to some number of consecutive probes, it is marked
+    healthy again and can receive new connections.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/load-balancing/docs/health-checks
+    api: https://cloud.google.com/compute/docs/reference/rest/latest/healthChecks
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+InstanceTemplate: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Defines an Instance Template resource that provides configuration settings
+    for your virtual machine instances. Instance templates are not tied to the
+    lifetime of an instance and can be used and reused as to deploy virtual
+    machines. You can also use different templates to create different virtual
+    machine configurations. Instance templates are required when you create a
+    managed instance group.
+
+    Tip: Disks should be set to autoDelete=true
+    so that leftover disks are not left behind on machine deletion.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  transport: !ruby/object:Api::Resource::Transport
+    encoder: encode_request
+    decoder: decode_response
+License: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    A License resource represents a software license. Licenses are used to
+    track software usage in images, persistent disks, snapshots, and virtual
+    machine instances.
+  readonly: true
+  base_url: "/projects/{{project}}/global/licenses"
+Image: !ruby/object:DiscoveryOverride::ResourceOverride
+  description: |
+    Represents an Image resource.
+
+    Google Compute Engine uses operating system images to create the root
+    persistent disks for your instances. You specify an image when you create
+    an instance. Images contain a boot loader, an operating system, and a
+    root file system. Linux operating system images are also capable of
+    running containers on Compute Engine.
+
+    Images can be either public or custom.
+
+    Public images are provided and maintained by Google, open-source
+    communities, and third-party vendors. By default, all projects have
+    access to these images and can use them to create instances.  Custom
+    images are available only to your project. You can create a custom image
+    from root persistent disks and other images. Then, use the custom image
+    to create an instance.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+Instance: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: 'An instance is a virtual machine (VM) hosted on Google''s infrastructure.
+
+'
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/zones/{{zone}}/operations/{{op_id}}
+      wait_ms: 1000
+      timeouts: !ruby/object:Api::Async::Operation::Timeouts
+        insert_sec: 360
+        update_sec: 360
+        delete_sec: 360
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  transport: !ruby/object:Api::Resource::Transport
+    encoder: encode_request
+    decoder: decode_response
+InstanceGroup: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents an Instance Group resource. Instance groups are self-managed
+    and can contain identical or different instances. Instance groups do not
+    use an instance template. Unlike managed instance groups, you must create
+    and add instances to an instance group manually.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/zones/{{zone}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  name: InstanceGroup
+  kind: compute#instanceGroup
+  base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
+InstanceGroupManager: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Creates a managed instance group using the information that you specify in
+    the request. After the group is created, it schedules an action to create
+    instances in the group using the specified instance template. This
+    operation is marked as DONE when the group is created even if the
+    instances in the group have not yet been created. You must separately
+    verify the status of the individual instances.
+
+    A managed instance group can have up to 1000 VM instances per group.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/zones/{{zone}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+InterconnectAttachment: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents an InterconnectAttachment (VLAN attachment) resource. For more
+    information, see Creating VLAN Attachments.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  name: InterconnectAttachment
+  kind: compute#interconnectAttachment
+  base_url: projects/{{project}}/regions/{{region}}/interconnectAttachments
+MachineType: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - name
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents a MachineType resource. Machine types determine the virtualized
+    hardware specifications of your virtual machine instances, such as the
+    amount of memory or number of virtual CPUs.
+  readonly: true
+Network: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents a Network resource.
+
+    Your Cloud Platform Console project can contain multiple networks, and
+    each network can have multiple instances attached to it. A network allows
+    you to define a gateway IP and the network range for the instances
+    attached to that network. Every project is provided with a default network
+    with preset configurations and firewall rules. You can choose to customize
+    the default network by adding or removing rules, or you can create new
+    networks in that project. Generally, most users only need one network,
+    although you can have up to five networks per project by default.
+
+    A network belongs to only one project, and each instance can only belong
+    to one network. All Compute Engine networks use the IPv4 protocol. Compute
+    Engine currently does not support IPv6. However, Google is a major
+    advocate of IPv6 and it is an important future direction.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/vpc/docs/vpc
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/networks
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  update_verb: :PATCH
+Region: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - name
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents a Region resource. A region is a specific geographical
+    location where you can run your resources. Each region has one or more
+    zones
+  readonly: true
+Route: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents a Route resource.
+
+    A route is a rule that specifies how certain packets should be handled by
+    the virtual network. Routes are associated with virtual machines by tag,
+    and the set of routes for a particular virtual machine is called its
+    routing table. For each packet leaving a virtual machine, the system
+    searches that virtual machine's routing table for a single best matching
+    route.
+
+    Routes match packets by destination IP address, preferring smaller or more
+    specific ranges over larger ones. If there is a tie, the system selects
+    the route with the smallest priority value. If there is still a tie, it
+    uses the layer three and four packet headers to select just one of the
+    remaining matching routes. The packet is then forwarded as specified by
+    the next_hop field of the winning route -- either to another virtual
+    machine destination, a virtual machine gateway or a Compute
+    Engine-operated gateway. Packets that do not match any route in the
+    sending virtual machine's routing table will be dropped.
+
+    A Route resource must have exactly one specification of either
+    nextHopGateway, nextHopInstance, nextHopIp, or nextHopVpnTunnel.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Using Routes: https://cloud.google.com/vpc/docs/using-routes
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/routes
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+Router: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: 'Represents a Router resource.
+
+'
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Google Cloud Router: https://cloud.google.com/router/docs/
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/routers
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  update_verb: :PATCH
+Snapshot: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents a Persistent Disk Snapshot resource.
+
+    Use snapshots to back up data from your persistent disks. Snapshots are
+    different from public images and custom images, which are used primarily
+    to create instances or configure instance templates. Snapshots are useful
+    for periodic backup of the data on your persistent disks. You can create
+    snapshots from persistent disks even while they are attached to running
+    instances.
+
+    Snapshots are incremental, so you can create regular snapshots on a
+    persistent disk faster and at a much lower cost than if you regularly
+    created a full image of the disk.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+SslCertificate: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    An SslCertificate resource, used for HTTPS load balancing. This resource
+    provides a mechanism to upload an SSL key and certificate to
+    the load balancer to serve secure connections from the user.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/load-balancing/docs/ssl-certificates
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+SslPolicy: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    Represents a SSL policy. SSL policies give you the ability to control the
+    features of SSL that your SSL proxy or HTTPS load balancer negotiates.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Using SSL Policies: https://cloud.google.com/compute/docs/load-balancing/ssl-policies
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  update_verb: :PATCH
+  name: SslPolicy
+  kind: compute#sslPolicy
+  base_url: projects/{{project}}/global/sslPolicies
+Subnetwork: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    A VPC network is a virtual version of the traditional physical networks
+    that exist within and between physical data centers. A VPC network
+    provides connectivity for your Compute Engine virtual machine (VM)
+    instances, Container Engine containers, App Engine Flex services, and
+    other network-related resources.
+
+    Each GCP project contains one or more VPC networks. Each VPC network is a
+    global entity spanning all GCP regions. This global VPC network allows VM
+    instances and other resources to communicate with each other via internal,
+    private IP addresses.
+
+    Each VPC network is subdivided into subnets, and each subnet is contained
+    within a single region. You can have more than one subnet in a region for
+    a given VPC network. Each subnet has a contiguous private RFC1918 IP
+    space. You create instances, containers, and the like in these subnets.
+    When you create an instance, you must create it in a subnet, and the
+    instance draws its internal IP address from that subnet.
+
+    Virtual machine (VM) instances in a VPC network can communicate with
+    instances in all other subnets of the same VPC network, regardless of
+    region, using their RFC1918 private IP addresses. You can isolate portions
+    of the network, even entire subnets, using firewall rules.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Private Google Access: https://cloud.google.com/vpc/docs/configure-private-google-access
+      Cloud Networking: https://cloud.google.com/vpc/docs/using-vpc
+    api: https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+      timeouts: !ruby/object:Api::Async::Operation::Timeouts
+        insert_sec: 360
+        update_sec: 360
+        delete_sec: 360
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+TargetHttpProxy: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents a TargetHttpProxy resource, which is used by one or more global
+    forwarding rule to route incoming HTTP requests to a URL map.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/compute/docs/load-balancing/http/target-proxies
+    api: https://cloud.google.com/compute/docs/reference/latest/targetHttpProxies
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+TargetHttpsProxy: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents a TargetHttpsProxy resource, which is used by one or more
+    global forwarding rule to route incoming HTTPS requests to a URL map.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/compute/docs/load-balancing/http/target-proxies
+    api: https://cloud.google.com/compute/docs/reference/latest/targetHttpsProxies
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+TargetPool: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: Represents a TargetPool resource, used for Load Balancing.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Official Documentation: https://cloud.google.com/compute/docs/load-balancing/network/target-pools
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/targetPools
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+  transport: !ruby/object:Api::Resource::Transport
+    encoder: encode_request
+    decoder: decode_request
+TargetSslProxy: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents a TargetSslProxy resource, which is used by one or more
+    global forwarding rule to route incoming SSL requests to a backend
+    service.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Setting Up SSL proxy for Google Cloud Load Balancing: https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/
+    api: https://cloud.google.com/compute/docs/reference/latest/targetSslProxies
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+TargetTcpProxy: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents a TargetTcpProxy resource, which is used by one or more
+    global forwarding rule to route incoming TCP requests to a Backend
+    service.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Setting Up TCP proxy for Google Cloud Load Balancing: https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy
+    api: https://cloud.google.com/compute/docs/reference/latest/targetTcpProxies
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+TargetVpnGateway: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: |
+    Represents a VPN gateway running in GCP. This virtual device is managed
+    by Google, but used only by you.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+UrlMap: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: |
+    UrlMaps are used to route requests to a backend service based on rules
+    that you define for the host and path of an incoming URL.
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/global/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+VpnTunnel: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  input: true
+  description: VPN tunnel resource.
+  references: !ruby/object:Api::Resource::ReferenceLinks
+    guides:
+      Cloud VPN Overview: https://cloud.google.com/vpn/docs/concepts/overview
+      Networks and Tunnel Routing: https://cloud.google.com/vpn/docs/concepts/choosing-networks-routing
+    api: https://cloud.google.com/compute/docs/reference/rest/v1/vpnTunnels
+  async: !ruby/object:Api::Async
+    operation: !ruby/object:Api::Async::Operation
+      kind: compute#operation
+      path: name
+      base_url: projects/{{project}}/regions/{{region}}/operations/{{op_id}}
+      wait_ms: 1000
+    result: !ruby/object:Api::Async::Result
+      path: targetLink
+    status: !ruby/object:Api::Async::Status
+      path: status
+      complete: DONE
+      allowed:
+      - PENDING
+      - RUNNING
+      - DONE
+    error: !ruby/object:Api::Async::Error
+      path: error/errors
+      message: message
+Zone: !ruby/object:DiscoveryOverride::ResourceOverride
+  exports:
+  - name
+  - !ruby/object:Api::Type::SelfLink
+    name: selfLink
+  description: Represents a Zone resource.
+  readonly: true
