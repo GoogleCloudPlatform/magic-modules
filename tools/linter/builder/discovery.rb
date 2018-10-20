@@ -80,9 +80,13 @@ class DiscoveryProperty
 
   def array
     schema_type = @schema.dig('items', 'type')
-    if !schema_type && @schema.dig('items', '$ref')
+    if (!schema_type && @schema.dig('items', '$ref')) || @schema.dig('items', 'properties')
       prop = Api::Type::NestedObject.new
-      prop.properties = @__product.get_resource(@schema.dig('items', '$ref')).properties
+      if @schema.dig('items', '$ref')
+        prop.properties = @__product.get_resource(@schema.dig('items', '$ref')).properties
+      else
+        prop.properties = DiscoveryResource.new(@schema.dig('items'), @__product).properties
+      end
       return prop
     end
     return "Api::Type::#{TYPES[schema_type.to_sym]}" if schema_type != 'object'
