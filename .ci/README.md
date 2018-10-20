@@ -126,5 +126,11 @@ This is the most common issue and the solution isn't complicated.  If you delete
 
 If you want to leave those PRs open for some reason (preserve comments, because an external partner is watching them, etc), no problem, the magician will still do the right thing, it'll just update the PRs in the `mm-generate` step (*before* the tests) rather than in `create-prs` (*after* the tests) - your PR will still get updated even if the generated code fails tests.
 
+## I can't log in to sunrisecafe!
+
+You might not be authorized - the github auth there is separate from the logic to determine who counts as an authorized contributor here.  Get someone who is permitted to run this command: `fly -t sunrise set-team -n magic-modules --github-team googlecloudplatform:graphite --github-user=ndmckinley --github-user=paddycarver  --github-user=<you!>`, then make them update this page so that the next person to run this command doesn't wipe you off the list ... there's no `add-user` or equivalent, this page here is the source-of-truth for the config, so this is important!
+
+After that, log out of sunrise, log back in to sunrise, then log out another time, then run `fly login -t sunrise` as above.
+
 ## Other: Consult your local Magician Expert
 Remind them to update this page.
