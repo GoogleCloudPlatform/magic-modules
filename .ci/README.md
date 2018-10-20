@@ -18,46 +18,23 @@ The Magician takes the PR you write against MagicModules and creates the downstr
 
 ## Your Workflow
 
-You'll write some commits, likely modifying files under `provider` or `products`, and push a PR.  Since The Magician needs to be able to add commits to your branch to update submodules, **make sure the branch of your PR is in `GoogleCloudPlatform/magic-modules`, not your personal fork**.
+You'll write some commits, likely modifying files under `provider` or `products`, and push a PR.  Since The Magician needs to be able to add commits to your branch to update submodules, make sure the Magician can write to the branch your PR comes from!  It must either be in `GoogleCloudPlatform/magic-modules`, not your personal fork, or you must set the "allow collaborators to push to this branch" bit on the PR when creating it.
 
-The Magician will take over, running the generator and running the downstream tests.  If the tests fail, you'll see "check failed" status on your PR<!--TODO(@ndmckinley) - better reporting and logs of test failures.-->.  When all the tests pass, the PR or PRs created by The Magician will link back to your MagicModules PR.  From there, it is your responsibility to engage with *all* the downstream PRs - The Magician doesn't test or merge those unless otherwise indicated.  You cannot merge your MagicModules PR until *all* downstreams accept the changes.  If a downstream requests changes and you need to modify your MagicModules PR, simply push another commit to your MagicModules PR and The Magician will push any generated updates to the downstream PRs.  Note that if you merge one PR, then another downstream asks for changes which affect the already-merged PR, you will have a messy situation - use caution when many repositories are impacted by your change.
+The Magician will take over, running the generator and running the downstream tests.  If the tests fail, you'll see "check failed" status on your PR, which will link to the step that failed.  When all the tests pass, the PR or PRs created by The Magician will link back to your MagicModules PR, and the Magician will post links to them on your PR.  From there, it is your responsibility to engage with *all* the downstream PRs - The Magician doesn't test or merge those unless otherwise indicated.  You cannot merge your MagicModules PR until *all* downstreams accept the changes.  If a downstream requests changes and you need to modify your MagicModules PR, simply push another commit to your MagicModules PR and The Magician will push any generated updates to the downstream PRs.  Note that if you merge one PR, then another downstream asks for changes which affect the already-merged PR, you will have a messy situation - use caution when many repositories are impacted by your change.  If you find yourself in this situation, reach out to an established developer on the project.  :)
 
 ## Useful `fly` Invocations
 
 If you want to see what The Magician is going to do to your PR, you'll want to use the `fly` CLI.  You can find documentation about how to use `fly` [here](https://concourse-ci.org/fly.html), but the following invocations may be useful.
 
-First, log in to https://terraform.ci.cloud-graphite.com and download `fly` from there.  You'll need to authenticate `fly` with that target, using `fly login`.  `fly login -t main` will prompt you interactively for the username and password.  [Here are the docs about fly login](https://concourse-ci.org/fly.html#fly-login).
+First, log in to https://sunrisecafe.ci.cloud-graphite.com and download `fly` from there.  You'll need to authenticate `fly` with that target, using `fly login`.  `fly login -t sunrise -n magic-modules --concourse-url https://sunrisecafe.ci.cloud-graphite.com` will prompt you to login using oauth.  [Here are the docs about fly login](https://concourse-ci.org/fly.html#fly-login).
 
-After you're authenticated, the most useful command will be `fly execute`.  [Execute is documented here](https://concourse-ci.org/running-tasks.html).
-
-**If you want to see the generated terraform repository**, run this command from the root of your repository (after ensuring that the downloaded `fly` is executable and in your PATH):
-
-<!--TODO(ndmckinley) Make these commands resilient to missing files and require no setup.-->
-
-```
-fly execute -t main --config .ci/magic-modules/branch.yml --input magic-modules=. --output magic-modules-branched=/tmp/magic-modules-branched/ --include-ignored
-fly execute -t main --config .ci/magic-modules/generate-terraform.yml --input magic-modules-branched=/tmp/magic-modules-branched  --output terraform-generated=/tmp/terraform-output/  --include-ignored
-```
-
-This tells Concourse to upload the current directory (including files that `git` treats as irrelevant, like the `.git` directory).  It treats the repo as if it were the PR that the Magician is running against, creates a branch, and then generates the terraform repository, placing it in /tmp/terraform-output.
-
-**If you want to run the terraform tests on the generated code**, run this command:
-
-```
-fly execute -t main --config .ci/unit-tests/test-terraform.yml --input terraform=/tmp/terraform-output  --include-ignored
-```
-
-**If you want to run the terraform tests on the existing submodule**, run this command:
-
-```
-fly execute -t main --config .ci/unit-tests/task.yml --input magic-modules=. --include-ignored
-```
+This will give you a command line interface which is rich and will allow you to manage your jobs as they flow through the pipeline. This is mostly useful as a secondary option (if your workflow doesn't support having a browser window open).  `fly` cannot be used to run these jobs locally - just go ahead and open a PR and let the CI take care of your build / test / debug loop.  Mark the opened PR as "WIP" if you're not ready for review.
 
 # CI For MagicModules Developers
 If you develop MagicModules (code generation features), here are the things you'll want to know.
 
 ## Deploying the pipeline
-The pipeline config is generated using jinja2.  You'll want `j2cli`: `pip install j2cli`.  To generate the pipeline, use `j2 .ci/ci.yml.tmpl`.  To deploy it, use `~/fly -t prod sp -c <(j2 .ci/ci.yml.tmpl) -p magic-modules`.
+The pipeline config is generated using jinja2.  You'll want `j2cli`: `pip install j2cli`.  To generate the pipeline, use `j2 .ci/ci.yml.tmpl`.  To deploy it, use `fly -t sunrise sp -c <(j2 ci.yml.tmpl) -p magician`.
 
 ## Adding Tests
 You can easily add things to the test suites.  The version of the `.yml` and `.sh` files in this subdirectory which are run when you call `fly execute` are the versions at HEAD in your local copy of the repository.  If you write new tests which require some setup, you can just add them to the shell scripts which are already being executed - if the overall shell script exits with a nonzero code, the task will be marked as failing.
@@ -83,10 +60,10 @@ Concourse has three primitives - Resources, Jobs, and Tasks.
 Concourse is strongly based on containers, and consequently it's worth keeping track of which containers the pipeline uses.
 
 ### nmckinley/concourse-github-pr-resource
-This is based on https://github.com/jtarchie/github-pullrequest-resource.  It contains a few features that haven't been merged into that repo yet, which you can see at this fork: https://github.com/ndmckinley/github-pullrequest-resource.  It is probably not necessary to update this container for now, and we should switch to using jtarchie/concourse-github-pr-resource ASAP, but if there are problems in the meantime, message @ndmckinley.
+This is based on https://github.com/jtarchie/github-pullrequest-resource.  It contains a few features that haven't been merged into that repo yet, which you can see at this fork: https://github.com/ndmckinley/github-pullrequest-resource.  It is probably not necessary to update this container often.  The credhub instance associated with sunrise contains the username / password for that dockerhub account.
 
 ### nmckinley/concourse-git-resource
-This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  This container will also go away when those changes are made.  It shouldn't be necessary to update, but if, for instance, you need a feature which was added to the git resource after the container was built, message @ndmckinley.
+This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  It is probably not necessary to update this container ever, but if for some reason you did need to do that, you would want to rebase the changes in that pull request onto the new master of `concourse/git-resource` and push a new version.  The credhub instance associated with sunrise contains the username / password for that dockerhub account.
 
 -------
 
