@@ -8,10 +8,12 @@ module DiscoveryOverride
 
     def initialize(product, override_filename)
       @product = product
+      return unless override_filename
       @override = YAML.load(File.read(override_filename))
     end
 
     def run
+      return unless @override
       @override.consume_config(@product, DiscoveryConfig)
       @override.run
     end
