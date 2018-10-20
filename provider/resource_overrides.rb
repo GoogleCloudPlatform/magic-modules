@@ -43,12 +43,16 @@ module Provider
     end
 
     def validate
+      run
+      super
+    end
+
+    def run
       return unless @__objects.nil? # allows idempotency of calling validate
       return if @__api.nil?
       populate_nonoverridden_objects
       convert_findings_to_hash
       override_objects
-      super
     end
 
     def [](index)
@@ -82,8 +86,6 @@ module Provider
       @__objects&.key?(key)
     end
 
-    private
-
     # Converts every variable into @__objects
     def convert_findings_to_hash
       @__objects = {}
@@ -105,6 +107,8 @@ module Provider
         override_properties api_object, override
       end
     end
+
+    private
 
     def override_properties(api_object, override)
       # We apply property overrides in reverse order of level of nesting.
