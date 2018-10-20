@@ -5,7 +5,7 @@
   scopes:
     - 'https://www.googleapis.com/auth/compute'
   output: output.yaml
-  override: tools/linter/override.yaml
+  override: tools/linter/generated_overrides.yaml
   objects:
     - Address
     - Autoscaler
@@ -22,16 +22,20 @@
     - HttpsHealthCheck
     - Image
     - Instance
+    - InterconnectAttachment
+    - InstanceGroup
     - InstanceGroupManager
     - InstanceTemplate
     - License
     - MachineType
     - Network
     - Region
+    - RegionAutoscaler
     - Route
     - Router
     - Snapshot
     - SslCertificate
+    - SslPolicy
     - Subnetwork
     - TargetHttpProxy
     - TargetHttpsProxy
