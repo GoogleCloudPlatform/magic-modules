@@ -1,11 +1,11 @@
 require 'google_compute_zones'
 
 class ZonesTest < Zones
-	def fetch_resource(data)
-		return data
-	end
+  def fetch_resource(data)
+    return data
+  end
 end
-
+    
 zones_fixture = {"kind"=>"compute#zoneList",
  "id"=>"projects/sam-inspec/zones",
  "items"=>
@@ -47,16 +47,16 @@ zones_fixture = {"kind"=>"compute#zoneList",
      ["Intel Skylake", "Intel Broadwell", "Intel Haswell"]}]}
 
 RSpec.describe Zones, "zones" do
-	it "first test" do
-		t = ZonesTest.new(zones_fixture)
-		expect(t.names.size).to eq 3
-		expect(t.names).to include 'us-east1-d'
-		expect(t.names).to include 'us-east1-b'
-		expect(t.names).to include 'us-east1-c'
-		expect(t.statuses).to include 'UP'
-		expect(t.statuses.size).to eq 3
-		expect(t.ids).to include '2231'
-		expect(t.ids).to include '2234'
-		expect(t.ids).to include '2233'
-	end
+  it "first test" do
+    t = ZonesTest.new(zones_fixture)
+    expect(t.names.size).to eq 3
+    expect(t.names).to include 'us-east1-d'
+	expect(t.names).to include 'us-east1-b'
+	expect(t.names).to include 'us-east1-c'
+	expect(t.statuses).to include 'UP'
+	expect(t.statuses.size).to eq 3
+	expect(t.ids).to include '2231'
+	expect(t.ids).to include '2234'
+	expect(t.ids).to include '2233'
+  end
 end
