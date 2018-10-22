@@ -42,12 +42,10 @@ module Api
       # GET/DELETE requests only.  In particular, this is often used
       # to add query parameters.
       attr_reader :self_link_query
-      # URL to be used to retrieve a list of these resources (for InSpec)
-      attr_reader :list_url
-      # This is the type of response from the list URL. It contains
+      # This is the type of response from the collection URL. It contains
       # the name of the list of items within the json, as well as the
-      # type that this list should be
-      attr_reader :list_url_response
+      # type that this list should be. This is of type Api::Resource::ResponseList
+      attr_reader :collection_url_response
       # This is an array with items that uniquely identify the resource.
       # This is useful in case an API returns a list result and we need
       # to fetch the particular resource we're interested in from that
