@@ -19,6 +19,8 @@ require 'tools/linter/builder/discovery'
 require 'tools/linter/builder/docs'
 require 'tools/linter/builder/override'
 
+require 'optparse'
+
 module Api
   class Object
     # Create a setter if the setter doesn't exist
@@ -39,13 +41,22 @@ module Api
   end
 end
 
-docs = YAML::load(File.read('tools/linter/docs.yaml'))
+doc_file = 'tools/linter/docs.yaml'
+
+OptionParser.new do |opts|
+  opts.banner = "Discovery doc runner. Usage: run.rb [docs.yaml]"
+  opts.on("-f", "--file [file]") { |file| doc_file = file }
+end.parse!
+
+docs = YAML::load(File.read(doc_file))
 
 docs.each do |doc|
   product = DiscoveryProduct.new(doc)
   product_obj = product.get_product
-  override = DiscoveryOverride::Runner.new(product_obj, doc.override)
-  override.run
-  product_obj = override.product
+  (doc.overrides || []).each do |override|
+    override = DiscoveryOverride::Runner.new(product_obj, override)
+    override.run
+    product_obj = override.product
+  end
   File.write(doc.output, product_obj.to_yaml)
 end
