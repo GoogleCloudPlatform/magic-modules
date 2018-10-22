@@ -6,6 +6,12 @@ require 'api/product'
 require 'api/type'
 require 'api/compiler'
 
+# Print Utility
+# ruby print.rb api_file1, output_file1, api_file2, output_file2
+#
+# This utility takes in two api.yaml files and prints them out
+# to output file locations in sorted order and without descriptions or `value: false`
+
 def alter_object(obj)
   obj.remove_instance_variable(:@description) if obj.instance_variable_get(:@description)
   obj.instance_variables.each do |inst_var|
