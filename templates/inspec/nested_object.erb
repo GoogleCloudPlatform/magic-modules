@@ -42,7 +42,7 @@ module Google
 <% nested_properties.each do |prop| -%>
 <%
   if time?(prop)
-      init = "Time.new(@fetched['#{prop.api_name}'])"
+      init = "DateTime.parse(@fetched['#{prop.api_name}'])"
   elsif primitive?(prop)
     init = "args['#{prop.api_name}']"
   elsif typed_array?(prop)

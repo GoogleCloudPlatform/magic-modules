@@ -74,7 +74,7 @@ class <%= object.name -%> < Inspec.resource(1)
     name = prop.out_name
 
     if time?(prop)
-      init = "Time.new(@fetched['#{prop.api_name}'])"
+      init = "DateTime.parse(@fetched['#{prop.api_name}'])"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
@@ -93,7 +93,7 @@ class <%= object.name -%> < Inspec.resource(1)
     !@fetched.nil?
   end
 
-  <% unless object.self_link_query.nil? -%>
+<% unless object.self_link_query.nil? -%>
   def fetch_wrapped_resource(params, kind, wrap_kind, wrap_path)
     result = fetch_resource(params, wrap_kind)
     return if result.nil? || !result.key?(wrap_path)
@@ -130,7 +130,6 @@ class <%= object.name -%> < Inspec.resource(1)
   def unwrap_resource_filter(resource)
     self.class.unwrap_resource_filter(resource)
   end
-
 <%= lines(indent(emit_method('self.unwrap_resource_filter', %w[resource],
                              urf_code, file_relative), 2), 1) -%>
 <% end # object.self_link_query.nil? -%>
