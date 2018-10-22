@@ -17,7 +17,7 @@ def wait_for_operation(module, response):
 <% if object.async.result.resource_inside_response -%>
     return navigate_hash(wait_done, ['response'])
 <% else #if object.async.result.resource_inside_response -%>
-  <% res_path = path2navigate(object.async.result.path) -%>
+<% res_path = path2navigate(object.async.result.path) -%>
     return <%= method_call('fetch_resource', ['module', "navigate_hash(wait_done, #{res_path})", (quote_string(object.kind) if object.kind?)]) %>
 <% end #if object.async.result.resource_inside_response -%>
 <% else # object.self_link_query.nil? -%>
