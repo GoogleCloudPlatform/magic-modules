@@ -627,6 +627,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -1702,6 +1708,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         # TODO(alexstephen): Change to ResourceRef with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
@@ -1768,6 +1780,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
       - !ruby/object:Api::Type::String
         name: 'sourceDiskId'
         description: |
@@ -2995,6 +3013,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceDiskEncryptionKey'
@@ -3014,6 +3038,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
     properties:
       - !ruby/object:Api::Type::Time
