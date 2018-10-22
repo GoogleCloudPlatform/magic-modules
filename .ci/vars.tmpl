@@ -1,6 +1,3 @@
-{% set chef_modules = ['_bundle', 'auth', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'iam'] %}
-{% set puppet_modules = ['_bundle', 'auth', 'bigquery', 'compute', 'sql', 'storage', 'spanner', 'container', 'dns', 'pubsub', 'resourcemanager'] %}
-{% set puppet_no_release = ['bigquery'] %}
 {% set terraform_v = {
     'ga': {
       'provider_name': 'terraform-provider-google',
@@ -24,38 +21,11 @@ build/{{repo}}/{{name}}
 build/{{name}}
 {%- endfor %}
 {% endmacro -%}
-{% set puppet_submodules = names_as_list('puppet', puppet_modules).split() %}
-{% set chef_submodules = names_as_list('chef', chef_modules).split() %}
 {% set terraform_submodules = build_folder(terraform_v.values()|map(attribute='short_name')).split() %}
 {%
-  set all_submodules = puppet_submodules + chef_submodules +
-     (terraform_submodules + ['build/ansible'] + ['build/inspec'])
+  set all_submodules = (terraform_submodules + ['build/ansible'] + ['build/inspec'])
 %}
 {% set all_submodules_yaml_format = '[' + ','.join(all_submodules) + ']' %}
-{% set chef_test_excludes = {
-    'iam': [
-      'spec/service_account_key_spec.rb',
-      'spec/service_account_spec.rb'
-    ],
-    'compute': [
-      'spec/vpn_tunnel_spec.rb'
-    ]
-  }
-%}
-{% set puppet_test_excludes = {
-  'compute': [
-      'spec/gcompute_instance_group_manager_provider_spec.rb',
-      'spec/gcompute_instance_provider_spec.rb',
-      'spec/gcompute_instance_template_provider_spec.rb',
-      'spec/gcompute_target_https_proxy_provider_spec.rb',
-      'spec/gcompute_target_ssl_proxy_provider_spec.rb',
-      'spec/gcompute_vpn_tunnel_provider_spec.rb',
-      'spec/puppetlint_spec.rb'],
-    'bigquery': [
-      'spec/gbigquery_table_provider_spec.rb'
-    ]
-  }
-%}
 {% macro serialize_terraform_properties(objs) -%}
 {% for obj in objs %}
 {{obj.provider_name}}:{{obj.short_name}}
