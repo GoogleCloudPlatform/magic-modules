@@ -56,12 +56,11 @@ def diff_properties(new_api_props, old_api_props, prefix='')
 
     if old_api_prop.is_a?(Api::Type::NestedObject)
       all_props.append(diff_properties(new_api_prop.properties, old_api_prop.properties, "#{prefix}#{old_api_prop.name}."))
-    end
     # I'm not convinced that overriding Arrays of NestedObjects doesn't work.
-#    elsif old_api_prop.is_a?(Api::Type::Array) && old_api_prop.item_type.is_a?(Api::Type::NestedObject)
-#      all_props.append(diff_properties(new_api_prop.item_type.properties, old_api_prop.item_type.properties,
-#                                       "#{old_api_prop.name}."))
-#    end
+    #elsif old_api_prop.is_a?(Api::Type::Array) && old_api_prop.item_type.is_a?(Api::Type::NestedObject)
+    #  all_props.append(diff_properties(new_api_prop.item_type.properties, old_api_prop.item_type.properties,
+    #                                   "#{prefix}#{old_api_prop.name}.item_type."))
+    end
 
     all_props.append({"#{prefix}#{old_api_prop.name}" => override}) if override.instance_variables.length > 0
     all_props
