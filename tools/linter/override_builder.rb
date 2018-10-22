@@ -20,6 +20,11 @@ require 'tools/linter/builder/docs'
 require 'tools/linter/builder/override'
 require 'api/compiler'
 
+# Override Builder
+# ruby override_builder.rb original_api.yaml discovery_api.yaml output.yaml
+# This script takes in an original version of api.yaml, a discovery doc generated version
+# and creates a series of overrides in output.yaml that override values from api.yaml to discovery_api.yaml
+
 module Api
   class Object
     # Create a setter if the setter doesn't exist

@@ -10,6 +10,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+################
+# Discovery Doc Builder
+#
+# This script takes in a yaml file with a Docs object that
+# describes which Discovery APIs are being taken in.
+#
+# The script will then build api.yaml files using
+# the Discovery API
 
 # Load everything from MM root.
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../../')
