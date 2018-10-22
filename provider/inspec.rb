@@ -16,6 +16,7 @@ require 'provider/core'
 require 'provider/inspec/manifest'
 require 'provider/inspec/resource_override'
 require 'provider/inspec/property_override'
+require 'active_support/inflector'
 
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
@@ -50,7 +51,8 @@ module Provider
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
-        out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + '.rb')
+        out_file: \
+          File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
       )
     end
 
@@ -158,13 +160,6 @@ module Provider
         'property',
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
-    end
-
-    def plural(word)
-      # TODO: use a real ruby gem for this? Pluralization is hard
-      return word + 'es' if word[-1] == 's'
-      return word[0...-1] + 'ies' if word[-1] == 'y'
-      word + 's'
     end
   end
 end

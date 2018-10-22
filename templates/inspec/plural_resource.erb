@@ -21,19 +21,14 @@ class <%= object.name -%>s < Inspec.resource(1)
 <%
 name = "google_#{product_ns.downcase}_#{object.name.underscore}"
 -%>
-  name '<%= plural(name) -%>'
+  name '<%= name.pluralize -%>'
   desc '<%= object.name -%> plural resource'
   supports platform: 'gcp2'
 
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
-<% 	 unless prop.input -%>
-<% 
-out = plural(prop.out_name)
--%>
 
-  <%= "filter_table_config.add(:#{out}, field: :#{prop.out_name})" -%>
-<% 	 end # unless prop.input -%>
+  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>
 
 
