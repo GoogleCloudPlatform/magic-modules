@@ -16,6 +16,7 @@ require 'provider/core'
 require 'provider/inspec/manifest'
 require 'provider/inspec/resource_override'
 require 'provider/inspec/property_override'
+require 'active_support/inflector'
 
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
@@ -50,7 +51,8 @@ module Provider
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
-        out_file: File.join(target_folder, plural("google_#{data[:product_name]}_#{name}") + ".rb")
+        out_file: \
+          File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/doc.md.erb',
@@ -58,10 +60,8 @@ module Provider
       )
     end
 
-    # Returns the url that this object can be retrieved from
-    # based off of the self link
-    def url(object)
-      url = object.self_link_url[1]
+    # Format a url that may be include newlines into a single line
+    def format_url(url)
       return url.join('') if url.is_a?(Array)
       url.split("\n").join('')
     end
@@ -164,17 +164,6 @@ module Provider
         'property',
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
-    end
-
-    def plural(word)
-      # TODO use a real ruby gem for this? Pluralization is hard
-      if word[-1] == 's'
-        return word + 'es'
-      end
-      if word[-1] == 'y'
-        return word[0...-1] + 'ies'
-      end
-      return word + 's'
     end
 
     def resource_name(object, product_ns)

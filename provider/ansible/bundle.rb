@@ -47,7 +47,7 @@ module Provider
         version = product.version_obj_or_default(version_name)
         product.set_properties_based_on_version(version)
       end
-      compile_files(output_folder)
+      compile_files(output_folder, version_name)
     end
 
     def products

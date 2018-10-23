@@ -21,17 +21,14 @@ class <%= object.name -%>s < Inspec.resource(1)
 <%
 name = "google_#{product_ns.downcase}_#{object.name.underscore}"
 -%>
-  name '<%= plural(name) -%>'
+  name '<%= name.pluralize -%>'
   desc '<%= object.name -%> plural resource'
   supports platform: 'gcp2'
 
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
-<% 
-out = plural(prop.out_name)
--%>
+  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.out_name})" -%>
 
-  <%= "filter_table_config.add(:#{out}, field: :#{prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>
 
 
@@ -39,19 +36,13 @@ out = plural(prop.out_name)
 
 <%
 base = "'#{object.self_link_url[0].join}'"
-url = object.base_url
-if url.is_a?(Array)
-  url = url.join('')
-else
-  url = url.split("\n").join('')
-end
 -%>
   def base
     <%= base %>
   end
 
   def url
-    '<%= url %>'
+    '<%= format_url(object.base_url) %>'
   end
 
   def initialize(params = {}) 
@@ -63,7 +54,7 @@ end
   end
 
 <% 
-link_query = object.self_link_query || object.list_url_response
+link_query = object.self_link_query || object.collection_url_response
 -%>
   def fetch_data
   	@data = fetch_wrapped_resource(<%= "'#{link_query.kind}'" -%>, <%= "'#{link_query.items}'" -%>)
@@ -73,16 +64,15 @@ link_query = object.self_link_query || object.list_url_response
     result = fetch_resource(@params)
     return if result.nil? || !result.key?(wrap_path)
 
-    # TODO hacky conversion of string => string hash to symbol => string hash that InSpec needs
-    res = result[wrap_path]
-    real = []
-    res.each do |x|
-      n = {}
-      x.each_pair { |k, v| n[k.to_sym] = v }
-      real.push(n)
+    # Conversion of string -> object hash to symbol -> object hash that InSpec needs
+    converted = []
+    result[wrap_path].each do |hash|
+      hash_with_symbols = {}
+      hash.each_pair { |k, v| hash_with_symbols[k.to_sym] = v }
+      converted.push(hash_with_symbols)
     end
 
-    real
+    converted
   end
 
 end
