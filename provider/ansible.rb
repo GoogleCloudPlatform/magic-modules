@@ -286,18 +286,6 @@ module Provider
         facts_info.validate
         data[:object].instance_variable_set(:@facts, facts_info)
       end
-
-      def generate_network_datas(data, object) end
-
-      def generate_base_property(data) end
-
-      def generate_simple_property(type, data) end
-
-      def generate_typed_array(type, data) end
-
-      def emit_nested_object(data) end
-
-      def emit_resourceref_object(data) end
     end
     # rubocop:enable Metrics/ClassLength
   end

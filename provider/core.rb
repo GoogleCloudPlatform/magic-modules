@@ -17,7 +17,6 @@ require 'google/extensions'
 require 'google/logger'
 require 'google/hash_utils'
 require 'pathname'
-require 'provider/properties'
 
 module Provider
   DEFAULT_FORMAT_OPTIONS = {
@@ -31,7 +30,6 @@ module Provider
   # such as compiling and including files, formatting data, etc.
   class Core
     include Compile::Core
-    include Provider::Properties
     include Api::Object::ObjectUtils
 
     attr_reader :test_data
@@ -215,8 +213,6 @@ module Provider
 
       generate_resource data
       generate_resource_tests data
-      generate_properties data, object.all_user_properties
-      generate_network_datas data, object
     end
 
     # rubocop:disable Metrics/AbcSize
