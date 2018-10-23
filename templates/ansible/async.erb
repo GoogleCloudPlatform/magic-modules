@@ -61,7 +61,11 @@ def wait_for_completion(status, op_result, module):
 -%>
     op_id = navigate_hash(op_result, <%= op_path -%>)
     op_uri = async_op_url(module, {'op_id': op_id})
+<% if object.async.status.complete == 'True' -%>
+    if not status:
+<% else -%>
     while status != <%= python_literal(object.async.status.complete) -%>:
+<% end -%>
         raise_if_errors(op_result, <%= err_path -%>, '<%= err_msg -%>')
         time.sleep(<%= sprintf('%.1f', object.async.operation.wait_ms / 1000.0) %>)
         op_result = <%= method_call('fetch_resource', ['module', 'op_uri', ("'#{object.async.operation.kind}'" if object.kind?)]) %>
