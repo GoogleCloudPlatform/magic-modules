@@ -13,35 +13,6 @@ chmod 400 ~/github_private_key
 pushd magic-modules-branched
 BRANCH="$(cat ./branchname)"
 # Update this repo to track the submodules we just pushed:
-IFS="," read -ra PRODUCT_ARRAY <<< "$PUPPET_MODULES"
-for PRD in "${PRODUCT_ARRAY[@]}"; do
-  git config -f .gitmodules "submodule.build/puppet/$PRD.branch" "$BRANCH"
-  # Bundle repo does not use the same naming scheme as the others
-  if [[ $PRD == *"_bundle"* ]]; then
-    repo="puppet-google"
-  else
-    repo="puppet-google-$PRD"
-  fi
-  git config -f .gitmodules "submodule.build/puppet/$PRD.url" "git@github.com:$GH_USERNAME/$repo.git"
-  git submodule sync "build/puppet/$PRD"
-  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/puppet/$PRD"
-  git add "build/puppet/$PRD"
-done
-
-IFS="," read -ra PRODUCT_ARRAY <<< "$CHEF_MODULES"
-for PRD in "${PRODUCT_ARRAY[@]}"; do
-  git config -f .gitmodules "submodule.build/chef/$PRD.branch" "$BRANCH"
-  # Bundle repo does not use the same naming scheme as the others
-  if [[ $PRD == *"_bundle"* ]]; then
-    repo="chef-google"
-  else
-    repo="chef-google-$PRD"
-  fi
-  git config -f .gitmodules "submodule.build/chef/$PRD.url" "git@github.com:$GH_USERNAME/$repo.git"
-  git submodule sync "build/chef/$PRD"
-  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/chef/$PRD"
-  git add "build/chef/$PRD"
-done
 
 if [ "$TERRAFORM_ENABLED" = "true" ]; then
   IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
