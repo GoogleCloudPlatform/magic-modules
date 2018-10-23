@@ -132,6 +132,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
     properties:
+      sourceSnapshot: !ruby/object:Provider::Ansible::PropertyOverride
+        description: |
+          The source snapshot used to create this disk. You can provide this as
+          a partial or full URL to the resource.
       labels: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
       type: !ruby/object:Provider::Ansible::PropertyOverride
@@ -276,6 +280,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
         version_added: '2.8'
   RegionDisk: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
+    properties:
+      sourceSnapshot: !ruby/object:Provider::Ansible::PropertyOverride
+        description: |
+          The source snapshot used to create this disk. You can provide this as
+          a partial or full URL to the resource.
   Route: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       description: !ruby/object:Provider::Ansible::PropertyOverride
