@@ -16,6 +16,7 @@ require 'provider/core'
 require 'provider/inspec/manifest'
 require 'provider/inspec/resource_override'
 require 'provider/inspec/property_override'
+require 'active_support/inflector'
 
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
@@ -50,14 +51,13 @@ module Provider
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
-        out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}s.rb")
+        out_file: \
+          File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
       )
     end
 
-    # Returns the url that this object can be retrieved from
-    # based off of the self link
-    def url(object)
-      url = object.self_link_url[1]
+    # Format a url that may be include newlines into a single line
+    def format_url(url)
       return url.join('') if url.is_a?(Array)
       url.split("\n").join('')
     end
@@ -99,6 +99,10 @@ module Provider
                       data[:property].property_class.last
                     end
       )
+    end
+
+    def time?(property)
+      property.is_a?(::Api::Type::Time)
     end
 
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
