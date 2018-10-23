@@ -97,6 +97,29 @@ module Api
       self.class.name.split('::').last
     end
 
+    # This is only used in puppet and chef, and it is the name of the Ruby type
+    # which is meant to parse the value of the property.  Usually it is 'Enum'
+    # or 'Integer' or 'String', unless complex logic is needed.  If so, a
+    # class will be generated specific to that type (e.g. AddressAddressType),
+    # and this must return the fully qualified name of that class.
+    def property_type
+      property_ns_prefix.concat([type]).join('::')
+    end
+
+    # This is only used in puppet and chef, and it is the string that must be
+    # used in a 'require' statement in order to use this property.  This is
+    # usually, e.g. 'google/compute/property/enum', but in the event that a
+    # class is generated specifically for a particular type, this will be the
+    # require path to that file.
+    def requires
+      File.join(
+        'google',
+        @__resource.__product.prefix[1..-1],
+        'property',
+        type
+      ).downcase
+    end
+
     def parent
       @__parent
     end
@@ -184,6 +207,24 @@ module Api
         super
         @output = true if @output.nil?
       end
+
+      def requires
+        File.join(
+          'google',
+          @__resource.__product.prefix[1..-1],
+          'property',
+          'string'
+        ).downcase
+      end
+
+      def property_type
+        [
+          'Google',
+          @__resource.__product.prefix[1..-1].camelize(:upper),
+          'Property',
+          'String'
+        ].join('::')
+      end
     end
 
     # Represents a timestamp
@@ -255,6 +296,21 @@ module Api
         property_class.join('::')
       end
 
+      def property_file
+        File.join(
+          'google', @__resource.__product.prefix[1..-1], 'property',
+          [get_type(@item_type).new(@name).type, 'array'].join('_')
+        ).downcase
+      end
+
+      # Returns the file that implements this property
+      def requires
+        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
+          return @item_type.requires
+        end
+        [property_file]
+      end
+
       def exclude_if_not_in_version(version)
         super
         @item_type.exclude_if_not_in_version(version) \
@@ -284,6 +340,20 @@ module Api
         else
           camelized_name = @name.camelize(:upper)
           property_ns_prefix.concat(["#{camelized_name}Enum"]).join('::')
+        end
+      end
+
+      def requires
+        # Similar to property_type, this just picks the right file to require
+        # for resources which use this enum property.  We'll need to require the
+        # generated unique Enum class if it exists.
+        if !generate_unique_enum_class
+          super
+        else
+          File.join(
+            'google', @__resource.__product.prefix[1..-1], 'property',
+            "#{@__resource.name}_#{@name}".underscore
+          ).downcase
         end
       end
 
@@ -362,6 +432,15 @@ module Api
         property_class.join('::')
       end
 
+      def property_file
+        File.join('google', @__resource.__product.prefix[1..-1], 'property',
+                  "#{resource}_#{@imports}").downcase
+      end
+
+      def requires
+        [property_file]
+      end
+
       private
 
       def check_resource_ref_exists
@@ -404,6 +483,17 @@ module Api
 
       def property_type
         property_class.join('::')
+      end
+
+      def property_file
+        File.join(
+          'google', @__resource.__product.prefix[1..-1], 'property',
+          [@__resource.name, @name.underscore].join('_')
+        ).downcase
+      end
+
+      def requires
+        [property_file].concat(properties.map(&:requires))
       end
 
       # Returns all properties including the ones that are excluded
@@ -462,6 +552,14 @@ module Api
 
     def get_type(type)
       Module.const_get(type)
+    end
+
+    def property_ns_prefix
+      [
+        'Google',
+        @__resource.__product.prefix[1..-1].camelize(:upper),
+        'Property'
+      ]
     end
   end
   # rubocop:enable Metrics/ClassLength
