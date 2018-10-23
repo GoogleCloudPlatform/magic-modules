@@ -1,6 +1,5 @@
 <!-- A summary of the changes in this commit goes here -->
 
-
 <!--
 Changes per downstream repository.  For each repository that you
 expect to have changed, find the [tag] and write your commit
@@ -16,6 +15,12 @@ The structure of the PR body is important to our CI system!
 The comments can be deleted, but if you want to make the downstream
 commits sensible, you'll need to leave the dashed line separating
 this PR's changes from the commit messages for downstream commits.
+-->
+
+<!-- 
+Note: You may see "This branch is out-of-date with the base branch"
+when you submit a pull request. This is fine! We don't use the GitHub
+merge button to merge PRs, and you can safely ignore that message.
 -->
 
 -----------------------------------------------------------------
