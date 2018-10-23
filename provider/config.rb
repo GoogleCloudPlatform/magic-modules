@@ -126,16 +126,6 @@ module Provider
       end
     end
 
-    # Reference to a module required by the module
-    class TestData < Api::Object
-      attr_reader :network
-
-      def validate
-        super
-        check_property :network, Api::Resource::HashArray
-      end
-    end
-
     # List of files to copy or compile into target module
     class Files < Api::Object
       attr_reader :compile
@@ -159,19 +149,6 @@ module Provider
         super
         check_property :path, String
         check_property :acl, String
-      end
-    end
-
-    # Identifies a location where a code style exception happened. This is used
-    # to guide the compiler to produce linter correct code, i.e. adding the
-    # necessary guards to avoid violations.
-    class StyleException < Api::Object::Named
-      attr_reader :pinpoints
-
-      def validate
-        super
-        check_property :pinpoints, Array
-        check_property_list :pinpoints, Hash
       end
     end
 
@@ -231,15 +208,8 @@ module Provider
       check_optional_property :files, Provider::Config::Files
       check_optional_property :objects, Api::Resource::HashArray
       check_property :overrides, Provider::ResourceOverrides
-      check_optional_property :test_data, Provider::Config::TestData
-      check_optional_property :tests, Api::Resource::HashArray
-
-      check_property_list :style, Provider::Config::StyleException \
-        unless @style.nil?
       check_property_list :changelog, Provider::Config::Changelog \
         unless @changelog.nil?
-      check_property_list :functions, Provider::Config::Function \
-        unless @functions.nil?
     end
 
     # Provides the API object to any type that requires, e.g. for validation

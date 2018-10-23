@@ -12,19 +12,12 @@
 # limitations under the License.
 
 require 'compile/core'
-require 'dependencies/dependency_graph'
 require 'fileutils'
 require 'google/extensions'
 require 'google/logger'
+require 'google/hash_utils'
 require 'pathname'
 require 'provider/properties'
-require 'provider/end2end/core'
-require 'provider/test_matrix'
-require 'provider/test_data/spec_formatter'
-require 'provider/test_data/constants'
-require 'provider/test_data/property'
-require 'provider/test_data/create_data'
-require 'provider/test_data/expectations'
 
 module Provider
   DEFAULT_FORMAT_OPTIONS = {
@@ -38,8 +31,6 @@ module Provider
   # such as compiling and including files, formatting data, etc.
   class Core
     include Compile::Core
-    include Provider::Properties
-    include Provider::End2End::Core
     include Api::Object::ObjectUtils
 
     attr_reader :test_data
@@ -47,11 +38,6 @@ module Provider
     def initialize(config, api)
       @config = config
       @api = api
-      @property = Provider::TestData::Property.new(self)
-      @constants = Provider::TestData::Constants.new(self)
-      @data_gen = Provider::TestData::Generator.new
-      @create_data = Provider::TestData::CreateData.new(self, @data_gen)
-      @prop_data = Provider::TestData::Expectations.new(self, @data_gen)
       @generated = []
       @sourced = []
       @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
