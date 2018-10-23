@@ -17,12 +17,9 @@
 <%= lines(autogen_notice :ruby) -%>
 
 <%
-  require 'google/string_utils'
-
-  inside_indent = 8
-
   requires = generate_requires(nested_properties)
   requires << 'google/hash_utils'
+  requires << 'google/string_utils'
 -%>
 <%= lines(emit_requires(requires)) -%>
 module Google
