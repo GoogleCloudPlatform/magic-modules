@@ -32,8 +32,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   DiskType: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
-  Firewall: !ruby/object:Provider::Chef::ResourceOverride
-    exclude: true
   ForwardingRule: !ruby/object:Provider::Chef::ResourceOverride
     exclude: true
   GlobalAddress: !ruby/object:Provider::Chef::ResourceOverride

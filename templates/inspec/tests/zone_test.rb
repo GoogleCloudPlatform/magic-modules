@@ -19,20 +19,20 @@ zone_fixture = {"kind"=>"compute#zone",
  "availableCpuPlatforms"=>
   ["Intel Skylake", "Intel Broadwell", "Intel Haswell"]}
 
-RSpec.describe Zone, "zone resource" do
-	it "parse test" do
-		t = ZoneTest.new(zone_fixture)
-		t.parse
-		expect(t.exists?).to be true
-		expect(t.name).to eq 'us-east1-b'
-		expect(t.status).to eq 'UP'
-		expect(t.deprecated.obsolete).to eq nil
-		time = Time.at(628232400).to_datetime
-		expect(t.creation_timestamp).to eq time
-	end
+RSpec.describe Zone, "parse" do
+  it "zone attributes" do
+    t = ZoneTest.new(zone_fixture)
+    t.parse
+    expect(t.exists?).to be true
+    expect(t.name).to eq 'us-east1-b'
+    expect(t.status).to eq 'UP'
+    expect(t.deprecated.obsolete).to eq nil
+    time = Time.at(628232400).to_datetime
+    expect(t.creation_timestamp).to eq time
+  end
 	it "no response" do
-		t = ZoneTest.new(nil)
-		expect(t.exists?).to be false
+    t = ZoneTest.new(nil)
+    expect(t.exists?).to be false
 	end
 end
 
