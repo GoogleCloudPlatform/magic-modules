@@ -25,35 +25,31 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-module: <%= module_name(object) %>
-description:
-<%= lines(indent(bullet_lines(object.description, 4), 4)) -%>
-short_description: Creates a GCP <%= object.name %>
-version_added: <%= lines(@config.manifest.get('version_added', object)) -%>
-author: <%= lines(@config.manifest.get('author', object)) -%>
-requirements:
-<% @config.manifest.get('requirements', object).each do |line| -%>
-<%= lines(indent(bullet_line(line, 4, false, false), 4)) -%>
-<% end -%>
-options:
-    state:
-        description:
-            - Whether the given object should exist in GCP
-        choices: ['present', 'absent']
-        default: 'present'
-<% object.all_user_properties.reject(&:output).each do |prop| -%>
-<%= lines(indent(doc_property_yaml(prop, object, 4), 4)) -%>
-<% end -%>
-extends_documentation_fragment: gcp
-<% if object.references -%>
-notes:
-<% if object.references.api -%>
-    - "API Reference: U(<%= object.references.api -%>)"
-<% end -%>
-<% object.references.guides.each do |guide, link| -%>
-    - "<%= guide -%>: U(<%= link -%>)"
-<% end # object.references -%>
-<% end # if object.references -%>
+<%= to_yaml({
+  'module' => module_name(object),
+  'description' => format_description(object.description),
+  'short_description' => "Creates a GCP #{object.name}",
+  'version_added' => @config.manifest.get('version_added', object).to_f,
+  'author' => @config.manifest.get('author', object),
+  'requirements' => @config.manifest.get('requirements', object),
+  'options' => [
+    {
+      'state' => {
+        'description' => ['Whether the given object should exist in GCP'],
+        'choices' => ['present', 'absent'],
+        'default' => 'present'
+      },
+    },
+    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
+  ].flatten.compact.reduce({}, :merge),
+  'extends_documentation_fragment' => 'gcp',
+  'notes' => (
+    [
+      ("API Reference: U(#{object.references.api})" if object.references.api),
+      object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
+    ].flatten.compact if object.references
+  )
+})-%>
 '''
 
 <% if example -%>
@@ -69,9 +65,7 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<% object.all_user_properties.each do |prop| -%>
-<%= lines(indent(return_property_yaml(prop, 4), 4)) -%>
-<% end -%>
+<%= to_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
 '''
 
 ################################################################################
