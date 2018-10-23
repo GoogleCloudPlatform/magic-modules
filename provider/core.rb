@@ -51,7 +51,6 @@ module Provider
     # rubocop:disable Metrics/PerceivedComplexity
     def generate(output_folder, types, version_name)
       generate_objects(output_folder, types, version_name)
-      generate_client_functions(output_folder) unless @config.functions.nil?
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
       compile_examples(output_folder) unless @config.examples.nil?
@@ -256,8 +255,6 @@ module Provider
       {
         name: object.out_name,
         object: object,
-        config: (@config.objects || {}).select { |o, _v| o == object.name }
-                                       .fetch(object.name, {}),
         tests: (@config.tests || {}).select { |o, _v| o == object.name }
                                     .fetch(object.name, {}),
         output_folder: output_folder,
@@ -274,9 +271,7 @@ module Provider
                    end
       generate_file(data.clone.merge(
         # Override with provider specific template for this object, if needed
-        template: Google::HashUtils.navigate(data[:config], ['template',
-                                                             data[:type]],
-                                             data[:default_template]),
+        template: data[:default_template],
         product_ns: product_ns
       ))
     end

@@ -25,15 +25,11 @@ module Provider
     attr_reader :overrides
     # Overrides for datasources
     attr_reader :datasources
-    attr_reader :objects
     attr_reader :examples
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
     attr_reader :tests
-    attr_reader :test_data
     attr_reader :files
-    attr_reader :style
     attr_reader :changelog
-    attr_reader :functions
     # Product names are complicated in MagicModules.  They are given by
     # product.prefix, which is in the format 'g<nameofproduct>', e.g.
     # gcompute or gresourcemanager.  This is munged in many places.
@@ -47,84 +43,6 @@ module Provider
     # instead is passed directly to the template as `product_ns` if
     # set.  Otherwise, the normal logic applies.
     attr_reader :name
-
-    # A custom client side function provided by the module.
-    class Function < Api::Object::Named
-      attr_reader :description
-      attr_reader :arguments
-      attr_reader :requires
-      attr_reader :code
-      attr_reader :helpers
-      attr_reader :examples
-      attr_reader :notes
-
-      def validate
-        super
-        check_property_list :requires, String
-        check_property :code, String
-        check_property_list :arguments, Provider::Config::Function::Argument
-        check_optional_property :helpers, String
-      end
-
-      # An argument required by the function being provided by the module.
-      class Argument < Api::Object::Named
-        attr_reader :description
-        attr_reader :type
-
-        def validate
-          super
-          check_property :description, String
-          check_property :type, String
-        end
-      end
-    end
-
-    # Operating system supported by the module
-    class OperatingSystem < Api::Object::Named
-      attr_reader :versions
-
-      def validate
-        super
-        check_property :versions
-      end
-
-      def all_versions
-        [@name, @versions.join(', ')].join(' ')
-      end
-    end
-
-    # Reference to a module required by the module
-    class Requirements < Api::Object::Named
-      attr_reader :versions
-
-      def self.create(name, versions)
-        Requirements.new(name, versions)
-      end
-
-      def validate
-        super
-        check_property :versions
-      end
-
-      private
-
-      def initialize(name, versions)
-        @name = name
-        @versions = versions
-      end
-    end
-
-    # Adds a reference to another product that should be referenced in the
-    # bundle.
-    class BundledProduct < Api::Object::Named
-      attr_reader :description
-      attr_reader :display_name
-      attr_reader :source
-
-      def prefix
-        @name.split('-').last
-      end
-    end
 
     # List of files to copy or compile into target module
     class Files < Api::Object
@@ -204,9 +122,7 @@ module Provider
 
       default_overrides
 
-      check_optional_property :examples, Api::Resource::HashArray
       check_optional_property :files, Provider::Config::Files
-      check_optional_property :objects, Api::Resource::HashArray
       check_property :overrides, Provider::ResourceOverrides
       check_property_list :changelog, Provider::Config::Changelog \
         unless @changelog.nil?
