@@ -3,7 +3,6 @@ package google
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/errwrap"
@@ -138,17 +137,6 @@ resource "google_spanner_instance" "basic" {
 resource "google_spanner_database" "basic" {
   instance      = "${google_spanner_instance.basic.name}"
   name          = "my-db-%s"
-}
-`, rnd, rnd, rnd)
-}
-
-func testAccSpannerDatabase_basicWithInitialDDL(rnd string) string {
-	return fmt.Sprintf(`
-resource "google_spanner_instance" "basic" {
-  name          = "my-instance-%s"
-  config        = "regional-us-central1"
-  display_name  = "my-displayname-%s"
-  name          = "%s"
 }
 `, instanceName, instanceName, databaseName)
 }
