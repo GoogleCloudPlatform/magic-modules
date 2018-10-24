@@ -7,6 +7,6 @@ echo 'TODO slevenick write tests'
 pushd "magic-modules/build/inspec/libraries"
 
 bundle install
-rspec -I . ../test/unit
+rspec -I . ../test/unit/*
 
 popd
