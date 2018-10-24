@@ -80,7 +80,7 @@ firewalls_fixture = {"kind"=>"compute#firewallList",
     "creationTimestamp"=>"2018-10-11T22:42:31.919-07:00",
     "name"=>"default-knsku4qwwbtr3bhcf3y6vcmu",
     "description"=>
-     "Destination resource: \"gcp/gce/g-on-g-default\"\nExposure: \"gcp/gce/g-on-g-default/gce_internal\"\nSource resource: \"gcp/gce/internal/gce_internal\"",
+     "Another description",
     "network"=>
      "https://www.googleapis.com/compute/v1/projects/sam-inspec/global/networks/default",
     "priority"=>1000,
