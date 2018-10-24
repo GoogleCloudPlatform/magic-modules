@@ -6,8 +6,6 @@ These tools manage the downstream repositories of [magic-modules](https://github
 Currently, they manage:
 
 * terraform
-* puppet
-* chef
 * ansible
 
 # CI For Downstream Developers
