@@ -87,6 +87,7 @@ jobs:
                 path: magic-modules-external-prs
 
     - name: mm-generate
+      max_in_flight: 2
       plan:
           - get: magic-modules
             resource: magic-modules-new-prs
@@ -344,6 +345,7 @@ jobs:
                 comment: magic-modules-with-comment/pr_comment
 
     - name: merge-prs
+      serial: true
       plan:
           - get: mm-approved-prs
             params:
