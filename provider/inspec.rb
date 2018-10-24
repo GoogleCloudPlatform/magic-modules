@@ -58,7 +58,7 @@ module Provider
       generate_documentation(data)
     end
 
-     # Generates InSpec markdown documents for the resource
+    # Generates InSpec markdown documents for the resource
     def generate_documentation(data)
       name = data[:object].name.underscore
       docs_folder = File.join(data[:output_folder], 'docs', 'resources')
@@ -178,7 +178,7 @@ module Provider
       "google_#{product_ns.downcase}_#{object.name.underscore}"
     end
 
-     def sub_property_descriptions(property)
+    def sub_property_descriptions(property)
       if nested_object?(property)
         return property.properties.map \
           { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
@@ -191,4 +191,5 @@ module Provider
     end
     # rubocop:enable Style/GuardClause
   end
+  # rubocop:enable Metrics/ClassLength
 end
