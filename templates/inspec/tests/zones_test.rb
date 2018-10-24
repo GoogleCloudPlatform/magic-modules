@@ -47,16 +47,16 @@ zones_fixture = {"kind"=>"compute#zoneList",
      ["Intel Skylake", "Intel Broadwell", "Intel Haswell"]}]}
 
 RSpec.describe Zones, "zones" do
-  it "first test" do
-    t = ZonesTest.new(zones_fixture)
-    expect(t.names.size).to eq 3
-    expect(t.names).to include 'us-east1-d'
-	expect(t.names).to include 'us-east1-b'
-	expect(t.names).to include 'us-east1-c'
-	expect(t.statuses).to include 'UP'
-	expect(t.statuses.size).to eq 3
-	expect(t.ids).to include '2231'
-	expect(t.ids).to include '2234'
-	expect(t.ids).to include '2233'
+  it "plural test" do
+    zones_mock_resource = ZonesTest.new(zones_fixture)
+    expect(zones_mock_resource.names.size).to eq 3
+    expect(zones_mock_resource.names).to include 'us-east1-d'
+    expect(zones_mock_resource.names).to include 'us-east1-b'
+    expect(zones_mock_resource.names).to include 'us-east1-c'
+    expect(zones_mock_resource.statuses).to include 'UP'
+    expect(zones_mock_resource.statuses.size).to eq 3
+    expect(zones_mock_resource.ids).to include '2231'
+    expect(zones_mock_resource.ids).to include '2234'
+    expect(zones_mock_resource.ids).to include '2233'
   end
 end

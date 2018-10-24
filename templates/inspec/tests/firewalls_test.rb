@@ -1,9 +1,9 @@
 require 'google_compute_firewalls'
 
 class FirewallsTest < Firewalls
-	def fetch_resource(data)
-		return data
-	end
+  def fetch_resource(data)
+    return data
+  end
 end
 
 firewalls_fixture = {"kind"=>"compute#firewallList",
@@ -14,7 +14,7 @@ firewalls_fixture = {"kind"=>"compute#firewallList",
     "creationTimestamp"=>"2018-10-11T22:42:38.647-07:00",
     "name"=>"default-2wnao3jebww7ldrn463stwke",
     "description"=>
-			"Desc",
+      "Desc",
     "network"=>
      "https://www.googleapis.com/compute/v1/projects/sam-inspec/global/networks/default",
     "priority"=>1000,
@@ -96,16 +96,15 @@ firewalls_fixture = {"kind"=>"compute#firewallList",
   "https://www.googleapis.com/compute/v1/projects/sam-inspec/global/firewalls"}
 
 RSpec.describe Firewalls, '#fetch_resource' do
-	before do 
-		@firewalls_mock = FirewallsTest.new(firewalls_fixture)
-	end
-	context 'firewalls plural' do
-		it { expect(@firewalls_mock.names.size).to eq 3 }
-		it { expect(@firewalls_mock.names).to include 'default-knsku4qwwbtr3bhcf3y6vcmu' }
-		it { expect(@firewalls_mock.names).to include 'default-7mzjmae3tlidh4yoidvnpe53' }
-		it { expect(@firewalls_mock.names).to include 'default-2wnao3jebww7ldrn463stwke' }
-		
-	end
+  before do 
+    @firewalls_mock = FirewallsTest.new(firewalls_fixture)
+  end
+  context 'firewalls plural' do
+    it { expect(@firewalls_mock.names.size).to eq 3 }
+    it { expect(@firewalls_mock.names).to include 'default-knsku4qwwbtr3bhcf3y6vcmu' }
+    it { expect(@firewalls_mock.names).to include 'default-7mzjmae3tlidh4yoidvnpe53' }
+    it { expect(@firewalls_mock.names).to include 'default-2wnao3jebww7ldrn463stwke' }
+  end
 end
 
 no_firewalls_fixture = {"kind"=>"compute#firewallList",
@@ -116,7 +115,7 @@ no_firewalls_fixture = {"kind"=>"compute#firewallList",
 
 no_firewalls = FirewallsTest.new(no_firewalls_fixture)
 RSpec.describe Firewalls, "#fetch_resource" do
-	it "no firewalls" do
-		expect(no_firewalls.names.size).to eq 0
-	end
+  it "no firewalls" do
+    expect(no_firewalls.names.size).to eq 0
+  end
 end

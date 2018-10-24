@@ -1,9 +1,9 @@
 require 'google_compute_zone'
 
 class ZoneTest < Zone
-	def initialize(data)
-		@fetched = data
-	end
+  def initialize(data)
+    @fetched = data
+  end
 end
 
 zone_fixture = {"kind"=>"compute#zone",
@@ -21,18 +21,18 @@ zone_fixture = {"kind"=>"compute#zone",
 
 RSpec.describe Zone, "parse" do
   it "zone attributes" do
-    t = ZoneTest.new(zone_fixture)
-    t.parse
-    expect(t.exists?).to be true
-    expect(t.name).to eq 'us-east1-b'
-    expect(t.status).to eq 'UP'
-    expect(t.deprecated.obsolete).to eq nil
+    zone_mock = ZoneTest.new(zone_fixture)
+    zone_mock.parse
+    expect(zone_mock.exists?).to be true
+    expect(zone_mock.name).to eq 'us-east1-b'
+    expect(zone_mock.status).to eq 'UP'
+    expect(zone_mock.deprecated.obsolete).to eq nil
     time = Time.at(628232400).to_datetime
-    expect(t.creation_timestamp).to eq time
+    expect(zone_mock.creation_timestamp).to eq time
   end
-	it "no response" do
-    t = ZoneTest.new(nil)
-    expect(t.exists?).to be false
-	end
+  it "no response" do
+    no_zone_resource = ZoneTest.new(nil)
+    expect(no_zone_resource.exists?).to be false
+  end
 end
 
