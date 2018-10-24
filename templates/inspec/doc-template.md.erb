@@ -1,0 +1,19 @@
+<% autogen_exception -%>
+
+---
+title: About the <%= object.name -%> resource
+platform: gcp
+---
+
+## Syntax
+A `<%= resource_name(object, product_ns) -%>` is used to test a Google <%= object.name -%> resource
+
+TODO: Examples
+
+## Properties
+Properties that can be accessed from the `<%= resource_name(object, product_ns) -%>` resource:
+<% object.properties.each do |prop| -%>
+  * `<%= "#{prop.out_name}" -%>`: <%= "#{prop.description}" -%>
+
+<%= sub_property_descriptions(prop) -%>
+<% end -%>

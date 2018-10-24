@@ -21,6 +21,7 @@ require 'active_support/inflector'
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
+  # rubocop:disable Metrics/ClassLength
   class Inspec < Provider::Core
     include Google::RubyUtils
     # Settings for the provider
@@ -53,6 +54,17 @@ module Provider
         default_template: 'templates/inspec/plural_resource.erb',
         out_file: \
           File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
+      )
+      generate_documentation(data)
+    end
+
+     # Generates InSpec markdown documents for the resource
+    def generate_documentation(data)
+      name = data[:object].name.underscore
+      docs_folder = File.join(data[:output_folder], 'docs', 'resources')
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/inspec/doc-template.md.erb',
+        out_file: File.join(docs_folder, "google_#{data[:product_name]}_#{name}.md")
       )
     end
 
@@ -161,5 +173,22 @@ module Provider
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase
     end
+
+    def resource_name(object, product_ns)
+      "google_#{product_ns.downcase}_#{object.name.underscore}"
+    end
+
+     def sub_property_descriptions(property)
+      if nested_object?(property)
+        return property.properties.map \
+          { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
+      end
+      # rubocop:disable Style/GuardClause
+      if typed_array?(property)
+        return property.item_type.properties.map \
+          { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
+      end
+    end
+    # rubocop:enable Style/GuardClause
   end
 end
