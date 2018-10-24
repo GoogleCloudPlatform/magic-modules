@@ -17,12 +17,7 @@
 <%= lines(autogen_notice :ruby) -%>
 
 <%
-  require 'google/string_utils'
-
-  inside_indent = 8
-
   requires = generate_requires(nested_properties)
-  requires << 'google/hash_utils'
 -%>
 <%= lines(emit_requires(requires)) -%>
 module Google
@@ -42,7 +37,7 @@ module Google
 <% nested_properties.each do |prop| -%>
 <%
   if time?(prop)
-      init = "DateTime.parse(@fetched['#{prop.api_name}'])"
+      init = "DateTime.parse(args['#{prop.api_name}'])"
   elsif primitive?(prop)
     init = "args['#{prop.api_name}']"
   elsif typed_array?(prop)

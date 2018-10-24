@@ -31,9 +31,7 @@ objects:
     name: 'Address'
     kind: 'compute#address'
     base_url: projects/{{project}}/regions/{{region}}/addresses
-    list_url: |
-      projects/{{project}}/regions/{{region}}/addresses
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#addressList'
       items: 'items'
     exports:
@@ -156,9 +154,7 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/zones/{{zone}}/autoscalers
     update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
-    list_url: |
-      projects/{{project}}/zone/{{zone}}/autoscalers
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#autoscalerList'
       items: 'items'
     exports:
@@ -197,9 +193,7 @@ objects:
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
-    list_url: |
-      projects/{{project}}/global/backendBuckets
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#backendBucketLists'
       items: 'items'
     exports:
@@ -255,9 +249,7 @@ objects:
     name: 'BackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/global/backendServices
-    list_url: |
-      projects/{{project}}/global/backendServices
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#backendServicesList'
       items: 'items'
     exports:
@@ -559,9 +551,7 @@ objects:
     name: 'DiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/zones/{{zone}}/diskTypes
-    list_url: |
-      projects/{{project}}/zones/{{zone}}/diskTypes
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#diskTypeList'
       items: 'items'
     # TODO(nelsonjr): Search all documentation for references of using URL (like
@@ -597,9 +587,7 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
-    list_url: |
-      projects/{{project}}/zones/{{zone}}/disks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#diskList'
       items: 'items'
     exports:
@@ -657,6 +645,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -711,9 +705,7 @@ objects:
     name: 'Firewall'
     kind: 'compute#firewall'
     base_url: projects/{{project}}/global/firewalls
-    list_url: |
-      projects/{{project}}/global/firewalls
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#firewallList'
       items: 'items'
     update_verb: :PATCH
@@ -952,9 +944,7 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
-    list_url: |
-      projects/{{project}}/regions/{{region}}/forwardingRules
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#forwardingRuleList'
       items: 'items'
     exports:
@@ -1050,9 +1040,7 @@ objects:
     name: 'GlobalAddress'
     kind: 'compute#address'
     base_url: projects/{{project}}/global/addresses
-    list_url: |
-      projects/{{project}}/global/addresses
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#addressList'
       items: 'items'
     exports:
@@ -1179,9 +1167,7 @@ objects:
     name: 'GlobalForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/global/forwardingRules
-    list_url: |
-      projects/{{project}}/global/forwardingRules
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#forwardingRulesList'
       items: 'items'
     description: |
@@ -1218,9 +1204,7 @@ objects:
     name: 'HttpHealthCheck'
     kind: 'compute#httpHealthCheck'
     base_url: projects/{{project}}/global/httpHealthChecks
-    list_url: |
-      projects/{{project}}/global/httpHealthChecks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#httpHealthCheckList'
       items: 'items'
     exports:
@@ -1304,9 +1288,7 @@ objects:
     name: 'HttpsHealthCheck'
     kind: 'compute#httpsHealthCheck'
     base_url: projects/{{project}}/global/httpsHealthChecks
-    list_url: |
-      projects/{{project}}/global/httpsHealthChecks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#httpsHealthCheckList'
       items: 'items'
     exports:
@@ -1389,9 +1371,7 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
-    list_url: |
-      projects/{{project}}/global/healthChecks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#healthCheckList'
       items: 'items'
     exports:
@@ -1514,9 +1494,7 @@ objects:
     kind: 'compute#instanceTemplate'
     input: true
     base_url: projects/{{project}}/global/instanceTemplates
-    list_url: |
-      projects/{{project}}/global/instanceTemplates
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceTemplatesListResponse'
       items: 'items'
     exports:
@@ -1600,9 +1578,7 @@ objects:
     name: 'License'
     kind: 'compute#license'
     base_url: /projects/{{project}}/global/licenses
-    list_url: |
-      /projects/{{project}}/global/licenses
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#TODO???'
       items: 'items'
     readonly: true
@@ -1630,9 +1606,7 @@ objects:
     name: 'Image'
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
-    list_url: |
-      projects/{{project}}/global/images
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#imageList'
       items: 'items'
     description: |
@@ -1782,6 +1756,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         # TODO(alexstephen): Change to ResourceRef with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
@@ -1848,6 +1828,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
       - !ruby/object:Api::Type::String
         name: 'sourceDiskId'
         description: |
@@ -1866,9 +1852,7 @@ objects:
     name: 'Instance'
     kind: 'compute#instance'
     base_url: projects/{{project}}/zones/{{zone}}/instances
-    list_url: |
-      projects/{{project}}/zones/{{zone}}/instances
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceList'
       items: 'items'
     input: true
@@ -1977,9 +1961,7 @@ objects:
     name: 'InstanceGroup'
     kind: 'compute#instanceGroup'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
-    list_url: |
-      projects/{{project}}/zones/{{zone}}/instanceGroups
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceGroupList'
       items: 'items'
     exports:
@@ -2080,9 +2062,7 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
-    list_url: |
-      projects/{{project}}/zones/{{zone}}/instanceGroupManagers
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceGroupManagerList'
       items: 'items'
     exports:
@@ -2268,9 +2248,7 @@ objects:
     name: 'InterconnectAttachment'
     kind: 'compute#interconnectAttachment'
     base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
-    list_url: |
-      projects/{{project}}/regions/{{region}}/interconnectAttachments
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#interconnectAttachementList'
       items: 'items'
     exports:
@@ -2373,9 +2351,7 @@ objects:
     name: 'MachineType'
     kind: 'compute#machineType'
     base_url: projects/{{project}}/zones/{{zone}}/machineTypes
-    list_url: |
-      projects/{{project}}/zones/{{zone}}/machineTypes
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#machineTypeList'
       items: 'items'
     exports:
@@ -2488,9 +2464,7 @@ objects:
     name: 'Network'
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
-    list_url: |
-      projects/{{project}}/global/networks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#networkList'
       items: 'items'
     update_verb: :PATCH
@@ -2605,9 +2579,7 @@ objects:
     name: 'Region'
     kind: 'compute#region'
     base_url: projects/{{project}}/regions
-    list_url: |
-      projects/{{project}}/regions
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#regionList'
       items: 'items'
     exports:
@@ -2688,9 +2660,7 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/regions/{{region}}/autoscalers
     update_url: projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}
-    list_url: |
-      projects/{{project}}/regions/{{region}}/autoscalers
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#autoscalerList'
       items: 'items'
     exports:
@@ -2730,9 +2700,7 @@ objects:
     name: 'RegionDiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/regions/{{region}}/diskTypes
-    list_url: |
-      projects/{{project}}/regions/{{region}}/diskTypes
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#diskTypeList'
       items: 'items'
     description: |
@@ -2757,9 +2725,7 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/disks
-    list_url: |
-      projects/{{project}}/regions/{{region}}/disks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#diskList'
       items: 'items'
     exports:
@@ -2828,9 +2794,7 @@ objects:
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
-    list_url: |
-      projects/{{project}}/global/routes
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#routeList'
       items: 'items'
     input: true
@@ -2957,9 +2921,7 @@ objects:
     name: 'Router'
     kind: 'compute#router'
     base_url: projects/{{project}}/regions/{{region}}/routers
-    list_url: |
-      projects/{{project}}/regions/{{region}}/routers
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#routerList'
       items: 'items'
     # Since Terraform has separate resources for router, router interface, and
@@ -3085,9 +3047,7 @@ objects:
     name: 'Snapshot'
     kind: 'compute#snapshot'
     base_url: projects/{{project}}/global/snapshots
-    list_url: |
-      projects/{{project}}/global/snapshots
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#snapshotList'
       items: 'items'
     exports:
@@ -3140,6 +3100,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceDiskEncryptionKey'
@@ -3159,6 +3125,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
     properties:
       - !ruby/object:Api::Type::Time
@@ -3218,9 +3190,7 @@ objects:
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/global/sslCertificates
-    list_url: |
-      projects/{{project}}/global/sslCertificates
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#sslCertificateList'
       items: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -3275,9 +3245,7 @@ objects:
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
-    list_url: |
-      projects/{{project}}/global/sslPolicies
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#sslPoliciesList'
       items: 'items'
     update_verb: :PATCH
@@ -3379,9 +3347,7 @@ objects:
     name: 'Subnetwork'
     kind: 'compute#subnetwork'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks
-    list_url: |
-      projects/{{project}}/regions/{{region}}/subnetworks
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#subnetworkList'
       items: 'items'
     input: true
@@ -3539,9 +3505,7 @@ objects:
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/global/targetHttpProxies
-    list_url: |
-      projects/{{project}}/global/targetHttpProxies
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetHttpProxyList'
       items: 'items'
     exports:
@@ -3594,9 +3558,7 @@ objects:
     name: 'TargetHttpsProxy'
     kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/global/targetHttpsProxies
-    list_url: |
-      projects/{{project}}/global/targetHttpsProxies
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetHttpProxyList'
       items: 'items'
     exports:
@@ -3694,9 +3656,7 @@ objects:
     name: 'TargetPool'
     kind: 'compute#targetPool'
     base_url: projects/{{project}}/regions/{{region}}/targetPools
-    list_url: |
-      projects/{{project}}/regions/{{region}}/targetPools
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetPoolList'
       items: 'items'
     description: 'Represents a TargetPool resource, used for Load Balancing.'
@@ -3823,9 +3783,7 @@ objects:
     name: 'TargetSslProxy'
     kind: 'compute#targetSslProxy'
     base_url: projects/{{project}}/global/targetSslProxies
-    list_url: |
-      projects/{{project}}/global/targetSslProxies
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetSslProxyList'
       items: 'items'
     input: true
@@ -3917,9 +3875,7 @@ objects:
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
     base_url: projects/{{project}}/global/targetTcpProxies
-    list_url: |
-      projects/{{project}}/global/targetTcpProxies
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetTcpProxyList'
       items: 'items'
     input: true
@@ -3984,9 +3940,7 @@ objects:
     name: 'TargetVpnGateway'
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
-    list_url: |
-      projects/{{project}}/regions/{{region}}/targetVpnGateways
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetVpnGatewayList'
       items: 'items'
     input: true
@@ -4064,9 +4018,7 @@ objects:
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
-    list_url: |
-      projects/{{project}}/global/urlMaps
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#urlMapList'
       items: 'items'
     exports:
@@ -4217,9 +4169,7 @@ objects:
     description: 'VPN tunnel resource.'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
-    list_url: |
-      projects/{{project}}/regions/{{region}}/vpnTunnels
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#vpnTunnelList'
       items: 'items'
     exports:
@@ -4337,9 +4287,7 @@ objects:
     name: 'Zone'
     kind: 'compute#zone'
     base_url: projects/{{project}}/zones
-    list_url: |
-      projects/{{project}}/zones
-    list_url_response: !ruby/object:Api::Resource::ResponseList
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#zoneList'
       items: 'items'
     exports:

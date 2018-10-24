@@ -13,42 +13,20 @@ chmod 400 ~/github_private_key
 pushd magic-modules-branched
 BRANCH="$(cat ./branchname)"
 # Update this repo to track the submodules we just pushed:
-IFS="," read -ra PRODUCT_ARRAY <<< "$PUPPET_MODULES"
-for PRD in "${PRODUCT_ARRAY[@]}"; do
-  git config -f .gitmodules "submodule.build/puppet/$PRD.branch" "$BRANCH"
-  # Bundle repo does not use the same naming scheme as the others
-  if [[ $PRD == *"_bundle"* ]]; then
-    repo="puppet-google"
-  else
-    repo="puppet-google-$PRD"
-  fi
-  git config -f .gitmodules "submodule.build/puppet/$PRD.url" "git@github.com:$GH_USERNAME/$repo.git"
-  git submodule sync "build/puppet/$PRD"
-  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/puppet/$PRD"
-  git add "build/puppet/$PRD"
-done
-
-IFS="," read -ra PRODUCT_ARRAY <<< "$CHEF_MODULES"
-for PRD in "${PRODUCT_ARRAY[@]}"; do
-  git config -f .gitmodules "submodule.build/chef/$PRD.branch" "$BRANCH"
-  # Bundle repo does not use the same naming scheme as the others
-  if [[ $PRD == *"_bundle"* ]]; then
-    repo="chef-google"
-  else
-    repo="chef-google-$PRD"
-  fi
-  git config -f .gitmodules "submodule.build/chef/$PRD.url" "git@github.com:$GH_USERNAME/$repo.git"
-  git submodule sync "build/chef/$PRD"
-  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/chef/$PRD"
-  git add "build/chef/$PRD"
-done
 
 if [ "$TERRAFORM_ENABLED" = "true" ]; then
-  git config -f .gitmodules submodule.build/terraform.branch "$BRANCH"
-  git config -f .gitmodules submodule.build/terraform.url "git@github.com:$GH_USERNAME/terraform-provider-google.git"
-  git submodule sync build/terraform
-  ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/terraform"
-  git add build/terraform
+  IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
+  for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
+    IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
+    PROVIDER_NAME="${TERRAFORM_DATA[0]}"
+    SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
+
+    git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.branch" "$BRANCH"
+    git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.url" "git@github.com:$GH_USERNAME/$PROVIDER_NAME.git"
+    git submodule sync "build/$SUBMODULE_DIR"
+    ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/$SUBMODULE_DIR"
+    git add "build/$SUBMODULE_DIR"
+  done
 fi
 
 if [ "$ANSIBLE_ENABLED" = "true" ]; then

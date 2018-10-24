@@ -322,6 +322,10 @@ objects:
     kind: 'storage#objectAccessControl'
     base_url: b/{{bucket}}/o/{{object}}/acl
     self_link: b/{{bucket}}/o/{{object}}/acl/{{entity}}
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/create-manage-lists'
+      api: 'https://cloud.google.com/storage/docs/json_api/v1/objectAccessControls'
     description: |
       The ObjectAccessControls resources represent the Access Control Lists
       (ACLs) for objects within Google Cloud Storage. ACLs let you specify
