@@ -43,6 +43,8 @@ module Provider
     end
 
     def validate
+      return unless @__objects.nil? # allows idempotency of calling validate
+      return if @__api.nil?
       run
       super
     end
