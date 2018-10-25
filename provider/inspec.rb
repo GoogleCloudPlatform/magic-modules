@@ -78,7 +78,7 @@ module Provider
     def generate_resource_tests(data)
       target_folder = File.join(data[:output_folder], 'test/unit')
       FileUtils.mkpath target_folder
-      FileUtils.cp_r 'templates/inspec/tests/.', target_folder 
+      FileUtils.cp_r 'templates/inspec/tests/.', target_folder
     end
 
     def generate_base_property(data) end
