@@ -16,6 +16,7 @@
 
 <%= lines(autogen_notice :ruby) -%>
 
+require 'inspec/resource'
 class <%= object.name -%>s < Inspec.resource(1)
 
 <%
