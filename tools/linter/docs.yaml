@@ -53,6 +53,8 @@
   scopes:
     - 'https://www.googleapis.com/auth/dns'
   output: output_dns.yaml
+  overrides:
+    - overrides_dns.yaml
   objects:
     - ManagedZone
     - ResourceRecordSet

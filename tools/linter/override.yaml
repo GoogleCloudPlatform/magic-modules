@@ -1,6 +1,0 @@
---- !ruby/object:Provider::ResourceOverrides
-Address: !ruby/object:DiscoveryOverride::ResourceOverride
-  description: 'This is a test'
-  properties:
-    region: !ruby/object:DiscoveryOverride::PropertyOverride
-      description: 'This is another test'
