@@ -9,9 +9,9 @@ RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
 # Install Ruby from source.
 RUN apt-get update
 RUN apt-get install -y bzip2 libssl-dev libreadline-dev zlib1g-dev
-ENV RUBY_VERSION 2.5.0
+ENV RUBY_VERSION 2.5.1
 ENV RUBYGEMS_VERSION 2.7.4
-ENV BUNDLER_VERSION 1.16.1
+ENV BUNDLER_VERSION 1.16.5
 
 RUN git clone https://github.com/rbenv/ruby-build.git
 RUN PREFIX=/usr/local ./ruby-build/install.sh

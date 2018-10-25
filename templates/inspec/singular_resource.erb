@@ -16,12 +16,23 @@
 
 <%= lines(autogen_notice :ruby) -%>
 
+<%
+  require 'google/string_utils'
+
+  inside_indent = 8
+
+  requires = generate_requires(object.all_user_properties)
+  requires << 'inspec/resource'
+  requires << 'google/hash_utils'
+-%>
+<%= lines(emit_requires(requires)) -%>
+
 # A provider to manage <%= @api.name -%> resources.
 class <%= object.name -%> < Inspec.resource(1)
 
-  name 'google_<%= product_ns.downcase -%>_<%= object.name.downcase -%>'
+  name 'google_<%= product_ns.downcase -%>_<%= object.name.underscore -%>'
   desc '<%= object.name -%>'
-  supports platform: 'gcp-mm'
+  supports platform: 'gcp2'
 
 <% object.properties.each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>
@@ -32,11 +43,61 @@ class <%= object.name -%> < Inspec.resource(1)
   end
 
   def url
-    '<%= url(object) %>'
+    '<%= format_url(object.self_link_url[1]) %>'
   end
 
-  # TODO
-  def parse end
+<% if object.self_link_query.nil? -%>
+  def initialize(params)
+    @fetched = fetch_resource(params)
+    parse unless @fetched.nil?
+  end
+<% else # object.self_link_query.nil? -%>
+    # TODO(slevenick) for other products
+    def initialize(params)
+      raise 'Not implemented'
+    end
+<% end # object.self_link_query.nil? -%>
+
+  def fetch_resource(params)
+    get_request = inspec.backend.fetch(base, url, params)
+  end
+
+<% if object.self_link_query.nil? -%>
+  def initialize(params)
+    @fetched = fetch_resource(params)
+    parse unless @fetched.nil?
+  end
+<% else # object.self_link_query.nil? -%>
+   # TODO(slevenick) for other products
+   def initialize(params)
+     raise 'Not implemented'
+   end
+<% end # object.self_link_query.nil? -%>
+
+  def fetch_resource(params)
+    get_request = inspec.backend.fetch(base, url, params)
+  end
+
+  def parse
+<%
+  parse_code = object.properties.map do |prop|
+    name = prop.out_name
+
+    if time?(prop)
+      init = "Time.new(@fetched['#{prop.api_name}'])"
+    elsif primitive?(prop)
+      init = "@fetched['#{prop.api_name}']"
+    elsif typed_array?(prop)
+      init = "#{prop.property_type}.parse(@fetched['#{prop.api_name}'])"
+    else
+      init = "#{prop.property_type}.new(@fetched['#{prop.api_name}'])"    
+    end
+    
+    assignment = "@#{name} = #{init}"
+  end
+-%>
+<%= lines(indent(parse_code, 4)) -%>
+  end
 
   def exists?
     !@fetched.nil?

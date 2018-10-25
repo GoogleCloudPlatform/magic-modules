@@ -8,7 +8,7 @@ image_resource:
     type: docker-image
     source:
         repository: nmckinley/go-ruby
-        tag: '1.11-2.5'
+        tag: '1.11-2.5.1'
 
 inputs:
     - name: magic-modules-branched
@@ -26,6 +26,4 @@ params:
   TERRAFORM_VERSIONS: ""
   ANSIBLE_ENABLED: false
   INSPEC_ENABLED: false
-  PUPPET_MODULES: ""
-  CHEF_MODULES: ""
 
