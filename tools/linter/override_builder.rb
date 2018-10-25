@@ -74,6 +74,7 @@ end
 
 def values_equal(old, new)
   return true if old.nil? && new == false
+  return false if new.nil? && old
   return old.sort == new.sort if old.is_a?(::Array)
   return old == new
 end

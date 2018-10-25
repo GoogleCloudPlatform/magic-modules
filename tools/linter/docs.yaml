@@ -56,4 +56,14 @@
   objects:
     - ManagedZone
     - ResourceRecordSet
-
+- !ruby/object:Docs
+  name: Google Storage Engine
+  prefix: gstorage
+  url: 'https://www.googleapis.com/discovery/v1/apis/storage/v1/rest'
+  scopes:
+    - 'https://www.googleapis.com/auth/devstorage.readwrite'
+  output: output_storage.yaml
+  objects:
+    - Bucket
+    - BucketAccessControl
+    - ObjectAccessControl
