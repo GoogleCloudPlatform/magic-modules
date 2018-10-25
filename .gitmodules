@@ -1,69 +1,3 @@
-[submodule "build/puppet/dns"]
-	path = build/puppet/dns
-	url = git@github.com:GoogleCloudPlatform/puppet-google-dns
-[submodule "build/puppet/auth"]
-	path = build/puppet/auth
-	url = git@github.com:GoogleCloudPlatform/puppet-google-auth
-[submodule "build/puppet/compute"]
-	path = build/puppet/compute
-	url = git@github.com:GoogleCloudPlatform/puppet-google-compute
-[submodule "build/chef/dns"]
-	path = build/chef/dns
-	url = git@github.com:GoogleCloudPlatform/chef-google-dns
-[submodule "build/chef/compute"]
-	path = build/chef/compute
-	url = git@github.com:GoogleCloudPlatform/chef-google-compute
-[submodule "build/puppet/storage"]
-	path = build/puppet/storage
-	url = git@github.com:GoogleCloudPlatform/puppet-google-storage
-[submodule "build/puppet/sql"]
-	path = build/puppet/sql
-	url = git@github.com:GoogleCloudPlatform/puppet-google-sql
-[submodule "build/puppet/container"]
-	path = build/puppet/container
-	url = git@github.com:GoogleCloudPlatform/puppet-google-container
-[submodule "build/puppet/_bundle"]
-	path = build/puppet/_bundle
-	url = git@github.com:GoogleCloudPlatform/puppet-google
-[submodule "build/chef/auth"]
-	path = build/chef/auth
-	url = git@github.com:GoogleCloudPlatform/chef-google-auth
-[submodule "build/chef/storage"]
-	path = build/chef/storage
-	url = git@github.com:GoogleCloudPlatform/chef-google-storage
-[submodule "build/chef/container"]
-	path = build/chef/container
-	url = git@github.com:GoogleCloudPlatform/chef-google-container
-[submodule "build/chef/sql"]
-	path = build/chef/sql
-	url = git@github.com:GoogleCloudPlatform/chef-google-sql
-[submodule "build/puppet/logging"]
-	path = build/puppet/logging
-	url = git@github.com:GoogleCloudPlatform/puppet-google-logging
-[submodule "build/chef/_bundle"]
-	path = build/chef/_bundle
-	url = git@github.com:GoogleCloudPlatform/chef-google
-[submodule "build/puppet/pubsub"]
-	path = build/puppet/pubsub
-	url = git@github.com:GoogleCloudPlatform/puppet-google-pubsub
-[submodule "build/chef/pubsub"]
-	path = build/chef/pubsub
-	url = git@github.com:GoogleCloudPlatform/chef-google-pubsub
-[submodule "build/puppet/spanner"]
-	path = build/puppet/spanner
-	url = git@github.com:GoogleCloudPlatform/puppet-google-spanner
-[submodule "build/puppet/resourcemanager"]
-	path = build/puppet/resourcemanager
-	url = git@github.com:GoogleCloudPlatform/puppet-google-resourcemanager
-[submodule "build/chef/resourcemanager"]
-	path = build/chef/resourcemanager
-	url = git@github.com:GoogleCloudPlatform/chef-google-resourcemanager
-[submodule "build/puppet/iam"]
-	path = build/puppet/iam
-	url = git@github.com:GoogleCloudPlatform/puppet-google-iam
-[submodule "build/chef/logging"]
-	path = build/chef/logging
-	url = git@github.com:GoogleCloudPlatform/chef-google-logging
 [submodule "build/ansible"]
 	path = build/ansible
 	url = git@github.com:modular-magician/ansible
@@ -71,13 +5,11 @@
 [submodule "build/terraform"]
 	path = build/terraform
 	url = git@github.com:terraform-providers/terraform-provider-google.git
-	branch = master
-[submodule "build/puppet/bigquery"]
-	path = build/puppet/bigquery
-	url = git@github.com:GoogleCloudPlatform/puppet-google-bigquery.git
-[submodule "build/chef/spanner"]
-	path = build/chef/spanner
-	url = git@github.com:GoogleCloudPlatform/chef-google-spanner.git
-[submodule "build/chef/iam"]
-	path = build/chef/iam
-	url = git@github.com:GoogleCloudPlatform/chef-google-iam.git
+	branch = 2.0.0
+[submodule "build/terraform-beta"]
+	path = build/terraform-beta
+	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
+	branch = 2.0.0
+[submodule "build/inspec"]
+	path = build/inspec
+	url = git@github.com:modular-magician/inspec-gcp.git

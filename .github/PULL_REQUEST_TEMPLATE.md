@@ -1,6 +1,5 @@
 <!-- A summary of the changes in this commit goes here -->
 
-
 <!--
 Changes per downstream repository.  For each repository that you
 expect to have changed, find the [tag] and write your commit
@@ -18,25 +17,15 @@ commits sensible, you'll need to leave the dashed line separating
 this PR's changes from the commit messages for downstream commits.
 -->
 
+<!-- 
+Note: You may see "This branch is out-of-date with the base branch"
+when you submit a pull request. This is fine! We don't use the GitHub
+merge button to merge PRs, and you can safely ignore that message.
+-->
+
 -----------------------------------------------------------------
 # [all]
 ## [terraform]
-## [puppet]
-### [puppet-bigquery]
-### [puppet-compute]
-### [puppet-container]
-### [puppet-dns]
-### [puppet-logging]
-### [puppet-pubsub]
-### [puppet-resourcemanager]
-### [puppet-sql]
-### [puppet-storage]
-## [chef]
-### [chef-compute]
-### [chef-container]
-### [chef-dns]
-### [chef-logging]
-### [chef-spanner]
-### [chef-sql]
-### [chef-storage]
+### [terraform-beta]
 ## [ansible]
+## [inspec]

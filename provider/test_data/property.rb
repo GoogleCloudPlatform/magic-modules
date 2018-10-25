@@ -31,7 +31,7 @@ module Provider
       # rubocop:disable Metrics/PerceivedComplexity
       def property(prop, index, comparator, value, start_indent = 0,
                    name_override = nil)
-        Google::LOGGER.info \
+        Google::LOGGER.debug \
           "Generating test #{prop.out_name}[#{index}] #{comparator} #{value}"
 
         if prop.class <= Api::Type::ResourceRef

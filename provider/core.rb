@@ -65,8 +65,7 @@ module Provider
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     def generate(output_folder, types, version_name)
-      version = @api.version_obj_or_default(version_name)
-      generate_objects(output_folder, types, version)
+      generate_objects(output_folder, types, version_name)
       generate_client_functions(output_folder) unless @config.functions.nil?
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
@@ -78,10 +77,10 @@ module Provider
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
-      compile_files(output_folder) \
+      compile_files(output_folder, version_name) \
         unless @config.files.nil? || @config.files.compile.nil?
 
-      generate_datasources(output_folder, types, version) \
+      generate_datasources(output_folder, types, version_name) \
         unless @config.datasources.nil?
       apply_file_acls(output_folder) \
         unless @config.files.nil? || @config.files.permissions.nil?
@@ -102,8 +101,8 @@ module Provider
       end
     end
 
-    def compile_files(output_folder)
-      compile_file_list(output_folder, @config.files.compile)
+    def compile_files(output_folder, version_name)
+      compile_file_list(output_folder, @config.files.compile, version: version_name)
     end
 
     def compile_examples(output_folder)
@@ -217,7 +216,8 @@ module Provider
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/AbcSize
-    def generate_objects(output_folder, types, version)
+    def generate_objects(output_folder, types, version_name)
+      version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
@@ -227,7 +227,11 @@ module Provider
         elsif types.empty? && object.exclude_if_not_in_version(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
-          generate_object object, output_folder, version
+          # version_name will differ from version.name if the resource is being
+          # generated at its default version instead of the one that was passed
+          # in to the compiler. Terraform needs to know which version was passed
+          # in so it can name its output directories correctly.
+          generate_object object, output_folder, version_name
         end
       end
     end
@@ -235,8 +239,8 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/AbcSize
 
-    def generate_object(object, output_folder, version)
-      data = build_object_data(object, output_folder, version)
+    def generate_object(object, output_folder, version_name)
+      data = build_object_data(object, output_folder, version_name)
 
       generate_resource data
       generate_resource_tests data
@@ -247,10 +251,11 @@ module Provider
     # rubocop:disable Metrics/AbcSize
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/PerceivedComplexity
-    def generate_datasources(output_folder, types, version)
+    def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
       @config.datasources.validate
 
+      version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)
@@ -266,7 +271,7 @@ module Provider
             "Excluding #{object.name} datasource per API version"
           )
         else
-          generate_datasource object, output_folder, version
+          generate_datasource object, output_folder, version_name
         end
       end
     end
@@ -274,8 +279,8 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/AbcSize
 
-    def generate_datasource(object, output_folder, version)
-      data = build_object_data(object, output_folder, version)
+    def generate_datasource(object, output_folder, version_name)
+      data = build_object_data(object, output_folder, version_name)
 
       compile_datasource data
     end
@@ -381,9 +386,21 @@ module Provider
       else
         vars = quote_string(obj_url[0])
         vars_parts = obj_url[0].split('/')
+        # What's going on here?  :)  Here we have an API-defined string
+        # (the self-link format), which we are doggedly trying to fit
+        # into 72 characters or less (80 - the 8 of indentation).  A
+        # very small number of our self links won't fit in 72 characters,
+        # especially those with long type names.  Here, we're trying to
+        # format it into a list of arguments, so the string needs to end
+        # with a comma.
         format([
+                 # Option 1: 'foo/bar',
                  [[vars, ','].join],
-                 # vars is too big to fit, split in half
+                 # Option 2: [
+                 #             'foo',
+                 #             'bar
+                 #           ].join('/'),
+                 ['['] +
                  vars_parts.each_slice((vars_parts.size / 2.0).round).to_a
                  .map.with_index do |p, i|
                    # Use implicit string joining for the first line.
@@ -397,7 +414,7 @@ module Provider
     def build_url(url_parts, extra = false)
       (product_url, obj_url) = url_parts
       extra_arg = ''
-      extra_arg = ', extra_data' if obj_url.to_s.include?('<|extra|>') || extra
+      extra_arg = ', extra_data' if extra
       ['URI.join(',
        indent([quote_string(product_url) + ',',
                'expand_variables(',
@@ -509,7 +526,7 @@ module Provider
     def emit_link(name, url, emit_self, extra_data = false)
       (params, fn_args) = emit_link_var_args(url, extra_data)
       code = ["def #{emit_self ? 'self.' : ''}#{name}(#{fn_args})",
-              indent(url, 2).gsub("'<|extra|>'", 'extra'),
+              indent(url, 2),
               'end']
 
       if emit_self
@@ -614,10 +631,9 @@ module Provider
                              .join(', ')]
     end
 
-    def emit_link_var_args_list(url, extra_data, args_list)
+    def emit_link_var_args_list(_url, extra_data, args_list)
       [args_list[0],
-       (args_list[1] if url.include?('<|extra|>')),
-       (args_list[2] if url.include?('<|extra|>') || extra_data)]
+       (args_list[2] if extra_data)]
     end
 
     def generate_file(data)

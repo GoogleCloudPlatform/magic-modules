@@ -19,24 +19,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Lien: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
     import_format: ["{{parent}}/{{name}}"]
-    examples: |
-      ```hcl
-      resource "random_id" "r" {
-        byte_length = 8
-      }
-
-      resource "google_project" "project" {
-        project_id = "project-${random_id.r.hex}"
-        name = "A very important project!"
-      }
-
-      resource "google_resource_manager_lien" "lien" {
-        parent = "projects/${google_project.project.number}"
-        restrictions = ["resourcemanager.projects.delete"]
-        origin = "machine-readable-explanation"
-        reason = "This project is very important to me!"
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_manager_lien"
+        skip_test: true
+        primary_resource_id: "lien"
+        version: <%= _version_name %>
+        vars:
+          project_id: "staging-project"
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -49,11 +39,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
 files: !ruby/object:Provider::Config::Files
   # All of these files will be copied verbatim.
   copy:
-    'google/transport.go': 'templates/terraform/transport.go'
-    'google/transport_test.go': 'templates/terraform/transport_test.go'
-    'google/import.go': 'templates/terraform/import.go'
-    'google/import_test.go': 'templates/terraform/import_test.go'
+<%= lines(indent(compile('provider/terraform/common~copy.yaml'), 4)) -%>
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
-    'google/provider_{{product_name}}_gen.go': 'templates/terraform/provider_gen.erb'
+<%= lines(indent(compile('provider/terraform/common~compile.yaml'), 4)) -%>

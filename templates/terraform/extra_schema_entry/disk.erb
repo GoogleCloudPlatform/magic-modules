@@ -3,12 +3,11 @@
         Optional:         true,
         ForceNew:         true,
         Sensitive:        true,
-        DiffSuppressFunc: diskEncryptionKeyDiffSuppress,
-        Deprecated:       "Use disk_encryption_key.raw_key instead.",
+        Removed:       "Use disk_encryption_key.raw_key instead.",
 },
 
 "disk_encryption_key_sha256": &schema.Schema{
 	Type:       schema.TypeString,
 	Computed:   true,
-  Deprecated: "Use disk_encryption_key.sha256 instead.",
+  Removed: "Use disk_encryption_key.sha256 instead.",
 },

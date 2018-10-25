@@ -6,8 +6,7 @@ These tools manage the downstream repositories of [magic-modules](https://github
 Currently, they manage:
 
 * terraform
-* puppet/compute
-* puppet/sql
+* ansible
 
 # CI For Downstream Developers
 If you're interested in developing the repositories that MagicModules manages, here are the things you'll want to know.

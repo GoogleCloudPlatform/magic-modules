@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.org/GoogleCloudPlatform/magic-modules.svg?branch=master)](https://travis-ci.org/GoogleCloudPlatform/magic-modules)
 
-<img src='mm_logo.png' align='right'>
 
 # Magic Modules
 
+<img src="images/magic-modules.svg" width="300" align="right" />
 
 ## Overview
 

@@ -97,6 +97,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
+  RegionDisk: !ruby/object:Provider::Puppet::ResourceOverride
+    exclude: true
   RegionDiskType: !ruby/object:Provider::Puppet::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Puppet::ResourceOverride
@@ -499,6 +501,8 @@ examples: !ruby/object:Api::Resource::HashArray
   Instance:
     - delete_instance.pp
     - instance.pp
+  InterconnectAttachment:
+    - interconnect_attachment.pp
   # License -- useful?
   License:
     - license.pp
@@ -517,6 +521,12 @@ examples: !ruby/object:Api::Resource::HashArray
   # RegionInstanceGroup
   Region:
     - region.pp
+  # RegionDisk is currently excluded because the tests that are failing for it
+  # are going to be deleted very soon. When possible, stop excluding it and
+  # un-comment these examples.
+  # RegionDisk:
+  #   - delete_disk.pp
+  #   - disk.pp
   # Router
   Route:
     - delete_route.pp

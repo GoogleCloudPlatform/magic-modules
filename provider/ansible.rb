@@ -102,16 +102,14 @@ module Provider
       # * extra_data is a dict of extra information.
       # * extra_url will have a URL chunk to be appended after the URL.
       # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/AbcSize
       def emit_link(name, url, object, has_extra_data = false)
         params = emit_link_var_args(url, has_extra_data)
-        extra = (' + extra_url' if url.include?('<|extra|>')) || ''
         if rrefs_in_link(url, object)
-          url_code = "#{url}.format(**res)#{extra}"
+          url_code = "#{url}.format(**res)"
           [
             "def #{name}(#{params.join(', ')}):",
             indent("res = #{resourceref_hash_for_links(url, object)}", 4),
-            indent("return #{url_code}", 4).gsub('<|extra|>', '')
+            indent("return #{url_code}", 4)
           ].join("\n")
         elsif has_extra_data
           [
@@ -120,7 +118,7 @@ module Provider
                      'if extra_data is None:',
                      indent('extra_data = {}', 4)
                    ], 4),
-            indent("url = #{url}#{extra}", 4).gsub('<|extra|>', ''),
+            indent("url = #{url}", 4),
             indent([
                      'combined = extra_data.copy()',
                      'combined.update(module.params)',
@@ -128,10 +126,10 @@ module Provider
                    ], 4)
           ].compact.join("\n")
         else
-          url_code = "#{url}.format(**module.params)#{extra}"
+          url_code = "#{url}.format(**module.params)"
           [
             "def #{name}(#{params.join(', ')}):",
-            indent("return #{url_code}", 4).gsub('<|extra|>', '')
+            indent("return #{url_code}", 4)
           ].join("\n")
         end
       end
@@ -246,6 +244,7 @@ module Provider
         path = ["products/#{data[:product_name]}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
+        return unless data[:object].has_tests
         # Unlike other providers, all resources will not be built at once or
         # in close timing to each other (due to external PRs).
         # This means that examples might not be built out for every resource

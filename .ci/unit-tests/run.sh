@@ -9,8 +9,8 @@ set -x
 
 # Create GOPATH structure
 mkdir -p "${GOPATH}/src/github.com/terraform-providers"
-ln -s "${PWD}/$1" "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
+ln -s "${PWD}/magic-modules/build/$SHORT_NAME" "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
-cd "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google"
+cd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
-go test -v ./google -parallel 16 -run '^Test' -timeout 1m
+go test -v ./$TEST_DIR -parallel 16 -run '^Test' -timeout 1m

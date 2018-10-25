@@ -11,7 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Temp files
+*~
+*#
 *.swp
+
 coverage/*
 *.pyc
 
@@ -21,3 +25,13 @@ coverage/*
 
 # Keep project coverage statistics under source control
 !coverage/.last_run.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+

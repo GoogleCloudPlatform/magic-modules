@@ -37,6 +37,12 @@
         The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
         encryption key that protects this resource.
       output: true
+    - !ruby/object:Api::Type::String
+      # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      name: 'kmsKeyName'
+      min_version: beta
+      description: |
+        The name of the encryption key that is stored in Google Cloud KMS.
   input: true
 - !ruby/object:Api::Type::ResourceRef
   name: 'sourceSnapshot'
@@ -62,6 +68,12 @@
       description: |
         Specifies a 256-bit customer-supplied encryption key, encoded in
         RFC 4648 base64 to either encrypt or decrypt this resource.
+    - !ruby/object:Api::Type::String
+      # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+      name: 'kmsKeyName'
+      min_version: beta
+      description: |
+        The name of the encryption key that is stored in Google Cloud KMS.
     - !ruby/object:Api::Type::String
       name: 'sha256'
       description: |

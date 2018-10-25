@@ -36,11 +36,3 @@ task: !ruby/object:Provider::Ansible::Task
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
-verifier: !ruby/object:Provider::Ansible::Verifier
-  command: |
-    gcloud sql databases describe
-      --instance='instance-database'
-      --project="{{ gcp_project}}"
-      "{{ resource_name }}"
-  failure: !ruby/object:Provider::Ansible::FailureCondition
-    error: '(gcloud.sql.databases.describe) HTTPError 404: Not Found'

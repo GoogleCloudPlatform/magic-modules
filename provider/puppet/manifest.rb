@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'provider/core'
+
 module Provider
   class Puppet < Provider::Core
     # Metadata for manifest.json

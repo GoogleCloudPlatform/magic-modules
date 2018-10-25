@@ -31,6 +31,9 @@ objects:
     name: 'Address'
     kind: 'compute#address'
     base_url: projects/{{project}}/regions/{{region}}/addresses
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#addressList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::FetchedExternal
         name: address
@@ -113,7 +116,6 @@ objects:
         values:
           - :PREMIUM
           - :STANDARD
-        min_version: beta
       # TODO(alexstephen): Add in status with exclude attribute. What does this
       # mean?
       - !ruby/object:Api::Type::ResourceRef
@@ -152,6 +154,9 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/zones/{{zone}}/autoscalers
     update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: selfLink
@@ -188,6 +193,9 @@ objects:
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#backendBucketLists'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -241,6 +249,9 @@ objects:
     name: 'BackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/global/backendServices
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#backendServicesList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -540,6 +551,9 @@ objects:
     name: 'DiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/zones/{{zone}}/diskTypes
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#diskTypeList'
+      items: 'items'
     # TODO(nelsonjr): Search all documentation for references of using URL (like
     # the description below) and replace with the proper reference to the
     # corresponding type.
@@ -573,6 +587,9 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#diskList'
+      items: 'items'
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -628,6 +645,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
       - !ruby/object:Api::Type::String
         name: 'sourceImageId'
@@ -682,6 +705,9 @@ objects:
     name: 'Firewall'
     kind: 'compute#firewall'
     base_url: projects/{{project}}/global/firewalls
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#firewallList'
+      items: 'items'
     update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -801,7 +827,6 @@ objects:
           network it is associated with. When set to true, the firewall rule is
           not enforced and the network behaves as if it did not exist. If this
           is unspecified, the firewall rule will be enabled.
-        min_version: beta
         send_empty_value: true
       - !ruby/object:Api::Type::Boolean
         name: 'enableLogging'
@@ -919,6 +944,9 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#forwardingRuleList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -974,6 +1002,7 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -983,7 +1012,6 @@ objects:
         values:
           - :PREMIUM
           - :STANDARD
-        min_version: beta
         input: true
       - !ruby/object:Api::Type::String
         name: 'serviceLabel'
@@ -1012,6 +1040,9 @@ objects:
     name: 'GlobalAddress'
     kind: 'compute#address'
     base_url: projects/{{project}}/global/addresses
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#addressList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1073,6 +1104,7 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
         update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'ipVersion'
         description: |
@@ -1107,7 +1139,6 @@ objects:
         - :EXTERNAL
         - :INTERNAL
         default_value: :EXTERNAL
-        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         description: |
@@ -1136,6 +1167,9 @@ objects:
     name: 'GlobalForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/global/forwardingRules
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#forwardingRulesList'
+      items: 'items'
     description: |
       Represents a GlobalForwardingRule resource. Global forwarding rules are
       used to forward traffic to the correct load balancer for HTTP load
@@ -1170,6 +1204,9 @@ objects:
     name: 'HttpHealthCheck'
     kind: 'compute#httpHealthCheck'
     base_url: projects/{{project}}/global/httpHealthChecks
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#httpHealthCheckList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1251,6 +1288,9 @@ objects:
     name: 'HttpsHealthCheck'
     kind: 'compute#httpsHealthCheck'
     base_url: projects/{{project}}/global/httpsHealthChecks
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#httpsHealthCheckList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1331,6 +1371,9 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#healthCheckList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1451,6 +1494,9 @@ objects:
     kind: 'compute#instanceTemplate'
     input: true
     base_url: projects/{{project}}/global/instanceTemplates
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#instanceTemplatesListResponse'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1532,6 +1578,9 @@ objects:
     name: 'License'
     kind: 'compute#license'
     base_url: /projects/{{project}}/global/licenses
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#TODO???'
+      items: 'items'
     readonly: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -1557,6 +1606,9 @@ objects:
     name: 'Image'
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#imageList'
+      items: 'items'
     description: |
       Represents an Image resource.
 
@@ -1704,6 +1756,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         # TODO(alexstephen): Change to ResourceRef with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
@@ -1770,6 +1828,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the
               customer-supplied encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
       - !ruby/object:Api::Type::String
         name: 'sourceDiskId'
         description: |
@@ -1788,6 +1852,10 @@ objects:
     name: 'Instance'
     kind: 'compute#instance'
     base_url: projects/{{project}}/zones/{{zone}}/instances
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#instanceList'
+      items: 'items'
+    input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1853,6 +1921,8 @@ objects:
         resource: 'MachineType'
         imports: 'selfLink'
         description: 'A reference to a machine type which defines VM kind.'
+        update_url: projdcts/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
+        update_verb: :POST
       # TODO(alexstephen): Add metatdata
       - !ruby/object:Api::Type::String
         name: 'minCpuPlatform'
@@ -1891,6 +1961,9 @@ objects:
     name: 'InstanceGroup'
     kind: 'compute#instanceGroup'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#instanceGroupList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -1989,6 +2062,9 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#instanceGroupManagerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2169,9 +2245,115 @@ objects:
           group. Deleting or abandoning instances reduces this number. Resizing
           the group changes this number.
   - !ruby/object:Api::Resource
+    name: 'InterconnectAttachment'
+    kind: 'compute#interconnectAttachment'
+    base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#interconnectAttachementList'
+      items: 'items'
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    input: true
+    description: |
+      Represents an InterconnectAttachment (VLAN attachment) resource. For more
+      information, see Creating VLAN Attachments.
+<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        required: true
+        description: |
+          Region where the regional interconnect attachment resides.
+    properties:
+      - !ruby/object:Api::Type::String 
+        name: 'cloudRouterIpAddress'
+        description: |
+          IPv4 address + prefix length to be configured on Cloud Router
+          Interface for this interconnect attachment.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'customerRouterIpAddress'
+        description: |
+          IPv4 address + prefix length to be configured on the customer
+          router subinterface for this interconnect attachment.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'interconnect'
+        description: |
+          URL of the underlying Interconnect object that this attachment's traffic will
+          traverse through.
+        required: true
+      - !ruby/object:Api::Type::String 
+        name: 'description'
+        description: |
+          An optional description of this resource. 
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateInterconnectInfo'
+        description: |
+          Information specific to an InterconnectAttachment. This property
+          is populated if the interconnect that this is attached to is of type DEDICATED.
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: tag8021q
+            description: |
+              802.1q encapsulation tag to be used for traffic between
+              Google and the customer, going to and from this network and region.
+            output: true
+      - !ruby/object:Api::Type::String 
+        name: 'googleReferenceId'
+        description: |
+          Google reference ID, to be used when raising support tickets with
+          Google or otherwise to debug backend connectivity issues.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'operationalStatus'
+        description: |
+          The current status of whether or not this interconnect attachment
+          is functional.
+        output: true
+        exclude: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'router'
+        resource: 'Router'
+        imports: 'selfLink'
+        description: |
+          URL of the cloud router to be used for dynamic routing. This router must be in
+          the same region as this InterconnectAttachment. The InterconnectAttachment will
+          automatically connect the Interconnect to the network & region within which the
+          Cloud Router is configured.
+        required: true
+      - !ruby/object:Api::Type::Time 
+        name: 'creationTimestamp'
+        description: |
+          Creation timestamp in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'id'
+        description: |
+          The unique identifier for the resource. This identifier is
+          defined by the server.
+        output: true
+      - !ruby/object:Api::Type::String 
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is created. The
+          name must be 1-63 characters long, and comply with RFC1035. Specifically, the
+          name must be 1-63 characters long and match the regular expression
+          `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first character must be a
+          lowercase letter, and all following characters must be a dash, lowercase
+          letter, or digit, except the last character, which cannot be a dash.
+        required: true
+  - !ruby/object:Api::Resource
     name: 'MachineType'
     kind: 'compute#machineType'
     base_url: projects/{{project}}/zones/{{zone}}/machineTypes
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#machineTypeList'
+      items: 'items'
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -2282,9 +2464,17 @@ objects:
     name: 'Network'
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#networkList'
+      items: 'items'
+    update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
       Represents a Network resource.
 
@@ -2308,6 +2498,7 @@ objects:
         description: |
           An optional description of this resource. Provide this property when
           you create the resource.
+        input: true
       - !ruby/object:Api::Type::String
         name: 'gateway_ipv4'
         description: |
@@ -2315,6 +2506,7 @@ objects:
           read only and is selected by the Google Compute Engine, typically as
           the first usable address in the IPv4Range.
         api_name: 'gatewayIPv4'
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -2326,6 +2518,7 @@ objects:
           range is a CIDR specification, for example: 192.168.0.0/16. Provided
           by the client when the network is created.
         api_name: 'IPv4Range'
+        input: true
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2336,6 +2529,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+        input: true
+        required: true
       - !ruby/object:Api::Type::Array
         # TODO: Change subnetworks to ResourceRef
         name: 'subnetworks'
@@ -2353,14 +2548,40 @@ objects:
           In "auto subnet mode", a newly created network is assigned the default
           CIDR of 10.128.0.0/9 and it automatically creates one subnetwork per
           region.
+        input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
         output: true
+      - !ruby/object:Api::Type::Array
+        name: 'routingConfig'
+        description: |
+          The network-level routing configuration for this network. Used by Cloud
+          Router to determine what type of network-wide routing behavior to
+          enforce.
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'routingMode'
+            required: true
+            description: |
+              The network-wide routing mode to use. If set to REGIONAL, this
+              network's cloud routers will only advertise routes with subnetworks
+              of this network in the same region as the router. If set to GLOBAL,
+              this network's cloud routers will advertise routes with all
+              subnetworks of this network, across regions.
+            values:
+              - :REGIONAL
+              - :GLOBAL
   - !ruby/object:Api::Resource
     name: 'Region'
     kind: 'compute#region'
     base_url: projects/{{project}}/regions
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#regionList'
+      items: 'items'
     exports:
       - name
       - !ruby/object:Api::Type::SelfLink
@@ -2439,6 +2660,9 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/regions/{{region}}/autoscalers
     update_url: projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#autoscalerList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: selfLink
@@ -2476,6 +2700,9 @@ objects:
     name: 'RegionDiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/regions/{{region}}/diskTypes
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#diskTypeList'
+      items: 'items'
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
       the type of disk to use, such as a pd-ssd or pd-standard. To reference a
@@ -2498,7 +2725,9 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/disks
-    min_version: beta
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#diskList'
+      items: 'items'
     exports:
       - 'name'
       - !ruby/object:Api::Type::SelfLink
@@ -2565,6 +2794,9 @@ objects:
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#routeList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -2689,6 +2921,9 @@ objects:
     name: 'Router'
     kind: 'compute#router'
     base_url: projects/{{project}}/regions/{{region}}/routers
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#routerList'
+      items: 'items'
     # Since Terraform has separate resources for router, router interface, and
     # router peer, calling PUT on the router will delete the interface and peer.
     # Use patch instead.
@@ -2735,6 +2970,7 @@ objects:
         name: description
         description: |
           An optional description of this resource.
+        send_empty_value: true
       - !ruby/object:Api::Type::ResourceRef
         name: network
         resource: Network
@@ -2784,6 +3020,7 @@ objects:
 
               This enum field has the one valid value: ALL_SUBNETS
             item_type: Api::Type::String # TODO(#324): enum?
+            send_empty_value: true
           - !ruby/object:Api::Type::Array
             name: advertisedIpRanges
             description: |
@@ -2792,6 +3029,7 @@ objects:
               is CUSTOM and is advertised to all peers of the router. These IP
               ranges will be advertised in addition to any specified groups.
               Leave this field blank to advertise no custom IP ranges.
+            send_empty_value: true
             item_type: !ruby/object:Api::Type::NestedObject
                 properties:
                   - !ruby/object:Api::Type::String
@@ -2799,14 +3037,19 @@ objects:
                     description: |
                       The IP range to advertise. The value must be a
                       CIDR-formatted string.
+                    send_empty_value: true
                   - !ruby/object:Api::Type::String
                     name: description
                     description: |
                       User-specified description for the IP range.
+                    send_empty_value: true
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
     base_url: projects/{{project}}/global/snapshots
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#snapshotList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -2857,6 +3100,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'sourceDiskEncryptionKey'
@@ -2876,6 +3125,12 @@ objects:
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
             output: true
+          - !ruby/object:Api::Type::String
+            # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+            name: 'kmsKeyName'
+            min_version: beta
+            description: |
+              The name of the encryption key that is stored in Google Cloud KMS.
         input: true
     properties:
       - !ruby/object:Api::Type::Time
@@ -2935,6 +3190,9 @@ objects:
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/global/sslCertificates
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#sslCertificateList'
+      items: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
@@ -2987,6 +3245,9 @@ objects:
     # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#sslPoliciesList'
+      items: 'items'
     update_verb: :PATCH
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3086,6 +3347,9 @@ objects:
     name: 'Subnetwork'
     kind: 'compute#subnetwork'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#subnetworkList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3177,7 +3441,6 @@ objects:
         name: 'enableFlowLogs'
         description: |
           Whether to enable flow logging for this subnetwork.
-        min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         send_empty_value: true
@@ -3186,7 +3449,6 @@ objects:
         description: |
           Fingerprint of this resource. This field is used internally during
           updates of this resource.
-        min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
       - !ruby/object:Api::Type::Array
@@ -3196,7 +3458,6 @@ objects:
           contained in this subnetwork. The primary IP of such VM must belong
           to the primary ipCidrRange of the subnetwork. The alias IPs may belong
           to either primary or secondary ranges.
-        min_version: beta
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         item_type: !ruby/object:Api::Type::NestedObject
@@ -3244,6 +3505,9 @@ objects:
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/global/targetHttpProxies
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#targetHttpProxyList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3294,6 +3558,9 @@ objects:
     name: 'TargetHttpsProxy'
     kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/global/targetHttpsProxies
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#targetHttpProxyList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3389,6 +3656,9 @@ objects:
     name: 'TargetPool'
     kind: 'compute#targetPool'
     base_url: projects/{{project}}/regions/{{region}}/targetPools
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#targetPoolList'
+      items: 'items'
     description: 'Represents a TargetPool resource, used for Load Balancing.'
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3513,6 +3783,9 @@ objects:
     name: 'TargetSslProxy'
     kind: 'compute#targetSslProxy'
     base_url: projects/{{project}}/global/targetSslProxies
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#targetSslProxyList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3602,6 +3875,9 @@ objects:
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
     base_url: projects/{{project}}/global/targetTcpProxies
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#targetTcpProxyList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3664,6 +3940,9 @@ objects:
     name: 'TargetVpnGateway'
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#targetVpnGatewayList'
+      items: 'items'
     input: true
     exports:
       - !ruby/object:Api::Type::SelfLink
@@ -3739,6 +4018,9 @@ objects:
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#urlMapList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3772,18 +4054,20 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'description'
               description: |
-                An optional description of this resource. Provide this property
+                An optional description of this HostRule. Provide this property
                 when you create the resource.
             - !ruby/object:Api::Type::Array
               name: 'hosts'
+              required: true
+              item_type: Api::Type::String
               description: |
                 The list of host patterns to match. They must be valid
                 hostnames, except * will match any string of ([a-z0-9-.]*). In
                 that case, * must be the first character and must be followed in
                 the pattern by either - or ..
-              item_type: Api::Type::String
             - !ruby/object:Api::Type::String
               name: 'pathMatcher'
+              required: true
               description: |
                 The name of the PathMatcher to use to match the path portion of
                 the URL if the hostRule matches the URL's host portion.
@@ -3791,8 +4075,15 @@ objects:
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -3808,6 +4099,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::ResourceRef
               name: 'defaultService'
+              required: true
               resource: 'BackendService'
               imports: 'selfLink'
               description: |
@@ -3819,6 +4111,7 @@ objects:
               description: 'An optional description of this resource.'
             - !ruby/object:Api::Type::String
               name: 'name'
+              required: true
               description: |
                 The name to which this PathMatcher is referred by the HostRule.
             - !ruby/object:Api::Type::Array
@@ -3828,15 +4121,17 @@ objects:
                 properties:
                   - !ruby/object:Api::Type::Array
                     name: 'paths'
+                    required: true
+                    item_type: Api::Type::String
                     description: |
                       The list of path patterns to match. Each must start with /
                       and the only place a * is allowed is at the end following
                       a /. The string fed to the path matcher does not include
                       any text after the first ? or #, and those chars are not
                       allowed here.
-                    item_type: Api::Type::String
                   - !ruby/object:Api::Type::ResourceRef
                     name: 'service'
+                    required: true
                     resource: 'BackendService'
                     imports: 'selfLink'
                     description: |
@@ -3845,7 +4140,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'tests'
         description: |
-          The list of expected URL mappings. Request to update this UrlMap will
+          The list of expected URL mappings. Requests to update this UrlMap will
           succeed only if all of the test cases pass.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
@@ -3854,12 +4149,15 @@ objects:
               description: 'Description of this test case.'
             - !ruby/object:Api::Type::String
               name: 'host'
+              required: true
               description: 'Host portion of the URL.'
             - !ruby/object:Api::Type::String
               name: 'path'
+              required: true
               description: 'Path portion of the URL.'
             - !ruby/object:Api::Type::ResourceRef
               name: 'service'
+              required: true
               resource: 'BackendService'
               imports: 'selfLink'
               description:
@@ -3871,6 +4169,9 @@ objects:
     description: 'VPN tunnel resource.'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#vpnTunnelList'
+      items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
@@ -3986,6 +4287,9 @@ objects:
     name: 'Zone'
     kind: 'compute#zone'
     base_url: projects/{{project}}/zones
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#zoneList'
+      items: 'items'
     exports:
       - name
       - !ruby/object:Api::Type::SelfLink
