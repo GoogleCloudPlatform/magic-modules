@@ -30,14 +30,15 @@ module Provider
         check_property :homepage, String
         check_property :issues, String
         check_property :operating_systems, Array
+        check_property_list \
+          :operating_systems, Provider::Config::OperatingSystem
         check_optional_property :requires, Array
+        check_property_list :requires, Provider::Config::Requirements
         check_property :source, String
         check_property :summary, String
         check_property :tags, Array
+        check_property_list :tags, String
         check_property :version, String
-        check_property_list :requires, Provider::Config::Requirements
-        check_property_list \
-          :operating_systems, Provider::Config::OperatingSystem
         super
       end
     end

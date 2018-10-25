@@ -62,6 +62,7 @@ module Provider
         check_optional_property :custom_code, Provider::Terraform::CustomCode
         check_optional_property :docs, Provider::Terraform::Docs
         check_property :import_format, Array
+        check_property_list :import_format, String
       end
 
       def apply(resource)
