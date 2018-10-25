@@ -27,6 +27,7 @@ module Provider
       def validate
         check_property :metadata_version, String
         check_property :status, Array
+        check_property_list :status, String
         check_property :supported_by, String
         check_property :requirements, Array
         check_property_list :requirements, String

@@ -30,15 +30,15 @@ module Provider
       def validate
         check_optional_property :additional_info, Array
         check_optional_property :depends, Array
+        check_property_list :depends, Provider::Config::Requirements
         check_property :description, String
         check_property :issues, String
         check_property :operating_systems, Array
+        check_property_list \
+          :operating_systems, Provider::Config::OperatingSystem
         check_property :source, String
         check_property :summary, String
         check_property :version, String
-        check_property_list :depends, Provider::Config::Requirements
-        check_property_list \
-          :operating_systems, Provider::Config::OperatingSystem
         super
       end
     end

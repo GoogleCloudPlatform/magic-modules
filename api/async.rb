@@ -98,6 +98,7 @@ module Api
         check_property :path, String
         check_property :complete, String
         check_property :allowed, Array
+        check_property_list :allowed, String
       end
     end
 
