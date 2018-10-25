@@ -254,10 +254,10 @@ module Api
       check_optional_property :references, ReferenceLinks
 
       default_value_property :collection_url_response,
-        Api::Resource::ResponseList.new
+                             Api::Resource::ResponseList.new
       check_property :collection_url_response, Api::Resource::ResponseList
       default_value_property :collection_url_response,
-        Api::Resource::ResponseList.new
+                             Api::Resource::ResponseList.new
 
       check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
       check_property_oneof_default \
