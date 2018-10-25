@@ -34,8 +34,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Firewall: !ruby/object:Provider::Inspec::ResourceOverride
     custom_code: |
-      def my_method
-        do_things
+      def custom
+        # TODO: actually add code here
       end
   ForwardingRule: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true

@@ -35,7 +35,7 @@ firewall_fixture = {"kind"=>"compute#firewall",
    "193.200.222.0/24",
    "89.207.224.0/21"],
  "targetTags"=>["https-server"],
- "allowed"=>[{"IPProtocol"=>"tcp", "ports"=>["443"]}],
+ "allowed"=>[{"IPProtocol"=>"tcp", "ports"=>["79-90", "443"]}],
  "denied"=>[{"IPProtocol"=>"udp", "ports"=>["555"]}],
  "direction"=>"INGRESS",
  "disabled"=>false,
@@ -54,14 +54,13 @@ RSpec.describe Firewall, '#parse' do
     it { expect(@firewall_mock.description).to eq description }
     it { expect(@firewall_mock.allowed.size).to be 1 }
     it { expect(@firewall_mock.allowed[0].ip_protocol).to eq 'tcp' }
-    it { expect(@firewall_mock.allowed[0].ports).to include "443" }
+    it { expect(@firewall_mock.allowed[0].ports).to include "79-90" }
     it { expect(@firewall_mock.denied.size).to be 1 }
     it { expect(@firewall_mock.denied[0].ip_protocol).to eq 'udp' }
     it { expect(@firewall_mock.denied[0].ports).to include "555" }
     it { expect(@firewall_mock.direction).to eq 'INGRESS' }
     it { expect(@firewall_mock.network).to match('/default$') }
     it { expect(@firewall_mock.source_ranges).to include "113.197.104.0/22" }
-
   end
 end
 
