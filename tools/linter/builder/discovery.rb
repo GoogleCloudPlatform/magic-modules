@@ -50,6 +50,10 @@ class DiscoveryProperty
     prop.values = enum if @schema.dig('enum')
     prop.properties = nested if prop.is_a?(Api::Type::NestedObject)
     prop.item_type = array if prop.is_a?(Api::Type::Array)
+    if prop.is_a?(Api::Type::NameValues)
+      prop.key_type = 'Api::Type::String'
+      prop.value_type = 'Api::Type::String'
+    end
     prop
   end
 
