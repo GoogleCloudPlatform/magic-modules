@@ -60,22 +60,35 @@ def diff_properties(new_api_props, old_api_props, prefix='')
     end
 
     if old_api_prop.is_a?(Api::Type::NestedObject)
-      all_props.append(diff_properties(new_api_prop.properties, old_api_prop.properties, "#{prefix}#{old_api_prop.name}."))
+      all_props.append(diff_properties(new_api_prop.properties, old_api_prop.properties, name(prefix, old_api_prop, '.')))
     # I'm not convinced that overriding Arrays of NestedObjects doesn't work.
     #elsif old_api_prop.is_a?(Api::Type::Array) && old_api_prop.item_type.is_a?(Api::Type::NestedObject)
     #  all_props.append(diff_properties(new_api_prop.item_type.properties, old_api_prop.item_type.properties,
     #                                   "#{prefix}#{old_api_prop.name}.item_type."))
     end
 
-    all_props.append({"#{prefix}#{old_api_prop.name}" => override}) if override.instance_variables.length > 0
+    all_props.append({ name(prefix, old_api_prop) => override}) if override.instance_variables.length > 0
     all_props
   end.compact
 end
 
+def name(prefix, api_prop, suffix='')
+  if api_prop.api_name
+    "#{prefix}#{api_prop.api_name}#{suffix}"
+  else
+    "#{prefix}#{api_prop.name}#{suffix}"
+  end
+end
+
+# Check if two values are equal.
 def values_equal(old, new)
+  # nil == false
   return true if old.nil? && new == false
+  # If it's in the old version, but not the new, we need it!
   return false if new.nil? && old
+  # If it's an array, make sure that these things are the same.
   return old.sort == new.sort if old.is_a?(::Array)
+  # If it's a normal thing, just check if it's equal.
   return old == new
 end
 raise "Must have 3 files" if ARGV.length < 3
@@ -101,6 +114,8 @@ original_api.objects.each do |obj|
   end
   properties = diff_properties(new_api_obj.properties, obj.properties)
   override.properties = properties.flatten.reduce({}, :merge) if properties
+  parameters = diff_properties(new_api_obj.parameters, obj.parameters)
+  override.parameters = parameters.flatten.reduce({}, :merge) if parameters
   if override.instance_variables.length > 0
     overrides.instance_variable_set("@#{obj.name}", override)
   end
