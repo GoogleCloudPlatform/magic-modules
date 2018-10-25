@@ -16,6 +16,10 @@
 
 <%= lines(autogen_notice :ruby) -%>
 
+<%
+  requires = generate_requires(nested_properties)
+-%>
+<%= lines(emit_requires(requires)) -%>
 module Google
   module <%= product_ns %>
     module Property
