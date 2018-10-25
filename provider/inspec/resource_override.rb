@@ -19,13 +19,7 @@ module Provider
     # inspec specific properties to be added to Api::Resource
     module OverrideProperties
       attr_reader :manual
-    end
-
-    # Custom inspec code to handle type convergence operations
-    class Handlers < Api::Object
-      def validate
-        super
-      end
+      attr_reader :custom_code
     end
 
     # Product specific overriden properties for inspec
@@ -37,6 +31,7 @@ module Provider
 
         super
         check_property :manual, :boolean
+        check_optional_property :custom_code, String
       end
 
       private
