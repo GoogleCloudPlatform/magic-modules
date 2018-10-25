@@ -55,7 +55,7 @@ module Provider
           prod.instance_variable_set(var_name, old_prod.instance_variable_get(var_name))
         end
       end
-      prod.instance_variable_set("@objects",
+      prod.instance_variable_set('@objects',
                                  old_prod.objects.map { |o| build_resource(o, overrides[o.name]) })
       prod
     end
@@ -64,7 +64,7 @@ module Provider
       override = {} if override.nil?
       res = Api::Resource.new
       old_resource.instance_variables.reject { |o| o == :properties || o == :parameters }
-                                     .each do |var_name|
+                  .each do |var_name|
         if override[var_name]
           res.instance_variable_set(var_name, override[var_name])
         else
@@ -74,7 +74,6 @@ module Provider
       res
     end
 
-    def build_property(old_property, override)
-    end
+    def build_property(old_property, override); end
   end
 end

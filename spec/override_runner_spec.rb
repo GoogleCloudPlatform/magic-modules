@@ -16,12 +16,13 @@ require 'spec_helper'
 describe Provider::OverrideRunner do
   context 'simple overrides' do
     describe 'should be able to override a product field' do
-      let(:overrides) { Provider::ResourceOverrides.new(
-          'product' => Provider::ResourceOverride.new({
+      let(:overrides) do
+        Provider::ResourceOverrides.new(
+          'product' => Provider::ResourceOverride.new(
             'name' => 'My Test Product'
-          })
+          )
         )
-      }
+      end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
@@ -32,12 +33,13 @@ describe Provider::OverrideRunner do
     end
 
     describe 'should be able to override a resource field' do
-      let(:overrides) { Provider::ResourceOverrides.new(
-          'MyResource' => Provider::ResourceOverride.new({
+      let(:overrides) do
+        Provider::ResourceOverrides.new(
+          'MyResource' => Provider::ResourceOverride.new(
             'description' => 'A description'
-          })
+          )
         )
-      }
+      end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
@@ -49,16 +51,17 @@ describe Provider::OverrideRunner do
     end
 
     describe 'should be able to override a property field' do
-      let(:overrides) { Provider::ResourceOverrides.new(
-          'ReferencedResource' => Provider::ResourceOverride.new({
-            'properties' => Provider::PropertyOverride.new({
+      let(:overrides) do
+        Provider::ResourceOverrides.new(
+          'ReferencedResource' => Provider::ResourceOverride.new(
+            'properties' => Provider::PropertyOverride.new(
               'name' => {
                 'description' => 'My overriden description'
               }
-            })
-          })
+            )
+          )
         )
-      }
+      end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
@@ -66,7 +69,9 @@ describe Provider::OverrideRunner do
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'ReferencedResource' }.first
         prop = resource.properties.select { |p| p.name == 'name' }.first
-        expect(prop.description).to eq(overrides['ReferencedResource']['properties']['name']['description'])
+        expect(prop.description).to eq(
+          overrides['ReferencedResource']['properties']['name']['description']
+        )
       }
     end
   end
