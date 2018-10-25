@@ -47,5 +47,27 @@ describe Provider::OverrideRunner do
         expect(resource.description).to eq(overrides['MyResource']['description'])
       }
     end
+
+    describe 'should be able to override a property field' do
+      let(:overrides) { Provider::ResourceOverrides.new(
+          'ReferencedResource' => Provider::ResourceOverride.new({
+            'properties' => Provider::PropertyOverride.new({
+              'name' => {
+                'description' => 'My overriden description'
+              }
+            })
+          })
+        )
+      }
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+      it {
+        runner = Provider::OverrideRunner.new(api, overrides)
+        new_api = runner.build
+        resource = new_api.objects.select { |p| p.name == 'ReferencedResource' }.first
+        prop = resource.properties.select { |p| p.name == 'name' }.first
+        expect(prop.description).to eq(overrides['ReferencedResource']['properties']['name']['description'])
+      }
+    end
   end
 end

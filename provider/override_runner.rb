@@ -71,9 +71,10 @@ module Provider
           res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
         end
       end
-      res.instance_variable_set("@properties", old_resource.properties)
-      res.instance_variable_set("@parameters", old_resource.parameters)
       res
+    end
+
+    def build_property(old_property, override)
     end
   end
 end
