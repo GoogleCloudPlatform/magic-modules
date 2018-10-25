@@ -11,9 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'api/object'
-require 'provider/property_override'
-require 'provider/resource_override'
+require 'api/product'
 
 module Provider
   # A hash of Provider::ResourceOverride objects where the key is the api name
@@ -35,14 +33,47 @@ module Provider
   #         !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'baz'
   #   ...
-  class ResourceOverrides < Api::Object
-    # Used mostly for testing.
-    def initialize(hash)
-      hash.each { |k, v| instance_variable_set("@#{k}", v) }
+  class OverrideRunner < Api::Object
+    def initialize(api, overrides)
+      @api = api
+      @overrides = overrides
     end
 
-    def [](key)
-      instance_variable_get("@#{key}")
+    def build
+      build_product(@api, @overrides)
+    end
+
+    private
+
+    def build_product(old_prod, overrides)
+      prod = Api::Product.new
+      old_prod.instance_variables
+              .reject { |o| o == :@objects }.each do |var_name|
+        if (overrides['product'] || {})[var_name]
+          prod.instance_variable_set(var_name, overrides['product'][var_name])
+        else
+          prod.instance_variable_set(var_name, old_prod.instance_variable_get(var_name))
+        end
+      end
+      prod.instance_variable_set("@objects",
+                                 old_prod.objects.map { |o| build_resource(o, overrides[o.name]) })
+      prod
+    end
+
+    def build_resource(old_resource, override)
+      override = {} if override.nil?
+      res = Api::Resource.new
+      old_resource.instance_variables.reject { |o| o == :properties || o == :parameters }
+                                     .each do |var_name|
+        if override[var_name]
+          res.instance_variable_set(var_name, override[var_name])
+        else
+          res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
+        end
+      end
+      res.instance_variable_set("@properties", old_resource.properties)
+      res.instance_variable_set("@parameters", old_resource.parameters)
+      res
     end
   end
 end

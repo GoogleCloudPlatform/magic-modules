@@ -11,22 +11,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'api/object'
+require 'spec_helper'
 
-module Provider
-  # Override to an Api::Resource in api.yaml
-  class ResourceOverride < Api::Object
-    # Used for testing.
-    def initialize(hash)
-      hash.each { |k, v| instance_variable_set("@#{k}", v) }
-    end
+describe Provider::OverrideRunner do
+  context 'simple overrides' do
+    describe 'should be able to override a product field' do
+      let(:overrides) { Provider::ResourceOverrides.new(
+          'product' => Provider::ResourceOverride.new({
+            'name' => 'My Test Product'
+          })
+        )
+      }
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
-    def [](key)
-      if key[0] == '@'
-        instance_variable_get(key)
-      else
-        instance_variable_get("@#{key}")
-      end
+      it {
+        runner = Provider::OverrideRunner.new(api, overrides)
+        new_api = runner.build
+        expect(new_api.name).to eq(overrides['product']['name'])
+      }
     end
   end
 end
