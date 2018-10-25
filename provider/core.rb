@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'active_support/inflector'
 require 'compile/core'
 require 'dependencies/dependency_graph'
 require 'fileutils'
