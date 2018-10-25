@@ -184,15 +184,14 @@ module Provider
 
     def sub_property_descriptions(property)
       if nested_object?(property)
-        return property.properties.map \
-          { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
+        property.properties.map { |prop| markdown_format(prop) }.join("\n\n") + "\n\n"
+      elsif typed_array?(property)
+        property.item_type.properties.map { |prop| markdown_format(prop) }.join("\n\n") + "\n\n"
       end
-      # rubocop:disable Style/GuardClause
-      if typed_array?(property)
-        return property.item_type.properties.map \
-          { |prop| "    * `#{prop.name}`: #{prop.description}" }.join("\n")
-      end
-      # rubocop:enable Style/GuardClause
+    end
+
+    def markdown_format(property)
+      "    * `#{property.name}`: #{property.description.split("\n").join(' ')}"
     end
   end
   # rubocop:enable Metrics/ClassLength
