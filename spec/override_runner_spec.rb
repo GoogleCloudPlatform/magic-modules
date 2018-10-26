@@ -74,5 +74,28 @@ describe Provider::OverrideRunner do
         )
       }
     end
+
+    describe 'should be able to override a property type' do
+      let(:overrides) do
+        Provider::ResourceOverrides.new(
+          'ReferencedResource' => Provider::ResourceOverride.new(
+            'properties' => {
+              'name' => Provider::PropertyOverride.new(
+                'type' => 'Api::Type::Integer'
+              )
+            }
+            )
+          )
+      end
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+      it {
+        runner = Provider::OverrideRunner.new(api, overrides)
+        new_api = runner.build
+        resource = new_api.objects.select { |p| p.name == 'ReferencedResource' }.first
+        prop = resource.properties.select { |p| p.name == 'name' }.first
+        expect(prop.class).to eq(Api::Type::Integer)
+      }
+    end
   end
 end
