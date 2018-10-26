@@ -98,7 +98,7 @@ describe Provider::OverrideRunner do
       }
     end
 
-    describe 'should be able to override a nested property' do
+    describe 'should be able to override a nested-nested property' do
       let(:overrides) do
         Provider::ResourceOverrides.new(
           'AnotherResource' => Provider::ResourceOverride.new(
@@ -118,6 +118,29 @@ describe Provider::OverrideRunner do
         resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
         prop = resource.properties.select { |p| p.name == 'nested-property2' }.first
         expect(prop.properties[0].properties[0].class).to eq(Api::Type::Integer)
+      }
+    end
+
+    describe 'should be able to override a nested array property' do
+      let(:overrides) do
+        Provider::ResourceOverrides.new(
+          'AnotherResource' => Provider::ResourceOverride.new(
+            'properties' => {
+              'array-property[].property1' => Provider::PropertyOverride.new(
+                'type' => 'Api::Type::Integer'
+              )
+            }
+            )
+          )
+      end
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+      it {
+        runner = Provider::OverrideRunner.new(api, overrides)
+        new_api = runner.build
+        resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
+        prop = resource.properties.select { |p| p.name == 'array-property' }.first
+        expect(prop.item_type.properties[0].class).to eq(Api::Type::Integer)
       }
     end
   end
