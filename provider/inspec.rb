@@ -43,7 +43,7 @@ module Provider
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
-      target_folder = File.join(data[:output_folder], 'inspec')
+      target_folder = File.join(data[:output_folder], 'libraries')
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       generate_resource_file data.clone.merge(
@@ -74,8 +74,12 @@ module Provider
       url.split("\n").join('')
     end
 
-    # TODO?
-    def generate_resource_tests(data) end
+    # Copies InSpec unit tests to build folder
+    def generate_resource_tests(data)
+      target_folder = File.join(data[:output_folder], 'test/unit')
+      FileUtils.mkpath target_folder
+      FileUtils.cp_r 'templates/inspec/tests/.', target_folder
+    end
 
     def generate_base_property(data) end
 
@@ -189,7 +193,6 @@ module Provider
     def markdown_format(property)
       "    * `#{property.name}`: #{property.description.split("\n").join(' ')}"
     end
-    # rubocop:enable Style/GuardClause
   end
   # rubocop:enable Metrics/ClassLength
 end

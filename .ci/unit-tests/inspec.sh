@@ -3,4 +3,9 @@
 set -e
 set -x
 
-echo 'TODO slevenick write tests'
+pushd "magic-modules/build/inspec/test/unit"
+
+bundle install
+rspec -I ../../libraries *
+
+popd

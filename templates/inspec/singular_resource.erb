@@ -23,7 +23,6 @@
 
   requires = generate_requires(object.all_user_properties)
   requires << 'inspec/resource'
-  requires << 'google/hash_utils'
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -84,7 +83,7 @@ class <%= object.name -%> < Inspec.resource(1)
     name = prop.out_name
 
     if time?(prop)
-      init = "Time.new(@fetched['#{prop.api_name}'])"
+      init = "DateTime.parse(@fetched['#{prop.api_name}'])"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
