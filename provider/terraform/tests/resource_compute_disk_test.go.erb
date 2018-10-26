@@ -343,7 +343,7 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'beta' -%>
+<% unless version.nil? || version == 'ga' -%>
 func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
