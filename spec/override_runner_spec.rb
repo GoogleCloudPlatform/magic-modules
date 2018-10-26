@@ -65,8 +65,8 @@ describe Provider::OverrideRunner do
                 'description' => 'My overriden description'
               )
             }
-            )
           )
+        )
       end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
@@ -90,8 +90,8 @@ describe Provider::OverrideRunner do
                 'type' => 'Api::Type::Integer'
               )
             }
-            )
           )
+        )
       end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
@@ -113,8 +113,8 @@ describe Provider::OverrideRunner do
                 'type' => 'Api::Type::Integer'
               )
             }
-            )
           )
+        )
       end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
@@ -136,8 +136,8 @@ describe Provider::OverrideRunner do
                 'type' => 'Api::Type::Integer'
               )
             }
-            )
           )
+        )
       end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 

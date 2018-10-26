@@ -60,12 +60,13 @@ module Provider
         end
       end
       prod.instance_variable_set('@objects',
-                                 old_prod.objects.map { |o| build_resource(o, all_overrides[o.name]) })
+                                 old_prod.objects
+                                         .map { |o| build_resource(o, all_overrides[o.name]) })
       prod
     end
 
     def build_resource(old_resource, res_override)
-      res_override = @res_override_class.new if (res_override.nil? || res_override.empty?)
+      res_override = @res_override_class.new if res_override.nil? || res_override.empty?
       res = Api::Resource.new
 
       set_values_for_overrides(res, res_override)
@@ -83,7 +84,7 @@ module Provider
       res
     end
 
-    def build_property(old_property, property_overrides, prefix='')
+    def build_property(old_property, property_overrides, prefix = '')
       property_overrides = {} if property_overrides.nil?
       if old_property.is_a?(Api::Type::NestedObject)
         new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
@@ -102,7 +103,7 @@ module Provider
     end
 
     def build_primitive_property(old_property, prop_override)
-      prop_override = @prop_override_class.new if (prop_override.nil? || prop_override.empty?)
+      prop_override = @prop_override_class.new if prop_override.nil? || prop_override.empty?
       prop = if prop_override['type']
                Module.const_get(prop_override['type']).new
              else
@@ -111,7 +112,7 @@ module Provider
 
       set_values_for_overrides(prop, prop_override)
       old_property.instance_variables.reject { |o| o == :@properties }
-                                     .each do |var_name|
+                  .each do |var_name|
         if prop_override[var_name]
           prop.instance_variable_set(var_name, prop_override[var_name])
         else
