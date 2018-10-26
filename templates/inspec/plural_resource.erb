@@ -17,7 +17,6 @@
 <%= lines(autogen_notice :ruby) -%>
 
 require 'inspec/resource'
-require 'google/hash_utils'
 class <%= object.name -%>s < Inspec.resource(1)
 
 <%
@@ -67,7 +66,14 @@ link_query = object.self_link_query || object.collection_url_response
     return if result.nil? || !result.key?(wrap_path)
 
     # Conversion of string -> object hash to symbol -> object hash that InSpec needs
-    result[wrap_path].map { |hash| Google::HashUtils.symbolize_keys(hash) }
+    converted = []
+    result[wrap_path].each do |hash|
+      hash_with_symbols = {}
+      hash.each_pair { |k, v| hash_with_symbols[k.to_sym] = v }
+      converted.push(hash_with_symbols)
+    end
+
+    converted
   end
 
 end

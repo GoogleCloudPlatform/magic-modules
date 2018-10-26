@@ -97,8 +97,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   VpnTunnel: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/inspec/common~copy.yaml'), 4)) -%>
 style:
 functions:
 changelog:
