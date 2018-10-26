@@ -15,17 +15,17 @@ require 'api/object'
 
 module Provider
   # Override to an Api::Resource in api.yaml
-  class ResourceOverride < Api::Object
+  class ResourceOverride < ::Hash
     # Used for testing.
     def initialize(hash)
-      hash.each { |k, v| instance_variable_set("@#{k}", v) }
+      hash.each { |k, v| self[k] = v }
     end
 
     def [](key)
-      if key[0] == '@'
-        instance_variable_get(key)
+      if key.to_s[0] == '@'
+        dig key.to_s[1..-1]
       else
-        instance_variable_get("@#{key}")
+        dig key.to_s
       end
     end
   end

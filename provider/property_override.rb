@@ -17,17 +17,17 @@ require 'api/type'
 module Provider
   # Override a resource property (Api::Type) in api.yaml
   # TODO(rosbo): Shared common logic with ResourceOverride via a base class.
-  class PropertyOverride < Api::Object
+  class PropertyOverride < ::Hash
     # Used for testing.
     def initialize(hash)
-      hash.each { |k, v| instance_variable_set("@#{k}", v) }
+      hash.each { |k, v| self[k] = v }
     end
 
     def [](key)
-      if key[0] == '@'
-        instance_variable_get(key)
+      if key.to_s[0] == '@'
+        dig key.to_s[1..-1]
       else
-        instance_variable_get("@#{key}")
+        dig key.to_s
       end
     end
   end

@@ -35,14 +35,18 @@ module Provider
   #         !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'baz'
   #   ...
-  class ResourceOverrides < Api::Object
+  class ResourceOverrides < ::Hash
     # Used mostly for testing.
     def initialize(hash)
-      hash.each { |k, v| instance_variable_set("@#{k}", v) }
+      hash.each { |k, v| self[k] = v }
     end
 
     def [](key)
-      instance_variable_get("@#{key}")
+      if key.to_s[0] == '@'
+        dig key.to_s[1..-1]
+      else
+        dig key.to_s
+      end
     end
   end
 end

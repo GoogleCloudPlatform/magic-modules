@@ -71,9 +71,28 @@ module Provider
           res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
         end
       end
+      res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, override[p.name]) })
+      res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, override[p.name]) })
       res
     end
 
-    def build_property(old_property, override); end
+    def build_property(old_property, override)
+      override = {} if override.nil?
+      prop = if override['type']
+               Module.const_get(override['type']).new
+             else
+               old_property.class.new
+             end
+
+      old_property.instance_variables.reject { |o| o == :properties }
+                                     .each do |var_name|
+        if override[var_name]
+          prop.instance_variable_set(var_name, override[var_name])
+        else
+          prop.instance_variable_set(var_name, old_property.instance_variable_get(var_name))
+        end
+      end
+      prop
+    end
   end
 end
