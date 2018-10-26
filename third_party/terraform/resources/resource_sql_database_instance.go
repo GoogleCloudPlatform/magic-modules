@@ -16,6 +16,8 @@ import (
 	"google.golang.org/api/sqladmin/v1beta4"
 )
 
+const peerNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+
 var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"expiration_time": &schema.Schema{
@@ -179,6 +181,12 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									"require_ssl": &schema.Schema{
 										Type:     schema.TypeBool,
 										Optional: true,
+									},
+									"private_network": &schema.Schema{
+										Type:             schema.TypeString,
+										Optional:         true,
+										ValidateFunc:     validateRegexp(peerNetworkLinkRegex),
+                                        DiffSuppressFunc: compareSelfLinkRelativePaths,
 									},
 								},
 							},
@@ -617,6 +625,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 	return &sqladmin.IpConfiguration{
 		Ipv4Enabled:        _ipConfiguration["ipv4_enabled"].(bool),
 		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
+		PrivateNetwork:     _ipConfiguration["private_network"].(string),
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
 	}
 }
@@ -667,6 +676,15 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		StartTime:        _backupConfiguration["start_time"].(string),
 	}
 }
+
+func expandComputePrivateNetwork(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+	f, err := parseGlobalFieldValue("private_network", v.(string), "project", d, config, true)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid value for network: %s", err)
+	}
+	return f.RelativeLink(), nil
+}
+
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -870,8 +888,9 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 
 func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration) interface{} {
 	data := map[string]interface{}{
-		"ipv4_enabled": ipConfiguration.Ipv4Enabled,
-		"require_ssl":  ipConfiguration.RequireSsl,
+		"ipv4_enabled":    ipConfiguration.Ipv4Enabled,
+		"private_network": ipConfiguration.PrivateNetwork,
+		"require_ssl":     ipConfiguration.RequireSsl,
 	}
 
 	if ipConfiguration.AuthorizedNetworks != nil {
