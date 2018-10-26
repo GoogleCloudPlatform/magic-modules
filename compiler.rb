@@ -120,7 +120,7 @@ product_names.each do |product_name|
     next
   end
 
-  provider_config = \
+  product_api, provider_config = \
     Provider::Config.parse(provider_yaml_path, product_api, version)
   pp provider_config if ENV['COMPILER_DEBUG']
 
