@@ -54,13 +54,13 @@ describe Provider::OverrideRunner do
       let(:overrides) do
         Provider::ResourceOverrides.new(
           'ReferencedResource' => Provider::ResourceOverride.new(
-            'properties' => Provider::PropertyOverride.new(
-              'name' => {
+            'properties' => {
+              'name' => Provider::PropertyOverride.new(
                 'description' => 'My overriden description'
-              }
+              )
+            }
             )
           )
-        )
       end
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 

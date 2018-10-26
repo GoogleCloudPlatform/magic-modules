@@ -71,8 +71,8 @@ module Provider
           res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
         end
       end
-      res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, override[p.name]) })
-      res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, override[p.name]) })
+      res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, override.dig('properties', p.name)) })
+      res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, override.dig('properties', p.name)) })
       res
     end
 
