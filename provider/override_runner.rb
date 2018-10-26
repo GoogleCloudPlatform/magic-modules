@@ -63,7 +63,7 @@ module Provider
     def build_resource(old_resource, res_override)
       res_override = {} if res_override.nil?
       res = Api::Resource.new
-      old_resource.instance_variables.reject { |o| o == :properties || o == :parameters }
+      old_resource.instance_variables.reject { |o| o == :@properties || o == :@parameters }
                   .each do |var_name|
         if res_override[var_name]
           res.instance_variable_set(var_name, res_override[var_name])
@@ -71,12 +71,23 @@ module Provider
           res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
         end
       end
-      res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, res_override.dig('properties', p.name)) })
-      res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, res_override.dig('properties', p.name)) })
+      res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, res_override.dig('properties')) })
+      res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, res_override.dig('properties')) })
       res
     end
 
-    def build_property(old_property, prop_override)
+    def build_property(old_property, property_overrides, prefix='')
+      property_overrides = {} if property_overrides.nil?
+      if old_property.is_a?(Api::Type::NestedObject)
+        new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
+        new_prop.instance_variable_set('@properties', old_property.properties.map { |p| build_property(p, property_overrides, "#{prefix}#{old_property.name}.") })
+        new_prop
+      else
+        build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
+      end
+    end
+
+    def build_primitive_property(old_property, prop_override)
       prop_override = {} if prop_override.nil?
       prop = if prop_override['type']
                Module.const_get(prop_override['type']).new
@@ -84,7 +95,7 @@ module Provider
                old_property.class.new
              end
 
-      old_property.instance_variables.reject { |o| o == :properties }
+      old_property.instance_variables.reject { |o| o == :@properties }
                                      .each do |var_name|
         if prop_override[var_name]
           prop.instance_variable_set(var_name, prop_override[var_name])
