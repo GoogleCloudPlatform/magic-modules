@@ -245,7 +245,7 @@ func getRoleEntitiesAsStringsFromApi(config *Config, bucket string, object strin
 
 // Creates 3 lists of changes we need to make to go from one set of entities to another- which entities need to be created, update, and deleted
 // Not resource specific
-func getRoleEntityChange(old []string, new []string, owner string) ([]*RoleEntity, []*RoleEntity, []*RoleEntity, error) {
+func getRoleEntityChange(old []string, new []string, owner string) (create, update, remove []*RoleEntity, err error) {
 	newEntitiesUsed := make(map[string]struct{})
 	for _, v := range new {
 		res := getValidatedRoleEntityPair(v)
@@ -268,9 +268,6 @@ func getRoleEntityChange(old []string, new []string, owner string) ([]*RoleEntit
 		oldEntitiesUsed[res.Entity] = res.Role
 	}
 
-	var create []*RoleEntity
-	var update []*RoleEntity
-	var remove []*RoleEntity
 	for _, re := range new {
 		res := getValidatedRoleEntityPair(re)
 
