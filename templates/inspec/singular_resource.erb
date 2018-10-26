@@ -23,7 +23,6 @@
 
   requires = generate_requires(object.all_user_properties)
   requires << 'inspec/resource'
-  requires << 'google/hash_utils'
 -%>
 <%= lines(emit_requires(requires)) -%>
 

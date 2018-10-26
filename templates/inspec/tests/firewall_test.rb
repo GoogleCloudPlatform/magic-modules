@@ -12,36 +12,15 @@
 # limitations under the License.
 
 require 'google_compute_firewall'
+require 'json'
 
 class FirewallTest < Firewall
   def initialize(data)
     @fetched = data
   end
 end
-description = "My description"
-firewall_fixture = {"kind"=>"compute#firewall",
- "id"=>"960238098441931407",
- "creationTimestamp"=>"2018-10-11T22:42:56.000-07:00",
- "name"=>"default-uuaca3r2wn7yqlbdyzue5lrn",
- "description"=>description,
- "network"=>
-  "https://www.googleapis.com/compute/v1/projects/sam-inspec/global/networks/default",
- "priority"=>1000,
- "sourceRanges"=>
-  ["103.104.152.0/22",
-   "104.132.0.0/14",
-   "113.197.104.0/22",
-   "185.25.28.0/22",
-   "193.200.222.0/24",
-   "89.207.224.0/21"],
- "targetTags"=>["https-server"],
- "allowed"=>[{"IPProtocol"=>"tcp", "ports"=>["79-90", "443"]}],
- "denied"=>[{"IPProtocol"=>"udp", "ports"=>["555"]}],
- "direction"=>"INGRESS",
- "disabled"=>false,
- "selfLink"=>
-  "https://www.googleapis.com/compute/v1/projects/sam-inspec/global/firewalls/default-uuaca3r2wn7yqlbdyzue5lrn"}
 
+firewall_fixture = JSON.parse(File.read('fixtures/firewall_fixture.json'))
 
 RSpec.describe Firewall, '#parse' do
   before do 
@@ -51,10 +30,10 @@ RSpec.describe Firewall, '#parse' do
   context 'firewall attributes' do
     it { expect(@firewall_mock.exists?).to be true }
     it { expect(@firewall_mock.creation_timestamp).to eq Time.at(1539322976).to_datetime }
-    it { expect(@firewall_mock.description).to eq description }
+    it { expect(@firewall_mock.description).to eq 'description' }
     it { expect(@firewall_mock.allowed.size).to be 1 }
     it { expect(@firewall_mock.allowed[0].ip_protocol).to eq 'tcp' }
-    it { expect(@firewall_mock.allowed[0].ports).to include "79-90" }
+    it { expect(@firewall_mock.allowed[0].ports).to include "443" }
     it { expect(@firewall_mock.denied.size).to be 1 }
     it { expect(@firewall_mock.denied[0].ip_protocol).to eq 'udp' }
     it { expect(@firewall_mock.denied[0].ports).to include "555" }

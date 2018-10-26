@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'google_compute_zone'
+require 'json'
 
 class ZoneTest < Zone
   def initialize(data)
@@ -19,18 +20,7 @@ class ZoneTest < Zone
   end
 end
 
-zone_fixture = {"kind"=>"compute#zone",
- "id"=>"2231",
- "creationTimestamp"=>"1989-11-28T00:00:00-05:00",
- "name"=>"us-east1-b",
- "description"=>"us-east1-b",
- "status"=>"UP",
- "region"=>
-  "https://www.googleapis.com/compute/v1/projects/sam-inspec/regions/us-east1",
- "selfLink"=>
-  "https://www.googleapis.com/compute/v1/projects/sam-inspec/zones/us-east1-b",
- "availableCpuPlatforms"=>
-  ["Intel Skylake", "Intel Broadwell", "Intel Haswell"]}
+zone_fixture = JSON.parse(File.read('fixtures/zone_fixture.json'))
 
 RSpec.describe Zone, "parse" do
   it "zone attributes" do
@@ -43,7 +33,10 @@ RSpec.describe Zone, "parse" do
     time = Time.at(628232400).to_datetime
     expect(zone_mock.creation_timestamp).to eq time
   end
-  it "no response" do
+end
+
+RSpec.describe Zone, "#parse" do
+  it "no result" do
     no_zone_resource = ZoneTest.new(nil)
     expect(no_zone_resource.exists?).to be false
   end

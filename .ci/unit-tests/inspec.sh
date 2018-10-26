@@ -3,9 +3,9 @@
 set -e
 set -x
 
-pushd "magic-modules/build/inspec/libraries"
+pushd "magic-modules/build/inspec/test/unit"
 
 bundle install
-rspec -I . ../test/unit/*
+rspec -I ../../libraries *
 
 popd
