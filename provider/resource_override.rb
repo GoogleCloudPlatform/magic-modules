@@ -16,8 +16,14 @@ require 'api/object'
 module Provider
   # Override to an Api::Resource in api.yaml
   class ResourceOverride < ::Hash
+    def self.attributes
+      []
+    end
+
+    attr_accessor *attributes
+
     # Used for testing.
-    def initialize(hash)
+    def initialize(hash = {})
       hash.each { |k, v| self[k] = v }
     end
 

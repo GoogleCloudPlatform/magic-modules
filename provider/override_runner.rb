@@ -34,9 +34,13 @@ module Provider
   #         description: 'baz'
   #   ...
   class OverrideRunner < Api::Object
-    def initialize(api, overrides)
+    def initialize(api, overrides,
+                   res_override_class = Provider::ResourceOverride,
+                   prop_override_class = Provider::PropertyOverride)
       @api = api
       @overrides = overrides
+      @res_override_class = res_override_class
+      @prop_override_class = prop_override_class
     end
 
     def build
@@ -61,8 +65,11 @@ module Provider
     end
 
     def build_resource(old_resource, res_override)
-      res_override = {} if res_override.nil?
+      res_override = @res_override_class.new if (res_override.nil? || res_override.empty?)
       res = Api::Resource.new
+
+      set_values_for_overrides(res, res_override)
+
       old_resource.instance_variables.reject { |o| o == :@properties || o == :@parameters }
                   .each do |var_name|
         if res_override[var_name]
@@ -95,13 +102,14 @@ module Provider
     end
 
     def build_primitive_property(old_property, prop_override)
-      prop_override = {} if prop_override.nil?
+      prop_override = @prop_override_class.new if (prop_override.nil? || prop_override.empty?)
       prop = if prop_override['type']
                Module.const_get(prop_override['type']).new
              else
                old_property.class.new
              end
 
+      set_values_for_overrides(prop, prop_override)
       old_property.instance_variables.reject { |o| o == :@properties }
                                      .each do |var_name|
         if prop_override[var_name]
@@ -111,6 +119,13 @@ module Provider
         end
       end
       prop
+    end
+
+    def set_values_for_overrides(object, override)
+      override.class.attributes.each do |o|
+        object.instance_variable_set("@#{o}", override[o])
+        object.define_singleton_method(o.to_sym) { instance_variable_get("@#{o}") }
+      end
     end
   end
 end

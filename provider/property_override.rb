@@ -15,11 +15,15 @@ require 'api/object'
 require 'api/type'
 
 module Provider
-  # Override a resource property (Api::Type) in api.yaml
-  # TODO(rosbo): Shared common logic with ResourceOverride via a base class.
   class PropertyOverride < ::Hash
+    def self.attributes
+      []
+    end
+
+    attr_accessor *attributes
+
     # Used for testing.
-    def initialize(hash)
+    def initialize(hash = {})
       hash.each { |k, v| self[k] = v }
     end
 

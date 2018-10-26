@@ -13,6 +13,12 @@
 
 require 'spec_helper'
 
+class TestResourceOverride < Provider::ResourceOverride
+  def self.attributes
+    [:test_field]
+  end
+end
+
 describe Provider::OverrideRunner do
   context 'simple overrides' do
     describe 'should be able to override a product field' do
@@ -141,6 +147,26 @@ describe Provider::OverrideRunner do
         resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
         prop = resource.properties.select { |p| p.name == 'array-property' }.first
         expect(prop.item_type.properties[0].class).to eq(Api::Type::Integer)
+      }
+    end
+
+    describe 'should be able to override a new value' do
+      let(:overrides) do
+        Provider::ResourceOverrides.new(
+          'AnotherResource' => TestResourceOverride.new(
+            'test_field' => 'test'
+          )
+        )
+      end
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+      it {
+        runner = Provider::OverrideRunner.new(api, overrides, TestResourceOverride)
+        new_api = runner.build
+        resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
+        expect(resource.test_field).to eq('test')
+        resource = new_api.objects.select { |p| p.name == 'ReferencedResource' }.first
+        expect(resource.test_field).to eq(nil)
       }
     end
   end
