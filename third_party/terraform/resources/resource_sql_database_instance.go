@@ -16,7 +16,7 @@ import (
 	"google.golang.org/api/sqladmin/v1beta4"
 )
 
-const peerNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
+const privateNetworkLinkRegex = "projects/(" + ProjectRegex + ")/global/networks/((?:[a-z](?:[-a-z0-9]*[a-z0-9])?))$"
 
 var sqlDatabaseAuthorizedNetWorkSchemaElem *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
@@ -185,8 +185,8 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 									"private_network": &schema.Schema{
 										Type:             schema.TypeString,
 										Optional:         true,
-										ValidateFunc:     validateRegexp(peerNetworkLinkRegex),
-                                        DiffSuppressFunc: compareSelfLinkRelativePaths,
+										ValidateFunc:     validateRegexp(privateNetworkLinkRegex),
+										DiffSuppressFunc: compareSelfLinkRelativePaths,
 									},
 								},
 							},
@@ -622,6 +622,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 	}
 
 	_ipConfiguration := configured[0].(map[string]interface{})
+
 	return &sqladmin.IpConfiguration{
 		Ipv4Enabled:        _ipConfiguration["ipv4_enabled"].(bool),
 		RequireSsl:         _ipConfiguration["require_ssl"].(bool),
@@ -676,15 +677,6 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		StartTime:        _backupConfiguration["start_time"].(string),
 	}
 }
-
-func expandComputePrivateNetwork(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
-	f, err := parseGlobalFieldValue("private_network", v.(string), "project", d, config, true)
-	if err != nil {
-		return nil, fmt.Errorf("Invalid value for network: %s", err)
-	}
-	return f.RelativeLink(), nil
-}
-
 
 func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
