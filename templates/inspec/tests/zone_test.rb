@@ -33,7 +33,11 @@ RSpec.describe Zone, "parse" do
     time = Time.at(628232400).to_datetime
     expect(zone_mock.creation_timestamp).to eq time
   end
-  it "no response" do
+
+end
+
+RSpec.describe Zone, "#parse" do
+  it "no result" do
     no_zone_resource = ZoneTest.new(nil)
     expect(no_zone_resource.exists?).to be false
   end

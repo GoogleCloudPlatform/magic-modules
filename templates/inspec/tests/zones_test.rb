@@ -36,3 +36,12 @@ RSpec.describe Zones, "zones" do
     expect(zones_mock_resource.ids).to include '2233'
   end
 end
+
+no_zones_fixture = JSON.parse(File.read('fixtures/zones_fixture.json'))
+no_zones_fixture['items'] = []
+no_zones = ZonesTest.new(no_zones_fixture)
+RSpec.describe Zones, "#fetch_resource" do
+  it "no zones" do
+    expect(no_zones.names.size).to eq 0
+  end
+end

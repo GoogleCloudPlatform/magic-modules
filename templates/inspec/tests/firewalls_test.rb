@@ -34,12 +34,9 @@ RSpec.describe Firewalls, '#fetch_resource' do
   end
 end
 
-no_firewalls_fixture = {"kind"=>"compute#firewallList",
- "id"=>"projects/sam-inspec/global/firewalls",
- "items"=>[],
- "selfLink"=>
-  "https://www.googleapis.com/compute/v1/projects/sam-inspec/global/firewalls"}
+no_firewalls_fixture = JSON.parse(File.read('fixtures/firewalls_fixture.json'))
 
+no_firewalls_fixture['items'] = []
 no_firewalls = FirewallsTest.new(no_firewalls_fixture)
 RSpec.describe Firewalls, "#fetch_resource" do
   it "no firewalls" do
