@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/resource_override'
+require 'provider/overrides/resources'
 require 'provider/ansible/facts_override'
 
 module Provider
@@ -40,7 +40,7 @@ module Provider
     end
 
     # Product specific overriden properties for Ansible
-    class ResourceOverride < Provider::ResourceOverride
+    class ResourceOverride < Provider::Overrides::ResourceOverride
       include OverrideProperties
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/MethodLength

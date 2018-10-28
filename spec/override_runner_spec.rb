@@ -13,18 +13,18 @@
 
 require 'spec_helper'
 
-class TestResourceOverride < Provider::ResourceOverride
+class TestResourceOverride < Provider::Overrides::ResourceOverride
   def self.attributes
     [:test_field]
   end
 end
 
-describe Provider::OverrideRunner do
+describe Provider::Overrides::Runner do
   context 'simple overrides' do
     describe 'should be able to override a product field' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
-          'product' => Provider::ResourceOverride.new(
+        Provider::Overrides::ResourceOverrides.new(
+          'product' => Provider::Overrides::ResourceOverride.new(
             'name' => 'My Test Product'
           )
         )
@@ -32,7 +32,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides)
+        runner = Provider::Overrides::Runner.new(api, overrides)
         new_api = runner.build
         expect(new_api.name).to eq(overrides['product']['name'])
       }
@@ -40,8 +40,8 @@ describe Provider::OverrideRunner do
 
     describe 'should be able to override a resource field' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
-          'MyResource' => Provider::ResourceOverride.new(
+        Provider::Overrides::ResourceOverrides.new(
+          'MyResource' => Provider::Overrides::ResourceOverride.new(
             'description' => 'A description'
           )
         )
@@ -49,7 +49,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides)
+        runner = Provider::Overrides::Runner.new(api, overrides)
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'MyResource' }.first
         expect(resource.description).to eq(overrides['MyResource']['description'])
@@ -58,10 +58,10 @@ describe Provider::OverrideRunner do
 
     describe 'should be able to override a property field' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
-          'ReferencedResource' => Provider::ResourceOverride.new(
+        Provider::Overrides::ResourceOverrides.new(
+          'ReferencedResource' => Provider::Overrides::ResourceOverride.new(
             'properties' => {
-              'name' => Provider::PropertyOverride.new(
+              'name' => Provider::Overrides::PropertyOverride.new(
                 'description' => 'My overriden description'
               )
             }
@@ -71,7 +71,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides)
+        runner = Provider::Overrides::Runner.new(api, overrides)
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'ReferencedResource' }.first
         prop = resource.properties.select { |p| p.name == 'name' }.first
@@ -83,10 +83,10 @@ describe Provider::OverrideRunner do
 
     describe 'should be able to override a property type' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
-          'ReferencedResource' => Provider::ResourceOverride.new(
+        Provider::Overrides::ResourceOverrides.new(
+          'ReferencedResource' => Provider::Overrides::ResourceOverride.new(
             'properties' => {
-              'name' => Provider::PropertyOverride.new(
+              'name' => Provider::Overrides::PropertyOverride.new(
                 'type' => 'Api::Type::Integer'
               )
             }
@@ -96,7 +96,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides)
+        runner = Provider::Overrides::Runner.new(api, overrides)
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'ReferencedResource' }.first
         prop = resource.properties.select { |p| p.name == 'name' }.first
@@ -106,10 +106,10 @@ describe Provider::OverrideRunner do
 
     describe 'should be able to override a nested-nested property' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
-          'AnotherResource' => Provider::ResourceOverride.new(
+        Provider::Overrides::ResourceOverrides.new(
+          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
             'properties' => {
-              'nested-property2.property1.property1-nested' => Provider::PropertyOverride.new(
+              'nested-property2.property1.property1-nested' => Provider::Overrides::PropertyOverride.new(
                 'type' => 'Api::Type::Integer'
               )
             }
@@ -119,7 +119,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides)
+        runner = Provider::Overrides::Runner.new(api, overrides)
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
         prop = resource.properties.select { |p| p.name == 'nested-property2' }.first
@@ -129,10 +129,10 @@ describe Provider::OverrideRunner do
 
     describe 'should be able to override a nested array property' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
-          'AnotherResource' => Provider::ResourceOverride.new(
+        Provider::Overrides::ResourceOverrides.new(
+          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
             'properties' => {
-              'array-property[].property1' => Provider::PropertyOverride.new(
+              'array-property[].property1' => Provider::Overrides::PropertyOverride.new(
                 'type' => 'Api::Type::Integer'
               )
             }
@@ -142,7 +142,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides)
+        runner = Provider::Overrides::Runner.new(api, overrides)
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
         prop = resource.properties.select { |p| p.name == 'array-property' }.first
@@ -152,7 +152,7 @@ describe Provider::OverrideRunner do
 
     describe 'should be able to override a new value' do
       let(:overrides) do
-        Provider::ResourceOverrides.new(
+        Provider::Overrides::ResourceOverrides.new(
           'AnotherResource' => TestResourceOverride.new(
             'test_field' => 'test'
           )
@@ -161,7 +161,7 @@ describe Provider::OverrideRunner do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::OverrideRunner.new(api, overrides, TestResourceOverride)
+        runner = Provider::Overrides::Runner.new(api, overrides, TestResourceOverride)
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
         expect(resource.test_field).to eq('test')

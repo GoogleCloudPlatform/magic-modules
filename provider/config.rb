@@ -13,9 +13,8 @@
 
 require 'api/object'
 require 'compile/core'
-require 'provider/resource_override'
-require 'provider/resource_overrides'
-require 'provider/override_runner'
+require 'provider/overrides/runner'
+require 'provider/overrides/resources'
 
 module Provider
   # Settings for the provider
@@ -153,7 +152,7 @@ module Provider
     end
 
     def default_overrides
-      @overrides ||= Provider::ResourceOverrides.new
+      @overrides ||= Provider::Overrides::ResourceOverrides.new
     end
   end
 end
