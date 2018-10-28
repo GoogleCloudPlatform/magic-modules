@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Bucket: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   BucketAccessControl: !ruby/object:Provider::Terraform::ResourceOverride

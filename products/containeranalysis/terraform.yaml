@@ -13,7 +13,7 @@
 
 --- !ruby/object:Provider::Terraform::Config
 name: ContainerAnalysis
-overrides: !ruby/object:Provider::ResourceOverrides
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Note: !ruby/object:Provider::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/notes/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode

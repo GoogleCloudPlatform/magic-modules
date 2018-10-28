@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   AlertPolicy: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]

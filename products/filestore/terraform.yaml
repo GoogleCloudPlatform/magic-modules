@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: false
     id_format: "{{project}}/{{zone}}/{{name}}"

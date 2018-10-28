@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'google/logger'
+require 'provider/overrides/resources'
 require 'yaml'
 
 module Google
@@ -27,7 +28,7 @@ module Google
 
       def allowed_classes
         ObjectSpace.each_object(Class).select do |klass|
-          klass < Google::YamlValidator
+          klass < Google::YamlValidator || klass < Provider::Overrides::OverrideResource
         end.concat([Time, Symbol])
       end
     end
