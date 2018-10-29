@@ -343,7 +343,11 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 	})
 }
 
+<<<<<<< HEAD
 <% unless version.nil? || version == 'ga' -%>
+=======
+<% unless version.nil? || version == 'ga' %>
+>>>>>>> properly remove kms tests from GA provider
 func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
@@ -712,7 +716,7 @@ resource "google_compute_disk" "foobar" {
 	}
 }`, diskName)
 }
-
+<% unless version.nil? || version == 'ga' %>
 func testAccComputeDisk_encryptionKMS(pid, pname, org, billing, diskName, keyRingName, keyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {
@@ -789,7 +793,7 @@ resource "google_compute_disk" "foobar" {
 }
 `, pid, pname, org, billing, keyRingName, keyName, diskName)
 }
-
+<% end -%>
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
