@@ -106,13 +106,13 @@ module Provider
 
       config.default_overrides
       # Handle overrides
-      runner = Provider::OverrideRunner.new(api, config.overrides,
-                                            config.resource_override,
-                                            config.property_override)
+      runner = Provider::Overrides::Runner.new(api, config.overrides,
+                                               config.resource_override,
+                                               config.property_override)
       api = runner.build
+      config.validate
 
       config.spread_api config, api, [], '' unless api.nil?
-      config.validate
       return api, config
     end
 

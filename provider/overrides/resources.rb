@@ -35,6 +35,16 @@ module Provider
           dig key.to_s
         end
       end
+
+      # This allows OverrideResource to take advantage of
+      # the YAMLValidator's validation without being tied down
+      # to it.
+      def validate
+        self.instance_variables.each do |var_name|
+          var = instance_variable_get(var_name)
+          var.validate if var.respond_to?(:validate)
+        end
+      end
     end
 
     # A hash of Provider::ResourceOverride objects where the key is the api name
