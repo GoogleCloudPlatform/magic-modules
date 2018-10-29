@@ -4806,6 +4806,91 @@ objects:
             - :REGIONAL
             - :GLOBAL
   - !ruby/object:Api::Resource
+    name: 'NetworkEndpointGroup'
+    kind: 'compute#networkEndpointGroup'
+    base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
+    input: true
+    min_version: beta
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/beta/networkEndpointGroups'
+    description: |
+      Network endpoint groups (NEGs) are zonal resources that represent
+      collections of IP address and port combinations for GCP resources within a
+      single subnet. Each IP address and port combination is called a network
+      endpoint.
+
+      Network endpoint groups can be used as backends in backend services for
+      HTTP(S), TCP proxy, and SSL proxy load balancers. You cannot use NEGs as a
+      backend with internal load balancers. Because NEG backends allow you to
+      specify IP addresses and ports, you can distribute traffic in a granular
+      fashion among applications or containers running within VM instances.
+<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Zone'
+        imports: 'name'
+        description: |
+          Zone where the network endpoint group is located.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource; provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Enum
+        name: 'networkEndpointType'
+        description: |
+          Type of network endpoints in this network endpoint group. Currently
+          the only supported value is GCE_VM_IP_PORT.
+        values:
+          - :GCE_VM_IP_PORT
+        default_value: :GCE_VM_IP_PORT
+      - !ruby/object:Api::Type::Integer
+        name: 'size'
+        description: Number of network endpoints in the network endpoint group.
+        output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          The network to which all network endpoints in the NEG belong.
+          Uses "default" project network if unspecified.
+        required: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'subnetwork'
+        resource: 'Subnetwork'
+        imports: 'selfLink'
+        description: |
+          Optional subnetwork to which all network endpoints in the NEG belong.
+      - !ruby/object:Api::Type::Integer
+        name: 'defaultPort'
+        description: |
+          The default port used if the port number is not specified in the
+          network endpoint.
+  - !ruby/object:Api::Resource
     name: 'NodeTemplate'
     kind: 'compute#nodeTemplate'
     base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
