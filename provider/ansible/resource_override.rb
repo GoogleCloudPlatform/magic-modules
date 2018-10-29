@@ -16,32 +16,34 @@ require 'provider/ansible/facts_override'
 
 module Provider
   module Ansible
-    # Ansible specific properties to be added to Api::Resource
-    module OverrideProperties
-      attr_reader :access_api_results
-      attr_reader :collection
-      attr_reader :custom_create_resource
-      attr_reader :custom_update_resource
-      attr_reader :create
-      attr_reader :delete
-      attr_reader :editable
-      attr_reader :has_tests
-      attr_reader :hidden
-      attr_reader :imports
-      attr_reader :post_create
-      attr_reader :post_action
-      attr_reader :provider_helpers
-      attr_reader :return_if_object
-      attr_reader :unwrap_resource
-      attr_reader :update
-      attr_reader :version_added
-
-      attr_reader :facts
-    end
-
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::Overrides::ResourceOverride
-      include OverrideProperties
+      def self.attributes
+        [
+          :access_api_results,
+          :collection,
+          :custom_create_resource,
+          :custom_update_resource,
+          :create,
+          :delete,
+          :editable,
+          :has_tests,
+          :hidden,
+          :imports,
+          :post_create,
+          :post_action,
+          :provider_helpers,
+          :return_if_object,
+          :unwrap_resource,
+          :update,
+          :version_added,
+
+          :facts
+        ]
+      end
+
+      attr_reader *self.attributes
+
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/MethodLength
       def validate
@@ -80,12 +82,6 @@ module Provider
       end
       # rubocop:enable Metrics/MethodLength
       # rubocop:enable Metrics/AbcSize
-
-      private
-
-      def overriden
-        Provider::Ansible::OverrideProperties
-      end
     end
   end
 end
