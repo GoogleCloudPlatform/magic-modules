@@ -22,7 +22,7 @@ end
 
 instances_fixture = JSON.parse(File.read('fixtures/instances_fixture.json'))
 
-instances_mock = InstancesTest.new(instances_fixture)
+instances_mock = InstancesTest.new([instances_fixture])
 RSpec.describe Instances, '#fetch_resource' do
   context 'instances plural' do
     it { expect(instances_mock.names.size).to eq 5 }
@@ -37,7 +37,7 @@ no_instances_fixture['items'] = []
 
 RSpec.describe Instance, "none" do
   it "no result" do
-    no_instances_mock = InstancesTest.new(no_instances_fixture)
+    no_instances_mock = InstancesTest.new([no_instances_fixture])
     expect(no_instances_mock.names.size).to eq 0
   end
 end

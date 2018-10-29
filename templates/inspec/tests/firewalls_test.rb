@@ -24,7 +24,7 @@ firewalls_fixture = JSON.parse(File.read('fixtures/firewalls_fixture.json'))
 
 RSpec.describe Firewalls, '#fetch_resource' do
   before do 
-    @firewalls_mock = FirewallsTest.new(firewalls_fixture)
+    @firewalls_mock = FirewallsTest.new([firewalls_fixture])
   end
   context 'firewalls plural' do
     it { expect(@firewalls_mock.names.size).to eq 3 }
@@ -37,7 +37,7 @@ end
 no_firewalls_fixture = JSON.parse(File.read('fixtures/firewalls_fixture.json'))
 
 no_firewalls_fixture['items'] = []
-no_firewalls = FirewallsTest.new(no_firewalls_fixture)
+no_firewalls = FirewallsTest.new([no_firewalls_fixture])
 RSpec.describe Firewalls, "#fetch_resource" do
   it "no firewalls" do
     expect(no_firewalls.names.size).to eq 0
