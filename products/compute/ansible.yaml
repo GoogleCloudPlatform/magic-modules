@@ -131,11 +131,12 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           - timeout_seconds
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
     editable: false
-    properties:
+    parameters:
       sourceSnapshot: !ruby/object:Provider::Ansible::PropertyOverride
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
+    properties:
       labels: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
       type: !ruby/object:Provider::Ansible::PropertyOverride
@@ -249,7 +250,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         aliases:
           - timeout_seconds
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
-    properties:
+    parameters:
       instances: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
         exclude: false
@@ -280,7 +281,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         version_added: '2.8'
   RegionDisk: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
-    properties:
+    parameters:
       sourceSnapshot: !ruby/object:Provider::Ansible::PropertyOverride
         description: |
           The source snapshot used to create this disk. You can provide this as

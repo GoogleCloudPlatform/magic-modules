@@ -83,8 +83,9 @@ module Provider
             res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
           end
         end
-        res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, res_override['properties']) })
-        res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, res_override['properties']) })
+        # Using instance_variable_get('properties') to make sure we get `exclude: true` properties
+        res.instance_variable_set('@properties', (old_resource.instance_variable_get('@properties') || []).map { |p| build_property(p, res_override['properties']) })
+        res.instance_variable_set('@parameters', (old_resource.instance_variable_get('@parameters') || []).map { |p| build_property(p, res_override['parameters']) })
         res
       end
 
