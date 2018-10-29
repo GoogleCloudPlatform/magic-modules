@@ -120,6 +120,10 @@ module Provider
 
         set_values_for_overrides(prop, prop_override)
         variables = (old_property.instance_variables + prop_override.instance_variables).uniq
+
+        # Set api_name with old property so that the new name doesn't override it.
+        prop.instance_variable_set("@api_name", old_property.name)
+
         variables.reject { |o| o == :@properties }
                  .each do |var_name|
           if !prop_override[var_name].nil?
