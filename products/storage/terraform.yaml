@@ -22,7 +22,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_object_access_control_public_object"
       primary_resource_id: "public_rule"
-      skip_test: true
       vars:
         bucket_name: "static-content-bucket"
         object_name: "public-object"
@@ -41,7 +40,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_default_object_access_control_public"
       primary_resource_id: "public_rule"
-      skip_test: true
       vars:
         bucket_name: "static-content-bucket"
     id_format: "{{bucket}}/{{entity}}"
