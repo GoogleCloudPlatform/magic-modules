@@ -74,9 +74,10 @@ module Provider
 
         set_values_for_overrides(res, res_override)
 
-        old_resource.instance_variables.reject { |o| o == :@properties || o == :@parameters }
-                    .each do |var_name|
-          if res_override[var_name]
+        variables = (old_resource.instance_variables + res_override.instance_variables).uniq
+        variables.reject { |o| o == :@properties || o == :@parameters }
+                 .each do |var_name|
+          if !res_override[var_name].nil?
             res.instance_variable_set(var_name, res_override[var_name])
           else
             res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
@@ -115,9 +116,10 @@ module Provider
                end
 
         set_values_for_overrides(prop, prop_override)
-        old_property.instance_variables.reject { |o| o == :@properties }
-                    .each do |var_name|
-          if prop_override[var_name]
+        variables = (old_property.instance_variables + prop_override.instance_variables).uniq
+        variables.reject { |o| o == :@properties }
+                 .each do |var_name|
+          if !prop_override[var_name].nil?
             prop.instance_variable_set(var_name, prop_override[var_name])
           else
             prop.instance_variable_set(var_name, old_property.instance_variable_get(var_name))

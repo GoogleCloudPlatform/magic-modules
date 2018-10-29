@@ -446,8 +446,7 @@ module Api
       def check_resource_ref_exists
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Missing '#{@resource}'" \
-          if resources.empty? || resources[0].exclude
+        raise "Missing '#{@resource}'" if resources.empty?
       end
 
       def check_resource_ref_property_exists
