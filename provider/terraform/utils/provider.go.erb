@@ -101,7 +101,7 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: mergeResourceMaps(
-			<% if !version.nil? && version == 'beta' -%>
+			<% unless version.nil? || version == 'ga' -%>
 			// start beta-only products
 			GeneratedBinaryAuthorizationResourcesMap,
 			GeneratedContainerAnalysisResourcesMap,
