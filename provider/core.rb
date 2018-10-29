@@ -17,6 +17,7 @@ require 'google/extensions'
 require 'google/logger'
 require 'google/hash_utils'
 require 'pathname'
+require 'provider/overrides/runner'
 
 module Provider
   DEFAULT_FORMAT_OPTIONS = {
@@ -219,7 +220,11 @@ module Provider
     # rubocop:disable Metrics/PerceivedComplexity
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
-      @config.datasources.validate
+      runner = Provider::Overrides::Runner.new(@api, @config.datasources,
+                                               @config.resource_override,
+                                               @config.property_override)
+      @api = runner.build
+      @api.validate
 
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)

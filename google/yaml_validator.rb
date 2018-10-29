@@ -39,7 +39,6 @@ module Google
 
     def set_variable(value, property)
       Google::LOGGER.debug "Setting variable of #{value} to #{self}"
-      ensure_property_does_not_exist property
       instance_variable_set("@#{property}", value)
     end
 

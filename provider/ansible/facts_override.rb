@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'provider/ansible/property_override'
 
 module Provider
   module Ansible
@@ -44,6 +45,8 @@ module Provider
     # This is the default property used for filter information on Ansible.
     # By using Api::Types, we get more flexibility and a lot for free.
     class FilterProp < Api::Type::Array
+      attr_reader *Provider::Ansible::PropertyOverride.attributes
+
       def validate
         @item_type ||= 'Api::Type::String'
         # GCE (and some others) uses the 'filters' property by default.
