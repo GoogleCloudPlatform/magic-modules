@@ -111,9 +111,18 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
         # sourceImage must be overridden first because it creates the 'image' property
-        override_order: -1
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
+        description: |
+          The image from which to initialize this disk. This can be
+          one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
+          `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
+          `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
+          `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
+          images names must include the family name. If they don't, use the
+          [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
+          For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
+          These images can be referred by family name here.
       diskEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         name: "kmsKeySelfLink"
@@ -138,18 +147,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           in the cloud console. In order to use this additional
           IAM permissions need to be set on the Compute Engine Service Agent. See
           https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      image: !ruby/object:Provider::Terraform::PropertyOverride
-        override_order: 5
-        description: |
-          The image from which to initialize this disk. This can be
-          one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
-          `projects/{project}/global/images/family/{family}`, `global/images/{image}`,
-          `global/images/family/{family}`, `family/{family}`, `{project}/{family}`,
-          `{project}/{image}`, `{family}`, or `{image}`. If referred by family, the
-          images names must include the family name. If they don't, use the
-          [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
-          For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
-          These images can be referred by family name here.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       post_import: templates/terraform/post_import/disk.erb

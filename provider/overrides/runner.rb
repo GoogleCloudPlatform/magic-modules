@@ -70,8 +70,9 @@ module Provider
       def build_resource(old_resource, res_override)
         res_override = @res_override_class.new if res_override.nil? || res_override.empty?
         res_override.validate
-        res = Api::Resource.new
+        res_override.apply old_resource
 
+        res = Api::Resource.new
         set_values_for_overrides(res, res_override)
 
         variables = (old_resource.instance_variables + res_override.instance_variables).uniq
@@ -110,6 +111,7 @@ module Provider
       def build_primitive_property(old_property, prop_override)
         prop_override = @prop_override_class.new if prop_override.nil? || prop_override.empty?
         prop_override.validate
+        prop_override.apply old_property
         prop = if prop_override['type']
                  Module.const_get(prop_override['type']).new
                else

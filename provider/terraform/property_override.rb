@@ -96,6 +96,13 @@ module Provider
         ]
       end
 
+      attr_reader *self.attributes
+
+      # Used to allow us to easily access these values in `apply`
+      # without resorting to "instance_variable_get"
+      attr_reader :description
+      attr_reader :is_set
+
       def validate
         super
 
@@ -129,7 +136,7 @@ module Provider
         end
 
         unless api_property.is_a?(Api::Type::Array) ||
-               ObjectUtils.string_to_object_map?(api_property)
+               ::Api::Object::ObjectUtils.string_to_object_map?(api_property)
           if @is_set
             raise 'Set can only be specified for Api::Type::Array ' \
                   'or Api::Type::NameValues<String, NestedObject>. ' \
@@ -139,7 +146,7 @@ module Provider
         end
 
         raise "'default_value' and 'default_from_api' cannot be both set"  \
-          if default_from_api && !default_value.nil?
+          if default_from_api && !api_property.default_value.nil?
 
         super
       end

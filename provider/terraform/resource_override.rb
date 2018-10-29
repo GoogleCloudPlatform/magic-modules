@@ -43,7 +43,7 @@ module Provider
     # A class to control overridden properties on terraform.yaml in lieu of
     # values from api.yaml.
     class ResourceOverride < Provider::Overrides::ResourceOverride
-      include OverrideProperties
+      attr_reader :description
 
       def self.attributes
         [:id_format, :import_format, :custom_code, :docs, :mutex, :examples, :example]
