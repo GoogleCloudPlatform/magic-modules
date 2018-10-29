@@ -46,7 +46,11 @@ objects:
           'https://cloud.google.com/filestore/docs/copying-data'
       api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
 <%=
-  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
+  # Tests were timing out on delete at 4 minutes.
+  indent(compile_file({timeouts: {
+                        insert_sec: 6 * 60,
+                        update_sec: 6 * 60,
+                        delete_sec: 6 * 60 }},
                       'templates/zonal_async.yaml.erb'), 4)
 %>
     parameters:
