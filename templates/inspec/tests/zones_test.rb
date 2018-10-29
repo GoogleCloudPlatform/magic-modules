@@ -24,7 +24,7 @@ zones_fixture = JSON.parse(File.read('fixtures/zones_fixture.json'))
 
 RSpec.describe Zones, "zones" do
   it "plural test" do
-    zones_mock_resource = ZonesTest.new(zones_fixture)
+    zones_mock_resource = ZonesTest.new([zones_fixture])
     expect(zones_mock_resource.names.size).to eq 3
     expect(zones_mock_resource.names).to include 'us-east1-d'
     expect(zones_mock_resource.names).to include 'us-east1-b'
@@ -39,7 +39,7 @@ end
 
 no_zones_fixture = JSON.parse(File.read('fixtures/zones_fixture.json'))
 no_zones_fixture['items'] = []
-no_zones = ZonesTest.new(no_zones_fixture)
+no_zones = ZonesTest.new([no_zones_fixture])
 RSpec.describe Zones, "#fetch_resource" do
   it "no zones" do
     expect(no_zones.names.size).to eq 0
