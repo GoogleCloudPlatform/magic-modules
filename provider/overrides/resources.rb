@@ -11,12 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/yaml_validator'
+
 module Provider
   module Overrides
     # All overrides act as a Hash under-the-hood.
     # This class allows them to get access to
     # Hash functions + lets the YAML parser import them.
-    class OverrideResource < ::Hash
+    class OverrideResource < Google::YamlValidator
       def self.attributes
         []
       end
@@ -25,15 +27,19 @@ module Provider
 
       # Used for testing.
       def initialize(hash = {})
-        hash.each { |k, v| self[k] = v }
+        hash.each { |k, v| instance_variable_set("@#{k}", v) }
       end
 
       def [](key)
         if key.to_s[0] == '@'
-          dig key.to_s[1..-1]
+          instance_variable_get(key.to_sym)
         else
-          dig key.to_s
+          instance_variable_get("@#{key}")
         end
+      end
+
+      def empty?
+        instance_variables.length == 0
       end
 
       # This allows OverrideResource to take advantage of

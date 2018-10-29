@@ -69,6 +69,7 @@ module Provider
 
       def build_resource(old_resource, res_override)
         res_override = @res_override_class.new if res_override.nil? || res_override.empty?
+        res_override.validate
         res = Api::Resource.new
 
         set_values_for_overrides(res, res_override)
@@ -81,8 +82,8 @@ module Provider
             res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
           end
         end
-        res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, res_override.dig('properties')) })
-        res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, res_override.dig('properties')) })
+        res.instance_variable_set('@properties', old_resource.properties.map { |p| build_property(p, res_override['properties']) })
+        res.instance_variable_set('@parameters', old_resource.parameters.map { |p| build_property(p, res_override['properties']) })
         res
       end
 
@@ -106,6 +107,7 @@ module Provider
 
       def build_primitive_property(old_property, prop_override)
         prop_override = @prop_override_class.new if prop_override.nil? || prop_override.empty?
+        prop_override.validate
         prop = if prop_override['type']
                  Module.const_get(prop_override['type']).new
                else

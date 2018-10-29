@@ -17,6 +17,7 @@ require 'compile/core'
 require 'google/golang_utils'
 require 'provider/abstract_core'
 require 'provider/overrides/resources'
+require 'uri'
 
 module Provider
   class Terraform < Provider::AbstractCore
