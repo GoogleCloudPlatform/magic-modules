@@ -101,7 +101,6 @@ module Provider
       # Used to allow us to easily access these values in `apply`
       # without resorting to "instance_variable_get"
       attr_reader :description
-      attr_reader :is_set
 
       def validate
         super
