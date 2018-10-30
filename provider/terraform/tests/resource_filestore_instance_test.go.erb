@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -62,31 +64,6 @@ func TestAccFilestoreInstance_update(t *testing.T) {
 	})
 }
 
-func testAccCheckFilestoreInstanceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_filestore_instance" {
-			continue
-		}
-
-		redisIdParts := strings.Split(rs.Primary.ID, "/")
-		if len(redisIdParts) != 3 {
-			return fmt.Errorf("Unexpected resource ID %s, expected {project}/{region}/{name}", rs.Primary.ID)
-		}
-
-		project, region, inst := redisIdParts[0], redisIdParts[1], redisIdParts[2]
-
-		name := fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, region, inst)
-		_, err := config.clientFilestore.Projects.Locations.Get(name).Do()
-		if err == nil {
-			return fmt.Errorf("Filestore instance still exists")
-		}
-	}
-
-	return nil
-}
-
 func testAccFilestoreInstance_basic(name string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
@@ -147,3 +124,6 @@ resource "google_filestore_instance" "instance" {
 	description = "A modified instance created during testing."
 }`, name)
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
