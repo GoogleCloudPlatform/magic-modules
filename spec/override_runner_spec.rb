@@ -169,5 +169,31 @@ describe Provider::Overrides::Runner do
         expect(resource.test_field).to eq(nil)
       }
     end
+
+    describe 'should be able to override a namevalue -> object map' do
+      let(:overrides) do
+        Provider::Overrides::ResourceOverrides.new(
+          'AnotherResource' => TestResourceOverride.new(
+            'properties' => {
+              'namevalue-property.nv-prop1' => Provider::Overrides::PropertyOverride.new(
+                'description' => 'overriden'
+              )
+            }
+          )
+        )
+      end
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+      it {
+        runner = Provider::Overrides::Runner.new(api, overrides, TestResourceOverride)
+        new_api = runner.build
+        resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
+        prop = resource.properties.select { |p| p.name == 'namevalue-property' }
+                                  .first
+                                  .value_type
+                                  .properties.first
+        expect(prop.description).to eq('overriden')
+      }
+    end
   end
 end

@@ -99,6 +99,11 @@ module Provider
           new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
           new_prop.instance_variable_set('@properties', old_property.properties.map { |p| build_property(p, property_overrides, "#{prefix}#{old_property.name}.") })
           new_prop
+        elsif old_property.is_a?(Api::Type::NameValues) && old_property.value_type.is_a?(Api::Type::NestedObject)
+          new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
+          new_prop.instance_variable_set('@value_type', Api::Type::NestedObject.new)
+            new_prop.value_type.instance_variable_set('@properties', old_property.value_type.properties.map { |p| build_property(p, property_overrides, "#{prefix}#{old_property.name}.") })
+          new_prop
         elsif old_property.is_a?(Api::Type::Array) && !old_property.item_type.is_a?(::String)
           new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
           if old_property.item_type.is_a?(Api::Type::NestedObject)
