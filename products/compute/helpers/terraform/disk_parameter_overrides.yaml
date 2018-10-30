@@ -1,0 +1,4 @@
+sourceSnapshot: !ruby/object:Provider::Terraform::PropertyOverride
+  name: snapshot
+  description: |
+    {{description}}* `snapshot`

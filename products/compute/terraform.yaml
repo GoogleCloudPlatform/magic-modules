@@ -106,10 +106,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     exclude: true
   Disk: !ruby/object:Provider::Terraform::ResourceOverride
     parameters:
-      sourceSnapshot: !ruby/object:Provider::Terraform::PropertyOverride
-        name: snapshot
-        description: |
-          {{description}}* `snapshot`
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_parameter_overrides.yaml'), 6) %>
       zone: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -509,6 +506,8 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         required: false
         default_from_api: true
   RegionDisk: !ruby/object:Provider::Terraform::ResourceOverride
+    parameters:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_parameter_overrides.yaml'), 6) %>
     properties:
 <%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
     parameters:
