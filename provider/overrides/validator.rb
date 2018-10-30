@@ -105,7 +105,7 @@ module Provider
       end
 
       def property_path(prop_name)
-        prop_name.split('.').each { |i| i.sub('[]', '') }
+        prop_name.split('.').map { |i| i.sub('[]', '') }
       end
     end
   end
