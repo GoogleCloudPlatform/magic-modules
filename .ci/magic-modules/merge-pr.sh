@@ -21,11 +21,16 @@ popd
 cp -r mm-approved-prs/* mm-output
 
 pushd mm-output
+# The github pull request resource reads this value to find
+# out which pull request to update.
 git config pullrequest.id "$ID"
-git branch -f "$BRANCH"
-git checkout "$BRANCH"
+
+# We should rebase onto master to avoid ugly merge histories.
+git fetch origin master
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
+git rebase origin/master
+
 ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init $ALL_SUBMODULES"
 
 # Word-splitting here is intentional.
@@ -40,13 +45,14 @@ echo "Merged PR #$ID." > ./commit_message
 
 # If the repo isn't 'GoogleCloudPlatform/magic-modules', then the PR has been
 # opened from someone's fork.  We ought to have push rights to that fork, no
-# problem, but if we don't, that's also okay.
+# problem, but if we don't, that's also okay.  This is a tiny bit dangerous
+# because it's a force-push.
 
 set +e
 if [ "$REPO" != "GoogleCloudPlatform/magic-modules" ]; then
   git remote add non-gcp-push-target "git@github.com:$REPO"
   # We know we have a commit, so all the machinery of the git resources is
-  # unnecessary.  We can just try to push directly, without forcing.
-  ssh-agent bash -c "ssh-add ~/github_private_key; git push non-gcp-push-target $BRANCH"
+  # unnecessary.  We can just try to push directly.
+  ssh-agent bash -c "ssh-add ~/github_private_key; git push -f non-gcp-push-target \"HEAD:$BRANCH\""
 fi
 set -e
