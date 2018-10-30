@@ -52,6 +52,9 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
       networkTier: !ruby/object:Provider::Terraform::PropertyOverride
         default_from_api: true
+      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+    parameters:
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -59,8 +62,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         description: |
           The Region in which the created address should reside.
           If it is not provided, the provider region is used.
-      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
-        default_from_api: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address` - The IP of the created resource.
