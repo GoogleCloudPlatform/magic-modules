@@ -33,7 +33,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Inspec::ResourceOverride
-    custom_code: |
+    additional_functions: |
       def custom
         # TODO: actually add code here
       end

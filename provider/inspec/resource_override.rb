@@ -19,7 +19,7 @@ module Provider
     # inspec specific properties to be added to Api::Resource
     module OverrideProperties
       attr_reader :manual
-      attr_reader :custom_code
+      attr_reader :additional_functions
     end
 
     # Product specific overriden properties for inspec
@@ -31,7 +31,7 @@ module Provider
 
         super
         check_property :manual, :boolean
-        check_optional_property :custom_code, String
+        check_optional_property :additional_functions, String
       end
 
       private
