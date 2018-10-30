@@ -70,7 +70,11 @@ module Provider
       def find_property(properties, path, res_name = '')
         prop = nil
         path.each do |part|
-          prop = properties.select { |o| o.name == part }.first
+          prop = properties.select { |o| o.name == part.sub('[]', '') }.first
+          # Check that next part is actually an array of nested objects.
+          if !part.include?('[]') && prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject) && part != path.last
+            raise "#{path.join('.')} on #{res_name} is incorrectly formatted for Arrays of NestedObjects"
+          end
           properties = if prop.is_a?(Api::Type::NestedObject)
                          prop.properties
                        elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
@@ -105,7 +109,7 @@ module Provider
       end
 
       def property_path(prop_name)
-        prop_name.split('.').map { |i| i.sub('[]', '') }
+        prop_name.split('.')
       end
     end
   end
