@@ -12,5 +12,5 @@ resource "google_storage_bucket" "bucket" {
  resource "google_storage_bucket_object" "object" {
 	name   = "<%= ctx[:vars]['object_name'] %>"
 	bucket = "${google_storage_bucket.bucket.name}"
-	source = "../static/img/header-logo.jpg"
+	source = "../static/img/header-logo.png"
 }
