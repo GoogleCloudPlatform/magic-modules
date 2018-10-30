@@ -59,9 +59,9 @@ module Provider
 
       # Verify a list of properties (parameters or properties on an API::Resource)
       def verify_properties(properties, overrides)
-        overrides.instance_variables.each do |prop|
-          path = property_path(prop[1..-1])
-          verify_property(find_property(properties, path), overrides[prop])
+        overrides.each do |k, v|
+          path = property_path(k)
+          verify_property(find_property(properties, path), v)
         end
       end
 
@@ -78,7 +78,7 @@ module Provider
                          []
                        end
         end
-        raise "#{path.join('.')} does not exist (is it mislabeled as a property, not parameter?)" \
+        raise "#{path.join('.')} does not exist (is it mislabeled as a property, not a parameter?)" \
           unless prop
         prop
       end
