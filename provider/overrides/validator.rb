@@ -79,8 +79,11 @@ module Provider
                          []
                        end
         end
-        raise "#{path.join('.')} does not exist on #{res_name} (is it mislabeled as a property, not a parameter?)" \
-          unless prop
+        unless prop
+          raise ["#{path.join('.')} does not exist on #{res_name}",
+                 "(is it mislabeled as a property, not a parameter?)"
+                ].join(' ')
+        end
         prop
       end
 
