@@ -27,14 +27,14 @@ git config pullrequest.id "$ID"
 
 # We should rebase onto master to avoid ugly merge histories.
 git fetch origin master
+git config --global user.email "magic-modules@google.com"
+git config --global user.name "Modular Magician"
 git rebase origin/master
 
 # Now we need to switch over to the branch we hope to commit, so
 # we can update the submodules!
 git checkout "$BRANCH"
 
-git config --global user.email "magic-modules@google.com"
-git config --global user.name "Modular Magician"
 ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init $ALL_SUBMODULES"
 
 # Word-splitting here is intentional.
