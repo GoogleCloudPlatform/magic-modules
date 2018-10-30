@@ -96,6 +96,7 @@ if all_products
   raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
 end
 
+provider = nil
 # rubocop:disable Metrics/BlockLength
 product_names.each do |product_name|
   product_yaml_path = File.join(product_name, 'api.yaml')
@@ -144,6 +145,7 @@ product_names.each do |product_name|
   end
 
   provider.generate output_path, types_to_generate, version
-  provider.copy_common_files output_path, version
 end
+
+provider.copy_common_files(output_path, version) unless provider.nil?
 # rubocop:enable Metrics/BlockLength
