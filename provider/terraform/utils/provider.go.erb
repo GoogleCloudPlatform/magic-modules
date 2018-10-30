@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -100,10 +101,12 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: mergeResourceMaps(
+			<% unless version.nil? || version == 'ga' -%>
 			GeneratedBinaryAuthorizationResourcesMap,
-			GeneratedComputeResourcesMap,
 			GeneratedContainerAnalysisResourcesMap,
 			GeneratedFilestoreResourcesMap,
+			<% end -%>
+			GeneratedComputeResourcesMap,
 			GeneratedRedisResourcesMap,
 			GeneratedResourceManagerResourcesMap,
 			GeneratedStorageResourcesMap,
