@@ -53,20 +53,21 @@ module Provider
           raise "#{field_name} does not exist on #{res.name}"
         end
         # Use instance_variable_get to get excluded properties
-        verify_properties(res.instance_variable_get('@properties'), overrides['properties'])
-        verify_properties(res.instance_variable_get('@parameters'), overrides['parameters'])
+        verify_properties(res.instance_variable_get('@properties'), overrides['properties'], res.name)
+        verify_properties(res.instance_variable_get('@parameters'), overrides['parameters'], res.name)
       end
 
       # Verify a list of properties (parameters or properties on an API::Resource)
-      def verify_properties(properties, overrides)
+      def verify_properties(properties, overrides, res_name = '')
+        overrides = {} unless overrides
         overrides.each do |k, v|
           path = property_path(k)
-          verify_property(find_property(properties, path), v)
+          verify_property(find_property(properties, path, res_name), v)
         end
       end
 
       # Returns a property (or throws an error if it does not exist)
-      def find_property(properties, path)
+      def find_property(properties, path, res_name = '')
         prop = nil
         path.each do |part|
           prop = properties.select { |o| o.name == part }.first
@@ -78,7 +79,7 @@ module Provider
                          []
                        end
         end
-        raise "#{path.join('.')} does not exist (is it mislabeled as a property, not a parameter?)" \
+        raise "#{path.join('.')} does not exist on #{res_name} (is it mislabeled as a property, not a parameter?)" \
           unless prop
         prop
       end
