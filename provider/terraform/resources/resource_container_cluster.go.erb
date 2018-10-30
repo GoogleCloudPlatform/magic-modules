@@ -511,17 +511,12 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"private_cluster": {
-<% if version.nil? || version == 'ga' -%>
-				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-				Default:    false,
-<% else -%>
 				Deprecated:    "Use private_cluster_config.enable_private_nodes instead.",
 				ConflictsWith: []string{"private_cluster_config"},
 				Computed:      true,
-<% end -%>
-				Type:       schema.TypeBool,
-				Optional:   true,
-				ForceNew:   true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      true,
 			},
 
 			"private_cluster_config": {
