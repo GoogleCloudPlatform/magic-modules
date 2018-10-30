@@ -50,7 +50,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   HttpsHealthCheck: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Image: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   InstanceGroup: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Provider::Inspec::ResourceOverride
@@ -64,9 +64,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
   MachineType: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   Region: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   RegionAutoscaler: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   RegionDisk: !ruby/object:Provider::Inspec::ResourceOverride
@@ -84,7 +84,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   SslPolicy: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   TargetHttpProxy: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   TargetHttpsProxy: !ruby/object:Provider::Inspec::ResourceOverride
