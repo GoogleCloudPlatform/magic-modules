@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -152,7 +154,8 @@ resource "google_binary_authorization_attestor" "attestor" {
     note_reference = "${google_container_analysis_note.note.name}"
     public_keys {
       ascii_armored_pgp_public_key = <<EOF
-%s
+<%- # load bearing - the erb compiler will interpret the %s as ruby otherwise -%>
+<%= "%s" %>
 EOF
       comment = "this key has a comment"
     }
@@ -180,3 +183,6 @@ MAU9vdm1DIv567meMqTaVZgR3w7bck2P49AO8lO5ERFpVkErtu/98y+rUy9d789l
 +OPuS1NGnxI1YKsNaWJF4uJVuvQuZ1twrhCbGNtVorO2U12+cEq+YtUxj7kmdOC1
 qoIRW6y0+UlAc+MbqfL0ziHDOAmcqz1GnROg
 =6Bvm`
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
