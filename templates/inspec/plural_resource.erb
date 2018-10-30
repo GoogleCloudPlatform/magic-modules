@@ -29,7 +29,7 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
 
-  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.out_name})" -%>
+  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.name})" -%>
 <% end # object.all_user_properties.each do -%>
 
 
