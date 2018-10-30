@@ -347,10 +347,15 @@ objects:
     kind: 'storage#objectAccessControl'
     base_url: b/{{bucket}}/defaultObjectAcl
     self_link: b/{{bucket}}/defaultObjectAcl/{{entity}}
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/create-manage-lists'
+      api: 'https://cloud.google.com/storage/docs/json_api/v1/defaultObjectAccessControls'
     description: |
-      The ObjectAccessControls resources represent the Access Control Lists
-      (ACLs) for objects within Google Cloud Storage. ACLs let you specify
-      who has access to your data and to what extent.
+      The DefaultObjectAccessControls resources represent the Access Control
+      Lists (ACLs) applied to a new object within a Google Cloud Storage bucket
+      when no ACL was provided for that object. ACLs let you specify who has
+      access to your bucket contents and to what extent.
 
       There are two roles that can be assigned to an entity:
 

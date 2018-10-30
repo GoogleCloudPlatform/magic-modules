@@ -147,11 +147,13 @@ module Provider
       end
 
       def substitute_test_paths(config)
+        config = config.gsub('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
         config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
         config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
       end
 
       def substitute_example_paths(config)
+        config = config.gsub('../static/img/header-logo.png', '../static/header-logo.png')
         config = config.gsub('path/to/private.key', '../static/ssl_cert/test.key')
         config.gsub('path/to/certificate.crt', '../static/ssl_cert/test.crt')
       end

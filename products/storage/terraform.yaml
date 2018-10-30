@@ -22,7 +22,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_object_access_control_public_object"
       primary_resource_id: "public_rule"
-      skip_test: true
       vars:
         bucket_name: "static-content-bucket"
         object_name: "public-object"
@@ -36,7 +35,22 @@ overrides: !ruby/object:Provider::ResourceOverrides
       object: !ruby/object:Provider::Terraform::PropertyOverride
         description: The name of the object to apply the access control to.
   DefaultObjectACL: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    name: "DefaultObjectAccessControl"
+    example:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "storage_default_object_access_control_public"
+      primary_resource_id: "public_rule"
+      vars:
+        bucket_name: "static-content-bucket"
+    id_format: "{{bucket}}/{{entity}}"
+    import_format: ["{{bucket}}/{{entity}}"]
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        exclude: true
+      bucket: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
+        # This field is (unexpectedly) not returned from the API
+        ignore_read: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
