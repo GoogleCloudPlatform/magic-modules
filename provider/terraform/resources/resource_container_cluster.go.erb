@@ -98,9 +98,6 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"region": {
-<% if version.nil? || version == 'ga' -%>
-				Deprecated:    "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
@@ -527,7 +524,6 @@ func resourceContainerCluster() *schema.Resource {
 				ForceNew:   true,
 			},
 
-<% unless version.nil? || version == 'ga' -%>
 			"private_cluster_config": {
 				Type:          schema.TypeList,
 				Optional:      true,
@@ -563,7 +559,6 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-<% end -%>
 
 			"master_ipv4_cidr_block": {
 <% if version.nil? || version == 'ga' -%>
@@ -710,11 +705,9 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-<% unless version.nil? || version == 'ga' -%>
 	if v, ok := d.GetOk("private_cluster_config"); ok {
 		cluster.PrivateClusterConfig = expandPrivateClusterConfig(v)
 	}
-<% end -%>
 
 	req := &containerBeta.CreateClusterRequest{
 		Cluster: cluster,
@@ -842,11 +835,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version.nil? || version == 'ga' -%>
 	if err := d.Set("private_cluster_config", flattenPrivateClusterConfig(cluster.PrivateClusterConfig)); err != nil {
 		return err
 	}
-<% end -%>
 
 	igUrls, err := getInstanceGroupUrlsFromManagerUrls(config, cluster.InstanceGroupUrls)
 	if err != nil {
@@ -1584,7 +1575,6 @@ func expandNetworkPolicy(configured interface{}) *containerBeta.NetworkPolicy {
 	return result
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func expandPrivateClusterConfig(configured interface{}) *containerBeta.PrivateClusterConfig {
 	l := configured.([]interface{})
 	if len(l) == 0 {
@@ -1598,7 +1588,6 @@ func expandPrivateClusterConfig(configured interface{}) *containerBeta.PrivateCl
 		ForceSendFields:       []string{"EnablePrivateEndpoint", "EnablePrivateNodes", "MasterIpv4CidrBlock"},
 	}
 }
-<% end -%>
 
 func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
 	l := configured.([]interface{})
@@ -1681,7 +1670,6 @@ func flattenClusterNodePools(d *schema.ResourceData, config *Config, c []*contai
 	return nodePools, nil
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func flattenPrivateClusterConfig(c *containerBeta.PrivateClusterConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -1696,7 +1684,6 @@ func flattenPrivateClusterConfig(c *containerBeta.PrivateClusterConfig) []map[st
 		},
 	}
 }
-<% end -%>
 
 func flattenIPAllocationPolicy(c *containerBeta.IPAllocationPolicy) []map[string]interface{} {
 	if c == nil {
