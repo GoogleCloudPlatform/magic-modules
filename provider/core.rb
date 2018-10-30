@@ -91,7 +91,19 @@ module Provider
     # rubocop:enable Metrics/PerceivedComplexity
 
     def copy_files(output_folder)
-      @config.files.copy.each do |target, source|
+      copy_file_list(output_folder, @config.files.copy)
+    end
+
+    def copy_common_files(output_folder, _version_name = nil)
+      provider_name = self.class.name.split('::').last.downcase
+      return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
+      files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
+
+      copy_file_list(output_folder, files)
+    end
+
+    def copy_file_list(output_folder, files)
+      files.each do |target, source|
         target_file = File.join(output_folder, target)
         target_dir = File.dirname(target_file)
         @sourced << relative_path(target_file, output_folder)

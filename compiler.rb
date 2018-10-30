@@ -142,6 +142,8 @@ product_names.each do |product_name|
     provider = \
       override_providers[force_provider].new(provider_config, product_api)
   end
+
   provider.generate output_path, types_to_generate, version
+  provider.copy_common_files output_path, version
 end
 # rubocop:enable Metrics/BlockLength
