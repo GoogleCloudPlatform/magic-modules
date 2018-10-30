@@ -57,5 +57,25 @@ describe Provider::Overrides::Validator do
                       "blahbad does not exist on AnotherResource (is it mislabeled as a property, not a parameter?)")
       }
     end
+
+    describe 'should be able validate a namevalues nestedobject properly' do
+      let(:overrides) do
+        Provider::Overrides::ResourceOverrides.new(
+          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
+            'properties' => {
+              'namevalue-property.nv-prop1' => TestResourceOverride.new(
+                'description' => 'A description'
+              )
+            }
+          )
+        )
+      end
+      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+
+      it {
+        runner = Provider::Overrides::Validator.new(api, overrides)
+        expect { runner.run }.not_to raise_error
+      }
+    end
   end
 end

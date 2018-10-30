@@ -75,8 +75,11 @@ module Provider
           if !part.include?('[]') && prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject) && part != path.last
             raise "#{path.join('.')} on #{res_name} is incorrectly formatted for Arrays of NestedObjects"
           end
+
           properties = if prop.is_a?(Api::Type::NestedObject)
                          prop.properties
+                       elsif prop.is_a?(Api::Type::NameValues) && prop.value_type.is_a?(Api::Type::NestedObject)
+                         prop.value_type.properties
                        elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
                          prop.item_type.properties
                        else
