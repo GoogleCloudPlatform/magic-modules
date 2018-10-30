@@ -19,7 +19,7 @@ manifest: !ruby/object:Provider::Inspec::Manifest
   summary: 'InSpec resources for verifying GCP infrastructure'
   description: |
     InSpec resources for verifying GCP infrastructure
-overrides: !ruby/object:Provider::ResourceOverrides
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Address: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Autoscaler: !ruby/object:Provider::Inspec::ResourceOverride
