@@ -31,10 +31,6 @@ git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 git rebase origin/master
 
-# Now we need to switch over to the branch we hope to commit, so
-# we can update the submodules!
-git checkout "$BRANCH"
-
 ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init $ALL_SUBMODULES"
 
 # Word-splitting here is intentional.
@@ -57,6 +53,6 @@ if [ "$REPO" != "GoogleCloudPlatform/magic-modules" ]; then
   git remote add non-gcp-push-target "git@github.com:$REPO"
   # We know we have a commit, so all the machinery of the git resources is
   # unnecessary.  We can just try to push directly.
-  ssh-agent bash -c "ssh-add ~/github_private_key; git push -f non-gcp-push-target $BRANCH"
+  ssh-agent bash -c "ssh-add ~/github_private_key; git push -f non-gcp-push-target \"HEAD:$BRANCH\""
 fi
 set -e
