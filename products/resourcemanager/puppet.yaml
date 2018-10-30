@@ -60,8 +60,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - project.pp
     - delete_project.pp
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
 <%= indent(include('provider/puppet/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/puppet/common~compile~after.yaml'), 4) %>

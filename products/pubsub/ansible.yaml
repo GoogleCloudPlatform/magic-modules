@@ -50,8 +50,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - 'products/pubsub/helpers/python/provider_subscription.py'
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
   compile:
 <%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray
