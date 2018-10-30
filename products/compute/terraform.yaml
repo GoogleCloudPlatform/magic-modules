@@ -205,7 +205,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         set_hash_func: 'resourceComputeFirewallRuleHash'
         conflicts_with:
             - 'allow'
-      denied.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+      denied[].ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
         name: 'protocol'
       destinationRanges: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true 
@@ -721,10 +721,10 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         name: secondaryIpRange
         unordered_list: true
         default_from_api: true
-      secondaryIpRanges.rangeName: !ruby/object:Provider::Terraform::PropertyOverride
+      secondaryIpRanges[].rangeName: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      secondaryIpRanges.ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
+      secondaryIpRanges[].ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
       fingerprint: !ruby/object:Provider::Terraform::PropertyOverride
@@ -901,21 +901,21 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       hostRules: !ruby/object:Provider::Terraform::PropertyOverride
         name: "host_rule"
         is_set: true
-      hostRules.hosts: !ruby/object:Provider::Terraform::PropertyOverride
+      hostRules[].hosts: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true
       pathMatchers: !ruby/object:Provider::Terraform::PropertyOverride
         name: "path_matcher"
-      pathMatchers.defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers[].defaultService: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket to use when none of the given paths match.
-      pathMatchers.pathRules: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers[].pathRules: !ruby/object:Provider::Terraform::PropertyOverride
         name: "path_rule"
-      pathMatchers.pathRules.paths: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers[].pathRules[].paths: !ruby/object:Provider::Terraform::PropertyOverride
         is_set: true
-      pathMatchers.pathRules.service: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers[].pathRules[].service: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket to use if any of the given paths match.
-      tests.service: !ruby/object:Provider::Terraform::PropertyOverride
+      tests[].service: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket link that should be matched by this test.
       tests: !ruby/object:Provider::Terraform::PropertyOverride

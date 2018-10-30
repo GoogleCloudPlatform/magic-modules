@@ -37,11 +37,11 @@ autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Provider::Terra
   required: true # See comment for minReplicas
 autoscalingPolicy.customMetricUtilizations: !ruby/object:Provider::Terraform::PropertyOverride
   name: metric
-autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations[].metric: !ruby/object:Provider::Terraform::PropertyOverride
   name: name
-autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations[].utilizationTarget: !ruby/object:Provider::Terraform::PropertyOverride
   name: target
-autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations[].utilizationTargetType: !ruby/object:Provider::Terraform::PropertyOverride
   name: type
 autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Provider::Terraform::PropertyOverride
   name: target
