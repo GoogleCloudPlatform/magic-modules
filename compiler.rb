@@ -147,5 +147,8 @@ product_names.each do |product_name|
   provider.generate output_path, types_to_generate, version
 end
 
-provider.copy_common_files(output_path, version) unless provider.nil?
+# In order to only copy files once per provider this must be called outside of the products loop
+# This will get called with the value from the final iteration of the loop
+provider&.copy_common_files(output_path, version)
+
 # rubocop:enable Metrics/BlockLength
