@@ -22,11 +22,7 @@ module Api
     class Named < Api::Object
       # The list of properties (attr_reader) that can be overridden in
       # <provider>.yaml.
-      module Properties
-        attr_reader :name
-      end
-
-      include Properties
+      attr_reader :name
 
       # original value of :name before the provider override happens
       # same as :name if not overridden in provider

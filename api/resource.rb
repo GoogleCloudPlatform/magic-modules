@@ -20,52 +20,48 @@ module Api
   class Resource < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
-    module Properties
-      include Api::Object::Named::Properties
 
-      attr_reader :description
-      attr_reader :kind
-      attr_reader :base_url
-      # URL to use for creating the resource. If not specified, the
-      # collection url (when create_verb is default or :POST) or
-      # self_link (when create_verb is :PUT) is used instead.
-      attr_reader :create_url
-      # URL to use to delete the resource. If not specified, the
-      # self link is used.
-      attr_reader :delete_url
-      # URL to use for updating the resource. If not specified, the self link
-      # will be used. This currently can only be used with Terraform resources.
-      # TODO(#302): Add support for the other providers.
-      attr_reader :update_url
-      attr_reader :self_link
-      # This is useful in case you need to change the query made for
-      # GET/DELETE requests only.  In particular, this is often used
-      # to add query parameters.
-      attr_reader :self_link_query
-      # This is the type of response from the collection URL. It contains
-      # the name of the list of items within the json, as well as the
-      # type that this list should be. This is of type Api::Resource::ResponseList
-      attr_reader :collection_url_response
-      # This is an array with items that uniquely identify the resource.
-      # This is useful in case an API returns a list result and we need
-      # to fetch the particular resource we're interested in from that
-      # list.  Otherwise, it's safe to leave empty.
-      # If empty, we assume that `name` is the identifier.
-      attr_reader :identity
-      attr_reader :exclude
-      attr_reader :async
-      attr_reader :readonly
-      attr_reader :exports
-      attr_reader :transport
-      attr_reader :references
-      attr_reader :create_verb
-      attr_reader :delete_verb
-      attr_reader :update_verb
-      attr_reader :input # If true, resource is not updatable as a whole unit
-      attr_reader :min_version # Minimum API version this resource is in
-    end
+    attr_reader :description
+    attr_reader :kind
+    attr_reader :base_url
+    # URL to use for creating the resource. If not specified, the
+    # collection url (when create_verb is default or :POST) or
+    # self_link (when create_verb is :PUT) is used instead.
+    attr_reader :create_url
+    # URL to use to delete the resource. If not specified, the
+    # self link is used.
+    attr_reader :delete_url
+    # URL to use for updating the resource. If not specified, the self link
+    # will be used. This currently can only be used with Terraform resources.
+    # TODO(#302): Add support for the other providers.
+    attr_reader :update_url
+    attr_reader :self_link
+    # This is useful in case you need to change the query made for
+    # GET/DELETE requests only.  In particular, this is often used
+    # to add query parameters.
+    attr_reader :self_link_query
+    # This is the type of response from the collection URL. It contains
+    # the name of the list of items within the json, as well as the
+    # type that this list should be. This is of type Api::Resource::ResponseList
+    attr_reader :collection_url_response
+    # This is an array with items that uniquely identify the resource.
+    # This is useful in case an API returns a list result and we need
+    # to fetch the particular resource we're interested in from that
+    # list.  Otherwise, it's safe to leave empty.
+    # If empty, we assume that `name` is the identifier.
+    attr_reader :identity
+    attr_reader :exclude
+    attr_reader :async
+    attr_reader :readonly
+    attr_reader :exports
+    attr_reader :transport
+    attr_reader :references
+    attr_reader :create_verb
+    attr_reader :delete_verb
+    attr_reader :update_verb
+    attr_reader :input # If true, resource is not updatable as a whole unit
+    attr_reader :min_version # Minimum API version this resource is in
 
-    include Properties
 
     # Parameters can be overridden via Provider::PropertyOverride
     # A custom getter is used for :parameters instead of `attr_reader`

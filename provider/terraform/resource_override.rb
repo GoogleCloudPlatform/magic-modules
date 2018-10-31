@@ -17,36 +17,29 @@ require 'provider/terraform/custom_code'
 
 module Provider
   class Terraform < Provider::AbstractCore
-    # Collection of properties allowed in the ResourceOverride section for
-    # Terraform. All properties should be `attr_reader :<property>`
-    module OverrideProperties
-      # The Terraform resource id format used when calling #setId(...).
-      # For instance, `{{name}}` means the id will be the resource name.
-      attr_reader :id_format
-      attr_reader :import_format
-      attr_reader :custom_code
-      attr_reader :docs
-
-      # Lock name for a mutex to prevent concurrent API calls for a given
-      # resource.
-      attr_reader :mutex
-
-      # Deprecated - examples in documentation
-      # TODO(rileykarson): Remove examples and replace them with new examples
-      attr_reader :examples
-
-      # New examples in documentation - will take the "examples" name when
-      # old-style examples are gone.
-      attr_reader :example
-    end
-
     # A class to control overridden properties on terraform.yaml in lieu of
     # values from api.yaml.
     class ResourceOverride < Provider::Overrides::ResourceOverride
       attr_reader :description
 
       def self.attributes
-        %i[id_format import_format custom_code docs mutex examples example]
+        [
+          # The Terraform resource id format used when calling #setId(...).
+          # For instance, `{{name}}` means the id will be the resource name.
+          :id_format,
+          :import_format,
+          :custom_code,
+          :docs,
+          # Lock name for a mutex to prevent concurrent API calls for a given
+          # resource.
+          :mutex,
+          # Deprecated - examples in documentation
+          # TODO(rileykarson): Remove examples and replace them with new examples
+          :examples,
+          # New examples in documentation - will take the "examples" name when
+          # old-style examples are gone.
+          :example
+        ]
       end
 
       attr_reader(*attributes)
@@ -81,10 +74,6 @@ module Provider
       end
 
       private
-
-      def overriden
-        Provider::Terraform::OverrideProperties
-      end
 
       # Formats the string and potentially uses its old value as part of the new
       # value. The marker should be in the form `{{name}}` where `name` is the

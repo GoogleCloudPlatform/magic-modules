@@ -85,7 +85,7 @@ module Provider
         res_override.apply old_resource
 
         res = Api::Resource.new
-        set_values_for_overrides(res, res_override)
+        set_additional_values(res, res_override)
 
         variables = (old_resource.instance_variables + res_override.instance_variables).uniq
         variables.reject { |o| o == :@properties || o == :@parameters }
