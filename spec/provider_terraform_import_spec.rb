@@ -23,10 +23,13 @@ end
 
 describe Provider::Terraform do
   context 'static' do
-    let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
-    let(:config) do
-      Provider::Config.parse('spec/data/terraform-config.yaml', product)
+    let(:original_product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:config_objects) do
+      Provider::Config.parse('spec/data/terraform-config.yaml', original_product)
     end
+    let(:product) { config_objects.first }
+    let(:config) { config_objects[1] }
+
     let(:provider) { Provider::Terraform.new(config, product) }
 
     before do
@@ -39,9 +42,7 @@ describe Provider::Terraform do
     describe '#import_id_formats' do
       subject do
         provider.import_id_formats(
-          resource(
-            'base_url: "projects/{{project}}/regions/{{region}}/subnetworks"'
-          )
+          product.objects.select { |o| o.name == 'TerraformImportIdTest' }.first
         )
       end
 
@@ -57,12 +58,6 @@ describe Provider::Terraform do
     def allow_open(file_name)
       IO.expects(:read).with(file_name).returns(File.real_read(file_name))
         .at_least(0)
-    end
-
-    def resource(*data)
-      Google::YamlValidator.parse(['--- !ruby/object:Api::Resource']
-                                    .concat(data)
-                                    .join("\n"))
     end
   end
 end

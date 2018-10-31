@@ -33,18 +33,6 @@ describe Provider::Config do
   end
 
   context 'parsing validation' do
-    it 'allows any Provider::Config class' do
-      IO.expects(:read).with('foo/bar').twice.returns([
-        '--- !ruby/object:Module1::Module2::MyConfig',
-        'p1: A',
-        'p2: B',
-        'objects:',
-        ' - o1'
-      ].join("\n"))
-
-      Provider::Config.parse('foo/bar')
-    end
-
     it 'fails if not a Provider::Config class' do
       IO.expects(:read).with('foo/bar').returns([
         'a: A',

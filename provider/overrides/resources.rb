@@ -77,12 +77,16 @@ module Provider
 
     # Override to an Api::Resource in api.yaml
     class ResourceOverride < OverrideResource
-      def apply(resource); end
+      def apply(_resource)
+        self
+      end
     end
 
     # Override to a Api::Type in api.yaml
     class PropertyOverride < OverrideResource
-      def apply(resource); end
+      def apply(_resource)
+        self
+      end
     end
   end
 end

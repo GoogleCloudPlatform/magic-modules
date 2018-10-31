@@ -119,3 +119,8 @@ objects:
             - !ruby/object:Api::Type::String
               name: 'nv-prop1'
               description: 'the first property in my namevalues'
+  - !ruby/object:Api::Resource
+    name: 'TerraformImportIdTest'
+    description: 'Used for spec/provider_terraform_import_spec'
+    base_url: "projects/{{project}}/regions/{{region}}/subnetworks"
+    properties: []

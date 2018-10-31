@@ -54,7 +54,7 @@ describe Provider::Overrides::Validator do
       it {
         runner = Provider::Overrides::Validator.new(api, overrides)
         expect { runner.run }.to raise_error(RuntimeError,
-                                             ['blahbad does not exist on AnotherResource (is it',
+                                             ['blahbad does not exist on AnotherResource (is it ',
                                               'mislabeled as a property, not a parameter?)'].join)
       }
     end

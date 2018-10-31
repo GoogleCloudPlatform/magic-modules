@@ -44,14 +44,12 @@ describe Provider::Terraform::ResourceOverride do
     end
 
     context 'with extend description' do
-      before(:each) do
-        create_override('description', '{{description}}bar').apply resource
-      end
+      subject { create_override('description', '{{description}}bar').apply(resource).description }
       it { is_expected.to eq 'foobar' }
     end
 
     context 'with override description' do
-      before(:each) { create_override('description', 'bar').apply resource }
+      subject { create_override('description', 'bar').apply(resource).description }
       it { is_expected.to eq 'bar' }
     end
   end
