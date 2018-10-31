@@ -82,6 +82,14 @@ module Provider
       copy_file_list(output_folder, files)
     end
 
+    def compile_common_files(output_folder, version_name = nil)
+      provider_name = self.class.name.split('::').last.downcase
+      return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
+      files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
+
+      compile_file_list(output_folder, files, version: version_name)
+    end
+
     def copy_file_list(output_folder, files)
       files.each do |target, source|
         target_file = File.join(output_folder, target)
