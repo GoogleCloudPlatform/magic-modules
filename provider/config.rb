@@ -131,7 +131,7 @@ module Provider
 
       check_optional_property :examples, Api::Resource::HashArray
       check_optional_property :files, Provider::Config::Files
-      check_property :overrides, Provider::ResourceOverrides
+      check_property :overrides, Provider::Overrides::ResourceOverrides
       check_property_list :changelog, Provider::Config::Changelog \
         unless @changelog.nil?
     end
