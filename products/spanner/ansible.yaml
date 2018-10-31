@@ -52,9 +52,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
-examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   compile:
 <%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray
-test_data: !ruby/object:Provider::Config::TestData
