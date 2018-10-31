@@ -109,7 +109,8 @@ describe Provider::Overrides::Runner do
         Provider::Overrides::ResourceOverrides.new(
           'AnotherResource' => Provider::Overrides::ResourceOverride.new(
             'properties' => {
-              'nested-property2.property1.property1-nested' => Provider::Overrides::PropertyOverride.new(
+              'nested-property2.property1.property1-nested' =>
+              Provider::Overrides::PropertyOverride.new(
                 'type' => 'Api::Type::Integer'
               )
             }
@@ -189,9 +190,9 @@ describe Provider::Overrides::Runner do
         new_api = runner.build
         resource = new_api.objects.select { |p| p.name == 'AnotherResource' }.first
         prop = resource.properties.select { |p| p.name == 'namevalue-property' }
-                                  .first
-                                  .value_type
-                                  .properties.first
+                       .first
+                       .value_type
+                       .properties.first
         expect(prop.description).to eq('overriden')
       }
     end

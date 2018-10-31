@@ -46,8 +46,10 @@ module Provider
       attr_reader :description
 
       def self.attributes
-        [:id_format, :import_format, :custom_code, :docs, :mutex, :examples, :example]
+        %i[id_format import_format custom_code docs mutex examples example]
       end
+
+      attr_reader(*attributes)
 
       def validate
         super

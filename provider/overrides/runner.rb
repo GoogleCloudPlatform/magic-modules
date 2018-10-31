@@ -36,6 +36,7 @@ module Provider
     #         !ruby/object:Provider::MyProvider::PropertyOverride
     #         description: 'baz'
     #   ...
+    # rubocop:disable Metrics/ClassLength
     class Runner
       def initialize(api, overrides,
                      res_override_class = Provider::Overrides::ResourceOverride,
@@ -70,6 +71,7 @@ module Provider
         prod
       end
 
+      # rubocop:disable Metrics/AbcSize
       def build_resource(old_resource, res_override)
         res_override = @res_override_class.new if res_override.nil? || res_override.empty?
         res_override.validate
@@ -87,39 +89,57 @@ module Provider
             res.instance_variable_set(var_name, old_resource.instance_variable_get(var_name))
           end
         end
+
         # Using instance_variable_get('properties') to make sure we get `exclude: true` properties
-        res.instance_variable_set('@properties', (old_resource.instance_variable_get('@properties') || []).map { |p| build_property(p, res_override['properties']) })
-        res.instance_variable_set('@parameters', (old_resource.instance_variable_get('@parameters') || []).map { |p| build_property(p, res_override['parameters']) })
+        ['@properties', '@parameters'].each do |val|
+          new_props = (old_resource.instance_variable_get(val) || []).map do |p|
+            build_property(p, res_override[val])
+          end
+          res.instance_variable_set(val, new_props)
+        end
         res
       end
+      # rubocop:enable Metrics/AbcSize
 
+      # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/AbcSize
       def build_property(old_property, property_overrides, prefix = '')
         property_overrides = {} if property_overrides.nil?
+        new_prop = build_primitive_property(old_property,
+                                            property_overrides["#{prefix}#{old_property.name}"])
         if old_property.is_a?(Api::Type::NestedObject)
-          new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
-          new_prop.instance_variable_set('@properties', old_property.properties.map { |p| build_property(p, property_overrides, "#{prefix}#{old_property.name}.") })
-          new_prop
-        elsif old_property.is_a?(Api::Type::NameValues) && old_property.value_type.is_a?(Api::Type::NestedObject)
-          new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
-          new_prop.instance_variable_set('@value_type', Api::Type::NestedObject.new)
-            new_prop.value_type.instance_variable_set('@properties', old_property.value_type.properties.map { |p| build_property(p, property_overrides, "#{prefix}#{old_property.name}.") })
-          new_prop
-        elsif old_property.is_a?(Api::Type::Array) && !old_property.item_type.is_a?(::String)
-          new_prop = build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
-          if old_property.item_type.is_a?(Api::Type::NestedObject)
-            new_prop.instance_variable_set('@item_type', Api::Type::NestedObject.new)
-            new_prop.item_type.instance_variable_set('@properties', old_property.item_type.properties.map { |p| build_property(p, property_overrides, "#{prefix}#{old_property.name}[].") })
+          new_props = old_property.properties.map do |p|
+            build_property(p, property_overrides, "#{prefix}#{old_property.name}.")
           end
-          new_prop
-        else
-          build_primitive_property(old_property, property_overrides["#{prefix}#{old_property.name}"])
+          new_prop.instance_variable_set('@properties', new_props)
+        elsif old_property.is_a?(Api::Type::NameValues) && \
+              old_property.value_type.is_a?(Api::Type::NestedObject)
+          new_prop.instance_variable_set('@value_type', Api::Type::NestedObject.new)
+          new_props = old_property.value_type.properties.map do |p|
+            build_property(p, property_overrides, "#{prefix}#{old_property.name}.")
+          end
+          new_prop.value_type.instance_variable_set('@properties', new_props)
+        elsif old_property.is_a?(Api::Type::Array) && \
+              old_property.item_type.is_a?(Api::Type::NestedObject)
+          new_prop.instance_variable_set('@item_type', Api::Type::NestedObject.new)
+          new_props = old_property.item_type.properties.map do |p|
+            build_property(p, property_overrides, "#{prefix}#{old_property.name}[].")
+          end
+          new_prop.item_type.instance_variable_set('@properties', new_props)
         end
+        new_prop
       end
+      # rubocop:enable Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/AbcSize
 
+      # rubocop:disable Metrics/AbcSize
       def build_primitive_property(old_property, prop_override)
         prop_override = @prop_override_class.new if prop_override.nil? || prop_override.empty?
         prop_override.validate
         prop_override.apply old_property
+
         prop = if prop_override['type']
                  Module.const_get(prop_override['type']).new
                else
@@ -129,8 +149,8 @@ module Provider
         set_values_for_overrides(prop, prop_override)
         variables = (old_property.instance_variables + prop_override.instance_variables).uniq
 
-        # Set api_name with old property so that the new name doesn't override it.
-        prop.instance_variable_set("@api_name", old_property.name)
+        # Set api_name with old property so that a potential new name doesn't override it.
+        prop.instance_variable_set('@api_name', old_property.name)
 
         variables.reject { |o| o == :@properties }
                  .each do |var_name|
@@ -142,6 +162,7 @@ module Provider
         end
         prop
       end
+      # rubocop:enable Metrics/AbcSize
 
       def set_values_for_overrides(object, override)
         override.class.attributes.each do |o|
@@ -150,5 +171,6 @@ module Provider
         end
       end
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

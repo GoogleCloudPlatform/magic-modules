@@ -23,7 +23,7 @@ module Provider
         []
       end
 
-      attr_accessor *attributes
+      attr_accessor(*attributes)
 
       # Used for testing.
       def initialize(hash = {})
@@ -39,14 +39,14 @@ module Provider
       end
 
       def empty?
-        instance_variables.length == 0
+        instance_variables.empty?
       end
 
       # This allows OverrideResource to take advantage of
       # the YAMLValidator's validation without being tied down
       # to it.
       def validate
-        self.instance_variables.each do |var_name|
+        instance_variables.each do |var_name|
           var = instance_variable_get(var_name)
           var.validate if var.respond_to?(:validate)
         end
@@ -77,14 +77,12 @@ module Provider
 
     # Override to an Api::Resource in api.yaml
     class ResourceOverride < OverrideResource
-      def apply(resource)
-      end
+      def apply(resource); end
     end
 
     # Override to a Api::Type in api.yaml
     class PropertyOverride < OverrideResource
-      def apply(resource)
-      end
+      def apply(resource); end
     end
   end
 end

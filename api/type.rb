@@ -73,6 +73,7 @@ module Api
       check_default_value_property
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def check_default_value_property
       return if @default_value.nil?
 
@@ -94,6 +95,7 @@ module Api
 
       check_optional_property :default_value, clazz
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def type
       self.class.name.split('::').last

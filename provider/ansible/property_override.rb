@@ -17,16 +17,15 @@ require 'provider/overrides/resources'
 
 module Provider
   module Ansible
-
     # Ansible-specific overrides to api.yaml.
     class PropertyOverride < Provider::Overrides::PropertyOverride
       # Collection of fields allowed in the PropertyOverride section for
       # Ansible. All fields should be `attr_reader :<property>`
       def self.attributes
-        [:aliases, :version_added]
+        %i[aliases version_added]
       end
-      
-      attr_reader *self.attributes
+
+      attr_reader(*attributes)
 
       def validate
         super

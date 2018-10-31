@@ -19,30 +19,30 @@ module Provider
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::Overrides::ResourceOverride
       def self.attributes
-        [
-          :access_api_results,
-          :collection,
-          :custom_create_resource,
-          :custom_update_resource,
-          :create,
-          :delete,
-          :editable,
-          :has_tests,
-          :hidden,
-          :imports,
-          :post_create,
-          :post_action,
-          :provider_helpers,
-          :return_if_object,
-          :unwrap_resource,
-          :update,
-          :version_added,
+        %i[
+          access_api_results
+          collection
+          custom_create_resource
+          custom_update_resource
+          create
+          delete
+          editable
+          has_tests
+          hidden
+          imports
+          post_create
+          post_action
+          provider_helpers
+          return_if_object
+          unwrap_resource
+          update
+          version_added
 
-          :facts
+          facts
         ]
       end
 
-      attr_reader *self.attributes
+      attr_reader(*attributes)
 
       # rubocop:disable Metrics/AbcSize
       # rubocop:disable Metrics/MethodLength

@@ -43,9 +43,10 @@ module Provider
       end
 
       # Verify top-level fields exist on resource
+      # rubocop:disable Metrics/AbcSize
       def verify_resource(res, overrides)
         overrides.instance_variables.reject { |i| i == :@properties || i == :@parameters }
-                                    .each do |field_name|
+                 .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
           next if overrides.class.attributes.include?(field_symbol)
@@ -53,13 +54,16 @@ module Provider
           raise "#{field_name} does not exist on #{res.name}"
         end
         # Use instance_variable_get to get excluded properties
-        verify_properties(res.instance_variable_get('@properties'), overrides['properties'], res.name)
-        verify_properties(res.instance_variable_get('@parameters'), overrides['parameters'], res.name)
+        verify_properties(res.instance_variable_get('@properties'), overrides['properties'],
+                          res.name)
+        verify_properties(res.instance_variable_get('@parameters'), overrides['parameters'],
+                          res.name)
       end
+      # rubocop:enable Metrics/AbcSize
 
       # Verify a list of properties (parameters or properties on an API::Resource)
       def verify_properties(properties, overrides, res_name = '')
-        overrides = {} unless overrides
+        overrides ||= {}
         overrides.each do |k, v|
           path = property_path(k)
           verify_property(find_property(properties, path, res_name), v)
@@ -67,20 +71,30 @@ module Provider
       end
 
       # Returns a property (or throws an error if it does not exist)
+      # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/PerceivedComplexity
       def find_property(properties, path, res_name = '')
         prop = nil
         path.each do |part|
           prop = properties.select { |o| o.name == part.sub('[]', '') }.first
           # Check that next part is actually an array of nested objects.
-          if !part.include?('[]') && prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject) && part != path.last
-            raise "#{path.join('.')} on #{res_name} is incorrectly formatted for Arrays of NestedObjects"
+          if !part.include?('[]') && \
+             prop.is_a?(Api::Type::Array) && \
+             prop.item_type.is_a?(Api::Type::NestedObject) \
+              && part != path.last
+            raise ["#{path.join('.')} on #{res_name} is incorrectly",
+                   'formatted for Arrays of NestedObjects'].join(' ')
           end
 
           properties = if prop.is_a?(Api::Type::NestedObject)
                          prop.properties
-                       elsif prop.is_a?(Api::Type::NameValues) && prop.value_type.is_a?(Api::Type::NestedObject)
+                       elsif prop.is_a?(Api::Type::NameValues) && \
+                             prop.value_type.is_a?(Api::Type::NestedObject)
                          prop.value_type.properties
-                       elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
+                       elsif prop.is_a?(Api::Type::Array) && \
+                             prop.item_type.is_a?(Api::Type::NestedObject)
                          prop.item_type.properties
                        else
                          []
@@ -88,15 +102,19 @@ module Provider
         end
         unless prop
           raise ["#{path.join('.')} does not exist on #{res_name}",
-                 "(is it mislabeled as a property, not a parameter?)"
-                ].join(' ')
+                 '(is it mislabeled as a property, not a parameter?)'].join(' ')
         end
         prop
       end
+      # rubocop:enable Metrics/AbcSize
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/MethodLength
+      # rubocop:enable Metrics/PerceivedComplexity
 
       def verify_property(property, overrides)
-        overrides.instance_variables.reject { |i| i == :@properties || i == :@item_type  || i == :@type }
-                                    .each do |field_name|
+        overrides.instance_variables
+                 .reject { |i| i == :@properties || i == :@item_type || i == :@type }
+                 .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
           next if overrides.class.attributes.include?(field_symbol)

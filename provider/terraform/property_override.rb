@@ -96,7 +96,7 @@ module Provider
         ]
       end
 
-      attr_reader *self.attributes
+      attr_reader(*attributes)
 
       # Used to allow us to easily access these values in `apply`
       # without resorting to "instance_variable_get"
@@ -128,6 +128,7 @@ module Provider
       end
       # rubocop:enable Metrics/MethodLength
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def apply(api_property)
         unless description.nil?
           @description = format_string(:description, @description,
@@ -149,6 +150,7 @@ module Provider
 
         super
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       private
 

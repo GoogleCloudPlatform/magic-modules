@@ -29,7 +29,7 @@ module Provider
         [:manual]
       end
 
-      attr_reader *self.attributes
+      attr_reader(*attributes)
 
       def validate
         assign_defaults
