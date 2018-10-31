@@ -146,8 +146,6 @@ bolt_tasks:
         exit 1
       end
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
     lib/google/pubsub/api/gpubsub_topic.rb:
       products/pubsub/helpers/puppet/bolt/api_gpubsub_topic.erb

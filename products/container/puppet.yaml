@@ -109,8 +109,6 @@ examples: !ruby/object:Api::Resource::HashArray
   KubeConfig:
     - kube_config.pp
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
     lib/google/container/api/gcontainer_node_pool.rb:
       products/container/helpers/puppet/bolt/api_gcontainer_node_pool.erb
