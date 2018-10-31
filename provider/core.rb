@@ -83,14 +83,13 @@ module Provider
       copy_file_list(output_folder, files)
     end
 
-    # _version_name is a magic name used by common~compile.yaml
-    def compile_common_files(output_folder, _version_name = nil)
+    def compile_common_files(output_folder, version_name = nil)
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version: _version_name)
+      compile_file_list(output_folder, files, version: version_name)
     end
 
     def copy_file_list(output_folder, files)

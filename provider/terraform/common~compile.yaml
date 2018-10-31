@@ -12,7 +12,7 @@
 # limitations under the License.
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
-<% dir = _version_name == 'beta' ? 'google-beta' : 'google' -%>
+<% dir = version_name == 'beta' ? 'google-beta' : 'google' -%>
 <%  Dir["provider/terraform/tests/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
