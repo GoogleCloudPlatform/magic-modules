@@ -30,7 +30,6 @@ module Provider
   # such as compiling and including files, formatting data, etc.
   class Core
     include Compile::Core
-    include Api::Object::ObjectUtils
 
     attr_reader :test_data
 

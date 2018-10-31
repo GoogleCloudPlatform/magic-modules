@@ -132,12 +132,10 @@ objects:
         description: 'The URLs of the resources that are using this address.'
         item_type: Api::Type::String
         output: true
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           Labels to apply to this address.  A list of key->value pairs.
-        key_type: Api::Type::String
-        value_type: Api::Type::String
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/addresses/{{name}}/setLabels'
         min_version: beta
@@ -987,11 +985,10 @@ objects:
         update_verb: :POST
         update_url:
           'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setTarget'
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           Labels to apply to this forwarding rule.  A list of key->value pairs.
-        value_type: Api::Type::String
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         min_version: beta
@@ -1088,12 +1085,10 @@ objects:
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
         required: true
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           Labels to apply to this address.  A list of key->value pairs.
-        key_type: Api::Type::String
-        value_type: Api::Type::String
         update_verb: :POST
         update_url: 'projects/{{project}}/global/addresses/{{name}}/setLabels'
         min_version: beta
@@ -4269,11 +4264,9 @@ objects:
           for example `192.168.0.0/16`. The ranges should be disjoint.
           Only IPv4 is supported.
         item_type: Api::Type::String
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: Labels to apply to this VpnTunnel.
-        key_type: Api::Type::String
-        value_type: Api::Type::String
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
       - !ruby/object:Api::Type::Fingerprint

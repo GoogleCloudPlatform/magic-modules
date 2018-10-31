@@ -17,7 +17,7 @@
                            prefix: prefix,
                            property: property)) -%>
 <% else -%>
-<%   if string_to_object_map?(property) -%>
+<%   if property.is_a?(Api::Type::Map) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
   if v == nil {
     return map[string]interface{}{}, nil
@@ -46,7 +46,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <%     next if prop.name == property.key_name -%>
 <%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
 <%   end -%>
-<%   elsif property.is_a?(Api::Type::NameValues) -%>
+<%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil

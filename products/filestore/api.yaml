@@ -98,12 +98,10 @@ objects:
           - TIER_UNSPECIFIED
           - STANDARD
           - PREMIUM
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           Resource labels to represent user-provided metadata.
-        key_type: Api::Type::String
-        value_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'fileShares'
         required: true

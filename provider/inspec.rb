@@ -122,18 +122,21 @@ module Provider
     end
 
     # Figuring out if a property is a primitive ruby type is a hassle. But it is important
-    # Fingerprints are strings, NameValues are hashes, and arrays of primitives are arrays
-    # Arrays of NestedObjects need to have their contents parsed and returned in an array
+    # Fingerprints are strings, KeyValuePairs and Maps are hashes, and arrays of primitives are
+    # arrays. Arrays of NestedObjects need to have their contents parsed and returned in an array
     # ResourceRefs are strings
+    # rubocop:disable Metrics/CyclomaticComplexity
     def primitive?(property)
       array_primitive = (property.is_a?(Api::Type::Array)\
         && !property.item_type.is_a?(::Api::Type::NestedObject))
       property.is_a?(::Api::Type::Primitive)\
         || array_primitive\
-        || property.is_a?(::Api::Type::NameValues)\
+        || property.is_a?(::Api::Type::KeyValuePairs)\
+        || property.is_a?(::Api::Type::Map)\
         || property.is_a?(::Api::Type::Fingerprint)\
         || property.is_a?(::Api::Type::ResourceRef)
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     # Arrays of nested objects need special requires statements
     def typed_array?(property)
