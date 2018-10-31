@@ -36,6 +36,7 @@ require 'provider/puppet'
 require 'provider/puppet/bundle'
 require 'provider/terraform'
 require 'provider/terraform_example'
+require 'provider/yaml'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 product_names = nil
