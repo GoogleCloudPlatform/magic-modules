@@ -95,10 +95,7 @@ The following arguments are supported:
 
 * `version` - (Optional) Application versions managed by this instance group. Each
     version deals with a specific instance template, allowing canary release scenarios.
-    Structure is documented below. Beware that exactly one version must not specify a
-    target size. It means that versions with a target size will respect the setting,
-    and the one without target size will be applied to all remaining Instances (top
-    level target_size - each version target_size).
+    Structure is documented below.
     This property is in beta, and should be used with the terraform-provider-google-beta provider.
     See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
@@ -146,7 +143,7 @@ group. You can specify only one value. Structure is documented below. For more i
 This property is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
-* `rolling_update_policy` - (Optional) The update policy for this managed instance group. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/patch)
+* `update_policy` - (Optional) The update policy for this managed instance group. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/patch)
 This property is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 - - -
@@ -154,7 +151,7 @@ See [Provider Versions](https://terraform.io/docs/providers/google/provider_vers
 The `update_policy` block supports:
 
 ```hcl
-rolling_update_policy{
+update_policy{
   type = "PROACTIVE"
   minimal_action = "REPLACE"
   max_surge_percent = 20
@@ -220,11 +217,17 @@ version {
 
 * `target_size` - (Optional) - The number of instances calculated as a fixed number or a percentage depending on the settings. Structure is documented below.
 
+-> Exactly one `version` you specify must not have a `target_size` specified. During a rolling update, the instance group manager will fulfill the `target_size`
+constraints of every other `version`, and any remaining instances will be provisioned with the version where `target_size` is unset.
+
+
 The `target_size` block supports:
 
 * `fixed` - (Optional), The number of instances which are managed for this version. Conflicts with `percent`.
 
 * `percent` - (Optional), The number of instances (calculated as percentage) which are managed for this version. Conflicts with `fixed`.
+Note that when using `percent`, rounding will be in favor of explicitly set `target_size` values; a managed instance group with 2 instances and 2 `version`s,
+one of which has a `target_size.percent` of `60` will create 2 instances of that `version`.
 
 ## Attributes Reference
 
