@@ -58,6 +58,9 @@ module Provider
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
+      # common-compile.yaml is a special file that will get compiled by the last product
+      # used in a single invocation of the compiled. It should not contain product-specific
+      # information; instead, it should be run-specific such as the version to compile at.
       compile_files(output_folder, version_name) \
         unless @config.files.nil? || @config.files.compile.nil?
 
