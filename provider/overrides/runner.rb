@@ -17,13 +17,13 @@ require 'provider/overrides/validator'
 
 module Provider
   module Overrides
-    # A hash of Provider::ResourceOverride objects where the key is the api name
-    # for that object.
-    #
+    # This runner takes an Api::Product and applies a set of Provider::Overrides::ResourceOverrides
+    # It does this by building a brand new Api::Product object from scratch, using
+    # the values from either the original Api::Product or the override values.
     # Example usage in a provider.yaml file where you want to extend a resource
     # description:
     #
-    # overrides: !ruby/object:Provider::ResourceOverrides
+    # overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     #   SomeResource: !ruby/object:Provider::MyProvider::ResourceOverride
     #     description: '{{description}} A tool-specific description complement'
     #     parameters:
@@ -33,6 +33,9 @@ module Provider
     #       someProperty: !ruby/object:Provider::MyProvider::PropertyOverride
     #         description: 'foobar' # replaces description
     #       anotherProperty.someNestedProperty:
+    #         !ruby/object:Provider::MyProvider::PropertyOverride
+    #         description: 'baz'
+    #       anotherProperty[].someNestedPropertyInAnArray:
     #         !ruby/object:Provider::MyProvider::PropertyOverride
     #         description: 'baz'
     #   ...
@@ -55,6 +58,8 @@ module Provider
 
       private
 
+      # Given a old Api::Product, and Provider::Overrides::ResourceOverrides,
+      # returns a new Api::Product with overrides applied
       def build_product(old_prod, all_overrides)
         prod = Api::Product.new
         old_prod.instance_variables
@@ -72,6 +77,8 @@ module Provider
       end
 
       # rubocop:disable Metrics/AbcSize
+      # Given a Api::Resource and Provider::Override::ResourceOverride,
+      # return a new Api::Resource with overrides applied.
       def build_resource(old_resource, res_override)
         res_override = @res_override_class.new if res_override.nil? || res_override.empty?
         res_override.validate
@@ -104,6 +111,8 @@ module Provider
       # rubocop:disable Metrics/PerceivedComplexity
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/AbcSize
+      # Given a Api::Type property and a hash of properties, create a new Api::Type property
+      # This will handle NestedObjects, Arrays of NestedObjects of arbitrary length
       def build_property(old_property, property_overrides, prefix = '')
         property_overrides = {} if property_overrides.nil?
         new_prop = build_primitive_property(old_property,
@@ -135,6 +144,9 @@ module Provider
       # rubocop:enable Metrics/AbcSize
 
       # rubocop:disable Metrics/AbcSize
+      # Given a primitive Api::Type (string, integers, times, etc) and override,
+      # return a new Api::Type with overrides applied.
+      # This will be called by build_property, which handles nesting.
       def build_primitive_property(old_property, prop_override)
         prop_override = @prop_override_class.new if prop_override.nil? || prop_override.empty?
         prop_override.validate
@@ -146,7 +158,7 @@ module Provider
                  old_property.class.new
                end
 
-        set_values_for_overrides(prop, prop_override)
+        set_additional_values(prop, prop_override)
         variables = (old_property.instance_variables + prop_override.instance_variables).uniq
 
         # Set api_name with old property so that a potential new name doesn't override it.
@@ -164,7 +176,10 @@ module Provider
       end
       # rubocop:enable Metrics/AbcSize
 
-      def set_values_for_overrides(object, override)
+      # Overrides have additional values inside the override that do not regularly belong
+      # on the Api::* object. These values need to be set + they need getters so they
+      # can be accessed propertly in the templates.
+      def set_additional_values(object, override)
         override.class.attributes.each do |o|
           object.instance_variable_set("@#{o}", override[o])
           object.define_singleton_method(o.to_sym) { instance_variable_get("@#{o}") }

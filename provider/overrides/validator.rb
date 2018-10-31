@@ -78,6 +78,7 @@ module Provider
       def find_property(properties, path, res_name = '')
         prop = nil
         path.each do |part|
+          # We should substitute the [] brackets away.
           prop = properties.select { |o| o.name == part.sub('[]', '') }.first
           # Check that next part is actually an array of nested objects.
           if !part.include?('[]') && \
@@ -129,6 +130,7 @@ module Provider
         obj.respond_to? field
       end
 
+      # This keeps the [] brackets in place.
       def property_path(prop_name)
         prop_name.split('.')
       end
