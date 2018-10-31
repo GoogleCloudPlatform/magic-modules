@@ -44,12 +44,6 @@ module Api
     # the name of the list of items within the json, as well as the
     # type that this list should be. This is of type Api::Resource::ResponseList
     attr_reader :collection_url_response
-    # This is an array with items that uniquely identify the resource.
-    # This is useful in case an API returns a list result and we need
-    # to fetch the particular resource we're interested in from that
-    # list.  Otherwise, it's safe to leave empty.
-    # If empty, we assume that `name` is the identifier.
-    attr_reader :identity
     attr_reader :exclude
     attr_reader :async
     attr_reader :readonly
@@ -60,8 +54,6 @@ module Api
     attr_reader :delete_verb
     attr_reader :update_verb
     attr_reader :input # If true, resource is not updatable as a whole unit
-    attr_reader :min_version # Minimum API version this resource is in
-
 
     # Parameters can be overridden via Provider::PropertyOverride
     # A custom getter is used for :parameters instead of `attr_reader`
@@ -209,6 +201,11 @@ module Api
       [@__product.prefix, @name.underscore].join('_')
     end
 
+    # This is an array with items that uniquely identify the resource.
+    # This is useful in case an API returns a list result and we need
+    # to fetch the particular resource we're interested in from that
+    # list.  Otherwise, it's safe to leave empty.
+    # If empty, we assume that `name` is the identifier.
     def identity
       props = all_user_properties
       if @identity.nil?
