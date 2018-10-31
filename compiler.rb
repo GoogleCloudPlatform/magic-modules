@@ -143,8 +143,9 @@ product_names.each do |product_name|
   provider.generate output_path, types_to_generate, version
 end
 
-# In order to only copy/compile files once per provider this must be called outside of the products loop
-# This will get called with the value from the final iteration of the loop
+# In order to only copy/compile files once per provider this must be called outside
+# of the products loop. This will get called with the provider from the final iteration
+# of the loop
 provider&.copy_common_files(output_path, version)
 provider&.compile_common_files(output_path, version)
 

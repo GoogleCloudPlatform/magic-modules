@@ -77,17 +77,20 @@ module Provider
     def copy_common_files(output_folder, _version_name = nil)
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
-      files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
 
+      Google::LOGGER.info "Copying common files for #{provider_name}"
+      files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
       copy_file_list(output_folder, files)
     end
 
-    def compile_common_files(output_folder, version_name = nil)
+    # _version_name is a magic name used by common~compile.yaml
+    def compile_common_files(output_folder, _version_name = nil)
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
-      files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
 
-      compile_file_list(output_folder, files, version: version_name)
+      Google::LOGGER.info "Compiling common files for #{provider_name}"
+      files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
+      compile_file_list(output_folder, files, version: _version_name)
     end
 
     def copy_file_list(output_folder, files)
