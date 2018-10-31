@@ -506,11 +506,10 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         required: false
         default_from_api: true
   RegionDisk: !ruby/object:Provider::Terraform::ResourceOverride
-    parameters:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_parameter_overrides.yaml'), 6) %>
     properties:
 <%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
     parameters:
+<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_parameter_overrides.yaml'), 6) %>
       region: !ruby/object:Provider::Terraform::PropertyOverride
         required: false
         default_from_api: true
