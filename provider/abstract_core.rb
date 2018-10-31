@@ -21,12 +21,6 @@ module Provider
     # rubocop:disable Layout/EmptyLineBetweenDefs
     def generate_resource(data) end
     def generate_resource_tests(data) end
-    def generate_network_datas(data, object) end
-    def generate_base_property(data) end
-    def generate_simple_property(type, data) end
-    def emit_nested_object(data) end
-    def emit_resourceref_object(data) end
-    def generate_typed_array(data, prop) end
     # rubocop:enable Layout/EmptyLineBetweenDefs
   end
 end
