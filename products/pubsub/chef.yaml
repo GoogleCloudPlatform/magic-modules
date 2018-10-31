@@ -94,8 +94,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - topic.rb
     - delete_topic.rb
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= indent(include('provider/chef/common~copy.yaml'), 4) %>
   compile:
 <%= indent(include('provider/chef/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/chef/common~compile~after.yaml'), 4) %>

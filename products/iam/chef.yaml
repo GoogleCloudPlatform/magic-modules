@@ -103,7 +103,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_service_account_key.rb
 files: !ruby/object:Provider::Config::Files
   copy:
-<%= indent(compile('provider/chef/common~copy.yaml'), 4) %>
     # Client-side functions require 'google/authorization'
     spec/stubs/google/authorization.rb: templates/spec_lib_stub.rb.erb
   compile:

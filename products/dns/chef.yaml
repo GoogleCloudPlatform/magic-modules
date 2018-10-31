@@ -73,8 +73,6 @@ examples: !ruby/object:Api::Resource::HashArray
     - delete_resource_record_set.rb
     - resource_record_set.rb
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= indent(include('provider/chef/common~copy.yaml'), 4) %>
   compile:
 <%= indent(include('provider/chef/common~compile~before.yaml'), 4) %>
 <%= indent(include('provider/chef/common~compile~after.yaml'), 4) %>

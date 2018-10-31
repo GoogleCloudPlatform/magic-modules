@@ -97,8 +97,6 @@ examples: !ruby/object:Api::Resource::HashArray
   ObjectAccessControl:
     - object_access_control.pp
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= indent(compile('provider/puppet/common~copy.yaml'), 4) %>
   compile:
     lib/google/storage/api/gstorage_object.rb:
       products/storage/helpers/puppet/bolt/api_gstorage_object.erb
