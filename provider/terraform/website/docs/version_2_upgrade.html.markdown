@@ -81,6 +81,7 @@ for more details.
 ### cluster_id, zone, num_nodes, and storage_type have moved into a cluster block
 
 Example previous configuration:
+
 ```hcl
 resource "google_bigtable_instance" "instance" {
   name         = "tf-instance"
@@ -92,6 +93,7 @@ resource "google_bigtable_instance" "instance" {
 ```
 
 Example updated configuration:
+
 ```hcl
 resource "google_bigtable_instance" "instance" {
   name = "tf-instance"
