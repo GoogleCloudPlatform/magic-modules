@@ -73,7 +73,7 @@ module Provider
     def generate_gemfile(data)
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/Gemfile.erb',
-        out_file: File.join(File.join(data[:output_folder]), "Gemfile")
+        out_file: File.join(File.join(data[:output_folder]), 'Gemfile')
       )
     end
 
