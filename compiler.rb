@@ -28,12 +28,8 @@ require 'google/logger'
 require 'optparse'
 require 'provider/ansible'
 require 'provider/ansible/bundle'
-require 'provider/chef'
-require 'provider/chef/bundle'
 require 'provider/example'
 require 'provider/inspec'
-require 'provider/puppet'
-require 'provider/puppet/bundle'
 require 'provider/terraform'
 require 'provider/terraform_example'
 require 'pp' if ENV['COMPILER_DEBUG']
@@ -96,6 +92,7 @@ if all_products
   raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
 end
 
+provider = nil
 # rubocop:disable Metrics/BlockLength
 product_names.each do |product_name|
   product_yaml_path = File.join(product_name, 'api.yaml')
@@ -142,6 +139,14 @@ product_names.each do |product_name|
     provider = \
       override_providers[force_provider].new(provider_config, product_api)
   end
+
   provider.generate output_path, types_to_generate, version
 end
+
+# In order to only copy/compile files once per provider this must be called outside
+# of the products loop. This will get called with the provider from the final iteration
+# of the loop
+provider&.copy_common_files(output_path, version)
+provider&.compile_common_files(output_path, version)
+
 # rubocop:enable Metrics/BlockLength

@@ -17,8 +17,6 @@ Dir.chdir(File.dirname(__FILE__))
 
 PROVIDER_FOLDERS = {
   ansible: 'build/ansible',
-  puppet: 'build/puppet/%<mod>s',
-  chef: 'build/chef/%<mod>s',
   terraform: 'build/terraform',
   inspec: 'build/inspec'
 }.freeze

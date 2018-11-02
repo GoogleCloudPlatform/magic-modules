@@ -34,6 +34,8 @@ objects:
     description: 'A Google Container Engine cluster.'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'clusters'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'zone'
@@ -285,6 +287,8 @@ objects:
       accommodate the workload.
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'nodePools'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'
