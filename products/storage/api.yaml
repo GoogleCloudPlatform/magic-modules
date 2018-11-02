@@ -45,6 +45,9 @@ objects:
       - !ruby/object:Api::Type::Path
         name: 'dest'
         description: Destination location of file (may be local machine or cloud depending on action)
+      - !ruby/object:Api::Type::String
+        name: 'bucket'
+        description: 'The name of the bucket'
   - !ruby/object:Api::Resource
     name: 'Bucket'
     kind: 'storage#bucket'
