@@ -30,6 +30,7 @@ __metaclass__ = type
 import json
 import os
 import mimetypes
+import hashlib
 <%
   imports = object.imports || []
   imports << 'time' if object.async
@@ -64,9 +65,15 @@ def main():
 
     auth = GcpSession(module, 'storage')
     if module.params['action'] == 'download':
+        if get_md5_local(module.params['dest']) != get_md5_remote(module):
+            if not module.params['overwrite']:
+                module.fail_json(msg="Remote file is different from local file and local file could be overwritten")
         # Get file from API
         results = upload_file(module)
     else:
+        if get_md5_local(module.params['src']) != get_md5_remote(module):
+            if not module.params['overwrite']:
+                module.fail_json(msg="Local file is different from remote file and remote file could be overwritten")
         # Get contents of file
         results = download_file(module)
 
@@ -90,6 +97,18 @@ def download_file(module):
     f.close()
     results['changed'] = True
     return results
+
+def get_md5_local(path):
+    md5 = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5.update(chunk)
+    return md5.hexdigest()
+
+
+def get_md5_remote(module):
+    resource = fetch_resource(module, self_link(module))
+    return resource.get('md5Hash')
 
 
 def fetch_resource(module, link, allow_not_found=True):
