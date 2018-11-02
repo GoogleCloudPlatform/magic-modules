@@ -59,4 +59,4 @@ files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
   compile:
-<%= lines(indent(compile('provider/terraform/common~compile.yaml'), 4)) -%>
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
