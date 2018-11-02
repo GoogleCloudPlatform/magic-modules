@@ -264,7 +264,7 @@ module Compile
 
     def comment_block(text, lang)
       case lang
-      when :ruby, :python, :puppet, :chef, :yaml, :git, :gemfile
+      when :ruby, :python, :yaml, :git, :gemfile
         text.map { |t| t&.empty? ? '#' : "# #{t}" }
       when :go
         text.map { |t| t&.empty? ? '//' : "// #{t}" }

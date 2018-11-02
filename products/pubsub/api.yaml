@@ -35,6 +35,8 @@ objects:
         description: 'Name of the topic.'
     transport: !ruby/object:Api::Resource::Transport
       decoder: decode_request
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'topics'
   - !ruby/object:Api::Resource
     name: 'Subscription'
     base_url: projects/{{project}}/subscriptions
@@ -45,6 +47,8 @@ objects:
     input: true
     transport: !ruby/object:Api::Resource::Transport
       decoder: decode_request
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'subscriptions'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

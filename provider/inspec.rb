@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
 require 'provider/inspec/manifest'

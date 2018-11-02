@@ -102,8 +102,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   VpnTunnel: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
-style:
-functions:
 changelog:
   - !ruby/object:Provider::Config::Changelog
     version: '0.1.0'
