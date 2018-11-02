@@ -13,7 +13,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.12
+          tag: v0.1.14
 
 resources:
     - name: magic-modules
@@ -346,16 +346,12 @@ jobs:
     - name: merge-prs
       plan:
           - get: mm-approved-prs
-            params:
-              fetch_merge: true
           - put: mm-approved-prs
             params:
               path: mm-approved-prs
               status: success
               label: automerged
-            get_params:
-              fetch_merge: true
-          - task: merge-and-update
+          - task: rebase-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
                 CREDS: ((repo-key.private_key))
@@ -370,12 +366,11 @@ jobs:
                 repository: mm-output
                 branch_file: mm-approved-prs/.git/branch
                 only_if_diff: true
+                force: true
           - put: mm-approved-prs
             params:
                 path: mm-output
                 status: success
-            get_params:
-                fetch_merge: true
           - put: mm-approved-prs
             params:
                 path: mm-output

@@ -41,4 +41,5 @@
 -%>
 '<%= dir -%>/<%= fname -%>': 'provider/terraform/utils/<%= fname -%>'
 <% end -%>
+'<%= dir -%>/test-fixtures/': 'provider/terraform/utils/test-fixtures'
 'website': 'provider/terraform/website'
