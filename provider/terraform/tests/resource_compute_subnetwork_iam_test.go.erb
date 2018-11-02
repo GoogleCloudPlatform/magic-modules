@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -245,3 +247,6 @@ resource "google_compute_subnetwork_iam_policy" "foo" {
 }
 `, account, subnetworkName, subnetworkName, region, roleId)
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
