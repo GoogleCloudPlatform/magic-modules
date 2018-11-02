@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -32,6 +33,7 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
 
@@ -54,6 +56,7 @@ func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerNodePool_noName(t *testing.T) {
 	t.Parallel()
@@ -513,6 +516,7 @@ resource "google_container_node_pool" "np" {
 }`, cluster, np)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerNodePool_maxPodsPerNode(cluster, np string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -564,6 +568,7 @@ resource "google_container_node_pool" "np" {
 	initial_node_count = 2
 }`, cluster, cluster, np)
 }
+<% end -%>
 
 func testAccContainerNodePool_regionalClusters(cluster, np string) string {
 	return fmt.Sprintf(`
