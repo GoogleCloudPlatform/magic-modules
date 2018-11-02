@@ -67,14 +67,6 @@ module Provider
         default_template: 'templates/inspec/doc-template.md.erb',
         out_file: File.join(docs_folder, "google_#{data[:product_name]}_#{name}.md")
       )
-      generate_gemfile(data)
-    end
-
-    def generate_gemfile(data)
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/Gemfile.erb',
-        out_file: File.join(File.join(data[:output_folder]), 'Gemfile')
-      )
     end
 
     # Format a url that may be include newlines into a single line
