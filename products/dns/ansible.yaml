@@ -33,7 +33,6 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      list_key: 'rrsets'
       test: results['items'] | length >= 2
     collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
@@ -42,7 +41,6 @@ datasources: !ruby/object:Provider::ResourceOverrides
       filter: !ruby/object:Provider::Ansible::FilterProp
         name: dnsName
         description: Restricts the list to return only zones with this domain name.
-      list_key: 'managedZones'
       query_options: false
       filter_api_param: dnsName
 overrides: !ruby/object:Provider::ResourceOverrides

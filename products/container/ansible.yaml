@@ -28,12 +28,10 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      list_key: 'clusters'
   NodePool: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      list_key: 'nodePools'
   KubeConfig: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides
