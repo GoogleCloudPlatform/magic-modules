@@ -8,7 +8,8 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-<%= lines(compile('templates/ansible/documentation.erb', 1) -%>
+
+<%= lines(compile('templates/ansible/documentation.erb', 1)) -%>
 ################################################################################
 # Imports
 ################################################################################
@@ -18,6 +19,8 @@ __metaclass__ = type
                                   .select { |prop| prop.imports == 'selfLink' }
                                   .map(&:resource_ref)
                                   .uniq
+
+  update_props = properties_by_custom_update(object.all_user_properties)
 -%>
 
 <%
