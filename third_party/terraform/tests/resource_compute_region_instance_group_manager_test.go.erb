@@ -154,6 +154,7 @@ func TestAccRegionInstanceGroupManager_updateStrategy(t *testing.T) {
 }
 <% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 	t.Parallel()
 
@@ -167,29 +168,24 @@ func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 			{
 				Config: testAccRegionInstanceGroupManager_rollingUpdatePolicy(igm),
 			},
-<% if version.nil? || version == 'ga' -%>
-			// No import step because rolling updates are broken and the field will be removed in 2.0.0.
-			// TODO(danawillow): Remove this test once we've removed the field.
-<% else -%>
 			{
 				ResourceName:      "google_compute_region_instance_group_manager.igm-rolling-update-policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 			{
 				Config: testAccRegionInstanceGroupManager_rollingUpdatePolicy2(igm),
 			},
-<% unless version.nil? || version == 'ga' -%>
 			{
 				ResourceName:      "google_compute_region_instance_group_manager.igm-rolling-update-policy",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
+<% end -%>
+
 func TestAccRegionInstanceGroupManager_separateRegions(t *testing.T) {
 	t.Parallel()
 
@@ -218,6 +214,7 @@ func TestAccRegionInstanceGroupManager_separateRegions(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_versions(t *testing.T) {
 	t.Parallel()
 
@@ -241,7 +238,9 @@ func TestAccRegionInstanceGroupManager_versions(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 	t.Parallel()
 
@@ -263,7 +262,6 @@ func TestAccRegionInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% unless version.nil? || version == 'ga' -%>
 			{
 				Config: testAccRegionInstanceGroupManager_autoHealingPoliciesRemoved(template, target, igm, hck),
 			},
@@ -272,10 +270,10 @@ func TestAccRegionInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-<% end -%>
 		},
 	})
 }
+<% end -%>
 
 func TestAccRegionInstanceGroupManager_distributionPolicy(t *testing.T) {
 	t.Parallel()
@@ -726,6 +724,7 @@ func testAccRegionInstanceGroupManager_separateRegions(igm1, igm2 string) string
 	`, igm1, igm2)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccRegionInstanceGroupManager_autoHealingPolicies(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -763,14 +762,10 @@ resource "google_compute_target_pool" "igm-basic" {
 resource "google_compute_region_instance_group_manager" "igm-basic" {
 	description = "Terraform test instance group manager"
 	name = "%s"
-<% if version.nil? || version == 'ga' -%>
-	instance_template = "${google_compute_instance_template.igm-basic.self_link}"
-<% else -%>
 	version {
 		instance_template = "${google_compute_instance_template.igm-basic.self_link}"
 		name = "primary"
 	}
-<% end -%>
 	target_pools = ["${google_compute_target_pool.igm-basic.self_link}"]
 	base_instance_name = "igm-basic"
 	region = "us-central1"
@@ -789,6 +784,7 @@ resource "google_compute_http_health_check" "zero" {
 }
 	`, template, target, igm, hck)
 }
+<% end -%>
 
 <% unless version.nil? || version == 'ga' -%>
 func testAccRegionInstanceGroupManager_autoHealingPoliciesRemoved(template, target, igm, hck string) string {
@@ -844,6 +840,7 @@ resource "google_compute_http_health_check" "zero" {
 }
 <% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccRegionInstanceGroupManager_versions(primaryTemplate string, canaryTemplate string, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -915,6 +912,7 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 }
 	`, primaryTemplate, canaryTemplate, igm)
 }
+<% end -%>
 
 func testAccRegionInstanceGroupManager_distributionPolicy(template, igm string, zones []string) string {
 	return fmt.Sprintf(`
@@ -1008,6 +1006,7 @@ resource "google_compute_region_instance_group_manager" "igm-update-strategy" {
 }
 <% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1042,26 +1041,16 @@ resource "google_compute_instance_template" "igm-rolling-update-policy" {
 resource "google_compute_region_instance_group_manager" "igm-rolling-update-policy" {
 	description        = "Terraform test instance group manager"
 	name               = "%s"
-<% if version.nil? || version == 'ga' -%>
-	instance_template  = "${google_compute_instance_template.igm-rolling-update-policy.self_link}"
-<% else -%>
 	version {
 		instance_template  = "${google_compute_instance_template.igm-rolling-update-policy.self_link}"
 		name = "primary"
 	}
-<% end -%>
 	base_instance_name = "igm-rolling-update-policy"
 	region             = "us-central1"
 	target_size        = 4
 	distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
-<% if version.nil? || version == 'ga' -%>
-	update_strategy = "ROLLING_UPDATE"
-
-	rolling_update_policy {
-<% else -%>
 
 	update_policy {
-<% end -%>
 		type                  = "PROACTIVE"
 		minimal_action        = "REPLACE"
 		max_surge_fixed       = 2
@@ -1075,7 +1064,9 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 	}
 }`, igm)
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy2(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1106,26 +1097,15 @@ resource "google_compute_instance_template" "igm-rolling-update-policy" {
 resource "google_compute_region_instance_group_manager" "igm-rolling-update-policy" {
 	description                = "Terraform test instance group manager"
 	name                       = "%s"
-<% if version.nil? || version == 'ga' -%>
-	instance_template          = "${google_compute_instance_template.igm-rolling-update-policy.self_link}"
-<% else -%>
 	version {
 		name              = "primary"
 		instance_template = "${google_compute_instance_template.igm-rolling-update-policy.self_link}"
 	}
-<% end -%>
 	base_instance_name         = "igm-rolling-update-policy"
 	region                     = "us-central1"
 	distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
 	target_size                = 3
-<% if version.nil? || version == 'ga' -%>
-	update_strategy            = "ROLLING_UPDATE"
-
-	rolling_update_policy {
-<% else -%>
-
 	update_policy {
-<% end -%>
 		type                  = "PROACTIVE"
 		minimal_action        = "REPLACE"
 		max_surge_fixed       = 2
@@ -1138,3 +1118,4 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 	}
 }`, igm)
 }
+<% end -%>
