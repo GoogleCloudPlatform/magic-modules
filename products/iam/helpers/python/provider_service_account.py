@@ -20,6 +20,7 @@ def encode_request(resource_request, module):
         'serviceAccount': resource_request
     }
 
+
 def decode_response(response, module):
     """Unstructures the request from accountId + rest of request"""
     if 'name' not in response:
