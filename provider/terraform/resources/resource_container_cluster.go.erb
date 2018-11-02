@@ -407,6 +407,8 @@ func resourceContainerCluster() *schema.Resource {
 <% if version.nil? || version == 'ga' -%>
 				// Remove return nil from expand when this is removed for good.
 				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% else -%>
+				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
 <% end -%>
 				Type:       schema.TypeList,
 				Optional:   true,
@@ -419,7 +421,6 @@ func resourceContainerCluster() *schema.Resource {
 						},
 					},
 				},
-				DiffSuppressFunc: podSecurityPolicyCfgSuppress,
 			},
 
 			"project": {
@@ -561,15 +562,10 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"master_ipv4_cidr_block": {
-<% if version.nil? || version == 'ga' -%>
-				Removed: "This field is in beta. Use private_cluster_config.master_ipv4_cidr_block in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% else -%>
-				Removed:    "Use private_cluster_config.master_ipv4_cidr_block instead.",
-				Computed:      true,
-<% end -%>
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
+				Removed:  "Use private_cluster_config.master_ipv4_cidr_block instead.",
+				Computed: true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"resource_labels": {
@@ -968,7 +964,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			d.SetPartial("addons_config")
 		}
 	}
-
+<% unless version.nil? || version == 'ga' -%>
 	if d.HasChange("enable_binary_authorization") {
 		enabled := d.Get("enable_binary_authorization").(bool)
 		req := &containerBeta.UpdateClusterRequest{
@@ -990,6 +986,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("enable_binary_authorization")
 	}
+<% end -%>
 
 	if d.HasChange("maintenance_policy") {
 		var req *containerBeta.SetMaintenancePolicyRequest
@@ -1263,6 +1260,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.SetPartial("master_auth")
 	}
 
+<% unless version.nil? || version == 'ga' -%>
 	if d.HasChange("pod_security_policy_config") {
 		c := d.Get("pod_security_policy_config")
 		req := &containerBeta.UpdateClusterRequest{
@@ -1287,6 +1285,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("pod_security_policy_config")
 	}
+<% end -%>
 
 	if d.HasChange("resource_labels") {
 		resourceLabels := d.Get("resource_labels").(map[string]interface{})
@@ -1842,6 +1841,7 @@ func masterAuthClientCertCfgSuppress(k, old, new string, r *schema.ResourceData)
 	return strings.HasSuffix(k, ".issue_client_certificate") && old == "" && new == "true"
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("pod_security_policy_config"); ok {
@@ -1855,3 +1855,4 @@ func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bo
 	}
 	return false
 }
+<% end -%>
