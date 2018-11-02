@@ -54,5 +54,5 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:
-<%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
+<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray
