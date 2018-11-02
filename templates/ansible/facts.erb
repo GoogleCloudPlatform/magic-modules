@@ -89,7 +89,7 @@ def main():
         )
     )
 
-    if 'scopes' not in module.params:
+    if not module.params['scopes']:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
 
 <%
