@@ -12,6 +12,7 @@
 # limitations under the License.
 
 def encode_request(resource_request, module):
+    """Structures the request as accountId + rest of request"""
     account_id = resource_request['name'].split('@')[0]
     del resource_request['name']
     return {
@@ -20,6 +21,7 @@ def encode_request(resource_request, module):
     }
 
 def decode_response(response, module):
+    """Unstructures the request from accountId + rest of request"""
     if 'name' not in response:
         return response
     response['name'] = response['name'].split('/')[-1]
