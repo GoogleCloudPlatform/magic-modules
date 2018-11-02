@@ -19,6 +19,6 @@ task: !ruby/object:Provider::Ansible::Task
     bucket: ansible-bucket
     src: modules.zip
     dest: ~/modules.zip
-    project: google.com:graphite-playground
-    auth_kind: serviceaccount
-    service_account_file: /Users/alexstephen/serviceaccounts/graphite_playground.json
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
