@@ -93,6 +93,7 @@ def download_file(module):
     results['changed'] = True
     return results
 
+
 def get_md5_local(path):
     md5 = hashlib.md5()
     with open(path, "rb") as f:
