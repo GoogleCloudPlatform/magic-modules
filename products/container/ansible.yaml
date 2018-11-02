@@ -28,12 +28,10 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      list_key: 'clusters'
   NodePool: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      list_key: 'nodePools'
   KubeConfig: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Provider::ResourceOverrides
@@ -47,5 +45,5 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - 'products/container/helpers/python/provider_node_pool.py'
 files: !ruby/object:Provider::Config::Files
   compile:
-<%= lines(indent(compile('provider/ansible/common~compile.yaml'), 4)) -%>
+<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
 tests: !ruby/object:Api::Resource::HashArray

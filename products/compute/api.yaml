@@ -1566,6 +1566,11 @@ objects:
             required: true
             resource: 'MachineType'
             imports: 'name'
+          - !ruby/object:Api::Type::String
+            name: 'minCpuPlatform'
+            description: |
+              Specifies a minimum CPU platform for the VM instance. Applicable
+              values are the friendly names of CPU platforms
 <%= indent(compile('products/compute/instance_metadata.yaml'), 10) %>
 <%= indent(compile('products/compute/instance_guestaccelerators.yaml'), 10) %>
 <%=
