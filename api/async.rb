@@ -101,7 +101,6 @@ module Api
         super
         check_property :path, String
         check_property :allowed, Array
-        check_property_list :allowed, String
       end
     end
 

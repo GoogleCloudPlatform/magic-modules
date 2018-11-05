@@ -46,6 +46,8 @@ objects:
       error: !ruby/object:Api::Async::Error
         path: 'error'
         message: 'message'
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'projects'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'
