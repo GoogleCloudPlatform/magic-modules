@@ -87,7 +87,6 @@ end
 # ALLOWED_TEST_URI URL.
 module Net
   class HTTP
-    # rubocop:disable Metrics/AbcSize - keep in a single injected method
     define_method(:initialize) do |*args|
       blocker = Google::Codegen::NetworkBlocker.instance
       unless blocker.allowed_test_hosts.map { |h| h[:host] }.include?(args[0])
@@ -103,7 +102,6 @@ module Net
         raise IOError, message
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
     instance_methods.each do |m|
       unless %i[get copy delete finish get get2 head head2 lock mkcol move
@@ -129,7 +127,6 @@ module Net
             end
           end
         end
-        # rubocop:enable Metrics/MethodLength
 
         return blocker.canned_response if request_allowed
 

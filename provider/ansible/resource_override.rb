@@ -42,8 +42,6 @@ module Provider
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def validate
         super
 
@@ -78,8 +76,6 @@ module Provider
         @facts ||= FactsOverride.new
         check_property :facts, FactsOverride
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
 
       private
 
