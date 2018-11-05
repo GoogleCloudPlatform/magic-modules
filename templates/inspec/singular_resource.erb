@@ -101,4 +101,8 @@ class <%= object.name -%> < Inspec.resource(1)
   def exists?
     !@fetched.nil?
   end
+<% unless object&.additional_functions.nil? -%>
+
+<%= lines(indent(object.additional_functions, 2)) -%>
+<% end -%>
 end

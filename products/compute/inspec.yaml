@@ -32,6 +32,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   DiskType: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
+  Firewall: !ruby/object:Provider::Inspec::ResourceOverride
+    additional_functions: |
+      def custom
+        # TODO: actually add code here
+      end
   ForwardingRule: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   GlobalAddress: !ruby/object:Provider::Inspec::ResourceOverride

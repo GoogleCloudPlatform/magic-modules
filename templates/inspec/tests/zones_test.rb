@@ -19,7 +19,7 @@ class ZonesTest < Zones
     return data
   end
 end
-    
+
 zones_fixture = JSON.parse(File.read('fixtures/zones_fixture.json'))
 
 RSpec.describe Zones, "zones" do
