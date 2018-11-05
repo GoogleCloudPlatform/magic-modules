@@ -1590,7 +1590,8 @@ func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSec
 		ForceSendFields: []string{"Enabled"},
 	}
 <% else -%>
-	// Removing lists is hard.
+	// Removing lists is hard - the element count (#) will have a diff from nil -> computed
+	// If we set this to empty on Read, it will be stable.
 	return nil
 <% end -%>
 }
