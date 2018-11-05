@@ -145,6 +145,7 @@ module Provider
         out_file: filepath
       )
     end
+
     def generate_resource_tests(data)
       return if data[:object].example.reject(&:skip_test).empty?
 

@@ -155,6 +155,7 @@ module Provider
             Hash[section[o.name].map { |file| mapper.call(o, file) }]
           end
     end
+
     def compile_file_list(output_folder, files, data = {})
       files.each do |target, source|
         Google::LOGGER.debug "Compiling #{source} => #{target}"
@@ -185,6 +186,7 @@ module Provider
         %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
       end
     end
+
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize
     def generate_objects(output_folder, types, version_name)
@@ -216,6 +218,7 @@ module Provider
       generate_resource data
       generate_resource_tests data
     end
+
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
       @config.datasources.validate

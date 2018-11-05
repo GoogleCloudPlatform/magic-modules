@@ -148,6 +148,7 @@ module Provider
             p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
       end
+
       def resourceref_hash_for_links(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         props = props_in_link.map do |p|

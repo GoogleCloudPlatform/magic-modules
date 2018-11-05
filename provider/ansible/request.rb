@@ -127,6 +127,7 @@ module Provider
           "#{hash_name}.get(#{unicode_string(prop.name)})"
         end
       end
+
       # rubocop:enable Metrics/MethodLength
       def request_output(prop, hash_name, module_name)
         return "response.get(#{quote_string(prop.name)})" \

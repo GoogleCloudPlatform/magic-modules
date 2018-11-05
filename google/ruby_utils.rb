@@ -37,6 +37,7 @@ module Google
     def method_decl(name, args)
       ["def #{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
     end
+
     def method_call(name, args, indent = 0)
       args = args.compact
       format([
