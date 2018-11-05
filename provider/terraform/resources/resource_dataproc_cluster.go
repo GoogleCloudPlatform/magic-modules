@@ -362,6 +362,30 @@ func instanceConfigSchema() *schema.Schema {
 					},
 				},
 
+				// Note: preemptible workers don't support accelerators
+				"accelerators": {
+					// Terraform was unhappy when this was a set, even though it probably could be one
+					Type:     schema.TypeList,
+					Optional: true,
+					ForceNew: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"accelerator_type": {
+								Type:             schema.TypeString,
+								Required:         true,
+								ForceNew:         true,
+								DiffSuppressFunc: compareSelfLinkOrResourceName,
+							},
+
+							"accelerator_count": {
+								Type:     schema.TypeInt,
+								Required: true,
+								ForceNew: true,
+							},
+						},
+					},
+				},
+
 				"instance_names": {
 					Type:     schema.TypeList,
 					Computed: true,
@@ -607,7 +631,24 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 			}
 		}
 	}
+
+	icg.Accelerators = expandAccelerators(cfg["accelerators"].([]interface{}))
 	return icg
+}
+
+func expandAccelerators(configured []interface{}) []*dataproc.AcceleratorConfig {
+	accelerators := make([]*dataproc.AcceleratorConfig, 0, len(configured))
+	for _, raw := range configured {
+		data := raw.(map[string]interface{})
+		accelerator := dataproc.AcceleratorConfig{
+			AcceleratorTypeUri: data["accelerator_type"].(string),
+			AcceleratorCount:   int64(data["accelerator_count"].(int)),
+		}
+
+		accelerators = append(accelerators, &accelerator)
+	}
+
+	return accelerators
 }
 
 func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -746,6 +787,20 @@ func flattenSoftwareConfig(d *schema.ResourceData, sc *dataproc.SoftwareConfig) 
 	return []map[string]interface{}{data}
 }
 
+func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) []map[string]interface{} {
+	acceleratorsSchema := make([]map[string]interface{}, 0, len(accelerators))
+	for _, accelerator := range accelerators {
+		data := map[string]interface{}{
+			"accelerator_type":  accelerator.AcceleratorTypeUri,
+			"accelerator_count": accelerator.AcceleratorCount,
+		}
+
+		acceleratorsSchema = append(acceleratorsSchema, data)
+	}
+
+	return acceleratorsSchema
+}
+
 func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]map[string]interface{}, error) {
 
 	actions := []map[string]interface{}{}
@@ -819,6 +874,8 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
 		}
+
+		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 	}
 
 	data["disk_config"] = []map[string]interface{}{disk}

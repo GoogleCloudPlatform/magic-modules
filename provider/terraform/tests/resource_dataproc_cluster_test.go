@@ -134,6 +134,22 @@ func TestAccDataprocCluster_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withAccelerators(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(10)
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDataprocClusterDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withAccelerators(rnd),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withInternalIpOnlyTrue(t *testing.T) {
 	t.Parallel()
 
@@ -626,6 +642,35 @@ func testAccDataprocCluster_basic(rnd string) string {
 resource "google_dataproc_cluster" "basic" {
 	name                  = "dproc-cluster-test-%s"
 	region                = "us-central1"
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_withAccelerators(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "accelerated_cluster" {
+	name                  = "dproc-cluster-test-%s"
+	region                = "us-central1"
+
+	cluster_config {
+		gce_cluster_config {
+			zone = "us-central1-a"
+		}
+
+		master_config {
+			accelerators {
+				accelerator_type  = "nvidia-tesla-k80"
+				accelerator_count = "1"
+			}
+		}
+
+		worker_config {
+			accelerators {
+				accelerator_type  = "nvidia-tesla-k80"
+				accelerator_count = "1"
+			}
+		}
+	}
 }
 `, rnd)
 }

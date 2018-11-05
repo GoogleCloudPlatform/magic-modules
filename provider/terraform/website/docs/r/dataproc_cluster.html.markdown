@@ -16,14 +16,18 @@ Manages a Cloud Dataproc cluster resource within GCP. For more information see
 `labels`,`cluster_config.worker_config.num_instances` and `cluster_config.preemptible_worker_config.num_instances` are non-updateable. Changing others will cause recreation of the
 whole cluster!
 
-## Example usage
+## Example Usage - Basic
 
 ```hcl
 resource "google_dataproc_cluster" "simplecluster" {
     name       = "simplecluster"
     region     = "us-central1"
 }
+```
 
+## Example Usage - Advanced
+
+```hcl
 resource "google_dataproc_cluster" "mycluster" {
     name       = "mycluster"
     region     = "us-central1"
@@ -76,6 +80,28 @@ resource "google_dataproc_cluster" "mycluster" {
         }
 
     }
+}
+```
+
+## Example Usage - Using a GPU accelerator
+
+```hcl
+resource "google_dataproc_cluster" "accelerated_cluster" {
+    name                  = "my-cluster-with-gpu"
+    region                = "us-central1"
+
+    cluster_config {
+        gce_cluster_config {
+            zone = "us-central1-a"
+        }
+
+        master_config {
+            accelerators {
+                accelerator_type  = "nvidia-tesla-k80"
+                accelerator_count = "1"
+			}
+		}
+	}
 }
 ```
 
@@ -239,6 +265,17 @@ The `cluster_config.master_config` block supports:
 	* `disk_config.num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
 
+* `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
+
+    * `accelerators.accelerator_type` - (Required) Full URL, partial URI, or short name of the accelerator type resource to expose to this instance.
+    If you are using the Cloud Dataproc Auto Zone Placement feature, you must use the short name of the accelerator type resource, for example, `nvidia-tesla-k80`.
+
+    * `accelerators.accelerator_count` - (Required) The number of the accelerator cards of this type exposed to this instance. Often restricted to one of `1`, `2`, `4`, or `8`.
+
+~> The Cloud Dataproc API can return unintuitive error messages when using accelerators; even when you have defined an accelerator, Auto Zone Placement does not exclusively select
+zones that have that accelerator available. If you get a 400 error that the accelerator can't be found, this is a likely cause. Make sure you check [accelerator availability by zone](https://cloud.google.com/compute/docs/reference/rest/v1/acceleratorTypes/list)
+if you are trying to use accelerators in a given zone.
+
 - - -
 
 The `cluster_config.worker_config` block supports:
@@ -281,6 +318,17 @@ The `cluster_config.worker_config` block supports:
 
     * `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each worker cluster node. Defaults to 0.
+
+* `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
+
+    * `accelerators.accelerator_type` - (Required) Full URL, partial URI, or short name of the accelerator type resource to expose to this instance.
+    If you are using the Cloud Dataproc Auto Zone Placement feature, you must use the short name of the accelerator type resource, for example, `nvidia-tesla-k80`.
+
+    * `accelerators.accelerator_count` - (Required) The number of the accelerator cards of this type exposed to this instance. Often restricted to one of `1`, `2`, `4`, or `8`.
+
+~> The Cloud Dataproc API can return unintuitive error messages when using accelerators; even when you have defined an accelerator, Auto Zone Placement does not exclusively select
+zones that have that accelerator available. If you get a 400 error that the accelerator can't be found, this is a likely cause. Make sure you check [accelerator availability by zone](https://cloud.google.com/compute/docs/reference/rest/v1/acceleratorTypes/list)
+if you are trying to use accelerators in a given zone.
 
 - - -
 
