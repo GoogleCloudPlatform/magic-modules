@@ -382,6 +382,6 @@ jobs:
       plan:
         - get: magic-modules-new-prs
         - task: inspec-integration
-          file: magic-modules/.ci/acceptance-tests/inspec-integration.yml
+          file: magic-modules-new-prs/.ci/magic-modules/inspec-integration.yml
           params:
             GOOGLE_JSON_ACCOUNT: "TODO"

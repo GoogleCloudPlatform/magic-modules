@@ -14,7 +14,7 @@ export GOPATH=${PWD}/go
 echo "${GOOGLE_JSON_ACCOUNT}" > /tmp/google-account.json
 
 git clone https://github.com/modular-magician/inspec-gcp.git
-pushd inspec/test/integration
+pushd inspec-gcp/test/integration
 
 # Generate tfvars
 pushd attributes
