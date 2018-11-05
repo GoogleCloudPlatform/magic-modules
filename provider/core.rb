@@ -46,9 +46,6 @@ module Provider
     # generators, it is okay to ignore Rubocop warnings about method size and
     # complexity.
     #
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
     def generate(output_folder, types, version_name)
       generate_objects(output_folder, types, version_name)
       copy_files(output_folder) \
@@ -158,9 +155,6 @@ module Provider
             Hash[section[o.name].map { |file| mapper.call(o, file) }]
           end
     end
-
-    # rubocop:disable Metrics/MethodLength
-    # rubocop:disable Metrics/AbcSize
     def compile_file_list(output_folder, files, data = {})
       files.each do |target, source|
         Google::LOGGER.debug "Compiling #{source} => #{target}"
@@ -193,10 +187,6 @@ module Provider
     end
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/AbcSize
-
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
-    # rubocop:disable Metrics/AbcSize
     def generate_objects(output_folder, types, version_name)
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
@@ -226,10 +216,6 @@ module Provider
       generate_resource data
       generate_resource_tests data
     end
-
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
       @config.datasources.validate

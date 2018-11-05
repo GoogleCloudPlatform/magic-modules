@@ -23,7 +23,6 @@ require 'google/golang_utils'
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
   # resources.
-  # rubocop:disable Metrics/ClassLength
   class Terraform < Provider::AbstractCore
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
@@ -146,8 +145,6 @@ module Provider
         out_file: filepath
       )
     end
-
-    # rubocop:disable Metrics/AbcSize
     def generate_resource_tests(data)
       return if data[:object].example.reject(&:skip_test).empty?
 

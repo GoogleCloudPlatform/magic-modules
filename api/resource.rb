@@ -16,7 +16,6 @@ require 'google/string_utils'
 
 module Api
   # An object available in the product
-  # rubocop:disable Metrics/ClassLength
   class Resource < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
@@ -233,8 +232,6 @@ module Api
     # the number of properties, it is okay to ignore Rubocop warnings about
     # method size and complexity.
     #
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
     def validate
       super
       check_optional_property :async, Api::Async
@@ -447,9 +444,6 @@ module Api
     #   props- a list of props
     #   original_object - the original object containing props. This is to
     #                     avoid self-referencing objects.
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
     def resourcerefs_for_properties(props, original_obj)
       rrefs = []
       props.each do |p|

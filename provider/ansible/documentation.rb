@@ -18,9 +18,6 @@ require 'provider/ansible/manifest'
 
 # Rubocop doesn't like this file because the hashes are complicated.
 # Humans like this file because the hashes are explicit and easy to read.
-# rubocop:disable Metrics/AbcSize
-# rubocop:disable Metrics/CyclomaticComplexity
-# rubocop:disable Metrics/PerceivedComplexity
 module Provider
   module Ansible
     # Responsible for building out YAML documentation blocks.

@@ -24,7 +24,6 @@ module Provider
     end
 
     # Create a directory of examples per resource
-    # rubocop:disable Metrics/AbcSize
     def generate_resource(data)
       return if data[:object].example.reject(&:skip_test).empty?
 

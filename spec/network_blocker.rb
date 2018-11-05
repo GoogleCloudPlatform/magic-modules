@@ -87,7 +87,6 @@ end
 # ALLOWED_TEST_URI URL.
 module Net
   class HTTP
-    # rubocop:disable Metrics/AbcSize - keep in a single injected method
     define_method(:initialize) do |*args|
       blocker = Google::Codegen::NetworkBlocker.instance
       unless blocker.allowed_test_hosts.map { |h| h[:host] }.include?(args[0])

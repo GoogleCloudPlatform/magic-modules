@@ -16,7 +16,6 @@ require 'google/string_utils'
 
 module Api
   # Represents a property type
-  # rubocop:disable Metrics/ClassLength
   class Type < Api::Object::Named
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
@@ -253,8 +252,6 @@ module Api
       STRING_ARRAY_TYPE = [Api::Type::Array, Api::Type::String].freeze
       NESTED_ARRAY_TYPE = [Api::Type::Array, Api::Type::NestedObject].freeze
       RREF_ARRAY_TYPE = [Api::Type::Array, Api::Type::ResourceRef].freeze
-
-      # rubocop:disable Metrics/CyclomaticComplexity
       def validate
         super
         if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)

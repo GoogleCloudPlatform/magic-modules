@@ -22,7 +22,6 @@ require 'active_support/inflector'
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
-  # rubocop:disable Metrics/ClassLength
   class Inspec < Provider::Core
     include Google::RubyUtils
     # Settings for the provider

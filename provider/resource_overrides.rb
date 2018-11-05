@@ -35,7 +35,6 @@ module Provider
   #         !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'baz'
   #   ...
-  # rubocop:disable Metrics/ClassLength
   class ResourceOverrides < Api::Object
     def consume_config(api, config)
       @__api = api

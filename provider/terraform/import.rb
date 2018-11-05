@@ -28,7 +28,6 @@ module Provider
       # c) short id w/o defaults: {{name}}
       #
       # Fields with default values are `project`, `region` and `zone`.
-      # rubocop:disable Metrics/AbcSize
       def import_id_formats(resource)
         if resource.import_format.nil? || resource.import_format.empty?
           underscored_base_url = resource.base_url.gsub(

@@ -30,7 +30,6 @@ module Provider
     # Code generator for Ansible Cookbooks that manage Google Cloud Platform
     # resources.
     # TODO(alexstephen): Split up class into multiple modules.
-    # rubocop:disable Metrics/ClassLength
     class Core < Provider::Core
       PYTHON_TYPE_FROM_MM_TYPE = {
         'Api::Type::NestedObject' => 'dict',
@@ -101,7 +100,6 @@ module Provider
       # * module will always be included.
       # * extra_data is a dict of extra information.
       # * extra_url will have a URL chunk to be appended after the URL.
-      # rubocop:disable Metrics/MethodLength
       def emit_link(name, url, object, has_extra_data = false)
         params = emit_link_var_args(url, has_extra_data)
         if rrefs_in_link(url, object)
@@ -150,8 +148,6 @@ module Provider
             p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly
         end.any?
       end
-
-      # rubocop:disable Metrics/AbcSize
       def resourceref_hash_for_links(link, object)
         props_in_link = link.scan(/{([a-z_]*)}/).flatten
         props = props_in_link.map do |p|
