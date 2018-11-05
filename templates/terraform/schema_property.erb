@@ -102,32 +102,26 @@
     // Default schema.HashSchema is used.
   <% end -%>
 	<% end -%>
-<% elsif property.is_a?(Api::Type::NameValues) -%>
-  <% if property.key_type == 'Api::Type::String' && property.value_type == 'Api::Type::String' -%>
+<% elsif property.is_a?(Api::Type::KeyValuePairs) -%>
   Elem: &schema.Schema{Type: schema.TypeString},
-  <% elsif string_to_object_map?(property) -%>
-  Elem: &schema.Resource{
-    Schema: map[string]*schema.Schema{
-      "<%= property.key_name -%>": {
-        Type:     schema.TypeString,
-        Required: true,
-        <% if force_new?(property, object) -%>
-        ForceNew: true,
-        <% end -%>
-      },
-      <% order_properties(property.value_type.properties).each do |prop| -%>
-        <%= lines(build_schema_property(prop, object)) -%>
-      <% end -%>
-    },
-  },
-  <% if !property.set_hash_func.nil? -%>
-  Set: <%= property.set_hash_func -%>,
-  <% end -%>
-  <% else -%>
-    // TODO(magic-modules): Handle this map specially - Terraform maps are String->String only,
-    // and support has been added for the String->Object case,
-    // but this map is marked as being <%= property.key_type -%>-><%= property.value_type -%>.
-  <% end -%>
+<% elsif property.is_a?(Api::Type::Map) -%>
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"<%= property.key_name -%>": {
+				Type:     schema.TypeString,
+				Required: true,
+				<% if force_new?(property, object) -%>
+				ForceNew: true,
+				<% end -%>
+			},
+			<% order_properties(property.value_type.properties).each do |prop| -%>
+				<%= lines(build_schema_property(prop, object)) -%>
+			<% end -%>
+		},
+	},
+	<% if !property.set_hash_func.nil? -%>
+	Set: <%= property.set_hash_func -%>,
+	<% end -%>
 <% end -%>
 <% if property.sensitive -%>
     Sensitive: true,

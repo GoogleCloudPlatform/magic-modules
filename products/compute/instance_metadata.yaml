@@ -31,10 +31,9 @@
 # adding the 'fingerprint' of the last metadata to allow update.
 #
 # To comply with the API please add an encoder: and decoder: to the provider.
-- !ruby/object:Api::Type::NameValues
+- !ruby/object:Api::Type::KeyValuePairs
   name: 'metadata'
   description: |
     The metadata key/value pairs to assign to instances that are
     created from this template. These pairs can consist of custom
     metadata or predefined keys.
-  value_type: Api::Type::String
