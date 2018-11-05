@@ -24,7 +24,7 @@ module Google
     # quotes becomes a ruby string without quotes unless you explicitly set
     # quotes in the string like "\"foo\"" which is not a pattern we want to
     # see in our yaml config files.
-    def python_literal(value, spaces=0)
+    def python_literal(value, spaces_to_use=0)
       if value.is_a?(String) || value.is_a?(Symbol)
         "'#{value}'"
       elsif value.is_a?(Numeric)
@@ -32,10 +32,8 @@ module Google
       elsif value.is_a?(Hash) && (value.keys.length == 1)
         "{#{quote_string(value.keys.first)}: #{python_literal(value[value.keys.first])}}"
       elsif value.is_a?(Array)
-        format([
-          ["[#{value.map { |x| python_literal(x) }.join(', ')}]"],
-          ["[#{value.map { |x| python_literal(x) }.join("\n") }]"],
-        ], 0, spaces)
+        values = value.map { |x| python_literal(x) }
+        array_format(values, spaces_to_use)
       elsif value == true
         'True'
       elsif value == false
@@ -55,6 +53,18 @@ module Google
     # Arguments may have nils and will be ignored.
     def method_call(name, args)
       "#{name}(#{args.compact.join(', ')})"
+    end
+
+    private
+
+    def array_format(values, spaces_to_use)
+      format([
+        ["[#{values.join(', ')}]"],
+        # Place everything on separate lines
+        ["[#{values.first}",
+         values[1..-2].map { |x| indent(x, spaces_to_use) },
+         "#{indent(values.last, spaces_to_use)}]"]
+      ], 0, spaces_to_use)
     end
   end
 end
