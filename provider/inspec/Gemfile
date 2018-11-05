@@ -15,7 +15,4 @@
 source 'https://rubygems.org'
 gem 'bundle'
 gem 'rubocop'
-
-group :inspec do
-  gem 'inspec', '~> 2.2', '>= 2.2.10'
-end
+gem 'inspec', '>= 3.0.0'
