@@ -112,10 +112,7 @@ def main():
 <%= lines(indent_list(mod_props, 12)) -%>
 <% unless conflicts.empty? -%>
         ),
-        mutually_exclusive=<%= format([
-          python_literal(conflicts),
-          python_literal(conflicts).gsub('], ', "],\n#{' ' * 28}")
-          ], 0, 28) %>
+        mutually_exclusive=<%= python_literal(conflicts, 28) %>
 <% else -%>
         )
 <% end -%>
