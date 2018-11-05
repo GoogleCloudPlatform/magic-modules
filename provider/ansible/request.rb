@@ -15,7 +15,6 @@ module Provider
   module Ansible
     # Responsible for building out the resource_to_request and
     # request_from_hash methods.
-    # rubocop:disable Metrics/ModuleLength
     module Request
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
@@ -128,12 +127,7 @@ module Provider
           "#{hash_name}.get(#{unicode_string(prop.name)})"
         end
       end
-      # rubocop:enable Metrics/MethodLength
 
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
       def request_output(prop, hash_name, module_name)
         return "response.get(#{quote_string(prop.name)})" \
           if prop.is_a? Api::Type::FetchedExternal
@@ -178,11 +172,6 @@ module Provider
           "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
     end
-    # rubocop:enable Metrics/ModuleLength
   end
 end

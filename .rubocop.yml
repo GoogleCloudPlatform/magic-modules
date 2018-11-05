@@ -11,35 +11,28 @@ AllCops:
     - 'vendor/**/*'
 
 Metrics/AbcSize:
-  Max: 20
+  Enabled: false
 
-Metrics/LineLength:
-  Max: 100
-
-# TODO(nelsonjr): Refactor this class and remove Rubocop exemptions below
 Metrics/ClassLength:
-  Exclude:
-    - 'google/yaml_validator.rb'
-    - 'provider/core.rb'
-    - 'provider/puppet.rb'
-    - 'provider/legacy_test_data_formatter.rb'
-    # TODO(alexstephen): Remove this when generate_object is removed
-    - 'provider/chef.rb'
-    - 'tools/end2end/tester_base.rb'
+  Enabled: false
 
-Metrics/ModuleLength:
-  Exclude:
-    - 'compile/core.rb'
+Metrics/CyclomaticComplexity:
+  Enabled: false
 
 Metrics/MethodLength:
-  Max: 25
+  Enabled: false
 
-Security/Eval:
-  Exclude:
-    - 'provider/legacy_test_data_generator.rb'
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
 
 Style/FrozenStringLiteralComment:
   Enabled: false
+
+Metrics/LineLength:
+  Max: 100
 
 Style/CommandLiteral:
   EnforcedStyle: percent_x

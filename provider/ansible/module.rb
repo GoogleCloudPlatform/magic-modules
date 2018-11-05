@@ -50,8 +50,6 @@ module Provider
       end
 
       # Returns an array of all base options for a given property.
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/AbcSize
       def prop_options(prop, _object, spaces)
         [
           ('required=True' if prop.required && !prop.default_value),
@@ -65,11 +63,8 @@ module Provider
             if prop.aliases)
         ].compact
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/AbcSize
 
       # Returns a formatted string represented the choices of an enum
-      # rubocop:disable Metrics/AbcSize
       def choices_enum(prop, spaces)
         name = prop.out_name.underscore
         type = "type=#{quote_string(python_type(prop))}"
@@ -92,8 +87,6 @@ module Provider
                  ]
                ], 0, choices_indent)
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/MethodLength
     end
   end
 end

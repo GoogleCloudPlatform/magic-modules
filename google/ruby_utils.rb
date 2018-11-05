@@ -38,7 +38,6 @@ module Google
       ["def #{name}", ("(#{args.compact.join(', ')})" unless args.empty?)].compact.join
     end
 
-    # rubocop:disable Metrics/AbcSize
     def method_call(name, args, indent = 0)
       args = args.compact
       format([
@@ -59,6 +58,5 @@ module Google
                ]
              ], 0, indent)
     end
-    # rubocop:enable Metrics/AbcSize
   end
 end
