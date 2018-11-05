@@ -102,7 +102,6 @@ module Net
         raise IOError, message
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
     instance_methods.each do |m|
       unless %i[get copy delete finish get get2 head head2 lock mkcol move
@@ -128,7 +127,6 @@ module Net
             end
           end
         end
-        # rubocop:enable Metrics/MethodLength
 
         return blocker.canned_response if request_allowed
 

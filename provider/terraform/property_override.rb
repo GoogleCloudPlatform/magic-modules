@@ -121,7 +121,6 @@ module Provider
         raise "'default_value' and 'default_from_api' cannot be both set"  \
           if default_from_api && !default_value.nil?
       end
-      # rubocop:enable Metrics/MethodLength
 
       def apply(api_property)
         unless description.nil?

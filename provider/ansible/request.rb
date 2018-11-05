@@ -128,7 +128,6 @@ module Provider
         end
       end
 
-      # rubocop:enable Metrics/MethodLength
       def request_output(prop, hash_name, module_name)
         return "response.get(#{quote_string(prop.name)})" \
           if prop.is_a? Api::Type::FetchedExternal
@@ -173,11 +172,6 @@ module Provider
           "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
     end
-    # rubocop:enable Metrics/ModuleLength
   end
 end

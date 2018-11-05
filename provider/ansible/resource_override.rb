@@ -76,8 +76,6 @@ module Provider
         @facts ||= FactsOverride.new
         check_property :facts, FactsOverride
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
 
       private
 

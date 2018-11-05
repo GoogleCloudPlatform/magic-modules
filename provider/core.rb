@@ -66,9 +66,6 @@ module Provider
       apply_file_acls(output_folder) \
         unless @config.files.nil? || @config.files.permissions.nil?
     end
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
 
     def copy_files(output_folder)
       copy_file_list(output_folder, @config.files.copy)
@@ -187,8 +184,6 @@ module Provider
       end
     end
 
-    # rubocop:enable Metrics/MethodLength
-    # rubocop:enable Metrics/AbcSize
     def generate_objects(output_folder, types, version_name)
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
@@ -208,9 +203,6 @@ module Provider
         end
       end
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
-    # rubocop:enable Metrics/AbcSize
 
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
@@ -243,9 +235,6 @@ module Provider
         end
       end
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
-    # rubocop:enable Metrics/AbcSize
 
     def generate_datasource(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)

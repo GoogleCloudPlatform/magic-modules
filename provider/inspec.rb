@@ -194,5 +194,4 @@ module Provider
       "    * `#{property.name}`: #{property.description.split("\n").join(' ')}"
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

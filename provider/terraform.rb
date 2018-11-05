@@ -169,7 +169,5 @@ module Provider
       # TODO: error check goimports
       %x(goimports -w #{filepath})
     end
-    # rubocop:enable Metrics/AbcSize
   end
-  # rubocop:enable Metrics/ClassLength
 end

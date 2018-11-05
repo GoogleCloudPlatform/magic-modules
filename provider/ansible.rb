@@ -131,8 +131,6 @@ module Provider
           ].join("\n")
         end
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
 
       def emit_method(name, args, code, _file_name, _opts = {})
         [
@@ -169,8 +167,6 @@ module Provider
         end
         ['{', indent_list(props, 4), '}'].join("\n")
       end
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/AbcSize
 
       def emit_link_var_args(url, extra_data)
         extra_url = url.include?('<|extra|>')
@@ -284,6 +280,5 @@ module Provider
         data[:object].instance_variable_set(:@facts, facts_info)
       end
     end
-    # rubocop:enable Metrics/ClassLength
   end
 end

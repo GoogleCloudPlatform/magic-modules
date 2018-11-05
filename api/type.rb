@@ -268,7 +268,6 @@ module Api
         check_optional_property :min_size, ::Integer
         check_optional_property :max_size, ::Integer
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       def item_type_class
         return Api::Type::NestedObject if @item_type.is_a? NestedObject
@@ -559,5 +558,4 @@ module Api
       ]
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

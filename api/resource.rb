@@ -274,8 +274,6 @@ module Api
 
       check_identity unless @identity.nil?
     end
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/MethodLength
 
     def properties
       (@properties || []).reject(&:exclude)
@@ -476,10 +474,5 @@ module Api
       end
       rrefs.uniq
     end
-
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
   end
-  # rubocop:enable Metrics/ClassLength
 end

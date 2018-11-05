@@ -63,8 +63,6 @@ module Provider
             if prop.aliases)
         ].compact
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/AbcSize
 
       # Returns a formatted string represented the choices of an enum
       def choices_enum(prop, spaces)
@@ -89,8 +87,6 @@ module Provider
                  ]
                ], 0, choices_indent)
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/MethodLength
     end
   end
 end

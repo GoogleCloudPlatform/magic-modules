@@ -124,6 +124,3 @@ module Provider
     end
   end
 end
-# rubocop:enable Metrics/AbcSize
-# rubocop:enable Metrics/CyclomaticComplexity
-# rubocop:enable Metrics/PerceivedComplexity

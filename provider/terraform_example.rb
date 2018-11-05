@@ -55,7 +55,6 @@ module Provider
         )
       end
     end
-    # rubocop:enable Metrics/AbcSize
 
     # We don't want to generate anything but the resource.
     def generate_resource_tests(data) end

@@ -58,6 +58,5 @@ module Google
                ]
              ], 0, indent)
     end
-    # rubocop:enable Metrics/AbcSize
   end
 end

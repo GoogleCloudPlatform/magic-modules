@@ -54,7 +54,6 @@ module Provider
 
         (id_formats + [short_id_format, short_id_default_format]).uniq.reject(&:empty?)
       end
-      # rubocop:enable Metrics/AbcSize
     end
   end
 end

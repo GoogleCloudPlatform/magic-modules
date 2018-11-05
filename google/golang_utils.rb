@@ -37,7 +37,5 @@ module Google
         raise "Unsupported go literal #{value}"
       end
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
   end
 end
