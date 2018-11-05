@@ -124,12 +124,11 @@ objects:
           The fully-qualified unique name of the dataset in the format
           projectId:datasetId. The dataset name without the project name is
           given in the datasetId field
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: >
           The labels associated with this dataset. You can use these to
           organize and group your datasets
-        value_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'lastModifiedTime'
         description: >
@@ -184,12 +183,11 @@ objects:
         name: 'id'
         description: 'An opaque ID uniquely identifying the table.'
         output: true
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: >
           The labels associated with this dataset. You can use these to
           organize and group your datasets
-        value_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'lastModifiedTime'
         description: >

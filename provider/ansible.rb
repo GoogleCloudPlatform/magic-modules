@@ -36,7 +36,7 @@ module Provider
         'Api::Type::Array' => 'list',
         'Api::Type::Boolean' => 'bool',
         'Api::Type::Integer' => 'int',
-        'Api::Type::NameValues' => 'dict',
+        'Api::Type::KeyValuePairs' => 'dict',
         'Provider::Ansible::FilterProp' => 'list'
       }.freeze
 

@@ -4,7 +4,7 @@
   if !nested_properties.empty?
 -%>
 The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%>:
-<%- if string_to_object_map?(property) %>
+<%- if property.is_a?(Api::Type::Map) %>
 * `<%= property.key_name.underscore -%>` - (Required) The identifier for this object. Format specified above.
 <% end -%>
 <% nested_properties.each do |prop| -%>

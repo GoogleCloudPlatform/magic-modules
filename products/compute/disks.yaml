@@ -38,11 +38,10 @@
   name: 'lastDetachTimestamp'
   description: 'Last dettach timestamp in RFC3339 text format.'
   output: true
-- !ruby/object:Api::Type::NameValues
+- !ruby/object:Api::Type::KeyValuePairs
   name: 'labels'
   description: |
     Labels to apply to this disk.  A list of key->value pairs.
-  value_type: Api::Type::String
   update_verb: :POST
   update_url: 'projects/{{project}}/<%= ctx[:location] -%>s/{{<%= ctx[:location] -%>}}/disks/{{name}}/setLabels'
 - !ruby/object:Api::Type::Array

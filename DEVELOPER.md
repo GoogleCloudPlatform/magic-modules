@@ -158,7 +158,9 @@ Currently MM supports the following types:
    specified by the `values` property.
 -  `Api::Type::Integer`: An integer number.
 -  `Api::Type::Long`: A long number
--  Api::Type::NameValues
+-  `Api::Type::KeyValuePairs`: A string -> string key -> value pair such as
+   labels
+-  `Api::Type::Map`: A string -> `Api::Type::NestedObject` map.
 -  `Api::Type::NestedObject`: A composite field, composed of inner fields. This
    is used for structures that are nested.
 -  <a id="resource-ref"></a>`Api::Type::ResourceRef`: A reference to another object described in the

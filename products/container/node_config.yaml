@@ -54,9 +54,8 @@
     The Google Cloud Platform Service Account to be used by the node
     VMs.  If no Service Account is specified, the "default" service
     account is used.
-- !ruby/object:Api::Type::NameValues
+- !ruby/object:Api::Type::KeyValuePairs
   name: 'metadata'
-  value_type: Api::Type::String
   description: |
     The metadata key/value pairs assigned to instances in the cluster.
 
@@ -81,9 +80,8 @@
   description: |
     The image type to use for this node.  Note that for a given image
     type, the latest version of it will be used.
-- !ruby/object:Api::Type::NameValues
+- !ruby/object:Api::Type::KeyValuePairs
   name: 'labels'
-  value_type: Api::Type::String
   description: |
     The map of Kubernetes labels (key/value pairs) to be applied to
     each node. These will added in addition to any default label(s)
