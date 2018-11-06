@@ -24,8 +24,6 @@ module Google
     # quotes becomes a ruby string without quotes unless you explicitly set
     # quotes in the string like "\"foo\"" which is not a pattern we want to
     # see in our yaml config files.
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
     def python_literal(value)
       if value.is_a?(String) || value.is_a?(Symbol)
         "'#{value}'"
@@ -41,8 +39,6 @@ module Google
         raise "Unsupported Python literal #{value}"
       end
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
 
     # Generates a method declaration with function name `name` and args `args`
     # Arguments may have nils and will be ignored.
