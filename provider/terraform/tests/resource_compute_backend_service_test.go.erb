@@ -589,6 +589,7 @@ func TestAccComputeBackendService_withMaxConnectionsPerInstance(t *testing.T) {
 	}
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 	t.Parallel()
 
@@ -619,6 +620,7 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccComputeBackendService_basic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
@@ -1036,6 +1038,7 @@ resource "google_compute_health_check" "default" {
 `, serviceName, maxConnectionsPerInstance, igName, itName, checkName)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccComputeBackendService_withCustomHeaders(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1053,3 +1056,4 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, serviceName, checkName)
 }
+<% end -%>
