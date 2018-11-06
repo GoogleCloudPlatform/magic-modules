@@ -59,8 +59,8 @@ module Google
       format([
         ["[#{values.join(', ')}]"],
         # Place everything on separate lines
-        ["[#{values.first}",
-         values[1..-2].map { |x| indent(x, spaces_to_use) },
+        ["[#{values.first},",
+         values[1..-2].map { |x| "#{indent(x, spaces_to_use)}," },
          "#{indent(values.last, spaces_to_use)}]"]
       ], 0, spaces_to_use)
     end
