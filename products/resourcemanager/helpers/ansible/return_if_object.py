@@ -15,7 +15,7 @@ try:
 except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
     module.fail_json(msg="Invalid JSON response with error: %s" % inst)
 
-if navigate_hash(result, ['error', 'errors']):
-    module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
+if navigate_hash(result, ['error', 'message']):
+    module.fail_json(msg=navigate_hash(result, ['error', 'message']))
 
 return result
