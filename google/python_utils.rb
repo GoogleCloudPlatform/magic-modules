@@ -31,6 +31,10 @@ module Google
         value.to_s
       elsif value.is_a?(Array)
         "[#{value.map { |x| python_literal(x) }.join(' ,')}]"
+      elsif value == true
+        'True'
+      elsif value == false
+        'False'
       else
         raise "Unsupported Python literal #{value}"
       end

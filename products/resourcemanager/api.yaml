@@ -29,6 +29,25 @@ objects:
     description: |
       Represents a GCP Project. A project is a container for ACLs, APIs, App
       Engine Apps, VMs, and other Google Cloud Platform resources.
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'notinuse'
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'projects'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -90,7 +109,6 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'id'
             description: Id of the organization
-
   - !ruby/object:Api::Resource
     name: 'Lien'
     base_url: liens

@@ -79,10 +79,14 @@ module Api
     # Represents the results of an Operation request
     class Result < Api::Object
       attr_reader :path
+      attr_reader :resource_inside_response
 
       def validate
         super
-        check_property :path, String
+        default_value_property :resource_inside_response, false
+
+        check_optional_property :path, String
+        check_optional_property :resource_inside_response, :boolean
       end
     end
 
@@ -96,9 +100,7 @@ module Api
       def validate
         super
         check_property :path, String
-        check_property :complete, String
         check_property :allowed, Array
-        check_property_list :allowed, String
       end
     end
 
