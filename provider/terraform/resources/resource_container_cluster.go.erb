@@ -187,6 +187,41 @@ func resourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"cluster_autoscaling": {
+				Type:     schema.TypeList,
+				Computed: true,
+				MaxItems: 1,
+<% if version.nil? || version == 'ga' -%>
+				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% else -%>
+				Optional: true,
+<% end -%>
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"resource_limits": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"resource_type": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"minimum": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+									"maximum": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
 			"cluster_ipv4_cidr": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -622,6 +657,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			Enabled:         d.Get("enable_binary_authorization").(bool),
 			ForceSendFields: []string{"Enabled"},
 		},
+		Autoscaling:    expandClusterAutoscaling(d.Get("cluster_autoscaling")),
 <% end -%>
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		ResourceLabels: expandStringMap(d, "resource_labels"),
@@ -801,6 +837,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 <% unless version.nil? || version == 'ga' -%>
 	d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled)
 	d.Set("enable_tpu", cluster.EnableTpu)
+	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
+		return err
+	}
 <% end -%>
 	if err := d.Set("node_config", flattenNodeConfig(cluster.NodeConfig)); err != nil {
 		return err
@@ -985,6 +1024,23 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's binary authorization has been updated to %v", d.Id(), enabled)
 
 		d.SetPartial("enable_binary_authorization")
+	}
+
+	if d.HasChange("cluster_autoscaling") {
+		req := &containerBeta.UpdateClusterRequest{
+			Update: &containerBeta.ClusterUpdate{
+				DesiredClusterAutoscaling: expandClusterAutoscaling(d.Get("cluster_autoscaling")),
+			}}
+
+		updateF := updateFunc(req, "updating GKE cluster autoscaling")
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's cluster-wide autoscaling has been updated", d.Id())
+
+		d.SetPartial("cluster_autoscaling")
 	}
 <% end -%>
 
@@ -1499,6 +1555,35 @@ func expandMaintenancePolicy(configured interface{}) *containerBeta.MaintenanceP
 	}
 }
 
+func expandClusterAutoscaling(configured interface{}) *containerBeta.ClusterAutoscaling {
+	l, ok := configured.([]interface{})
+	if !ok || l == nil || len(l) == 0 || l[0] == nil {
+		return &containerBeta.ClusterAutoscaling{
+			EnableNodeAutoprovisioning: false,
+			ForceSendFields:            []string{"EnableNodeAutoprovisioning"},
+		}
+	}
+	r := &containerBeta.ClusterAutoscaling{
+		EnableNodeAutoprovisioning: true,
+	}
+	if config, ok := l[0].(map[string]interface{}); ok {
+		if limits, ok := config["resource_limits"]; ok {
+			if lmts, ok := limits.([]interface{}); ok {
+				for _, v := range lmts {
+					limit := v.(map[string]interface{})
+					r.ResourceLimits = append(r.ResourceLimits, &containerBeta.ResourceLimit{
+						ResourceType: limit["resource_type"].(string),
+						// Here we're relying on *not* setting ForceSendFields for 0-values.
+						Minimum: int64(limit["minimum"].(int)),
+						Maximum: int64(limit["maximum"].(int)),
+					})
+				}
+			}
+		}
+	}
+	return r
+}
+
 func expandMasterAuth(configured interface{}) *containerBeta.MasterAuth {
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -1732,6 +1817,27 @@ func flattenMasterAuth(ma *containerBeta.MasterAuth) []map[string]interface{} {
 		}
 	}
 	return masterAuth
+}
+
+func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string]interface{} {
+	if a == nil {
+		return nil
+	}
+	if !a.EnableNodeAutoprovisioning {
+		return nil
+	} else {
+		r := make(map[string]interface{})
+		resourceLimits := make([]interface{}, 0, len(a.ResourceLimits))
+		for _, rl := range a.ResourceLimits {
+			resourceLimits = append(resourceLimits, map[string]interface{}{
+				"resource_type": rl.ResourceType,
+				"minimum":       rl.Minimum,
+				"maximum":       rl.Maximum,
+			})
+		}
+		r["resource_limits"] = resourceLimits
+		return []map[string]interface{}{r}
+	}
 }
 
 func flattenMasterAuthorizedNetworksConfig(c *containerBeta.MasterAuthorizedNetworksConfig) []map[string]interface{} {
