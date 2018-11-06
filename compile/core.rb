@@ -11,9 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'api/product'
 require 'binding_of_caller'
 require 'erb'
 require 'ostruct'
+require 'google/yaml_validator'
 
 module Compile
   # Unique ID for the Google libraries to be compiled/used by modules
@@ -170,6 +172,13 @@ module Compile
     def compile_if(config, node)
       file = Google::HashUtils.navigate(config, node)
       compile(file, 2) unless file.nil?
+    end
+
+    def compile_object(filename, object_name)
+      yaml = Google::YamlValidator.parse(compile(filename))
+      raise "This should be an Api::Product" unless yaml.is_a?(Api::Product)
+      object = yaml.objects.select { |x| x.name == object_name }
+      return object.to_yaml.sub("---\n", '')
     end
 
     def indent(text, spaces, filler = ' ')
