@@ -32,6 +32,20 @@ datasources: !ruby/object:Provider::ResourceOverrides
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
 overrides: !ruby/object:Provider::ResourceOverrides
+  Dataset: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      access.view.tableId: !ruby/object:Provider::Ansible::PropertyOverride
+        # Ansible linter doesn't like the (_) notation.
+        description: >
+          The ID of the table. The ID must contain only letters (a-z,
+          A-Z), numbers (0-9), or underscores. The maximum length
+          is 1,024 characters.
+      datasetReference.datasetId: !ruby/object:Provider::Ansible::PropertyOverride
+        # Ansible linter doesn't like the (_) notation.
+        description: >
+          A unique ID for this dataset, without the project name. The ID
+          must contain only letters (a-z, A-Z), numbers (0-9), or
+          underscores. The maximum length is 1,024 characters.
 examples: !ruby/object:Api::Resource::HashArray
 files: !ruby/object:Provider::Config::Files
   copy:
