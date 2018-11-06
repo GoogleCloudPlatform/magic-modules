@@ -402,7 +402,7 @@ module Api
         check_property :resource, ::String
         check_property :imports, ::String
         check_resource_ref_exists
-        check_resource_ref_property_exists
+        #check_resource_ref_property_exists
       end
 
       def property

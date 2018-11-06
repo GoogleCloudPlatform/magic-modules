@@ -112,6 +112,7 @@ product_names.each do |product_name|
 
   product_api = Api::Compiler.new(product_yaml_path).run
   pp product_api if ENV['COMPILER_DEBUG']
+  product_api.validate
 
   unless product_api.exists_at_version_or_lower(version)
     Google::LOGGER.info \
