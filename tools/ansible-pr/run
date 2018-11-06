@@ -44,7 +44,7 @@ ADDITIONAL_FILES = [
 
 @options = {
   directory: "#{Dir.pwd}/build/ansible/",
-  ansible_version: '2.7',
+  ansible_version: '2.8',
   dry_run: false,
   only_facts: false
 }
@@ -152,7 +152,7 @@ puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 
 # Find list of all modules.
 files = if @options[:files]
-          @options[:files]
+          @options[:files].map { |x| "lib/ansible/modules/cloud/google/#{x}.py" }
         else
           get_all_modules('magician')
         end
