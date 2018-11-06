@@ -10,4 +10,4 @@ image_resource:
         tag: '1.11-2.5.1-2.7'
 
 run:
-    path: magic-modules-new-prs/.ci/magic-modules/inspec-integration.sh
+    path: magic-modules-new-prs/.ci/acceptance-tests/inspec-integration.sh

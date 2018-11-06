@@ -11,7 +11,7 @@ export GOPATH=${PWD}/go
 
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
-echo "${GOOGLE_JSON_ACCOUNT}" > /tmp/google-account.json
+echo "${TERRAFORM_KEY}" > /tmp/google-account.json
 
 git clone https://github.com/slevenick/inspec-gcp.git
 pushd inspec-gcp/test/integration
