@@ -1,5 +1,5 @@
 require 'yaml'
-require 'provider/resource_overrides'
+require 'provider/overrides/runner'
 require 'provider/resource_override'
 require 'provider/property_override'
 module DiscoveryOverride
@@ -14,54 +14,8 @@ module DiscoveryOverride
 
     def run
       return unless @override
-      @override.consume_config(@product, DiscoveryConfig)
-      @override.run
-    end
-  end
-
-  module OverrideProperties
-  end
-
-  class DiscoveryConfig
-    def self.resource_override
-      ResourceOverride
-    end
-
-    def self.property_override
-      PropertyOverride
-    end
-  end
-
-  # Product specific overriden properties for Ansible
-  class ResourceOverride < Provider::ResourceOverride
-    include OverrideProperties
-    def validate
-    end
-
-    def properties
-      @properties || {}
-    end
-
-    private
-
-    def overriden
-      DiscoveryOverride::OverrideProperties
-    end
-  end
-
-  class PropertyOverride < Provider::PropertyOverride
-    include OverrideProperties
-    def validate
-    end
-
-    def properties
-      @properties || {}
-    end
-
-    private
-
-    def overriden
-      DiscoveryOverride::OverrideProperties
+      runner = Provider::Overrides::Runner.new(@product, @override)
+      runner.run
     end
   end
 end

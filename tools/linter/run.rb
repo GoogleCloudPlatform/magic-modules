@@ -63,8 +63,7 @@ docs.each do |doc|
   product_obj = product.get_product
   (doc.overrides || []).each do |override|
     override = DiscoveryOverride::Runner.new(product_obj, override)
-    override.run
-    product_obj = override.product
+    product_obj = override.run
   end
   File.write(doc.output, product_obj.to_yaml)
 end
