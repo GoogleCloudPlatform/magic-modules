@@ -1,7 +1,5 @@
 require 'yaml'
 require 'provider/overrides/runner'
-require 'provider/resource_override'
-require 'provider/property_override'
 module DiscoveryOverride
   class Runner
     attr_reader :product
@@ -15,7 +13,7 @@ module DiscoveryOverride
     def run
       return unless @override
       runner = Provider::Overrides::Runner.new(@product, @override)
-      runner.run
+      runner.build
     end
   end
 end

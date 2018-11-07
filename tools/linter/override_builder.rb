@@ -45,11 +45,31 @@ module Api
   end
 end
 
+module Google
+  class YamlValidator
+    # Create a setter if the setter doesn't exist
+    # Yes, this isn't pretty and I apologize
+    def method_missing(method_name, *args)
+      matches = /([a-z_]*)=/.match(method_name)
+      super unless matches
+      create_setter(matches[1])
+      method(method_name.to_sym).call(*args)
+    end
+
+    def create_setter(variable)
+      self.class.define_method("#{variable}=") { |val| instance_variable_set("@#{variable}", val) }
+    end
+
+    def validate
+    end
+  end
+end
+
 # Takes a series of properties, does diffs between them and returns a list.
 def diff_properties(new_api_props, old_api_props, prefix='')
   old_api_props.map do |old_api_prop|
     all_props = []
-    override = DiscoveryOverride::PropertyOverride.new
+    override = Provider::Overrides::PropertyOverride.new
     new_api_prop = new_api_props.select { |p| p.name == old_api_prop.name }.first
     # Compare the new prop values to the old prop values.
     old_api_prop.instance_variables.reject { |o| o.to_s.include?('properties') }
@@ -100,10 +120,10 @@ output_file = ARGV[2]
 original_api = Api::Compiler.new(original_api_file).run
 new_api = Api::Compiler.new(new_api_file).run
 
-overrides = Provider::ResourceOverrides.new
+overrides = Provider::Overrides::ResourceOverrides.new
 original_api.objects.each do |obj|
   # Grab all of the first level things and do a diff
-  override = DiscoveryOverride::ResourceOverride.new
+  override = Provider::Overrides::ResourceOverride.new
   new_api_obj = new_api.objects.select { |o| o.name == obj.name }.first
   next unless new_api_obj
   obj.instance_variables.reject { |o| o.to_s.include?('properties') || o.to_s.include?('parameters') }
