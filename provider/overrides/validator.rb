@@ -49,7 +49,6 @@ module Provider
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
-          next if overrides.class.attributes.include?(field_symbol)
           next if check_if_exists(res, field_symbol)
           raise "#{field_name} does not exist on #{res.name}"
         end
@@ -81,8 +80,7 @@ module Provider
           # We should substitute the [] brackets away.
           prop = properties.select { |o| o.name == part.sub('[]', '') }.first
           # Check that next part is actually an array of nested objects.
-          if !part.include?('[]') && \
-             prop.is_a?(Api::Type::Array) && \
+          if !part.include?('[]') && prop.is_a?(Api::Type::Array) && \
              prop.item_type.is_a?(Api::Type::NestedObject) \
               && part != path.last
             raise ["#{path.join('.')} on #{res_name} is incorrectly",
@@ -118,15 +116,16 @@ module Provider
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
-          next if overrides.class.attributes.include?(field_symbol)
           next if check_if_exists(property, field_symbol, overrides['@type'])
           raise "#{field_name} does not exist on #{property.name}"
         end
       end
 
       # Check if this field exists on this object.
-      # The best way (sadly) to do this is see if a getter exists.
+      # The best way (sadly) to do this is to see if a getter exists.
       def check_if_exists(obj, field, override_type = nil)
+        # Not all types share the same values.
+        # If we're changing types, the new type's getters matter, not the old type.
         if override_type
           Module.const_get(override_type).new.respond_to? field
         else
