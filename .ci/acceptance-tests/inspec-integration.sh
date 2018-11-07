@@ -5,7 +5,7 @@ set -x
 
 # TODO make this work
 # Service account credentials for GCP to allow terraform to work
-export GOOGLE_CREDENTIALS_FILE="/tmp/google-account.json"
+export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
 # Setup GOPATH
 export GOPATH=${PWD}/go
 
@@ -14,6 +14,14 @@ export GOPATH=${PWD}/go
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
 
 git clone https://github.com/slevenick/inspec-gcp.git
+
+# new train plugin not published yet, install locally for now
+pushd inspec-gcp
+bundle
+inspec plugin install train-gcp2/lib/train-gcp2.rb
+inspec detect -t gcp2://
+popd
+
 pushd inspec-gcp/test/integration
 
 # Generate tfvars
@@ -32,6 +40,7 @@ unzip terraform_0.11.10_linux_amd64.zip
 ./terraform apply -auto-approve
 export GOOGLE_APPLICATION_CREDENTIALS="${PWD}/inspec.json"
 popd
+
 
 # Copy inspec resources
 pushd inspec-mm
