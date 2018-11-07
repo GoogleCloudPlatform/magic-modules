@@ -108,10 +108,9 @@ objects:
         name: 'beta-property'
         description: 'A property that exists in the beta API'
         min_version: 'beta'
-      - !ruby/object:Api::Type::NameValues
+      - !ruby/object:Api::Type::Map
         name: 'namevalue-property'
         description: 'A property that maps Strings -> NestedObject'
-        key_type: Api::Type::String
         key_name: 'key'
         value_type: !ruby/object:Api::Type::NestedObject
           name: 'namevalue-nested'

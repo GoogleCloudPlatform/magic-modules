@@ -83,7 +83,7 @@ module Provider
 
           properties = if prop.is_a?(Api::Type::NestedObject)
                          prop.properties
-                       elsif prop.is_a?(Api::Type::NameValues) && \
+                       elsif prop.is_a?(Api::Type::Map) && \
                              prop.value_type.is_a?(Api::Type::NestedObject)
                          prop.value_type.properties
                        elsif prop.is_a?(Api::Type::Array) && \
