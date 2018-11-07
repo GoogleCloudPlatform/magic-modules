@@ -138,13 +138,25 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(10)
+
+	project := getTestProjectFromEnv()
+	zone := "us-central1-a"
+	acceleratorType := "nvidia-tesla-k80"
+	acceleratorLink := fmt.Sprintf("https://www.googleapis.com/compute/beta/projects/%s/zones/%s/acceleratorTypes/%s", project, zone, acceleratorType)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataprocClusterDestroy(),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_withAccelerators(rnd),
+				Config: testAccDataprocCluster_withAccelerators(rnd, zone, acceleratorType),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.master_config.0.accelerators.0.accelerator_count", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.master_config.0.accelerators.0.accelerator_type", acceleratorLink),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.worker_config.0.accelerators.0.accelerator_count", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.worker_config.0.accelerators.0.accelerator_type", acceleratorLink),
+				),
 			},
 		},
 	})
@@ -646,7 +658,7 @@ resource "google_dataproc_cluster" "basic" {
 `, rnd)
 }
 
-func testAccDataprocCluster_withAccelerators(rnd string) string {
+func testAccDataprocCluster_withAccelerators(rnd, zone, acceleratorType string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "accelerated_cluster" {
 	name                  = "dproc-cluster-test-%s"
@@ -654,25 +666,25 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 	cluster_config {
 		gce_cluster_config {
-			zone = "us-central1-a"
+			zone = "%s"
 		}
 
 		master_config {
 			accelerators {
-				accelerator_type  = "nvidia-tesla-k80"
+				accelerator_type  = "%s"
 				accelerator_count = "1"
 			}
 		}
 
 		worker_config {
 			accelerators {
-				accelerator_type  = "nvidia-tesla-k80"
+				accelerator_type  = "%s"
 				accelerator_count = "1"
 			}
 		}
 	}
 }
-`, rnd)
+`, rnd, zone, acceleratorType, acceleratorType)
 }
 
 func testAccDataprocCluster_withInternalIpOnlyTrue(rnd string) string {

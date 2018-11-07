@@ -364,7 +364,7 @@ func instanceConfigSchema() *schema.Schema {
 
 				// Note: preemptible workers don't support accelerators
 				"accelerators": {
-					// Terraform was unhappy when this was a set, even though it probably could be one
+					// Terraform throws an error if you try to set this field while it is a TypeSet.
 					Type:     schema.TypeList,
 					Optional: true,
 					ForceNew: true,
