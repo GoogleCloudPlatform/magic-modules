@@ -79,7 +79,6 @@ jobs:
     - name: authorize-single-rev
       plan:
           - get: magic-modules-external-prs
-            version: every
             trigger: false
           - put: magic-modules-new-prs
             params:
