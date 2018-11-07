@@ -34,6 +34,11 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 					testAccCheckComputeProjectMetadataSize(projectID, 2),
 				),
 			},
+			resource.TestStep{
+				ResourceName:      "google_compute_project_metadata.fizzbuzz",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -63,6 +68,11 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 					testAccCheckComputeProjectMetadataSize(projectID, 3),
 				),
 			},
+			resource.TestStep{
+				ResourceName:      "google_compute_project_metadata.fizzbuzz",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 
 			resource.TestStep{
 				Config: testAccComputeProject_modify1_metadata(projectID, pname, org, billingId),
@@ -74,6 +84,11 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 					testAccCheckComputeProjectMetadataContains(projectID, "happy", "laughing"),
 					testAccCheckComputeProjectMetadataSize(projectID, 3),
 				),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_project_metadata.fizzbuzz",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -103,6 +118,11 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 					testAccCheckComputeProjectMetadataSize(projectID, 2),
 				),
 			},
+			resource.TestStep{
+				ResourceName:      "google_compute_project_metadata.fizzbuzz",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 
 			resource.TestStep{
 				Config: testAccComputeProject_basic1_metadata(projectID, pname, org, billingId),
@@ -113,6 +133,11 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 					testAccCheckComputeProjectMetadataContains(projectID, "finches", "darwinism"),
 					testAccCheckComputeProjectMetadataSize(projectID, 2),
 				),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_project_metadata.fizzbuzz",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -151,10 +176,6 @@ func testAccCheckComputeProjectExists(n, projectID string, project *compute.Proj
 		found, err := config.clientCompute.Projects.Get(projectID).Do()
 		if err != nil {
 			return err
-		}
-
-		if "common_metadata" != rs.Primary.ID {
-			return fmt.Errorf("Common metadata not found, found %s", rs.Primary.ID)
 		}
 
 		*project = *found
