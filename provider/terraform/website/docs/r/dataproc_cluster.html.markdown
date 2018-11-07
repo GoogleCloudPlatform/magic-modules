@@ -267,8 +267,7 @@ The `cluster_config.master_config` block supports:
 
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 
-    * `accelerator_type` - (Required) Full URL, partial URI, or short name of the accelerator type resource to expose to this instance.
-    If you are using the Cloud Dataproc Auto Zone Placement feature, you must use the short name of the accelerator type resource, for example, `nvidia-tesla-k80`.
+    * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
 
     * `accelerator_count` - (Required) The number of the accelerator cards of this type exposed to this instance. Often restricted to one of `1`, `2`, `4`, or `8`.
 
@@ -321,8 +320,7 @@ The `cluster_config.worker_config` block supports:
 
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
-    * `accelerator_type` - (Required) Full URL, partial URI, or short name of the accelerator type resource to expose to this instance.
-    If you are using the Cloud Dataproc Auto Zone Placement feature, you must use the short name of the accelerator type resource, for example, `nvidia-tesla-k80`.
+    * `accelerator_type` - (Required) The short name of the accelerator type to expose to this instance. For example, `nvidia-tesla-k80`.
 
     * `accelerator_count` - (Required) The number of the accelerator cards of this type exposed to this instance. Often restricted to one of `1`, `2`, `4`, or `8`.
 

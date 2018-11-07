@@ -364,26 +364,10 @@ func instanceConfigSchema() *schema.Schema {
 
 				// Note: preemptible workers don't support accelerators
 				"accelerators": {
-					// Terraform throws an error if you try to set this field while it is a TypeSet.
-					Type:     schema.TypeList,
+					Type:     schema.TypeSet,
 					Optional: true,
 					ForceNew: true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"accelerator_type": {
-								Type:             schema.TypeString,
-								Required:         true,
-								ForceNew:         true,
-								DiffSuppressFunc: compareSelfLinkOrResourceName,
-							},
-
-							"accelerator_count": {
-								Type:     schema.TypeInt,
-								Required: true,
-								ForceNew: true,
-							},
-						},
-					},
+					Elem:     acceleratorsSchema(),
 				},
 
 				"instance_names": {
@@ -391,6 +375,25 @@ func instanceConfigSchema() *schema.Schema {
 					Computed: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 				},
+			},
+		},
+	}
+}
+
+// We need to pull accelerators' schema out so we can use it to make a set hash func
+func acceleratorsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"accelerator_type": {
+				Type:      schema.TypeString,
+				Required:  true,
+				ForceNew:  true,
+			},
+
+			"accelerator_count": {
+				Type:     schema.TypeInt,
+				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -632,7 +635,7 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 		}
 	}
 
-	icg.Accelerators = expandAccelerators(cfg["accelerators"].([]interface{}))
+	icg.Accelerators = expandAccelerators(cfg["accelerators"].(*schema.Set).List())
 	return icg
 }
 
@@ -787,18 +790,18 @@ func flattenSoftwareConfig(d *schema.ResourceData, sc *dataproc.SoftwareConfig) 
 	return []map[string]interface{}{data}
 }
 
-func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) []map[string]interface{} {
-	acceleratorsSchema := make([]map[string]interface{}, 0, len(accelerators))
+func flattenAccelerators(accelerators []*dataproc.AcceleratorConfig) interface{} {
+	acceleratorsTypeSet := schema.NewSet(schema.HashResource(acceleratorsSchema()), []interface{}{})
 	for _, accelerator := range accelerators {
 		data := map[string]interface{}{
-			"accelerator_type":  accelerator.AcceleratorTypeUri,
-			"accelerator_count": accelerator.AcceleratorCount,
+			"accelerator_type":  GetResourceNameFromSelfLink(accelerator.AcceleratorTypeUri),
+			"accelerator_count": int(accelerator.AcceleratorCount),
 		}
 
-		acceleratorsSchema = append(acceleratorsSchema, data)
+		acceleratorsTypeSet.Add(data)
 	}
 
-	return acceleratorsSchema
+	return acceleratorsTypeSet
 }
 
 func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]map[string]interface{}, error) {

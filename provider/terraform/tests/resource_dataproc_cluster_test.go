@@ -138,6 +138,7 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 	t.Parallel()
 
 	rnd := acctest.RandString(10)
+	var cluster dataproc.Cluster
 
 	project := getTestProjectFromEnv()
 	zone := "us-central1-a"
@@ -152,14 +153,45 @@ func TestAccDataprocCluster_withAccelerators(t *testing.T) {
 			{
 				Config: testAccDataprocCluster_withAccelerators(rnd, zone, acceleratorType),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.master_config.0.accelerators.0.accelerator_count", "1"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.master_config.0.accelerators.0.accelerator_type", acceleratorLink),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.worker_config.0.accelerators.0.accelerator_count", "1"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.accelerated_cluster", "cluster_config.0.worker_config.0.accelerators.0.accelerator_type", acceleratorLink),
+					testAccCheckDataprocClusterExists("google_dataproc_cluster.accelerated_cluster", &cluster),
+					testAccCheckDataprocClusterAccelerator(&cluster, 1, acceleratorLink, 1, acceleratorLink),
 				),
 			},
 		},
 	})
+}
+
+func testAccCheckDataprocClusterAccelerator(cluster *dataproc.Cluster, masterCount int, masterAccelerator string, workerCount int, workerAccelerator string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		master := cluster.Config.MasterConfig.Accelerators
+		if len(master) != 1 {
+			return fmt.Errorf("Saw %d master accelerator types instead of 1", len(master))
+		}
+
+		if int(master[0].AcceleratorCount) != masterCount {
+			return fmt.Errorf("Saw %d master accelerators instead of %d", int(master[0].AcceleratorCount), masterCount)
+		}
+
+		if master[0].AcceleratorTypeUri != masterAccelerator {
+			return fmt.Errorf("Saw %s master accelerator type instead of %s", master[0].AcceleratorTypeUri, masterAccelerator)
+		}
+
+		worker := cluster.Config.WorkerConfig.Accelerators
+		if len(worker) != 1 {
+			return fmt.Errorf("Saw %d worker accelerator types instead of 1", len(worker))
+		}
+
+		if int(worker[0].AcceleratorCount) != workerCount {
+			return fmt.Errorf("Saw %d worker accelerators instead of %d", int(worker[0].AcceleratorCount), workerCount)
+		}
+
+		if worker[0].AcceleratorTypeUri != workerAccelerator {
+			return fmt.Errorf("Saw %s worker accelerator type instead of %s", worker[0].AcceleratorTypeUri, workerAccelerator)
+		}
+
+		return nil
+	}
 }
 
 func TestAccDataprocCluster_withInternalIpOnlyTrue(t *testing.T) {
