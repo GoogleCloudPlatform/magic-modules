@@ -26,7 +26,7 @@ package google
     settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
     # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
     update_body_properties = settable_properties
-    update_body_properties = update_body_properties.reject(&:input) if object.update_verb == :PATCH
+    update_body_properties = settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
