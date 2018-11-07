@@ -119,15 +119,19 @@ module Provider
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
           next if overrides.class.attributes.include?(field_symbol)
-          next if check_if_exists(property, field_symbol)
+          next if check_if_exists(property, field_symbol, overrides['@type'])
           raise "#{field_name} does not exist on #{property.name}"
         end
       end
 
       # Check if this field exists on this object.
       # The best way (sadly) to do this is see if a getter exists.
-      def check_if_exists(obj, field)
-        obj.respond_to? field
+      def check_if_exists(obj, field, override_type=nil)
+        if override_type
+          Module.const_get(override_type).new.respond_to? field
+        else
+          obj.respond_to? field
+        end
       end
 
       # This keeps the [] brackets in place.
