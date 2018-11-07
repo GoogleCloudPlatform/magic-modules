@@ -16,7 +16,6 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	billingId := getTestBillingAccountFromEnv(t)
-	var project compute.Project
 	projectID := "terrafom-test-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -26,13 +25,6 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeProjectExists(
-						"google_compute_project_metadata.fizzbuzz", projectID, &project),
-					testAccCheckComputeProjectMetadataContains(projectID, "banana", "orange"),
-					testAccCheckComputeProjectMetadataContains(projectID, "sofa", "darwinism"),
-					testAccCheckComputeProjectMetadataSize(projectID, 2),
-				),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -49,7 +41,6 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	billingId := getTestBillingAccountFromEnv(t)
-	var project compute.Project
 	projectID := "terrafom-test-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -59,14 +50,6 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeProject_modify0_metadata(projectID, pname, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeProjectExists(
-						"google_compute_project_metadata.fizzbuzz", projectID, &project),
-					testAccCheckComputeProjectMetadataContains(projectID, "paper", "pen"),
-					testAccCheckComputeProjectMetadataContains(projectID, "genghis_khan", "french bread"),
-					testAccCheckComputeProjectMetadataContains(projectID, "happy", "smiling"),
-					testAccCheckComputeProjectMetadataSize(projectID, 3),
-				),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -76,14 +59,6 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 
 			resource.TestStep{
 				Config: testAccComputeProject_modify1_metadata(projectID, pname, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeProjectExists(
-						"google_compute_project_metadata.fizzbuzz", projectID, &project),
-					testAccCheckComputeProjectMetadataContains(projectID, "paper", "pen"),
-					testAccCheckComputeProjectMetadataContains(projectID, "paris", "french bread"),
-					testAccCheckComputeProjectMetadataContains(projectID, "happy", "laughing"),
-					testAccCheckComputeProjectMetadataSize(projectID, 3),
-				),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -100,7 +75,6 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 
 	org := getTestOrgFromEnv(t)
 	billingId := getTestBillingAccountFromEnv(t)
-	var project compute.Project
 	projectID := "terraform-test-" + acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
@@ -110,13 +84,6 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeProjectExists(
-						"google_compute_project_metadata.fizzbuzz", projectID, &project),
-					testAccCheckComputeProjectMetadataContains(projectID, "banana", "orange"),
-					testAccCheckComputeProjectMetadataContains(projectID, "sofa", "darwinism"),
-					testAccCheckComputeProjectMetadataSize(projectID, 2),
-				),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
@@ -126,13 +93,6 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 
 			resource.TestStep{
 				Config: testAccComputeProject_basic1_metadata(projectID, pname, org, billingId),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeProjectExists(
-						"google_compute_project_metadata.fizzbuzz", projectID, &project),
-					testAccCheckComputeProjectMetadataContains(projectID, "kiwi", "papaya"),
-					testAccCheckComputeProjectMetadataContains(projectID, "finches", "darwinism"),
-					testAccCheckComputeProjectMetadataSize(projectID, 2),
-				),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
