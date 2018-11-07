@@ -24,9 +24,12 @@ objects:
   - !ruby/object:Api::Resource
     name: 'AccessPolicy'
     base_url: accessPolicies
-    exclude: true
     self_link: "accessPolicies/{{name}}"
     update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies'
     description: |
       AccessPolicy is a container for AccessLevels (which define the necessary
       attributes to use GCP services) and ServicePerimeters (which define
