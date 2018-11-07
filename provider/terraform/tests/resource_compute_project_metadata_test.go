@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"google.golang.org/api/compute/v1"
 )
 
 // Add two key value pairs
@@ -118,70 +117,6 @@ func testAccCheckComputeProjectMetadataDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccCheckComputeProjectExists(n, projectID string, project *compute.Project) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := testAccProvider.Meta().(*Config)
-
-		found, err := config.clientCompute.Projects.Get(projectID).Do()
-		if err != nil {
-			return err
-		}
-
-		*project = *found
-
-		return nil
-	}
-}
-
-func testAccCheckComputeProjectMetadataContains(projectID, key, value string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
-		project, err := config.clientCompute.Projects.Get(projectID).Do()
-		if err != nil {
-			return fmt.Errorf("Error, failed to load project service for %s: %s", config.Project, err)
-		}
-
-		for _, kv := range project.CommonInstanceMetadata.Items {
-			if kv.Key == key {
-				if kv.Value != nil && *kv.Value == value {
-					return nil
-				} else {
-					return fmt.Errorf("Error, key value mismatch, wanted (%s, %s), got (%s, %s)",
-						key, value, kv.Key, *kv.Value)
-				}
-			}
-		}
-
-		return fmt.Errorf("Error, key %s not present in %s", key, project.SelfLink)
-	}
-}
-
-func testAccCheckComputeProjectMetadataSize(projectID string, size int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
-		project, err := config.clientCompute.Projects.Get(projectID).Do()
-		if err != nil {
-			return fmt.Errorf("Error, failed to load project service for %s: %s", config.Project, err)
-		}
-
-		if size > len(project.CommonInstanceMetadata.Items) {
-			return fmt.Errorf("Error, expected at least %d metadata items, got %d", size,
-				len(project.CommonInstanceMetadata.Items))
-		}
-
-		return nil
-	}
 }
 
 func testAccComputeProject_basic0_metadata(projectID, name, org, billing string) string {
