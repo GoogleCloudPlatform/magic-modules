@@ -24,8 +24,10 @@ package google
     # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
     # can just be read in anyways, and after a Read they will need to be set in every Update.
     settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
+    # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
+    api_client_name = api_name_lower.downcase
     has_project = object.base_url.include?("{{project}}")
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
@@ -153,7 +155,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return err
     }
 <%  end -%>
-    op := &<%= api_name_lower -%>.Operation{}
+    op := &<%= api_client_name -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
@@ -311,7 +313,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
             return err
         }
 <%      end -%>
-        op := &<%= api_name_lower -%>.Operation{}
+        op := &<%= api_client_name -%>.Operation{}
         err = Convert(res, op)
         if err != nil {
             return err
@@ -389,7 +391,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         return err
     }
 <%  end -%>
-    op := &<%= api_name_lower -%>.Operation{}
+    op := &<%= api_client_name -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
@@ -443,7 +445,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return err
     }
 <%  end -%>
-    op := &<%= api_name_lower -%>.Operation{}
+    op := &<%= api_client_name -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err

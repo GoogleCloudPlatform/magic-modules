@@ -1,0 +1,68 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Access Context Manager
+prefix: gaccesscontextmanager
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://accesscontextmanager.googleapis.com/v1beta/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'AccessPolicy'
+    base_url: accessPolicies
+    self_link: "accessPolicies/{{name}}"
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies'
+    description: |
+      AccessPolicy is a container for AccessLevels (which define the necessary
+      attributes to use GCP services) and ServicePerimeters (which define
+      regions of services able to freely pass data within a perimeter). An
+      access policy is globally visible within an organization, and the
+      restrictions it specifies apply to all projects within an organization.
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        input: true
+        required: true
+        description: |
+          The parent of this AccessPolicy in the Cloud Resource Hierarchy.
+          Format: organizations/{organization_id}
+      - !ruby/object:Api::Type::String
+        name: title
+        required: true
+        description: |
+          Human readable title. Does not affect behavior.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          Resource name of the AccessPolicy. Format: accessPolicies/{policy_id}
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: |
+          Time the AccessPolicy was created in UTC.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'updateTime'
+        description: |
+          Time the AccessPolicy was updated in UTC.
+        output: true

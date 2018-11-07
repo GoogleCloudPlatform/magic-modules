@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -16,6 +17,9 @@ import (
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	appengine "google.golang.org/api/appengine/v1"
+<% unless version.nil? || version == 'ga' -%>
+	"google.golang.org/api/accesscontextmanager/v1beta"
+<% end -%>
 	"google.golang.org/api/bigquery/v2"
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudbuild/v1"
@@ -60,6 +64,9 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
+	<% unless version.nil? || version == 'ga' -%>
+	clientAccessContextManager   *accesscontextmanager.Service
+	<% end -%>
 	clientBilling                *cloudbilling.APIService
 	clientBuild                  *cloudbuild.Service
 	clientComposer               *composer.Service
@@ -323,6 +330,15 @@ func (c *Config) loadAndValidate() error {
 		return err
 	}
 	c.clientCloudFunctions.UserAgent = userAgent
+
+	<% unless version.nil? || version == 'ga' -%>
+	log.Printf("[INFO] Instantiating Google Cloud AccessContextManager Client...")
+	c.clientAccessContextManager, err = accesscontextmanager.New(client)
+	if err != nil {
+		return err
+	}
+	c.clientAccessContextManager.UserAgent = userAgent
+	<% end -%>
 
 	c.bigtableClientFactory = &BigtableClientFactory{
 		UserAgent:   userAgent,
