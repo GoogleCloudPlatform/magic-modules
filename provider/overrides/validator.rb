@@ -43,7 +43,6 @@ module Provider
       end
 
       # Verify top-level fields exist on resource
-      # rubocop:disable Metrics/AbcSize
       def verify_resource(res, overrides)
         overrides.instance_variables.reject { |i| i == :@properties || i == :@parameters }
                  .each do |field_name|
@@ -58,7 +57,6 @@ module Provider
         verify_properties(res.instance_variable_get('@parameters'), overrides['parameters'],
                           res.name)
       end
-      # rubocop:enable Metrics/AbcSize
 
       # Verify a list of properties (parameters or properties on an API::Resource)
       def verify_properties(properties, overrides, res_name = '')
@@ -70,10 +68,6 @@ module Provider
       end
 
       # Returns a property (or throws an error if it does not exist)
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/MethodLength
-      # rubocop:disable Metrics/PerceivedComplexity
       def find_property(properties, path, res_name = '')
         prop = nil
         path.each do |part|
@@ -105,10 +99,6 @@ module Provider
         end
         prop
       end
-      # rubocop:enable Metrics/AbcSize
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/MethodLength
-      # rubocop:enable Metrics/PerceivedComplexity
 
       def verify_property(property, overrides)
         overrides.instance_variables
