@@ -24,6 +24,9 @@ package google
     # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
     # can just be read in anyways, and after a Read they will need to be set in every Update.
     settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
+    # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
+    update_body_properties = settable_properties
+    update_body_properties = update_body_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
@@ -244,7 +247,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
 <%      props.each do |prop| -%>
-<%      if settable_properties.include? prop -%>
+<%      if update_body_properties.include? prop -%>
         <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
         if err != nil {
             return err
@@ -278,10 +281,10 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
 <%          end -%>
         }
-<%      else # if settable_properties.include? prop -%>
+<%      else # if update_body_properties.include? prop -%>
         <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%      end # if settable_properties.include? prop -%>
+<%      end # if update_body_properties.include? prop -%>
 <%      end # props.each -%>
 
 <%      if object.mutex -%>
@@ -338,7 +341,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     d.Partial(false)
 <%  else # if object.input -%>
     obj := make(map[string]interface{})
-<%  settable_properties.each do |prop| -%>
+<%  update_body_properties.each do |prop| -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return err
