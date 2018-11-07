@@ -4,6 +4,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/terraform-providers/terraform-provider-google-beta/google-beta"
 	"os"
 
 	"github.com/hashicorp/terraform/helper/mutexkv"
@@ -106,6 +107,7 @@ func Provider() terraform.ResourceProvider {
 			GeneratedBinaryAuthorizationResourcesMap,
 			GeneratedContainerAnalysisResourcesMap,
 			GeneratedFilestoreResourcesMap,
+			GeneratedAccessContextManagerResourcesMap,
 			// end beta-only products
 			<% end -%>
 			GeneratedComputeResourcesMap,
