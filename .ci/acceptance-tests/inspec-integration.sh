@@ -3,9 +3,13 @@
 set -e
 set -x
 
-# TODO make this work
+function cleanup {
+	cd $TF_PATH
+	./terraform destroy -auto-approve
+}
+
 # Service account credentials for GCP to allow terraform to work
-export GOOGLE_CREDENTIALS_FILE="/tmp/google-account.json"
+export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
 # Setup GOPATH
 export GOPATH=${PWD}/go
 
@@ -14,6 +18,14 @@ export GOPATH=${PWD}/go
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
 
 git clone https://github.com/slevenick/inspec-gcp.git
+
+# new train plugin not published yet, install locally for now
+pushd inspec-gcp
+bundle
+inspec plugin install train-gcp2/lib/train-gcp2.rb
+
+popd
+
 pushd inspec-gcp/test/integration
 
 # Generate tfvars
@@ -29,8 +41,12 @@ apt-get install unzip
 unzip terraform_0.11.10_linux_amd64.zip
 ./terraform init
 ./terraform plan
+
+export TF_PATH=${PWD}
+trap cleanup EXIT
 ./terraform apply -auto-approve
 export GOOGLE_APPLICATION_CREDENTIALS="${PWD}/inspec.json"
+inspec detect -t gcp2://
 popd
 
 # Copy inspec resources
@@ -40,9 +56,18 @@ popd
 
 # Run inspec
 bundle
-inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
 
-pushd terraform
-./terraform destroy -auto-approve
+# Service accounts take several minutes to be authorized everywhere
+set +e
+
+for i in {1..50}
+do
+	inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
+	if [ "$?" -eq "0" ]; then
+		exit 0
+	fi
+done
+set -e
+
 popd
-popd
+exit 100
