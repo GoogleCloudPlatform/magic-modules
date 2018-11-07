@@ -25,7 +25,6 @@ module Provider
     attr_reader :overrides
     # Overrides for datasources
     attr_reader :datasources
-    attr_reader :examples
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
     attr_reader :tests
     attr_reader :files
