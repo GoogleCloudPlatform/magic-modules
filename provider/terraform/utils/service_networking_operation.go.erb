@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -80,3 +82,6 @@ func serviceNetworkingOperationWaitTime(config *Config, op *servicenetworking.Op
 
 	return nil
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>

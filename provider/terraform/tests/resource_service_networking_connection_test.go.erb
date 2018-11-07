@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -90,3 +92,7 @@ resource "google_service_networking_connection" "foobar" {
 }
 `, networkName, addressRangeName, serviceName)
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
+

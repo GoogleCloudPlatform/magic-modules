@@ -1,3 +1,6 @@
+<% autogen_exception -%>
+package google
+<% unless version.nil? || version == 'ga' -%>
 package google
 
 import (
@@ -233,3 +236,6 @@ func formatParentService(service string) string {
 		return service
 	}
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
