@@ -31,13 +31,9 @@ module Provider
   class Core
     include Compile::Core
 
-    attr_reader :test_data
-
     def initialize(config, api)
       @config = config
       @api = api
-      @generated = []
-      @sourced = []
       @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
     end
 
@@ -92,7 +88,6 @@ module Provider
       files.each do |target, source|
         target_file = File.join(output_folder, target)
         target_dir = File.dirname(target_file)
-        @sourced << relative_path(target_file, output_folder)
         Google::LOGGER.debug "Copying #{source} => #{target}"
         FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
         FileUtils.copy_entry source, target_file
@@ -169,8 +164,6 @@ module Provider
             manifest: manifest,
             tests: '',
             template: source,
-            generated_files: @generated,
-            sourced_files: @sourced,
             compiler: compiler,
             output_folder: output_folder,
             out_file: target_file,
@@ -440,7 +433,6 @@ module Provider
       file_folder = File.dirname(data[:out_file])
       file_relative = relative_path(data[:out_file], data[:output_folder]).to_s
       FileUtils.mkpath file_folder unless Dir.exist?(file_folder)
-      @generated << relative_path(data[:out_file], data[:output_folder])
       ctx = binding
       data.each { |name, value| ctx.local_variable_set(name, value) }
       generate_file_write ctx, data
