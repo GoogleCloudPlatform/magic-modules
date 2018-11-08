@@ -85,6 +85,17 @@ objects:
            - !ruby/object:Api::Type::String
              name: 'property1'
              description: 'a nested property'
+      - !ruby/object:Api::Type::NestedObject
+         name: 'nested-property2'
+         description: 'a nested object property'
+         properties:
+           - !ruby/object:Api::Type::NestedObject
+             name: 'property1'
+             description: 'a nested property'
+             properties:
+               - !ruby/object:Api::Type::String
+                 name: 'property1-nested'
+                 description: 'a deeply nested property'
       - !ruby/object:Api::Type::Array
         name: 'array-property'
         description: 'an array of nested object property'
@@ -97,3 +108,18 @@ objects:
         name: 'beta-property'
         description: 'A property that exists in the beta API'
         min_version: 'beta'
+      - !ruby/object:Api::Type::Map
+        name: 'namevalue-property'
+        description: 'A property that maps Strings -> NestedObject'
+        key_name: 'key'
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: 'namevalue-nested'
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'nv-prop1'
+              description: 'the first property in my namevalues'
+  - !ruby/object:Api::Resource
+    name: 'TerraformImportIdTest'
+    description: 'Used for spec/provider_terraform_import_spec'
+    base_url: "projects/{{project}}/regions/{{region}}/subnetworks"
+    properties: []
