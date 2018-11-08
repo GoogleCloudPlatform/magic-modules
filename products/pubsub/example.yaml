@@ -15,9 +15,6 @@
 # This is where custom code would be defined eventually.
 objects: !ruby/object:Api::Resource::HashArray
 
-# This is for a list of example files.
-examples: !ruby/object:Api::Resource::HashArray
-
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # All of these files will be copied verbatim.
