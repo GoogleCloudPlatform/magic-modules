@@ -72,6 +72,10 @@ module Provider
       copy_file_list(output_folder, files)
     end
 
+    def compile_files(output_folder, version_name)
+      compile_file_list(output_folder, @config.files.compile, version: version_name)
+    end
+
     def compile_common_files(output_folder, version_name = nil)
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
@@ -89,10 +93,6 @@ module Provider
         FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
         FileUtils.copy_entry source, target_file
       end
-    end
-
-    def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version: version_name)
     end
 
     def compile_examples(output_folder)
@@ -242,38 +242,13 @@ module Provider
        ')'].join("\n")
     end
 
-    def extract_variables(template)
-      template.scan(/{{[^}]*}}/)
-              .map { |v| v.gsub(/{{([^}]*)}}/, '\1') }
-              .map(&:to_sym)
-    end
-
-    def variable_type(object, var)
-      return Api::Type::String::PROJECT if var == :project
-      return Api::Type::String::NAME if var == :name
-      v = object.all_user_properties
-                .select { |p| p.out_name.to_sym == var || p.name.to_sym == var }
-                .first
-      return v.property if v.is_a?(Api::Type::ResourceRef)
-      v
-    end
-
-    # Used to convert a string 'a b c' into a\ b\ c for use in %w[...] form
-    def str2warray(value)
-      unquote_string(value).gsub(/ /, '\\ ')
-    end
-
+    # TODO(rileykarson): Rehome this function.
+    # For some reason the corresponding quote_string function lives in compile/core.rb
+    # and no beside this function.
     def unquote_string(value)
       return value.gsub(/"(.*)"/, '\1') if value.start_with?('"')
       return value.gsub(/'(.*)'/, '\1') if value.start_with?("'")
       value
-    end
-
-    # TODO(alexstephen): Retire in favor of a real code object.
-    # No validation is possible on get_code_multiline
-    def get_code_multiline(config, node)
-      search = node.class <= Array ? node : [node]
-      Google::HashUtils.navigate(config, search)
     end
 
     def true?(obj)
@@ -282,18 +257,6 @@ module Provider
 
     def false?(obj)
       obj.to_s.casecmp('false').zero?
-    end
-
-    def get_style_exceptions(file_name, type, name)
-      styles = @config.style
-      return [] if styles.nil?
-      styles.select { |s| s.name == file_name }
-            .map(&:pinpoints)
-            .flatten
-            .select { |ps| ps.any? { |k, v| k.to_sym == type && v == name } }
-            .map { |p| p['exceptions'] }
-            .flatten
-            .sort
     end
 
     def emit_link(name, url, emit_self, extra_data = false)
@@ -401,6 +364,7 @@ module Provider
 
     def generate_file(data)
       file_folder = File.dirname(data[:out_file])
+      # This variable looks unused, but is used in ansible/resource.erb
       file_relative = relative_path(data[:out_file], data[:output_folder]).to_s
       FileUtils.mkpath file_folder unless Dir.exist?(file_folder)
       ctx = binding

@@ -244,46 +244,6 @@ Example (excerpt from `templates/terraform/resource.erb`):
 
 TODO(nelsona): Document
 
-## Functions: Product Data Retrieval
-
-### `get_code_multiline()`
-
-    def get_code_multiline(config, node)
-
-Retrieves a multi line code block from a `@config` or hash object. This function
-is _not_ meant to retrieve arbitrary data. Use to retrieve code blocks only.
-
-Arguments:
-
--   `config (@config | hash)`: object to fetch code from
--   `node (list)`: the path to follow to find the code
-
-Example (excerpt from `templates/puppet/provider_spec.erb`):
-
-    <%= lines_before(lines(indent(get_code_multiline(tests,
-                                                     %w[flush cases]), 6))) -%>
-
-In this example if there are test cases defined in `puppet.yaml` for the object
-being compiled, it will be added to the spec tests and all code will be indented
-by 6 characters.
-
-Example (excerpt from `products/dns/test.yaml`):references instead.
-
-    ManagedZone:
-      flush:
-        cases:
-          - |
-            it 'cannot edit' do
-              expect do
-                subject.flush
-              end.to raise_error(StandardError, /cannot be edited/)
-            end
-
-> **IMPORTANT:** `get_code_multiline()` does not provide any type safety or
-> validation. Use it as sparingly as possible and favor strong typed objects.
-
-TODO(nelsona): Track down uses that can use direct object references instead.
-
 ## Functions: Formatting
 
 ### `indent()`
