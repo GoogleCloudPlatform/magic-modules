@@ -45,7 +45,6 @@ module Provider
       generate_objects(output_folder, types, version_name)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
-      compile_examples(output_folder) unless @config.examples.nil?
       compile_changelog(output_folder) unless @config.changelog.nil?
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
@@ -125,26 +124,6 @@ module Provider
         Google::LOGGER.info "Permission #{perm.path} => #{perm.acl}"
         FileUtils.chmod perm.acl, File.join(output_folder, perm.path)
       end
-    end
-
-    def compile_file_map(output_folder, section, mapper)
-      create_object_list(section, mapper).each do |o|
-        compile_file_list(
-          output_folder,
-          o
-        )
-      end
-    end
-
-    # Creates an object list by calling a lambda
-    # This can be useful for converting a list of config values to something
-    # less human-centric.
-    def create_object_list(section, mapper)
-      @api.objects
-          .select { |o| section.key?(o.name) }
-          .map do |o|
-            Hash[section[o.name].map { |file| mapper.call(o, file) }]
-          end
     end
 
     def compile_file_list(output_folder, files, data = {})
