@@ -13,6 +13,7 @@
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
 <% dir = version_name == 'beta' ? 'google-beta' : 'google' -%>
+'website/google.erb': 'provider/terraform/website/google.erb'
 <%  Dir["provider/terraform/tests/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
