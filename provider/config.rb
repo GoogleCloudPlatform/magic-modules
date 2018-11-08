@@ -47,25 +47,11 @@ module Provider
     class Files < Api::Object
       attr_reader :compile
       attr_reader :copy
-      attr_reader :permissions
 
       def validate
         super
         check_optional_property :compile, Hash
         check_optional_property :copy, Hash
-        check_property_list :permissions, Provider::Config::Permission
-      end
-    end
-
-    # Represents a permission to be set at the generated module
-    class Permission < Api::Object
-      attr_reader :path
-      attr_reader :acl
-
-      def validate
-        super
-        check_property :path, String
-        check_property :acl, String
       end
     end
 
