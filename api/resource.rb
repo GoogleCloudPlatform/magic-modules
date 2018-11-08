@@ -130,17 +130,7 @@ module Api
       end
     end
 
-    # Represents a hierarchy that has an object as its key. For example, when
-    # creating test data, we'll do it per type, so it would look like this in
-    # the provider.yaml file:
-    #
-    # test_data: !ruby/object:Api::Resource::HashArray
-    #   Object1:
-    #     - data1
-    #     - data2
-    #   Object2:
-    #     - data3
-    #     - data4
+    # Represents a hierarchy that has an object as its key.
     class HashArray < Api::Object
       def consume_api(api)
         @__api = api
