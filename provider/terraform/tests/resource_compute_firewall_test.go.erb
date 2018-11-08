@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -283,6 +284,7 @@ func TestAccComputeFirewall_disabled(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccComputeFirewall_enableLogging(t *testing.T) {
 	t.Parallel()
 
@@ -324,6 +326,7 @@ func TestAccComputeFirewall_enableLogging(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccCheckComputeFirewallExists(n string, firewall *compute.Firewall) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -468,6 +471,7 @@ func testAccCheckComputeFirewallApiVersion(firewall *compute.Firewall) resource.
 	}
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccCheckComputeFirewallLoggingEnabled(firewall *computeBeta.Firewall, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if firewall == nil || firewall.EnableLogging != enabled {
@@ -476,6 +480,7 @@ func testAccCheckComputeFirewallLoggingEnabled(firewall *computeBeta.Firewall, e
 		return nil
 	}
 }
+<% end -%>
 
 func testAccComputeFirewall_basic(network, firewall string) string {
 	return fmt.Sprintf(`
@@ -652,6 +657,7 @@ func testAccComputeFirewall_disabled(network, firewall string) string {
 	}`, network, firewall)
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccComputeFirewall_enableLogging(network, firewall string, enableLogging bool) string {
 	enableLoggingCfg := ""
 	if enableLogging {
@@ -677,3 +683,4 @@ func testAccComputeFirewall_enableLogging(network, firewall string, enableLoggin
 		%s
 	}`, network, firewall, enableLoggingCfg)
 }
+<% end -%>
