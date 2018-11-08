@@ -130,5 +130,14 @@ You might not be authorized - the github auth there is separate from the logic t
 
 After that, log out of sunrise, log back in to sunrise, then log out another time, then run `fly login -t sunrise` as above.
 
+## I can't merge my PR!
+There are a couple reasons this might happen - I'll cover the ones I know about right now.
+
+* There might be merge conflicts right now - you'll see a failure in the first step with "there are merge conflicts" in the error message.  If you see that error message in Concourse, but *not* in GitHub, simply try again - the GitHub API sometimes reports merge conflicts for a minute or so after a new commit is pushed, even if there aren't any.
+
+* To make sure that you end up with a clean history, the Magician rebases your PR onto master, and so if an old commit of yours introduces a merge conflict, *even if you fix that conflict in a subsequent commit*, the rebase process will fail.  You need to fix this problem by rebasing your branch onto master yourself, and force-pushing to Github.
+
+* If you see Concourse complaining about an SSL error of some kind, please just retry.  The Magician will auto-retry most transient failures, but this one seems to be a failure way down in some C code, so the Magician can't retry it easily.
+
 ## Other: Consult your local Magician Expert
 Remind them to update this page.
