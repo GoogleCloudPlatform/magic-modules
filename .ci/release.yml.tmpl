@@ -33,11 +33,7 @@ resources:
       source:
         username: ((puppet-forge.username))
         password: ((puppet-forge.password))
-{% if module == '_bundle' %}
-        module_name: google-cloud
-{% else %}
         module_name: google-g{{module}}
-{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -49,6 +45,13 @@ resources:
         username: ((puppet-forge.username))
         password: ((puppet-forge.password))
         module_name: google-glogging
+
+    - name: puppet-bundle-forge
+      type: puppet-forge
+      source:
+        username: ((puppet-forge.username))
+        password: ((puppet-forge.password))
+        module_name: google-cloud
 
     - name: gcp-bucket
       type: gcs-resource
@@ -135,6 +138,23 @@ jobs:
             repo: magic-modules-gcp/build/puppet/{{module}}
       {% endif %}
     {% endfor %}
+
+
+    - name: release-bundle
+      plan:
+        {% for module in vars.puppet_modules + ["logging"] %}
+        {% if module not in vars.puppet_no_release %}
+        - get: puppet-{{module}}-forge
+        {% endif %}
+        {% endfor %}
+        - get: magic-modules
+          resource: magic-modules-gcp
+        - task: create-bundle-manifest
+          file: magic-modules/.ci/release/create_bundle_manifest.yml
+        - put: puppet-bundle-forge
+          params:
+            patch_bump: false
+            repo: magic-modules/build/puppet/_bundle
 
     - name: nightly-build
       plan:
