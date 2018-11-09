@@ -15,6 +15,15 @@ require 'net/http'
 require 'json'
 require 'active_support/inflector'
 
+TYPES = {
+  'string': 'String',
+  'boolean': 'Boolean',
+  'object': 'NameValues',
+  'integer': 'Integer',
+  'number': 'Double',
+  'array': 'Array'
+}
+
 class DiscoveryProperty
   attr_reader :schema
   attr_reader :name
@@ -44,6 +53,13 @@ class DiscoveryProperty
     else
       return []
     end
+  end
+
+  def type
+    return "Api::Type::NestedObject" if @schema.dig('$ref')
+    return "Api::Type::NestedObject" if @schema.dig('type') == 'object' && @schema.dig('properties')
+    return "Api::Type::Enum" if @schema.dig('enum')
+    "Api::Type::#{TYPES[@schema.dig('type').to_sym]}"
   end
 end
 
