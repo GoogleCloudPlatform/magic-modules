@@ -17,16 +17,27 @@ export GOPATH=${PWD}/go
 # to disk for use in tests.
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
 
-git clone https://github.com/slevenick/inspec-gcp.git
+export CLOUD_SDK_REPO="cloud-sdk-stretch"
+echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+apt-get update && apt-get install google-cloud-sdk -y
 
-# new train plugin not published yet, install locally for now
-pushd inspec-gcp
-bundle
+gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
+
+# Download train plugin (it's not published yet)
+gsutil cp -r gs://magic-modules-inspec-bucket/train-gcp2 .
+gem install inspec
 inspec plugin install train-gcp2/lib/train-gcp2.rb
 
-popd
+pushd magic-modules-new-prs
 
-pushd inspec-gcp/test/integration
+# Compile inspec because we are running off of new-prs
+bundle install
+for i in $(find products/ -name 'inspec.yaml' -printf '%h\n');
+do
+  bundle exec compiler -p $i -e inspec -o "build/inspec/"
+done
+pushd build/inspec/test/integration
 
 # Generate tfvars
 pushd attributes
@@ -36,7 +47,7 @@ popd
 
 # Run terraform
 pushd terraform
-wget https://releases.hashicorp.com/terraform/0.11.10/terraform_0.11.10_linux_amd64.zip
+curl https://releases.hashicorp.com/terraform/0.11.10/terraform_0.11.10_linux_amd64.zip > terraform_0.11.10_linux_amd64.zip
 apt-get install unzip
 unzip terraform_0.11.10_linux_amd64.zip
 ./terraform init
@@ -60,7 +71,7 @@ bundle
 # Service accounts take several minutes to be authorized everywhere
 set +e
 
-for i in {1..50}
+for i in {1..20}
 do
 	inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
 	if [ "$?" -eq "0" ]; then
@@ -69,5 +80,6 @@ do
 done
 set -e
 
+popd
 popd
 exit 100
