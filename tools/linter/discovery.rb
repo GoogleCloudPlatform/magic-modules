@@ -15,15 +15,6 @@ require 'net/http'
 require 'json'
 require 'active_support/inflector'
 
-TYPES = {
-  'string': 'String',
-  'boolean': 'Boolean',
-  'object': 'NameValues',
-  'integer': 'Integer',
-  'number': 'Double',
-  'array': 'Array'
-}
-
 class DiscoveryProperty
   attr_reader :schema
   attr_reader :name
@@ -37,32 +28,21 @@ class DiscoveryProperty
     @__product = product
   end
 
-  def type
-    return "NestedObject" if @schema.dig('$ref')
-    return "NestedObject" if @schema.dig('type') == 'object' && @schema.dig('properties')
-    return "Enum" if @schema.dig('enum')
-    TYPES[@schema.dig('type').to_sym]
-  end
-
-  def output?
-    (@schema.dig('description') || '').downcase.include?('output only')
-  end
-
-  def enum
-    @schema.dig('enum').map { |val| val.to_sym }
-  end
-
   def has_nested_properties?
+    return !nested_properties.empty?
+  end
+
+  def nested_properties
     if @schema.dig('$ref')
-      return true
+      return @__product.get_resource(@schema.dig('$ref')).properties
     elsif @schema.dig('type') == 'object' && @schema.dig('properties')
-      return true
+      return DiscoveryResource.new(@schema, nil, @__product).properties
     elsif @schema.dig('type') == 'array' && @schema.dig('items', '$ref')
-      return true
+      return @__product.get_resource(@schema.dig('items', '$ref')).properties
     elsif @schema.dig('type') == 'array' && @schema.dig('items', 'properties')
-      return true
+      return DiscoveryResource.new(@schema.dig('items'), nil, @__product).properties
     else
-      return false
+      return []
     end
   end
 end
@@ -114,14 +94,14 @@ class DiscoveryBuilder
     @results['resources'][resource.pluralize.camelize(:lower)]['methods']
   end
 
+  def get_resource(resource)
+    DiscoveryResource.new(@results['schemas'][resource], resource, self)
+  end
+
   private
 
   def send_request(url)
     JSON.parse(Net::HTTP.get(URI(url)))
-  end
-
-  def get_resource(resource)
-    DiscoveryResource.new(@results['schemas'][resource], resource, self)
   end
 end
 
