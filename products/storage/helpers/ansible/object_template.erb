@@ -62,20 +62,38 @@ def main():
     if not module.params['scopes']:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
 
-    results = module.params
+    remote_object = fetch_resource(module, self_link(module))
+    local_file_exists = os.path.isfile(local_file_path(module))
 
+    # Check if files exist.
+    if module.params['action'] == 'download' and not remote_object:
+        module.fail_json(msg="File does not exist in bucket")
+
+    if module.params['action'] == 'upload' and not local_file_exists:
+        module.fail_json(msg="File does not exist on disk")
+
+
+    # Check if we'll be overwriting files.
+    if not module.params['overwrite']:
+      if module.params['action'] == 'download' and local_file_exists:
+          if get_md5_local(local_file_path(module)) != remote_object['md5Hash']:
+              module.fail_json(msg="Local file is different than remote file")
+
+      elif module.params['action'] == 'upload' and remote_object:
+          if get_md5_local(local_file_path(module)) != remote_object['md5Hash']:
+              module.fail_json(msg="Local file is different than remote file")
+
+    # Upload/download the files
     auth = GcpSession(module, 'storage')
     if module.params['action'] == 'download':
-        # Get file from API
-        results = upload_file(module)
-    else:
-        # Get contents of file
         results = download_file(module)
+    else:
+        results = upload_file(module)
 
     module.exit_json(**results)
 
 
-def upload_file(module):
+def download_file(module):
     auth = GcpSession(module, 'storage')
     data = auth.get(media_link(module))
     f = open(module.params['dest'], 'w')
@@ -84,7 +102,7 @@ def upload_file(module):
     return fetch_resource(module, self_link(module))
 
 
-def download_file(module):
+def upload_file(module):
     auth = GcpSession(module, 'storage')
     f = open(module.params['src'], 'r')
     src = f.read()
@@ -99,7 +117,7 @@ def get_md5_local(path):
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             md5.update(chunk)
-    return base64.b64encode(md5.hexdigest())
+    return base64.b64encode(md5.digest())
 
 
 def get_md5_remote(module):
@@ -117,6 +135,12 @@ def self_link(module):
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{src}".format(**module.params)
     else:
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{dest}".format(**module.params)
+
+def local_file_path(module):
+    if module.params['action'] == 'download':
+        return module.params['dest']
+    else:
+        return module.params['src']
 
 
 def media_link(module):

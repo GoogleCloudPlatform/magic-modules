@@ -40,7 +40,6 @@ objects:
           'Overwrite the file on the bucket/local machine. If overwrite is
           false and a difference exists between GCS + local, module will fail
           with error'
-        exclude: true
       - !ruby/object:Api::Type::Path
         name: 'src'
         description: Source location of file (may be local machine or cloud depending on action)
