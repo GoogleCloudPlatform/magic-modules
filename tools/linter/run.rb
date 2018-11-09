@@ -46,10 +46,9 @@ docs.each do |doc|
   RSpec.describe api.prefix do
     builder.resources.each do |disc_res|
       api_obj = api.objects.select { |p| p.name == disc_res.name }.first
-
-      include_examples "resource_tests", disc_res, api_obj
       # RSpec tests begin here.
       describe disc_res.name do
+        include_examples "resource_tests", disc_res, api_obj
         TestRunner.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
           context name do
             include_examples "property_tests", disc_prop, api_prop
