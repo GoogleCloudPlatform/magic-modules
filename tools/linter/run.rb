@@ -23,6 +23,7 @@
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../../')
 Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 
+require 'google/logger'
 require 'tools/linter/api'
 require 'tools/linter/discovery'
 require 'tools/linter/test_runner'
@@ -30,6 +31,8 @@ require 'tools/linter/tests'
 
 require 'yaml'
 require 'rspec'
+
+Google::LOGGER.level = Logger::ERROR
 
 VALID_KEYS = %w[filename url].freeze
 
