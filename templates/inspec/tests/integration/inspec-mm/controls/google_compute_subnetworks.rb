@@ -17,9 +17,11 @@ control 'gcp-compute-subnetworks-1.0' do
 
   impact 1.0
   title 'Plural GCP subnetwork resource test'
-  describe google_compute_subnetworks(project: attribute('project_name'), region: attribute('region')) do
+
+  resource = google_compute_subnetworks(project: attribute('project_name'), region: attribute('region'))
+  describe resource do
     it { should exist }
-    its('names') { should include 'gcp-inspec-subnetwork' }
+    its('names') { should include attribute('subnetwork')['name'] }
     its('ip_cidr_ranges') { should include "10.2.0.0/29" }
   end
 end
