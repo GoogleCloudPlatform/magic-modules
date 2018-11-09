@@ -23,7 +23,7 @@ control 'gcp-compute-network-1.0' do
 
     its ('subnetworks.count') { should eq 1 }
     its ('creation_timestamp') { should be > (Time.now - 365*60*60*24*1).to_datetime }
-    its ('routing_config.routing_mode') { should eq "REGIONAL" }
+    its ('routing_config.routing_mode') { should eq attribute('network')['routing_mode'] }
     its ('auto_create_subnetworks'){ should be false }
   end
 
