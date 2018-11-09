@@ -43,14 +43,16 @@ docs.each do |doc|
   raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
   api = ApiFetcher.new(doc['filename']).fetch
   builder = DiscoveryBuilder.new(doc['url'], api.objects.map(&:name))
-  builder.resources.each do |disc_res|
-    api_obj = api.objects.select { |p| p.name == disc_res.name }.first
+  RSpec.describe api.prefix do
+    builder.resources.each do |disc_res|
+      api_obj = api.objects.select { |p| p.name == disc_res.name }.first
 
-    # RSpec tests begin here.
-    RSpec.describe disc_res.name do
-      TestRunner.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
-        context name do
-          include_examples "property_tests", disc_prop, api_prop
+      # RSpec tests begin here.
+      describe disc_res.name do
+        TestRunner.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
+          context name do
+            include_examples "property_tests", disc_prop, api_prop
+          end
         end
       end
     end
