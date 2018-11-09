@@ -36,16 +36,16 @@ class TestRunner
     @api_res = api_res
   end
 
-  def run
-    run_on_properties(@discovery_res.properties, @api_res.all_user_properties)
+  def run(&block)
+    run_on_properties(@discovery_res.properties, @api_res.all_user_properties, '', &block)
   end
 
-  def run_on_properties(discovery_properties, api_properties, prefix='')
+  def run_on_properties(discovery_properties, api_properties, prefix, &block)
     discovery_properties.each do |disc_prop|
       api_prop = api_properties.select { |p| p.name == disc_prop.name }.first
-      [PropExistsTest].map { |t| t.new(disc_prop, api_prop, "#{prefix}#{disc_prop.name}").run }
+      yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
       if disc_prop.has_nested_properties?
-        run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop), "#{prefix}#{disc_prop.name}.")
+        run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop), "#{prefix}#{disc_prop.name}.", &block)
       end
     end
   end

@@ -27,21 +27,27 @@ require 'tools/linter/api'
 require 'tools/linter/discovery'
 require 'tools/linter/test_runner'
 
-require 'optparse'
 require 'yaml'
+require 'rspec'
 
 doc_file = 'tools/linter/docs.yaml'
-OptionParser.new do |opts|
-  opts.banner = "Discovery doc runner. Usage: run.rb [docs.yaml]"
-  opts.on("-f", "--file [file]") { |file| doc_file = file }
-end.parse!
-
 docs = YAML::load(File.read(doc_file))
 
 docs.each do |doc|
   builder = DiscoveryBuilder.new(doc['url'], doc['objects'])
-  api = ApiFetcher.new(doc['filename']).fetch
   builder.resources.each do |disc_res|
-    TestRunner.new(disc_res, api.objects.select { |p| p.name == disc_res.name }.first).run
+    api = ApiFetcher.new(doc['filename']).fetch
+    api_obj = api.objects.select { |p| p.name == disc_res.name }.first
+    RSpec.describe disc_res.name do
+      TestRunner.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
+        context name do
+          it 'should exist' do
+            expect(api_prop).to be_truthy
+          end
+        end
+      end
+    end
   end
 end
+
+
