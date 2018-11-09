@@ -1,3 +1,7 @@
 ---
 - url: https://www.googleapis.com/discovery/v1/apis/compute/v1/rest
   filename: products/compute/api.yaml
+- url: https://www.googleapis.com/discovery/v1/apis/dns/v1/rest
+  filename: products/dns/api.yaml
+- url: https://www.googleapis.com/discovery/v1/apis/storage/v1/rest
+  filename: products/storage/api.yaml
