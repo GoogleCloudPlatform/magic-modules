@@ -35,7 +35,7 @@ Google::LOGGER.level = Logger::ERROR
 VALID_KEYS = %w[filename url].freeze
 
 doc_file = 'tools/linter/docs.yaml'
-docs = YAML::load(File.read(doc_file))
+docs = YAML.safe_load(File.read(doc_file))
 
 docs.each do |doc|
   raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
@@ -49,12 +49,12 @@ docs.each do |doc|
       # Second context: resource name
       describe disc_res.name do
         # Run all resource tests on this resource
-        include_examples "resource_tests", disc_res, api_obj
+        include_examples 'resource_tests', disc_res, api_obj
         PropertyFetcher.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
           # Third context: property name
           context name do
             # Run all tests on this property
-            include_examples "property_tests", disc_prop, api_prop
+            include_examples 'property_tests', disc_prop, api_prop
           end
         end
       end

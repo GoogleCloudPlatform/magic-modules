@@ -29,21 +29,21 @@ class DiscoveryProperty
     @__product = product
   end
 
-  def has_nested_properties?
-    return !nested_properties.empty?
+  def nested_properties?
+    !nested_properties.empty?
   end
 
   def nested_properties
     if @schema.dig('$ref')
-      return @__product.get_resource(@schema.dig('$ref')).properties
+      @__product.get_resource(@schema.dig('$ref')).properties
     elsif @schema.dig('type') == 'object' && @schema.dig('properties')
-      return DiscoveryResource.new(@schema, nil, @__product).properties
+      DiscoveryResource.new(@schema, nil, @__product).properties
     elsif @schema.dig('type') == 'array' && @schema.dig('items', '$ref')
-      return @__product.get_resource(@schema.dig('items', '$ref')).properties
+      @__product.get_resource(@schema.dig('items', '$ref')).properties
     elsif @schema.dig('type') == 'array' && @schema.dig('items', 'properties')
-      return DiscoveryResource.new(@schema.dig('items'), nil, @__product).properties
+      DiscoveryResource.new(@schema.dig('items'), nil, @__product).properties
     else
-      return []
+      []
     end
   end
 end
@@ -61,7 +61,6 @@ class DiscoveryResource
     @schema = schema
     @name = name
     @__product = product
-
   end
 
   def exists?
@@ -106,4 +105,3 @@ class DiscoveryBuilder
     JSON.parse(Net::HTTP.get(URI(url)))
   end
 end
-

@@ -18,8 +18,9 @@ class PropertyFetcher
     discovery_properties.each do |disc_prop|
       api_prop = api_properties.select { |p| p.name == disc_prop.name }.first
       yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
-      if disc_prop.has_nested_properties?
-        run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop), "#{prefix}#{disc_prop.name}.", &block)
+      if disc_prop.nested_properties?
+        run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop),
+                          "#{prefix}#{disc_prop.name}.", &block)
       end
     end
   end
@@ -41,7 +42,7 @@ end
 class ApiFetcher
   def initialize(filename)
     @filename = filename
-    @api = get_yaml
+    @api = build_api
   end
 
   def fetch
@@ -50,7 +51,7 @@ class ApiFetcher
 
   private
 
-  def get_yaml
+  def build_api
     Api::Compiler.new(@filename).run
   end
 end
