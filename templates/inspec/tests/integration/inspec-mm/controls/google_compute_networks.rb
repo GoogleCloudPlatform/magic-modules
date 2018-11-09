@@ -18,7 +18,9 @@ control 'gcp-compute-networks-1.0' do
   impact 1.0
   title 'GCP compute networks plural.'
 
-  describe google_compute_networks(project: attribute('project_name')) do
+	resource = google_compute_networks(project: attribute('project_name'))
+	
+  describe resource do
     it { should exist }
 
     its ('names.size') { should eq 2 }
