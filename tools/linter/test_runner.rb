@@ -30,10 +30,6 @@ class PropExistsTest < Test
   end
 end
 
-TESTS = [
-  PropExistsTest
-]
-
 class TestRunner
   def initialize(discovery_res, api_res)
     @discovery_res = discovery_res
@@ -47,7 +43,7 @@ class TestRunner
   def run_on_properties(discovery_properties, api_properties, prefix='')
     discovery_properties.each do |disc_prop|
       api_prop = api_properties.select { |p| p.name == disc_prop.name }.first
-      TESTS.map { |t| t.new(disc_prop, api_prop, "#{prefix}#{disc_prop.name}").run }
+      [PropExistsTest].map { |t| t.new(disc_prop, api_prop, "#{prefix}#{disc_prop.name}").run }
       if disc_prop.has_nested_properties?
         run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop), "#{prefix}#{disc_prop.name}.")
       end
@@ -66,3 +62,4 @@ class TestRunner
     end
   end
 end
+
