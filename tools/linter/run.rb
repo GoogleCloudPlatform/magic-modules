@@ -26,6 +26,7 @@ Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 require 'tools/linter/api'
 require 'tools/linter/discovery'
 require 'tools/linter/test_runner'
+require 'tools/linter/tests'
 
 require 'yaml'
 require 'rspec'
@@ -41,13 +42,9 @@ docs.each do |doc|
     RSpec.describe disc_res.name do
       TestRunner.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
         context name do
-          it 'should exist' do
-            expect(api_prop).to be_truthy
-          end
+          include_examples "property_tests", disc_prop, api_prop
         end
       end
     end
   end
 end
-
-
