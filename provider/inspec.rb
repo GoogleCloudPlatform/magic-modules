@@ -56,6 +56,60 @@ module Provider
           File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
       )
       generate_documentation(data)
+      generate_properties(data)
+    end
+
+    def generate_properties(data)
+      object = data[:object]
+      nested_object_arrays = object.properties.select\
+        { |type| typed_array?(type) && nested_object?(type.item_type) }
+
+      nested_objects = object.properties.select { |prop| nested_object?(prop) }
+
+      prop_map = nested_objects.map\
+        { |nested_object| emit_nested_object(nested_object_data(data, nested_object)) }
+
+      prop_map << nested_object_arrays.map\
+        { |array| emit_nested_object(nested_object_array_data(data, array)) }
+
+      generate_property_files(prop_map, data)
+      nested_objects.map { |prop| generate_properties(data.clone.merge(object: prop)) }
+      nested_object_arrays.map\
+        { |prop| generate_properties(data.clone.merge(object: prop.item_type)) }
+    end
+
+    def nested_object_data(data, nested_object)
+      data.clone.merge(
+        emit_array: false,
+        api_name: nested_object.name.underscore,
+        property: nested_object,
+        nested_properties: nested_object.properties,
+        obj_name: data[:object].name.underscore
+      )
+    end
+
+    def nested_object_array_data(data, nested_object_array)
+      data.clone.merge(
+        emit_array: true,
+        api_name: nested_object_array.name.underscore,
+        property: nested_object_array,
+        nested_properties: nested_object_array.item_type.properties,
+        obj_name: data[:object].name.underscore
+      )
+    end
+
+    # Generate the files for the properties
+    def generate_property_files(prop_map, data)
+      prop_map.flatten.compact.each do |prop|
+        compile_file_list(
+          data[:output_folder],
+          { prop[:target] => prop[:source] },
+          {
+            product_ns: data[:product_name].camelize(:upper),
+            prop_ns_dir: data[:product_name].downcase
+          }.merge((prop[:overrides] || {}))
+        )
+      end
     end
 
     # Generates InSpec markdown documents for the resource
@@ -80,16 +134,6 @@ module Provider
       FileUtils.mkpath target_folder
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
     end
-
-    def generate_base_property(data) end
-
-    def generate_simple_property(type, data) end
-
-    def generate_typed_array(data, prop) end
-
-    def emit_resourceref_object(data) end
-
-    def generate_network_datas(data, object) end
 
     def emit_nested_object(data)
       target = if data[:emit_array]
