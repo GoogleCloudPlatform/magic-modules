@@ -17,7 +17,7 @@ import (
 <% object.example.reject(&:skip_test).each do |example| -%>
 <%
 	# {Compute}{Address}_{addressBasic}
-	test_slug = "#{resource_name}_#{example.name.camelize}Example"
+	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 	  ignore_read = data[:object].all_user_properties
                  .select(&:ignore_read)
                  .map { |p| p.name.underscore }
