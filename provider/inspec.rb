@@ -74,9 +74,9 @@ module Provider
       url.split("\n").join('')
     end
 
-    # Copies InSpec unit tests to build folder
+    # Copies InSpec tests to build folder
     def generate_resource_tests(data)
-      target_folder = File.join(data[:output_folder], 'test/unit')
+      target_folder = File.join(data[:output_folder], 'test')
       FileUtils.mkpath target_folder
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
     end
