@@ -15,15 +15,7 @@ require 'net/http'
 require 'json'
 require 'active_support/inflector'
 
-TYPES = {
-  'string': 'String',
-  'boolean': 'Boolean',
-  'object': 'NameValues',
-  'integer': 'Integer',
-  'number': 'Double',
-  'array': 'Array'
-}
-
+# Holds all Discovery Information about a Api::Type (property)
 class DiscoveryProperty
   attr_reader :schema
   attr_reader :name
@@ -54,17 +46,11 @@ class DiscoveryProperty
       return []
     end
   end
-
-  def type
-    return "Api::Type::NestedObject" if @schema.dig('$ref')
-    return "Api::Type::NestedObject" if @schema.dig('type') == 'object' && @schema.dig('properties')
-    return "Api::Type::Enum" if @schema.dig('enum')
-    "Api::Type::#{TYPES[@schema.dig('type').to_sym]}"
-  end
 end
 
-# Holds information about discovery objects
-# Two sections: schema (properties) and methods
+# Holds Discovery information about a Resource
+# This Resource is usually a Api::Resource,
+# although it may be the contents of a NestedObject
 class DiscoveryResource
   attr_reader :schema
   attr_reader :name

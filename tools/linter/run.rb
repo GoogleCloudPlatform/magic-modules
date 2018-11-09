@@ -24,16 +24,14 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '../../')
 Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 
 require 'google/logger'
-require 'tools/linter/api'
 require 'tools/linter/discovery'
-require 'tools/linter/test_runner'
+require 'tools/linter/fetcher'
 require 'tools/linter/tests'
 
 require 'yaml'
 require 'rspec'
 
 Google::LOGGER.level = Logger::ERROR
-
 VALID_KEYS = %w[filename url].freeze
 
 doc_file = 'tools/linter/docs.yaml'
@@ -43,14 +41,19 @@ docs.each do |doc|
   raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
   api = ApiFetcher.new(doc['filename']).fetch
   builder = DiscoveryBuilder.new(doc['url'], api.objects.map(&:name))
+
+  # First context: product name
   RSpec.describe api.prefix do
     builder.resources.each do |disc_res|
       api_obj = api.objects.select { |p| p.name == disc_res.name }.first
-      # RSpec tests begin here.
+      # Second context: resource name
       describe disc_res.name do
+        # Run all resource tests on this resource
         include_examples "resource_tests", disc_res, api_obj
-        TestRunner.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
+        PropertyFetcher.new(disc_res, api_obj).run do |disc_prop, api_prop, name|
+          # Third context: property name
           context name do
+            # Run all tests on this property
             include_examples "property_tests", disc_prop, api_prop
           end
         end

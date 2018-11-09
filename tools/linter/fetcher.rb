@@ -1,36 +1,10 @@
-class Test
-  def initialize(disc_prop, api_prop, prop_name)
-    @disc = disc_prop
-    @api = api_prop
-    @prop_name = prop_name
-  end
+require 'api/compiler'
 
-  def run
-    unless test(@disc, @api)
-      puts fail_message(@prop_name)
-    end
-  end
-
-  def test(disc, api)
-    raise "This should be overriden"
-  end
-
-  def fail_message(prop_name)
-    raise "This should be overriden"
-  end
-end
-
-class PropExistsTest < Test
-  def test(disc, api)
-    return api
-  end
-
-  def fail_message(prop_name)
-    "#{prop_name} does not exist"
-  end
-end
-
-class TestRunner
+# Takes in a DiscoveryResource + Api::Resource
+# Loops through all properties of the DiscoveryResource (at any depth)
+# Passes the DiscoveryProperties and their corresponding Api Properties
+# to a test block.
+class PropertyFetcher
   def initialize(discovery_res, api_res)
     @discovery_res = discovery_res
     @api_res = api_res
@@ -63,3 +37,20 @@ class TestRunner
   end
 end
 
+# Gets a Api::Product from a api.yaml filename
+class ApiFetcher
+  def initialize(filename)
+    @filename = filename
+    @api = get_yaml
+  end
+
+  def fetch
+    @api
+  end
+
+  private
+
+  def get_yaml
+    Api::Compiler.new(@filename).run
+  end
+end
