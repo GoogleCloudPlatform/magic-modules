@@ -30,7 +30,7 @@ go get
 # "-wholename": entire relative path - including directory names - matches following wildcard.
 # "-name": filename alone matches following string.  e.g. -name README.md matches ./README.md *and* ./foo/bar/README.md
 # "-exec": for each file found, execute the command following until the literal ';'
-find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "main.go" -not -wholename "./scripts*" -exec git rm {} \;
+find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "main.go" -not -wholename "./scripts*" -not -wholename "./version*" -exec git rm {} \;
 popd
 
 pushd magic-modules-branched
