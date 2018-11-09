@@ -1,3 +1,39 @@
+class Test
+  def initialize(disc_prop, api_prop, prop_name)
+    @disc = disc_prop
+    @api = api_prop
+    @prop_name = prop_name
+  end
+
+  def run
+    unless test(@disc, @api)
+      puts fail_message(@prop_name)
+    end
+  end
+
+  def test(disc, api)
+    raise "This should be overriden"
+  end
+
+  def fail_message(prop_name)
+    raise "This should be overriden"
+  end
+end
+
+class PropExistsTest < Test
+  def test(disc, api)
+    return api
+  end
+
+  def fail_message(prop_name)
+    "#{prop_name} does not exist"
+  end
+end
+
+TESTS = [
+  PropExistsTest
+]
+
 class TestRunner
   def initialize(discovery_res, api_res)
     @discovery_res = discovery_res
@@ -11,16 +47,10 @@ class TestRunner
   def run_on_properties(discovery_properties, api_properties, prefix='')
     discovery_properties.each do |disc_prop|
       api_prop = api_properties.select { |p| p.name == disc_prop.name }.first
-      test_prop(disc_prop, api_prop, prefix)
+      TESTS.map { |t| t.new(disc_prop, api_prop, "#{prefix}#{disc_prop.name}").run }
       if disc_prop.has_nested_properties?
         run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop), "#{prefix}#{disc_prop.name}.")
       end
-    end
-  end
-
-  def test_prop(disc, api, prefix)
-    unless api
-      puts "#{prefix}#{disc.name}: not found"
     end
   end
 
