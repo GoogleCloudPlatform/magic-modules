@@ -57,8 +57,6 @@ module Provider
 
       generate_datasources(output_folder, types, version_name) \
         unless @config.datasources.nil?
-      apply_file_acls(output_folder) \
-        unless @config.files.nil? || @config.files.permissions.nil?
     end
 
     def copy_files(output_folder)
@@ -117,13 +115,6 @@ module Provider
         output_folder: output_folder,
         out_file: File.join(output_folder, 'CHANGELOG.md')
       )
-    end
-
-    def apply_file_acls(output_folder)
-      @config.files.permissions.each do |perm|
-        Google::LOGGER.info "Permission #{perm.path} => #{perm.acl}"
-        FileUtils.chmod perm.acl, File.join(output_folder, perm.path)
-      end
     end
 
     def compile_file_list(output_folder, files, data = {})
