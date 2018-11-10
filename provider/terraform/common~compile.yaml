@@ -13,23 +13,23 @@
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
 <% dir = version_name == 'beta' ? 'google-beta' : 'google' -%>
-'website/google.erb': 'provider/terraform/website/google.erb'
-<%  Dir["provider/terraform/tests/*.go.erb"].each do |file_path|
+'website/google.erb': 'third_party/terraform/website/google.erb'
+<%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/tests/<%= fname -%>'
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/tests/<%= fname -%>'
 <% end -%>
 <%
-  Dir["provider/terraform/resources/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/resources/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/resources/<%= fname -%>'
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/resources/<%= fname -%>'
 <% end -%>
 <%
-  Dir["provider/terraform/data_sources/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/data_sources/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/data_sources/<%= fname -%>'
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/data_sources/<%= fname -%>'
 <% end -%>
 <%
   Dir["provider/terraform/utils/*.go.erb"].each do |file_path|
