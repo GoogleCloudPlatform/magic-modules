@@ -115,7 +115,7 @@ class DiscoveryResource
   end
 
   def resource
-    @methods = @__product.get_methods_for_resource(@schema.dig('id'))
+    @methods = @__product.get_methods_for_resource(@schema.dig('id'), @__product.doc.resource_path)
 
     res = Api::Resource.new
     res.name = @schema.dig('id')
@@ -142,6 +142,7 @@ end
 # Responsible for grabbing Discovery Docs and getting resources from it
 class DiscoveryProduct
   attr_reader :results
+  attr_reader :doc
 
   def initialize(doc)
     @doc = doc
@@ -159,9 +160,16 @@ class DiscoveryProduct
     DiscoveryResource.new(@results['schemas'][resource], self)
   end
 
-  def get_methods_for_resource(resource)
-    return unless @results['resources'][resource.pluralize.camelize(:lower)]
-    @results['resources'][resource.pluralize.camelize(:lower)]['methods']
+  def get_methods_for_resource(resource, resource_path = nil)
+    resource_path = 'resources' if resource_path.nil?
+    # Discovery docs aren't created equal and some define resources at different nesting levels.
+    @resources = @results
+    resource_path.split('.').each{|k| @resources = @resources[k]}
+
+    raise "Cannot find #{resource} at api path: root.#{resource_path}" unless @resources[resource.pluralize.camelize(:lower)]
+    return unless @resources[resource.pluralize.camelize(:lower)]
+
+    @resources[resource.pluralize.camelize(:lower)]['methods']
   end
 
   def get_product
