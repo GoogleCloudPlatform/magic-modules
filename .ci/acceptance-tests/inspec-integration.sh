@@ -75,6 +75,7 @@ for i in {1..30}
 do
 	inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
 	if [ "$?" -eq "0" ]; then
+		gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/inspec-cassettes
 		exit 0
 	fi
 done
