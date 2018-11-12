@@ -14,17 +14,11 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Provider::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Terraform::ResourceOverride
-    examples: |
-      ```hcl
-      resource "google_dns_managed_zone" "prod" {
-        name = "prod-zone"
-        dns_name = "prod.mydomain.com."
-        description = "Production DNS zone"
-        labels = {
-          foo = "bar"
-        }
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_basic"
+        primary_resource_id: "example-zone"
+        version: <%= _version_name %>
     properties:
       creationTime: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
@@ -32,6 +26,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         description: |
           A textual description field. Defaults to 'Managed by Terraform'.
         default_value: 'Managed by Terraform'
+        required: false
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       nameServerSet: !ruby/object:Provider::Terraform::PropertyOverride
