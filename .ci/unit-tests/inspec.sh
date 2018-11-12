@@ -3,6 +3,25 @@
 set -e
 set -x
 
+# Service account credentials for GCP to pull VCR cassettes
+export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
+
+# CI sets the contents of our json account secret in our environment; dump it
+# to disk for use in tests.
+echo "${TERRAFORM_KEY}" > /tmp/google-account.json
+
+export CLOUD_SDK_REPO="cloud-sdk-stretch"
+echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+apt-get update && apt-get install google-cloud-sdk -y
+
+gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
+
+# Download train plugin (it's not published yet)
+gsutil cp -r gs://magic-modules-inspec-bucket/train-gcp2 .
+gem install inspec
+inspec plugin install train-gcp2/lib/train-gcp2.rb
+
 pushd "magic-modules/build/inspec/test/integration"
 
 # Generate a rsa private key to use in mocks
@@ -14,7 +33,7 @@ echo '{
   "type": "service_account",
   "project_id": "fake",
   "private_key_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "private_key": "<%= @private_key %>",
+  "private_key": "<%= @fake_private_key %>",
   "client_email": "fake@fake.iam.gserviceaccount.com",
   "client_id": "123451234512345123451",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -23,10 +42,13 @@ echo '{
   "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fake%40fake.iam.gserviceaccount.com"
 }' > inspec.json.erb
 
-# Formatting a private key file for use is surprisingly difficult
-echo -n "@private_key = '$(echo -n "$(cat id_rsa)")'.gsub(\"\n\", '\n')" > var.rb
+# Formatting a rsa key file for use is surprisingly difficult
+echo -n "@fake_private_key = '$(echo -n "$(cat id_rsa)")'.gsub(\"\n\", '\n')" > var.rb
 erb -r './var' inspec.json.erb > inspec.json
 
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 
+bundle install
+# TODO change this to use a github repo
+gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
