@@ -809,7 +809,7 @@ objects:
         created prior to verification being required for channels of this type.This
         field cannot be modified using a standard UpdateNotificationChannel operation.
         To change the value of this field, you must call VerifyNotificationChannel.
-      # output: true
+      output: true
       values:
       - :VERIFICATION_STATUS_UNSPECIFIED
       - :UNVERIFIED
@@ -817,9 +817,10 @@ objects:
     - !ruby/object:Api::Type::String
       name: type
       required: true
-      # TODO enum?
       description: The type of the notification channel. This field matches the value
-        of the NotificationChannelDescriptor.type field.
+        of the NotificationChannelDescriptor.type field. See
+        https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannelDescriptors/list
+        to get the list of valid values such as "email", "slack", etc...
     - !ruby/object:Api::Type::KeyValuePairs
       name: userLabels
       description: User-supplied key/value data that does not need to conform to the

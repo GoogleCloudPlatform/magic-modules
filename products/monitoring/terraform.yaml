@@ -72,6 +72,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
   NotificationChannel: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
+    mutex: stackdriver/notifications/{{project}}
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notification_channel_basic"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Test Notification Channel"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
