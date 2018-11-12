@@ -26,6 +26,8 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   desc '<%= object.name -%> plural resource'
   supports platform: 'gcp2'
 
+  attr_reader :table
+
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
 
@@ -52,10 +54,6 @@ link_query = object.self_link_query || object.collection_url_response
   def initialize(params = {}) 
     @params = params
     @table = fetch_wrapped_resource(<%= "'#{link_query.kind}'" -%>, <%= "'#{link_query.items}'" -%>)
-  end
-
-  def table
-    @table
   end
 
   def fetch_wrapped_resource(wrap_kind, wrap_path)
