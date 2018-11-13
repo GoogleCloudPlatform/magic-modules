@@ -27,7 +27,9 @@ pushd "magic-modules/build/inspec/test/integration"
 # Generate a rsa private key to use in mocks
 # Due to using gauth library InSpec + train expect to load a service account file from an env variable
 # This service account file must contain a real RSA key, but this key is never used in unit tests.
-ssh-keygen -f id_rsa -t rsa -N ''
+rsatmp=$(mktemp /tmp/rsatmp.XXXXXX)
+yes y | ssh-keygen -f "${rsatmp}" -t rsa -N ''
+
 
 echo '{
   "type": "service_account",
@@ -43,7 +45,8 @@ echo '{
 }' > inspec.json.erb
 
 # Formatting a rsa key file for use is surprisingly difficult
-echo -n "@fake_private_key = '$(echo -n "$(cat id_rsa)")'.gsub(\"\n\", '\n')" > var.rb
+echo -n "@fake_private_key = '$(echo -n "$(cat ${rsatmp})")'.gsub(\"\n\", '\n')" > var.rb
+rm ${rsatmp}
 erb -r './var' inspec.json.erb > inspec.json
 
 pushd inspec-mm
@@ -62,7 +65,4 @@ rm -rf inspec-mm/libraries
 rm inspec.json
 rm inspec.json.erb
 rm var.rb
-rm id_rsa
-rm id_rsa.pub
-
 
