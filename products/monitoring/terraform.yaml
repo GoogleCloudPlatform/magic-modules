@@ -52,11 +52,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
         primary_resource_id: "basic"
+        version: <%= _version_name %>
         vars:
           display_name: "New Test Group"
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_subgroup"
         primary_resource_id: "subgroup"
+        version: <%= _version_name %>
         vars:
           display_name: "New Test SubGroup"
           display_name2: "New Test SubGroup"
