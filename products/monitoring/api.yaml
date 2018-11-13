@@ -727,11 +727,9 @@ objects:
 
   - !ruby/object:Api::Resource
     name: 'Group'
-    exclude: true
-    # TODO - chrisst this resource is tested well enough to be release yet.
     base_url: projects/{{project}}/groups
-    self_link: projects/{{project}}/groups/{{name}}
-    update_verb: :PATCH
+    self_link: "{{name}}"
+    update_verb: :PUT
     description: |
       The description of a dynamic collection of monitored resources. Each group
       has a filter that is matched against monitored resources and their
@@ -746,7 +744,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: parentName
         # TODO chrisst - turn into self-reference if possible.
-        # if not, turn into {groupId} and expand
         description: |
           The name of the group's parent, if it has one. The format is
           "projects/{project_id_or_number}/groups/{group_id}". For
@@ -771,6 +768,7 @@ objects:
           purposes.
       - !ruby/object:Api::Type::String
         name: filter
+        required: true
         description: |
           The filter used to determine which monitored resources
           belong to this group.
