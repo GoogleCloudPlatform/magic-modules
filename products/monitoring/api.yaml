@@ -784,6 +784,11 @@ objects:
       when a policy violation is detected. Examples of channels include email, SMS,
       and third-party messaging applications. Fields containing sensitive information
       like authentication tokens or contact info are only partially populated on retrieval.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/monitoring/api/v3/'
+      api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannels'
     properties:
     - !ruby/object:Api::Type::KeyValuePairs
       name: labels
