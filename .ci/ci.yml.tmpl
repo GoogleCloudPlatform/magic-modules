@@ -239,10 +239,11 @@ jobs:
           trigger: true
           params:
               submodules: [build/inspec]
-              TERRAFORM_KEY: ((terraform-key))
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/inspec.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
           timeout: 30m
           on_failure:
               do:
