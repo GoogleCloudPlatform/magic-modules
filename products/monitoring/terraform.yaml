@@ -75,6 +75,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     mutex: stackdriver/notifications/{{project}}
     example:
       - !ruby/object:Provider::Terraform::Examples
+        version: <%= _version_name %>
         name: "notification_channel_basic"
         primary_resource_id: "basic"
         vars:
