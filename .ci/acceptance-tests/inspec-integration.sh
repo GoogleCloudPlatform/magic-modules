@@ -71,10 +71,13 @@ bundle
 # Service accounts take several minutes to be authorized everywhere
 set +e
 
-for i in {1..30}
+for i in {1..50}
 do
+	# Cleanup cassettes folder each time, we don't want to use a recorded cassette if it records an unauthorized response
+	rm -r inspec-cassettes
 	inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
 	if [ "$?" -eq "0" ]; then
+		# Upload cassettes to storage bucket for unit test use
 		gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/inspec-cassettes
 		exit 0
 	fi
