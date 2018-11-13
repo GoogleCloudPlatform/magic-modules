@@ -32,8 +32,8 @@
 '<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/data_sources/<%= fname -%>'
 <% end -%>
 <%
-  Dir["provider/terraform/utils/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/utils/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/utils/<%= fname -%>'
+'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/utils/<%= fname -%>'
 <% end -%>
