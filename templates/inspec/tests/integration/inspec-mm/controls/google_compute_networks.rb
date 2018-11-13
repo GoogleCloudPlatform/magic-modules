@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'vcr_config'
+
 title 'Test GCP plural compute networks'
 
 control 'gcp-compute-networks-1.0' do
@@ -18,14 +20,16 @@ control 'gcp-compute-networks-1.0' do
   impact 1.0
   title 'GCP compute networks plural.'
 
-	resource = google_compute_networks(project: attribute('project_name'))
-	
-  describe resource do
-    it { should exist }
-
-    its ('names.size') { should eq 2 }
-    its ('names') { should include attribute('network')['name'] }
-    its ('names') { should include 'default' }
+  VCR.use_cassette('gcp-compute-networks') do
+    resource = google_compute_networks(project: attribute('project_name'))
     
+    describe resource do
+      it { should exist }
+
+      its ('names.size') { should eq 2 }
+      its ('names') { should include attribute('network')['name'] }
+      its ('names') { should include 'default' }
+      
+    end
   end
 end

@@ -11,17 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'vcr_config'
+
 title 'GCP Zone resource test'
 
-control 'gcp-single-zone-1.0' do
+control 'gcp-zone-1.0' do
 
   impact 1.0
   title 'Ensure single GCP zone resource works.'
 
-  resource = google_compute_zone({project: attribute('project_name'), name: attribute('zone')})
+  VCR.use_cassette('gcp-zone') do
+    resource = google_compute_zone({project: attribute('project_name'), name: attribute('zone')})
 
-  describe resource do
-    it { should exist }
-    its('status') { should cmp 'UP' }
+    describe resource do
+      it { should exist }
+      its('status') { should cmp 'UP' }
+    end
   end
 end
