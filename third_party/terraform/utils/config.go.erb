@@ -173,7 +173,7 @@ func (c *Config) loadAndValidate() error {
 	providerVersion := fmt.Sprintf("terraform-provider-google-<%= version -%>/%s", version.ProviderVersion)
 	<% end -%>
 	terraformWebsite := "(+https://www.terraform.io)"
-	userAgent := fmt.Sprintf("%s %s %s", terraformVersion, providerVersion, terraformWebsite)
+	userAgent := fmt.Sprintf("%s %s %s", terraformVersion, terraformWebsite, providerVersion)
 
 	c.client = client
 	c.userAgent = userAgent
