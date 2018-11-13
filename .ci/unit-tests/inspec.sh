@@ -46,9 +46,23 @@ echo '{
 echo -n "@fake_private_key = '$(echo -n "$(cat id_rsa)")'.gsub(\"\n\", '\n')" > var.rb
 erb -r './var' inspec.json.erb > inspec.json
 
+pushd inspec-mm
+cp -r ../../../libraries libraries
+popd
+
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 
 bundle install
 # TODO change this to use a github repo
 gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
+
+rm -rf inspec-cassettes
+rm -rf inspec-mm/libraries
+rm inspec.json
+rm inspec.json.erb
+rm var.rb
+rm id_rsa
+rm id_rsa.pub
+
+
