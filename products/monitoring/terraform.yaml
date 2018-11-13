@@ -40,49 +40,34 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ]
       }
       ```
-
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 
   Group: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
-    examples: |
-      ### Basic Usage
-      ```hcl
-      resource "google_monitoring_group" "test" {
-        display_name = "New Group"
-        filter = "resource.metadata.region=\"europe-west2\""
-      }
-      ```
-
-      ### Full Usage
-      ```hcl
-      resource "google_monitoring_group" "parent_group" {
-        display_name = "Parent Group"
-        filter = "resource.metadata.region=\"europe-west2\""
-        is_cluster = true
-      }
-
-      resource "google_monitoring_group" "child_group" {
-        display_name = "Child Group"
-        parent_name = "${google_monitoring_group.parent_group.name}"
-        filter = "resource.metadata.region=\"europe-west2\""
-      }
-
-      output "parent_group_name" {
-        value = "${google_monitoring_group.parent_group.name}"
-      }
-      ```
+    import_format: ["{{name}}"]
+    mutex: stackdriver/groups/{{project}}
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_group_basic"
+        primary_resource_id: "basic"
+        version: <%= _version_name %>
+        vars:
+          display_name: "New Test Group"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_group_subgroup"
+        primary_resource_id: "subgroup"
+        version: <%= _version_name %>
+        vars:
+          display_name: "New Test SubGroup"
+          display_name2: "New Test SubGroup"
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       parentName: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/group.erb
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
 
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
