@@ -198,9 +198,13 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
 						"resource_limits": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"resource_type": {
@@ -1592,10 +1596,9 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 			}
 		}
 	}
-	r := &containerBeta.ClusterAutoscaling{
-		EnableNodeAutoprovisioning: true,
-	}
+	r := &containerBeta.ClusterAutoscaling{}
 	if config, ok := l[0].(map[string]interface{}); ok {
+		r.EnableNodeAutoprovisioning = config["enabled"].(bool)
 		if limits, ok := config["resource_limits"]; ok {
 			if lmts, ok := limits.([]interface{}); ok {
 				for _, v := range lmts {
@@ -1849,13 +1852,10 @@ func flattenMasterAuth(ma *containerBeta.MasterAuth) []map[string]interface{} {
 }
 
 func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string]interface{} {
-	if a == nil {
-		return nil
-	}
-	if !a.EnableNodeAutoprovisioning {
-		return nil
+	r := make(map[string]interface{})
+	if a == nil || !a.EnableNodeAutoprovisioning {
+		r["enabled"] = false
 	} else {
-		r := make(map[string]interface{})
 		resourceLimits := make([]interface{}, 0, len(a.ResourceLimits))
 		for _, rl := range a.ResourceLimits {
 			resourceLimits = append(resourceLimits, map[string]interface{}{
@@ -1865,8 +1865,9 @@ func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string
 			})
 		}
 		r["resource_limits"] = resourceLimits
-		return []map[string]interface{}{r}
+		r["enabled"] = true
 	}
+	return []map[string]interface{}{r}
 }
 
 func flattenMasterAuthorizedNetworksConfig(c *containerBeta.MasterAuthorizedNetworksConfig) []map[string]interface{} {
