@@ -51,7 +51,10 @@ description: |-
 # google\_<%= resource_name.gsub("_", "\\_") %>
 
 <%= lines(object.description) -%>
-
+<% if object.min_version.name == 'beta' -%>
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+<% end -%>
 
 <% if !object.references.nil? -%>
 To get more information about <%= object.name -%>, see:
