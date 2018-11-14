@@ -71,7 +71,7 @@ bundle
 # Service accounts take several minutes to be authorized everywhere
 set +e
 
-for i in {1..50}
+for i in {1..30}
 do
 	# Cleanup cassettes folder each time, we don't want to use a recorded cassette if it records an unauthorized response
 	rm -r inspec-cassettes
