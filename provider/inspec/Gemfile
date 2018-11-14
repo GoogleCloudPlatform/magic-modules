@@ -13,8 +13,20 @@
 # limitations under the License.
 
 source 'https://rubygems.org'
+
 gem 'bundle'
-gem 'inspec', '>= 3.0.0'
+gem 'google-api-client'
+gem 'google-cloud'
+gem 'googleauth'
+gem 'inifile'
+gem 'inspec', '~> 3.0', '>= 3.0.25'
 gem 'rubocop'
-gem 'vcr'
-gem 'webmock'
+
+group :development do
+  gem 'github_changelog_generator'
+  gem 'passgen'
+  gem 'pry-coolline'
+  gem 'rake'
+  gem 'vcr'
+  gem 'webmock'
+end
