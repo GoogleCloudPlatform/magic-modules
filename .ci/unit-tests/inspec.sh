@@ -67,14 +67,5 @@ function cleanup {
   rm var.rb
 }
 trap cleanup EXIT
-set +e
-inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
-exit_status=$?
 
-# InSpec uses exit code 101 to indicate some tests were skipped, but none failed
-# exit code 0 means all passed, none skipped
-if [ exit_status -eq "0" ] || [ exit_status -eq "101" ] ; then
-  exit 0
-fi
-exit 1
-set -e
+inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2:// --no-distinct-exit
