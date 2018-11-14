@@ -19,7 +19,7 @@ control 'gcp-zone-1.0' do
 
   impact 1.0
   title 'Ensure single GCP zone resource works.'
-
+  only_if { false }
   VCR.use_cassette('gcp-zone') do
     resource = google_compute_zone({project: attribute('project_name'), name: attribute('zone')})
 

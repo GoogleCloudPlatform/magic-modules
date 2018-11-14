@@ -19,7 +19,7 @@ control 'gcp-compute-networks-1.0' do
 
   impact 1.0
   title 'GCP compute networks plural.'
-
+  only_if { false }
   VCR.use_cassette('gcp-compute-networks') do
     resource = google_compute_networks(project: attribute('project_name'))
     
