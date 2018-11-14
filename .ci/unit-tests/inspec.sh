@@ -58,11 +58,23 @@ export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 bundle install
 # TODO change this to use a github repo
 gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
+
+function cleanup {
+  rm -rf inspec-cassettes
+  rm -rf inspec-mm/libraries
+  rm inspec.json
+  rm inspec.json.erb
+  rm var.rb
+}
+trap cleanup EXIT
+set +e
 inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
+exit_status=$?
 
-rm -rf inspec-cassettes
-rm -rf inspec-mm/libraries
-rm inspec.json
-rm inspec.json.erb
-rm var.rb
-
+# InSpec uses exit code 101 to indicate some tests were skipped, but none failed
+# exit code 0 means all passed, none skipped
+if [ exit_status -eq "0" ] || [ exit_status -eq "101" ] ; then
+  exit 0
+fi
+exit 1
+set -e
