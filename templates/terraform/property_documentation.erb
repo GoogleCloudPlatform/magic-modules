@@ -1,9 +1,17 @@
 
 * `<%= property.name.underscore -%>` -
-<% if property.required -%>
+<% if property.min_version.name == 'beta' && property.__resource.min_version.name != 'beta'-%>
+<%   if property.required -%>
+  (Required, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+<%   elsif !property.output -%>
+  (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+<%   end -%>
+<% else -%>
+<%   if property.required -%>
   (Required)
-<% elsif !property.output -%>
+<%   elsif !property.output -%>
   (Optional)
+<%   end -%>
 <% end -%>
 <%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>
 <% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
