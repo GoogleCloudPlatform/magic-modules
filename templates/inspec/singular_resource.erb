@@ -22,16 +22,17 @@
   inside_indent = 8
 
   requires = generate_requires(object.all_user_properties)
-  requires << 'inspec/resource'
+  requires << 'gcp_backend'
 -%>
 <%= lines(emit_requires(requires)) -%>
 
+
 # A provider to manage <%= @api.name -%> resources.
-class <%= object.name -%> < Inspec.resource(1)
+class <%= object.name -%> < GcpResourceBase
 
   name '<%= resource_name(object, product_ns) -%>'
   desc '<%= object.name -%>'
-  supports platform: 'gcp2'
+  supports platform: 'gcp'
 
 <% object.properties.each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>
@@ -47,7 +48,8 @@ class <%= object.name -%> < Inspec.resource(1)
 
 <% if object.self_link_query.nil? -%>
   def initialize(params)
-    @fetched = fetch_resource(params)
+    super(params.merge({:flag => true}))
+    @fetched = @connection.fetch(base, url, params)
     parse unless @fetched.nil?
   end
 <% else # object.self_link_query.nil? -%>
@@ -56,26 +58,6 @@ class <%= object.name -%> < Inspec.resource(1)
       raise 'Not implemented'
     end
 <% end # object.self_link_query.nil? -%>
-
-  def fetch_resource(params)
-    get_request = inspec.backend.fetch(base, url, params)
-  end
-
-<% if object.self_link_query.nil? -%>
-  def initialize(params)
-    @fetched = fetch_resource(params)
-    parse unless @fetched.nil?
-  end
-<% else # object.self_link_query.nil? -%>
-   # TODO(slevenick) for other products
-   def initialize(params)
-     raise 'Not implemented'
-   end
-<% end # object.self_link_query.nil? -%>
-
-  def fetch_resource(params)
-    get_request = inspec.backend.fetch(base, url, params)
-  end
 
   def parse
 <%
