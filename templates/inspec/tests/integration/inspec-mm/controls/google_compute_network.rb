@@ -19,7 +19,7 @@ control 'gcp-compute-network-1.0' do
 
   impact 1.0
   title 'Ensure GCP compute network has the correct properties.'
-  # TODO remove only_if once we generate this again
+  # TODO(slevenick): remove only_if once we generate this again
   only_if { false }
   VCR.use_cassette('gcp-compute-network') do
     resource = google_compute_network({project: attribute('project_name'), name: attribute('network')['name']})
