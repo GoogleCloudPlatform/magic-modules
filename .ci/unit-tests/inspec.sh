@@ -2,6 +2,8 @@
 
 set -e
 set -x
+echo 'TODO(slevenick): reimplement the following'
+exit 0
 
 # Service account credentials for GCP to pull VCR cassettes
 export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
