@@ -19,7 +19,8 @@ control 'gcp-zones-1.0' do
 
   impact 1.0
   title 'Ensure that google compute zones resource works correctly'
-
+  # TODO(slevenick): remove only_if once we generate this again
+  only_if { false }
   VCR.use_cassette('gcp-zones') do
     resource = google_compute_zones({project: attribute('project_name')})
 

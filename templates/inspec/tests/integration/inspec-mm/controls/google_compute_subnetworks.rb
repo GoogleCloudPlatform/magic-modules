@@ -19,7 +19,8 @@ control 'gcp-compute-subnetworks-1.0' do
 
   impact 1.0
   title 'Plural GCP subnetwork resource test'
-
+  # TODO(slevenick): remove only_if once we generate this again
+  only_if { false }
   VCR.use_cassette('gcp-compute-subnetworks') do
     resource = google_compute_subnetworks(project: attribute('project_name'), region: attribute('region'))
     describe resource do
