@@ -11,21 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project_name: 'graphite-test-sam-chef'
-region: 'us-west1'
-zone: 'us-west1-a'
+require 'vcr_config'
 
-network:
-  name: 'inspec-gcp-network'
-  routing_mode: 'REGIONAL'
+title 'Test GCP SSL policies plural resource.'
 
-subnetwork:
-  name: 'inspec-gcp-subnetwork'
-  ip_range: '10.2.0.0/29'
+control 'gcp-ssl-policies-1.0' do
+  impact 1.0
+  title 'GCP SSL policies plural test'
 
-ssl_policy:
-  name: 'inspec-gcp-ssl-policy'
-  min_tls_version: 'TLS_1_2'
-  profile: 'CUSTOM'
-  custom_feature: 'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384'
-  custom_feature2: 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384'
+  VCR.use_cassette('gcp-ssl-policies') do
+    resource = google_compute_ssl_policies(project: attribute('project_name'))
+
+    describe resource do
+      it { should exist }
+      its('names') { should include attribute('ssl_policy')['name'] }
+      its('profiles') { should include attribute('ssl_policy')['profile'] }
+    end
+  end
+end
