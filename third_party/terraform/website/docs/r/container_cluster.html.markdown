@@ -92,8 +92,9 @@ output "cluster_ca_certificate" {
 * `cluster_ipv4_cidr` - (Optional) The IP address range of the kubernetes pods in
     this cluster. Default is an automatically assigned CIDR.
 
-* `cluster_autoscaling` - (Optional) Configuration for cluster autoscaling, as described
-    in [the docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning).
+* `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+    Configuration for cluster autoscaling (also called autoprovisioning), as described in
+    [the docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning).
     Structure is documented below.
 
 * `description` - (Optional) Description of the cluster.
