@@ -1,6 +1,6 @@
 --- !ruby/object:Api::Product
 name: Azure Resource Group
-prefix: gazurerm
+prefix: azurerm
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

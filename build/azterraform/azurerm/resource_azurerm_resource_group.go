@@ -178,3 +178,12 @@ func resourceAzureRmResourceGroupDelete(d *schema.ResourceData, meta interface{}
     log.Printf("[DEBUG] Finished deleting ResourceGroup %q: %#v", d.Id(), res)
     return nil
 }
+
+func flattenAzureRmResourceGroupName(v interface{}) interface{} {
+  return v
+}
+
+
+func expandAzureRmResourceGroupName(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+  return v, nil
+}

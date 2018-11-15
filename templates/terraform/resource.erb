@@ -484,3 +484,29 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
 }
+
+<% properties.reject(&:ignore_read).each do |prop| -%>
+<%= lines(build_flatten_method(resource_name, prop), 1) -%>
+<% end -%>
+
+<% settable_properties.each do |prop| -%>
+<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<% end -%>
+
+<% if object.custom_code.encoder -%>
+func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.encoder)) -%>
+}
+<% end -%>
+
+<% if object.custom_code.update_encoder-%>
+func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.update_encoder)) -%>
+}
+<% end -%>
+
+<% if object.custom_code.decoder -%>
+func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.decoder)) -%>
+}
+<% end -%>
