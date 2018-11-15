@@ -140,6 +140,10 @@ For example, to compile Google Compute Engine for Puppet, you invoke:
 
 And the generated code should be written to `build/puppet/compute`
 
+In Windows, run
+
+    bundle exec ruby ./compiler.rb -p products/azresourcegroup -e terraform -o build/azterraform
+
 ### Compiling all modules
 
 The Rakefile can be used to compile all of the modules at once. The following

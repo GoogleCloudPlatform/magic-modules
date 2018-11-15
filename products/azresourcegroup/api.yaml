@@ -1,0 +1,22 @@
+--- !ruby/object:Api::Product
+name: Azure Resource Group
+prefix: gazurerm
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://pubsub.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/pubsub
+objects:
+  - !ruby/object:Api::Resource
+    name: 'ResourceGroup'
+    base_url: projects/{{project}}/topics
+    create_verb: :PUT
+    description: |
+      A named resource to which messages are sent by publishers.
+    exports:
+      - name
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the topic.'
