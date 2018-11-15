@@ -2,8 +2,6 @@
 
 set -e
 set -x
-echo 'TODO(slevenick): reimplement the following'
-exit 0
 
 # Service account credentials for GCP to pull VCR cassettes
 export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
@@ -51,7 +49,7 @@ echo -n "@fake_private_key = '$(echo -n "$(cat ${rsatmp})")'.gsub(\"\n\", '\n')"
 rm ${rsatmp}
 erb -r './var' inspec.json.erb > inspec.json
 
-pushd inspec-mm
+pushd verify
 cp -r ../../../libraries libraries
 popd
 
@@ -63,11 +61,11 @@ gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 
 function cleanup {
   rm -rf inspec-cassettes
-  rm -rf inspec-mm/libraries
+  rm -rf verify/libraries
   rm inspec.json
   rm inspec.json.erb
   rm var.rb
 }
 trap cleanup EXIT
 
-inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2:// --no-distinct-exit
+inspec exec verify --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit
