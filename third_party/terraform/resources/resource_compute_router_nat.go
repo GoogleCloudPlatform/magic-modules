@@ -7,8 +7,35 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	computeBeta "google.golang.org/api/compute/v0.beta"
+
 	"google.golang.org/api/googleapi"
+)
+
+var (
+	subnetworkConfig = &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"source_ip_ranges_to_nat": &schema.Schema{
+				Type:         schema.TypeSet,
+				Optional:     true,
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeString},
+				ValidateFunc: validation.StringInSlice([]string{"ALL_IP_RANGES", "LIST_OF_SECONDARY_IP_RANGES", "PRIMARY_IP_RANGE"}, false),
+			},
+			"secondary_ip_range_names": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+		},
+	}
 )
 
 func resourceComputeRouterNat() *schema.Resource {
@@ -22,10 +49,10 @@ func resourceComputeRouterNat() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				ValidateFunc: validateRFC1035Name(6, 30),
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateRFC1035Name(1, 63),
 			},
 
 			"router": &schema.Schema{
@@ -34,46 +61,28 @@ func resourceComputeRouterNat() *schema.Resource {
 				ForceNew: true,
 			},
 			"nat_ip_allocate_option": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"MANUAL_ONLY", "AUTO_ONLY"}, false),
 			},
 			"nat_ips": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"source_subnetwork_ip_ranges_to_nat": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ALL_SUBNETWORKS_ALL_IP_RANGES", "ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES", "LIST_OF_SUBNETWORKS"}, false),
 			},
 			"subnetwork": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"source_ip_ranges_to_nat": &schema.Schema{
-							Type:     schema.TypeList,
-							Optional: true,
-							ForceNew: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"secondary_ip_range_names": &schema.Schema{
-							Type:     schema.TypeList,
-							Optional: true,
-							ForceNew: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-					},
-				},
+				Elem:     subnetworkConfig,
 			},
 			"min_ports_per_vm": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -164,8 +173,16 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 		nat.NatIpAllocateOption = v.(string)
 	}
 
+	if v, ok := d.GetOk("nat_ips"); ok {
+		nat.NatIps = convertStringArr(v.(*schema.Set).List())
+	}
+
 	if v, ok := d.GetOk("source_subnetwork_ip_ranges_to_nat"); ok {
 		nat.SourceSubnetworkIpRangesToNat = v.(string)
+	}
+
+	if v, ok := d.GetOk("subnetwork"); ok {
+		nat.Subnetworks = expandSubnetworks(v.([]map[string]interface{}))
 	}
 
 	if v, ok := d.GetOk("min_ports_per_vm"); ok {
@@ -244,7 +261,9 @@ func resourceComputeRouterNatRead(d *schema.ResourceData, meta interface{}) erro
 		if nat.Name == natName {
 			d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, natName))
 			d.Set("nat_ip_allocate_option", nat.NatIpAllocateOption)
+			d.Set("nat_ips", schema.NewSet(schema.HashString, convertStringArrToInterface(nat.NatIps)))
 			d.Set("source_subnetwork_ip_ranges_to_nat", nat.SourceSubnetworkIpRangesToNat)
+			d.Set("subnetwork", flattenRouterNatSubnetworkToNatBeta(nat.Subnetworks))
 			d.Set("min_ports_per_vm", nat.MinPortsPerVm)
 			d.Set("udp_idle_timeout_sec", nat.UdpIdleTimeoutSec)
 			d.Set("icmp_idle_timeout_sec", nat.IcmpIdleTimeoutSec)
@@ -294,7 +313,7 @@ func resourceComputeRouterNatDelete(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
 	}
 
-	var newNats []*computeBeta.RouterNat = make([]*computeBeta.RouterNat, 0, len(router.BgpPeers))
+	var newNats []*computeBeta.RouterNat = make([]*computeBeta.RouterNat, 0, len(router.Nats))
 	for _, nat := range router.Nats {
 		if nat.Name == natName {
 			continue
@@ -345,4 +364,22 @@ func resourceComputeRouterNatImportState(d *schema.ResourceData, meta interface{
 	d.Set("name", parts[2])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func flattenRouterNatSubnetworkToNatBeta(subnetworksToNat []*computeBeta.RouterNatSubnetworkToNat) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, len(subnetworksToNat))
+	for _, subnetworkToNat := range subnetworksToNat {
+		stnMap := make(map[string]interface{})
+		stnMap["name"] = subnetworkToNat.Name
+		stnMap["source_ip_ranges_to_nat"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SourceIpRangesToNat))
+		stnMap["secondary_ip_range_names"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SecondaryIpRangeNames))
+		result = append(result, stnMap)
+	}
+	return result
+}
+
+func expandSubnetworks(subnetworks []map[string]interface{}) []*computeBeta.RouterNatSubnetworkToNat {
+	result := make([]*computeBeta.RouterNatSubnetworkToNat, 0, len(subnetworks))
+
+	return result
 }
