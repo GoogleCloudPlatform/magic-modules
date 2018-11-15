@@ -27,7 +27,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   BackendBucket: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   BackendService: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   Disk: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   DiskType: !ruby/object:Provider::Inspec::ResourceOverride
