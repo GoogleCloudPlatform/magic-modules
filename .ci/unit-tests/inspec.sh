@@ -58,11 +58,14 @@ export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 bundle install
 # TODO change this to use a github repo
 gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
-inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2://
 
-rm -rf inspec-cassettes
-rm -rf inspec-mm/libraries
-rm inspec.json
-rm inspec.json.erb
-rm var.rb
+function cleanup {
+  rm -rf inspec-cassettes
+  rm -rf inspec-mm/libraries
+  rm inspec.json
+  rm inspec.json.erb
+  rm var.rb
+}
+trap cleanup EXIT
 
+inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2:// --no-distinct-exit

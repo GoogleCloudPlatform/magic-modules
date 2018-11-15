@@ -18,7 +18,8 @@ title 'Test GCP regions plural resource.'
 control 'gcp-regions-1.0' do
   impact 1.0
   title 'GCP Region plural test'
-
+  # TODO(slevenick): remove only_if once we generate this again
+  only_if { false }
   VCR.use_cassette('gcp-regions') do
     resource = google_compute_regions(project: attribute('project_name'))
 
