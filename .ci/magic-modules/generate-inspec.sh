@@ -13,8 +13,6 @@ bundle install
 for i in $(find products/ -name 'inspec.yaml' -printf '%h\n');
 do
   bundle exec compiler -p $i -e inspec -o "build/inspec/"
-  # We are not ready to overwrite changelog yet.
-  git checkout CHANGELOG.md
 done
 
 # This command can crash - if that happens, the script should not fail.
@@ -26,6 +24,8 @@ if [ -z "$INSPEC_COMMIT_MSG" ]; then
 fi
 
 pushd "build/inspec"
+# We are not ready to overwrite changelog yet.
+git checkout CHANGELOG.md
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
