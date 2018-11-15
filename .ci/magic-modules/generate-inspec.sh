@@ -9,10 +9,11 @@ source "$(dirname "$0")/helpers.sh"
 PATCH_DIR="$(pwd)/patches"
 pushd magic-modules-branched
 LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
-bundle install
+# bundle install
 for i in $(find products/ -name 'inspec.yaml' -printf '%h\n');
 do
-  bundle exec compiler -p $i -e inspec -o "build/inspec/"
+  # bundle exec compiler -p $i -e inspec -o "build/inspec/"
+  echo 'TODO(slevenick): Re implement'
 done
 
 # This command can crash - if that happens, the script should not fail.
