@@ -264,7 +264,7 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"ip_addresses": &schema.Schema{
+			"ip_address": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -712,7 +712,7 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[WARN] Failed to set SQL Database Instance Replica Configuration")
 	}
 	ipAddresses := flattenIpAddresses(instance.IpAddresses)
-	if err := d.Set("ip_addresses", ipAddresses); err != nil {
+	if err := d.Set("ip_address", ipAddresses); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance IP Addresses")
 	}
 
