@@ -24,6 +24,9 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     return nil
   }
   original := v.(map[string]interface{})
+  if len(original) == 0 {
+    return nil
+  }
   transformed := make(map[string]interface{})
   <% property.properties.each do |prop| -%>
     transformed["<%= prop.name.underscore -%>"] =
@@ -39,7 +42,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   for _, raw := range l {
     original := raw.(map[string]interface{})
     if len(original) < 1 {
-      // Do not include empty maps coming back from the api
+      // Do not include empty json objects coming back from the api
       continue
     }
     transformed = append(transformed, map[string]interface{}{
