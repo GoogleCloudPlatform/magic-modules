@@ -47,10 +47,14 @@ objects:
           A mutable string of at most 1024 characters associated with this
           resource for the user's convenience. Has no effect on the managed
           zone's function.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+        required: true
       - !ruby/object:Api::Type::String
         name: 'dnsName'
         description: |
           The DNS name of this managed zone, for instance "example.com.".
+        required: true
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: Unique identifier for the resource; defined by the server.
@@ -81,6 +85,17 @@ objects:
           The time that this resource was created on the server.
           This is in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this ManagedZone.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Managing Zones':
+          'https://cloud.google.com/dns/zones/'
+      api: 'https://cloud.google.com/dns/api/v1/managedZones'
   - !ruby/object:Api::Resource
     name: 'Project'
     kind: 'dns#project'
