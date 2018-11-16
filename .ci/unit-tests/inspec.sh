@@ -17,11 +17,6 @@ apt-get update && apt-get install google-cloud-sdk -y
 
 gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
 
-# Download train plugin (it's not published yet)
-gsutil cp -r gs://magic-modules-inspec-bucket/train-gcp2 .
-gem install inspec
-inspec plugin install train-gcp2/lib/train-gcp2.rb
-
 pushd "magic-modules/build/inspec/test/integration"
 
 # Generate a rsa private key to use in mocks
@@ -48,10 +43,6 @@ echo '{
 echo -n "@fake_private_key = '$(echo -n "$(cat ${rsatmp})")'.gsub(\"\n\", '\n')" > var.rb
 rm ${rsatmp}
 erb -r './var' inspec.json.erb > inspec.json
-
-pushd verify
-cp -r ../../../libraries libraries
-popd
 
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 

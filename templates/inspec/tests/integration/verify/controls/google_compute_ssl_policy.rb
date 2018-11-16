@@ -15,19 +15,22 @@ require 'vcr_config'
 
 title 'GCP SSL policy resource test'
 
+project_name = attribute('project_name', default: '')
+ssl_policy = attribute('ssl_policy', default: {})
+
 control 'gcp-ssl-policy-1.0' do
 
   impact 1.0
   title 'Ensure single SSL policy resource works.'
   VCR.use_cassette('gcp-ssl-policy') do
-    resource = google_compute_zone({project: attribute('project_name'), name: attribute('ssl_policy')['name']})
+    resource = google_compute_zone({project: project_name, name: ssl_policy['name']})
 
     describe resource do
       it { should exist }
-      its('min_tls_version') { should cmp attribute('ssl_policy')['min_tls_version'] }
-      its('profile') { should cmp attribute('ssl_policy')['profile'] }
-      its('custom_features') { should include attribute('ssl_policy')['custom_feature'] }
-      its('custom_features') { should include attribute('ssl_policy')['custom_feature2'] }
+      its('min_tls_version') { should cmp ssl_policy['min_tls_version'] }
+      its('profile') { should cmp ssl_policy['profile'] }
+      its('custom_features') { should include ssl_policy['custom_feature'] }
+      its('custom_features') { should include ssl_policy['custom_feature2'] }
     end
   end
 end

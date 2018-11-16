@@ -15,17 +15,20 @@ require 'vcr_config'
 
 title 'Test GCP SSL policies plural resource.'
 
+project_name = attribute('project_name', default: '')
+ssl_policy = attribute('ssl_policy', default: {})
+
 control 'gcp-ssl-policies-1.0' do
   impact 1.0
   title 'GCP SSL policies plural test'
 
   VCR.use_cassette('gcp-ssl-policies') do
-    resource = google_compute_ssl_policies(project: attribute('project_name'))
+    resource = google_compute_ssl_policies(project: project_name)
 
     describe resource do
       it { should exist }
-      its('names') { should include attribute('ssl_policy')['name'] }
-      its('profiles') { should include attribute('ssl_policy')['profile'] }
+      its('names') { should include ssl_policy['name'] }
+      its('profiles') { should include ssl_policy['profile'] }
     end
   end
 end
