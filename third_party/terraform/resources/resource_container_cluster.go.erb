@@ -844,6 +844,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
 		return err
 	}
+<% else -%>
+	if err := d.Set("cluster_autoscaling", nil); err != nil {
+		return err
+	}
 <% end -%>
 	if err := d.Set("node_config", flattenNodeConfig(cluster.NodeConfig)); err != nil {
 		return err
