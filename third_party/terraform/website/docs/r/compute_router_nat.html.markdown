@@ -3,27 +3,28 @@ layout: "google"
 page_title: "Google: google_compute_router_nat"
 sidebar_current: "docs-google-compute-router-nat"
 description: |-
-  Manages a Cloud Router BGP peer.
+  Manages a Cloud NAT.
 ---
 
 # google\_compute\_router\_nat
 
-Manages a Cloud Router BGP peer. For more information see
-[the official documentation](https://cloud.google.com/compute/docs/cloudrouter)
+Manages a Cloud NAT. For more information see
+[the official documentation](https://cloud.google.com/nat/docs/overview)
 and
-[API](https://cloud.google.com/compute/docs/reference/latest/routers).
+[API](https://cloud.google.com/compute/docs/reference/rest/beta/routers).
 
 ## Example Usage
 
+A simple NAT configuration: enable NAT for all Subnetworks associated with
+the Network associated with the given Router.
+
 ```hcl
-resource "google_compute_router_peer" "foobar" {
-  name                      = "peer-1"
-  router                    = "router-1"
-  region                    = "us-central1"
-  peer_ip_address           = "169.254.1.2"
-  peer_asn                  = 65513
-  advertised_route_priority = 100
-  interface                 = "interface-1"
+resource "google_compute_router_nat" "simple-nat" {
+  name                               = "nat-1"
+  router                             = "router-1"
+  region                             = "us-central1"
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 ```
 
@@ -31,44 +32,72 @@ resource "google_compute_router_peer" "foobar" {
 
 The following arguments are supported:
 
-* `name` - (Required) A unique name for BGP peer, required by GCE. Changing
-    this forces a new peer to be created.
+* `name` - (Required) A unique name for Cloud NAT, required by GCE. Changing
+    this forces a new NAT to be created.
 
-* `router` - (Required) The name of the router in which this BGP peer will be configured.
-    Changing this forces a new peer to be created.
+* `router` - (Required) The name of the router in which this NAT will be configured.
+    Changing this forces a new NAT to be created.
 
-* `interface` - (Required) The name of the interface the BGP peer is associated with.
-    Changing this forces a new peer to be created.
+* `nat_ip_allocate_option` - (Required) How external IPs should be allocated for
+    this NAT. Valid values are `AUTO_ONLY` or `MANUAL_ONLY`. Changing this forces
+    a new NAT to be created.
 
-* `peer_ip_address` - (Required) IP address of the BGP interface outside Google Cloud.
-    Changing this forces a new peer to be created.
-
-* `peer_asn` - (Required) Peer BGP Autonomous System Number (ASN).
-    Changing this forces a new peer to be created.
+* `source_subnetwork_ip_ranges_to_nat` - (Required) How NAT should be configured
+    per Subnetwork. Valid values include: `ALL_SUBNETWORKS_ALL_IP_RANGES`,
+    `ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES`, `LIST_OF_SUBNETWORKS`. Changing
+    this forces a new NAT to be created.
 
 - - -
 
-* `advertised_route_priority` - (Optional) The priority of routes advertised to this BGP peer.
-    Changing this forces a new peer to be created.
+* `nat_ips` - (Optional) List of `self_link`s of external IPs. Only valid if
+    `nat_ip_allocate_option` is set to `MANUAL_ONLY`. Changing this forces a
+    new NAT to be created.
 
-* `project` - (Optional) The ID of the project in which this peer's router belongs. If it
-    is not provided, the provider project is used. Changing this forces a new peer to be created.
+* `subnetwork` - (Optional) One or more subnetwork NAT configurations. Only used
+    if `source_subnetwork_ip_ranges_to_nat` is set to `LIST_OF_SUBNETWORKS`. See
+    the section below for details on configuration.
 
-* `region` - (Optional) The region this peer's router sits in. If not specified,
-    the project region will be used. Changing this forces a new peer to be
+* `min_ports_per_vm` - (Optional) Minimum number of ports allocated to a VM
+    from this NAT config. If not set, a default number of ports is allocated to a VM.
+    Changing this forces a new NAT to be created.
+
+* `udp_idle_timeout_sec` - (Optional) Timeout (in seconds) for UDP connections.
+    Defaults to 30s if not set. Changing this forces a new NAT to be created.
+
+* `icmp_idle_timeout_sec` - (Optional) Timeout (in seconds) for ICMP connections.
+    Defaults to 30s if not set. Changing this forces a new NAT to be created.
+
+* `tcp_established_idle_timeout_sec` - (Optional) Timeout (in seconds) for TCP
+    established connections. Defaults to 1200s if not set. Changing this forces
+    a new NAT to be created.
+
+* `tcp_transitory_idle_timeout_sec` - (Optional) Timeout (in seconds) for TCP
+    transitory connections. Defaults to 30s if not set. Changing this forces a
+    new NAT to be created.
+
+* `project` - (Optional) The ID of the project in which this NAT's router belongs. If it
+    is not provided, the provider project is used. Changing this forces a new NAT to be created.
+
+* `region` - (Optional) The region this NAT's router sits in. If not specified,
+    the project region will be used. Changing this forces a new NAT to be
     created.
 
-## Attributes Reference
+The `subnetwork` block supports:
 
-In addition to the arguments listed above, the following computed attributes are
-exported:
+* `name` - (Required) The `self_link` of the subnetwork to NAT.
 
-* `ip_address` - IP address of the interface inside Google Cloud Platform.
+* `source_ip_ranges_to_nat` - (Optional) List of options for which source IPs in the subnetwork
+    should have NAT enabled. Supported values include: `ALL_IP_RANGES`,
+    `LIST_OF_SECONDARY_IP_RANGES`, `PRIMARY_IP_RANGE`
+
+* `secondary_ip_range_names` - (Optional) List of the secondary ranges of the subnetwork
+    that are allowed to use NAT. This can be populated only if
+    `LIST_OF_SECONDARY_IP_RANGES` is one of the values in `source_ip_ranges_to_nat`.
 
 ## Import
 
-Router BGP peers can be imported using the `region`, `router`, and `name`, e.g.
+Router NATs can be imported using the `region`, `router`, and `name`, e.g.
 
 ```
-$ terraform import google_compute_router_peer.foobar us-central1/router-1/peer-1
+$ terraform import google_compute_router_nat.my-nat us-central1/router-1/nat-1
 ```
