@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	subnetworkConfig = &schema.Resource{
+	routerNatSubnetworkConfig = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
@@ -82,7 +82,7 @@ func resourceComputeRouterNat() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
-				Elem:     subnetworkConfig,
+				Elem:     routerNatSubnetworkConfig,
 			},
 			"min_ports_per_vm": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -150,10 +150,8 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 	router, err := routersService.Get(project, region, routerName).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
-			log.Printf("[WARN] Removing router nat %s because its router %s/%s is gone", natName, region, routerName)
 			d.SetId("")
-
-			return nil
+			return fmt.Errorf("Router %s/%s not found", region, routerName)
 		}
 
 		return fmt.Errorf("Error Reading router %s/%s: %s", region, routerName, err)
@@ -380,6 +378,17 @@ func flattenRouterNatSubnetworkToNatBeta(subnetworksToNat []*computeBeta.RouterN
 
 func expandSubnetworks(subnetworks []map[string]interface{}) []*computeBeta.RouterNatSubnetworkToNat {
 	result := make([]*computeBeta.RouterNatSubnetworkToNat, 0, len(subnetworks))
+
+	for _, subnetwork := range subnetworks {
+		subnetworkToNat := computeBeta.RouterNatSubnetworkToNat{
+			Name:                subnetwork["name"].(string),
+			SourceIpRangesToNat: convertStringSet(subnetwork["source_ip_ranges_to_nat"].(*schema.Set)),
+		}
+		if v, ok := subnetwork["secondary_ip_range_names"]; ok {
+			subnetworkToNat.SecondaryIpRangeNames = convertStringSet(v.(*schema.Set))
+		}
+		result = append(result, &subnetworkToNat)
+	}
 
 	return result
 }
