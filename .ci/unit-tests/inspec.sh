@@ -52,11 +52,11 @@ gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 
 function cleanup {
   rm -rf inspec-cassettes
-  rm -rf verify/libraries
+  rm -rf verify-mm/libraries
   rm inspec.json
   rm inspec.json.erb
   rm var.rb
 }
 trap cleanup EXIT
 
-inspec exec verify --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit
+inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit
