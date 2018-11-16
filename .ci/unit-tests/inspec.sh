@@ -52,7 +52,6 @@ gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 
 function cleanup {
   rm -rf inspec-cassettes
-  rm -rf verify-mm/libraries
   rm inspec.json
   rm inspec.json.erb
   rm var.rb

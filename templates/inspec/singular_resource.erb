@@ -48,7 +48,7 @@ class <%= object.name -%> < GcpResourceBase
 
 <% if object.self_link_query.nil? -%>
   def initialize(params)
-    super(params.merge({:flag => true}))
+    super(params.merge({:use_http_transport => true}))
     @fetched = @connection.fetch(base, url, params)
     parse unless @fetched.nil?
   end
