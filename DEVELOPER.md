@@ -108,7 +108,7 @@ Example:
 >
 > For example a in a virtual machine disk, do not say "disk: array or full URI
 > (self link) to the disks". Instead you should say "disks: reference to a list
-> disks to attach to the machine".
+> of disks to attach to the machine".
 >
 > Also avoid language or provider specific lingo in the product definitions.
 >
