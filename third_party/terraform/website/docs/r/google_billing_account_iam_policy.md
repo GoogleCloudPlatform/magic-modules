@@ -24,8 +24,8 @@ by use of this resource. The safest alternative is to use multiple `google_billi
 
 ```hcl
 resource "google_billing_account_iam_policy" "policy" {
-  resource    = "00AA00-000AAA-00AA0A"
-  policy_data = "${data.google_iam_policy.admin.policy_data}"
+  billing_account_id    = "00AA00-000AAA-00AA0A"
+  policy_data           = "${data.google_iam_policy.admin.policy_data}"
 }
 
 data "google_iam_policy" "admin" {
@@ -43,7 +43,7 @@ data "google_iam_policy" "admin" {
 
 The following arguments are supported:
 
-* `resource` - (Required) The billing account id.
+* `billing_account_id` - (Required) The billing account id.
 
 * `policy_data` - (Required) The `google_iam_policy` data source that represents
     the IAM policy that will be applied to the billing account. This policy overrides any existing

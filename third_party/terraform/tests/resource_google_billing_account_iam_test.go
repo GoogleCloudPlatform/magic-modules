@@ -73,7 +73,7 @@ func testAccCheckGoogleBillingAccountIamBindingExists(bindingResourceName, role 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		p, err := config.clientBilling.BillingAccounts.GetIamPolicy("billingAccounts/" + bindingRs.Primary.Attributes["resource"]).Do()
+		p, err := config.clientBilling.BillingAccounts.GetIamPolicy("billingAccounts/" + bindingRs.Primary.Attributes["billing_account_id"]).Do()
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func testAccCheckGoogleBillingAccountIamMemberExists(n, role, member string) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		p, err := config.clientBilling.BillingAccounts.GetIamPolicy("billingAccounts/" + rs.Primary.Attributes["resource"]).Do()
+		p, err := config.clientBilling.BillingAccounts.GetIamPolicy("billingAccounts/" + rs.Primary.Attributes["billing_account_id"]).Do()
 		if err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func testAccCheckGoogleBillingAccountIamMemberExists(n, role, member string) res
 	}
 }
 
-func testAccBillingAccountIamBinding_basic(account, resource, role string) string {
+func testAccBillingAccountIamBinding_basic(account, billingAccountId, role string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -132,14 +132,14 @@ resource "google_service_account" "test-account" {
 }
 
 resource "google_billing_account_iam_binding" "foo" {
-  resource  = "%s"
-  role      = "%s"
-  members   = ["serviceAccount:${google_service_account.test-account.email}"]
+  billing_account_id  = "%s"
+  role                = "%s"
+  members             = ["serviceAccount:${google_service_account.test-account.email}"]
 }
-`, account, resource, role)
+`, account, billingAccountId, role)
 }
 
-func testAccBillingAccountIamBinding_update(account, resource, role string) string {
+func testAccBillingAccountIamBinding_update(account, billingAccountId, role string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -152,17 +152,17 @@ resource "google_service_account" "test-account-2" {
 }
 
 resource "google_billing_account_iam_binding" "foo" {
-  resource  = "%s"
-  role      = "%s"
-  members   = [
+  billing_account_id  = "%s"
+  role                = "%s"
+  members             = [
     "serviceAccount:${google_service_account.test-account.email}",
     "serviceAccount:${google_service_account.test-account-2.email}"
   ]
 }
-`, account, account, resource, role)
+`, account, account, billingAccountId, role)
 }
 
-func testAccBillingAccountIamMember_basic(account, resource, role string) string {
+func testAccBillingAccountIamMember_basic(account, billingAccountId, role string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -170,9 +170,9 @@ resource "google_service_account" "test-account" {
 }
 
 resource "google_billing_account_iam_member" "foo" {
-  resource = "%s"
-  role     = "%s"
-  member   = "serviceAccount:${google_service_account.test-account.email}"
+  billing_account_id = "%s"
+  role               = "%s"
+  member             = "serviceAccount:${google_service_account.test-account.email}"
 }
-`, account, resource, role)
+`, account, billingAccountId, role)
 }

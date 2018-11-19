@@ -9,7 +9,7 @@ import (
 )
 
 var IamBillingAccountSchema = map[string]*schema.Schema{
-	"resource": {
+	"billing_account_id": {
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
@@ -17,24 +17,24 @@ var IamBillingAccountSchema = map[string]*schema.Schema{
 }
 
 type BillingAccountIamUpdater struct {
-	resource string
-	Config   *Config
+	billingAccountId string
+	Config           *Config
 }
 
 func NewBillingAccountIamUpdater(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
 	return &BillingAccountIamUpdater{
-		resource: canonicalBillingAccountId(d.Get("resource").(string)),
-		Config:   config,
+		billingAccountId: canonicalBillingAccountId(d.Get("billing_account_id").(string)),
+		Config:           config,
 	}, nil
 }
 
 func BillingAccountIdParseFunc(d *schema.ResourceData, _ *Config) error {
-	d.Set("resource", d.Id())
+	d.Set("billing_account_id", d.Id())
 	return nil
 }
 
 func (u *BillingAccountIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	return getBillingAccountIamPolicyByBillingAccountName(u.resource, u.Config)
+	return getBillingAccountIamPolicyByBillingAccountName(u.billingAccountId, u.Config)
 }
 
 func (u *BillingAccountIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
@@ -43,7 +43,7 @@ func (u *BillingAccountIamUpdater) SetResourceIamPolicy(policy *cloudresourceman
 		return err
 	}
 
-	_, err = u.Config.clientBilling.BillingAccounts.SetIamPolicy("billingAccounts/"+u.resource, &cloudbilling.SetIamPolicyRequest{
+	_, err = u.Config.clientBilling.BillingAccounts.SetIamPolicy("billingAccounts/"+u.billingAccountId, &cloudbilling.SetIamPolicyRequest{
 		Policy: billingPolicy,
 	}).Do()
 
@@ -55,15 +55,15 @@ func (u *BillingAccountIamUpdater) SetResourceIamPolicy(policy *cloudresourceman
 }
 
 func (u *BillingAccountIamUpdater) GetResourceId() string {
-	return u.resource
+	return u.billingAccountId
 }
 
 func (u *BillingAccountIamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-billing-account-%s", u.resource)
+	return fmt.Sprintf("iam-billing-account-%s", u.billingAccountId)
 }
 
 func (u *BillingAccountIamUpdater) DescribeResource() string {
-	return fmt.Sprintf("billingAccount %q", u.resource)
+	return fmt.Sprintf("billingAccount %q", u.billingAccountId)
 }
 
 func canonicalBillingAccountId(resource string) string {

@@ -19,8 +19,8 @@ an existing Google Cloud Platform Billing Account.
 
 ```hcl
 resource "google_billing_account_iam_binding" "binding" {
-  resource = "00AA00-000AAA-00AA0A"
-  role     = "roles/billing.viewer"
+  billing_account_id = "00AA00-000AAA-00AA0A"
+  role               = "roles/billing.viewer"
 
   members = [
     "user:jane@example.com",
@@ -32,7 +32,7 @@ resource "google_billing_account_iam_binding" "binding" {
 
 The following arguments are supported:
 
-* `resource` - (Required) The billing account id.
+* `billing_account_id` - (Required) The billing account id.
 
 * `role` - (Required) The role that should be applied.
 
@@ -47,7 +47,7 @@ exported:
 
 ## Import
 
-IAM binding imports use space-delimited identifiers; first the resource in question and then the role.  These bindings can be imported using the `resource` and role, e.g.
+IAM binding imports use space-delimited identifiers; first the resource in question and then the role.  These bindings can be imported using the `billing_account_id` and role, e.g.
 
 ```
 $ terraform import google_billing_account_iam_binding.binding "your-billing-account-id roles/viewer"
