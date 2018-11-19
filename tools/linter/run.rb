@@ -39,7 +39,7 @@ docs = YAML.safe_load(File.read(doc_file))
 
 docs.each do |doc|
   raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
-  api = ApiFetcher.new(doc['filename']).api_from_file
+  api = ApiFetcher.api_from_file(doc['filename'])
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
 
   # First context: product name
@@ -50,7 +50,9 @@ docs.each do |doc|
       describe disc_resource.name do
         # Run all resource tests on this resource
         include_examples 'resource_tests', disc_resource, api_obj
-        PropertyFetcher.new(disc_resource, api_obj).run do |disc_prop, api_prop, name|
+        PropertyFetcher.fetch_property_pairs(disc_resource.properties,
+                                             api_obj.all_user_properties) \
+                                            do |disc_prop, api_prop, name|
           # Third context: property name
           context name do
             # Run all tests on this property

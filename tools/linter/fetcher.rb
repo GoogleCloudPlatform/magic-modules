@@ -18,55 +18,42 @@ require 'api/compiler'
 # Passes the DiscoveryProperties and their corresponding Api Properties
 # to a test block.
 class PropertyFetcher
-  def initialize(discovery_res, api_res)
-    @discovery_res = discovery_res
-    @api_res = api_res
-  end
+  class << self
+    # Runs a block with a matching set of a DiscoveryProperty and Api::Type property
+    def fetch_property_pairs(discovery_properties, api_properties, &block)
+      run_on_properties(discovery_properties, api_properties, '', &block)
+    end
 
-  def run(&block)
-    run_on_properties(@discovery_res.properties, @api_res.all_user_properties, '', &block)
-  end
+    private
 
-  private
-
-  def run_on_properties(discovery_properties, api_properties, prefix, &block)
-    discovery_properties.each do |disc_prop|
-      api_props = api_properties.select { |p| p.name == disc_prop.name }
-      raise 'Multiple properties with name' if api_props.length > 1
-      api_prop = api_props.first
-      yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
-      if disc_prop.nested_properties?
-        run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop),
-                          "#{prefix}#{disc_prop.name}.", &block)
+    def run_on_properties(discovery_properties, api_properties, prefix, &block)
+      discovery_properties.each do |disc_prop|
+        api_props = api_properties.select { |p| p.name == disc_prop.name }
+        raise 'Multiple properties with name' if api_props.length > 1
+        api_prop = api_props.first
+        yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
+        if disc_prop.nested_properties?
+          run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop),
+                            "#{prefix}#{disc_prop.name}.", &block)
+        end
       end
     end
-  end
 
-  def nested_properties_for_api(api)
-    if api.is_a?(Api::Type::NestedObject)
-      api.properties
-    elsif api.is_a?(Api::Type::Array) && api.item_type.is_a?(Api::Type::NestedObject)
-      api.item_type.properties
-    else
-      []
+    def nested_properties_for_api(api)
+      if api.is_a?(Api::Type::NestedObject)
+        api.properties
+      elsif api.is_a?(Api::Type::Array) && api.item_type.is_a?(Api::Type::NestedObject)
+        api.item_type.properties
+      else
+        []
+      end
     end
   end
 end
 
 # Gets a Api::Product from a api.yaml filename
 class ApiFetcher
-  def initialize(filename)
-    @filename = filename
-    @api = build_api
-  end
-
-  def api_from_file
-    @api
-  end
-
-  private
-
-  def build_api
-    Api::Compiler.new(@filename).run
+  def self.api_from_file(filename)
+    Api::Compiler.new(filename).run
   end
 end
