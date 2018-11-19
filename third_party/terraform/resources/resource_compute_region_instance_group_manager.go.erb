@@ -480,7 +480,7 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	}
 	d.Set("update_strategy", update_strategy.(string))
 
-	// When we make a list Removed, we see a permadiff from `0 => ` (nil). Set to nil in Read so we see no diff.
+	// When we make a list Removed, we see a permadiff from `field_name.#: "" => "<computed>"`. Set to nil in Read so we see no diff.
 	d.Set("version" , nil)
 <% else -%>
 	if err := d.Set("auto_healing_policies", flattenAutoHealingPolicies(manager.AutoHealingPolicies)); err != nil {
