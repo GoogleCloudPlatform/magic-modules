@@ -137,6 +137,7 @@ func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
 func TestAccComposerEnvironment_withSoftwareConfig(t *testing.T) {
 	t.Parallel()
  	envName := acctest.RandomWithPrefix(testComposerEnvironmentPrefix)
+	var env composer.Environment
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
