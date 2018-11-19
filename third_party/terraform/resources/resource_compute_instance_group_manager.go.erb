@@ -536,7 +536,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	}
 	d.Set("update_strategy", update_strategy.(string))
 
-	// Terraform _really_ doesn't like removing lists.
+	// When we make a list Removed, we see a permadiff from `0 => ` (nil). Set to nil in Read so we see no diff.
 	d.Set("version" , nil)
 <% else -%>
 	if err = d.Set("auto_healing_policies", flattenAutoHealingPolicies(manager.AutoHealingPolicies)); err != nil {
