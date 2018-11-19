@@ -844,6 +844,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
 		return err
 	}
+<% else -%>
+	if err := d.Set("cluster_autoscaling", nil); err != nil {
+		return err
+	}
 <% end -%>
 	if err := d.Set("node_config", flattenNodeConfig(cluster.NodeConfig)); err != nil {
 		return err
@@ -1559,6 +1563,7 @@ func expandMaintenancePolicy(configured interface{}) *containerBeta.MaintenanceP
 	}
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *containerBeta.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
@@ -1615,6 +1620,7 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	}
 	return r
 }
+<% end -%>
 
 func expandMasterAuth(configured interface{}) *containerBeta.MasterAuth {
 	l := configured.([]interface{})
@@ -1851,6 +1857,7 @@ func flattenMasterAuth(ma *containerBeta.MasterAuth) []map[string]interface{} {
 	return masterAuth
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string]interface{} {
 	r := make(map[string]interface{})
 	if a == nil || !a.EnableNodeAutoprovisioning {
@@ -1869,6 +1876,7 @@ func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string
 	}
 	return []map[string]interface{}{r}
 }
+<% end -%>
 
 func flattenMasterAuthorizedNetworksConfig(c *containerBeta.MasterAuthorizedNetworksConfig) []map[string]interface{} {
 	if c == nil {
