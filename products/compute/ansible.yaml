@@ -274,6 +274,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
       - 'products/compute/helpers/python/instance_start.py'
+    properties:
+      status: !ruby/object:Provider::Ansible::PropertyOverride
+        versino_added: '2.8'
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
