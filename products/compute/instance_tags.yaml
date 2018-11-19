@@ -19,6 +19,8 @@
     the client during instance creation. The tags can be later modified
     by the setTags method. Each tag within the list must comply with
     RFC1035.
+  update_verb: :POST
+  update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setTags
   properties:
     # TODO(alexstephen) Investigate bytes type
     - !ruby/object:Api::Type::String
