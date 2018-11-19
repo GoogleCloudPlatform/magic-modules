@@ -30,9 +30,13 @@
         changes after every request to modify or update metadata. You
         must always provide an up-to-date fingerprint hash in order to
         update or change metadata.
+      update_verb: :POST
+      update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setTags
     - !ruby/object:Api::Type::Array
       name: 'items'
       description: |
         An array of tags. Each tag must be 1-63 characters long, and
         comply with RFC1035.
       item_type: Api::Type::String
+      update_verb: :POST
+      update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setTags
