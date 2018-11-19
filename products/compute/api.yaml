@@ -1954,6 +1954,11 @@ objects:
 
           As a user, use RUNNING to keep a machine "on" and TERMINATED to
           turn a machine off
+        # GCP API shows this as output: true.
+        # This is incorrect because you can make actions on the Instance (start, stop)
+        # In an idempotent world, the best way to express these actions is to
+        # change the status value.
+        output: false
         values:
           - :PROVISIONING
           - :STAGING
