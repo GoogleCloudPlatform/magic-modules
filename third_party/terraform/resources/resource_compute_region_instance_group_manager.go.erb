@@ -172,8 +172,9 @@ func resourceComputeRegionInstanceGroupManager() *schema.Resource {
 <% if version.nil? || version == 'ga' -%>
 			"update_strategy": &schema.Schema{
 				Type:         schema.TypeString,
+				Deprecated:   "This field is deprecated as it has no functionality anymore. It will be removed in 3.0.0.",
 				Optional:     true,
-				Default:      "NONE",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"NONE", "ROLLING_UPDATE"}, false),
 			},
 <% end -%>
@@ -474,12 +475,6 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 	}
 	d.Set("self_link", ConvertSelfLinkToV1(manager.SelfLink))
 <% if version.nil? || version == 'ga' -%>
-	update_strategy, ok := d.GetOk("update_strategy")
-	if !ok {
-		update_strategy = "NONE"
-	}
-	d.Set("update_strategy", update_strategy.(string))
-
 	// When we make a list Removed, we see a permadiff from `field_name.#: "" => "<computed>"`. Set to nil in Read so we see no diff.
 	d.Set("version" , nil)
 <% else -%>
