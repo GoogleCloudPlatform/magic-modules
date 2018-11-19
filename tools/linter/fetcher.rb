@@ -27,9 +27,13 @@ class PropertyFetcher
     run_on_properties(@discovery_res.properties, @api_res.all_user_properties, '', &block)
   end
 
+  private
+
   def run_on_properties(discovery_properties, api_properties, prefix, &block)
     discovery_properties.each do |disc_prop|
-      api_prop = api_properties.select { |p| p.name == disc_prop.name }.first
+      api_props = api_properties.select { |p| p.name == disc_prop.name }
+      raise "Multiple properties with name" if api_props.length > 1
+      api_prop = api_props.first
       yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
       if disc_prop.nested_properties?
         run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop),
@@ -37,8 +41,6 @@ class PropertyFetcher
       end
     end
   end
-
-  private
 
   def nested_properties_for_api(api)
     if api.is_a?(Api::Type::NestedObject)
@@ -58,7 +60,7 @@ class ApiFetcher
     @api = build_api
   end
 
-  def fetch
+  def api_from_file
     @api
   end
 

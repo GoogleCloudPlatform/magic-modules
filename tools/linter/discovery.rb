@@ -16,92 +16,93 @@ require 'json'
 require 'active_support/inflector'
 
 # Holds all Discovery Information about a Api::Type (property)
-class DiscoveryProperty
-  attr_reader :schema
-  attr_reader :name
+module Discovery
+  class Property
+    attr_reader :schema
+    attr_reader :name
 
-  attr_reader :__product
+    attr_reader :__product
 
-  def initialize(name, schema, product)
-    @name = name
-    @schema = schema
+    def initialize(name, schema, product)
+      @name = name
+      @schema = schema
 
-    @__product = product
-  end
+      @__product = product
+    end
 
-  def nested_properties?
-    !nested_properties.empty?
-  end
+    def nested_properties?
+      !nested_properties.empty?
+    end
 
-  def nested_properties
-    if @schema.dig('$ref')
-      @__product.get_resource(@schema.dig('$ref')).properties
-    elsif @schema.dig('type') == 'object' && @schema.dig('properties')
-      DiscoveryResource.new(@schema, nil, @__product).properties
-    elsif @schema.dig('type') == 'array' && @schema.dig('items', '$ref')
-      @__product.get_resource(@schema.dig('items', '$ref')).properties
-    elsif @schema.dig('type') == 'array' && @schema.dig('items', 'properties')
-      DiscoveryResource.new(@schema.dig('items'), nil, @__product).properties
-    else
-      []
+    def nested_properties
+      if @schema.dig('$ref')
+        @__product.get_resource(@schema.dig('$ref')).properties
+      elsif @schema.dig('type') == 'object' && @schema.dig('properties')
+        Resource.new(@schema, nil, @__product).properties
+      elsif @schema.dig('type') == 'array' && @schema.dig('items', '$ref')
+        @__product.get_resource(@schema.dig('items', '$ref')).properties
+      elsif @schema.dig('type') == 'array' && @schema.dig('items', 'properties')
+        Resource.new(@schema.dig('items'), nil, @__product).properties
+      else
+        []
+      end
     end
   end
-end
 
-# Holds Discovery information about a Resource
-# This Resource is usually a Api::Resource,
-# although it may be the contents of a NestedObject
-class DiscoveryResource
-  attr_reader :schema
-  attr_reader :name
+  # Holds Discovery information about a Resource
+  # This Resource is usually a Api::Resource,
+  # although it may be the contents of a NestedObject
+  class Resource
+    attr_reader :schema
+    attr_reader :name
 
-  attr_reader :__product
+    attr_reader :__product
 
-  def initialize(schema, name, product)
-    @schema = schema
-    @name = name
-    @__product = product
+    def initialize(schema, name, product)
+      @schema = schema
+      @name = name
+      @__product = product
+    end
+
+    def exists?
+      !@schema.nil?
+    end
+
+    def properties
+      @schema.dig('properties')
+             .reject { |k, _| k == 'kind' }
+             .map { |k, v| Property.new(k, v, @__product) }
+    end
   end
 
-  def exists?
-    !@schema.nil?
-  end
+  # Responsible for grabbing Discovery Docs and getting resources from it
+  class Builder
+    attr_reader :results
 
-  def properties
-    @schema.dig('properties')
-           .reject { |k, _| k == 'kind' }
-           .map { |k, v| DiscoveryProperty.new(k, v, @__product) }
-  end
-end
+    def initialize(url, objects)
+      @resources_in_api_yaml = objects
+      @results = fetch_discovery_doc(url)
+    end
 
-# Responsible for grabbing Discovery Docs and getting resources from it
-class DiscoveryBuilder
-  attr_reader :results
+    def resources
+      @results['schemas'].select { |name, _| @resources_in_api_yaml.include?(name) }
+                         .map { |name, _| get_resource(name) }
+                         .compact
+    end
 
-  def initialize(url, objects)
-    @objects = objects
-    @results = send_request(url)
-  end
+    def get_methods_for_resource(resource)
+      return unless @results['resources'][resource.pluralize.camelize(:lower)]
+      @results['resources'][resource.pluralize.camelize(:lower)]['methods']
+    end
 
-  def resources
-    @results['schemas'].map do |name, _|
-      next unless @objects.include?(name)
-      get_resource(name)
-    end.compact
-  end
+    def get_resource(resource)
+      Resource.new(@results['schemas'][resource], resource, self)
+    end
 
-  def get_methods_for_resource(resource)
-    return unless @results['resources'][resource.pluralize.camelize(:lower)]
-    @results['resources'][resource.pluralize.camelize(:lower)]['methods']
-  end
+    private
 
-  def get_resource(resource)
-    DiscoveryResource.new(@results['schemas'][resource], resource, self)
-  end
-
-  private
-
-  def send_request(url)
-    JSON.parse(Net::HTTP.get(URI(url)))
+    def fetch_discovery_doc(url)
+      JSON.parse(Net::HTTP.get(URI(url)))
+    end
   end
 end
