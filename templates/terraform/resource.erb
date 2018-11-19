@@ -103,6 +103,8 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
+<%= lines(compile(object.custom_code.pre_create)) if object.custom_code.pre_create -%>
+
     obj := make(map[string]interface{})
 <%  settable_properties.each do |prop| -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)

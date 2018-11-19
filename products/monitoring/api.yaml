@@ -950,6 +950,10 @@ objects:
           description: The checker's human-readable name. The display name should be
             unique within a Stackdriver Workspace in order to make it easier to identify;
             however, uniqueness is not enforced.
+    - !ruby/object:Api::Type::String
+      name: passwordSentinel
+      description: This is a computed only field to determine whether the password has
+        changed since the api doesn't provide the ability to detect drift.
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.
