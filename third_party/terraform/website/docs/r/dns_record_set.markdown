@@ -125,9 +125,10 @@ resource "google_dns_record_set" "cname" {
   managed_zone = "${google_dns_managed_zone.prod.name}"
   type = "CNAME"
   ttl  = 300
-   rrdatas = ["frontend.mydomain.com."]
+  rrdatas = ["frontend.mydomain.com."]
 }
- resource "google_dns_managed_zone" "prod" {
+
+resource "google_dns_managed_zone" "prod" {
   name        = "prod-zone"
   dns_name    = "prod.mydomain.com."
 }
