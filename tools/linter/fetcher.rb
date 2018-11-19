@@ -32,7 +32,7 @@ class PropertyFetcher
   def run_on_properties(discovery_properties, api_properties, prefix, &block)
     discovery_properties.each do |disc_prop|
       api_props = api_properties.select { |p| p.name == disc_prop.name }
-      raise "Multiple properties with name" if api_props.length > 1
+      raise 'Multiple properties with name' if api_props.length > 1
       api_prop = api_props.first
       yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
       if disc_prop.nested_properties?

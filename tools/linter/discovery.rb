@@ -15,8 +15,9 @@ require 'net/http'
 require 'json'
 require 'active_support/inflector'
 
-# Holds all Discovery Information about a Api::Type (property)
+# Holds all information about parsing parts of the Discovery docs.
 module Discovery
+  # Holds all Discovery Information about a Api::Type (property)
   class Property
     attr_reader :schema
     attr_reader :name
