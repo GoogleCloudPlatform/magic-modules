@@ -1921,7 +1921,7 @@ objects:
         resource: 'MachineType'
         imports: 'selfLink'
         description: 'A reference to a machine type which defines VM kind.'
-        update_url: projdcts/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
+        update_url: projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType
         update_verb: :POST
       # TODO(alexstephen): Add metatdata
       - !ruby/object:Api::Type::String
