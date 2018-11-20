@@ -13,7 +13,7 @@ resource_types:
       type: docker-image
       source:
           repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.14
+          tag: v0.1.15
 
 resources:
     - name: magic-modules
@@ -80,10 +80,14 @@ jobs:
       plan:
           - get: magic-modules-external-prs
             trigger: false
+            params:
+              skip_clone: true
           - put: magic-modules-new-prs
             params:
                 status: pending
                 path: magic-modules-external-prs
+            get_params:
+                skip_clone: true
 
     - name: mm-generate
       plan:
@@ -112,6 +116,8 @@ jobs:
               params:
                 status: pending
                 path: magic-modules
+              get_params:
+                skip_clone: true
           - aggregate:
             {% for k, v in vars.terraform_v.iteritems() %}
             - do:
@@ -162,6 +168,8 @@ jobs:
                 status: failure
                 context: code-generation
                 path: magic-modules
+              get_params:
+                skip_clone: true
 
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
@@ -210,6 +218,8 @@ jobs:
                   status: failure
                   context: terraform-tests
                   path: magic-modules-new-prs
+                get_params:
+                  skip_clone: true
 
     - name: ansible-test
       plan:
@@ -231,6 +241,8 @@ jobs:
                   status: failure
                   context: ansible-tests
                   path: magic-modules-new-prs
+                get_params:
+                  skip_clone: true
 
     - name: inspec-test
       plan:
@@ -254,6 +266,8 @@ jobs:
                   status: failure
                   context: inspec-tests
                   path: magic-modules-new-prs
+                get_params:
+                  skip_clone: true
 
     - name: create-prs
       plan:
@@ -291,6 +305,8 @@ jobs:
                   status: failure
                   context: pr-creation
                   path: mm-initial-pr
+              get_params:
+                  skip_clone: true
           # This will be a no-op the first time through the pipeline.  This pushes the updated
           # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
           # first time through the pipeline, that branch is unchanged by the create-prs task,
@@ -343,15 +359,20 @@ jobs:
                 label: downstream-generated
                 path: mm-initial-pr
                 comment: magic-modules-with-comment/pr_comment
+            get_params:
+                skip_clone: true
 
     - name: merge-prs
       plan:
           - get: mm-approved-prs
-          - put: mm-approved-prs
+          - put: mark-automerged
+            resource: mm-approved-prs
             params:
               path: mm-approved-prs
               status: success
               label: automerged
+            get_params:
+              skip_clone: true
           - task: rebase-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
@@ -368,17 +389,23 @@ jobs:
                 branch_file: mm-approved-prs/.git/branch
                 only_if_diff: true
                 force: true
-          - put: mm-approved-prs
+          - put: mark-success
+            resource: mm-approved-prs
             params:
                 path: mm-output
                 status: success
-          - put: mm-approved-prs
+            get_params:
+                skip_clone: true
+          - put: merge-pr
+            resource: mm-approved-prs
             params:
                 path: mm-output
                 status: success
                 merge:
                     method: squash
                     commit_msg: mm-output/commit_message
+            get_params:
+                skip_clone: true
     - name: inspec-integration-test
       serial: true
       plan:
