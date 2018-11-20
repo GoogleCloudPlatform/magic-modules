@@ -64,7 +64,7 @@ for i in {1..30}
 do
 	# Cleanup cassettes folder each time, we don't want to use a recorded cassette if it records an unauthorized response
 	rm -r inspec-cassettes
-	inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp2:// --no-distinct-exit
+	inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit
 	if [ "$?" -eq "0" ]; then
 		# Upload cassettes to storage bucket for unit test use
 		gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/inspec-cassettes
