@@ -212,6 +212,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("project", project); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
 
 <%  properties.reject(&:ignore_read).each do |prop| -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
@@ -220,15 +229,6 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 <%  if has_self_link -%>
     if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
-<%  end -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-    if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>
