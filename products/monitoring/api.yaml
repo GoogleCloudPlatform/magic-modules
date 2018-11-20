@@ -729,6 +729,8 @@ objects:
     name: 'Group'
     base_url: projects/{{project}}/groups
     self_link: "{{name}}"
+    exports:
+    - name
     update_verb: :PUT
     description: |
       The description of a dynamic collection of monitored resources. Each group
@@ -1016,9 +1018,10 @@ objects:
         - :RESOURCE_TYPE_UNSPECIFIED
         - :INSTANCE
         - :AWS_ELB_LOAD_BALANCER
-      - !ruby/object:Api::Type::String
-        # TODO chrisst - move to reference?
+      - !ruby/object:Api::Type::ResourceRef
         name: groupId
+        resource: Group
+        imports: name
         description: The group of resources being monitored. Should be the `name` of a group
     - !ruby/object:Api::Type::NestedObject
       name: monitoredResource
