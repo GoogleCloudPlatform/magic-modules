@@ -98,18 +98,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
-      pre_create: templates/terraform/post_create/set_sentinel.go.erb
-      pre_update: templates/terraform/post_create/set_sentinel.go.erb
     properties:
-      passwordSentinel: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: "templates/terraform/custom_expand/null.go.erb"
-        sensitive: true
-        ignore_read: true
-        default_from_api: true
       httpCheck.authInfo.password: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: "templates/terraform/custom_expand/monitoring_password_sentinal.erb"
-        diff_suppress_func: "passwordSentinelDiff"
+        full_context: true
+        custom_flatten: "templates/terraform/custom_expand/get_from_root.erb"
+      httpCheck.authInfo: !ruby/object:Provider::Terraform::PropertyOverride
+        full_context: true
       httpCheck: !ruby/object:Provider::Terraform::PropertyOverride
+        full_context: true
         conflicts_with:
         - tcp_check
       tcpCheck: !ruby/object:Provider::Terraform::PropertyOverride
