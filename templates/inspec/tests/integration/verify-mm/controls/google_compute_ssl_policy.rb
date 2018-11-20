@@ -23,7 +23,7 @@ control 'gcp-ssl-policy-1.0' do
   impact 1.0
   title 'Ensure single SSL policy resource works.'
   VCR.use_cassette('gcp-ssl-policy') do
-    resource = google_compute_zone({project: project_name, name: ssl_policy['name']})
+    resource = google_compute_ssl_policy({project: project_name, name: ssl_policy['name']})
 
     describe resource do
       it { should exist }
