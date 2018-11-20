@@ -4,14 +4,14 @@ prefix: azurerm
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://pubsub.googleapis.com/v1/
+    base_url: NotUsedInAzure
 scopes:
-  - https://www.googleapis.com/auth/pubsub
+  - NotUsedInAzure
 objects:
   - !ruby/object:Api::Resource
     name: 'ResourceGroup'
-    base_url: projects/{{project}}/topics
-    create_verb: :PUT
+    base_url: NotUsedInAzure
+    azure_delete_async: true
     description: |
       A named resource to which messages are sent by publishers.
     exports:

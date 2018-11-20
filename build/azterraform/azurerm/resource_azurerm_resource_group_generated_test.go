@@ -66,7 +66,7 @@ func testAccCheckAzureRmResourceGroupDestroy(s *terraform.State) error {
 
 	config := testAccProvider.Meta().(*Config)
 
-	url, err := replaceVarsForTest(rs, "https://pubsub.googleapis.com/v1/projects/{{project}}/topics/{{name}}")
+	url, err := replaceVarsForTest(rs, "NotUsedInAzureNotUsedInAzure/{{name}}")
 	if err != nil {
 		return err
 	}

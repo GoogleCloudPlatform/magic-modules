@@ -16,11 +16,12 @@ package azurerm
 
 
 
+
 func resourceAzureRmResourceGroup() *schema.Resource {
     return &schema.Resource{
-        Create: resourceAzureRmResourceGroupCreate,
+        Create: resourceAzureRmResourceGroupCreateOrUpdate,
         Read: resourceAzureRmResourceGroupRead,
-        Update: resourceAzureRmResourceGroupUpdate,
+        Update: resourceAzureRmResourceGroupCreateOrUpdate,
         Delete: resourceAzureRmResourceGroupDelete,
 
         Importer: &schema.ResourceImporter{
@@ -33,18 +34,14 @@ func resourceAzureRmResourceGroup() *schema.Resource {
     Type: schema.TypeString,
     Optional: true,
 },
-            "project": {
-                Type:     schema.TypeString,
-                Optional: true,
-                Computed: true,
-                ForceNew: true,
-            },
+            "location": locationSchema(),
+            "tags": tagsSchema(),
         },
     }
 }
 
-func resourceAzureRmResourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient)/*.TODO*/
+func resourceAzureRmResourceGroupCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).resourceGroupsClient
     ctx := meta.(*ArmClient).StopContext
 
     obj := make(map[string]interface{})
@@ -57,12 +54,13 @@ func resourceAzureRmResourceGroupCreate(d *schema.ResourceData, meta interface{}
 
 
 
-    if _, err := client/*.TODOCreateOrUpdate*/(/* TODO */); err != nil {
+    name := d.Get("name").(string)
+
+    // TODO parameters
+
+    if _, err := client.CreateOrUpdate(ctx, name, parameters); err != nil {
         return fmt.Errorf("Error creating ResourceGroup: %+v", err)
     }
-
-
-    log.Printf("[DEBUG] Finished creating ResourceGroup %q: %#v", d.Id(), res)
 
 
     resp, err := client.Get(ctx, /* TODO */)
@@ -75,16 +73,16 @@ func resourceAzureRmResourceGroupCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAzureRmResourceGroupRead(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient)/*.TODO*/
+    client := meta.(*ArmClient).resourceGroupsClient
     ctx := meta.(*ArmClient).StopContext
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
         return fmt.Errorf("Error parsing ResourceGroup ID %q: %+v", d.Id(), err)
     }
-    /* TODO */
+    name := id.ResourceGroup
 
-    resp, err := client.Get(ctx, /* TODO */)
+    resp, err := client.Get(ctx, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] ResourceGroup %q does not exist - removing from state", d.Id())
@@ -94,56 +92,19 @@ func resourceAzureRmResourceGroupRead(d *schema.ResourceData, meta interface{}) 
         return fmt.Errorf("Error reading ResourceGroup: %+v", err)
     }
 
-    /* TODO */
 
 
 
-
+    d.Set("name", resp.Name)
     if err := d.Set("name", flattenAzureRmResourceGroupName(res["name"])); err != nil {
-        return fmt.Errorf("Error reading ResourceGroup: %s", err)
-    }
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-    if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading ResourceGroup: %s", err)
     }
 
     return nil
 }
 
-func resourceAzureRmResourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-    config := meta.(*Config)
-
-    obj := make(map[string]interface{})
-    nameProp, err := expandAzureRmResourceGroupName(d.Get("name"), d, config)
-    if err != nil {
-        return err
-    } else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
-        obj["name"] = nameProp
-    }
-
-
-
-    url, err := replaceVars(d, config, "https://pubsub.googleapis.com/v1/projects/{{project}}/topics/{{name}}")
-    if err != nil {
-        return err
-    }
-
-    log.Printf("[DEBUG] Updating ResourceGroup %q: %#v", d.Id(), obj)
-    _, err = sendRequest(config, "PUT", url, obj)
-
-    if err != nil {
-    return fmt.Errorf("Error updating ResourceGroup %q: %s", d.Id(), err)
-    }
-
-
-    return resourceAzureRmResourceGroupRead(d, meta)
-}
-
 func resourceAzureRmResourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient)/*.TODO*/
+    client := meta.(*ArmClient).resourceGroupsClient
     ctx := meta.(*ArmClient).StopContext
 
 
@@ -151,9 +112,9 @@ func resourceAzureRmResourceGroupDelete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return fmt.Errorf("Error parsing ResourceGroup ID %q: %+v", d.Id(), err)
     }
-    /* TODO */
+    name := id.ResourceGroup
 
-    future, err := client.Delete(ctx, /* TODO */)
+    future, err := client.Delete(ctx, name)
     if err != nil {
         if response.WasNotFound(deleteFuture.Response()) {
             return nil
@@ -167,15 +128,6 @@ func resourceAzureRmResourceGroupDelete(d *schema.ResourceData, meta interface{}
         }
     }
 
-    var obj map[string]interface{}
-    log.Printf("[DEBUG] Deleting ResourceGroup %q", d.Id())
-    res, err := sendRequest(config, "DELETE", url, obj)
-    if err != nil {
-        return handleNotFoundError(err, d, "ResourceGroup")
-    }
-
-
-    log.Printf("[DEBUG] Finished deleting ResourceGroup %q: %#v", d.Id(), res)
     return nil
 }
 

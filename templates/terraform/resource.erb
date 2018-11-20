@@ -35,12 +35,19 @@ package azurerm
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
 
+<%
+    azure_is_resource_group = object.name == "ResourceGroup"
+    azure_has_location = true
+    azure_has_tags = true
+    azure_client_name = "#{object.name}sClient".camelcase(:lower)
+-%>
+
 func resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
-        Create: resource<%= resource_name -%>Create,
+        Create: resource<%= resource_name -%>CreateOrUpdate,
         Read: resource<%= resource_name -%>Read,
 <%      if updatable?(object, properties) -%>
-        Update: resource<%= resource_name -%>Update,
+        Update: resource<%= resource_name -%>CreateOrUpdate,
 <%      end -%>
         Delete: resource<%= resource_name -%>Delete,
 <%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
@@ -73,6 +80,12 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%=             lines(build_schema_property(prop, object)) -%>
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+<%          if azure_has_location -%>
+            "location": locationSchema(),
+<%          end -%>
+<%          if azure_has_tags -%>
+            "tags": tagsSchema(),
+<%          end -%>
 <%          if has_project -%>
             "project": {
                 Type:     schema.TypeString,
@@ -100,8 +113,9 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 }
 <% end -%>
 
-func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient)/*.TODO*/
+func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).<%= azure_client_name -%>
+
     ctx := meta.(*ArmClient).StopContext
 
     obj := make(map[string]interface{})
@@ -134,35 +148,20 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    if _, err := client/*.TODOCreateOrUpdate*/(/* TODO */); err != nil {
+    name := d.Get("name").(string)
+<%  unless azure_is_resource_group -%>
+    resourceGroup := d.Get("resource_group_name").(string)
+<%  end -%>
+
+    // TODO parameters
+
+<%  unless object.azure_create_async -%>
+    if _, err := client.CreateOrUpdate(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters); err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %+v", err)
     }
-
-<%  unless object.async.nil? -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
+<%  else -%>
+    // TODO: Async CreateOrUpdate Operation
 <%  end -%>
-    op := &<%= api_client_name -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    waitErr := <%= api_name_lower -%>OperationWaitTime(
-    config.client<%= product_ns -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutCreate).Minutes()))
-
-    if waitErr != nil {
-        // The resource didn't actually create
-        d.SetId("")
-        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
-    }
-<%  end -%>
-
-    log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
@@ -176,16 +175,22 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 }
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient)/*.TODO*/
+    client := meta.(*ArmClient).<%= azure_client_name -%>
+
     ctx := meta.(*ArmClient).StopContext
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
         return fmt.Errorf("Error parsing <%= object.name -%> ID %q: %+v", d.Id(), err)
     }
-    /* TODO */
+<%  if azure_is_resource_group -%>
+    name := id.ResourceGroup
+<%  else -%>
+    resourceGroup := id.ResourceGroup
+    // TODO: Get name out
+<%  end -%>
 
-    resp, err := client.Get(ctx, /* TODO */)
+    resp, err := client.Get(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] <%= object.name -%> %q does not exist - removing from state", d.Id())
@@ -194,8 +199,6 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         }
         return fmt.Errorf("Error reading <%= object.name -%>: %+v", err)
     }
-
-    /* TODO */
 
 <%  unless object.self_link_query.nil? -%>
 <%#     This part of the template extracts the one resource we're interested in
@@ -215,6 +218,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 
+    d.Set("name", resp.Name)
 <%  properties.reject(&:ignore_read).each do |prop| -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
@@ -238,187 +242,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     return nil
 }
 
-<% if updatable?(object, properties) -%>
-func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
-    config := meta.(*Config)
-
-<%  if object.input -%>
-    d.Partial(true)
-
-<%  properties_by_custom_update(properties).each do |key, props| -%>
-    if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
-        obj := make(map[string]interface{})
-<%      props.each do |prop| -%>
-<%      if update_body_properties.include? prop -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-        if err != nil {
-            return err
-<%#         There is some nuance in when we choose to send a value to an update function.
-            This is unfortunate, but it's because of the way that GCP works, so there's
-            no easy way out.  Some APIs require you to send `enable_foo: false`, while
-            others will crash if you send `attribute: ''`.  We require this nuance to
-            be annotated in api.yaml, since it is not discoverable automatically.
-
-            The behavior here, which we believe to be correct, is to send a value if
-            * It is non-empty OR
-            * It is marked send_empty_value in api.yaml.
-            AND
-            * It has been set by the user OR
-            * It has been modified by the expander in any way
-
-            This subsumes both `ForceSendFields` and `NullFields` in the go API client -
-            `NullFields` is a special case of `send_empty_value` where the empty value
-            in question is go's literal nil.
--%>
-<%          unless prop.send_empty_value -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%          else -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%          end -%>
-<%          if prop.update_statement -%>
-            obj["<%= prop.api_name -%>"] = <%= compile_template(prop.update_statement,
-                                                                prefix: resource_name,
-                                                                property: prop) -%>
-<%          else -%>
-            obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%          end -%>
-        }
-<%      else # if update_body_properties.include? prop -%>
-        <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%      end # if update_body_properties.include? prop -%>
-<%      end # props.each -%>
-
-<%      if object.mutex -%>
-        lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
-        if err != nil {
-            return err
-        }
-        mutexKV.Lock(lockName)
-        defer mutexKV.Unlock(lockName)
-<%      end -%>
-
-        url, err := replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
-        if err != nil {
-            return err
-        }
-<%      if object.async.nil? -%>
-        _, err = sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
-<%      else -%>
-        res, err := sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
-<%      end -%>
-        if err != nil {
-            return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
-        }
-
-<%      unless object.async.nil? -%>
-<%      if has_project -%>
-        project, err := getProject(d, config)
-        if err != nil {
-            return err
-        }
-<%      end -%>
-        op := &<%= api_client_name -%>.Operation{}
-        err = Convert(res, op)
-        if err != nil {
-            return err
-        }
-
-        err = <%= api_name_lower -%>OperationWaitTime(
-            config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-        if err != nil {
-            return err
-        }
-
-<%      end -%>
-
-<%      props.each do |prop|    -%>
-        d.SetPartial("<%= prop.name.underscore -%>")
-<%      end -%>
-    }
-<%  end -%>
-
-    d.Partial(false)
-<%  else # if object.input -%>
-    obj := make(map[string]interface{})
-<%  update_body_properties.each do |prop| -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-    if err != nil {
-        return err
-<%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%  end -%>
-
-<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
-<%  if object.custom_code.update_encoder -%>
-    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
-<%  elsif object.custom_code.encoder -%>
-    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
-<%  end -%>
-
-<%  if object.mutex -%>
-    lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
-    if err != nil {
-        return err
-    }
-    mutexKV.Lock(lockName)
-    defer mutexKV.Unlock(lockName)
-<%  end -%>
-
-    url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
-    if err != nil {
-        return err
-    }
-
-    log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
-<%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
-<%  if object.async.nil? -%>
-    _, err = sendRequest(config, "<%= object.update_verb -%>", url, obj)
-<%  else -%>
-    res, err := sendRequest(config, "<%= object.update_verb -%>", url, obj)
-<% end -%>
-
-    if err != nil {
-    return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
-    }
-
-<%  unless object.async.nil? -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-    op := &<%= api_client_name -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    err = <%= api_name_lower -%>OperationWaitTime(
-    config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
-    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
-
-    if err != nil {
-        return err
-    }
-<%  end -%>
-<%  end # if object.input -%>
-
-<%= lines(compile(object.custom_code.post_update)) if object.custom_code.post_update -%>
-    return resource<%= resource_name -%>Read(d, meta)
-}
-<% end # if updatable? -%>
-
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient)/*.TODO*/
+    client := meta.(*ArmClient).<%= azure_client_name -%>
+
     ctx := meta.(*ArmClient).StopContext
 
 <%  if object.mutex -%>
@@ -434,9 +260,17 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error parsing <%= object.name -%> ID %q: %+v", d.Id(), err)
     }
-    /* TODO */
+<%  if azure_is_resource_group -%>
+    name := id.ResourceGroup
+<%  else -%>
+    resourceGroup := id.ResourceGroup
+    // TODO: Get name out
+<%  end -%>
 
-    future, err := client.Delete(ctx, /* TODO */)
+<%  unless object.azure_delete_async -%>
+    // TODO: Synced Delete Operation
+<%  else -%>
+    future, err := client.Delete(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         if response.WasNotFound(deleteFuture.Response()) {
             return nil
@@ -449,39 +283,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
             return fmt.Errorf("Error waiting for deleting <%= object.name -%> %q: %+v", name, err)
         }
     }
-
-<%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
-    var obj map[string]interface{}
-<%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
-    log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-    res, err := sendRequest(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj)
-    if err != nil {
-        return handleNotFoundError(err, d, "<%= object.name -%>")
-    }
-
-<%  unless object.async.nil? -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
-    op := &<%= api_client_name -%>.Operation{}
-    err = Convert(res, op)
-    if err != nil {
-        return err
-    }
-
-    err = <%= api_name_lower -%>OperationWaitTime(
-        config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
-        int(d.Timeout(schema.TimeoutDelete).Minutes()))
-
-    if err != nil {
-        return err
-    }
 <%  end -%>
 
-    log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
 }
 

@@ -62,6 +62,10 @@ module Api
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
       attr_reader :min_version # Minimum API version this resource is in
+
+      # Azure Specific Attributes
+      attr_reader :azure_create_async
+      attr_reader :azure_delete_async
     end
 
     include Properties
@@ -253,6 +257,9 @@ module Api
         :update_verb, %i[POST PUT PATCH], :PUT, Symbol
       check_optional_property :input, :boolean
       check_optional_property :min_version, String
+
+      check_optional_property :azure_create_async, :boolean
+      check_optional_property :azure_delete_async, :boolean
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
