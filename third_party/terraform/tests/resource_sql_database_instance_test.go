@@ -594,7 +594,7 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_with_private_network(t *testing.T) {
+func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 	t.Parallel()
 
 	databaseName := "tf-test-" + acctest.RandString(10)
@@ -607,7 +607,7 @@ func TestAccSqlDatabaseInstance_with_private_network(t *testing.T) {
 		CheckDestroy: testAccSqlDatabaseInstanceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccSqlDatabaseInstance_with_private_network(databaseName, networkName, addressName),
+				Config: testAccSqlDatabaseInstance_withPrivateNetwork(databaseName, networkName, addressName),
 			},
 			resource.TestStep{
 				ResourceName:      "google_sql_database_instance.instance",
@@ -738,10 +738,11 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-func testAccSqlDatabaseInstance_with_private_network(databaseName, networkName, addressRangeName string) string {
+func testAccSqlDatabaseInstance_withPrivateNetwork(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
 	name       = "%s"
+	auto_create_subnetworks = false
 }
 
 resource "google_compute_global_address" "foobar" {
@@ -758,7 +759,6 @@ resource "google_service_networking_connection" "foobar" {
 	reserved_peering_ranges = ["${google_compute_global_address.foobar.name}"]
 }
 
-# TODO figure out a way to specify the dependency to the connection resource
 resource "google_sql_database_instance" "instance" {
 	depends_on = ["google_service_networking_connection.foobar"]
 	name = "%s"
