@@ -128,7 +128,7 @@ module Provider
         out_file: filepath
       )
       # TODO: error check goimports
-      %x(goimports -w #{filepath})
+      # %x(goimports -w #{filepath})
       generate_documentation(data)
     end
 
@@ -150,7 +150,8 @@ module Provider
     def generate_resource_tests(data)
       return if data[:object].example.reject(&:skip_test).empty?
 
-      dir = data[:version] == 'beta' ? 'google-beta' : 'google'
+      # dir = data[:version] == 'beta' ? 'google-beta' : 'google'
+      dir = 'azurerm'
       target_folder = File.join(data[:output_folder], dir)
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
@@ -168,7 +169,7 @@ module Provider
       )
 
       # TODO: error check goimports
-      %x(goimports -w #{filepath})
+      # %x(goimports -w #{filepath})
     end
   end
 end
