@@ -131,7 +131,7 @@
 <% end -%>
 <% unless property.conflicting().empty? -%>
 <% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
-    ConflictsWith: []string{<%= go_literal(conflicting_props) -%>},
+    ConflictsWith: <%= go_literal(conflicting_props) -%>,
 <% end -%>
 },
 <% else -%>
