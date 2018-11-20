@@ -95,6 +95,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
         primary_resource_id: "http"
         vars:
           display_name: "http-uptime-check"
+      - !ruby/object:Provider::Terraform::Examples
+        version: <%= _version_name %>
+        name: "uptime_check_tcp"
+        primary_resource_id: "tcp_group"
+        vars:
+          display_name: "tcp-uptime-check"
+          group_display_name: "uptime-check-group"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
@@ -102,7 +109,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       httpCheck.authInfo.password: !ruby/object:Provider::Terraform::PropertyOverride
         full_context: true
         sensitive: true
-        custom_flatten: "templates/terraform/custom_expand/get_pwd_from_config.erb"
+        custom_flatten: "templates/terraform/custom_flatten/get_pwd_from_config.erb"
       httpCheck.authInfo: !ruby/object:Provider::Terraform::PropertyOverride
         full_context: true
       httpCheck: !ruby/object:Provider::Terraform::PropertyOverride
@@ -116,9 +123,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
         conflicts_with:
         - resource_group
       resourceGroup: !ruby/object:Provider::Terraform::PropertyOverride
+        full_context: true
         conflicts_with:
         - monitored_resource
-        # TODO chrisst - add the id -> name translation
+      resourceGroup.groupId: !ruby/object:Provider::Terraform::PropertyOverride
+        full_context: true
+        custom_expand: "templates/terraform/custom_expand/group_name_to_id.erb"
+        custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
 
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
