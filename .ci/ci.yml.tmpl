@@ -7,7 +7,7 @@ resource_types:
       source:
           # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
           repository: nmckinley/concourse-git-resource
-          tag: v0.1.7
+          tag: v0.1.14
 
     - name: github-pull-request
       type: docker-image
@@ -137,6 +137,8 @@ jobs:
                       branch_file: magic-modules-branched/branchname
                       only_if_diff: true
                       force: true
+                  get_params:
+                      skip_clone: true
             {% endfor %}
             - do:
                 # consumes: magic-modules-branched
@@ -150,6 +152,8 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
+                get_params:
+                    skip_clone: true
             - do:
                 # consumes: magic-modules-branched
                 # produces: inspec-generated
@@ -162,6 +166,8 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
+                get_params:
+                    skip_clone: true
             on_failure:
               put: magic-modules-new-prs
               params:
@@ -190,6 +196,8 @@ jobs:
                 repository: magic-modules-submodules
                 branch_file: magic-modules-branched/branchname
                 force: true
+            get_params:
+                skip_clone: true
 
     - name: terraform-test
       plan:
@@ -327,6 +335,8 @@ jobs:
                 # not push the update even though the commit hashes are different.
                 only_if_diff: true
                 force: true
+              get_params:
+                  skip_clone: true
             {% endfor %}
             - put: ansible-intermediate
               params:
@@ -335,6 +345,8 @@ jobs:
                 # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
+              get_params:
+                  skip_clone: true
             - put: inspec-intermediate
               params:
                 repository: magic-modules-with-comment/build/inspec
@@ -342,7 +354,8 @@ jobs:
                 # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
-
+              get_params:
+                  skip_clone: true
           # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
           # time through, it works the same way as the preceding push.
           - put: magic-modules
@@ -351,6 +364,8 @@ jobs:
               branch_file: magic-modules-with-comment/original_pr_branch_name
               only_if_diff: true
               force: true
+            get_params:
+                skip_clone: true
           # Once everything is done and working, post the updated information to the
           # magic-modules PR.
           - put: magic-modules-new-prs
