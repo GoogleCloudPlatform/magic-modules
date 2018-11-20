@@ -16,8 +16,12 @@ name: Google Cloud DNS
 prefix: gdns
 versions:
   - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://www.googleapis.com/dns/v1beta2/
+  - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/dns/v1/
+    default: true
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 objects:
@@ -91,6 +95,35 @@ objects:
           A set of key/value label pairs to assign to this ManagedZone.
         update_verb: :PATCH
         update_url: 'projects/{{project}}/managedZones/{{name}}'
+      - !ruby/object:Api::Type::Enum
+        name: 'visibility'
+        description: |
+          Visibility of the zone. Public zones are visible to the public
+          internet. Private zones are only visible in your internal networks
+          denoted by the `networks` argument. Must be one of: `public`,
+          `private`.
+        values:
+        - :private
+        - :public
+        default_value: :public
+        min_version: beta
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateVisibilityConfig'
+        description: 'Visibility config for private zones.'
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'networks'
+            description: 'List of networks.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+                # are possible.
+                - !ruby/object:Api::Type::String
+                  name: 'networkUrl'
+                  description: 'URL of the network resource.'
+        min_version: beta
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
