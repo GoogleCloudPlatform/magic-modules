@@ -87,7 +87,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   UptimeCheckConfig: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    # mutex: stackdriver/notifications/{{project}} TODO see if needed
     example:
       - !ruby/object:Provider::Terraform::Examples
         version: <%= _version_name %>

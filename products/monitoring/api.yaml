@@ -898,7 +898,6 @@ objects:
         Accepted formats https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.Duration
     - !ruby/object:Api::Type::Array
       name: contentMatchers
-      # TODO - TEST this change to nested object of content:string ?
       description: The expected content on the page the check is run against. Currently,
         only the first entry in the list is supported, and other entries will be ignored.
         The server will look for an exact match of the string in the page response's
@@ -1020,6 +1019,7 @@ objects:
         - :AWS_ELB_LOAD_BALANCER
       - !ruby/object:Api::Type::ResourceRef
         name: groupId
+        input: true
         resource: Group
         imports: name
         description: The group of resources being monitored. Should be the `name` of a group
