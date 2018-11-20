@@ -234,6 +234,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 				Computed:   true,
 <% else -%>
 			"update_policy": &schema.Schema{
+				Computed:   true,
 <% end -%>
 				Type:       schema.TypeList,
 				Optional:   true,
@@ -538,6 +539,7 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 
 	// When we make a list Removed, we see a permadiff from `field_name.#: "" => "<computed>"`. Set to nil in Read so we see no diff.
 	d.Set("version" , nil)
+	d.Set("rolling_update_policy" , nil)
 <% else -%>
 	if err = d.Set("auto_healing_policies", flattenAutoHealingPolicies(manager.AutoHealingPolicies)); err != nil {
 		return fmt.Errorf("Error setting auto_healing_policies in state: %s", err.Error())
