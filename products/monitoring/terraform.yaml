@@ -102,7 +102,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       httpCheck.authInfo.password: !ruby/object:Provider::Terraform::PropertyOverride
         full_context: true
         sensitive: true
-        custom_flatten: "templates/terraform/custom_expand/get_from_root.erb"
+        custom_flatten: "templates/terraform/custom_expand/get_pwd_from_config.erb"
       httpCheck.authInfo: !ruby/object:Provider::Terraform::PropertyOverride
         full_context: true
       httpCheck: !ruby/object:Provider::Terraform::PropertyOverride

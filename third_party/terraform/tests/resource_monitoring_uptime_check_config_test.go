@@ -69,5 +69,3 @@ resource "google_monitoring_uptime_check_config" "http" {
 `, acctest.RandString(4), path, project, pwd,
 	)
 }
-
-// Error 400: 'metric' is not a valid resource type. Only 'gce_instance', 'aws_ec2_instance', 'aws_elb_load_balancer', 'gae_app', and 'uptime_url' are valid.
