@@ -594,6 +594,30 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_with_private_network(t *testing.T) {
+	t.Parallel()
+
+	databaseName := "tf-test-" + acctest.RandString(10)
+	networkName := "tf-test-" + acctest.RandString(10)
+	addressName := "tf-test-" + acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccSqlDatabaseInstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccSqlDatabaseInstance_with_private_network(databaseName, networkName, addressName),
+			},
+			resource.TestStep{
+				ResourceName:      "google_sql_database_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccSqlDatabaseInstanceDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
 		config := testAccProvider.Meta().(*Config)
@@ -712,6 +736,42 @@ resource "google_sql_database_instance" "instance-failover" {
   }
 }
 `, instanceName, failoverName)
+}
+
+func testAccSqlDatabaseInstance_with_private_network(databaseName, networkName, addressRangeName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+	name       = "%s"
+}
+
+resource "google_compute_global_address" "foobar" {
+	name          = "%s"
+	purpose       = "VPC_PEERING"
+	address_type = "INTERNAL"
+	prefix_length = 16
+	network       = "${google_compute_network.foobar.self_link}"
+}
+
+resource "google_service_networking_connection" "foobar" {
+	network       = "${google_compute_network.foobar.self_link}"
+	service       = "servicenetworking.googleapis.com"
+	reserved_peering_ranges = ["${google_compute_global_address.foobar.name}"]
+}
+
+# TODO figure out a way to specify the dependency to the connection resource
+resource "google_sql_database_instance" "instance" {
+	depends_on = ["google_service_networking_connection.foobar"]
+	name = "%s"
+	region = "us-central1"
+	settings {
+		tier = "db-f1-micro"
+		ip_configuration {
+			ipv4_enabled = "false"
+			private_network = "${google_compute_network.foobar.self_link}"
+		}
+	}
+}
+`, networkName, addressRangeName, databaseName)
 }
 
 var testGoogleSqlDatabaseInstance_settings = `
