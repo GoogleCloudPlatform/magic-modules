@@ -100,12 +100,6 @@ objects:
           The AccessPolicy this AccessLevel lives in.
           Format: accessPolicies/{policy_id}
       - !ruby/object:Api::Type::String
-        name: title
-        input: true
-        required: true
-        description: |
-          Human readable title. Must be unique within the Policy.
-      - !ruby/object:Api::Type::String
         name: name
         input: true
         required: true
@@ -114,6 +108,11 @@ objects:
           with a letter and only include alphanumeric and '_'.
           Format: accessPolicies/{policy_id}/accessLevels/{short_name}
     properties:
+      - !ruby/object:Api::Type::String
+        name: title
+        required: true
+        description: |
+          Human readable title. Must be unique within the Policy.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -156,21 +155,22 @@ objects:
             required: true
             min_size: 1
             description: |
-              A list of requirements for the AccessLevel to be granted.
+              A set of requirements for the AccessLevel to be granted.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
               - !ruby/object:Api::Type::Array
                 name: 'ipSubnetworks'
                 description: |
-                  CIDR block IP subnetwork specification. May be IPv4 or IPv6.
+                  A list of CIDR block IP subnetwork specification. May be IPv4
+                  or IPv6.
                   Note that for a CIDR IP address block, the specified IP address
                   portion must be properly truncated (i.e. all the host bits must
                   be zero) or the input is considered malformed. For example,
                   "192.0.2.0/24" is accepted but "192.0.2.1/24" is not. Similarly,
                   for IPv6, "2001:db8::/32" is accepted whereas "2001:db8::1/32"
                   is not. The originating IP of a request must be in one of the
-                  listed subnets in order for this Condition to be true. If empty,
-                  all IP addresses are allowed.
+                  listed subnets in order for this Condition to be true.
+                  If empty, all IP addresses are allowed.
                 item_type: Api::Type::String
               - !ruby/object:Api::Type::Array
                 name: 'requiredAccessLevels'
@@ -184,6 +184,7 @@ objects:
               - !ruby/object:Api::Type::Array
                 name: 'members'
                 description: |
+                  An allowed list of members (users, groups, service accounts).
                   The signed-in user originating the request must be a part of one
                   of the provided members. If not specified, a request may come
                   from any user (logged in/not logged in, not present in any
@@ -211,7 +212,8 @@ objects:
                   - !ruby/object:Api::Type::Array
                     name: 'allowedEncryptionStatuses'
                     description: |
-                      Allowed encryptions statuses, an empty list allows all statuses.
+                      A list of allowed encryptions statuses.
+                      An empty list allows all statuses.
                     item_type: !ruby/object:Api::Type::Enum
                       name: 'undefined'
                       description: |
@@ -225,7 +227,8 @@ objects:
                   - !ruby/object:Api::Type::Array
                     name: 'allowedDeviceManagementLevels'
                     description: |
-                      Allowed device management levels, an empty list allows all management levels.
+                      A list of allowed device management levels.
+                      An empty list allows all management levels.
                     item_type: !ruby/object:Api::Type::Enum
                       name: 'undefined'
                       description: |
@@ -239,7 +242,8 @@ objects:
                   - !ruby/object:Api::Type::Array
                     name: 'osConstraints'
                     description: |
-                      Allowed OS versions, an empty list allows all types and all versions.
+                      A list of allowed OS versions.
+                      An empty list allows all types and all versions.
                     item_type: !ruby/object:Api::Type::NestedObject
                       properties:
                       - !ruby/object:Api::Type::String
