@@ -223,7 +223,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  properties.reject(&:ignore_read).each do |prop| -%>
-     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>
