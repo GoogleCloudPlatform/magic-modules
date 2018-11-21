@@ -76,7 +76,7 @@ module Provider
       end
     end
 
-    def self.parse(cfg_file, api = nil, _version_name = nil)
+    def self.parse(cfg_file, api = nil, _version_name = 'ga')
       raise "Version passed to the compiler cannot be nil" if _version_name.nil?
 
       # Compile step #1: compile with generic class to instantiate target class
