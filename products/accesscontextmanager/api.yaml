@@ -90,12 +90,11 @@ objects:
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     parameters:
       # Parent is a path parameter that _cannot_ be read or sent in the request at all.
-      # Providers need custom code to never send it.
+      # This must be done at the provider level.
       - !ruby/object:Api::Type::String
         name: parent
         input: true
         required: true
-        ignore_read: true
         description: |
           The AccessPolicy this AccessLevel lives in.
           Format: accessPolicies/{policy_id}

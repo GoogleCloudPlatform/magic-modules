@@ -42,6 +42,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
       vars:
         access_level_name: "ios_no_lock"
     properties:
+      parent: !ruby/object:Provider::Terraform::PropertyOverride
+        ignore_read: true
       basic.combiningFunction: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
