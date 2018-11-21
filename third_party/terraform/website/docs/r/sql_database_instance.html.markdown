@@ -241,8 +241,7 @@ The optional `settings.ip_configuration` subblock supports:
 * `require_ssl` - (Optional) True if mysqld should default to `REQUIRE X509`
     for users connecting over IP.
 
-* `private_network` - (Optional) The resource link for the VPC network from which
-    the Cloud SQL instance is accessible for private IP.
+* `private_network` - (Optional) The resource link for the VPC network from which the Cloud SQL instance is accessible for private IP.
 
 The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 
@@ -324,6 +323,8 @@ when the resource is configured with a `count`.
 
 * `ip_address.0.time_to_retire` - The time this IP address will be retired, in RFC
     3339 format.
+
+* `ip_address.0.type` - The type of this IP address. A PRIMARY address is an address that can accept incoming connections. An OUTGOING address is the source address of connections originating from the instance, if supported. A PRIVATE address is an address for an instance which has been configured to use private networking see: [Private IP](https://cloud.google.com/sql/docs/mysql/private-ip).
 
 * `self_link` - The URI of the created resource.
 
