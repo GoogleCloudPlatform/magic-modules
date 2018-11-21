@@ -40,7 +40,7 @@ output_path = nil
 provider_name = nil
 force_provider = nil
 types_to_generate = []
-version = nil
+version = 'ga'
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
