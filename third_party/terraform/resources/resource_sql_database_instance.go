@@ -273,6 +273,10 @@ func resourceSqlDatabaseInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"type": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"time_to_retire": &schema.Schema{
 							Type:     schema.TypeString,
 							Optional: true,
