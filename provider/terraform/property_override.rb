@@ -44,11 +44,6 @@ module Provider
       # Names of attributes that can't be set alongside this one
       attr_reader :conflicts_with
 
-      # Set to true in order to pass a reference to the full terraform resource
-      # into the flatten methods. This can be used to ignore api responses and
-      # override properties from what is set in the config.
-      attr_reader :full_context
-
       # ===========
       # Custom code
       # ===========

@@ -106,13 +106,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
       httpCheck.authInfo.password: !ruby/object:Provider::Terraform::PropertyOverride
-        full_context: true
         sensitive: true
-        custom_flatten: "templates/terraform/custom_flatten/get_pwd_from_config.erb"
-      httpCheck.authInfo: !ruby/object:Provider::Terraform::PropertyOverride
-        full_context: true
+        custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
       httpCheck: !ruby/object:Provider::Terraform::PropertyOverride
-        full_context: true
         conflicts_with:
         - tcp_check
       tcpCheck: !ruby/object:Provider::Terraform::PropertyOverride
@@ -122,12 +118,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         conflicts_with:
         - resource_group
       resourceGroup: !ruby/object:Provider::Terraform::PropertyOverride
-        full_context: true
         conflicts_with:
         - monitored_resource
       resourceGroup.groupId: !ruby/object:Provider::Terraform::PropertyOverride
-        full_context: true
-        custom_expand: "templates/terraform/custom_expand/group_name_to_id.erb"
+        custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
 
 files: !ruby/object:Provider::Config::Files
