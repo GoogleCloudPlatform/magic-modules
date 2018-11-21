@@ -41,6 +41,8 @@ module Api
 
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
+
+      attr_reader :azure_api_path
     end
 
     include Fields
@@ -68,6 +70,8 @@ module Api
       check_optional_property_oneof_default \
         :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
       check_optional_property :update_url, ::String
+
+      check_optional_property :azure_api_path, ::String
 
       check_default_value_property
     end

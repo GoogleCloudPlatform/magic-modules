@@ -2,7 +2,7 @@
 name: AzureRm
 overrides: !ruby/object:Provider::ResourceOverrides
   ResourceGroup: !ruby/object:Provider::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/notes/{{name}}"]
+    azure_parameters_type: Group
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_schema: 'templates/terraform/custom_schema/resource_group_name.erb'

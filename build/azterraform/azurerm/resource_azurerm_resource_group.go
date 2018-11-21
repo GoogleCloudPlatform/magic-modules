@@ -41,31 +41,16 @@ func resourceAzureRmResourceGroupCreateOrUpdate(d *schema.ResourceData, meta int
     client := meta.(*ArmClient).resourceGroupsClient
     ctx := meta.(*ArmClient).StopContext
 
-    obj := make(map[string]interface{})
-    nameProp, err := expandAzureRmResourceGroupName(d.Get("name"), d, config)
-    if err != nil {
-        return err
-    } else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
-        obj["name"] = nameProp
-    }
-    locationProp, err := expandAzureRmResourceGroupLocation(d.Get("location"), d, config)
-    if err != nil {
-        return err
-    } else if v, ok := d.GetOkExists("location"); !isEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
-        obj["location"] = locationProp
-    }
-    tagsProp, err := expandAzureRmResourceGroupTags(d.Get("tags"), d, config)
-    if err != nil {
-        return err
-    } else if v, ok := d.GetOkExists("tags"); !isEmptyValue(reflect.ValueOf(tagsProp)) && (ok || !reflect.DeepEqual(v, tagsProp)) {
-        obj["tags"] = tagsProp
-    }
-
-
-
     name := d.Get("name").(string)
+    location := d.Get("location").(string)
+    tags := d.Get("tags").(map[string]interface{})
 
-    // TODO parameters
+    parameters := resources.Group{
+        Location: utils.String(location),
+        Tags: expandAzureRmResourceGroupTags(tags),
+    }
+
+
 
     if _, err := client.CreateOrUpdate(ctx, name, parameters); err != nil {
         return fmt.Errorf("Error creating ResourceGroup: %+v", err)
@@ -156,24 +141,4 @@ func flattenAzureRmResourceGroupLocation(v interface{}) interface{} {
 
 func flattenAzureRmResourceGroupTags(v interface{}) interface{} {
   return v
-}
-
-
-func expandAzureRmResourceGroupName(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
-  return v, nil
-}
-
-func expandAzureRmResourceGroupLocation(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
-  return v, nil
-}
-
-func expandAzureRmResourceGroupTags(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
-  if v == nil {
-    return map[string]string{}, nil
-  }
-  m := make(map[string]string)
-  for k, val := range v.(map[string]interface{}) {
-    m[k] = val.(string)
-  }
-  return m, nil
 }

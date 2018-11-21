@@ -76,7 +76,7 @@ module Provider
       # As with flatten, `property` and `prefix` are available.
       attr_reader :custom_expand
 
-      # Azure Experiment, specify custom schema to replace the standard one
+      # Azure Specific Properties
       attr_reader :custom_schema
     end
 

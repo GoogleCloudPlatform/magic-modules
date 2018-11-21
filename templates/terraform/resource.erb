@@ -37,7 +37,7 @@ package azurerm
 
 <%
     azure_is_resource_group = object.name == "ResourceGroup"
-    azure_client_name = "#{object.name}sClient".camelcase(:lower)
+    azure_client_name = "#{object.api_name}Client".camelcase(:lower)
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -110,19 +110,21 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
 
     ctx := meta.(*ArmClient).StopContext
 
-    obj := make(map[string]interface{})
 <%  settable_properties.each do |prop| -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-    if err != nil {
-        return err
-<%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
+    <%= prop.name.camelcase(:lower) -%> := d.Get("<%= prop.name.underscore -%>").(<%= go_type(prop) -%>)
 <%  end -%>
+
+    parameters := <%= azure_resource_go_package(object.__product) -%>.<%= object.azure_parameters_type -%>{
+<%  settable_properties.each do |prop| -%>
+<%    unless prop.name == "name" || prop.name == "resourceGroupName" -%>
+<%      unless azure_address_of_func(prop).nil? -%>
+        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= azure_address_of_func(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
+<%      else -%>
+        <%= prop.azure_api_path.camelcase(:upper) -%>: expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
+<%      end -%>
+<%    end -%>
+<%  end -%>
+    }
 
 <%  if object.custom_code.encoder -%>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
@@ -140,15 +142,8 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    name := d.Get("name").(string)
-<%  unless azure_is_resource_group -%>
-    resourceGroup := d.Get("resource_group_name").(string)
-<%  end -%>
-
-    // TODO parameters
-
 <%  unless object.azure_create_async -%>
-    if _, err := client.CreateOrUpdate(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters); err != nil {
+    if _, err := client.<%= object.azure_create_or_update_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters); err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %+v", err)
     }
 <%  else -%>
@@ -157,7 +152,7 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    resp, err := client.Get(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    resp, err := client.<%= object.azure_get_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         return err
     }
@@ -182,7 +177,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     // TODO: Get name out
 <%  end -%>
 
-    resp, err := client.Get(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    resp, err := client.<%= object.azure_get_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] <%= object.name -%> %q does not exist - removing from state", d.Id())
@@ -262,7 +257,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  unless object.azure_delete_async -%>
     // TODO: Synced Delete Operation
 <%  else -%>
-    future, err := client.Delete(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    future, err := client.<%= object.azure_delete_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         if response.WasNotFound(deleteFuture.Response()) {
             return nil
@@ -282,10 +277,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <% properties.reject(&:ignore_read).each do |prop| -%>
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>
-<% end -%>
-
-<% settable_properties.each do |prop| -%>
-<%= lines(build_expand_method(resource_name, prop), 1) -%>
 <% end -%>
 
 <% if object.custom_code.encoder -%>

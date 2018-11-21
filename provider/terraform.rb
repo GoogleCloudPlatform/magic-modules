@@ -61,6 +61,37 @@ module Provider
       }
     end
 
+    # BEGIN Azure Specific Methods
+
+    def go_type(property)
+      go_types[property.class]
+    end
+
+    def go_types
+      {
+        Api::Type::Boolean => 'bool',
+        Api::Type::String => 'string',
+        Api::Type::KeyValuePairs => 'map[string]interface{}',
+      }
+    end
+
+    def azure_address_of_func(property)
+      azure_address_of_funcs[property.class]
+    end
+
+    def azure_address_of_funcs
+      {
+        Api::Type::Boolean => 'utils.Bool',
+        Api::Type::String => 'utils.String',
+      }
+    end
+
+    def azure_resource_go_package(product)
+      product.azure_namespace.split('.').last.camelcase(:lower)
+    end
+
+    # END Azure Specific Methods
+
     def updatable?(resource, properties)
       !resource.input || !properties.reject { |p| p.update_url.nil? }.empty?
     end

@@ -73,7 +73,6 @@ The following arguments are supported:
 ResourceGroup can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_azure_rm_resource_group.default projects/{{project}}/notes/{{name}}
-$ terraform import google_azure_rm_resource_group.default {{project}}/{{name}}
+$ terraform import google_azure_rm_resource_group.default NotUsedInAzure/{{name}}
 $ terraform import google_azure_rm_resource_group.default {{name}}
 ```

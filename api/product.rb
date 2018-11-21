@@ -24,6 +24,10 @@ module Api
     attr_reader :versions
     attr_reader :base_url
 
+    # Azure Specific Properties
+    attr_reader :azure_namespace
+    attr_reader :azure_version
+
     include Compile::Core
 
     def validate
@@ -34,6 +38,9 @@ module Api
       check_property :prefix, String
       check_property :scopes, ::Array
       check_property_list :scopes, String
+
+      check_property :azure_namespace, String
+      check_property :azure_version, String
 
       check_versions
     end

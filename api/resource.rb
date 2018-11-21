@@ -66,6 +66,10 @@ module Api
       # Azure Specific Attributes
       attr_reader :azure_create_async
       attr_reader :azure_delete_async
+      attr_reader :azure_create_or_update_verb
+      attr_reader :azure_get_verb
+      attr_reader :azure_delete_verb
+      attr_reader :azure_parameters_type
     end
 
     include Properties
@@ -260,6 +264,10 @@ module Api
 
       check_optional_property :azure_create_async, :boolean
       check_optional_property :azure_delete_async, :boolean
+      check_optional_property :azure_create_or_update_verb, String
+      check_optional_property :azure_get_verb, String
+      check_optional_property :azure_delete_verb, String
+      check_optional_property :azure_parameters_type, String
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)

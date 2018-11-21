@@ -7,11 +7,18 @@ versions:
     base_url: NotUsedInAzure
 scopes:
   - NotUsedInAzure
+azure_namespace: 'Microsoft.Resources'
+azure_version: 'stable/2018-05-01'
 objects:
   - !ruby/object:Api::Resource
     name: 'ResourceGroup'
+    api_name: ResourceGroups
     base_url: NotUsedInAzure
+    azure_create_or_update_verb: CreateOrUpdate
+    azure_get_verb: Get
+    azure_delete_verb: Delete
     azure_delete_async: true
+    azure_parameters_type: ResourceGroup
     description: |
       Manages a resource group on Azure.
     properties:
@@ -25,6 +32,8 @@ objects:
         description: 'The location where the resource group should be created.'
         required: true
         input: true
+        azure_api_path: 'location'
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'tags'
         description: 'A mapping of tags to assign to the resource group.'
+        azure_api_path: 'tags'
