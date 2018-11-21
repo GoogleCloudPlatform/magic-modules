@@ -78,7 +78,7 @@ OptionParser.new do |opt|
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
-raise 'Cannt use -p/--products and -a/--all simultaneously' if product_names && all_products
+raise 'Cannot use -p/--products and -a/--all simultaneously' if product_names && all_products
 raise 'Either -p/--products OR -a/--all must be present' if product_names.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
