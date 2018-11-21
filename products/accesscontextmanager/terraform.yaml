@@ -30,6 +30,24 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/update_mask.erb
       post_create: templates/terraform/post_create/accesspolicy.erb
+  AccessLevel: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    example:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "access_context_manager_access_level_basic"
+      skip_test: true
+      primary_resource_id: "access-level"
+      version: <%= _version_name %>
+      vars:
+        access_level_name: "ios_no_lock"
+    properties:
+      basic.combiningFunction: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/update_mask.erb
+      encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
+      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

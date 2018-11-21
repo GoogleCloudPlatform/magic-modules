@@ -409,7 +409,7 @@ module Api
       else
         [
           @__product.base_url.split("\n").map(&:strip).compact,
-          @create_url
+          @create_url.split("\n").map(&:strip).compact
         ]
       end
     end

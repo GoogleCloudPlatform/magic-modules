@@ -1,0 +1,8 @@
+
+	config := meta.(*Config)
+	
+	// current import_formats can't import id's with forward slashes in them.
+	parseImportId([]string{"(?P<name>.+)"}, d, config)
+	stringParts := strings.Split(d.Get("name").(string), "/")
+	d.Set("parent", fmt.Sprintf("%s/%s", stringParts[0], stringParts[1]))
+	return []*schema.ResourceData{d}, nil
