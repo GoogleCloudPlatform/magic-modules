@@ -63,7 +63,9 @@ module Provider
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    def copy_common_files(output_folder, version_name = nil)
+    # version_name is used within templates because binding is passed down
+    # rubocop:disable Lint/UnusedMethodArgument
+    def copy_common_files(output_folder, version_name = 'ga')
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
 
@@ -71,6 +73,7 @@ module Provider
       files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
       copy_file_list(output_folder, files)
     end
+    # rubocop:enable Lint/UnusedMethodArgument
 
     def compile_files(output_folder, version_name)
       compile_file_list(output_folder, @config.files.compile, version: version_name)
