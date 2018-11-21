@@ -16,12 +16,12 @@ layout: "google"
 page_title: "Google: google_azure_rm_resource_group"
 sidebar_current: "docs-google-azure-rm-resource-group"
 description: |-
-  A named resource to which messages are sent by publishers.
+  Manages a resource group on Azure.
 ---
 
 # google\_azure\_rm\_resource\_group
 
-A named resource to which messages are sent by publishers.
+Manages a resource group on Azure.
 
 
 
@@ -49,13 +49,21 @@ resource "google_container_analysis_note" "note" {
 The following arguments are supported:
 
 
+* `name` -
+  (Required)
+  The name of the resource group.
+
+* `location` -
+  (Required)
+  The location where the resource group should be created.
+
 
 - - -
 
 
-* `name` -
+* `tags` -
   (Optional)
-  Name of the topic.
+  A mapping of tags to assign to the resource group.
 
 
 

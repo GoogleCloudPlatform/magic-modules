@@ -37,8 +37,6 @@ package azurerm
 
 <%
     azure_is_resource_group = object.name == "ResourceGroup"
-    azure_has_location = true
-    azure_has_tags = true
     azure_client_name = "#{object.name}sClient".camelcase(:lower)
 -%>
 
@@ -80,12 +78,6 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%=             lines(build_schema_property(prop, object)) -%>
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<%          if azure_has_location -%>
-            "location": locationSchema(),
-<%          end -%>
-<%          if azure_has_tags -%>
-            "tags": tagsSchema(),
-<%          end -%>
 <%          if has_project -%>
             "project": {
                 Type:     schema.TypeString,
@@ -165,7 +157,7 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    resp, err := client.Get(ctx, /* TODO */)
+    resp, err := client.Get(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         return err
     }

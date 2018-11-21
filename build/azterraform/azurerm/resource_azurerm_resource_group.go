@@ -30,12 +30,9 @@ func resourceAzureRmResourceGroup() *schema.Resource {
 
 
         Schema: map[string]*schema.Schema{
-"name": {
-    Type: schema.TypeString,
-    Optional: true,
-},
-            "location": locationSchema(),
-            "tags": tagsSchema(),
+"location": locationSchema(),
+"name": resourceGroupNameSchema(),
+"tags": tagsSchema(),
         },
     }
 }
@@ -51,6 +48,18 @@ func resourceAzureRmResourceGroupCreateOrUpdate(d *schema.ResourceData, meta int
     } else if v, ok := d.GetOkExists("name"); !isEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
         obj["name"] = nameProp
     }
+    locationProp, err := expandAzureRmResourceGroupLocation(d.Get("location"), d, config)
+    if err != nil {
+        return err
+    } else if v, ok := d.GetOkExists("location"); !isEmptyValue(reflect.ValueOf(locationProp)) && (ok || !reflect.DeepEqual(v, locationProp)) {
+        obj["location"] = locationProp
+    }
+    tagsProp, err := expandAzureRmResourceGroupTags(d.Get("tags"), d, config)
+    if err != nil {
+        return err
+    } else if v, ok := d.GetOkExists("tags"); !isEmptyValue(reflect.ValueOf(tagsProp)) && (ok || !reflect.DeepEqual(v, tagsProp)) {
+        obj["tags"] = tagsProp
+    }
 
 
 
@@ -63,7 +72,7 @@ func resourceAzureRmResourceGroupCreateOrUpdate(d *schema.ResourceData, meta int
     }
 
 
-    resp, err := client.Get(ctx, /* TODO */)
+    resp, err := client.Get(ctx, name)
     if err != nil {
         return err
     }
@@ -97,6 +106,12 @@ func resourceAzureRmResourceGroupRead(d *schema.ResourceData, meta interface{}) 
 
     d.Set("name", resp.Name)
     if err := d.Set("name", flattenAzureRmResourceGroupName(res["name"])); err != nil {
+        return fmt.Errorf("Error reading ResourceGroup: %s", err)
+    }
+    if err := d.Set("location", flattenAzureRmResourceGroupLocation(res["location"])); err != nil {
+        return fmt.Errorf("Error reading ResourceGroup: %s", err)
+    }
+    if err := d.Set("tags", flattenAzureRmResourceGroupTags(res["tags"])); err != nil {
         return fmt.Errorf("Error reading ResourceGroup: %s", err)
     }
 
@@ -135,7 +150,30 @@ func flattenAzureRmResourceGroupName(v interface{}) interface{} {
   return v
 }
 
+func flattenAzureRmResourceGroupLocation(v interface{}) interface{} {
+  return v
+}
+
+func flattenAzureRmResourceGroupTags(v interface{}) interface{} {
+  return v
+}
+
 
 func expandAzureRmResourceGroupName(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
   return v, nil
+}
+
+func expandAzureRmResourceGroupLocation(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+  return v, nil
+}
+
+func expandAzureRmResourceGroupTags(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
+  if v == nil {
+    return map[string]string{}, nil
+  }
+  m := make(map[string]string)
+  for k, val := range v.(map[string]interface{}) {
+    m[k] = val.(string)
+  }
+  return m, nil
 }

@@ -3,6 +3,14 @@ name: AzureRm
 overrides: !ruby/object:Provider::ResourceOverrides
   ResourceGroup: !ruby/object:Provider::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/notes/{{name}}"]
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_schema: 'templates/terraform/custom_schema/resource_group_name.erb'
+      location: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_schema: 'templates/terraform/custom_schema/location.erb'
+      tags: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+        custom_schema: 'templates/terraform/custom_schema/tags.erb'
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "container_analysis_note_basic"

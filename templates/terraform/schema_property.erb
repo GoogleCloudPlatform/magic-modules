@@ -12,6 +12,9 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
+<% if property.custom_schema -%>
+"<%= property.name.underscore -%>": <%= compile_template(property.custom_schema, property: property) -%>,
+<% else -%>
 <% if tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
   <% if property.is_set -%>
@@ -136,3 +139,4 @@
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 <% end # tf_types.include?(property.class) -%>
+<% end # property.custom_schema -%>
