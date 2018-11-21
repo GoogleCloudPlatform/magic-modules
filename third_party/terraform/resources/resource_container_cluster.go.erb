@@ -655,7 +655,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		EnableKubernetesAlpha:   d.Get("enable_kubernetes_alpha").(bool),
 		IpAllocationPolicy:      expandIPAllocationPolicy(d.Get("ip_allocation_policy")),
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 		EnableTpu:               d.Get("enable_tpu").(bool),
 		BinaryAuthorization: &containerBeta.BinaryAuthorization{
 			Enabled:         d.Get("enable_binary_authorization").(bool),
@@ -838,7 +838,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("monitoring_service", cluster.MonitoringService)
 	d.Set("network", cluster.NetworkConfig.Network)
 	d.Set("subnetwork", cluster.NetworkConfig.Subnetwork)
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled)
 	d.Set("enable_tpu", cluster.EnableTpu)
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
@@ -880,7 +880,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	if err := d.Set("pod_security_policy_config", flattenPodSecurityPolicyConfig(cluster.PodSecurityPolicyConfig)); err != nil {
 		return err
 	}
@@ -1011,7 +1011,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			d.SetPartial("addons_config")
 		}
 	}
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	if d.HasChange("enable_binary_authorization") {
 		enabled := d.Get("enable_binary_authorization").(bool)
 		req := &containerBeta.UpdateClusterRequest{
@@ -1324,7 +1324,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.SetPartial("master_auth")
 	}
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	if d.HasChange("pod_security_policy_config") {
 		c := d.Get("pod_security_policy_config")
 		req := &containerBeta.UpdateClusterRequest{
@@ -1563,7 +1563,7 @@ func expandMaintenancePolicy(configured interface{}) *containerBeta.MaintenanceP
 	}
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *containerBeta.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
@@ -1701,7 +1701,7 @@ func expandPrivateClusterConfig(configured interface{}) *containerBeta.PrivateCl
 }
 
 func expandPodSecurityPolicyConfig(configured interface{}) *containerBeta.PodSecurityPolicyConfig {
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	l := configured.([]interface{})
 	if len(l) == 0 || l[0] == nil {
 		return nil
@@ -1857,7 +1857,7 @@ func flattenMasterAuth(ma *containerBeta.MasterAuth) []map[string]interface{} {
 	return masterAuth
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func flattenClusterAutoscaling(a *containerBeta.ClusterAutoscaling) []map[string]interface{} {
 	r := make(map[string]interface{})
 	if a == nil || !a.EnableNodeAutoprovisioning {
@@ -1896,7 +1896,7 @@ func flattenMasterAuthorizedNetworksConfig(c *containerBeta.MasterAuthorizedNetw
 	return []map[string]interface{}{result}
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func flattenPodSecurityPolicyConfig(c *containerBeta.PodSecurityPolicyConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -1986,7 +1986,7 @@ func masterAuthClientCertCfgSuppress(k, old, new string, r *schema.ResourceData)
 	return strings.HasSuffix(k, ".issue_client_certificate") && old == "" && new == "true"
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("pod_security_policy_config"); ok {

@@ -357,7 +357,7 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 		TargetSize:          int64(d.Get("target_size").(int)),
 		NamedPorts:          getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
 		TargetPools:         convertStringSet(d.Get("target_pools").(*schema.Set)),
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:        expandUpdatePolicy(d.Get("update_policy").([]interface{})),

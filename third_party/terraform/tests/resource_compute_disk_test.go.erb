@@ -343,7 +343,7 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
@@ -712,7 +712,7 @@ resource "google_compute_disk" "foobar" {
 	}
 }`, diskName)
 }
-<% unless version.nil? || version == 'ga' %>
+<% unless version == 'ga' %>
 func testAccComputeDisk_encryptionKMS(pid, pname, org, billing, diskName, keyRingName, keyName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "project" {

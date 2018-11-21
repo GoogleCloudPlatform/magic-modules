@@ -477,7 +477,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 		}
 	}
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &containerBeta.MaxPodsConstraint{
 			MaxPodsPerNode: int64(v.(int)),
@@ -536,7 +536,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		}
 	}
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	if np.MaxPodsConstraint != nil {
 		nodePool["max_pods_per_node"] = np.MaxPodsConstraint.MaxPodsPerNode
 	}

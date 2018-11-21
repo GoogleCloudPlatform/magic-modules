@@ -68,7 +68,7 @@ func TestAccComputeGlobalAddress_ipv6(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeGlobalAddress_internal(t *testing.T) {
 	t.Parallel()
 
@@ -162,7 +162,7 @@ resource "google_compute_global_address" "foobar" {
 }`, acctest.RandString(10))
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeGlobalAddress_internal() string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {

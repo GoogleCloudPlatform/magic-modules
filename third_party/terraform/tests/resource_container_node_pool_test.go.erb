@@ -33,7 +33,7 @@ func TestAccContainerNodePool_basic(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccContainerNodePool_maxPodsPerNode(t *testing.T) {
 	t.Parallel()
 
@@ -516,7 +516,7 @@ resource "google_container_node_pool" "np" {
 }`, cluster, np)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccContainerNodePool_maxPodsPerNode(cluster, np string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {

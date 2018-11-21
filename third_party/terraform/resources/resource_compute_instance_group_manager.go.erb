@@ -374,7 +374,7 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 		TargetSize:          int64(d.Get("target_size").(int)),
 		NamedPorts:          getNamedPortsBeta(d.Get("named_port").(*schema.Set).List()),
 		TargetPools:         convertStringSet(d.Get("target_pools").(*schema.Set)),
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 		AutoHealingPolicies: expandAutoHealingPolicies(d.Get("auto_healing_policies").([]interface{})),
 		Versions:            expandVersions(d.Get("version").([]interface{})),
 		UpdatePolicy:        expandUpdatePolicy(d.Get("update_policy").([]interface{})),
@@ -889,7 +889,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	return nil
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func expandAutoHealingPolicies(configured []interface{}) []*computeBeta.InstanceGroupManagerAutoHealingPolicy {
 	autoHealingPolicies := make([]*computeBeta.InstanceGroupManagerAutoHealingPolicy, 0, len(configured))
 	for _, raw := range configured {
@@ -905,7 +905,7 @@ func expandAutoHealingPolicies(configured []interface{}) []*computeBeta.Instance
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func expandVersions(configured []interface{}) []*computeBeta.InstanceGroupManagerVersion {
 	versions := make([]*computeBeta.InstanceGroupManagerVersion, 0, len(configured))
 	for _, raw := range configured {
@@ -923,7 +923,7 @@ func expandVersions(configured []interface{}) []*computeBeta.InstanceGroupManage
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func expandFixedOrPercent(configured []interface{}) *computeBeta.FixedOrPercent {
 	fixedOrPercent := &computeBeta.FixedOrPercent{}
 
@@ -941,7 +941,7 @@ func expandFixedOrPercent(configured []interface{}) *computeBeta.FixedOrPercent 
 <% end -%>
 
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupManagerUpdatePolicy {
 	updatePolicy := &computeBeta.InstanceGroupManagerUpdatePolicy{}
 
@@ -989,7 +989,7 @@ func expandUpdatePolicy(configured []interface{}) *computeBeta.InstanceGroupMana
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func flattenAutoHealingPolicies(autoHealingPolicies []*computeBeta.InstanceGroupManagerAutoHealingPolicy) []map[string]interface{} {
 	autoHealingPoliciesSchema := make([]map[string]interface{}, 0, len(autoHealingPolicies))
 	for _, autoHealingPolicy := range autoHealingPolicies {
@@ -1004,7 +1004,7 @@ func flattenAutoHealingPolicies(autoHealingPolicies []*computeBeta.InstanceGroup
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func flattenUpdatePolicy(updatePolicy *computeBeta.InstanceGroupManagerUpdatePolicy) []map[string]interface{} {
 	results := []map[string]interface{}{}
 	if updatePolicy != nil {
