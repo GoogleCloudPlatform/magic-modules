@@ -21,7 +21,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         name: "access_context_manager_access_policy_basic"
         skip_test: true
         primary_resource_id: "access-policy"
-        version: <%= _version_name %>
+        version: <%= version_name %>
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb

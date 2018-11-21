@@ -18,7 +18,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
-        version: <%= _version_name %>
+        version: <%= version_name %>
     properties:
       creationTime: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true

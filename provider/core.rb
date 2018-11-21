@@ -63,7 +63,7 @@ module Provider
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    def copy_common_files(output_folder, _version_name = nil)
+    def copy_common_files(output_folder, version_name = nil)
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
 
