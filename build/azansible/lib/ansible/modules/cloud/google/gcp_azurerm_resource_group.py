@@ -30,9 +30,9 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: gcp_azurerm_resource_group
+module: gcp_zurerm_resource_group
 description:
-- A named resource to which messages are sent by publishers.
+- Manages a resource group on Azure.
 short_description: Creates a GCP ResourceGroup
 version_added: 2.6
 author: Google Inc. (@googlecloudplatform)
@@ -50,7 +50,15 @@ options:
     default: present
   name:
     description:
-    - Name of the topic.
+    - The name of the resource group.
+    required: true
+  location:
+    description:
+    - The location where the resource group should be created.
+    required: true
+  tags:
+    description:
+    - A mapping of tags to assign to the resource group.
     required: false
 extends_documentation_fragment: gcp
 '''
@@ -59,9 +67,19 @@ extends_documentation_fragment: gcp
 RETURN = '''
 name:
   description:
-  - Name of the topic.
+  - The name of the resource group.
   returned: success
   type: str
+location:
+  description:
+  - The location where the resource group should be created.
+  returned: success
+  type: str
+tags:
+  description:
+  - A mapping of tags to assign to the resource group.
+  returned: success
+  type: dict
 '''
 
 ################################################################################
@@ -82,12 +100,14 @@ def main():
     module = GcpModule(
         argument_spec=dict(
             state=dict(default='present', choices=['present', 'absent'], type='str'),
-            name=dict(type='str')
+            name=dict(required=True, type='str'),
+            location=dict(required=True, type='str'),
+            tags=dict(type='dict')
         )
     )
 
     if not module.params['scopes']:
-        module.params['scopes'] = ['https://www.googleapis.com/auth/pubsub']
+        module.params['scopes'] = ['NotUsedInAzure']
 
     state = module.params['state']
 
@@ -106,7 +126,7 @@ def main():
             changed = True
     else:
         if state == 'present':
-            fetch = create(module, self_link(module))
+            fetch = create(module, collection(module))
             changed = True
         else:
             fetch = {}
@@ -117,23 +137,25 @@ def main():
 
 
 def create(module, link):
-    auth = GcpSession(module, 'azurerm')
-    return return_if_object(module, auth.put(link, resource_to_request(module)))
+    auth = GcpSession(module, 'zurerm')
+    return return_if_object(module, auth.post(link, resource_to_request(module)))
 
 
 def update(module, link):
-    auth = GcpSession(module, 'azurerm')
+    auth = GcpSession(module, 'zurerm')
     return return_if_object(module, auth.put(link, resource_to_request(module)))
 
 
 def delete(module, link):
-    auth = GcpSession(module, 'azurerm')
+    auth = GcpSession(module, 'zurerm')
     return return_if_object(module, auth.delete(link))
 
 
 def resource_to_request(module):
     request = {
-        u'name': module.params.get('name')
+        u'name': module.params.get('name'),
+        u'location': module.params.get('location'),
+        u'tags': module.params.get('tags')
     }
     request = encode_request(request, module)
     return_vals = {}
@@ -145,16 +167,16 @@ def resource_to_request(module):
 
 
 def fetch_resource(module, link, allow_not_found=True):
-    auth = GcpSession(module, 'azurerm')
+    auth = GcpSession(module, 'zurerm')
     return return_if_object(module, auth.get(link), allow_not_found)
 
 
 def self_link(module):
-    return "https://pubsub.googleapis.com/v1/projects/{project}/topics/{name}".format(**module.params)
+    return "NotUsedInAzureNotUsedInAzure/{name}".format(**module.params)
 
 
 def collection(module):
-    return "https://pubsub.googleapis.com/v1/projects/{project}/topics".format(**module.params)
+    return "NotUsedInAzureNotUsedInAzure".format(**module.params)
 
 
 def return_if_object(module, response, allow_not_found=False):
@@ -203,7 +225,9 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return {
-        u'name': response.get(u'name')
+        u'name': module.params.get('name'),
+        u'location': module.params.get('location'),
+        u'tags': response.get(u'tags')
     }
 
 
