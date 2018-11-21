@@ -108,6 +108,42 @@ resource "google_sql_database_instance" "postgres" {
 }
 ```
 
+### Private IP Instance
+
+
+```hcl
+resource "google_compute_network" "private_network" {
+	name       = "private_network"
+}
+
+resource "google_compute_global_address" "private_ip_address" {
+	name          = "private_ip_address"
+	purpose       = "VPC_PEERING"
+	address_type = "INTERNAL"
+	prefix_length = 16
+	network       = "${google_compute_network.private_network.self_link}"
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+	network       = "${google_compute_network.private_network.self_link}"
+	service       = "servicenetworking.googleapis.com"
+	reserved_peering_ranges = ["${google_compute_global_address.private_ip_address.name}"]
+}
+
+resource "google_sql_database_instance" "instance" {
+	depends_on = ["google_service_networking_connection.private_vpc_connection"]
+	name = "private_instance"
+	region = "us-central1"
+	settings {
+		tier = "db-f1-micro"
+		ip_configuration {
+			ipv4_enabled = "false"
+			private_network = "${google_compute_network.private_network.self_link}"
+		}
+	}
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -204,6 +240,9 @@ The optional `settings.ip_configuration` subblock supports:
 
 * `require_ssl` - (Optional) True if mysqld should default to `REQUIRE X509`
     for users connecting over IP.
+
+* `private_network` - (Optional) The resource link for the VPC network from which
+    the Cloud SQL instance is accessible for private IP.
 
 The optional `settings.ip_configuration.authorized_networks[]` sublist supports:
 
