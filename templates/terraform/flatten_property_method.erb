@@ -18,7 +18,7 @@
                            property: property)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) interface{} {
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
   if v == nil {
     return nil
@@ -30,7 +30,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
   transformed := make(map[string]interface{})
   <% property.properties.each do |prop| -%>
     transformed["<%= prop.name.underscore -%>"] =
-    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"])
+    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d)
   <% end -%>
   return []interface{}{transformed}
 <% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
@@ -47,7 +47,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     }
     transformed = append(transformed, map[string]interface{}{
     <% property.item_type.properties.reject(&:ignore_read).each do |prop| -%>
-      "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
+      "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
     <% end -%>
     })
   }
@@ -63,7 +63,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}) in
     transformed = append(transformed, map[string]interface{}{
       "<%= property.key_name -%>": k,
     <% property.value_type.properties.each do |prop| -%>
-      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
+      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
     <% end -%>
     })
   }
