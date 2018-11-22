@@ -63,7 +63,8 @@ module Provider
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    # version_name is used within templates because binding is passed down
+    # version_name is actually used because all of the variables in scope in this method
+    # are made available within the templates by the compile call.
     # rubocop:disable Lint/UnusedMethodArgument
     def copy_common_files(output_folder, version_name = 'ga')
       provider_name = self.class.name.split('::').last.downcase
