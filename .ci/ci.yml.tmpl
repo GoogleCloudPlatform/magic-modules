@@ -2,6 +2,13 @@
 
 # These resource types are here until the PRs get merged in upstream.  :)
 resource_types:
+    - name: merged-downstreams
+      type: docker-image
+      source:
+          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
+          repository: nmckinley/merged-prs-resource
+          tag: v0.0.5
+
     - name: git-branch
       type: docker-image
       source:
@@ -75,6 +82,13 @@ resources:
           check_dependent_prs: true
           label: downstream-generated
 
+    - name: merged-prs
+      type: merged-downstreams
+      check_every: 5m
+      source:
+        repo: GoogleCloudPlatform/magic-modules
+        token: ((github-account.password))
+
 jobs:
     - name: authorize-single-rev
       plan:
@@ -97,13 +111,9 @@ jobs:
             trigger: true
             params:
               fetch_merge: true
-            # consumes: magic-modules (because that's where the code is)
-            # products: patches
           - aggregate:
-            - task: get-merged-patches
-              file: magic-modules/.ci/magic-modules/get-merged-patches.yml
-              params:
-                GH_TOKEN: ((github-account.password))
+            - get: patches
+              resource: merged-prs
               # consumes: magic-modules (detached HEAD)
               # produces: magic-modules-branched (new branch, with submodule)
             - task: branch-magic-modules
