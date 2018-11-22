@@ -19,10 +19,9 @@ def main(argv):
   g = Github(in_json['source']['token'])
   open_pulls = g.get_repo(in_json['source']['repo']).get_pulls(state='open')
   # For each open pull request, get all the dependencies.
-  depends = [item for sublist in
-      [get_downstream_prs.get_github_dependencies(g, open_pull.number)
-        for open_pull in open_pulls]
-      for item in sublist]
+  depends = itertools.chain.from_iterable(
+          [get_downstream_prs.get_github_dependencies(g, open_pull.number)
+              for open_pull in open_pulls])
   # for each dependency, generate a tuple - (repo, pr_number)
   parsed_dependencies = [re.match(r'https://github.com/([\w-]+/[\w-]+)/pull/(\d+)', d).groups()
       for d in depends]
