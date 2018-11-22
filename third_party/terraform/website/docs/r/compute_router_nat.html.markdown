@@ -28,6 +28,24 @@ resource "google_compute_router_nat" "simple-nat" {
 }
 ```
 
+A production-like configuration: enable NAT for one Subnetwork and use a list of
+static external IP address.
+
+```hcl
+resource "google_compute_router_nat" "advanced-nat" {
+  name                               = "nat-1"
+  router                             = "router-1"
+  region                             = "us-central1"
+  nat_ip_allocate_option             = "MANUAL_ONLY"
+  nat_ips                            =
+  ["${google_compute_address.addr1.self_link}", "${google_compute_address.addr2.self_link}"]
+  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  subnetwork {
+    name = "${google_compute_subnetwork.subnetwork1.self_link}"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:

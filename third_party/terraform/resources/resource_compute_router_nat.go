@@ -22,11 +22,10 @@ var (
 				ForceNew: true,
 			},
 			"source_ip_ranges_to_nat": &schema.Schema{
-				Type:         schema.TypeSet,
-				Optional:     true,
-				ForceNew:     true,
-				Elem:         &schema.Schema{Type: schema.TypeString},
-				ValidateFunc: validation.StringInSlice([]string{"ALL_IP_RANGES", "LIST_OF_SECONDARY_IP_RANGES", "PRIMARY_IP_RANGE"}, false),
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"secondary_ip_range_names": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -52,9 +51,8 @@ func resourceComputeRouterNat() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validateRFC1035Name(1, 63),
+				ValidateFunc: validateRFC1035Name(2, 63),
 			},
-
 			"router": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
