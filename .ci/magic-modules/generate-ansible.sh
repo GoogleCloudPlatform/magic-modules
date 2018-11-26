@@ -20,7 +20,7 @@ set +e
 ANSIBLE_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag ansible < .git/body)"
 set -e
 if [ -z "$ANSIBLE_COMMIT_MSG" ]; then
-  ANSIBLE_COMMIT_MSG="Magic Modules changes."
+  ANSIBLE_COMMIT_MSG="$(cat .git/title)"
 fi
 
 pushd "build/ansible"
