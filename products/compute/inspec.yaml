@@ -33,6 +33,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   DiskType: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Inspec::ResourceOverride
+    exclude: true
     additional_functions: |
       def custom
         # TODO: actually add code here
@@ -50,6 +51,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   HttpsHealthCheck: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Image: !ruby/object:Provider::Inspec::ResourceOverride
+    exclude: true
+  Instance: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   InstanceGroup: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
@@ -82,7 +85,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   SslCertificate: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   SslPolicy: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
+    exclude: false
   Subnetwork: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   TargetHttpProxy: !ruby/object:Provider::Inspec::ResourceOverride
@@ -100,6 +103,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
   UrlMap: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Provider::Inspec::ResourceOverride
+    exclude: true
+  Zone: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   copy:

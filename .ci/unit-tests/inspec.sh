@@ -2,8 +2,6 @@
 
 set -e
 set -x
-echo 'TODO(slevenick): reimplement the following'
-exit 0
 
 # Service account credentials for GCP to pull VCR cassettes
 export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
@@ -18,11 +16,6 @@ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 apt-get update && apt-get install google-cloud-sdk -y
 
 gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
-
-# Download train plugin (it's not published yet)
-gsutil cp -r gs://magic-modules-inspec-bucket/train-gcp2 .
-gem install inspec
-inspec plugin install train-gcp2/lib/train-gcp2.rb
 
 pushd "magic-modules/build/inspec/test/integration"
 
@@ -51,10 +44,6 @@ echo -n "@fake_private_key = '$(echo -n "$(cat ${rsatmp})")'.gsub(\"\n\", '\n')"
 rm ${rsatmp}
 erb -r './var' inspec.json.erb > inspec.json
 
-pushd inspec-mm
-cp -r ../../../libraries libraries
-popd
-
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 
 bundle install
@@ -63,11 +52,10 @@ gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 
 function cleanup {
   rm -rf inspec-cassettes
-  rm -rf inspec-mm/libraries
   rm inspec.json
   rm inspec.json.erb
   rm var.rb
 }
 trap cleanup EXIT
 
-inspec exec inspec-mm --attrs=attributes/attributes.yaml -t gcp2:// --no-distinct-exit
+inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit

@@ -1,0 +1,6 @@
+name: inspec-gcp-integration-tests-mm-generated
+version: 0.7.0
+inspec_version: '>= 3.0.25'
+depends:
+  - name: inspec-gcp
+    path: ../../../

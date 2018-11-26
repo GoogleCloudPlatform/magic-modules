@@ -9,6 +9,10 @@ variable "subnetwork" {
   type = "map"
 }
 
+variable "ssl_policy" {
+  type = "map"
+}
+
 provider "google" {
   project = "${var.project_name}"
   region = "${var.region}"
@@ -48,4 +52,11 @@ resource "google_compute_subnetwork" "inspec-gcp-subnetwork" {
   ip_cidr_range = "${var.subnetwork["ip_range"]}"
   name =  "${var.subnetwork["name"]}"
   network = "${google_compute_network.inspec-gcp-network.self_link}"
+}
+
+resource "google_compute_ssl_policy" "custom-ssl-policy" {
+  name            = "${var.ssl_policy["name"]}"
+  min_tls_version = "${var.ssl_policy["min_tls_version"]}"
+  profile         = "${var.ssl_policy["profile"]}"
+  custom_features = ["${var.ssl_policy["custom_feature"]}", "${var.ssl_policy["custom_feature2"]}"]
 }
