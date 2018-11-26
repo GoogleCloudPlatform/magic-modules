@@ -2559,8 +2559,6 @@ objects:
           The network-level routing configuration for this network. Used by Cloud
           Router to determine what type of network-wide routing behavior to
           enforce.
-        update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
           - !ruby/object:Api::Type::Enum
