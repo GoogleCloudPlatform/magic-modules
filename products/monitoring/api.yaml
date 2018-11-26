@@ -858,15 +858,15 @@ objects:
         This is a more convenient approach when the change is temporary and you want
         to receive notifications from the same set of alerting policies on the channel
         at some point in the future.
-  
-  
+
+
   - !ruby/object:Api::Resource
     name: UptimeCheckConfig
     update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
-          'https://cloud.google.com/monitoring/api/v3/'
+          'https://cloud.google.com/monitoring/uptime-checks/'
       api: 'https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.uptimeCheckConfigs'
     base_url: projects/{{project}}/uptimeCheckConfigs
     self_link: "{{name}}"
@@ -876,8 +876,7 @@ objects:
     - !ruby/object:Api::Type::String
       name: name
       output: true
-      description: A unique resource name for this UptimeCheckConfig. The format is:projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID].
-        on create the resource name is assigned by the server and included in the response.
+      description: A unique resource name for this UptimeCheckConfig. The format is projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID].
     - !ruby/object:Api::Type::String
       name: displayName
       required: true
@@ -939,8 +938,8 @@ objects:
             the same as the workspace project.
         - !ruby/object:Api::Type::String
           name: name
-          description: A unique resource name for this InternalChecker. The format is:projects/[PROJECT_ID]/internalCheckers/[INTERNAL_CHECKER_ID].PROJECT_ID
-            is the stackdriver workspace project for the uptime check config associated
+          description: A unique resource name for this InternalChecker. The format is projects/[PROJECT_ID]/internalCheckers/[INTERNAL_CHECKER_ID].
+            PROJECT_ID is the stackdriver workspace project for the uptime check config associated
             with the internal checker.
         - !ruby/object:Api::Type::String
           name: network
