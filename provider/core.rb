@@ -64,7 +64,9 @@ module Provider
     end
 
     # version_name is actually used because all of the variables in scope in this method
-    # are made available within the templates by the compile call.
+    # are made available within the templates by the compile call. This means that version_name
+    # is exposed to the templating logic and version_name is used in other places in the same
+    # way so it needs to be named consistently
     # rubocop:disable Lint/UnusedMethodArgument
     def copy_common_files(output_folder, version_name = 'ga')
       provider_name = self.class.name.split('::').last.downcase
