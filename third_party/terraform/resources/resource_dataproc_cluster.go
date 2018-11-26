@@ -429,13 +429,12 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Create the cluster
+	d.SetId(cluster.ClusterName)
 	op, err := config.clientDataproc.Projects.Regions.Clusters.Create(
 		project, region, cluster).Do()
 	if err != nil {
 		return fmt.Errorf("Error creating Dataproc cluster: %s", err)
 	}
-
-	d.SetId(cluster.ClusterName)
 
 	// Wait until it's created
 	timeoutInMinutes := int(d.Timeout(schema.TimeoutCreate).Minutes())
