@@ -15,8 +15,10 @@ class InstancePower(object):
             return
         elif self.desired_status == 'RUNNING':
             self.start()
-        elif self.desired_status == 'TERMINATED' or self.desired_status == 'SUSPENDED':
+        elif self.desired_status == 'TERMINATED':
             self.stop()
+        elif self.desired_status == 'SUSPENDED':
+            self.module.fail_json(msg="Instances cannot be suspended using Ansible")
 
     def start(self):
         auth = GcpSession(self.module, 'compute')
