@@ -11,27 +11,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: inspec-mm
-title: InSpec Profile
-maintainer: slevenick@google.com
-copyright: Google
-copyright_email: slevenick@google.com
-license: TODO
-summary: An InSpec Compliance Profile for testing Magic Modules generated resources
-version: 0.1.0
-attributes:
-  - name: project_name
-    type: string
-    required: true
-  - name: network
-    type: hash
-    required: true
-  - name: subnetwork
-    type: hash
-    required: true
-  - name: zone
-    type: string
-    required: true
-  - name: region
-    type: string
-    required: true
+require 'vcr_config'
+
+title 'Test GCP SSL policies plural resource.'
+
+project_name = attribute('project_name', default: '')
+ssl_policy = attribute('ssl_policy', default: {})
+
+control 'gcp-ssl-policies-1.0' do
+  impact 1.0
+  title 'GCP SSL policies plural test'
+
+  VCR.use_cassette('gcp-ssl-policies') do
+    resource = google_compute_ssl_policies(project: project_name)
+
+    describe resource do
+      it { should exist }
+      its('names') { should include ssl_policy['name'] }
+      its('profiles') { should include ssl_policy['profile'] }
+    end
+  end
+end

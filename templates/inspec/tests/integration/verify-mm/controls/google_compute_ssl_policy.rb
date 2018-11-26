@@ -13,20 +13,24 @@
 
 require 'vcr_config'
 
-title 'Test GCP regions plural resource.'
+title 'GCP SSL policy resource test'
 
-control 'gcp-regions-1.0' do
+project_name = attribute('project_name', default: '')
+ssl_policy = attribute('ssl_policy', default: {})
+
+control 'gcp-ssl-policy-1.0' do
+
   impact 1.0
-  title 'GCP Region plural test'
-  # TODO(slevenick): remove only_if once we generate this again
-  only_if { false }
-  VCR.use_cassette('gcp-regions') do
-    resource = google_compute_regions(project: attribute('project_name'))
+  title 'Ensure single SSL policy resource works.'
+  VCR.use_cassette('gcp-ssl-policy') do
+    resource = google_compute_ssl_policy({project: project_name, name: ssl_policy['name']})
 
     describe resource do
       it { should exist }
-      its('names') { should include 'us-west1' }
-      its('names') { should include 'us-east4' }
+      its('min_tls_version') { should cmp ssl_policy['min_tls_version'] }
+      its('profile') { should cmp ssl_policy['profile'] }
+      its('custom_features') { should include ssl_policy['custom_feature'] }
+      its('custom_features') { should include ssl_policy['custom_feature2'] }
     end
   end
 end
