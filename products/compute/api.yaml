@@ -2561,6 +2561,8 @@ objects:
           by the client when the network is created.
         api_name: 'IPv4Range'
         input: true
+        conflicts:
+          - autoCreateSubnetworks
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
