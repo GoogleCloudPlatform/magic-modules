@@ -20,7 +20,7 @@ set +e
 INSPEC_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag inspec < .git/body)"
 set -e
 if [ -z "$INSPEC_COMMIT_MSG" ]; then
-  INSPEC_COMMIT_MSG="Magic Modules changes."
+  INSPEC_COMMIT_MSG="$(cat .git/title)"
 fi
 
 pushd "build/inspec"

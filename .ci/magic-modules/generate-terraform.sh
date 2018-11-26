@@ -45,7 +45,7 @@ set +e
 TERRAFORM_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag "$SHORT_NAME" < .git/body)"
 set -e
 if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
-  TERRAFORM_COMMIT_MSG="Magic Modules changes."
+  TERRAFORM_COMMIT_MSG="$(cat .git/title)"
 fi
 
 pushd "build/$SHORT_NAME"
