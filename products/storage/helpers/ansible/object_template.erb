@@ -75,13 +75,22 @@ def main():
 
     # Check if we'll be overwriting files.
     if not module.params['overwrite']:
+      remote_object['changed'] = False
       if module.params['action'] == 'download' and local_file_exists:
+          # If files differ, throw an error
           if get_md5_local(local_file_path(module)) != remote_object['md5Hash']:
               module.fail_json(msg="Local file is different than remote file")
+          # If files are the same, module is done running.
+          else:
+              module.exit_json(**remote_object)
 
       elif module.params['action'] == 'upload' and remote_object:
+          # If files differ, throw an error
           if get_md5_local(local_file_path(module)) != remote_object['md5Hash']:
               module.fail_json(msg="Local file is different than remote file")
+          # If files are the same, module is done running.
+          else:
+              module.exit_json(**remote_object)
 
     # Upload/download the files
     auth = GcpSession(module, 'storage')
@@ -105,8 +114,7 @@ def download_file(module):
 def upload_file(module):
     auth = GcpSession(module, 'storage')
     f = open(module.params['src'], 'r')
-    src = f.read()
-    results = return_if_object(module, auth.post(upload_link(module), src, headers=object_headers(module)))
+    results = return_if_object(module, auth.post_contents(upload_link(module), f, object_headers(module)))
     f.close()
     results['changed'] = True
     return results
