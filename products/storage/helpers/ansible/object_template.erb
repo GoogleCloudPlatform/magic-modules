@@ -72,7 +72,6 @@ def main():
     if module.params['action'] == 'upload' and not local_file_exists:
         module.fail_json(msg="File does not exist on disk")
 
-
     # Check if we'll be overwriting files.
     if not module.params['overwrite']:
         remote_object['changed'] = False
@@ -105,17 +104,15 @@ def main():
 def download_file(module):
     auth = GcpSession(module, 'storage')
     data = auth.get(media_link(module))
-    f = open(module.params['dest'], 'w')
-    f.write(data.text.encode('utf8'))
-    f.close()
+    with open(module.params['dest'], 'w') as f:
+        f.write(data.text.encode('utf8'))
     return fetch_resource(module, self_link(module))
 
 
 def upload_file(module):
     auth = GcpSession(module, 'storage')
-    f = open(module.params['src'], 'r')
-    results = return_if_object(module, auth.post_contents(upload_link(module), f, object_headers(module)))
-    f.close()
+    with open(module.params['src'], 'r') as f:
+        results = return_if_object(module, auth.post_contents(upload_link(module), f, object_headers(module)))
     results['changed'] = True
     return results
 
@@ -143,6 +140,7 @@ def self_link(module):
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{src}".format(**module.params)
     else:
         return "https://www.googleapis.com/storage/v1/b/{bucket}/o/{dest}".format(**module.params)
+
 
 def local_file_path(module):
     if module.params['action'] == 'download':

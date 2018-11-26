@@ -33,7 +33,6 @@ objects:
         values:
           - :download
           - :upload
-      # TODO(alexstephen): Figure out why MD5 hashes are different local vs. remote
       - !ruby/object:Api::Type::Boolean
         name: 'overwrite'
         description: >
