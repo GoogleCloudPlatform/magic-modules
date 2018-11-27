@@ -43,6 +43,9 @@ module Api
       attr_reader :new_type
 
       attr_reader :azure_api_path
+      attr_reader :custom_schema_get
+      attr_reader :custom_schema_set
+      attr_reader :custom_expand_func
     end
 
     include Fields
@@ -72,6 +75,9 @@ module Api
       check_optional_property :update_url, ::String
 
       check_optional_property :azure_api_path, ::String
+      check_optional_property :custom_schema_get, ::String
+      check_optional_property :custom_schema_set, ::String
+      check_optional_property :custom_expand_func, ::String
 
       check_default_value_property
     end

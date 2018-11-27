@@ -13,13 +13,13 @@
 #
 # ----------------------------------------------------------------------------
 layout: "google"
-page_title: "Google: google_azure_rm_resource_group"
-sidebar_current: "docs-google-azure-rm-resource-group"
+page_title: "Google: google_arm_resource_group"
+sidebar_current: "docs-google-arm-resource-group"
 description: |-
   Manages a resource group on Azure.
 ---
 
-# google\_azure\_rm\_resource\_group
+# google\_arm\_resource\_group
 
 Manages a resource group on Azure.
 
@@ -73,6 +73,6 @@ The following arguments are supported:
 ResourceGroup can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_azure_rm_resource_group.default NotUsedInAzure/{{name}}
-$ terraform import google_azure_rm_resource_group.default {{name}}
+$ terraform import google_arm_resource_group.default NotUsedInAzure/{{name}}
+$ terraform import google_arm_resource_group.default {{name}}
 ```

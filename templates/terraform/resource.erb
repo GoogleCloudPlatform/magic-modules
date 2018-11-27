@@ -111,16 +111,22 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.each do |prop| -%>
+<%    unless prop.custom_schema_get -%>
     <%= prop.name.camelcase(:lower) -%> := d.Get("<%= prop.name.underscore -%>").(<%= go_type(prop) -%>)
+<%    else -%>
+    <%= prop.name.camelcase(:lower) -%> := <%= lines(compile_template(prop.custom_schema_get, property: prop, schema: prop.name.underscore)) -%>
+<%    end -%>
 <%  end -%>
 
     parameters := <%= azure_resource_go_package(object.__product) -%>.<%= object.azure_parameters_type -%>{
 <%  settable_properties.each do |prop| -%>
 <%    unless prop.name == "name" || prop.name == "resourceGroupName" -%>
-<%      unless azure_address_of_func(prop).nil? -%>
-        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= azure_address_of_func(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
-<%      else -%>
+<%      if !prop.custom_expand_func.nil? -%>
+        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= prop.custom_expand_func -%>(<%= prop.name.camelcase(:lower) -%>),
+<%      elsif azure_address_of_func(prop).nil? -%>
         <%= prop.azure_api_path.camelcase(:upper) -%>: expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
+<%      else -%>
+        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= azure_address_of_func(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
 <%      end -%>
 <%    end -%>
 <%  end -%>
@@ -204,26 +210,12 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-
-    d.Set("name", resp.Name)
-<%  properties.reject(&:ignore_read).each do |prop| -%>
-    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"])); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
-<%  end -%>
-<%  if has_self_link -%>
-    if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
-<%  end -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-    if err := d.Set("project", project); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
+<%  properties.each do |prop| -%>
+<%    unless prop.custom_schema_set -%>
+    d.Set("<%= prop.name.underscore -%>", resp.<%= prop.azure_api_path.camelcase(:upper) -%>)
+<%    else -%>
+    <%= lines(compile_template(prop.custom_schema_set, property: prop, schema: prop.name.underscore, response: 'resp')) -%>
+<%    end -%>
 <%  end -%>
 
     return nil
@@ -259,14 +251,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  else -%>
     future, err := client.<%= object.azure_delete_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
-        if response.WasNotFound(deleteFuture.Response()) {
+        if response.WasNotFound(future.Response()) {
             return nil
         }
         return fmt.Errorf("Error deleting <%= object.name -%> %q: %+v", name, err)
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        if !response.WasNotFound(deleteFuture.Response()) {
+        if !response.WasNotFound(future.Response()) {
             return fmt.Errorf("Error waiting for deleting <%= object.name -%> %q: %+v", name, err)
         }
     }
@@ -274,10 +266,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     return nil
 }
-
-<% properties.reject(&:ignore_read).each do |prop| -%>
-<%= lines(build_flatten_method(resource_name, prop), 1) -%>
-<% end -%>
 
 <% if object.custom_code.encoder -%>
 func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {

@@ -1,6 +1,6 @@
 --- !ruby/object:Api::Product
 name: Azure Resource Group
-prefix: azurerm
+prefix: arm
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -27,6 +27,7 @@ objects:
         description: 'The name of the resource group.'
         required: true
         input: true
+        azure_api_path: 'name'
       - !ruby/object:Api::Type::String
         name: 'location'
         description: 'The location where the resource group should be created.'

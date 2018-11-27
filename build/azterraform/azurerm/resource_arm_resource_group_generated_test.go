@@ -23,19 +23,19 @@ import (
 )
 
 
-func TestAccAzureRmResourceGroup_containerAnalysisNoteBasicExample(t *testing.T) {
+func TestAccArmResourceGroup_containerAnalysisNoteBasicExample(t *testing.T) {
   t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAzureRmResourceGroupDestroy,
+		CheckDestroy: testAccCheckArmResourceGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAzureRmResourceGroup_containerAnalysisNoteBasicExample(acctest.RandString(10)),
+				Config: testAccArmResourceGroup_containerAnalysisNoteBasicExample(acctest.RandString(10)),
 			},
 			{
-				ResourceName:      "google_azure_rm_resource_group.note",
+				ResourceName:      "google_arm_resource_group.note",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -43,7 +43,7 @@ func TestAccAzureRmResourceGroup_containerAnalysisNoteBasicExample(t *testing.T)
 	})
 }
 
-func testAccAzureRmResourceGroup_containerAnalysisNoteBasicExample(val string) string {
+func testAccArmResourceGroup_containerAnalysisNoteBasicExample(val string) string {
   return fmt.Sprintf(`
 resource "google_container_analysis_note" "note" {
   name = "test-attestor-note-%s"
@@ -58,9 +58,9 @@ resource "google_container_analysis_note" "note" {
 }
 
 
-func testAccCheckAzureRmResourceGroupDestroy(s *terraform.State) error {
+func testAccCheckArmResourceGroupDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_azure_rm_resource_group" {
+		if rs.Type != "google_arm_resource_group" {
 			continue
 		}
 
@@ -73,7 +73,7 @@ func testAccCheckAzureRmResourceGroupDestroy(s *terraform.State) error {
 
 	_, err = sendRequest(config, "GET", url, nil)
 	if err == nil {
-			return fmt.Errorf("AzureRmResourceGroup still exists at %s", url)
+			return fmt.Errorf("ArmResourceGroup still exists at %s", url)
 		}
 	}
 
