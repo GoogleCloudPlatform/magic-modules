@@ -41,7 +41,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       defaultObjectAcl: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
   Object: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: false
     template: 'products/storage/helpers/ansible/object_template.erb'
     version_added: '2.8'
     has_tests: false

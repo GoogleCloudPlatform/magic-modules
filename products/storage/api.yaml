@@ -25,7 +25,6 @@ objects:
     name: 'Object'
     base_url: b/{{bucket}}/o/
     description: Upload or download a file from a GCS bucket.
-    exclude: true
     parameters:
       - !ruby/object:Api::Type::Enum
         name: 'action'
