@@ -264,9 +264,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/compute/helpers/python/instancegroup_instances.py'
   Instance: !ruby/object:Provider::Ansible::ResourceOverride
+    post_action: |
+      if fetch:
+          instance = InstancePower(module, fetch.get('status'))
+          instance.run()
+          if module.params.get('status'):
+              fetch.update({'status': module.params['status']})
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
+      - 'products/compute/helpers/python/instance_start.py'
+    properties:
+      status: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   InstanceTemplate: !ruby/object:Provider::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
