@@ -198,6 +198,9 @@ module Api
       end
     end
 
+    class Path < Primitive
+    end
+
     # Represents a fingerprint.  A fingerprint is an output-only
     # field used for optimistic locking during updates.
     # They are fetched from the GCP response.

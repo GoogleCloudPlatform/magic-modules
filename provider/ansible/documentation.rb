@@ -64,6 +64,8 @@ module Provider
       # This will eventually be converted to YAML
       def returns_for_property(prop)
         type = python_type(prop)
+        # Type is a valid AnsibleModule type, but not a valid return type
+        type = 'str' if type == 'path'
         # Complex types only mentioned in reference to RETURNS YAML block
         # Complex types are nested objects traditionally, but arrays of nested
         # objects will be included to avoid linting errors.

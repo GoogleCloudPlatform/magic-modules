@@ -29,6 +29,8 @@ datasources: !ruby/object:Provider::ResourceOverrides
     exclude: true
   Bucket: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
+  Object: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: true
   ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
@@ -38,6 +40,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       defaultObjectAcl: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
+  Object: !ruby/object:Provider::Ansible::ResourceOverride
+    exclude: false
+    template: 'products/storage/helpers/ansible/object_template.erb'
+    version_added: '2.8'
+    has_tests: false
   ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
