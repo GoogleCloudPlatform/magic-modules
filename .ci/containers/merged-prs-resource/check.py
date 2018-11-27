@@ -25,6 +25,7 @@ def main(argv):
   # for each dependency, generate a tuple - (repo, pr_number)
   parsed_dependencies = [re.match(r'https://github.com/([\w-]+/[\w-]+)/pull/(\d+)', d).groups()
       for d in depends]
+  parsed_dependencies.sort(key=operator.itemgetter(0))
   # group those dependencies by repo - e.g. [("terraform-provider-google", ["123", "456"]), ...]
   for r, pulls in itertools.groupby(parsed_dependencies, key=operator.itemgetter(0)):
     repo = g.get_repo(r)
@@ -33,15 +34,15 @@ def main(argv):
       # check whether the PR is merged - if it is, add it to the version.
       pr = repo.get_pull(int(pull[1]))
       if pr.is_merged():
-        out_version[r].append(int(pull[1]))
+        out_version[r].append(pull[1])
   for k, v in out_version.iteritems():
     out_version[k] = ','.join(v)
   print(json.dumps([out_version]))
   # version dict:
   # {
-  #   "terraform-providers/terraform-provider-google": [1514, 1931],
-  #   "terraform-providers/terraform-provider-google-beta": [121, 220],
-  #   "modular-magician/ansible": [45],
+  #   "terraform-providers/terraform-provider-google": "1514,1931",
+  #   "terraform-providers/terraform-provider-google-beta": "121,220",
+  #   "modular-magician/ansible": "",
   # }
 
 if __name__ == '__main__':
