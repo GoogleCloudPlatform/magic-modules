@@ -204,15 +204,15 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     tags = ["team-a", "service-b"]
     step {
       name = "gcr.io/cloud-builders/gsutil"
-      args = "cp gs://mybucket/remotefile.zip localfile.zip "
+      args = ["cp", "gs://mybucket/remotefile.zip", "localfile.zip"]
     }
     step {
       name = "gcr.io/cloud-builders/go"
-      args = "build my_package"
+      args = ["build", "my_package"]
     }
     step {
       name = "gcr.io/cloud-builders/docker"
-      args = "build -t gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA -f Dockerfile ."
+      args = ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA", "-f", "Dockerfile ."]
     }
   }
 }
@@ -253,19 +253,19 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     tags = ["team-a", "service-b", "updated"]
     step {
       name = "gcr.io/cloud-builders/gsutil"
-      args = "cp gs://mybucket/remotefile.zip localfile-updated.zip "
+      args = ["cp", "gs://mybucket/remotefile.zip", "localfile-updated.zip "]
     }
     step {
       name = "gcr.io/cloud-builders/go"
-      args = "build my_package_updated"
+      args = ["build", "my_package_updated"]
     }
     step {
       name = "gcr.io/cloud-builders/docker"
-      args = "build -t gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA -f Dockerfile ."
+      args = ["build", "-t", "gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA", "-f", "Dockerfile ."]
     }
     step {
       name = "gcr.io/$PROJECT_ID/$REPO_NAME:$SHORT_SHA"
-      args = "test"
+      args = ["test"]
     }
   }
 }
