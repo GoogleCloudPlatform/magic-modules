@@ -1,6 +1,6 @@
 <!---
 Note: This tutorial is meant for Google Cloud Shell, and can be opened by going to
-https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=tutorial.md
+https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=TUTORIAL.md
 --->
 # Magic Modules Tutorial
 
