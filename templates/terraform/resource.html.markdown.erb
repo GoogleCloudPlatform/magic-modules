@@ -36,19 +36,19 @@
     directly inserted from YAML.
 -%>
 <%
-  resource_name = product_ns.underscore.downcase + '_' + object.name.underscore
+  resource_name = object.name.underscore
   properties = object.all_user_properties
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
-layout: "google"
-page_title: "Google: google_<%= resource_name -%>"
-sidebar_current: "docs-google-<%= resource_name.gsub("_", "-") -%>"
+layout: "azurerm"
+page_title: "Azure Resource Manager: azurerm_<%= resource_name -%>"
+sidebar_current: "docs-azurerm-resource-<%= resource_name.gsub("_", "-") -%>"
 description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# google\_<%= resource_name.gsub("_", "\\_") %>
+# azurerm_<%= resource_name -%>
 
 <%= lines(object.description) -%>
 
@@ -78,13 +78,6 @@ To get more information about <%= object.name -%>, see:
 <% end -%>
 <% unless object.example.empty? -%>
   <%- object.example.each do |example| -%>
-    <%- unless example.skip_test -%>
-<div class = "oics-button" style="float: right; margin: 0 0 -15px">
-  <a href="<%= example.oics_link %>" target="_blank">
-    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
-  </a>
-</div>
-    <%- end -%>
 ## Example Usage - <%= example.name.camelize(:upper).uncombine %>
 
 
@@ -98,35 +91,20 @@ The following arguments are supported:
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-
 <% properties.select(&:required).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-<%- unless object.docs.required_properties.nil? -%>
-<%= "\n" + object.docs.required_properties -%>
-<% end -%>
-
-- - -
-
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-<% if object.base_url.include?("{{project}}") -%>
-* `project` - (Optional) The ID of the project in which the resource belongs.
-    If it is not provided, the provider project is used.
-<% end -%>
-
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-<%- unless object.docs.optional_properties.nil? -%>
-<%= "\n" + object.docs.optional_properties -%>
-<% end -%>
-
-<% unless properties.select(&:output).empty? && object.docs.attributes.nil? -%>
 ## Attributes Reference
 
-In addition to the arguments listed above, the following computed attributes are exported:
+The following attributes are exported:
+
+* `id` - The <%= resource_name.gsub("_", " ") -%> ID.
 
 <% properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
@@ -140,7 +118,6 @@ In addition to the arguments listed above, the following computed attributes are
 <% end -%>
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>
-<% end -%>
 <% end -%>
 
 <% unless object.async.nil? -%>
@@ -158,10 +135,8 @@ This resource provides the following
 
 ## Import
 
-<%= object.name -%> can be imported using any of these accepted formats:
+<%= object.name -%> can be imported using the `resource id`, e.g.
 
-```
-<% import_id_formats(object).each do |id_format| -%>
-$ terraform import google_<%= resource_name -%>.default <%= id_format %>
-<% end -%>
+```shell
+$ terraform import azurerm_<%= resource_name -%>.example /subscriptions/00000000-0000-0000-0000-000000000000/<%= object.name.camelcase(:lower) -%>s/example
 ```

@@ -171,7 +171,7 @@ module Provider
       product_name = data[:product_name].underscore
 
       filepath =
-        File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+        File.join(target_folder, "#{name}.html.markdown")
       generate_resource_file data.clone.merge(
         default_template: 'templates/terraform/resource.html.markdown.erb',
         out_file: filepath

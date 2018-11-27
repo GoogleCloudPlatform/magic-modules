@@ -17,8 +17,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_schema_set: 'templates/terraform/custom_schema/set_tags.erb'
     example:
       - !ruby/object:Provider::Terraform::Examples
-        name: "container_analysis_note_basic"
-        primary_resource_id: "note"
-        version: <%= _version_name %>
+        name: "resource_group"
+        primary_resource_id: "example"
         vars:
-          note_name: "test-attestor-note"
+          rg_name: "ExampleRG"

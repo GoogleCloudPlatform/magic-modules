@@ -23,7 +23,7 @@ import (
 )
 
 
-func TestAccArmResourceGroup_containerAnalysisNoteBasicExample(t *testing.T) {
+func TestAccArmResourceGroup_resourceGroupExample(t *testing.T) {
   t.Parallel()
 
 	resource.Test(t, resource.TestCase{
@@ -32,10 +32,10 @@ func TestAccArmResourceGroup_containerAnalysisNoteBasicExample(t *testing.T) {
 		CheckDestroy: testAccCheckArmResourceGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccArmResourceGroup_containerAnalysisNoteBasicExample(acctest.RandString(10)),
+				Config: testAccArmResourceGroup_resourceGroupExample(acctest.RandString(10)),
 			},
 			{
-				ResourceName:      "google_arm_resource_group.note",
+				ResourceName:      "google_arm_resource_group.example",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -43,14 +43,14 @@ func TestAccArmResourceGroup_containerAnalysisNoteBasicExample(t *testing.T) {
 	})
 }
 
-func testAccArmResourceGroup_containerAnalysisNoteBasicExample(val string) string {
+func testAccArmResourceGroup_resourceGroupExample(val string) string {
   return fmt.Sprintf(`
-resource "google_container_analysis_note" "note" {
-  name = "test-attestor-note-%s"
-  attestation_authority {
-    hint {
-      human_readable_name = "Attestor Note"
-    }
+resource "azurerm_resource_group" "example" {
+  name     = "ExampleRG-%s"
+  location = "West US"
+
+  tags {
+    environment = "Production"
   }
 }
 `, val,
