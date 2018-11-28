@@ -112,7 +112,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Lien'
     base_url: liens
-    exclude: true
     # This resource has some issues - it returns a list when you query for it.
     # You can't use the same URL for GET and DELETE.  This here is the URL that
     # we use for GET, and the DELETE is in custom code.  If this happens a lot,
