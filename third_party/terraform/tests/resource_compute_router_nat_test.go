@@ -21,17 +21,35 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccComputeRouterNatBasic(testId),
 				Check: testAccCheckComputeRouterNatExists(
-					"google_compute_router_peer.foobar"),
+					"google_compute_router_nat.foobar"),
 			},
 			resource.TestStep{
-				ResourceName:      "google_compute_router_peer.foobar",
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			resource.TestStep{
 				Config: testAccComputeRouterNatKeepRouter(testId),
 				Check: testAccCheckComputeRouterNatDelete(
-					"google_compute_router_peer.foobar"),
+					"google_compute_router_nat.foobar"),
+			},
+		},
+	})
+}
+
+func TestAccComputeRouterNat_withManualIpAndSubnetConfiguration(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(10)
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRouterNatDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId),
+				Check: testAccCheckComputeRouterNatExists(
+					"google_compute_router_nat.foobar"),
 			},
 		},
 	})
@@ -74,10 +92,10 @@ func testAccCheckComputeRouterNatDelete(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		routersService := config.clientCompute.Routers
+		routersService := config.clientComputeBeta.Routers
 
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_router_peer" {
+			if rs.Type != "google_compute_router_nat" {
 				continue
 			}
 
@@ -100,11 +118,11 @@ func testAccCheckComputeRouterNatDelete(n string) resource.TestCheckFunc {
 				return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
 			}
 
-			peers := router.BgpPeers
-			for _, peer := range peers {
+			nats := router.Nats
+			for _, nat := range nats {
 
-				if peer.Name == name {
-					return fmt.Errorf("Peer %s still exists on router %s/%s", name, region, router.Name)
+				if nat.Name == name {
+					return fmt.Errorf("Nat %s still exists on router %s/%s", name, region, router.Name)
 				}
 			}
 		}
@@ -139,31 +157,60 @@ func testAccCheckComputeRouterNatExists(n string) resource.TestCheckFunc {
 		name := rs.Primary.Attributes["name"]
 		routerName := rs.Primary.Attributes["router"]
 
-		routersService := config.clientCompute.Routers
+		routersService := config.clientComputeBeta.Routers
 		router, err := routersService.Get(project, region, routerName).Do()
 
 		if err != nil {
 			return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
 		}
 
-		for _, peer := range router.BgpPeers {
+		for _, nat := range router.Nats {
 
-			if peer.Name == name {
+			if nat.Name == name {
 				return nil
 			}
 		}
 
-		return fmt.Errorf("Peer %s not found for router %s", name, router.Name)
+		return fmt.Errorf("Nat %s not found for router %s", name, router.Name)
 	}
 }
 
 func testAccComputeRouterNatBasic(testId string) string {
 	return fmt.Sprintf(`
 	        resource "google_compute_network" "foobar" {
-			name = "router-peer-test-%s"
+			name = "router-nat-test-%s"
 		}
 		resource "google_compute_subnetwork" "foobar" {
-			name = "router-peer-test-subnetwork-%s"
+			name = "router-nat-test-subnetwork-%s"
+			network = "${google_compute_network.foobar.self_link}"
+			ip_cidr_range = "10.0.0.0/16"
+			region = "us-central1"
+		}
+		resource "google_compute_router" "foobar"{
+			name = "router-nat-test-%s"
+			region = "${google_compute_subnetwork.foobar.region}"
+			network = "${google_compute_network.foobar.self_link}"
+			bgp {
+				asn = 64514
+			}
+		}
+		resource "google_compute_router_nat" "foobar" {
+			name                               = "router-nat-test-%s"
+			router                             = "${google_compute_router.foobar.name}"
+			region                             = "${google_compute_router.foobar.region}"
+			nat_ip_allocate_option             = "AUTO_ONLY"
+			source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+		}
+	`, testId, testId, testId, testId)
+}
+
+func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) string {
+	return fmt.Sprintf(`
+	        resource "google_compute_network" "foobar" {
+			name = "router-nat-test-%s"
+		}
+		resource "google_compute_subnetwork" "foobar" {
+			name = "router-nat-test-subnetwork-%s"
 			network = "${google_compute_network.foobar.self_link}"
 			ip_cidr_range = "10.0.0.0/16"
 			region = "us-central1"
@@ -172,134 +219,46 @@ func testAccComputeRouterNatBasic(testId string) string {
 			name = "router-peer-test-%s"
 			region = "${google_compute_subnetwork.foobar.region}"
 		}
-		resource "google_compute_vpn_gateway" "foobar" {
-			name = "router-peer-test-%s"
-			network = "${google_compute_network.foobar.self_link}"
-			region = "${google_compute_subnetwork.foobar.region}"
-		}
-		resource "google_compute_forwarding_rule" "foobar_esp" {
-			name = "router-peer-test-%s-1"
-			region = "${google_compute_vpn_gateway.foobar.region}"
-			ip_protocol = "ESP"
-			ip_address = "${google_compute_address.foobar.address}"
-			target = "${google_compute_vpn_gateway.foobar.self_link}"
-		}
-		resource "google_compute_forwarding_rule" "foobar_udp500" {
-			name = "router-peer-test-%s-2"
-			region = "${google_compute_forwarding_rule.foobar_esp.region}"
-			ip_protocol = "UDP"
-			port_range = "500-500"
-			ip_address = "${google_compute_address.foobar.address}"
-			target = "${google_compute_vpn_gateway.foobar.self_link}"
-		}
-		resource "google_compute_forwarding_rule" "foobar_udp4500" {
-			name = "router-peer-test-%s-3"
-			region = "${google_compute_forwarding_rule.foobar_udp500.region}"
-			ip_protocol = "UDP"
-			port_range = "4500-4500"
-			ip_address = "${google_compute_address.foobar.address}"
-			target = "${google_compute_vpn_gateway.foobar.self_link}"
-		}
 		resource "google_compute_router" "foobar"{
-			name = "router-peer-test-%s"
-			region = "${google_compute_forwarding_rule.foobar_udp500.region}"
+			name = "router-nat-test-%s"
+			region = "${google_compute_subnetwork.foobar.region}"
 			network = "${google_compute_network.foobar.self_link}"
 			bgp {
 				asn = 64514
 			}
 		}
-		resource "google_compute_vpn_tunnel" "foobar" {
-			name = "router-peer-test-%s"
-			region = "${google_compute_forwarding_rule.foobar_udp4500.region}"
-			target_vpn_gateway = "${google_compute_vpn_gateway.foobar.self_link}"
-			shared_secret = "unguessable"
-			peer_ip = "8.8.8.8"
-			router = "${google_compute_router.foobar.name}"
+		resource "google_compute_router_nat" "foobar" {
+			name                               = "router-nat-test-%s"
+			router                             = "${google_compute_router.foobar.name}"
+			region                             = "${google_compute_router.foobar.region}"
+			nat_ip_allocate_option             = "MANUAL_ONLY"
+			nat_ips                            = ["${google_compute_address.foobar.self_link}"]
+			source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+			subnetwork {
+			  name = "${google_compute_subnetwork.foobar.self_link}"
+			}
 		}
-		resource "google_compute_router_interface" "foobar" {
-			name = "router-peer-test-%s"
-			router = "${google_compute_router.foobar.name}"
-			region = "${google_compute_router.foobar.region}"
-			ip_range = "169.254.3.1/30"
-			vpn_tunnel = "${google_compute_vpn_tunnel.foobar.name}"
-		}
-		resource "google_compute_router_peer" "foobar" {
-			name = "router-peer-test-%s"
-			router = "${google_compute_router.foobar.name}"
-			region = "${google_compute_router.foobar.region}"
-			peer_ip_address = "169.254.3.2"
-			peer_asn = 65515
-			advertised_route_priority = 100
-			interface = "${google_compute_router_interface.foobar.name}"
-		}
-	`, testId, testId, testId, testId, testId, testId, testId, testId, testId, testId, testId)
+	`, testId, testId, testId, testId, testId)
 }
 
 func testAccComputeRouterNatKeepRouter(testId string) string {
 	return fmt.Sprintf(`
 		resource "google_compute_network" "foobar" {
-			name = "router-peer-test-%s"
+			name = "router-nat-test-%s"
 		}
 		resource "google_compute_subnetwork" "foobar" {
-			name = "router-peer-test-subnetwork-%s"
+			name = "router-nat-test-subnetwork-%s"
 			network = "${google_compute_network.foobar.self_link}"
 			ip_cidr_range = "10.0.0.0/16"
 			region = "us-central1"
 		}
-		resource "google_compute_address" "foobar" {
-			name = "router-peer-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
-		}
-		resource "google_compute_vpn_gateway" "foobar" {
-			name = "router-peer-test-%s"
-			network = "${google_compute_network.foobar.self_link}"
-			region = "${google_compute_subnetwork.foobar.region}"
-		}
-		resource "google_compute_forwarding_rule" "foobar_esp" {
-			name = "router-peer-test-%s-1"
-			region = "${google_compute_vpn_gateway.foobar.region}"
-			ip_protocol = "ESP"
-			ip_address = "${google_compute_address.foobar.address}"
-			target = "${google_compute_vpn_gateway.foobar.self_link}"
-		}
-		resource "google_compute_forwarding_rule" "foobar_udp500" {
-			name = "router-peer-test-%s-2"
-			region = "${google_compute_forwarding_rule.foobar_esp.region}"
-			ip_protocol = "UDP"
-			port_range = "500-500"
-			ip_address = "${google_compute_address.foobar.address}"
-			target = "${google_compute_vpn_gateway.foobar.self_link}"
-		}
-		resource "google_compute_forwarding_rule" "foobar_udp4500" {
-			name = "router-peer-test-%s-3"
-			region = "${google_compute_forwarding_rule.foobar_udp500.region}"
-			ip_protocol = "UDP"
-			port_range = "4500-4500"
-			ip_address = "${google_compute_address.foobar.address}"
-			target = "${google_compute_vpn_gateway.foobar.self_link}"
-		}
 		resource "google_compute_router" "foobar"{
-			name = "router-peer-test-%s"
-			region = "${google_compute_forwarding_rule.foobar_udp500.region}"
+			name = "router-nat-test-%s"
+			region = "${google_compute_subnetwork.foobar.region}"
 			network = "${google_compute_network.foobar.self_link}"
 			bgp {
 				asn = 64514
 			}
 		}
-		resource "google_compute_vpn_tunnel" "foobar" {
-			name = "router-peer-test-%s"
-			region = "${google_compute_forwarding_rule.foobar_udp4500.region}"
-			target_vpn_gateway = "${google_compute_vpn_gateway.foobar.self_link}"
-			shared_secret = "unguessable"
-			peer_ip = "8.8.8.8"
-			router = "${google_compute_router.foobar.name}"
-		}
-		resource "google_compute_router_interface" "foobar" {
-			name = "router-peer-test-%s"
-			router = "${google_compute_router.foobar.name}"
-			region = "${google_compute_router.foobar.region}"
-			ip_range = "169.254.3.1/30"
-			vpn_tunnel = "${google_compute_vpn_tunnel.foobar.name}"
-		}
-	`, testId, testId, testId, testId, testId, testId, testId, testId, testId, testId)
+	`, testId, testId, testId)
 }
