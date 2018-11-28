@@ -334,6 +334,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       quicOverride: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
+      sslPolicy: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
+  TargetSslProxy: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      sslPolicy: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   TargetVpnGateway: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: false
     version_added: '2.7'
