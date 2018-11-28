@@ -16,7 +16,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	appengine "google.golang.org/api/appengine/v1"
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	"google.golang.org/api/accesscontextmanager/v1beta"
 <% end -%>
 	"google.golang.org/api/bigquery/v2"
@@ -43,7 +43,7 @@ import (
 	"google.golang.org/api/redis/v1beta1"
 	"google.golang.org/api/runtimeconfig/v1beta1"
 	"google.golang.org/api/servicemanagement/v1"
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	"google.golang.org/api/servicenetworking/v1beta"
 <% end -%>
 	"google.golang.org/api/serviceusage/v1beta1"
@@ -66,7 +66,7 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	clientAccessContextManager   *accesscontextmanager.Service
 	<% end -%>
 	clientBilling                *cloudbilling.APIService
@@ -99,7 +99,7 @@ type Config struct {
 	clientCloudFunctions         *cloudfunctions.Service
 	clientCloudIoT               *cloudiot.Service
 	clientAppEngine              *appengine.APIService
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	clientServiceNetworking      *servicenetworking.APIService
 	<% end -%>
 
@@ -341,7 +341,7 @@ func (c *Config) loadAndValidate() error {
 	}
 	c.clientCloudFunctions.UserAgent = userAgent
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	log.Printf("[INFO] Instantiating Google Cloud AccessContextManager Client...")
 	c.clientAccessContextManager, err = accesscontextmanager.New(client)
 	if err != nil {
@@ -403,7 +403,7 @@ func (c *Config) loadAndValidate() error {
 	}
 	c.clientComposer.UserAgent = userAgent
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	log.Printf("[INFO] Instantiating Service Networking Client...")
 	c.clientServiceNetworking, err = servicenetworking.New(client)
 	if err != nil {

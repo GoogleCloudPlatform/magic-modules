@@ -460,7 +460,7 @@ func TestAccContainerCluster_withKubernetesAlpha(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_withTpu(t *testing.T) {
 	t.Parallel()
 
@@ -1167,7 +1167,7 @@ func TestAccContainerCluster_withIPAllocationPolicy_createSubnetwork(t *testing.
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_withPodSecurityPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -1326,7 +1326,7 @@ func TestAccContainerCluster_withResourceLabelsUpdate(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccContainerCluster_withBinaryAuthorization(t *testing.T) {
 	t.Parallel()
 
@@ -1775,7 +1775,7 @@ resource "google_container_cluster" "with_kubernetes_alpha" {
 }`, clusterName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withTpu(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "container_network" {
@@ -2193,7 +2193,7 @@ resource "google_container_cluster" "with_node_pool" {
 }`, cluster, nodePool)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccContainerCluster_autoprovisioning(cluster string, autoprovisioning bool) string {
 	config := fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2446,7 +2446,7 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 }`, cluster)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withPodSecurityPolicy(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_pod_security_policy" {
@@ -2634,7 +2634,7 @@ resource "google_container_cluster" "with_resource_labels" {
 `, clusterName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withBinaryAuthorization(clusterName string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_binary_authorization" {

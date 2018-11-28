@@ -155,7 +155,7 @@ resource "google_compute_forwarding_rule" "foobar" {
   name        = "%s"
   port_range  = "80-81"
   target      = "${google_compute_target_pool.foo-tp.self_link}"
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
   labels      = {"foo" = "bar"}
 <% end -%>
 }
@@ -180,7 +180,7 @@ resource "google_compute_forwarding_rule" "foobar" {
   name        = "%s"
   port_range  = "80-81"
   target      = "${google_compute_target_pool.bar-tp.self_link}"
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
   labels      = {"baz" = "qux"}
 <% end -%>
 }

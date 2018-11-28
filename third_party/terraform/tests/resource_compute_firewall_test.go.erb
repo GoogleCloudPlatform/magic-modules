@@ -284,7 +284,7 @@ func TestAccComputeFirewall_disabled(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeFirewall_enableLogging(t *testing.T) {
 	t.Parallel()
 
@@ -471,7 +471,7 @@ func testAccCheckComputeFirewallApiVersion(firewall *compute.Firewall) resource.
 	}
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccCheckComputeFirewallLoggingEnabled(firewall *computeBeta.Firewall, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if firewall == nil || firewall.EnableLogging != enabled {
@@ -657,7 +657,7 @@ func testAccComputeFirewall_disabled(network, firewall string) string {
 	}`, network, firewall)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeFirewall_enableLogging(network, firewall string, enableLogging bool) string {
 	enableLoggingCfg := ""
 	if enableLogging {

@@ -539,7 +539,7 @@ func expandBackendService(d *schema.ResourceData) (*computeBeta.BackendService, 
 				ForceSendFields: []string{"IncludeProtocol", "IncludeHost", "IncludeQueryString", "QueryStringWhitelist", "QueryStringBlacklist"},
 			},
 		},
-		<% unless version.nil? || version == 'ga' -%>
+		<% unless version == 'ga' -%>
 		CustomRequestHeaders: convertStringSet(d.Get("custom_request_headers").(*schema.Set)),
 		<% end -%>
 	}

@@ -114,7 +114,7 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 	t.Parallel()
 
@@ -256,7 +256,7 @@ func testAccCheckComputeBetaGlobalForwardingRuleIpVersion(n, version string) res
 		return nil
 	}
 }
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccCheckComputeBetaGlobalForwardingRuleHasLabel(frule *computeBeta.ForwardingRule, key, value string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		val, ok := frule.Labels[key]
@@ -272,7 +272,7 @@ func testAccCheckComputeBetaGlobalForwardingRuleHasLabel(frule *computeBeta.Forw
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccCheckComputeBetaGlobalForwardingRuleHasCorrectLabelFingerprint(
 	frule *computeBeta.ForwardingRule, resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -345,7 +345,7 @@ func testAccComputeGlobalForwardingRule_basic1(fr, proxy1, proxy2, backend, hc, 
 	}`, fr, proxy1, proxy2, backend, hc, urlmap)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeGlobalForwardingRule_labels(fr, proxy1, proxy2, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
 	resource "google_compute_global_forwarding_rule" "foobar" {
@@ -409,7 +409,7 @@ func testAccComputeGlobalForwardingRule_labels(fr, proxy1, proxy2, backend, hc, 
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeGlobalForwardingRule_labelsUpdated(fr, proxy1, proxy2, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
 	resource "google_compute_global_forwarding_rule" "foobar" {

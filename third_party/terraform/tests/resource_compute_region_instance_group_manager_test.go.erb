@@ -155,7 +155,7 @@ func TestAccRegionInstanceGroupManager_updateStrategy(t *testing.T) {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_rollingUpdatePolicy(t *testing.T) {
 	t.Parallel()
 
@@ -215,7 +215,7 @@ func TestAccRegionInstanceGroupManager_separateRegions(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_versions(t *testing.T) {
 	t.Parallel()
 
@@ -241,7 +241,7 @@ func TestAccRegionInstanceGroupManager_versions(t *testing.T) {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccRegionInstanceGroupManager_autoHealingPolicies(t *testing.T) {
 	t.Parallel()
 
@@ -725,7 +725,7 @@ func testAccRegionInstanceGroupManager_separateRegions(igm1, igm2 string) string
 	`, igm1, igm2)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccRegionInstanceGroupManager_autoHealingPolicies(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -787,7 +787,7 @@ resource "google_compute_http_health_check" "zero" {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccRegionInstanceGroupManager_autoHealingPoliciesRemoved(template, target, igm, hck string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -841,7 +841,7 @@ resource "google_compute_http_health_check" "zero" {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccRegionInstanceGroupManager_versions(primaryTemplate string, canaryTemplate string, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1007,7 +1007,7 @@ resource "google_compute_region_instance_group_manager" "igm-update-strategy" {
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1067,7 +1067,7 @@ resource "google_compute_region_instance_group_manager" "igm-rolling-update-poli
 }
 <% end -%>
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccRegionInstanceGroupManager_rollingUpdatePolicy2(igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
