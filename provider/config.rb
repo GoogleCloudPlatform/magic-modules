@@ -22,7 +22,6 @@ module Provider
     include Compile::Core
     extend Compile::Core
 
-    attr_reader :overrides
     # Overrides for datasources
     attr_reader :datasources
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
@@ -91,7 +90,7 @@ module Provider
       # class features
       source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
-      config.default_overrides
+      config.overrides
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
       config
@@ -108,7 +107,7 @@ module Provider
     def validate
       super
 
-      default_overrides
+      overrides
 
       check_optional_property :files, Provider::Config::Files
       check_property :overrides, Provider::ResourceOverrides
@@ -133,8 +132,8 @@ module Provider
     end
 
     # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
-    def default_overrides
-      @default_overrides ||= Provider::ResourceOverrides.new
+    def overrides
+      @overrides ||= Provider::ResourceOverrides.new
     end
   end
 end
