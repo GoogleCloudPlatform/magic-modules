@@ -84,6 +84,46 @@ overrides: !ruby/object:Provider::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 
+  UptimeCheckConfig: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        version: <%= _version_name %>
+        name: "uptime_check_config_http"
+        primary_resource_id: "http"
+        vars:
+          display_name: "http-uptime-check"
+      - !ruby/object:Provider::Terraform::Examples
+        version: <%= _version_name %>
+        name: "uptime_check_tcp"
+        primary_resource_id: "tcp_group"
+        vars:
+          display_name: "tcp-uptime-check"
+          group_display_name: "uptime-check-group"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
+    properties:
+      httpCheck.authInfo.password: !ruby/object:Provider::Terraform::PropertyOverride
+        sensitive: true
+        custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
+      httpCheck: !ruby/object:Provider::Terraform::PropertyOverride
+        conflicts_with:
+        - tcp_check
+      tcpCheck: !ruby/object:Provider::Terraform::PropertyOverride
+        conflicts_with:
+        - http_check
+      monitoredResource: !ruby/object:Provider::Terraform::PropertyOverride
+        conflicts_with:
+        - resource_group
+      resourceGroup: !ruby/object:Provider::Terraform::PropertyOverride
+        conflicts_with:
+        - monitored_resource
+      resourceGroup.groupId: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
+        custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
+
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
   # This is usually to add licensing info, autogeneration notices, etc.
