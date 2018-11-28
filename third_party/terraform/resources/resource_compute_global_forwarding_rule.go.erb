@@ -141,7 +141,7 @@ func resourceComputeGlobalForwardingRuleCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	// If we have labels to set, try to set those too
 	if _, ok := d.GetOk("labels"); ok {
 		labels := expandLabels(d)
@@ -188,7 +188,7 @@ func resourceComputeGlobalForwardingRuleUpdate(d *schema.ResourceData, meta inte
 
 		d.SetPartial("target")
 	}
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	if d.HasChange("labels") {
 		labels := expandLabels(d)
 		fingerprint := d.Get("label_fingerprint").(string)
@@ -228,7 +228,7 @@ func resourceComputeGlobalForwardingRuleRead(d *schema.ResourceData, meta interf
 	d.Set("ip_protocol", frule.IPProtocol)
 	d.Set("ip_version", frule.IpVersion)
 	d.Set("self_link", ConvertSelfLinkToV1(frule.SelfLink))
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	d.Set("labels", frule.Labels)
 	d.Set("label_fingerprint", frule.LabelFingerprint)
 <% else -%>
@@ -263,7 +263,7 @@ func resourceComputeGlobalForwardingRuleDelete(d *schema.ResourceData, meta inte
 	return nil
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 // resourceComputeGlobalForwardingRuleReadLabelFingerprint performs a read on the remote resource and returns only the
 // fingerprint. Used on create when setting labels as we don't know the label fingerprint initially.
 func resourceComputeGlobalForwardingRuleReadLabelFingerprint(config *Config, project, name string) (string, error) {

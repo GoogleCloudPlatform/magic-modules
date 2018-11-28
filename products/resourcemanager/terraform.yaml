@@ -24,7 +24,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         name: "resource_manager_lien"
         skip_test: true
         primary_resource_id: "lien"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           project_id: "staging-project"
     properties:

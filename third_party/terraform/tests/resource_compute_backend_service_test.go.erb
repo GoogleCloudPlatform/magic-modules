@@ -589,7 +589,7 @@ func TestAccComputeBackendService_withMaxConnectionsPerInstance(t *testing.T) {
 	}
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 	t.Parallel()
 
@@ -1038,7 +1038,7 @@ resource "google_compute_health_check" "default" {
 `, serviceName, maxConnectionsPerInstance, igName, itName, checkName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeBackendService_withCustomHeaders(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {

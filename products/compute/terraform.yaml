@@ -19,13 +19,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "address_basic"
         primary_resource_id: "ip_address"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           address_name: "my-address"
       - !ruby/object:Provider::Terraform::Examples
         name: "address_with_subnetwork"
         primary_resource_id: "internal_with_subnet_and_address"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           address_name: "my-internal-address"
           network_name: "my-network"
@@ -34,7 +34,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
         primary_resource_id: "static"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
          address_name: "ipv4-address"
          instance_name: "vm-instance"
@@ -72,7 +72,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_basic"
         primary_resource_id: "foobar"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           autoscaler_name: "my-autoscaler"
           instance_template_name: "my-instance-template"
@@ -90,7 +90,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_basic"
         primary_resource_id: "image_backend"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
@@ -167,7 +167,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           disk_name: "test-disk"
   DiskType: !ruby/object:Provider::Terraform::ResourceOverride
@@ -177,7 +177,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           firewall_name: "test-firewall"
           network_name: "test-network"
@@ -242,7 +242,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
@@ -291,7 +291,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "global_address_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           global_address_name: "global-appserver-ip"
     properties:
@@ -322,7 +322,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "http_health_check_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           http_health_check_name: "authentication-health-check"
     properties:
@@ -353,7 +353,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "https_health_check_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           https_health_check_name: "authentication-health-check"
     properties:
@@ -376,7 +376,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "health_check_basic"
         primary_resource_id: "internal-health-check"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           health_check_name: "internal-service-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -493,7 +493,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_autoscaler_basic"
         primary_resource_id: "foobar"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           region_autoscaler_name: "my-region-autoscaler"
           instance_template_name: "my-instance-template"
@@ -525,7 +525,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_basic"
         primary_resource_id: "regiondisk"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           region_disk_name: "my-region-disk"
           disk_name: "my-disk"
@@ -537,7 +537,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           route_name: "network-route"
           network_name: "compute-network"
@@ -594,7 +594,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "router_basic"
         primary_resource_id: "foobar"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           router_name: "my-router"
           network_name: "my-network"
@@ -619,17 +619,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           target_https_proxy_name: "test-proxy"
           url_map_name: "url-map"
@@ -660,7 +660,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_policy_basic"
         primary_resource_id: "prod-ssl-policy"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           production_ssl_policy_name: "production-ssl-policy"
           nonprod_ssl_policy_name: "nonprod-ssl-policy"
@@ -738,7 +738,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_basic"
         primary_resource_id: "network-with-private-secondary-ip-ranges"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
@@ -747,7 +747,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "target_http_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           target_http_proxy_name: "test-proxy"
           url_map_name: "url-map"
@@ -761,7 +761,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "target_https_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           target_https_proxy_name: "test-proxy"
           ssl_certificate_name: "my-certificate"
@@ -811,7 +811,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "target_ssl_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           target_ssl_proxy_name: "test-proxy"
           ssl_certificate_name: "default-cert"
@@ -831,7 +831,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "target_tcp_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           target_tcp_proxy_name: "test-proxy"
           backend_service_name: "backend-service"
@@ -850,7 +850,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "target_vpn_gateway_basic"
         primary_resource_id: "target_gateway"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           target_vpn_gateway_name: "vpn1"
           network_name: "network1"
@@ -876,7 +876,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "url_map_basic"
         primary_resource_id: "urlmap"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           url_map_name: "urlmap"
           login_backend_service_name: "login"
@@ -917,7 +917,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "vpn_tunnel_basic"
         primary_resource_id: "tunnel1"
-        version: <%= _version_name %>
+        version: <%= version_name %>
         vars:
           vpn_tunnel_name: "tunnel1"
           target_vpn_gateway_name: "vpn1"
