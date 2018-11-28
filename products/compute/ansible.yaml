@@ -130,7 +130,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         aliases:
           - timeout_seconds
   Disk: !ruby/object:Provider::Ansible::ResourceOverride
-    editable: false
     properties:
       sourceSnapshot: !ruby/object:Provider::Ansible::PropertyOverride
         description: |

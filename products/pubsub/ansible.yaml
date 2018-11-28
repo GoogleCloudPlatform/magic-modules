@@ -40,7 +40,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/pubsub/helpers/python/provider_topic.py'
   Subscription: !ruby/object:Provider::Ansible::ResourceOverride
-    editable: false
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
