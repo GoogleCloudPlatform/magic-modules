@@ -39,6 +39,7 @@ module Provider
       def get(value, object)
         return object.instance_variable_get("@#{value}".to_sym) \
           unless object.instance_variable_get("@#{value}".to_sym).nil?
+
         instance_variable_get("@#{value}".to_sym)
       end
     end

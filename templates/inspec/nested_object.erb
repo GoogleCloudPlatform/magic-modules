@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
+# frozen_string_literal: false
+
 <%= compile('templates/license.erb') -%>
 
 <%= lines(autogen_notice :ruby) -%>
-
 <%
   requires = generate_requires(nested_properties)
 -%>
@@ -24,20 +25,19 @@ module Google
   module <%= product_ns %>
     module Property
       class <%= class_name -%>
-
 <% if !nested_properties.empty? -%>
 <% nested_properties.each do |prop| -%>
+
         attr_reader :<%= prop.out_name %>
 <% end # nested_properties.each -%>
 
 <% end # if !nested_properties.empty? -%>
-
         def initialize(args = nil)
-          return nil if args.nil?
+          return if args.nil?
 <% nested_properties.each do |prop| -%>
 <%
   if time?(prop)
-      init = "DateTime.parse(args['#{prop.api_name}'])"
+      init = "Time.parse(args['#{prop.api_name}'])"
   elsif primitive?(prop)
     init = "args['#{prop.api_name}']"
   elsif typed_array?(prop)

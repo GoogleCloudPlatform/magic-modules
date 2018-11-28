@@ -47,6 +47,7 @@ module Google
 
     def check_types(objects, type)
       return if objects.nil?
+
       objects.each do |object|
         log_check_type object
         check_type object, type
@@ -79,12 +80,14 @@ module Google
     def check_optional_property(property, type = nil)
       value = instance_variable_get("@#{property}")
       return if value.nil?
+
       check_property_value property, value, type
     end
 
     def check_property_value(property, prop_value, type)
       Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
       raise "Missing '#{property}' on #{object_display_name}" if prop_value.nil?
+
       check_type property, prop_value, type unless type.nil?
       prop_value.validate if prop_value.is_a?(Api::Object)
     end
@@ -98,6 +101,7 @@ module Google
       instance_variables.each do |variable|
         var_name = variable.id2name[1..-1]
         next if var_name.start_with?('__')
+
         Google::LOGGER.debug "Validating '#{var_name}' on #{object_display_name}"
         raise "Extraneous variable '#{var_name}' in #{object_display_name}" \
           unless methods.include?(var_name.intern)
@@ -118,6 +122,7 @@ module Google
     def check_optional_property_list(name, type = nil)
       obj_list = instance_variable_get("@#{name}")
       return if obj_list.nil?
+
       check_property_list(name, type)
     end
 
@@ -147,11 +152,13 @@ module Google
                                               type = nil)
       prop_value = instance_variable_get("@#{prop}")
       return if prop_value.nil? && default.nil?
+
       check_property_oneof_default(prop, valid_values, default, type)
     end
 
     def set_variables(objects, property)
       return if objects.nil?
+
       objects.each do |object|
         object.set_variable(self, property) if object.respond_to?(:set_variable)
       end

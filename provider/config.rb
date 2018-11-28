@@ -22,7 +22,6 @@ module Provider
     include Compile::Core
     extend Compile::Core
 
-    attr_reader :overrides
     # Overrides for datasources
     attr_reader :datasources
     attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
@@ -84,13 +83,14 @@ module Provider
       config = Google::YamlValidator.parse(source)
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
+
       # Config must be validated so items are properly setup for next compile
       config.validate
       # Compile step #2: Now that we have the target class, compile with that
       # class features
       source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
-      config.default_overrides
+      config.overrides
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
       config
@@ -107,7 +107,7 @@ module Provider
     def validate
       super
 
-      default_overrides
+      overrides
 
       check_optional_property :files, Provider::Config::Files
       check_property :overrides, Provider::ResourceOverrides
@@ -122,6 +122,7 @@ module Provider
       object.instance_variables.each do |var|
         var_value = object.instance_variable_get(var)
         next if visited.include?(var_value)
+
         visited << var_value
         var_value.consume_api api if var_value.respond_to?(:consume_api)
         var_value.consume_config api, self \
@@ -131,7 +132,7 @@ module Provider
     end
 
     # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
-    def default_overrides
+    def overrides
       @overrides ||= Provider::ResourceOverrides.new
     end
   end

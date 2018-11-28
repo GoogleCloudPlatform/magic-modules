@@ -110,6 +110,7 @@ module Provider
         # If input true, treat like request, but use module names.
         return request_output(prop, "#{module_name}.params", module_name) \
           if prop.input
+
         if prop.is_a? Api::Type::NestedObject
           [
             "#{prop.property_class[-1]}(",

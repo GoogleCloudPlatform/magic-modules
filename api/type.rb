@@ -131,15 +131,18 @@ module Api
       end
     end
 
+    # rubocop:disable Naming/MemoizedInstanceVariableName
     def exclude_if_not_in_version(version)
       @exclude ||= version < min_version
     end
+    # rubocop:enable Naming/MemoizedInstanceVariableName
 
     # Overriding is_a? to enable class overrides.
     # Ruby does not let you natively change types, so this is the next best
     # thing.
     def is_a?(clazz)
       return Module.const_get(@new_type).new.is_a?(clazz) if @new_type
+
       super(clazz)
     end
 
@@ -148,6 +151,7 @@ module Api
     # thing.
     def class
       return Module.const_get(@new_type) if @new_type
+
       super
     end
 
@@ -275,6 +279,7 @@ module Api
       def item_type_class
         return Api::Type::NestedObject if @item_type.is_a? NestedObject
         return Api::Type::ResourceRef if @item_type.is_a? ResourceRef
+
         get_type("Api::Type::#{@item_type}")
       end
 
@@ -307,6 +312,7 @@ module Api
         if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
           return @item_type.requires
         end
+
         [property_file]
       end
 
@@ -417,6 +423,7 @@ module Api
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
         raise "Unknown item type '#{@resource}'" if resources.empty?
+
         resources[0]
       end
 
@@ -466,6 +473,7 @@ module Api
         super
 
         raise "Properties missing on #{name}" if @properties.nil?
+
         @properties.each do |p|
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)

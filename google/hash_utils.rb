@@ -19,21 +19,17 @@ module Google
     # Converts all keys to symbols
     def self.camelize_keys(source)
       result = source.clone
-      # rubocop:disable Performance/HashEachMethods
       result.keys.each do |k|
         result[Google::StringUtils.camelize(k.to_s)] = result.delete(k)
       end
-      # rubocop:enable Performance/HashEachMethods
       result
     end
 
     def self.symbolize_keys(source)
       result = source.clone
-      # rubocop:disable Performance/HashEachMethods
       result.keys.each do |k|
         result[Google::StringUtils.symbolize(k)] = result.delete(k)
       end
-      # rubocop:enable Performance/HashEachMethods
       result
     end
 
@@ -42,6 +38,7 @@ module Google
       key = path.take(1)[0]
       path = path.drop(1)
       return default unless source.key?(key)
+
       result = source.fetch(key)
       return HashUtils.navigate(result, path, default) unless path.empty?
       return result if path.empty?

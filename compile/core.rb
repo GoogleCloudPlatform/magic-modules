@@ -185,6 +185,7 @@ module Compile
 
     def indent_array(text, spaces, filler = ' ')
       return [] if text.nil?
+
       lines = text.class <= Array ? text : text.split("\n")
       lines.map do |line|
         if line.class <= Array
@@ -218,6 +219,7 @@ module Compile
 
     def quote_string(value)
       raise 'Invalid value' if value.nil?
+
       if value.include?('#{') || value.include?("'")
         ['"', value, '"'].join
       else
@@ -227,6 +229,7 @@ module Compile
 
     def lines(code, number = 0)
       return if code.nil? || code.empty?
+
       code = code.join("\n") if code.is_a?(Array)
       code[-1] = '' while code[-1] == "\n" || code[-1] == "\r"
       "#{code}#{"\n" * (number + 1)}"
@@ -234,6 +237,7 @@ module Compile
 
     def lines_before(code, number = 0)
       return if code.nil? || code.empty?
+
       code = code.join("\n") if code.is_a?(Array)
       code[0] = '' while code[0] == "\n" || code[0] == "\r"
       "#{"\n" * (number + 1)}#{code}"
@@ -294,6 +298,7 @@ module Compile
     def strip_copyright_notice(content, comment_marker = '#')
       lines = content.split("\n")
       return content unless lines[0].include?('Copyright 20')
+
       lines = lines.drop(1) while lines[0].start_with?(comment_marker)
       lines = lines.drop(1) while lines[0].strip.empty?
       lines.join("\n")

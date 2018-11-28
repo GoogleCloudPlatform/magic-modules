@@ -54,6 +54,7 @@ RSpec::Matchers.define :contain_array do |expected|
       start = actual.index(expected[0])
       actual = actual.drop(start) unless start.nil?
       return true if actual[0, expected.size] == expected
+
       actual = actual.drop(1)
     end
     false

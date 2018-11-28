@@ -95,8 +95,10 @@ module Api
       # Versions aren't normally going to be empty since products need a
       # base_url. This nil check exists for atypical products, like _bundle.
       return true if @versions.nil?
+
       name ||= Version::ORDER[0]
       return false unless Version::ORDER.include?(name)
+
       (0..Version::ORDER.index(name)).each do |i|
         return true if exists_at_version(Version::ORDER[i])
       end
@@ -107,6 +109,7 @@ module Api
       # Versions aren't normally going to be empty since products need a
       # base_url. This nil check exists for atypical products, like _bundle.
       return true if @versions.nil?
+
       @versions.any? { |v| v.name == name }
     end
 
