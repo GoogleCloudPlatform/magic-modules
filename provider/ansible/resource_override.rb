@@ -24,7 +24,6 @@ module Provider
       attr_reader :custom_update_resource
       attr_reader :create
       attr_reader :delete
-      attr_reader :editable
       attr_reader :has_tests
       attr_reader :hidden
       attr_reader :imports
@@ -50,7 +49,6 @@ module Provider
         default_value_property :custom_create_resource, false
         default_value_property :custom_update_resource, false
         default_value_property :exclude, false
-        default_value_property :editable, true
         default_value_property :has_tests, true
         default_value_property :imports, []
         default_value_property :provider_helpers, []
@@ -62,7 +60,6 @@ module Provider
         check_property :custom_update_resource, :boolean
         check_optional_property :create, ::String
         check_optional_property :delete, ::String
-        check_property :editable, :boolean
         check_property :has_tests, :boolean
         check_optional_property :hidden, ::Array
         check_property :imports, ::Array

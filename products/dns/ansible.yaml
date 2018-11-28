@@ -45,13 +45,11 @@ datasources: !ruby/object:Provider::ResourceOverrides
       filter_api_param: dnsName
 overrides: !ruby/object:Provider::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
-    editable: false
     properties:
       labels: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
   ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
     access_api_results: true
-    editable: true
     version_added: '2.6'
     imports:
       - copy
