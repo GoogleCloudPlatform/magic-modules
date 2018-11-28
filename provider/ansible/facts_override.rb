@@ -52,6 +52,7 @@ module Provider
                 Each additional filter in the list will act be added as an AND condition
                 (filter1 and filter2)
         STRING
+        true
       end
 
       def gce?

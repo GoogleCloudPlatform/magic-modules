@@ -28,6 +28,7 @@ module Provider
       def resourceref_handlers(object)
         rrefs = nonreadonly_rrefs(object)
         return unless rrefs.any?
+
         comments = [
           '# Converts data from:',
           '# foo:',

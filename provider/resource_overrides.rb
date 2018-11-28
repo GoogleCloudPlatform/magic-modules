@@ -44,6 +44,7 @@ module Provider
     def validate
       return unless @__objects.nil? # allows idempotency of calling validate
       return if @__api.nil?
+
       populate_nonoverridden_objects
       convert_findings_to_hash
       override_objects
@@ -56,12 +57,14 @@ module Provider
 
     def each
       return enum_for(:each) unless block_given?
+
       @__objects.each { |o| yield o }
       self
     end
 
     def select
       return enum_for(:select) unless block_given?
+
       @__objects.select { |o| yield o }
       self
     end
@@ -88,6 +91,7 @@ module Provider
       @__objects = {}
       instance_variables.each do |var|
         next if var.id2name.start_with?('@__')
+
         @__objects[var.id2name[1..-1]] = instance_variable_get(var)
         remove_instance_variable(var)
       end
@@ -98,6 +102,7 @@ module Provider
       @__objects.each do |name, override|
         api_object = @__api.objects.find { |o| o.name == name }
         raise "The resource to override must exist #{name}" if api_object.nil?
+
         check_property_value 'overrides', override, Provider::ResourceOverride
         override.apply api_object
         populate_nonoverridden_properties api_object, override

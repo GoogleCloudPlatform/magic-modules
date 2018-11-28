@@ -138,6 +138,7 @@ module Api
 
       def validate
         return unless @__objects.nil? # allows idempotency of calling validate
+
         convert_findings_to_hash
         ensure_keys_are_objects unless @__api.nil?
         super
@@ -149,12 +150,14 @@ module Api
 
       def each
         return enum_for(:each) unless block_given?
+
         @__objects.each { |o| yield o }
         self
       end
 
       def select
         return enum_for(:select) unless block_given?
+
         @__objects.select { |k, v| yield k, v }
       end
 
@@ -184,6 +187,7 @@ module Api
         @__objects = {}
         instance_variables.each do |var|
           next if var.id2name.start_with?('@__')
+
           @__objects[var.id2name[1..-1]] = instance_variable_get(var)
           remove_instance_variable(var)
         end
@@ -192,6 +196,7 @@ module Api
       def ensure_keys_are_objects
         @__objects.each_key do |type|
           next unless @__api.objects.select { |o| o.name == type }.empty?
+
           raise [
             "Object #{type} is not a valid type.",
             "Allowed types are: #{@__api.objects.map(&:name)}"
@@ -297,6 +302,7 @@ module Api
 
     def exported_properties
       return [] if @exports.nil?
+
       from_api = @exports.select { |e| e.is_a?(Api::Type::FetchedExternal) }
                          .each { |e| e.resource = self }
       prop_names = @exports - from_api
@@ -383,6 +389,7 @@ module Api
 
     def async_operation_url
       raise 'Not an async resource' if @async.nil?
+
       [@__product.base_url, @async.operation.base_url]
     end
 
@@ -444,6 +451,7 @@ module Api
           # in between it.
           next if p.resource_ref == original_obj
           next if p.resource_ref == p.__resource
+
           rrefs << p
           rrefs.concat(resourcerefs_for_properties(p.resource_ref
                                                     .required_properties,

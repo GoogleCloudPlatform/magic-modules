@@ -87,11 +87,11 @@ module Provider
                          version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
-        ))
+                     ))
         lines(compile_file(
                 { content: body },
                 'templates/terraform/examples/base_configs/documentation.tf.erb'
-        ))
+              ))
       end
 
       def config_test
@@ -103,7 +103,7 @@ module Provider
                          version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
-        ))
+                     ))
 
         body = substitute_test_paths body
 
@@ -113,7 +113,7 @@ module Provider
                   count: vars.length
                 },
                 'templates/terraform/examples/base_configs/test_body.go.erb'
-        ))
+              ))
       end
 
       def config_example
@@ -125,7 +125,7 @@ module Provider
                          version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
-        ))
+                     ))
 
         substitute_example_paths body
       end

@@ -84,6 +84,7 @@ module Provider
       config = Google::YamlValidator.parse(source)
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
+
       # Config must be validated so items are properly setup for next compile
       config.validate
       # Compile step #2: Now that we have the target class, compile with that
@@ -122,6 +123,7 @@ module Provider
       object.instance_variables.each do |var|
         var_value = object.instance_variable_get(var)
         next if visited.include?(var_value)
+
         visited << var_value
         var_value.consume_api api if var_value.respond_to?(:consume_api)
         var_value.consume_config api, self \
@@ -132,7 +134,7 @@ module Provider
 
     # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
     def default_overrides
-      @overrides ||= Provider::ResourceOverrides.new
+      @default_overrides ||= Provider::ResourceOverrides.new
     end
   end
 end

@@ -57,6 +57,7 @@ module Provider
         # All ResourceRefs are dicts with properties.
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resource_ref.readonly
+
           return 'dict'
         end
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
@@ -209,6 +210,7 @@ module Provider
         ex = Google::YamlValidator.parse(File.read(cfg_file))
         raise "#{cfg_file}(#{ex.class}) is not a Provider::Ansible::Example" \
           unless ex.is_a?(Provider::Ansible::Example)
+
         ex.validate
         ex
       end

@@ -38,17 +38,19 @@ module Provider
         @overrides.instance_variables.reject { |i| i == :@product }.each do |var|
           obj_array = objects.select { |o| o.name == var[1..-1] }
           raise "#{var[1..-1]} not found" if obj_array.empty?
+
           verify_resource(obj_array.first, @overrides[var])
         end
       end
 
       # Verify top-level fields exist on resource
       def verify_resource(res, overrides)
-        overrides.instance_variables.reject { |i| i == :@properties || i == :@parameters }
+        overrides.instance_variables.reject { |i| %i[@properties @parameters].include?(i) }
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
           next if check_if_exists(res, field_symbol)
+
           raise "#{field_name} does not exist on #{res.name}"
         end
         # Use instance_variable_get to get excluded properties
@@ -102,11 +104,12 @@ module Provider
 
       def verify_property(property, overrides)
         overrides.instance_variables
-                 .reject { |i| i == :@properties || i == :@item_type || i == :@type }
+                 .reject { |i| %i[@properties @item_type @type].include?(i) }
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
           next if check_if_exists(property, field_symbol, overrides['@type'])
+
           raise "#{field_name} does not exist on #{property.name}"
         end
       end

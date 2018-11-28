@@ -254,6 +254,7 @@ module Provider
     def unquote_string(value)
       return value.gsub(/"(.*)"/, '\1') if value.start_with?('"')
       return value.gsub(/'(.*)'/, '\1') if value.start_with?("'")
+
       value
     end
 
@@ -337,6 +338,7 @@ module Provider
 
     def update_url(resource, url_part)
       return build_url(resource.self_link_url) if url_part.nil?
+
       [resource.__product.base_url, url_part].flatten.join
     end
 
@@ -407,6 +409,7 @@ module Provider
     def format_section_ruler(size)
       size_pad = (size - size.to_s.length - 4) # < + > + 2 spaces around number.
       return unless size_pad.positive?
+
       ['<',
        '-' * (size_pad / 2), ' ', size.to_s, ' ', '-' * (size_pad / 2),
        (size_pad.even? ? '' : '-'),

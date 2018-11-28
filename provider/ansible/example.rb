@@ -198,56 +198,6 @@ module Provider
       end
     end
 
-    # Holds all information necessary to run a facts module and verify the
-    # creation / deletion of a resource.
-    # FactsVerifiers are verifiers in the sense that they verify GCP status.
-    # They do not do this with bash commands, but with a Ansible facts module.
-    # This verifier will look + an act a lot like a Task.
-    class FactsVerifier < Verifier
-      # Ruby YAML requires at least one value to create the object.
-      attr_reader :noop
-
-      attr_reader :__example
-      include Compile::Core
-      include Provider::Ansible::HandwrittenValuesFromExample
-
-      def validate
-        @failure ||= FailureCondition.new
-      end
-
-      def build_task(_state, object)
-        @parameters = build_parameters(object)
-        compile 'templates/ansible/verifiers/facts.yaml.erb'
-      end
-
-      private
-
-      def verbs
-        {
-          present: 'created',
-          absent: 'deleted'
-        }
-      end
-
-      def build_parameters(object)
-        sample_code = @__example.task.code
-        ignored_props = %w[project name]
-
-        # Grab all code values for parameters
-        parameters = handwritten_vals_for_properties(object,
-                                                     uri_properties(object, ignored_props))
-
-        # Grab values for filters.
-        underscore_name = object.facts.filter.name.underscore
-        parameters[underscore_name] = sample_code[underscore_name] if sample_code[underscore_name]
-        parameters.compact
-      end
-
-      def name_parameter
-        compile_string(INTEGRATION_TEST_DEFAULTS, @__example.task.code['name']).join
-      end
-    end
-
     # A gcloud command failing is not enough to verify that a resource does not
     # exist
     # Stderr should be checked to verify that the resource actually does not
@@ -269,6 +219,7 @@ module Provider
         @name ||= '{{ resource_name }}'
         @error ||= "#{@name} was not found."
         @test ||= "\"\\\"#{@error.strip}\\\" in results.stderr\""
+        true
       end
     end
 

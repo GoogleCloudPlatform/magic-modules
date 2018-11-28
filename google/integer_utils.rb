@@ -16,6 +16,7 @@ module Google
   class IntegerUtils
     def self.underscore(value)
       return '0' if value.zero?
+
       result = []
       while value.positive?
         value, part = value.divmod(1000)
