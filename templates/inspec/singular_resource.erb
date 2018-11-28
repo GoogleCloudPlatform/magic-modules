@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
+# frozen_string_literal: true
+
 <%= compile 'templates/license.erb' -%>
 
 <%= lines(autogen_notice :ruby) -%>
-
 <%
   require 'google/string_utils'
 
@@ -26,10 +27,8 @@
 -%>
 <%= lines(emit_requires(requires)) -%>
 
-
 # A provider to manage <%= @api.name -%> resources.
 class <%= object.name -%> < GcpResourceBase
-
   name '<%= resource_name(object, product_ns) -%>'
   desc '<%= object.name -%>'
   supports platform: 'gcp'
@@ -48,7 +47,7 @@ class <%= object.name -%> < GcpResourceBase
 
 <% if object.self_link_query.nil? -%>
   def initialize(params)
-    super(params.merge({:use_http_transport => true}))
+    super(params.merge({ use_http_transport: true }))
     @fetched = @connection.fetch(base, url, params)
     parse unless @fetched.nil?
   end
@@ -65,7 +64,7 @@ class <%= object.name -%> < GcpResourceBase
     name = prop.out_name
 
     if time?(prop)
-      init = "DateTime.parse(@fetched['#{prop.api_name}'])"
+      init = "Time.parse(@fetched['#{prop.api_name}'])"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
