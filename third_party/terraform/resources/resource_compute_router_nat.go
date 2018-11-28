@@ -148,7 +148,6 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 	router, err := routersService.Get(project, region, routerName).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
-			d.SetId("")
 			return fmt.Errorf("Router %s/%s not found", region, routerName)
 		}
 
@@ -158,7 +157,6 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 	nats := router.Nats
 	for _, nat := range nats {
 		if nat.Name == natName {
-			d.SetId("")
 			return fmt.Errorf("Router %s has nat %s already", routerName, natName)
 		}
 	}
@@ -324,8 +322,7 @@ func resourceComputeRouterNatDelete(d *schema.ResourceData, meta interface{}) er
 		return nil
 	}
 
-	log.Printf(
-		"[INFO] Removing nat %s from router %s/%s", natName, region, routerName)
+	log.Printf("[INFO] Removing nat %s from router %s/%s", natName, region, routerName)
 	patchRouter := &computeBeta.Router{
 		Nats: newNats,
 	}
