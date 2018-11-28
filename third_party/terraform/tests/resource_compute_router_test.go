@@ -6,259 +6,177 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccComputeRouterNat_basic(t *testing.T) {
+func TestAccComputeRouter_basic(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(10)
+	resourceRegion := "europe-west1"
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRouterDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeRouterBasic(testId, resourceRegion),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouter_noRegion(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(10)
+	providerRegion := "us-central1"
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRouterDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeRouterNoRegion(testId, providerRegion),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouter_full(t *testing.T) {
 	t.Parallel()
 
 	testId := acctest.RandString(10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroy,
+		CheckDestroy: testAccCheckComputeRouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeRouterNatBasic(testId),
-				Check: testAccCheckComputeRouterNatExists(
-					"google_compute_router_nat.foobar"),
+				Config: testAccComputeRouterFull(testId),
 			},
 			resource.TestStep{
-				ResourceName:      "google_compute_router_nat.foobar",
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouter_update(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(10)
+	region := getTestRegionFromEnv()
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeRouterDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeRouterBasic(testId, region),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			resource.TestStep{
-				Config: testAccComputeRouterNatKeepRouter(testId),
-				Check: testAccCheckComputeRouterNatDelete(
-					"google_compute_router_nat.foobar"),
+				Config: testAccComputeRouterFull(testId),
 			},
-		},
-	})
-}
-
-func TestAccComputeRouterNat_withManualIpAndSubnetConfiguration(t *testing.T) {
-	t.Parallel()
-
-	testId := acctest.RandString(10)
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRouterNatDestroy,
-		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId),
-				Check: testAccCheckComputeRouterNatExists(
-					"google_compute_router_nat.foobar"),
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				Config: testAccComputeRouterBasic(testId, region),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func testAccCheckComputeRouterNatDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	routersService := config.clientCompute.Routers
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_compute_router" {
-			continue
+func testAccComputeRouterBasic(testId, resourceRegion string) string {
+	return fmt.Sprintf(`
+		resource "google_compute_network" "foobar" {
+			name = "router-test-%s"
+			auto_create_subnetworks = false
 		}
-
-		project, err := getTestProject(rs.Primary, config)
-		if err != nil {
-			return err
+		resource "google_compute_subnetwork" "foobar" {
+			name = "router-test-subnetwork-%s"
+			network = "${google_compute_network.foobar.self_link}"
+			ip_cidr_range = "10.0.0.0/16"
+			region = "%s"
 		}
-
-		region, err := getTestRegion(rs.Primary, config)
-		if err != nil {
-			return err
+		resource "google_compute_router" "foobar" {
+			name = "router-test-%s"
+			region = "${google_compute_subnetwork.foobar.region}"
+			network = "${google_compute_network.foobar.name}"
+			bgp {
+				asn = 64514
+			}
 		}
-
-		routerName := rs.Primary.Attributes["router"]
-
-		_, err = routersService.Get(project, region, routerName).Do()
-
-		if err == nil {
-			return fmt.Errorf("Error, Router %s in region %s still exists",
-				routerName, region)
-		}
-	}
-
-	return nil
+	`, testId, testId, resourceRegion, testId)
 }
 
-func testAccCheckComputeRouterNatDelete(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
-
-		routersService := config.clientComputeBeta.Routers
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "google_compute_router_nat" {
-				continue
+func testAccComputeRouterNoRegion(testId, providerRegion string) string {
+	return fmt.Sprintf(`
+		resource "google_compute_network" "foobar" {
+			name = "router-test-%s"
+			auto_create_subnetworks = false
+		}
+		resource "google_compute_subnetwork" "foobar" {
+			name = "router-test-subnetwork-%s"
+			network = "${google_compute_network.foobar.self_link}"
+			ip_cidr_range = "10.0.0.0/16"
+			region = "%s"
+		}
+		resource "google_compute_router" "foobar" {
+			name = "router-test-%s"
+			network = "${google_compute_network.foobar.name}"
+			bgp {
+				asn = 64514
 			}
+		}
+	`, testId, testId, providerRegion, testId)
+}
 
-			project, err := getTestProject(rs.Primary, config)
-			if err != nil {
-				return err
-			}
+func testAccComputeRouterFull(testId string) string {
+	return fmt.Sprintf(`
+		resource "google_compute_network" "foobar" {
+			name = "router-test-%s"
+			auto_create_subnetworks = false
+		}
 
-			region, err := getTestRegion(rs.Primary, config)
-			if err != nil {
-				return err
-			}
-
-			name := rs.Primary.Attributes["name"]
-			routerName := rs.Primary.Attributes["router"]
-
-			router, err := routersService.Get(project, region, routerName).Do()
-
-			if err != nil {
-				return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
-			}
-
-			nats := router.Nats
-			for _, nat := range nats {
-
-				if nat.Name == name {
-					return fmt.Errorf("Nat %s still exists on router %s/%s", name, region, router.Name)
+		resource "google_compute_router" "foobar" {
+			name = "router-test-%s"
+			network = "${google_compute_network.foobar.name}"
+			bgp {
+				asn = 64514
+				advertise_mode = "CUSTOM"
+				advertised_groups = ["ALL_SUBNETS"]
+				advertised_ip_ranges {
+					range = "1.2.3.4"
+				}
+				advertised_ip_ranges {
+					range = "6.7.0.0/16"
 				}
 			}
 		}
-
-		return nil
-	}
-}
-
-func testAccCheckComputeRouterNatExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := testAccProvider.Meta().(*Config)
-
-		project, err := getTestProject(rs.Primary, config)
-		if err != nil {
-			return err
-		}
-
-		region, err := getTestRegion(rs.Primary, config)
-		if err != nil {
-			return err
-		}
-
-		name := rs.Primary.Attributes["name"]
-		routerName := rs.Primary.Attributes["router"]
-
-		routersService := config.clientComputeBeta.Routers
-		router, err := routersService.Get(project, region, routerName).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
-		}
-
-		for _, nat := range router.Nats {
-
-			if nat.Name == name {
-				return nil
-			}
-		}
-
-		return fmt.Errorf("Nat %s not found for router %s", name, router.Name)
-	}
-}
-
-func testAccComputeRouterNatBasic(testId string) string {
-	return fmt.Sprintf(`
-	        resource "google_compute_network" "foobar" {
-			name = "router-nat-test-%s"
-		}
-		resource "google_compute_subnetwork" "foobar" {
-			name = "router-nat-test-subnetwork-%s"
-			network = "${google_compute_network.foobar.self_link}"
-			ip_cidr_range = "10.0.0.0/16"
-			region = "us-central1"
-		}
-		resource "google_compute_router" "foobar"{
-			name = "router-nat-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
-			network = "${google_compute_network.foobar.self_link}"
-			bgp {
-				asn = 64514
-			}
-		}
-		resource "google_compute_router_nat" "foobar" {
-			name                               = "router-nat-test-%s"
-			router                             = "${google_compute_router.foobar.name}"
-			region                             = "${google_compute_router.foobar.region}"
-			nat_ip_allocate_option             = "AUTO_ONLY"
-			source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-		}
-	`, testId, testId, testId, testId)
-}
-
-func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) string {
-	return fmt.Sprintf(`
-	        resource "google_compute_network" "foobar" {
-			name = "router-nat-test-%s"
-		}
-		resource "google_compute_subnetwork" "foobar" {
-			name = "router-nat-test-subnetwork-%s"
-			network = "${google_compute_network.foobar.self_link}"
-			ip_cidr_range = "10.0.0.0/16"
-			region = "us-central1"
-		}
-		resource "google_compute_address" "foobar" {
-			name = "router-peer-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
-		}
-		resource "google_compute_router" "foobar"{
-			name = "router-nat-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
-			network = "${google_compute_network.foobar.self_link}"
-			bgp {
-				asn = 64514
-			}
-		}
-		resource "google_compute_router_nat" "foobar" {
-			name                               = "router-nat-test-%s"
-			router                             = "${google_compute_router.foobar.name}"
-			region                             = "${google_compute_router.foobar.region}"
-			nat_ip_allocate_option             = "MANUAL_ONLY"
-			nat_ips                            = ["${google_compute_address.foobar.self_link}"]
-			source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
-			subnetwork {
-			  name = "${google_compute_subnetwork.foobar.self_link}"
-			}
-		}
-	`, testId, testId, testId, testId, testId)
-}
-
-func testAccComputeRouterNatKeepRouter(testId string) string {
-	return fmt.Sprintf(`
-		resource "google_compute_network" "foobar" {
-			name = "router-nat-test-%s"
-		}
-		resource "google_compute_subnetwork" "foobar" {
-			name = "router-nat-test-subnetwork-%s"
-			network = "${google_compute_network.foobar.self_link}"
-			ip_cidr_range = "10.0.0.0/16"
-			region = "us-central1"
-		}
-		resource "google_compute_router" "foobar"{
-			name = "router-nat-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
-			network = "${google_compute_network.foobar.self_link}"
-			bgp {
-				asn = 64514
-			}
-		}
-	`, testId, testId, testId)
+	`, testId, testId)
 }
