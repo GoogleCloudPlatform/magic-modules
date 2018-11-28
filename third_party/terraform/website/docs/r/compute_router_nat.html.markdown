@@ -31,11 +31,11 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_compute_router" "router" {
-        name = "router"
-        region = "${google_compute_subnetwork.foobar.region}"
+        name    = "router"
+        region  = "${google_compute_subnetwork.foobar.region}"
         network = "${google_compute_network.foobar.self_link}"
         bgp {
-                asn = 64514
+          asn = 64514
         }
 }
 
@@ -64,11 +64,11 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_compute_router" "router" {
-        name = "router"
-        region = "${google_compute_subnetwork.foobar.region}"
+        name    = "router"
+        region  = "${google_compute_subnetwork.foobar.region}"
         network = "${google_compute_network.foobar.self_link}"
         bgp {
-                asn = 64514
+          asn = 64514
         }
 }
 
