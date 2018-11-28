@@ -89,13 +89,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
     import_format: ["{{name}}"]
     example:
       - !ruby/object:Provider::Terraform::Examples
-        version: <%= _version_name %>
+        version: <%= version_name %>
         name: "uptime_check_config_http"
         primary_resource_id: "http"
         vars:
           display_name: "http-uptime-check"
       - !ruby/object:Provider::Terraform::Examples
-        version: <%= _version_name %>
+        version: <%= version_name %>
         name: "uptime_check_tcp"
         primary_resource_id: "tcp_group"
         vars:

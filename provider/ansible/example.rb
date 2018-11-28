@@ -212,7 +212,7 @@ module Provider
       include Provider::Ansible::HandwrittenValuesFromExample
 
       def validate
-        @failure ||= FailureCondition.new
+        true
       end
 
       def build_task(_state, object)
@@ -269,6 +269,7 @@ module Provider
         @name ||= '{{ resource_name }}'
         @error ||= "#{@name} was not found."
         @test ||= "\"\\\"#{@error.strip}\\\" in results.stderr\""
+        true
       end
     end
 

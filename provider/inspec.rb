@@ -126,6 +126,7 @@ module Provider
     # Format a url that may be include newlines into a single line
     def format_url(url)
       return url.join('') if url.is_a?(Array)
+
       url.split("\n").join('')
     end
 
