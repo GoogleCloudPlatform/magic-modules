@@ -1,0 +1,9 @@
+<% project_name = grab_attributes['project_name'] -%>
+<% ssl_policy = grab_attributes['ssl_policy'] -%>
+describe google_compute_ssl_policy({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: <%= doc_generation ? "'#{ssl_policy['name']}'" : "ssl_policy['name']" -%>}) do
+  it { should exist }
+  its('min_tls_version') { should cmp <%= doc_generation ? "'#{ssl_policy['min_tls_version']}'" : "ssl_policy['min_tls_version']" -%> }
+  its('profile') { should cmp <%= doc_generation ? "'#{ssl_policy['profile']}'" : "ssl_policy['profile']" -%> }
+  its('custom_features') { should include <%= doc_generation ? "'#{ssl_policy['custom_feature']}'" : "ssl_policy['custom_feature']" -%> }
+  its('custom_features') { should include <%= doc_generation ? "'#{ssl_policy['custom_feature2']}'" : "ssl_policy['custom_feature2']" -%> }
+end

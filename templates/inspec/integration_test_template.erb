@@ -1,0 +1,17 @@
+<%= compile 'templates/license.erb' -%>
+<%= lines(autogen_notice :ruby) -%>
+
+require 'vcr_config'
+
+title 'Test GCP <%= name -%> resource.'
+
+<%= compile("templates/inspec/examples/attributes/#{name}.erb") -%>
+
+control '<%= name -%>-1.0' do
+  impact 1.0
+  title '<%= name -%> resource test'
+
+  VCR.use_cassette('<%= name -%>') do
+<%= indent(compile("templates/inspec/examples/#{name}.erb"), 4) %>
+  end
+end
