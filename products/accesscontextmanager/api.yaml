@@ -68,17 +68,14 @@ objects:
         output: true
   - !ruby/object:Api::Resource
     name: 'AccessLevel'
-    # This is a weird API, so we need to use a few fields to map the methods to
-    # the right URL.
+    # This is an unusual API, so we need to use a few fields to map the methods
+    # to the right URL.
     # create_url is the Create URL
     # base_url is the Get and Delete and Patch URL. It is empty on purpose.
     # List won't work yet. It should share a URL with Create.
-    create_url: |
-      {{parent}}/accessLevels
-    base_url: |
-
-    self_link: |
-      {{name}}
+    create_url: "{{parent}}/accessLevels"
+    base_url: ""
+    self_link: "{{name}}"
     update_verb: :PATCH
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
