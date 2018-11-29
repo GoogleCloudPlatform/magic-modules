@@ -39,6 +39,7 @@ var (
 
 func resourceComputeRouterNat() *schema.Resource {
 	return &schema.Resource{
+		// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/963)
 		Create: resourceComputeRouterNatCreate,
 		Read:   resourceComputeRouterNatRead,
 		Delete: resourceComputeRouterNatDelete,
@@ -161,42 +162,20 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 		}
 	}
 
-	nat := &computeBeta.RouterNat{Name: natName}
-
-	if v, ok := d.GetOk("nat_ip_allocate_option"); ok {
-		nat.NatIpAllocateOption = v.(string)
-	}
-
-	if v, ok := d.GetOk("nat_ips"); ok {
-		nat.NatIps = convertStringArr(v.(*schema.Set).List())
-	}
-
-	if v, ok := d.GetOk("source_subnetwork_ip_ranges_to_nat"); ok {
-		nat.SourceSubnetworkIpRangesToNat = v.(string)
+	nat := &computeBeta.RouterNat{
+		Name:                          natName,
+		NatIpAllocateOption:           d.Get("nat_ip_allocate_option").(string),
+		NatIps:                        convertStringArr(d.Get("nat_ips").(*schema.Set).List()),
+		SourceSubnetworkIpRangesToNat: d.Get("source_subnetwork_ip_ranges_to_nat").(string),
+		MinPortsPerVm:                 int64(d.Get("min_ports_per_vm").(int)),
+		UdpIdleTimeoutSec:             int64(d.Get("udp_idle_timeout_sec").(int)),
+		IcmpIdleTimeoutSec:            int64(d.Get("icmp_idle_timeout_sec").(int)),
+		TcpEstablishedIdleTimeoutSec:  int64(d.Get("tcp_established_idle_timeout_sec").(int)),
+		TcpTransitoryIdleTimeoutSec:   int64(d.Get("tcp_transitory_idle_timeout_sec").(int)),
 	}
 
 	if v, ok := d.GetOk("subnetwork"); ok {
 		nat.Subnetworks = expandSubnetworks(v.([]map[string]interface{}))
-	}
-
-	if v, ok := d.GetOk("min_ports_per_vm"); ok {
-		nat.MinPortsPerVm = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("udp_idle_timeout_sec"); ok {
-		nat.UdpIdleTimeoutSec = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("icmp_idle_timeout_sec"); ok {
-		nat.IcmpIdleTimeoutSec = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("tcp_established_idle_timeout_sec"); ok {
-		nat.TcpEstablishedIdleTimeoutSec = int64(v.(int))
-	}
-
-	if v, ok := d.GetOk("tcp_transitory_idle_timeout_sec"); ok {
-		nat.TcpTransitoryIdleTimeoutSec = int64(v.(int))
 	}
 
 	log.Printf("[INFO] Adding nat %s", natName)
@@ -257,7 +236,6 @@ func resourceComputeRouterNatRead(d *schema.ResourceData, meta interface{}) erro
 			d.Set("nat_ip_allocate_option", nat.NatIpAllocateOption)
 			d.Set("nat_ips", schema.NewSet(schema.HashString, convertStringArrToInterface(nat.NatIps)))
 			d.Set("source_subnetwork_ip_ranges_to_nat", nat.SourceSubnetworkIpRangesToNat)
-			d.Set("subnetwork", flattenRouterNatSubnetworkToNatBeta(nat.Subnetworks))
 			d.Set("min_ports_per_vm", nat.MinPortsPerVm)
 			d.Set("udp_idle_timeout_sec", nat.UdpIdleTimeoutSec)
 			d.Set("icmp_idle_timeout_sec", nat.IcmpIdleTimeoutSec)
@@ -265,6 +243,11 @@ func resourceComputeRouterNatRead(d *schema.ResourceData, meta interface{}) erro
 			d.Set("tcp_transitory_idle_timeout_sec", nat.TcpTransitoryIdleTimeoutSec)
 			d.Set("region", region)
 			d.Set("project", project)
+
+			if err := d.Set("subnetwork", nat.Subnetworks); err != nil {
+				return fmt.Errorf("Error reading router nat: %s", err)
+			}
+
 			return nil
 		}
 	}
@@ -357,18 +340,6 @@ func resourceComputeRouterNatImportState(d *schema.ResourceData, meta interface{
 	d.Set("name", parts[2])
 
 	return []*schema.ResourceData{d}, nil
-}
-
-func flattenRouterNatSubnetworkToNatBeta(subnetworksToNat []*computeBeta.RouterNatSubnetworkToNat) []map[string]interface{} {
-	result := make([]map[string]interface{}, 0, len(subnetworksToNat))
-	for _, subnetworkToNat := range subnetworksToNat {
-		stnMap := make(map[string]interface{})
-		stnMap["name"] = subnetworkToNat.Name
-		stnMap["source_ip_ranges_to_nat"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SourceIpRangesToNat))
-		stnMap["secondary_ip_range_names"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SecondaryIpRangeNames))
-		result = append(result, stnMap)
-	}
-	return result
 }
 
 func expandSubnetworks(subnetworks []map[string]interface{}) []*computeBeta.RouterNatSubnetworkToNat {
