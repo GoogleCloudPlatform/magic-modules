@@ -109,6 +109,7 @@ jobs:
             resource: magic-modules-new-prs
             version: every
             trigger: true
+            attempts: 2
             params:
               fetch_merge: true
           - aggregate:
@@ -300,6 +301,7 @@ jobs:
               - ansible-test
               - inspec-test
           - get: mm-initial-pr
+            attempts: 2
             resource: magic-modules-new-prs
             passed: [mm-generate]
             version: every
@@ -390,6 +392,7 @@ jobs:
     - name: merge-prs
       plan:
           - get: mm-approved-prs
+            attempts: 2
           - put: mark-automerged
             resource: mm-approved-prs
             params:
