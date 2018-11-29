@@ -20,8 +20,6 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeRouterNatBasic(testId),
-				Check: testAccCheckComputeRouterNatExists(
-					"google_compute_router_nat.foobar"),
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_router_nat.foobar",
@@ -48,8 +46,11 @@ func TestAccComputeRouterNat_withManualIpAndSubnetConfiguration(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId),
-				Check: testAccCheckComputeRouterNatExists(
-					"google_compute_router_nat.foobar"),
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -128,50 +129,6 @@ func testAccCheckComputeRouterNatDelete(n string) resource.TestCheckFunc {
 		}
 
 		return nil
-	}
-}
-
-func testAccCheckComputeRouterNatExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := testAccProvider.Meta().(*Config)
-
-		project, err := getTestProject(rs.Primary, config)
-		if err != nil {
-			return err
-		}
-
-		region, err := getTestRegion(rs.Primary, config)
-		if err != nil {
-			return err
-		}
-
-		name := rs.Primary.Attributes["name"]
-		routerName := rs.Primary.Attributes["router"]
-
-		routersService := config.clientComputeBeta.Routers
-		router, err := routersService.Get(project, region, routerName).Do()
-
-		if err != nil {
-			return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
-		}
-
-		for _, nat := range router.Nats {
-
-			if nat.Name == name {
-				return nil
-			}
-		}
-
-		return fmt.Errorf("Nat %s not found for router %s", name, router.Name)
 	}
 }
 
