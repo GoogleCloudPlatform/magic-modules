@@ -95,6 +95,12 @@ class Providers
   end
 end
 
+# API Linter Tasks
+desc 'Runs the API Linter'
+RSpec::Core::RakeTask.new(:lint) do |t|
+  t.rspec_opts = '--pattern tools/linter/run.rb'
+end
+
 # Test Tasks
 desc 'Run all of the MM tests (rubocop, rspec)'
 multitask test: %w[rubocop spec]
