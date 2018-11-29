@@ -29,6 +29,8 @@ module Google
         "'#{value}'"
       elsif value.is_a?(Numeric)
         value.to_s
+      elsif value.is_a?(Hash) and value.keys.length == 1
+        "{#{quote_string(value.keys.first) }: #{python_literal(value[value.keys.first]) }}"
       elsif value.is_a?(Array)
         "[#{value.map { |x| python_literal(x) }.join(' ,')}]"
       elsif value == true

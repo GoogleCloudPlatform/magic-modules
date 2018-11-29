@@ -140,7 +140,16 @@ overrides: !ruby/object:Provider::ResourceOverrides
       type: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.7'
   Firewall: !ruby/object:Provider::Ansible::ResourceOverride
+    imports:
+      - re
+    provider_helpers:
+      - 'products/compute/helpers/python/provider_firewall.py'
+    transport: !ruby/object:Api::Resource::Transport
+      encoder: encode_request
     properties:
+      network: !ruby/object:Provider::Ansible::PropertyOverride
+        default_value:
+          selfLink: global/networks/default
       denied: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
       destinationRanges: !ruby/object:Provider::Ansible::PropertyOverride
