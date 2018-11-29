@@ -39,6 +39,7 @@ docs = YAML.safe_load(File.read(doc_file))
 
 docs.each do |doc|
   raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
+
   api = ApiFetcher.api_from_file(doc['filename'])
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
 
