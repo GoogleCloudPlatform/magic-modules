@@ -35,7 +35,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     provider_helpers:
       - 'products/iam/helpers/python/provider_service_account.py'
   ServiceAccountKey: !ruby/object:Provider::Ansible::ResourceOverride
-    exclude: true
+    template: 'products/iam/helpers/ansible/service_account_key_template.erb'
+    has_tests: false
 files: !ruby/object:Provider::Config::Files
   copy:
 <%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
