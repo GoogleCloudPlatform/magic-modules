@@ -71,7 +71,7 @@ objects:
         resource: ServiceAccount
         imports: name
       # A non-API property to allow writing results to a specific output file.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Path
         name: path
         description: |
           The full name of the file that will hold the service account private
@@ -79,17 +79,6 @@ objects:
           sync_file parameter.
 
           File path must be absolute.
-      # A non-API property to allow writing results to a specific output file.
-      - !ruby/object:Api::Type::String
-        name: key_id
-        description: |
-          Used to ensure the deletion of the key in the absence of a key file.
-      - !ruby/object:Api::Type::Boolean
-        name: fail_if_mismatch
-        description: |
-          If set to 'true' protects the target file from being rewritten with a
-          new private key. By default the file is always ensured to have a valid
-          private key on final state.
     properties:
       - !ruby/object:Api::Type::String
         name: name
