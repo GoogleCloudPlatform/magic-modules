@@ -93,6 +93,7 @@ module Discovery
 
     def get_methods_for_resource(resource)
       return unless @results['resources'][resource.pluralize.camelize(:lower)]
+
       @results['resources'][resource.pluralize.camelize(:lower)]['methods']
     end
 
