@@ -17,5 +17,5 @@ def encode_request(request, module):
         if not re.match(r"https://www.googleapis.com/compute/v1/projects/.*", request['network']):
             request['network'] = "https://www.googleapis.com/compute/v1/projects/{project}/{network}".format(project=module.params['project'],
                                                                                                              network=request['network'])
-                                    
+
     return request

@@ -42,7 +42,12 @@ module Provider
                if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
             ].flatten.compact,
             'required' => required,
-            'default' => (prop.default_value&.to_s),
+            'default' => (
+              if prop.default_value&.is_a?(::Hash)
+                prop.default_value
+              else
+                prop.default_value&.to_s
+              end),
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => prop.aliases,
             'version_added' => (prop.version_added&.to_f),
