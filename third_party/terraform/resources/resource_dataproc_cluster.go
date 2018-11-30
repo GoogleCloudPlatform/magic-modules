@@ -326,7 +326,7 @@ func instanceConfigSchema() *schema.Schema {
 					Optional: true,
 					Computed: true,
 					ForceNew: true,
-				}
+				},
 
 				"machine_type": {
 					Type:     schema.TypeString,
