@@ -15,6 +15,12 @@ sed -i 's/@PROJECT/graphite-test-ansible/g' test/integration/cloud-config-gcp.ym
 sed -i 's/@CRED_KIND/serviceaccount/g' test/integration/cloud-config-gcp.yml
 sed -i 's/@CRED_FILE/\/tmp\/google-account.json/g' test/integration/cloud-config-gcp.yml
 
+# Install dependencies for ansible
+apt-get update
+apt-get install -y man
+pip install requests
+pip install google-api-client
+
 # Setup ansible
 source hacking/env-setup
 
