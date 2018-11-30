@@ -3,6 +3,7 @@
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
 echo "${SERVICE_ACCOUNT_KEY}" > /tmp/google-account.json
+echo "${ANSIBLE_TEMPLATE}" > /tmp/ansible-template.yml
 
 set -e
 set -x
@@ -10,10 +11,7 @@ set -x
 pushd magic-modules-new-prs/build/ansible
 
 # Setup Cloud configuration template with variables
-cp test/integration/cloud-config-gcp.yml.template test/integration/cloud-config-gcp.yml
-sed -i 's/@PROJECT/graphite-test-ansible/g' test/integration/cloud-config-gcp.yml
-sed -i 's/@CRED_KIND/serviceaccount/g' test/integration/cloud-config-gcp.yml
-sed -i 's/@CRED_FILE/\/tmp\/google-account.json/g' test/integration/cloud-config-gcp.yml
+cp /tmp/ansible-template.yml test/integration/cloud-config-gcp.yml
 
 # Install dependencies for ansible
 apt-get update
