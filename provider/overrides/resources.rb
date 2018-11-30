@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,15 +19,17 @@ module Provider
     # This class allows them to get access to
     # Hash functions + lets the YAML parser import them.
     class OverrideResource < Google::YamlValidator
+      def self.attributes
+        []
+      end
+
+      attr_accessor(*attributes)
+
       # Used for testing.
       def initialize(hash = {})
         hash.each { |k, v| instance_variable_set("@#{k}", v) }
       end
 
-      # All keys in this "hash" are actually instance_variables with
-      # the @name notation.
-      # We're abstracting away the @name notation and allowing
-      # for @name or `name` to be valid.
       def [](key)
         if key.to_s[0] == '@'
           instance_variable_get(key.to_sym)
