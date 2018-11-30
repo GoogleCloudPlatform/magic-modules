@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"strings"
 
@@ -39,12 +40,17 @@ var (
 
 func resourceComputeRouterNat() *schema.Resource {
 	return &schema.Resource{
-		// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/963): Implement Update
+		// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/963)
 		Create: resourceComputeRouterNatCreate,
 		Read:   resourceComputeRouterNatRead,
 		Delete: resourceComputeRouterNatDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceComputeRouterNatImportState,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -175,7 +181,7 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if v, ok := d.GetOk("subnetwork"); ok {
-		nat.Subnetworks = expandSubnetworks(v.([]map[string]interface{}))
+		nat.Subnetworks = expandSubnetworks(v.(*schema.Set).List())
 	}
 
 	log.Printf("[INFO] Adding nat %s", natName)
@@ -190,7 +196,7 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
 	d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, natName))
-	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", 4)
+	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		d.SetId("")
 		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
@@ -234,7 +240,7 @@ func resourceComputeRouterNatRead(d *schema.ResourceData, meta interface{}) erro
 		if nat.Name == natName {
 			d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, natName))
 			d.Set("nat_ip_allocate_option", nat.NatIpAllocateOption)
-			d.Set("nat_ips", schema.NewSet(schema.HashString, convertStringArrToInterface(nat.NatIps)))
+			d.Set("nat_ips", schema.NewSet(schema.HashString, convertStringArrToInterface(convertSelfLinksToV1(nat.NatIps))))
 			d.Set("source_subnetwork_ip_ranges_to_nat", nat.SourceSubnetworkIpRangesToNat)
 			d.Set("min_ports_per_vm", nat.MinPortsPerVm)
 			d.Set("udp_idle_timeout_sec", nat.UdpIdleTimeoutSec)
@@ -244,7 +250,7 @@ func resourceComputeRouterNatRead(d *schema.ResourceData, meta interface{}) erro
 			d.Set("region", region)
 			d.Set("project", project)
 
-			if err := d.Set("subnetwork", nat.Subnetworks); err != nil {
+			if err := d.Set("subnetwork", flattenRouterNatSubnetworkToNatBeta(nat.Subnetworks)); err != nil {
 				return fmt.Errorf("Error reading router nat: %s", err)
 			}
 
@@ -320,7 +326,7 @@ func resourceComputeRouterNatDelete(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
 
-	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", 4)
+	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", int(d.Timeout(schema.TimeoutDelete).Minutes()))
 	if err != nil {
 		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
 	}
@@ -342,19 +348,40 @@ func resourceComputeRouterNatImportState(d *schema.ResourceData, meta interface{
 	return []*schema.ResourceData{d}, nil
 }
 
-func expandSubnetworks(subnetworks []map[string]interface{}) []*computeBeta.RouterNatSubnetworkToNat {
+func expandSubnetworks(subnetworks []interface{}) []*computeBeta.RouterNatSubnetworkToNat {
 	result := make([]*computeBeta.RouterNatSubnetworkToNat, 0, len(subnetworks))
 
 	for _, subnetwork := range subnetworks {
+		snm := subnetwork.(map[string]interface{})
 		subnetworkToNat := computeBeta.RouterNatSubnetworkToNat{
-			Name:                subnetwork["name"].(string),
-			SourceIpRangesToNat: convertStringSet(subnetwork["source_ip_ranges_to_nat"].(*schema.Set)),
+			Name:                snm["name"].(string),
+			SourceIpRangesToNat: convertStringSet(snm["source_ip_ranges_to_nat"].(*schema.Set)),
 		}
-		if v, ok := subnetwork["secondary_ip_range_names"]; ok {
+		if v, ok := snm["secondary_ip_range_names"]; ok {
 			subnetworkToNat.SecondaryIpRangeNames = convertStringSet(v.(*schema.Set))
 		}
 		result = append(result, &subnetworkToNat)
 	}
 
+	return result
+}
+
+func flattenRouterNatSubnetworkToNatBeta(subnetworksToNat []*computeBeta.RouterNatSubnetworkToNat) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, len(subnetworksToNat))
+	for _, subnetworkToNat := range subnetworksToNat {
+		stnMap := make(map[string]interface{})
+		stnMap["name"] = ConvertSelfLinkToV1(subnetworkToNat.Name)
+		stnMap["source_ip_ranges_to_nat"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SourceIpRangesToNat))
+		stnMap["secondary_ip_range_names"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SecondaryIpRangeNames))
+		result = append(result, stnMap)
+	}
+	return result
+}
+
+func convertSelfLinksToV1(selfLinks []string) []string {
+	result := make([]string, 0, len(selfLinks))
+	for _, selfLink := range selfLinks {
+		result = append(result, ConvertSelfLinkToV1(selfLink))
+	}
 	return result
 }

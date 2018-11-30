@@ -164,7 +164,8 @@ func testAccComputeRouterNatBasic(testId string) string {
 func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) string {
 	return fmt.Sprintf(`
 	        resource "google_compute_network" "foobar" {
-			name = "router-nat-test-%s"
+			name                    = "router-nat-test-%s"
+			auto_create_subnetworks = "false"
 		}
 		resource "google_compute_subnetwork" "foobar" {
 			name = "router-nat-test-subnetwork-%s"
@@ -173,7 +174,7 @@ func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) st
 			region = "us-central1"
 		}
 		resource "google_compute_address" "foobar" {
-			name = "router-peer-test-%s"
+			name = "router-nat-test-%s"
 			region = "${google_compute_subnetwork.foobar.region}"
 		}
 		resource "google_compute_router" "foobar"{
@@ -192,7 +193,8 @@ func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) st
 			nat_ips                            = ["${google_compute_address.foobar.self_link}"]
 			source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 			subnetwork {
-			  name = "${google_compute_subnetwork.foobar.self_link}"
+			  name                    = "${google_compute_subnetwork.foobar.self_link}"
+			  source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
 			}
 		}
 	`, testId, testId, testId, testId, testId)
@@ -201,7 +203,8 @@ func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) st
 func testAccComputeRouterNatKeepRouter(testId string) string {
 	return fmt.Sprintf(`
 		resource "google_compute_network" "foobar" {
-			name = "router-nat-test-%s"
+			name                    = "router-nat-test-%s"
+			auto_create_subnetworks = "false"
 		}
 		resource "google_compute_subnetwork" "foobar" {
 			name = "router-nat-test-subnetwork-%s"
