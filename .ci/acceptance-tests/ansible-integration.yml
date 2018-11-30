@@ -8,7 +8,7 @@ image_resource:
   source:
     repository: gcr.io/google.com/graphite-playground/ansible
     username: _json_key
-    password: {{gcr-key}}
+    password: ((test-image-key))
 
 run:
     path: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.sh
