@@ -442,6 +442,7 @@ jobs:
             TERRAFORM_KEY: ((terraform-key))
     - name: ansible-integration-test
       serial: true
+      trigger: false
       plan:
         - get: magic-modules-new-prs
         - task: ansible-integration
