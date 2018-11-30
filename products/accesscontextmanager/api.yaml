@@ -260,3 +260,154 @@ objects:
                         - :DESKTOP_CHROME_OS
                         - :ANDROID
                         - :IOS
+  - !ruby/object:Api::Resource
+    name: 'ServicePerimeter'
+    # This is an unusual API, so we need to use a few fields to map the methods
+    # to the right URL.
+    # create_url is the Create URL
+    # base_url is the Get and Delete and Patch URL. It is empty on purpose.
+    # List won't work yet. It should share a URL with Create.
+    create_url: "{{parent}}/servicePerimeters"
+    base_url: ""
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies.servicePerimeters'
+    description: |
+      ServicePerimeter describes a set of GCP resources which can freely import
+      and export data amongst themselves, but not export outside of the
+      ServicePerimeter. If a request with a source within this ServicePerimeter
+      has a target outside of the ServicePerimeter, the request will be blocked.
+      Otherwise the request is allowed. There are two types of Service Perimeter
+      - Regular and Bridge. Regular Service Perimeters cannot overlap, a single
+      GCP project can only belong to a single regular Service Perimeter. Service
+      Perimeter Bridges can contain only GCP projects as members, a single GCP
+      project may belong to multiple Service Perimeter Bridges.
+<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    parameters:
+      # Parent is a path parameter that _cannot_ be read or sent in the request at all.
+      # This must be done at the provider level.
+      - !ruby/object:Api::Type::String
+        name: parent
+        input: true
+        required: true
+        description: |
+          The AccessPolicy this ServicePerimeter lives in.
+          Format: accessPolicies/{policy_id}
+      - !ruby/object:Api::Type::String
+        name: name
+        input: true
+        required: true
+        description: |
+          Resource name for the ServicePerimeter. The short_name component must
+          begin with a letter and only include alphanumeric and '_'.
+          Format: accessPolicies/{policy_id}/servicePerimeters/{short_name}
+    properties:
+      - !ruby/object:Api::Type::String
+        name: title
+        required: true
+        description: |
+          Human readable title. Must be unique within the Policy.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          Description of the ServicePerimeter and its use. Does not affect
+          behavior.
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: |
+          Time the AccessPolicy was created in UTC.
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'updateTime'
+        description: |
+          Time the AccessPolicy was updated in UTC.
+        output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'perimeterType'
+        description: |
+          Specifies the type of the Perimeter. There are two types: regular and
+          bridge. Regular Service Perimeter contains resources, access levels,
+          and restricted/unrestricted services. Every resource can be in at most
+          ONE regular Service Perimeter.
+
+          In addition to being in a regular service perimeter, a resource can also
+          be in zero or more perimeter bridges. A perimeter bridge only contains
+          resources. Cross project operations are permitted if all effected
+          resources share some perimeter (whether bridge or regular). Perimeter
+          Bridge does not contain access levels or services: those are governed
+          entirely by the regular perimeter that resource is in.
+
+          Perimeter Bridges are typically useful when building more complex
+          toplogies with many independent perimeters that need to share some data
+          with a common perimeter, but should not be able to share data among
+          themselves.
+        values:
+          - :PERIMETER_TYPE_REGULAR
+          - :PERIMETER_TYPE_BRIDGE
+        default_value: :PERIMETER_TYPE_REGULAR
+      - !ruby/object:Api::Type::NestedObject
+        name: 'status'
+        description: |
+          ServicePerimeter configuration. Specifies sets of resources,
+          restricted/unrestricted services and access levels that determine
+          perimeter content and boundaries.
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'resources'
+            description: |
+              A list of GCP resources that are inside of the service perimeter.
+              Currently only projects are allowed.
+              Format: projects/{project_number}
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'accessLevels'
+            description: |
+              A list of AccessLevel resource names that allow resources within
+              the ServicePerimeter to be accessed from the internet.
+              AccessLevels listed must be in the same policy as this
+              ServicePerimeter. Referencing a nonexistent AccessLevel is a
+              syntax error. If no AccessLevel names are listed, resources within
+              the perimeter can only be accessed via GCP calls with request
+              origins within the perimeter. For Service Perimeter Bridge, must
+              be empty.
+
+              Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'unrestrictedServices'
+            description: |
+              GCP services that are not subject to the Service Perimeter
+              restrictions. May contain a list of services or a single wildcard
+              "*". For example, if logging.googleapis.com is unrestricted, users
+              can access logs inside the perimeter as if the perimeter doesn't
+              exist, and it also means VMs inside the perimeter can access logs
+              outside the perimeter.
+
+              The wildcard means that unless explicitly specified by
+              "restrictedServices" list, any service is treated as unrestricted.
+              One of the fields "restrictedServices", "unrestrictedServices"
+              must contain a wildcard "*", otherwise the Service Perimeter
+              specification is invalid. It also means that both field being
+              empty is invalid as well. "unrestrictedServices" can be empty if
+              and only if "restrictedServices" list contains a "*" wildcard.
+            item_type: Api::Type::String
+          - !ruby/object:Api::Type::Array
+            name: 'restrictedServices'
+            description: |
+              GCP services that are subject to the Service Perimeter
+              restrictions. May contain a list of services or a single wildcard
+              "*". For example, if storage.googleapis.com is specified, access
+              to the storage buckets inside the perimeter must meet the
+              perimeter's access restrictions.
+
+              Wildcard means that unless explicitly specified by
+              "unrestrictedServices" list, any service is treated as restricted.
+              One of the fields "restrictedServices", "unrestrictedServices"
+              must contain a wildcard "*", otherwise the Service Perimeter
+              specification is invalid. It also means that both field being
+              empty is invalid as well. "restrictedServices" can be empty if and
+              only if "unrestrictedServices" list contains a "*" wildcard.
+            item_type: Api::Type::String
