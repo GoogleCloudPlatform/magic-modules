@@ -19,17 +19,17 @@
     established (default value is empty). If both request and response are
     empty, the connection establishment alone will indicate health. The request
     data can only be ASCII.
+<%
+   else
+    raise "Unknown protocol: #{protocol}"
+   end
+-%>
 - !ruby/object:Api::Type::String
   name: 'response'
   description: |
     The bytes to match against the beginning of the response data. If left empty
     (the default value), any response will indicate health. The response data
     can only be ASCII.
-<%
-   else
-    raise "Unknown protocol: #{protocol}"
-   end
--%>
 - !ruby/object:Api::Type::Integer
   name: 'port'
   description: |
