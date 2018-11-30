@@ -14,10 +14,6 @@ pushd magic-modules-new-prs/build/ansible
 cp /tmp/ansible-template.yml test/integration/cloud-config-gcp.yml
 
 # Install dependencies for ansible
-apt-get update
-apt-get install -y man
-pip install requests
-pip install google-auth
 pip install -r requirements.txt
 
 # Setup ansible
