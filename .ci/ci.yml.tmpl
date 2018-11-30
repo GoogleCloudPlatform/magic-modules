@@ -94,8 +94,6 @@ jobs:
       plan:
           - get: magic-modules-external-prs
             trigger: false
-            params:
-              skip_clone: true
           - put: magic-modules-new-prs
             params:
                 status: pending
