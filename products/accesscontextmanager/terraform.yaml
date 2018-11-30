@@ -38,7 +38,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: "access_context_manager_access_level_basic"
       skip_test: true
       primary_resource_id: "access-level"
-      version: <%= _version_name %>
+      version: <%= version_name %>
       vars:
         access_level_name: "ios_no_lock"
     properties:
