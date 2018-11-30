@@ -17,6 +17,8 @@ require 'csv'
 # This is an Rspec Formatter that's responsible for outputting the
 # linter 'tests' out to a CSV format.
 #
+# This formatter only works on tests tagged with `property`
+#
 # Format:
 # product | resource | property | api.yaml (y/n)
 class CsvFormatterForMM
@@ -28,23 +30,22 @@ class CsvFormatterForMM
 
   # Places in the CSV header
   def start(_start_notification)
-    @output << ["Product", "Resource", "Property", "api.yaml"].to_csv
+    @output << ['Product', 'Resource', 'Property', 'api.yaml'].to_csv
   end
 
   # This property exists in api.yaml
   def example_passed(notification)
-    @output << info_to_csv(test_information(notification).merge({ api_yaml: true }))
+    @output << info_to_csv(test_information(notification).merge(api_yaml: true))
   end
 
   # This property does not exist in api.yaml
   def example_failed(notification)
-    @output << info_to_csv(test_information(notification).merge({ api_yaml: false }))
+    @output << info_to_csv(test_information(notification).merge(api_yaml: false))
   end
 
   # This test isn't being run.
   # Don't do anything.
-  def example_pending
-  end
+  def example_pending; end
 
   private
 
