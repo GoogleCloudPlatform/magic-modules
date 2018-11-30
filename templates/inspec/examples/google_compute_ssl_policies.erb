@@ -5,4 +5,11 @@ describe resource do
   it { should exist }
   its('names') { should include <%= doc_generation ? "'#{ssl_policy['name']}'" : "ssl_policy['name']" -%> }
   its('profiles') { should include <%= doc_generation ? "'#{ssl_policy['profile']}'" : "ssl_policy['profile']" -%> }
+  its('count') { should eq 1 }
+end
+
+resource.names.each do |policy_name|
+  describe google_compute_ssl_policy({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: policy_name}) do
+    its('min_tls_version') { should cmp <%= doc_generation ? "'#{ssl_policy['min_tls_version']}'" : "ssl_policy['min_tls_version']" -%> }
+  end
 end
