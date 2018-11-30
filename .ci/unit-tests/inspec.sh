@@ -8,9 +8,9 @@ export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
 
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
-set +e
+set +x
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
-set -e
+set -x
 
 export CLOUD_SDK_REPO="cloud-sdk-stretch"
 echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
