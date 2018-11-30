@@ -20,7 +20,7 @@ title: About the <%= object.name -%> resource
 platform: gcp
 ---
 
-<% resource_underscored_name = resource_name(object, product_ns) %>
+<% resource_underscored_name = plural ? resource_name(object, product_ns).pluralize : resource_name(object, product_ns) %>
 ## Syntax
 A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -%> resource
 
@@ -33,9 +33,22 @@ A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -
 ## Properties
 Properties that can be accessed from the `<%= resource_underscored_name -%>` resource:
 
+<% if plural -%>
+See <%= "[#{resource_name(object, product_ns)}.md](#{resource_name(object, product_ns)}.md)" -%> for more detailed information
+<% object.properties.each do |prop| -%>
+  * `<%= "#{prop.out_name.pluralize}" -%>`: an array of `<%= resource_name(object, product_ns) -%>` <%= "#{prop.out_name}" -%>
+
+<% end -%>
+
+## Filter Criteria
+This resource supports all of the above properties as filter criteria, which can be used
+with `where` as a block or a method.
+<% else # if plural -%>
 <% object.properties.each do |prop| -%>
   * `<%= "#{prop.out_name}" -%>`: <%= "#{prop.description.split("\n").join(' ')}" -%>
 
 
 <%= sub_property_descriptions(prop) -%>
 <% end -%>
+
+<% end # if plural -%>

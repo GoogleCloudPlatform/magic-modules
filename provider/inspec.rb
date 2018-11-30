@@ -55,7 +55,8 @@ module Provider
         out_file: \
           File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
       )
-      generate_documentation(data)
+      generate_documentation(data, name, false)
+      generate_documentation(data, name, true)
       generate_properties(data)
     end
 
@@ -113,10 +114,13 @@ module Provider
     end
 
     # Generates InSpec markdown documents for the resource
-    def generate_documentation(data)
-      name = data[:object].name.underscore
+    def generate_documentation(data, base_name, plural)
       docs_folder = File.join(data[:output_folder], 'docs', 'resources')
+
+      name = plural ? base_name.pluralize : base_name
       generate_resource_file data.clone.merge(
+        name: name,
+        plural: plural,
         doc_generation: true,
         default_template: 'templates/inspec/doc_template.md.erb',
         out_file: File.join(docs_folder, "google_#{data[:product_name]}_#{name}.md")
