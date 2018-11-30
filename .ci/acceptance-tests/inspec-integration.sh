@@ -15,7 +15,9 @@ export GOPATH=${PWD}/go
 
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
+set +e
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
+set -e
 
 gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
 
