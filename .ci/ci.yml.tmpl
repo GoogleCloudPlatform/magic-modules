@@ -440,3 +440,11 @@ jobs:
           file: magic-modules-new-prs/.ci/acceptance-tests/inspec-integration.yml
           params:
             TERRAFORM_KEY: ((terraform-key))
+    - name: ansible-integration-test
+      serial: true
+      plan:
+        - get: magic-modules-new-prs
+        - task: ansible-integration
+          file: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.yml
+          params:
+            SERVICE_ACCOUNT_KEY: ((ansible-integration-key))
