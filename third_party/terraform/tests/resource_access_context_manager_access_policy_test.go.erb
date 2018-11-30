@@ -10,10 +10,8 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// We can only have a single test as long as we are using a single organization
+// Access Context Manager tests need to run serially
 func TestAccAccessContextManagerAccessPolicy_basic(t *testing.T) {
-	t.Parallel()
-
 	org := getTestOrgFromEnv(t)
 
 	resource.Test(t, resource.TestCase{
