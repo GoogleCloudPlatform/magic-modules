@@ -1,11 +1,11 @@
 #!/bin/bash
 
-set -e
-set -x
-
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
 echo "${SERVICE_ACCOUNT_KEY}" > /tmp/google-account.json
+
+set -e
+set -x
 
 pushd magic-modules-new-prs/build/ansible
 

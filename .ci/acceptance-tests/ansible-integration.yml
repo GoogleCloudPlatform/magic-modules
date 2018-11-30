@@ -4,10 +4,10 @@ inputs:
   - name: magic-modules-new-prs
 
 image_resource:
-    type: docker-image
-    source:
-        repository: nmckinley/go-ruby-python
-        tag: '1.11-2.5.1-2.7'
+  type: docker-image
+  source:
+    repository: python
+    tag: '2-jessie'
 
 run:
     path: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.sh
