@@ -19,13 +19,11 @@ sed -i 's/@CRED_FILE/\/tmp\/google-account.json/g' test/integration/cloud-config
 apt-get update
 apt-get install -y man
 pip install requests
-pip install google-api-client
+pip install google-auth
+pip install -r requirements.txt
 
 # Setup ansible
 source hacking/env-setup
 
 # Run ansible
 ansible-test integration -v --allow-unsupported --continue-on-error $(find test/integration/targets -name "gcp*" -type d -printf "%P ")
-
-popd
-exit 100
