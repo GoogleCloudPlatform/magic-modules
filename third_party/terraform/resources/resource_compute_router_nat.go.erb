@@ -42,7 +42,7 @@ var (
 
 func resourceComputeRouterNat() *schema.Resource {
 	return &schema.Resource{
-		// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/963)
+		// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/963): Implement Update
 		Create: resourceComputeRouterNatCreate,
 		Read:   resourceComputeRouterNatRead,
 		Delete: resourceComputeRouterNatDelete,
