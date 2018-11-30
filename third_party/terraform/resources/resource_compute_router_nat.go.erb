@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -385,3 +387,6 @@ func convertSelfLinksToV1(selfLinks []string) []string {
 	}
 	return result
 }
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
