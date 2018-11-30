@@ -140,14 +140,14 @@ func testAccComputeRouterNatBasic(testId string) string {
 			name = "router-nat-test-%s"
 		}
 		resource "google_compute_subnetwork" "foobar" {
-			name = "router-nat-test-subnetwork-%s"
-			network = "${google_compute_network.foobar.self_link}"
+			name          = "router-nat-test-subnetwork-%s"
+			network       = "${google_compute_network.foobar.self_link}"
 			ip_cidr_range = "10.0.0.0/16"
-			region = "us-central1"
+			region        = "us-central1"
 		}
 		resource "google_compute_router" "foobar"{
-			name = "router-nat-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
+			name    = "router-nat-test-%s"
+			region  = "${google_compute_subnetwork.foobar.region}"
 			network = "${google_compute_network.foobar.self_link}"
 			bgp {
 				asn = 64514
@@ -170,18 +170,18 @@ func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) st
 			auto_create_subnetworks = "false"
 		}
 		resource "google_compute_subnetwork" "foobar" {
-			name = "router-nat-test-subnetwork-%s"
-			network = "${google_compute_network.foobar.self_link}"
+			name          = "router-nat-test-subnetwork-%s"
+			network       = "${google_compute_network.foobar.self_link}"
 			ip_cidr_range = "10.0.0.0/16"
-			region = "us-central1"
+			region        = "us-central1"
 		}
 		resource "google_compute_address" "foobar" {
-			name = "router-nat-test-%s"
+			name   = "router-nat-test-%s"
 			region = "${google_compute_subnetwork.foobar.region}"
 		}
 		resource "google_compute_router" "foobar"{
-			name = "router-nat-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
+			name    = "router-nat-test-%s"
+			region  = "${google_compute_subnetwork.foobar.region}"
 			network = "${google_compute_network.foobar.self_link}"
 			bgp {
 				asn = 64514
@@ -209,14 +209,14 @@ func testAccComputeRouterNatKeepRouter(testId string) string {
 			auto_create_subnetworks = "false"
 		}
 		resource "google_compute_subnetwork" "foobar" {
-			name = "router-nat-test-subnetwork-%s"
-			network = "${google_compute_network.foobar.self_link}"
+			name          = "router-nat-test-subnetwork-%s"
+			network       = "${google_compute_network.foobar.self_link}"
 			ip_cidr_range = "10.0.0.0/16"
-			region = "us-central1"
+			region        = "us-central1"
 		}
 		resource "google_compute_router" "foobar"{
-			name = "router-nat-test-%s"
-			region = "${google_compute_subnetwork.foobar.region}"
+			name    = "router-nat-test-%s"
+			region  = "${google_compute_subnetwork.foobar.region}"
 			network = "${google_compute_network.foobar.self_link}"
 			bgp {
 				asn = 64514
