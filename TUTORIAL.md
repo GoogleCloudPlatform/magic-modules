@@ -4,6 +4,9 @@ https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/Goo
 --->
 # Magic Modules Tutorial
 
+<!-- TODO: analytics id? -->
+<walkthrough-author name="danahoffman@google.com" tutorialName="Magic Modules Tutorial" repositoryUrl="https://github.com/GoogleCloudPlatform/magic-modules"></walkthrough-author>
+
 ## Intro
 
 This tutorial will walk you through the components that make up Magic Modules.
