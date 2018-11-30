@@ -19,6 +19,8 @@ module Provider
     # This class allows them to get access to
     # Hash functions + lets the YAML parser import them.
     class OverrideResource < Google::YamlValidator
+      # This is the list of additional attributes that a provider
+      # can add through overrides
       def self.attributes
         []
       end
@@ -30,6 +32,10 @@ module Provider
         hash.each { |k, v| instance_variable_set("@#{k}", v) }
       end
 
+      # All keys in this "hash" are actually instance_variables with	
+      # the @name notation.	
+      # We're abstracting away the @name notation and allowing	
+      # for @name or `name` to be valid.
       def [](key)
         if key.to_s[0] == '@'
           instance_variable_get(key.to_sym)
