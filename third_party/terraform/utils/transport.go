@@ -2,6 +2,7 @@ package google
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -33,6 +34,10 @@ func isEmptyValue(v reflect.Value) bool {
 }
 
 func sendRequest(config *Config, method, rawurl string, body map[string]interface{}) (map[string]interface{}, error) {
+	return sendRequestWithTimeout(config, method, rawurl, body, 0)
+}
+
+func sendRequestWithTimeout(config *Config, method, rawurl string, body map[string]interface{}, timeout time.Duration) (map[string]interface{}, error) {
 	reqHeaders := make(http.Header)
 	reqHeaders.Set("User-Agent", config.userAgent)
 	reqHeaders.Set("Content-Type", "application/json")
@@ -77,8 +82,27 @@ func sendRequest(config *Config, method, rawurl string, body map[string]interfac
 		return nil, err
 	}
 
-	if res == nil {
-		return nil, fmt.Errorf("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/terraform-providers/terraform-provider-google/issues.")
+	req, err := http.NewRequest(method, u, &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header = reqHeaders
+
+	if timeout != 0 {
+		ctx, cancel := context.WithTimeout(context.TODO(), timeout)
+		// Cancel must always be called to avoid leaking go routines
+		defer cancel()
+
+		req = req.WithContext(ctx)
+	}
+
+	res, err := config.client.Do(req)
+	if err != nil {
+		// Explicitly catch timeout errors in order to throw a friendlier error message.
+		if uerr, ok := err.(*url.Error); ok && uerr.Err == context.DeadlineExceeded {
+			return nil, fmt.Errorf("%v Timeout Exceeded : %v", timeout, err)
+		}
+		return nil, err
 	}
 	// The defer call must be made outside of the retryFunc otherwise it's closed too soon.
 	defer googleapi.CloseBody(res)

@@ -57,15 +57,15 @@ func resource<%= resource_name -%>() *schema.Resource {
             State: resource<%= resource_name -%>Import,
         },
 
-<%      unless object.async.nil? -%>
+
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
+            Create: schema.DefaultTimeout(<%= !object.async.nil? ? object.async.operation.timeouts.insert_sec : 300 -%> * time.Second),
 <%          if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= object.async.operation.timeouts.update_sec -%> * time.Second),
+            Update: schema.DefaultTimeout(<%= !object.async.nil? ? object.async.operation.timeouts.update_sec : 300 -%> * time.Second),
 <%          end -%>
-            Delete: schema.DefaultTimeout(<%= object.async.operation.timeouts.delete_sec -%> * time.Second),
+            Delete: schema.DefaultTimeout(<%= !object.async.nil? ? object.async.operation.timeouts.delete_sec : 300 -%> * time.Second),
         },
-<%      end -%>
+
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{
@@ -139,7 +139,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-    res, err := sendRequest(config, "<%= object.create_verb.to_s.upcase -%>", url, obj)
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutCreate))
     if err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
     }
@@ -301,9 +301,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
             return err
         }
 <%      if object.async.nil? -%>
-        _, err = sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
+        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      else -%>
-        res, err := sendRequest(config, "<%= key[:update_verb] -%>", url, obj)
+        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      end -%>
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
@@ -378,9 +378,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%  if object.async.nil? -%>
-    _, err = sendRequest(config, "<%= object.update_verb -%>", url, obj)
+    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
 <%  else -%>
-    res, err := sendRequest(config, "<%= object.update_verb -%>", url, obj)
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
 <% end -%>
 
     if err != nil {
@@ -436,7 +436,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     var obj map[string]interface{}
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-    res, err := sendRequest(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj)
+    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutDelete))
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
