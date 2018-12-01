@@ -6,9 +6,9 @@ inputs:
 image_resource:
   type: docker-image
   source:
-    repository: gcr.io/google.com/graphite-playground/ansible
+    repository: gcr.io/cg-concourse-hub/magician-ansible
     username: _json_key
-    password: ((test-image-key))
+    password: ((image-key))
 
 run:
     path: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.sh
