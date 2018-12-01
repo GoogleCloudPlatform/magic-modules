@@ -1,6 +1,7 @@
 platform: linux
+
 inputs:
-  - name: magic-modules
+  - name: magic-modules-new-prs
 
 image_resource:
   type: docker-image
@@ -10,6 +11,4 @@ image_resource:
     password: ((image-key))
 
 run:
-  path: magic-modules/.ci/unit-tests/ansible.sh
-  args:
-    - magic-modules/build/ansible
+    path: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.sh
