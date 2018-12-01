@@ -609,7 +609,34 @@ overrides: !ruby/object:Provider::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+    create_url: projects/{{project}}/zones/{{zone}}/disks/{{source_disk}}/createSnapshot
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `source_disk_encryption_key_raw`: (Optional)  This is an alias for
+          `source_disk_encryption_key.raw_key`.
+      attributes: |
+        * (Deprecated) `disk_encryption_key_sha256`: This is an alias for
+          `disk_encryption_key.sha256`.  It is deprecated to enhance
+          consistency with `source_image_encryption_key` and
+          `source_snapshot_encryption_key`.
+    properties:
+      id: !ruby/object:Provider::Terraform::PropertyOverride
+        name: 'snapshot_id'
+      zone: !ruby/object:Provider::Terraform::PropertyOverride
+        ignore_read: true
+      snapshotEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        diff_suppress_func: snapshotEncryptionKeyDiffSuppress
+        custom_expand: templates/terraform/custom_expand/snapshot_encryption_key_expand.erb
+      sourceDisk: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      sourceDiskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+        ignore_read: true
+        diff_suppress_func: sourceDiskEncryptionKeyDiffSuppress
+        custom_expand: templates/terraform/custom_expand/source_disk_encryption_key_expand.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: templates/terraform/constants/snapshot.erb
+      decoder: templates/terraform/decoders/snapshot.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |

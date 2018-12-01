@@ -3058,7 +3058,9 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
+    input: true
     base_url: projects/{{project}}/global/snapshots
+    create_url: projects/{{project}}/zones/{{zone}}/disks/{{sourceDisk}}/createSnapshot
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#snapshotList'
       items: 'items'
@@ -3084,11 +3086,12 @@ objects:
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
-        name: 'source'
+        name: 'sourceDisk'
         resource: 'Disk'
         imports: 'name'
         description: 'A reference to the disk used to create this snapshot.'
         input: true
+      # ignore_read in providers - this is only used in Create
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
         resource: 'Zone'
@@ -3097,6 +3100,7 @@ objects:
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'snapshotEncryptionKey'
+        input: true
         description: |
           The customer-supplied encryption key of the snapshot. Required if the
           source snapshot is protected by a customer-supplied encryption key.
@@ -3118,9 +3122,10 @@ objects:
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
-        input: true
       - !ruby/object:Api::Type::NestedObject
+        # ignore_read in providers - this is only used in Create
         name: 'sourceDiskEncryptionKey'
+        input: true
         description: |
           The customer-supplied encryption key of the source snapshot. Required
           if the source snapshot is protected by a customer-supplied encryption
@@ -3143,7 +3148,6 @@ objects:
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
-        input: true
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -3160,6 +3164,8 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource; provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -3168,9 +3174,9 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'description'
+        input: true
         description: 'An optional description of this resource.'
       # 'sourceDiskId' not useful for object convergence.
       - !ruby/object:Api::Type::Integer
@@ -3183,6 +3189,7 @@ objects:
       # 'storageBytesStatus' not useful for object convergence.
       - !ruby/object:Api::Type::Array
         name: 'licenses'
+        output: true
         description: |
           A list of public visible licenses that apply to this snapshot. This
           can be because the original image had licenses attached (such as a
@@ -3193,11 +3200,18 @@ objects:
           resource: 'License'
           imports: 'selfLink'
           description: 'A reference to a license associated with this snapshot'
-      # 'labelFingerprint' is used internally on updates
-      - !ruby/object:Api::Type::Array
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: 'Labels to apply to this snapshot.'
-        item_type: Api::Type::String
+        description: Labels to apply to this Snapshot.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource. Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
+        update_verb: :POST
   - !ruby/object:Api::Resource
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'

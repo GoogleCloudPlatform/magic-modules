@@ -1,0 +1,34 @@
+if v, ok := res["snapshotEncryptionKey"]; ok {
+   original := v.(map[string]interface{})
+   transformed := make(map[string]interface{})
+  // The raw key won't be returned, so we need to use the original.
+  transformed["rawKey"] = d.Get("snapshot_encryption_key.0.raw_key")
+  transformed["sha256"] = original["sha256"]
+
+  //TODO: Remove block when fields are removed
+  if v, ok := d.GetOk("snapshot_encryption_key_raw"); ok {
+    transformed["rawKey"] = v
+  }
+  d.Set("snapshot_encryption_key_sha256", original["sha256"])
+
+  res["snapshotEncryptionKey"] = transformed
+}
+
+if v, ok := res["sourceDiskEncryptionKey"]; ok {
+   original := v.(map[string]interface{})
+   transformed := make(map[string]interface{})
+  // The raw key won't be returned, so we need to use the original.
+  transformed["rawKey"] = d.Get("source_disk_encryption_key.0.raw_key")
+  transformed["sha256"] = original["sha256"]
+
+  //TODO: Remove block when fields are removed
+  if v, ok := d.GetOk("source_disk_encryption_key_raw"); ok {
+    transformed["rawKey"] = v
+  }
+  d.Set("source_disk_encryption_key_sha256", original["sha256"])
+
+  res["sourceDiskEncryptionKey"] = transformed
+}
+
+d.Set("source_disk_link", res["sourceDisk"])
+return res, nil

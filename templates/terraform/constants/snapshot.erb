@@ -1,0 +1,39 @@
+func snapshotEncryptionKeyDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+  if strings.HasSuffix(k, "#") {
+    if old == "1" && new == "0" {
+      // If we have a disk_encryption_key_raw, we can trust that the diff will be handled there
+      // and we don't need to worry about it here.
+      return d.Get("snapshot_encryption_key_raw").(string) != ""
+    } else if new == "1" && old == "0" {
+      // This will be handled by diffing the 'raw_key' attribute.
+      return true
+    }
+  } else if strings.HasSuffix(k, "raw_key") {
+    disk_key := d.Get("snapshot_encryption_key_raw").(string)
+    return disk_key == old && old != "" && new == ""
+  } else if k == "snapshot_encryption_key_raw" {
+    disk_key := d.Get("snapshot_encryption_key.0.raw_key").(string)
+    return disk_key == old && old != "" && new == ""
+  }
+  return false
+}
+
+func sourceDiskEncryptionKeyDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+  if strings.HasSuffix(k, "#") {
+    if old == "1" && new == "0" {
+      // If we have a disk_encryption_key_raw, we can trust that the diff will be handled there
+      // and we don't need to worry about it here.
+      return d.Get("source_disk_encryption_key_raw").(string) != ""
+    } else if new == "1" && old == "0" {
+      // This will be handled by diffing the 'raw_key' attribute.
+      return true
+    }
+  } else if strings.HasSuffix(k, "raw_key") {
+    disk_key := d.Get("source_disk_encryption_key_raw").(string)
+    return disk_key == old && old != "" && new == ""
+  } else if k == "source_disk_encryption_key_raw" {
+    disk_key := d.Get("source_disk_encryption_key.0.raw_key").(string)
+    return disk_key == old && old != "" && new == ""
+  }
+  return false
+}
