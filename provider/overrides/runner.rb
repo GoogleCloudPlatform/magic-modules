@@ -86,7 +86,7 @@ module Provider
         set_additional_values(res, res_override)
 
         variables = (old_resource.instance_variables + res_override.instance_variables).uniq
-        variables.reject { |o| o == :@properties || o == :@parameters }
+        variables.reject { |o| %i[@properties @parameters].include?(o) }
                  .each do |var_name|
           if !res_override[var_name].nil?
             res.instance_variable_set(var_name, res_override[var_name])
@@ -104,7 +104,6 @@ module Provider
         end
         res
       end
-      # rubocop:enable Metrics/AbcSize
 
       # Given a Api::Type property and a hash of properties, create a new Api::Type property
       # This will handle NestedObjects, Arrays of NestedObjects of arbitrary length
