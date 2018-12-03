@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
@@ -77,12 +76,10 @@ resource "google_compute_region_instance_group_manager" "foo" {
 	}
 	wait_for_instances = true
 
-<% unless version.nil? || version == 'ga' -%>
 	auto_healing_policies {
 		health_check = "${google_compute_health_check.autohealing.self_link}"
 		initial_delay_sec = 10
 	}
-<% end -%>
 }
 
 data "google_compute_region_instance_group" "data_source" {
