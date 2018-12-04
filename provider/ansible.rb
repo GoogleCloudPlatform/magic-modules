@@ -202,10 +202,10 @@ module Provider
         "#{object.kind}List"
       end
 
-      # Grabs all conflicted properties and returns an array of arrays without
+      # Grabs all conflicting properties and returns an array of arrays without
       # any duplicates.
       # This does not create an optimal list, but it does create a valid list.
-      def conflicted_property_batches(object)
+      def conflicting_property_batches(object)
         sets = object.all_user_properties.map do |p|
           if !p.conflicting.empty?
             p.conflicting.map(&:name).map(&:underscore) + [p.name.underscore]
