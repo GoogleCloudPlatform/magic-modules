@@ -3124,6 +3124,7 @@ objects:
         imports: 'name'
         description: 'A reference to the disk used to create this snapshot.'
         input: true
+        required: true
       # ignore_read in providers - this is only used in Create
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'

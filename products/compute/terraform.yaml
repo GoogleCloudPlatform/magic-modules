@@ -605,6 +605,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         name: 'snapshot_id'
       zone: !ruby/object:Provider::Terraform::PropertyOverride
         ignore_read: true
+        default_from_api: true
+        required: false
       snapshotEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
         # there's no default from the API, but we need the top-level List to be computed
         # so we can always set the inner sha256 field. Long-term, we're going to ForceNew
