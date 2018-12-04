@@ -15,6 +15,16 @@ require 'api/object'
 
 module Provider
   module Ansible
+    class AnsibleFactsTestInformation < Api::Object
+      attr_reader :exists
+      attr_reader :does_not_exist
+      def validate
+        super
+        check_optional_property :exists, ::String
+        check_optional_property :does_not_exist, ::String
+      end
+    end
+
     # Ansible specific properties to be added to Api::Resource
     class FactsOverride < Api::Object
       attr_reader :has_filters
@@ -34,7 +44,7 @@ module Provider
         check_property :filter, Api::Object
         check_property :query_options, :boolean
         check_property :filter_api_param, ::String
-        check_optional_property :test, ::String
+        check_optional_property :test, AnsibleFactsTestInformation
       end
     end
     # This is a property exclusive to Ansible filters.

@@ -33,7 +33,6 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      test: results['items'] | length >= 2
     collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
   ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
