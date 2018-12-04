@@ -329,7 +329,7 @@ module Provider
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
-        p.update_url.nil? || p.update_verb.nil?
+        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
       update_props.group_by do |p|
         { update_url: p.update_url, update_verb: p.update_verb }

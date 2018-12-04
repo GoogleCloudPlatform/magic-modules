@@ -1,0 +1,18 @@
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+	l := v.([]interface{})
+	req := make([]interface{}, 0, 1)
+	if len(l) == 1 && l[0].(map[string]interface{})["raw_key"] != "" {
+		// There is a value
+		outMap := make(map[string]interface{})
+		outMap["rawKey"] = l[0].(map[string]interface{})["raw_key"]
+		req = append(req, outMap)
+	} else {
+		// Check alternative setting?
+		if altV, ok := d.GetOk("snapshot_encryption_key_raw"); ok && altV != "" {
+			outMap := make(map[string]interface{})
+			outMap["rawKey"] = altV
+			req = append(req, outMap)
+    }
+	}
+ 	return req, nil
+}

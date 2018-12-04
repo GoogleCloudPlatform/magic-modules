@@ -1,0 +1,3 @@
+d.Set("source_disk_link", res["sourceDisk"])
+d.Set("snapshot_encryption_key_sha256", res["snapshotEncryptionKey"].((map[string]interface{}))["sha256"])
+return res, nil

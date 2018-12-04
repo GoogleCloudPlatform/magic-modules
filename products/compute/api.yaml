@@ -3087,13 +3087,19 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Snapshot'
     kind: 'compute#snapshot'
+    input: true
     base_url: projects/{{project}}/global/snapshots
+    create_url: projects/{{project}}/zones/{{zone}}/disks/{{sourceDisk}}/createSnapshot
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#snapshotList'
       items: 'items'
     exports:
       - !ruby/object:Api::Type::SelfLink
         name: 'selfLink'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
     description: |
       Represents a Persistent Disk Snapshot resource.
 
@@ -3113,11 +3119,12 @@ objects:
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
-        name: 'source'
+        name: 'sourceDisk'
         resource: 'Disk'
         imports: 'name'
         description: 'A reference to the disk used to create this snapshot.'
         input: true
+      # ignore_read in providers - this is only used in Create
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
         resource: 'Zone'
@@ -3147,8 +3154,8 @@ objects:
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
-        input: true
       - !ruby/object:Api::Type::NestedObject
+        # ignore_read in providers - this is only used in Create
         name: 'sourceDiskEncryptionKey'
         description: |
           The customer-supplied encryption key of the source snapshot. Required
@@ -3160,19 +3167,20 @@ objects:
             description: |
               Specifies a 256-bit customer-supplied encryption key, encoded in
               RFC 4648 base64 to either encrypt or decrypt this resource.
+          # The docs list this field but it is never returned.
           - !ruby/object:Api::Type::String
             name: 'sha256'
+            exclude: true
+            output: true
             description: |
               The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
               encryption key that protects this resource.
-            output: true
           - !ruby/object:Api::Type::String
             # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
             name: 'kmsKeyName'
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
-        input: true
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -3189,6 +3197,8 @@ objects:
         output: true
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource; provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -3197,9 +3207,9 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'description'
+        input: true
         description: 'An optional description of this resource.'
       # 'sourceDiskId' not useful for object convergence.
       - !ruby/object:Api::Type::Integer
@@ -3212,6 +3222,7 @@ objects:
       # 'storageBytesStatus' not useful for object convergence.
       - !ruby/object:Api::Type::Array
         name: 'licenses'
+        output: true
         description: |
           A list of public visible licenses that apply to this snapshot. This
           can be because the original image had licenses attached (such as a
@@ -3222,11 +3233,18 @@ objects:
           resource: 'License'
           imports: 'selfLink'
           description: 'A reference to a license associated with this snapshot'
-      # 'labelFingerprint' is used internally on updates
-      - !ruby/object:Api::Type::Array
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: 'Labels to apply to this snapshot.'
-        item_type: Api::Type::String
+        description: Labels to apply to this Snapshot.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource. Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/snapshots/{{name}}/setLabels'
+        update_verb: :POST
   - !ruby/object:Api::Resource
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
