@@ -953,6 +953,8 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.
+      conflicts:
+        - tcpCheck
       properties:
       - !ruby/object:Api::Type::NestedObject
         name: authInfo
@@ -999,6 +1001,8 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: tcpCheck
       description: Contains information needed to make a TCP check.
+      conflicts:
+        - httpCheck
       properties:
       - !ruby/object:Api::Type::Integer
         name: port
@@ -1008,6 +1012,8 @@ objects:
     - !ruby/object:Api::Type::NestedObject
       name: resourceGroup
       description: The group resource associated with the configuration.
+      conflicts:
+        - monitoredResource
       properties:
       - !ruby/object:Api::Type::Enum
         name: resourceType
@@ -1027,6 +1033,8 @@ objects:
       description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
         associated with the configuration. The following monitored resource types are
         supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance  aws_elb_load_balancer'
+      conflicts:
+        - resourceGroup
       properties:
       - !ruby/object:Api::Type::String
         name: type
