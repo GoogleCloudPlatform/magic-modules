@@ -1,6 +1,6 @@
 require 'tools/linter/tests/tests'
 
-def run_tests(discovery_doc, api, tags={})
+def run_tests(discovery_doc, api, filters={}, tags={})
   # First context: product name
   RSpec.describe api.prefix do
     discovery_doc.resources.each do |disc_resource|
@@ -8,18 +8,18 @@ def run_tests(discovery_doc, api, tags={})
       # Second context: resource name
       describe disc_resource.name do
         # Run all resource tests on this resource
-        if tags[:resource]
-          include_examples 'resource_tests', disc_resource, api_obj
+        if filters[:resource]
+          include_examples 'resource_tests', disc_resource, api_obj, tags
         end
 
-        if tags[:property]
+        if filters[:property]
           PropertyFetcher.fetch_property_pairs(disc_resource.properties,
                                                api_obj.all_user_properties) \
                                               do |disc_prop, api_prop, name|
             # Third context: property name
             context name do
               # Run all tests on this property
-              include_examples 'property_tests', disc_prop, api_prop
+              include_examples 'property_tests', disc_prop, api_prop, tags
             end
           end
         end

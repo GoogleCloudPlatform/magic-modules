@@ -12,6 +12,10 @@
 # limitations under the License.
 
 require 'api/compiler'
+require 'provider/config'
+require 'provider/terraform/config'
+require 'provider/terraform/resource_override'
+require 'provider/terraform/property_override'
 
 # Takes in a DiscoveryResource + Api::Resource
 # Loops through all properties of the DiscoveryResource (at any depth)
@@ -62,7 +66,7 @@ class ApiFetcher
   # Get api from filename and apply overrides from a provider.
   def self.provider_from_file(api_filename, provider_name)
     api = self.api_from_file(api_filename)
-    provider_filename = "#{api_filename.split('/')[1..-1].join('/')}/#{provider_name}.yaml"
+    provider_filename = "#{api_filename.split('/')[0..-2].join('/')}/#{provider_name}.yaml"
     Provider::Config.parse(provider_filename, api, 'ga')
     api
   end

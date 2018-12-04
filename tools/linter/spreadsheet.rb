@@ -36,9 +36,9 @@ require 'rspec'
 doc_file = 'tools/linter/docs.yaml'
 RSpec.configure do |c|
   c.add_formatter(CsvFormatterForMM)
-  c.includsion_filter = [:property]
+  c.inclusion_filter = [:property]
 end
-Google::LOGGER.level = Logger::ERR
+Google::LOGGER.level = Logger::ERROR
 VALID_KEYS = %w[filename url].freeze
 
 # Running tests.
@@ -52,6 +52,6 @@ docs.each do |doc|
   run_tests(builder, api, {property: true})
 
   # Run tests on TF API
-  api = ApiFetcher.provider_from_file(doc['filename'])
-  run_tests(builder, api)
+  api = ApiFetcher.provider_from_file(doc['filename'], 'terraform')
+  run_tests(builder, api, {property: true}, {provider: 'terraform'})
 end
