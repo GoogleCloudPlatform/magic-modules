@@ -739,6 +739,8 @@ objects:
           The list of ALLOW rules specified by this firewall. Each rule
           specifies a protocol and port-range tuple that describes a permitted
           connection.
+        conflicts:
+          - denied
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             # IPProtocol has to be string, instead of Enum because user can
@@ -808,6 +810,9 @@ objects:
           traffic that has destination IP address in these ranges. These ranges
           must be expressed in CIDR format. Only IPv4 is supported.
         item_type: Api::Type::String
+        conflicts:
+          - sourceRanges
+          - sourceTags
       - !ruby/object:Api::Type::Enum
         name: 'direction'
         description: |
@@ -906,6 +911,9 @@ objects:
           used at the same time as sourceTags or targetTags.
         item_type: Api::Type::String
         max_size: 1
+        conflicts:
+          - sourceTags
+          - targetTags
       - !ruby/object:Api::Type::Array
         name: 'sourceTags'
         description: |
@@ -930,6 +938,9 @@ objects:
           network.
         item_type: Api::Type::String
         max_size: 1
+        conflicts:
+          - sourceTags
+          - targetTags
       - !ruby/object:Api::Type::Array
         name: 'targetTags'
         description: |
@@ -1456,6 +1467,10 @@ objects:
           - :HTTPS
       - !ruby/object:Api::Type::NestedObject
         name: 'httpHealthCheck'
+        conflicts:
+          - httpsHealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
 <%=
   protocol = 'HTTP'
@@ -1464,6 +1479,10 @@ objects:
 %>
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
+        conflicts:
+          - httpHealthCheck
+          - tcpHealthCheck
+          - sslHealthCheck
         properties:
 <%=
   protocol = 'HTTPS'
@@ -1472,6 +1491,10 @@ objects:
 %>
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - sslHealthCheck
         properties:
 <%=
   protocol = 'TCP'
@@ -1479,6 +1502,10 @@ objects:
 %>
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
+        conflicts:
+          - httpHealthCheck
+          - httpsHealthCheck
+          - tcpHealthCheck
         properties:
 <%=
   protocol = 'SSL'
@@ -2534,6 +2561,8 @@ objects:
           by the client when the network is created.
         api_name: 'IPv4Range'
         input: true
+        conflicts:
+          - autoCreateSubnetworks
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |

@@ -108,18 +108,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       httpCheck.authInfo.password: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
         custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
-      httpCheck: !ruby/object:Provider::Terraform::PropertyOverride
-        conflicts_with:
-        - tcp_check
-      tcpCheck: !ruby/object:Provider::Terraform::PropertyOverride
-        conflicts_with:
-        - http_check
-      monitoredResource: !ruby/object:Provider::Terraform::PropertyOverride
-        conflicts_with:
-        - resource_group
-      resourceGroup: !ruby/object:Provider::Terraform::PropertyOverride
-        conflicts_with:
-        - monitored_resource
       resourceGroup.groupId: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
