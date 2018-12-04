@@ -28,8 +28,7 @@ The formatter is located at `tools/linter/formatter.rb`
 To get the property tests as a CSV, do the following:
 
 ```
-  rspec tools/linter/run.rb --require ./tools/linter/spreadsheet/formatter.rb -f
-  CsvFormatterForMM --tag property > <output_file>
+  rspec tools/linter/spreadsheet.rb > <output_file>
 ```
 
 NOTE: The first line of this CSV will be RSpec formatting info and should be deleted.

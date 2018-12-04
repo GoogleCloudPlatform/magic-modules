@@ -22,30 +22,36 @@ require 'csv'
 # Format:
 # product | resource | property | api.yaml (y/n)
 class CsvFormatterForMM
-  RSpec::Core::Formatters.register self, :start, :example_passed, :example_failed, :example_pending
+  RSpec::Core::Formatters.register self, :start, :example_passed, :example_failed, :example_pending, :stop
 
   def initialize(output)
     @output = output
+    @rows = []
   end
 
   # Places in the CSV header
   def start(_start_notification)
-    @output << ['Product', 'Resource', 'Property', 'api.yaml'].to_csv
+    @output << ['Product', 'Resource', 'Property', 'api.yaml', 'terraform'].to_csv
   end
 
   # This property exists in api.yaml
   def example_passed(notification)
-    @output << info_to_csv(test_information(notification).merge(api_yaml: true))
+    add_row(test_information(notification).merge(pass: true))
   end
 
   # This property does not exist in api.yaml
   def example_failed(notification)
-    @output << info_to_csv(test_information(notification).merge(api_yaml: false))
+    add_row(test_information(notification).merge(pass: false))
   end
 
   # This test isn't being run.
   # Don't do anything.
   def example_pending; end
+
+  def stop(_stop_notification)
+    @rows.map { |r| info_to_csv(r) }
+         .each { |r| @output << r }
+  end
 
   private
 
@@ -54,13 +60,25 @@ class CsvFormatterForMM
     {
       product: example_group[:parent_example_group][:parent_example_group][:description],
       resource: example_group[:parent_example_group][:description],
-      property: example_group[:description]
+      property: example_group[:description],
+      provider: notification.example.metadata[:provider]
     }
   end
 
   def info_to_csv(test_info)
     [
-      test_info[:product], test_info[:resource], test_info[:property], test_info[:api_yaml]
+      test_info[:product], test_info[:resource], test_info[:property], test_info[:api], test_info[:terraform]
     ].to_csv
+  end
+
+  def add_row(test_info)
+    row = @rows.select { |r| %i[product resource property].all? { |v| r[v] == test_info[v] } }.first
+    if row
+      row[test_info[:provider]] = test_info[:pass]
+    else
+      test_info[test_info[:provider]] = test_info[:pass]
+      %i[pass provider].each { |k| test_info.delete(k) }
+      @rows.append(test_info)
+    end
   end
 end
