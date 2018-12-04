@@ -26,7 +26,7 @@ Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 require 'google/logger'
 require 'tools/linter/discovery'
 require 'tools/linter/fetcher'
-require 'tools/linter/tests'
+require 'tools/linter/tests/test_runner'
 
 require 'yaml'
 require 'rspec'
@@ -42,25 +42,5 @@ docs.each do |doc|
 
   api = ApiFetcher.api_from_file(doc['filename'])
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
-
-  # First context: product name
-  RSpec.describe api.prefix do
-    builder.resources.each do |disc_resource|
-      api_obj = api.objects.select { |p| p.name == disc_resource.name }.first
-      # Second context: resource name
-      describe disc_resource.name do
-        # Run all resource tests on this resource
-        include_examples 'resource_tests', disc_resource, api_obj
-        PropertyFetcher.fetch_property_pairs(disc_resource.properties,
-                                             api_obj.all_user_properties) \
-                                            do |disc_prop, api_prop, name|
-          # Third context: property name
-          context name do
-            # Run all tests on this property
-            include_examples 'property_tests', disc_prop, api_prop
-          end
-        end
-      end
-    end
-  end
+  run_tests(builder, api, {resource: true, property: true})
 end
