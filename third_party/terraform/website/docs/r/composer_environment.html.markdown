@@ -282,7 +282,7 @@ The `software_config` block supports:
   for allowed release names. This field can only be set in the [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
   provider, but is an output-only attribute in the GA provider.
 
-* `pythonVersion` (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) -
+* `python_version` (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) -
   The major version of Python used to run the Apache Airflow scheduler, worker, and webserver processes.
   Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be updated.
 
