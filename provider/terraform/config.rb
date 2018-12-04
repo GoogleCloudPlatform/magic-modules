@@ -29,6 +29,14 @@ module Provider
       def property_override
         Provider::Terraform::PropertyOverride
       end
+
+      def new_resource_override
+        Provider::Overrides::Terraform::ResourceOverride
+      end
+
+      def new_property_override
+        Provider::Overrides::Terraform::PropertyOverride
+      end
     end
   end
 end

@@ -17,6 +17,8 @@ require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
 require 'provider/terraform/property_override'
 require 'provider/terraform/resource_override'
+require 'provider/overrides/terraform/resource_override'
+require 'provider/overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
