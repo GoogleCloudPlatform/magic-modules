@@ -67,5 +67,5 @@ resource "google_compute_region_instance_group_manager" "foo" {
 data "google_compute_region_instance_group" "data_source" {
 	self_link = "${google_compute_region_instance_group_manager.foo.instance_group}"
 }
-`, acctest.RandomWithPrefix("test-rigm-"), acctest.RandomWithPrefix("test-rigm-"), instanceManagerName)
+`, acctest.RandomWithPrefix("test-rigm-"), instanceManagerName)
 }
