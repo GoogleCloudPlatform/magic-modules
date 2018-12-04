@@ -3116,7 +3116,14 @@ objects:
     # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
     # operation. we'll leave the object as global operation and use the disk's
     # zonal operation for the create action.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+<%=
+  indent(compile_file({timeouts: {
+                        insert_sec: 5 * 60,
+                        update_sec: 5 * 60,
+                        delete_sec: 5 * 60}},
+                      'templates/global_async.yaml.erb'), 4)
+
+%>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceDisk'
