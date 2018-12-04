@@ -22,7 +22,8 @@ require 'csv'
 # Format:
 # product | resource | property | api.yaml (y/n)
 class CsvFormatterForMM
-  RSpec::Core::Formatters.register self, :start, :example_passed, :example_failed, :example_pending, :stop
+  RSpec::Core::Formatters.register self, :start, :example_passed, :example_failed, :example_pending,
+                                   :stop
 
   def initialize(output)
     @output = output
@@ -67,7 +68,8 @@ class CsvFormatterForMM
 
   def info_to_csv(test_info)
     [
-      test_info[:product], test_info[:resource], test_info[:property], test_info[:api], test_info[:terraform]
+      test_info[:product], test_info[:resource], test_info[:property], test_info[:api],
+      test_info[:terraform]
     ].to_csv
   end
 

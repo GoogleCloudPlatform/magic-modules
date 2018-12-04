@@ -1,6 +1,19 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 require 'tools/linter/tests/tests'
 
-def run_tests(discovery_doc, api, filters={}, tags={})
+def run_tests(discovery_doc, api, filters = {}, tags = {})
   # First context: product name
   RSpec.describe api.prefix do
     discovery_doc.resources.each do |disc_resource|
@@ -8,9 +21,7 @@ def run_tests(discovery_doc, api, filters={}, tags={})
       # Second context: resource name
       describe disc_resource.name do
         # Run all resource tests on this resource
-        if filters[:resource]
-          include_examples 'resource_tests', disc_resource, api_obj, tags
-        end
+        include_examples 'resource_tests', disc_resource, api_obj, tags if filters[:resource]
 
         if filters[:property]
           PropertyFetcher.fetch_property_pairs(disc_resource.properties,

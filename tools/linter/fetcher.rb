@@ -65,7 +65,7 @@ class ApiFetcher
 
   # Get api from filename and apply overrides from a provider.
   def self.provider_from_file(api_filename, provider_name)
-    api = self.api_from_file(api_filename)
+    api = api_from_file(api_filename)
     provider_filename = "#{api_filename.split('/')[0..-2].join('/')}/#{provider_name}.yaml"
     Provider::Config.parse(provider_filename, api, 'ga')
     api
