@@ -35,7 +35,7 @@ require 'rspec'
 # Configuration
 doc_file = 'tools/linter/docs.yaml'
 RSpec.configure do |c|
-  c.add_formatter(CsvFormatterForMM)
+  c.add_formatter(CsvFormatterForMM, 'output.csv')
   c.inclusion_filter = [:property]
 end
 Google::LOGGER.level = Logger::ERROR
