@@ -1,31 +1,27 @@
 func customDiffComputeSnapshotSnapshotEncryptionKeys(diff *schema.ResourceDiff, meta interface{}) error {
-	// oC -> Old Convenience Value
-	// nC -> New Convenience Value
-	// oN -> Old New Field Value
-	// nN -> New New Field Value
-	oC, nC := diff.GetChange("snapshot_encryption_key_raw")
-	oN, nN := diff.GetChange("snapshot_encryption_key.0.raw_key")
+	oldConvenience, newConvenience := diff.GetChange("snapshot_encryption_key_raw")
+	oldNewField, newNewField := diff.GetChange("snapshot_encryption_key.0.raw_key")
 
-	if nC != "" && nN != "" {
+	if newConvenience != "" && newNewField != "" {
 		return fmt.Errorf("can't use snapshot_encryption_key_raw and snapshot_encryption_key.0.raw_key at the same time." +
-			"If you're removing snapshot_encryption_key.0.raw_key, set the value to \"\" instead. This is due to limitations in terraform plan.")
+			"If you're removing snapshot_encryption_key.0.raw_key, set the value to \"\" instead. This is due to limitations in Terraform.")
 	}
 
 	// Either field (convenience or new) has a value
 	// and then has another different value, so we ForceNew.
 	// We need to handle _EVERY_ ForceNew case in this diff
-	if oC != "" && nC != "" && oC != nC {
+	if oldConvenience != "" && newConvenience != "" && oldConvenience != newConvenience {
 		return diff.ForceNew("snapshot_encryption_key_raw")
 	}
 
-	if oN != "" && nN != "" && oN != nN {
+	if oldNewField != "" && newNewField != "" && oldNewField != newNewField {
 		return diff.ForceNew("snapshot_encryption_key.0.raw_key")
 	}
 
 	// Our resource isn't using either field, then uses one;
 	// ForceNew on whichever one is now using it.
-	if (oC == "" && oN == "" && nC != "") || (oC == "" && oN == "" && nN != "") {
-		if (oC == "" && nC != "") {
+	if (oldConvenience == "" && oldNewField == "" && newConvenience != "") || (oldConvenience == "" && oldNewField == "" && newNewField != "") {
+		if oldConvenience == "" && newConvenience != "" {
 			return diff.ForceNew("snapshot_encryption_key_raw")
 		} else {
 			return diff.ForceNew("snapshot_encryption_key.0.raw_key")
@@ -33,12 +29,12 @@ func customDiffComputeSnapshotSnapshotEncryptionKeys(diff *schema.ResourceDiff, 
 	}
 
 	// convenience no longer used
-	if oC != "" && nC == "" {
-		if nN == "" {
+	if oldConvenience != "" && newConvenience == "" {
+		if newNewField == "" {
 			// convenience is being nulled, and the new field is empty as well
 			// we've stopped using the field altogether
 			return diff.ForceNew("snapshot_encryption_key_raw")
-		} else if oC != nN {
+		} else if oldConvenience != newNewField {
 			// convenience is being nulled, and the new field has a new value
 			// so we ForceNew on either field
 			return diff.ForceNew("snapshot_encryption_key_raw")
@@ -48,14 +44,14 @@ func customDiffComputeSnapshotSnapshotEncryptionKeys(diff *schema.ResourceDiff, 
 	}
 
 	// new no longer used
-	// note that it will remain _set_ because Computed fields don't
-	// lose diffs when unset, just to a 0 value.
-	if oN != "" && nN == "" {
-		if nC == "" {
+	// note that it will remain _set_ because of how Computed fields work
+	// unset fields will have their values kept in state as a non-zero value
+	if oldNewField != "" && newNewField == "" {
+		if newConvenience == "" {
 			// new field is being nulled, and the convenience field is empty as well
 			// we've stopped using the field altogether
 			return diff.ForceNew("snapshot_encryption_key.0.raw_key")
-		} else if oN != nC {
+		} else if oldNewField != newConvenience {
 			// new is being nulled, and the convenience field has a new value
 			// so we ForceNew on either field
 
@@ -80,27 +76,23 @@ func customDiffComputeSnapshotSnapshotEncryptionKeys(diff *schema.ResourceDiff, 
 }
 
 func customDiffComputeSnapshotSourceDiskEncryptionKeys(diff *schema.ResourceDiff, meta interface{}) error {
-	// oC -> Old Convenience Value
-	// nC -> New Convenience Value
-	// oN -> Old New Field Value
-	// nN -> New New Field Value
-	oC, nC := diff.GetChange("source_disk_encryption_key_raw")
-	oN, nN := diff.GetChange("source_disk_encryption_key.0.raw_key")
+	oldConvenience, newConvenience := diff.GetChange("source_disk_encryption_key_raw")
+	oldNewField, newNewField := diff.GetChange("source_disk_encryption_key.0.raw_key")
 
 	// Either field has a value and then has another value
 	// We need to handle _EVERY_ ForceNew case in this diff
-	if oC != "" && nC != "" && oC != nC {
-			return diff.ForceNew("source_disk_encryption_key_raw")
+	if oldConvenience != "" && newConvenience != "" && oldConvenience != newConvenience {
+		return diff.ForceNew("source_disk_encryption_key_raw")
 	}
 
-	if oN != "" && nN != "" && oN != nN {
-			return diff.ForceNew("source_disk_encryption_key.0.raw_key")
+	if oldNewField != "" && newNewField != "" && oldNewField != newNewField {
+		return diff.ForceNew("source_disk_encryption_key.0.raw_key")
 	}
 
 	// Our resource isn't using either field, then uses one;
 	// ForceNew on whichever one is now using it.
-	if (oC == "" && oN == "" && nC != "") || (oC == "" && oN == "" && nN != "") {
-		if (oC == "" && nC != "") {
+	if (oldConvenience == "" && oldNewField == "" && newConvenience != "") || (oldConvenience == "" && oldNewField == "" && newNewField != "") {
+		if oldConvenience == "" && newConvenience != "" {
 			return diff.ForceNew("source_disk_encryption_key_raw")
 		} else {
 			return diff.ForceNew("source_disk_encryption_key.0.raw_key")
@@ -108,12 +100,12 @@ func customDiffComputeSnapshotSourceDiskEncryptionKeys(diff *schema.ResourceDiff
 	}
 
 	// convenience no longer used
-	if oC != "" && nC == "" {
-		if nN == "" {
+	if oldConvenience != "" && newConvenience == "" {
+		if newNewField == "" {
 			// convenience is being nulled, and the new field is empty as well
 			// we've stopped using the field altogether
 			return diff.ForceNew("source_disk_encryption_key_raw")
-		} else if oC != nN {
+		} else if oldConvenience != newNewField {
 			// convenience is being nulled, and the new field has a new value
 			// so we ForceNew on either field
 			return diff.ForceNew("source_disk_encryption_key_raw")
@@ -123,12 +115,12 @@ func customDiffComputeSnapshotSourceDiskEncryptionKeys(diff *schema.ResourceDiff
 	}
 
 	// new no longer used
-	if oN != "" && nN == "" {
-		if nC == "" {
+	if oldNewField != "" && newNewField == "" {
+		if newConvenience == "" {
 			// new field is being nulled, and the convenience field is empty as well
 			// we've stopped using the field altogether
 			return diff.ForceNew("source_disk_encryption_key.0.raw_key")
-		} else if nC != oN {
+		} else if newConvenience != oldNewField {
 			// new is being nulled, and the convenience field has a new value
 			// so we ForceNew on either field
 			return diff.ForceNew("source_disk_encryption_key.0.raw_key")
