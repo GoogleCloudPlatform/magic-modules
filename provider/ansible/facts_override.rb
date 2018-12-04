@@ -15,6 +15,10 @@ require 'api/object'
 
 module Provider
   module Ansible
+    # Contains alternate tests for verifying resource existence
+    # using facts modules.
+    # Contains a test to verify that a resource does exist and does not.
+    # These tests may be the same, or they may differ.
     class AnsibleFactsTestInformation < Api::Object
       attr_reader :exists
       attr_reader :does_not_exist
