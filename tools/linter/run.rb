@@ -42,5 +42,5 @@ docs.each do |doc|
 
   api = ApiFetcher.api_from_file(doc['filename'])
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
-  run_tests(builder, api, resource: true, property: true)
+  run_tests(builder, api, {resource: true, property: true})
 end

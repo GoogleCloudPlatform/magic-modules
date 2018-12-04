@@ -20,7 +20,7 @@ require 'csv'
 # This formatter only works on tests tagged with `property`
 #
 # Format:
-# product | resource | property | api.yaml (y/n)
+# product | resource | property | api.yaml (y/n) | tf (y/n) | ansible (y/n)
 class CsvFormatterForMM
   RSpec::Core::Formatters.register self, :start, :example_passed, :example_failed, :example_pending,
                                    :stop
@@ -32,7 +32,7 @@ class CsvFormatterForMM
 
   # Places in the CSV header
   def start(_start_notification)
-    @output << ['Product', 'Resource', 'Property', 'api.yaml', 'terraform'].to_csv
+    @output << ['Product', 'Resource', 'Property', 'api.yaml', 'terraform', 'ansible'].to_csv
   end
 
   # This property exists in api.yaml
@@ -69,7 +69,7 @@ class CsvFormatterForMM
   def info_to_csv(test_info)
     [
       test_info[:product], test_info[:resource], test_info[:property], test_info[:api],
-      test_info[:terraform]
+      test_info[:terraform], test_info[:ansible]
     ].to_csv
   end
 

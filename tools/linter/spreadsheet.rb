@@ -48,10 +48,17 @@ docs.each do |doc|
 
   # Run tests on regular API
   api = ApiFetcher.api_from_file(doc['filename'])
+  # Need value in case TF or Ansible file does not exist.
+  prefix = api.prefix
+
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
-  run_tests(builder, api, { property: true }, provider: :api)
+  run_tests(builder, api, { property: true }, {provider: :api}, prefix: prefix)
 
   # Run tests on TF API
   api = ApiFetcher.provider_from_file(doc['filename'], 'terraform')
-  run_tests(builder, api, { property: true }, provider: :terraform)
+  run_tests(builder, api, { property: true }, {provider: :terraform}, prefix: prefix)
+
+  # Run tests on Ansible API
+  api = ApiFetcher.provider_from_file(doc['filename'], 'ansible')
+  run_tests(builder, api, { property: true }, {provider: :ansible}, prefix: prefix)
 end
