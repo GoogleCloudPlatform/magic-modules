@@ -32,10 +32,20 @@ datasources: !ruby/object:Provider::ResourceOverrides
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
+        does_not_exist: |
+          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
   User: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          "'test-user' in \"{{ results['items'] | map(attribute='name') | list }}\""
+        does_not_exist: |
+          "'test-user' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   Tier: !ruby/object:Provider::Ansible::ResourceOverride
     exclude: true
   SslCert: !ruby/object:Provider::Ansible::ResourceOverride
