@@ -179,9 +179,8 @@ func resourceComposerEnvironment() *schema.Resource {
 									},
 									"image_version": {
 										Type:     schema.TypeString,
-<% if version.nil? || version == 'ga' -%>
 										Computed: true,
-<% else -%>
+<% unless version.nil? || version == 'ga' -%>
 										Optional: true,
 										ForceNew: true,
 									},
