@@ -52,13 +52,13 @@ docs.each do |doc|
   prefix = api.prefix
 
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
-  run_tests(builder, api, { property: true }, {provider: :api}, prefix: prefix)
+  run_tests(builder, api, { property: true }, { provider: :api }, prefix: prefix)
 
   # Run tests on TF API
   api = ApiFetcher.provider_from_file(doc['filename'], 'terraform')
-  run_tests(builder, api, { property: true }, {provider: :terraform}, prefix: prefix)
+  run_tests(builder, api, { property: true }, { provider: :terraform }, prefix: prefix)
 
   # Run tests on Ansible API
   api = ApiFetcher.provider_from_file(doc['filename'], 'ansible')
-  run_tests(builder, api, { property: true }, {provider: :ansible}, prefix: prefix)
+  run_tests(builder, api, { property: true }, { provider: :ansible }, prefix: prefix)
 end

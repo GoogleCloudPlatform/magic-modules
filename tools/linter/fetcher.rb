@@ -69,6 +69,7 @@ class ApiFetcher
     api = api_from_file(api_filename)
     provider_filename = "#{api_filename.split('/')[0..-2].join('/')}/#{provider_name}.yaml"
     return nil unless File.file?(provider_filename)
+
     Provider::Config.parse(provider_filename, api, 'ga')
     api
   end
