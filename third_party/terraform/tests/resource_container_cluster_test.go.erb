@@ -1249,7 +1249,6 @@ func TestAccContainerCluster_autoprovisioning(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccContainerCluster_sharedVpc(t *testing.T) {
 	t.Parallel()
@@ -1276,6 +1275,7 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_withResourceLabels(t *testing.T) {
 	t.Parallel()
@@ -2506,6 +2506,7 @@ resource "google_container_cluster" "with_private_cluster" {
 	}
 }`, clusterName, clusterName)
 }
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_sharedVpc(org, billingId, projectName, name string) string {
 	return fmt.Sprintf(`
 resource "google_project" "host_project" {
@@ -2609,6 +2610,7 @@ resource "google_container_cluster" "shared_vpc_cluster" {
 	]
 }`, projectName, org, billingId, projectName, org, billingId, acctest.RandString(10), acctest.RandString(10), name)
 }
+<% end -%>
 
 func testAccContainerCluster_withoutResourceLabels(clusterName string) string {
 	return fmt.Sprintf(`
