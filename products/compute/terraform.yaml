@@ -621,6 +621,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         # This is _correct_, but we don't support ignore_read on nested fields.
         # Use a custom flatten instead & avoid shaving too many yaks in this PR.
         ignore_read: true
+        sensitive: true
         custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
       snapshotEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
         # This is a beta field that showed up in GA. Removed from both.
@@ -632,6 +633,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/source_disk_encryption_key_expand.go.erb
         update_verb: :NOOP
         update_url: ""
+      sourceDiskEncryptionKey.rawKey: !ruby/object:Provider::Terraform::PropertyOverride
+        sensitive: true
       sourceDiskEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
         # This is a beta field that showed up in GA. Removed from both.
         exclude: true
