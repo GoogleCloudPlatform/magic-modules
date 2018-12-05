@@ -188,6 +188,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"python_version": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Computed: true,
 										ForceNew: true,
 <% end -%>
 									},
