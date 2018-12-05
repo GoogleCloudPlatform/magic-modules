@@ -13,87 +13,17 @@
 
 require 'api/object'
 require 'provider/overrides/resources'
+require 'provider/terraform/property_override'
 
 module Provider
   module Overrides
     module Terraform
-      # Support for schema ValidateFunc functionality.
-      class Validation < Api::Object
-        # Ensures the value matches this regex
-        attr_reader :regex
-        attr_reader :function
-
-        def validate
-          super
-
-          check_optional_property :regex, String
-          check_optional_property :function, String
-        end
-      end
-
       # Terraform-specific overrides to api.yaml.
       class PropertyOverride < Provider::Overrides::PropertyOverride
         # Collection of fields allowed in the PropertyOverride section for
         # Terraform. All fields should be `attr_reader :<property>`
         def self.attributes
-          [
-            :diff_suppress_func, # Adds a DiffSuppressFunc to the schema
-            :state_func, # Adds a StateFunc to the schema
-            :sensitive, # Adds `Sensitive: true` to the schema
-
-            # Does not set this value to the returned API value.  Useful for fields
-            # like secrets where the returned API value is not helpful.
-            :ignore_read,
-            :validation, # Adds a ValidateFunc to the schema
-            # Indicates that this is an Array that should have Set diff semantics.
-            :unordered_list,
-
-            :is_set, # Uses a Set instead of an Array
-            # Optional function to determine the unique ID of an item in the set
-            # If not specified, schema.HashString (when elements are string) or
-            # schema.HashSchema are used.
-            :set_hash_func,
-
-            # if true, then we get the default value from the Google API if no value
-            # is set in the terraform configuration for this field.
-            # It translates to setting the field to Computed & Optional in the schema.
-            :default_from_api,
-
-            # Names of attributes that can't be set alongside this one
-            :conflicts_with,
-
-            # ===========
-            # Custom code
-            # ===========
-            # All custom code attributes are string-typed.  The string should
-            # be the name of a template file which will be compiled in the
-            # specified / described place.
-            #
-            # Property Updates are used when a resource is updateable but
-            # resource.input is true.  In this case, only individual
-            # properties can be updated.  The value of this attribute should
-            # be the path to a template which will be compiled. This code is placed
-            # *inline* in the obj := { ... } definition - it is not a custom
-            # function, it is a custom statement.  Note that this cannot
-            # be used for nested properties, as they are not present in the
-            # obj := {...} statement.  This statement template receives `property`
-            # and `prefix` to aid in code reuse.
-            :update_statement,
-            # A custom flattener replaces the default flattener for an attribute.
-            # It is called as part of Read.  It can return an object of any
-            # type, and may sometimes need to return an object with non-interface{}
-            # type so that the d.Set() call will succeed, so the function
-            # header *is* a part of the custom code template.  To help with
-            # creating the function header, `property` and `prefix` are available,
-            # just as they are in the standard flattener template.
-            :custom_flatten,
-            # A custom expander replaces the default expander for an attribute.
-            # It is called as part of Create, and as part of Update if
-            # object.input is false.  It can return an object of any type,
-            # so the function header *is* part of the custom code template.
-            # As with flatten, `property` and `prefix` are available.
-            :custom_expand
-          ]
+          Provider::Terraform::OverrideFields.attributes
         end
 
         attr_reader(*attributes)

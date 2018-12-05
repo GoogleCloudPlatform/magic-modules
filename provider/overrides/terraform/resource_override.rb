@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'provider/terraform/custom_code'
+require 'provider/terraform/resource_override'
 
 module Provider
   module Overrides
@@ -22,23 +23,7 @@ module Provider
         attr_reader :description
 
         def self.attributes
-          [
-            # The Terraform resource id format used when calling #setId(...).
-            # For instance, `{{name}}` means the id will be the resource name.
-            :id_format,
-            :import_format,
-            :custom_code,
-            :docs,
-            # Lock name for a mutex to prevent concurrent API calls for a given
-            # resource.
-            :mutex,
-            # Deprecated - examples in documentation
-            # TODO(rileykarson): Remove examples and replace them with new examples
-            :examples,
-            # New examples in documentation - will take the "examples" name when
-            # old-style examples are gone.
-            :example
-          ]
+          Provider::Terraform::OverrideProperties.attributes
         end
 
         attr_reader(*attributes)
