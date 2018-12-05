@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -12,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"google.golang.org/api/composer/v1"
+	"google.golang.org/api/composer/v1beta1"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -131,6 +132,30 @@ func TestAccComposerEnvironment_withNodeConfig(t *testing.T) {
 		},
 	})
 }
+
+<% unless version.nil? || version == 'ga' -%>
+func TestAccComposerEnvironment_withSoftwareConfig(t *testing.T) {
+	t.Parallel()
+ 	envName := acctest.RandomWithPrefix(testComposerEnvironmentPrefix)
+	var env composer.Environment
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccComposerEnvironmentDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComposerEnvironment_softwareCfg(envName),
+				Check:  testAccCheckComposerEnvironmentExists("google_composer_environment.test", &env),
+			},
+			{
+				ResourceName:      "google_composer_environment.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
 
 // Checks behavior of config for creation for attributes that must
 // be updated during create.
@@ -307,6 +332,23 @@ resource "google_project_iam_member" "composer-worker" {
 }
 `, environment, network, subnetwork, serviceAccount)
 }
+
+<% unless version.nil? || version == 'ga' -%>
+func testAccComposerEnvironment_softwareCfg(name string) string {
+	return fmt.Sprintf(`
+resource "google_composer_environment" "test" {
+  name           = "%s"
+  region         = "us-central1"
+	config {
+		software_config {
+			image_version = "composer-latest-airflow-1.10"
+			python_version = "3"
+		}
+	}
+}
+`, name)
+}
+<% end -%>
 
 func testAccComposerEnvironment_updateOnlyFields(name string) string {
 	return fmt.Sprintf(`
