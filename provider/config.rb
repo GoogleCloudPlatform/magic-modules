@@ -95,7 +95,8 @@ module Provider
         config.validate
         config.spread_api config, api, [], '' unless api.nil?
         [api, config]
-      # Config must be validated so items are properly setup for next compile
+      # Use old overrides
+      # TODO(alexstephen): Remove when old overrides are no longer in use.
       else
         # Compile step #2: Now that we have the target class, compile with that
         # class features
