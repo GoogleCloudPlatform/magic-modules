@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'provider/terraform/custom_code'
+require 'provider/overrides/resources'
 require 'provider/terraform/resource_override'
 
 module Provider
