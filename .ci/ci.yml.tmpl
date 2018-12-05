@@ -271,8 +271,6 @@ jobs:
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/inspec.yml
-          params:
-            TERRAFORM_KEY: ((terraform-key))
           timeout: 30m
           on_failure:
               do:

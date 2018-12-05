@@ -3,22 +3,6 @@
 set -e
 set -x
 
-# Service account credentials for GCP to pull VCR cassettes
-export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
-
-# CI sets the contents of our json account secret in our environment; dump it
-# to disk for use in tests.
-set +x
-echo "${TERRAFORM_KEY}" > /tmp/google-account.json
-set -x
-
-export CLOUD_SDK_REPO="cloud-sdk-stretch"
-echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-apt-get update && apt-get install google-cloud-sdk -y
-
-gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
-
 pushd "magic-modules/build/inspec/test/integration"
 
 # Generate a rsa private key to use in mocks
@@ -49,15 +33,17 @@ erb -r './var' inspec.json.erb > inspec.json
 export GOOGLE_APPLICATION_CREDENTIALS=${PWD}/inspec.json
 
 bundle install
-# TODO change this to use a github repo
-gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
+git clone https://github.com/modular-magician/inspec-gcp-cassettes
 
 function cleanup {
-  rm -rf inspec-cassettes
+  rm -rf inspec-gcp-cassettes
   rm inspec.json
   rm inspec.json.erb
   rm var.rb
 }
 trap cleanup EXIT
+
+# Disallow any real HTTP calls from InSpec
+sed -i s/"c.allow_http_connections_when_no_cassette = true"/"c.allow_http_connections_when_no_cassette = false"/g verify-mm/vcr_config.rb
 
 inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit

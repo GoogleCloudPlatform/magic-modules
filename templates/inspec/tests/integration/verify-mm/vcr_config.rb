@@ -15,7 +15,7 @@ require 'vcr'
 
 VCR.configure do |c|
   c.hook_into :webmock
-  c.cassette_library_dir = 'inspec-cassettes'
+  c.cassette_library_dir = 'inspec-gcp-cassettes'
   c.allow_http_connections_when_no_cassette = true
 
   c.before_record do |i|
