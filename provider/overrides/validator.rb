@@ -51,8 +51,6 @@ module Provider
           field_symbol = field_name[1..-1].to_sym
           next if check_if_exists(res, field_symbol, overrides.class.attributes)
 
-          require 'byebug'
-          byebug
           raise "#{field_name} does not exist on #{res.name}"
         end
         # Use instance_variable_get to get excluded properties
@@ -110,7 +108,8 @@ module Provider
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
-          next if check_if_exists(property, field_symbol, overrides.class.attributes, overrides['@type'])
+          next if check_if_exists(property, field_symbol, overrides.class.attributes,
+                                  overrides['@type'])
 
           raise "#{field_name} does not exist on #{property.name}"
         end
@@ -118,7 +117,7 @@ module Provider
 
       # Check if this field exists on this object.
       # The best way (sadly) to do this is to see if a getter exists.
-      def check_if_exists(obj, field, attributes=[], override_type = nil)
+      def check_if_exists(obj, field, attributes = [], override_type = nil)
         # Not all types share the same values.
         # If we're changing types, the new type's getters matter, not the old type.
         return true if attributes.include?(field)

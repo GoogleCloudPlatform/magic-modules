@@ -56,9 +56,7 @@ module Provider
           check_optional_property :custom_flatten, String
           check_optional_property :custom_expand, String
         end
-        # rubocop:enable Metrics/MethodLength
 
-        # rubocop:disable Metrics/CyclomaticComplexity
         def apply(api_property)
           unless description.nil?
             @description = format_string(:description, @description,
@@ -80,7 +78,6 @@ module Provider
 
           super
         end
-        # rubocop:enable Metrics/CyclomaticComplexity
 
         private
 

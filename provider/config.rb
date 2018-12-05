@@ -123,7 +123,8 @@ module Provider
       overrides
 
       check_optional_property :files, Provider::Config::Files
-      check_property :overrides, [Provider::ResourceOverrides, Provider::Overrides::ResourceOverrides]
+      check_property :overrides, [Provider::ResourceOverrides,
+                                  Provider::Overrides::ResourceOverrides]
       check_property_list :changelog, Provider::Config::Changelog \
         unless @changelog.nil?
     end
