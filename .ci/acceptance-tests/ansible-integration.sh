@@ -8,6 +8,16 @@ echo "${ANSIBLE_TEMPLATE}" > /tmp/ansible-template.yml
 set -e
 set -x
 
+# Get the newest version of Ansible from the PR
+pushd magic-modules-new-prs
+bundle install
+for i in $(find products/ -name 'ansible.yaml' -printf '%h\n');
+do
+  bundle exec compiler -p $i -e ansible -o "build/ansible/"
+done
+popd
+
+# Go to the newly-compiled version of Ansible
 pushd magic-modules-new-prs/build/ansible
 
 # Setup Cloud configuration template with variables

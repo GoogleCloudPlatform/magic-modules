@@ -15,7 +15,7 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_sql_instance
     code:
-      name: <%= dependency_name('instance', 'user') %>
+      name: <%= ctx[:name] %>
       settings:
         ip_configuration:
           authorized_networks:

@@ -19,7 +19,9 @@ task: !ruby/object:Provider::Ansible::Task
     disk_encryption_key:
       raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
     region: 'us-central1'
-    replica_zones: ['us-central1-a', 'us-central1-f']
+    replica_zones:
+      - 'https://www.googleapis.com/compute/v1/projects/google.com:graphite-playground/zones/us-central1-a'
+      - 'https://www.googleapis.com/compute/v1/projects/google.com:graphite-playground/zones/us-central1-b'
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>
