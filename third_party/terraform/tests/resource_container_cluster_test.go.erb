@@ -703,7 +703,12 @@ func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
 					resource.TestCheckResourceAttr("google_container_cluster.with_node_config", "node_config.0.taint.#", "2"),
 				),
 			},
-			// Don't include an import step because beta features can't yet be imported.
+			{
+				ResourceName:            "google_container_cluster.with_node_config",
+				ImportStateIdPrefix:     "us-central1-f/",
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 			// Once taints are in GA, consider merging this test with the _withNodeConfig test.
 		},
 	})
