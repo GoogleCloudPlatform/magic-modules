@@ -688,6 +688,7 @@ func TestAccContainerCluster_withNodeConfigScopeAlias(t *testing.T) {
 	})
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
 	t.Parallel()
 
@@ -707,7 +708,9 @@ func TestAccContainerCluster_withNodeConfigTaints(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 	t.Parallel()
 
@@ -733,6 +736,7 @@ func TestAccContainerCluster_withWorkloadMetadataConfig(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func TestAccContainerCluster_network(t *testing.T) {
 	t.Parallel()
@@ -1984,6 +1988,7 @@ resource "google_container_cluster" "with_node_config_scope_alias" {
 }`, acctest.RandString(10))
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withNodeConfigTaints() string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_node_config" {
@@ -2005,7 +2010,9 @@ resource "google_container_cluster" "with_node_config" {
 	}
 }`, acctest.RandString(10))
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func testAccContainerCluster_withWorkloadMetadataConfig() string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
@@ -2032,6 +2039,7 @@ resource "google_container_cluster" "with_workload_metadata_config" {
 }
 `, acctest.RandString(10))
 }
+<% end -%>
 
 func testAccContainerCluster_networkRef() string {
 	return fmt.Sprintf(`
