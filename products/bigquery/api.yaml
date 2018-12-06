@@ -28,6 +28,8 @@ objects:
     base_url: projects/{{project}}/datasets
     description: >
       Datasets allow you to organize and control access to your tables.
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'datasets'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -147,6 +149,8 @@ objects:
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
     description: >
       A Table that belongs to a Dataset
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'tables'
     parameters:
       # TODO(alexstephen): Remove once we have support for placing
       # nested object fields in URL
@@ -162,7 +166,7 @@ objects:
             name: 'datasetId'
             description: The ID of the dataset containing this table
           - !ruby/object:Api::Type::String
-            name: 'projectid'
+            name: 'projectId'
             description: The ID of the project containing this table
           - !ruby/object:Api::Type::String
             name: 'tableId'
@@ -200,6 +204,9 @@ objects:
           The geographic location where the table resides. This value is
           inherited from the dataset.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the table'
       - !ruby/object:Api::Type::Integer
         name: 'numBytes'
         description: >
