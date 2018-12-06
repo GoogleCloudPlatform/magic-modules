@@ -641,7 +641,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       resource_definition: templates/terraform/resource_definition/snapshot.go.erb
       constants: templates/terraform/constants/snapshot.erb
-      decoder: templates/terraform/decoders/snapshot.erb
+      decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
