@@ -30,7 +30,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'my-clutser' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-cluster' in \"{{ results['items'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "'my-cluster' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   NodePool: !ruby/object:Provider::Ansible::ResourceOverride
