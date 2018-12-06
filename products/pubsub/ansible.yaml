@@ -30,9 +30,9 @@ datasources: !ruby/object:Provider::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-topic1' in \"{{ results['items'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-topic1' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   Subscription: !ruby/object:Provider::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride

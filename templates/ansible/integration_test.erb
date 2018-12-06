@@ -68,7 +68,9 @@
 <% if example.dependencies and !example.dependencies.empty? -%>
 #---------------------------------------------------------
 # Post-test teardown
+# If errors happen, don't crash the playbook!
 <% example.dependencies.reverse.each do |depend| -%>
 <%= lines(depend.build_test('absent', object, false)) -%>
+  ignore_errors: true
 <% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
