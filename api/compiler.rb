@@ -19,6 +19,8 @@ require 'api/type'
 require 'compile/core'
 require 'google/yaml_validator'
 
+require 'api/azure/type'
+
 module Api
   # Process <product>.yaml and produces output module
   class Compiler

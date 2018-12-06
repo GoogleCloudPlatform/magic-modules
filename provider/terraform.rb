@@ -20,6 +20,9 @@ require 'provider/terraform/resource_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
+require 'provider/azure/terraform/schema'
+require 'provider/azure/terraform/sub_template'
+
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
   # resources.
@@ -27,6 +30,9 @@ module Provider
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
+
+    include Provider::Azure::Terraform::Schema
+    include Provider::Azure::Terraform::SubTemplate
 
     # Sorts properties in the order they should appear in the TF schema:
     # Required, Optional, Computed
@@ -62,29 +68,6 @@ module Provider
     end
 
     # BEGIN Azure Specific Methods
-
-    def go_type(property)
-      go_types[property.class]
-    end
-
-    def go_types
-      {
-        Api::Type::Boolean => 'bool',
-        Api::Type::String => 'string',
-        Api::Type::KeyValuePairs => 'map[string]interface{}',
-      }
-    end
-
-    def azure_address_of_func(property)
-      azure_address_of_funcs[property.class]
-    end
-
-    def azure_address_of_funcs
-      {
-        Api::Type::Boolean => 'utils.Bool',
-        Api::Type::String => 'utils.String',
-      }
-    end
 
     def azure_resource_go_package(product)
       product.azure_namespace.split('.').last.camelcase(:lower)

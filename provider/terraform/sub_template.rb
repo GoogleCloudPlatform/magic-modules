@@ -17,10 +17,12 @@ module Provider
   class Terraform < Provider::AbstractCore
     # Functions to compile sub-templates.
     module SubTemplate
-      def build_schema_property(property, object)
-        compile_template'templates/terraform/schema_property.erb',
-                        property: property,
-                        object: object
+      def build_schema_property(property, object, indentation = 0)
+        compile_template schema_property_template(property),
+                         indentation: indentation,
+                         prop_name: property.name.underscore,
+                         property: property,
+                         object: object
       end
 
       # Transforms a Cloud API representation of a property into a Terraform
@@ -71,7 +73,8 @@ module Provider
       def compile_template(template_file, data)
         ctx = binding
         data.each { |name, value| ctx.local_variable_set(name, value) }
-        compile_file(ctx, template_file).join("\n")
+        result = compile_file(ctx, template_file).join("\n")
+        indent result, data[:indentation] || 0
       end
     end
   end

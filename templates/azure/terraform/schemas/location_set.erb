@@ -1,0 +1,5 @@
+<%  if output_var == 'd' -%>
+<%=   output_var -%>.Set("<%= prop_name -%>", azureRMNormalizeLocation(*<%= input_var -%>))
+<%  else -%>
+<%=   output_var -%>["<%= prop_name -%>"] = azureRMNormalizeLocation(*<%= input_var -%>)
+<%  end -%>

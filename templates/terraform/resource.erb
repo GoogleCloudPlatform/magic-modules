@@ -75,7 +75,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 
         Schema: map[string]*schema.Schema{
 <%          order_properties(properties).each do |prop| -%>
-<%=             lines(build_schema_property(prop, object)) -%>
+<%=             lines(build_schema_property(prop, object, 12)) -%>
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
 <%          if has_project -%>
@@ -118,15 +118,17 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
 <%    end -%>
 <%  end -%>
 
+<%  settable_properties.each do |prop| -%>
+<%=   lines(build_schema_property_get('d', prop.name.camelcase(:lower), prop, object, 4)) -%>
+<%  end -%>
+
     parameters := <%= azure_resource_go_package(object.__product) -%>.<%= object.azure_parameters_type -%>{
 <%  settable_properties.each do |prop| -%>
 <%    unless prop.name == "name" || prop.name == "resourceGroupName" -%>
-<%      if !prop.custom_expand_func.nil? -%>
-        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= prop.custom_expand_func -%>(<%= prop.name.camelcase(:lower) -%>),
-<%      elsif azure_address_of_func(prop).nil? -%>
-        <%= prop.azure_api_path.camelcase(:upper) -%>: expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
+<%      if expand_funcs.include?(prop.class) -%>
+        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= expand_func(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
 <%      else -%>
-        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= azure_address_of_func(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
+        <%= prop.azure_api_path.camelcase(:upper) -%>: expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
 <%      end -%>
 <%    end -%>
 <%  end -%>
@@ -215,6 +217,13 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     d.Set("<%= prop.name.underscore -%>", resp.<%= prop.azure_api_path.camelcase(:upper) -%>)
 <%    else -%>
     <%= lines(compile_template(prop.custom_schema_set, property: prop, schema: prop.name.underscore, response: 'resp')) -%>
+<%    end -%>
+<%  end -%>
+
+<%  properties.each do |prop| -%>
+<%    if will_property_set_dereference?('d', prop) -%>
+<%    else -%>
+<%=     lines(build_schema_property_set("resp.#{prop.azure_api_path.camelcase(:upper)}", 'd', prop, object, 4)) -%>
 <%    end -%>
 <%  end -%>
 
