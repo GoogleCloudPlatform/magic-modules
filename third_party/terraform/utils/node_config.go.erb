@@ -144,7 +144,7 @@ var schemaNodeConfig = &schema.Schema{
 
 			"taint": {
 <% if version.nil? || version == 'ga' -%>
-				Deprecated:       "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed:       "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
 <% end -%>
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -174,7 +174,7 @@ var schemaNodeConfig = &schema.Schema{
 
 			"workload_metadata_config": {
 <% if version.nil? || version == 'ga' -%>
-				Deprecated: "This field is in beta and will be removed from this provider. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
 <% end -%>
 				Type:       schema.TypeList,
 				Optional:   true,
@@ -287,7 +287,7 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 	if v, ok := nodeConfig["min_cpu_platform"]; ok {
 		nc.MinCpuPlatform = v.(string)
 	}
-
+<% unless version.nil? || version == 'ga' -%>
 	if v, ok := nodeConfig["taint"]; ok && len(v.([]interface{})) > 0 {
 		taints := v.([]interface{})
 		nodeTaints := make([]*containerBeta.NodeTaint, 0, len(taints))
@@ -309,6 +309,7 @@ func expandNodeConfig(v interface{}) *containerBeta.NodeConfig {
 			NodeMetadata: conf["node_metadata"].(string),
 		}
 	}
+<% end -%>
 
 	return nc
 }
@@ -333,8 +334,10 @@ func flattenNodeConfig(c *containerBeta.NodeConfig) []map[string]interface{} {
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
 		"min_cpu_platform":         c.MinCpuPlatform,
+<% unless version.nil? || version == 'ga' -%>
 		"taint":                    flattenTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
+<% end -%>
 	})
 
 	if len(c.OauthScopes) > 0 {
@@ -355,6 +358,7 @@ func flattenContainerGuestAccelerators(c []*containerBeta.AcceleratorConfig) []m
 	return result
 }
 
+<% unless version.nil? || version == 'ga' -%>
 func flattenTaints(c []*containerBeta.NodeTaint) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	for _, taint := range c {
@@ -366,7 +370,9 @@ func flattenTaints(c []*containerBeta.NodeTaint) []map[string]interface{} {
 	}
 	return result
 }
+<% end -%>
 
+<% unless version.nil? || version == 'ga' -%>
 func flattenWorkloadMetadataConfig(c *containerBeta.WorkloadMetadataConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
@@ -376,6 +382,7 @@ func flattenWorkloadMetadataConfig(c *containerBeta.WorkloadMetadataConfig) []ma
 	}
 	return result
 }
+<% end -%>
 
 func taintDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasSuffix(k, "#") {
