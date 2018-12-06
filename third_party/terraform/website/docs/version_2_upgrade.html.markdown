@@ -372,7 +372,7 @@ Use the [`google-beta` provider](#google-beta-provider) to set these fields.
 
 ### `max_pods_per_node`, `node_config.taints`, `node_config.workload_metadata_config` have been removed from the GA provider
 
-Use the [`google-beta` provider](#google-beta-provider) to set these field.
+Use the [`google-beta` provider](#google-beta-provider) to set these fields.
 
 ### `name_prefix` has been removed
 
