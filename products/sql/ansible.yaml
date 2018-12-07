@@ -75,4 +75,3 @@ files: !ruby/object:Provider::Config::Files
   copy:
   compile:
 <%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
-tests: !ruby/object:Api::Resource::HashArray
