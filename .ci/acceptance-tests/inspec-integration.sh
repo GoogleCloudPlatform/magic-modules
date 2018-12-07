@@ -5,7 +5,7 @@ set -x
 
 function cleanup {
 	cd $TF_PATH
-	terraform destroy -auto-approve
+	terraform destroy -force -var-file=inspec-gcp.tfvars -auto-approve
 }
 
 # Service account credentials for GCP to allow terraform to work
