@@ -3309,7 +3309,6 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
-    # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
     collection_url_response: !ruby/object:Api::Resource::ResponseList
@@ -3698,8 +3697,6 @@ objects:
           description: 'The SSL certificates used by this TargetHttpsProxy'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
-        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
-        exclude: true
         resource: 'SslPolicy'
         imports: 'selfLink'
         description: |
@@ -3927,8 +3924,6 @@ objects:
           description: 'The SSL certificates used by this TargetSslProxy'
       - !ruby/object:Api::Type::ResourceRef
         name: 'sslPolicy'
-        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/173): Enable
-        exclude: true
         resource: 'SslPolicy'
         imports: 'selfLink'
         description: |

@@ -27,7 +27,6 @@ scopes:
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
-    exclude: true
     base_url: |
       projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}

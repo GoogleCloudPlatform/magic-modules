@@ -84,8 +84,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   SslCertificate: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
-  SslPolicy: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: false
   Subnetwork: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   TargetHttpProxy: !ruby/object:Provider::Inspec::ResourceOverride

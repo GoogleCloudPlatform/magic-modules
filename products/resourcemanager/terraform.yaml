@@ -17,7 +17,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Project: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
   Lien: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
     import_format: ["{{parent}}/{{name}}"]
     example:
       - !ruby/object:Provider::Terraform::Examples

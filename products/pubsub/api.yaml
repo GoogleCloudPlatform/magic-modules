@@ -33,8 +33,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the topic.'
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_request
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'topics'
   - !ruby/object:Api::Resource
@@ -45,8 +43,6 @@ objects:
       A named resource representing the stream of messages from a single,
       specific topic, to be delivered to the subscribing application.
     input: true
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_request
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'subscriptions'
     properties:
