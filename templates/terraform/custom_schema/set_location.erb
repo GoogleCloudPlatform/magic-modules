@@ -1,3 +1,0 @@
-if location := <%= response -%>.Location; location != nil {
-    d.Set("<%= schema -%>", azureRMNormalizeLocation(*location))
-}

@@ -3,18 +3,6 @@ name: Arm
 overrides: !ruby/object:Provider::ResourceOverrides
   ResourceGroup: !ruby/object:Provider::Terraform::ResourceOverride
     azure_parameters_type: Group
-    properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_schema: 'templates/terraform/custom_schema/resource_group_name.erb'
-      location: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_schema: 'templates/terraform/custom_schema/location.erb'
-        custom_schema_get: 'templates/terraform/custom_schema/get_location.erb'
-        custom_schema_set: 'templates/terraform/custom_schema/set_location.erb'
-      tags: !ruby/object:Provider::Terraform::PropertyOverride
-        default_from_api: true
-        custom_schema: 'templates/terraform/custom_schema/tags.erb'
-        custom_expand_func: 'expandTags'
-        custom_schema_set: 'templates/terraform/custom_schema/set_tags.erb'
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_group"

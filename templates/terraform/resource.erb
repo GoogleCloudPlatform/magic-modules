@@ -111,14 +111,6 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.each do |prop| -%>
-<%    unless prop.custom_schema_get -%>
-    <%= prop.name.camelcase(:lower) -%> := d.Get("<%= prop.name.underscore -%>").(<%= go_type(prop) -%>)
-<%    else -%>
-    <%= prop.name.camelcase(:lower) -%> := <%= lines(compile_template(prop.custom_schema_get, property: prop, schema: prop.name.underscore)) -%>
-<%    end -%>
-<%  end -%>
-
-<%  settable_properties.each do |prop| -%>
 <%=   lines(build_schema_property_get('d', prop.name.camelcase(:lower), prop, object, 4)) -%>
 <%  end -%>
 
@@ -213,18 +205,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  properties.each do |prop| -%>
-<%    unless prop.custom_schema_set -%>
-    d.Set("<%= prop.name.underscore -%>", resp.<%= prop.azure_api_path.camelcase(:upper) -%>)
-<%    else -%>
-    <%= lines(compile_template(prop.custom_schema_set, property: prop, schema: prop.name.underscore, response: 'resp')) -%>
-<%    end -%>
-<%  end -%>
-
-<%  properties.each do |prop| -%>
-<%    if will_property_set_dereference?('d', prop) -%>
-<%    else -%>
-<%=     lines(build_schema_property_set("resp.#{prop.azure_api_path.camelcase(:upper)}", 'd', prop, object, 4)) -%>
-<%    end -%>
+<%=   lines(build_schema_property_set("resp.#{prop.azure_api_path.camelcase(:upper)}", 'd', prop, object, 4)) -%>
 <%  end -%>
 
     return nil

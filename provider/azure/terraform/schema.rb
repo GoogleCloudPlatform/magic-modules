@@ -5,8 +5,10 @@ module Provider
 
         def go_type(property)
           case property
-          when Api::Type::String, Api::Azure::Type::Location
+          when Api::Type::String
             'string'
+          when Api::Type::KeyValuePairs
+            'map[string]interface{}'
           else
             'interface{}'
           end
@@ -21,13 +23,18 @@ module Provider
             Api::Type::Boolean => 'utils.Bool',
             Api::Type::String => 'utils.String',
             Api::Azure::Type::Location => "utils.String",
+            Api::Azure::Type::Tags => 'expandTags',
           }
         end
 
         def schema_property_template(property)
           case property
+          when Api::Azure::Type::ResourceGroupName
+            'templates/azure/terraform/schemas/resource_group_name.erb'
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location.erb'
+          when Api::Azure::Type::Tags
+            'templates/azure/terraform/schemas/tags.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
           end
@@ -37,6 +44,8 @@ module Provider
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_get.erb'
+          when Api::Type::String, Api::Type::KeyValuePairs
+            'templates/terraform/schemas/basic_get.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
           end
@@ -46,15 +55,13 @@ module Provider
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_set.erb'
+          when Api::Azure::Type::Tags
+            'templates/azure/terraform/schemas/tags_set.erb'
+          when Api::Type::String
+            'templates/terraform/schemas/basic_set.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
           end
-        end
-
-        def will_property_set_dereference?(output_var, property)
-          return true if output_var != 'd'
-          return true if property.is_a? Api::Azure::Type::Location
-          false
         end
 
       end

@@ -30,9 +30,9 @@ func resourceArmResourceGroup() *schema.Resource {
 
 
         Schema: map[string]*schema.Schema{
-"location": locationSchema(),
-"name": resourceGroupNameSchema(),
-"tags": tagsSchema(),
+            "location": locationSchema(),
+            "name": resourceGroupNameSchema(),
+            "tags": tagsSchema(),
         },
     }
 }
@@ -90,8 +90,8 @@ func resourceArmResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
 
     d.Set("name", resp.Name)
     if location := resp.Location; location != nil {
-    d.Set("location", azureRMNormalizeLocation(*location))
-}
+        d.Set("location", azureRMNormalizeLocation(*location))
+    }
     flattenAndSetTags(d, resp.Tags)
 
     return nil
