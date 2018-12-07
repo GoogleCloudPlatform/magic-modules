@@ -11,12 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
 require 'provider/resource_override'
 require 'provider/terraform/custom_code'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  module Terraform
     # Collection of properties allowed in the ResourceOverride section for
     # Terraform. All properties should be `attr_reader :<property>`
     module OverrideProperties

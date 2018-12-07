@@ -19,7 +19,7 @@ require 'provider/abstract_core'
 require 'provider/property_override'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  module Terraform
     # Inserts custom strings into terraform resource docs.
     class Docs < Api::Object
       # All these values should be strings, which will be inserted

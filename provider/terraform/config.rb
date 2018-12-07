@@ -11,15 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
 require 'provider/config'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  module Terraform
     # Settings for the provider
     class Config < Provider::Config
       def provider
-        Provider::Terraform
+        Provider::Terraform::Core
       end
 
       def resource_override
@@ -28,6 +27,10 @@ module Provider
 
       def property_override
         Provider::Terraform::PropertyOverride
+      end
+
+      def generator
+        Provider::Terraform::Generator
       end
     end
   end

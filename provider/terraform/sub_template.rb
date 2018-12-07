@@ -11,10 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
-
 module Provider
-  class Terraform < Provider::AbstractCore
+  module Terraform
     # Functions to compile sub-templates.
     module SubTemplate
       def build_schema_property(property, object)

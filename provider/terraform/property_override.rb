@@ -12,11 +12,10 @@
 # limitations under the License.
 
 require 'api/object'
-require 'provider/abstract_core'
 require 'provider/property_override'
 
 module Provider
-  class Terraform < Provider::AbstractCore
+  module Terraform
     # Collection of fields allowed in the PropertyOverride section for
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
