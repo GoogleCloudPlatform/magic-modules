@@ -40,7 +40,7 @@ module Provider
       end
     end
 
-    generation_steps([:generate_objects, :copy_files, :compile_changelog, :compile_files])
+    generation_steps :generate_objects, :copy_files, :compile_changelog, :compile_files
 
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec

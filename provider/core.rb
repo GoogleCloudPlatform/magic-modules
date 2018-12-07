@@ -33,7 +33,7 @@ module Provider
     include Compile::Core
     include Provider::Generator
 
-    def self.generation_steps(steps)
+    def self.generation_steps(*steps)
       @steps = steps
     end
 

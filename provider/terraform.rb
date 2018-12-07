@@ -29,7 +29,7 @@ module Provider
       include Provider::Terraform::SubTemplate
       include Google::GolangUtils
 
-      generation_steps([:generate_objects, :copy_files, :compile_files])
+      generation_steps :generate_objects, :copy_files, :compile_files
 
       # Sorts properties in the order they should appear in the TF schema:
       # Required, Optional, Computed

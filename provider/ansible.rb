@@ -45,7 +45,7 @@ module Provider
       include Provider::Ansible::Module
       include Provider::Ansible::Request
 
-      generation_steps([:generate_objects, :copy_files, :compile_files, :generate_datasources])
+      generation_steps :generate_objects, :copy_files, :compile_files, :generate_datasources
 
       def initialize(config, api)
         super(config, api)
