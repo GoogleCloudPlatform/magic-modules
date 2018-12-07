@@ -132,6 +132,7 @@ module Provider
     # Generate the CHANGELOG.md file with the history of the module.
     def compile_changelog(output_folder, _types, _version_name)
       return if @config.changelog.nil?
+
       FileUtils.mkpath output_folder
       generate_file(
         changes: @config.changelog,

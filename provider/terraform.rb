@@ -24,6 +24,7 @@ module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
   # resources.
   module Terraform
+    # Functions used in Terraform templates
     class Core < Provider::Core
       include Provider::Terraform::Import
       include Provider::Terraform::SubTemplate

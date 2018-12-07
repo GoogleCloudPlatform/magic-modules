@@ -12,13 +12,19 @@
 # limitations under the License.
 
 module Provider
+  # Handles all generation logic for a provider.
+  # Providers must call generation_steps to specify which generation functions
+  # are being called and in what order.
   module Generation
     # Main entry point for the compiler. As this method is simply invoking other
     # generators, it is okay to ignore Rubocop warnings about method size and
     # complexity.
     def generate(output_folder, types, version_name)
-      raise "Use `generation_steps` to specify which steps and ordering" unless self.class.instance_variable_get(:@steps)
-      self.class.instance_variable_get(:@steps).each { |s| method(s).call(output_folder, types, version_name) }
+      steps = self.class.instance_variable_get(:@steps)
+      raise 'Use `generation_steps` to specify which steps and ordering' unless steps
+
+      steps.each { |s| raise "#{s} function does not exist" unless method(s) }
+      steps.each { |s| method(s).call(output_folder, types, version_name) }
     end
 
     def generate_objects(output_folder, types, version_name)
@@ -43,11 +49,13 @@ module Provider
 
     def copy_files(output_folder, _types, _version_name)
       return if @config.files.nil? || @config.files.copy.nil?
+
       copy_file_list(output_folder, @config.files.copy)
     end
 
     def compile_files(output_folder, _types, version_name)
       return if @config.files.nil? || @config.files.compile.nil?
+
       compile_file_list(output_folder, @config.files.compile, version: version_name)
     end
 

@@ -301,10 +301,9 @@ module Provider
         data[:object].instance_variable_set(:@facts, facts_info)
       end
 
-      private
-
       def generate_datasources(output_folder, types, version_name)
         return if @config.datasources.nil?
+
         # We need to apply overrides for datasources
         @config.datasources.validate
 
