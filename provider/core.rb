@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/generator'
+require 'provider/generation'
 require 'compile/core'
 require 'fileutils'
 require 'google/extensions'
@@ -31,7 +31,7 @@ module Provider
   # such as compiling and including files, formatting data, etc.
   class Core
     include Compile::Core
-    include Provider::Generator
+    include Provider::Generation
 
     def self.generation_steps(*steps)
       @steps = steps

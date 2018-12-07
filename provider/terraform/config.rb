@@ -28,10 +28,6 @@ module Provider
       def property_override
         Provider::Terraform::PropertyOverride
       end
-
-      def generator
-        Provider::Terraform::Generator
-      end
     end
   end
 end

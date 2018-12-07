@@ -12,7 +12,7 @@
 # limitations under the License.
 
 module Provider
-  module Generator
+  module Generation
     # Main entry point for the compiler. As this method is simply invoking other
     # generators, it is okay to ignore Rubocop warnings about method size and
     # complexity.
