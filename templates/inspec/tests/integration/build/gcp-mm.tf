@@ -19,7 +19,6 @@ resource "google_service_account" "inspecaccount" {
 resource "google_service_account_key" "inspeckey" {
   service_account_id = "${google_service_account.inspecaccount.name}"
   public_key_type = "TYPE_X509_PEM_FILE"
-  project = "${var.gcp_project_id}"
 }
 
 resource "google_project_iam_member" "inspec-iam-member" {
