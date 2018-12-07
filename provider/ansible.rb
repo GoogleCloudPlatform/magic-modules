@@ -45,6 +45,8 @@ module Provider
       include Provider::Ansible::Module
       include Provider::Ansible::Request
 
+      generation_steps([:generate_objects, :copy_files, :compile_files, :generate_datasources])
+
       def initialize(config, api)
         super(config, api)
         @max_columns = 160
@@ -297,6 +299,39 @@ module Provider
         facts_info ||= Provider::Ansible::FactsOverride.new
         facts_info.validate
         data[:object].instance_variable_set(:@facts, facts_info)
+      end
+
+      private
+
+      def generate_datasources(output_folder, types, version_name)
+        # We need to apply overrides for datasources
+        @config.datasources.validate
+
+        version = @api.version_obj_or_default(version_name)
+        @api.set_properties_based_on_version(version)
+        @api.objects.each do |object|
+          if !types.empty? && !types.include?(object.name)
+            Google::LOGGER.info(
+              "Excluding #{object.name} datasource per user request"
+            )
+          elsif types.empty? && object.exclude
+            Google::LOGGER.info(
+              "Excluding #{object.name} datasource per API catalog"
+            )
+          elsif types.empty? && object.exclude_if_not_in_version(version)
+            Google::LOGGER.info(
+              "Excluding #{object.name} datasource per API version"
+            )
+          else
+            generate_datasource object, output_folder, version_name
+          end
+        end
+      end
+
+      def generate_datasource(object, output_folder, version_name)
+        data = build_object_data(object, output_folder, version_name)
+
+        compile_datasource data
       end
     end
   end

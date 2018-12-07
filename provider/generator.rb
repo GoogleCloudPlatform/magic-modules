@@ -28,31 +28,6 @@ module Provider
       end
     end
 
-    def generate_datasources(output_folder, types, version_name)
-      # We need to apply overrides for datasources
-      @config.datasources.validate
-
-      version = @api.version_obj_or_default(version_name)
-      @api.set_properties_based_on_version(version)
-      @api.objects.each do |object|
-        if !types.empty? && !types.include?(object.name)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per user request"
-          )
-        elsif types.empty? && object.exclude
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API catalog"
-          )
-        elsif types.empty? && object.exclude_if_not_in_version(version)
-          Google::LOGGER.info(
-            "Excluding #{object.name} datasource per API version"
-          )
-        else
-          generate_datasource object, output_folder, version_name
-        end
-      end
-    end
-
     def copy_files(output_folder, _types, _version_name)
       return if @config.files.nil? || @config.files.copy.nil?
       copy_file_list(output_folder, @config.files.copy)
@@ -155,12 +130,6 @@ module Provider
 
       generate_resource data
       generate_resource_tests data
-    end
-
-    def generate_datasource(object, output_folder, version_name)
-      data = build_object_data(object, output_folder, version_name)
-
-      compile_datasource data
     end
 
     def build_object_data(object, output_folder, version)
