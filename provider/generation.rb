@@ -65,21 +65,33 @@ module Provider
     # way so it needs to be named consistently
     # rubocop:disable Lint/UnusedMethodArgument
     def copy_common_files(output_folder, version_name = 'ga')
-      provider_name = self.class.name.split('::').last.downcase
-      return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
+      # The provider name may be a module name or a class name.
+      # We need to try both
+      possible_provider_names = self.class.name.split('::')[1..-1].map(&:downcase)
+      filename = possible_provider_names.map do |provider_name|
+        name = "provider/#{provider_name}/common~copy.yaml"
+        name if File.exist?(name)
+      end.compact.first
+      return unless filename
 
-      Google::LOGGER.info "Copying common files for #{provider_name}"
-      files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
+      Google::LOGGER.info "Copying common files at #{filename}"
+      files = YAML.safe_load(compile(filename))
       copy_file_list(output_folder, files)
     end
     # rubocop:enable Lint/UnusedMethodArgument
 
     def compile_common_files(output_folder, _types, version_name = nil)
-      provider_name = self.class.name.split('::').last.downcase
-      return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
+      # The provider name may be a module name or a class name.
+      # We need to try both
+      possible_provider_names = self.class.name.split('::')[1..-1].map(&:downcase)
+      filename = possible_provider_names.map do |provider_name|
+        name = "provider/#{provider_name}/common~compile.yaml"
+        name if File.exist?(name)
+      end.compact.first
+      return unless filename
 
-      Google::LOGGER.info "Compiling common files for #{provider_name}"
-      files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
+      Google::LOGGER.info "Compiling common files at #{filename}"
+      files = YAML.safe_load(compile(filename))
       compile_file_list(output_folder, files, version: version_name)
     end
 
