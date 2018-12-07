@@ -266,7 +266,7 @@ module Provider
     end
 
     def grab_attributes
-      YAML.load_file('templates/inspec/tests/integration/attributes/attributes.yaml')
+      YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yaml')
     end
   end
 end
