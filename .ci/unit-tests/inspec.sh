@@ -60,4 +60,4 @@ function cleanup {
 }
 trap cleanup EXIT
 
-inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit
+inspec exec verify-mm --attrs=configuration/mm-attributes.yaml -t gcp:// --no-distinct-exit
