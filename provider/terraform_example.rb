@@ -15,7 +15,7 @@ require 'provider/terraform'
 
 module Provider
   # Code generator for runnable Terraform Examples
-  class TerraformExample < Provider::Terraform
+  class TerraformExample < Provider::Terraform::Core
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
     def generate(output_folder, types, version_name)

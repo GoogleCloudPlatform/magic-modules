@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/abstract_core'
+require 'provider/core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
@@ -24,10 +24,12 @@ module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
   # resources.
   module Terraform
-    class Core
+    class Core < Provider::Core
       include Provider::Terraform::Import
       include Provider::Terraform::SubTemplate
       include Google::GolangUtils
+
+      generation_steps([:generate_objects, :copy_files, :compile_files])
 
       # Sorts properties in the order they should appear in the TF schema:
       # Required, Optional, Computed
@@ -110,8 +112,9 @@ module Provider
           []
         end
       end
-    end
-    class Generator < Provider::Generator
+
+      private
+
       # This function uses the resource.erb template to create one file
       # per resource. The resource.erb template forms the basis of a single
       # GCP Resource on Terraform.
