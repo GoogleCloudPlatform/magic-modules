@@ -70,6 +70,7 @@ func sendRequest(config *Config, method, rawurl string, body map[string]interfac
 
 			return nil
 		},
+		// TODO chrisst - use the timeouts specified at the resource level so that a user can override this.
 		time.Duration(5)*time.Minute,
 	)
 	if err != nil {
@@ -77,7 +78,7 @@ func sendRequest(config *Config, method, rawurl string, body map[string]interfac
 	}
 
 	if res == nil {
-		return nil, fmt.Errorf("Unable to server response. This is most likely a terraform problem.")
+		return nil, fmt.Errorf("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/terraform-providers/terraform-provider-google/issues.")
 	}
 	// The defer call must be made outside of the retryFunc otherwise it's closed too soon.
 	defer googleapi.CloseBody(res)
