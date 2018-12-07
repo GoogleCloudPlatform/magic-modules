@@ -19,6 +19,8 @@ apt-get update && apt-get install google-cloud-sdk -y
 
 gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
 
+pushd "magic-modules/build/inspec"
+rbenv exec bundle exec rake test:plan_integration_tests
 pushd "magic-modules/build/inspec/test/integration"
 
 # Generate a rsa private key to use in mocks
@@ -60,4 +62,6 @@ function cleanup {
 }
 trap cleanup EXIT
 
-inspec exec verify-mm --attrs=configuration/mm-attributes.yaml -t gcp:// --no-distinct-exit
+inspec exec verify-mm --attrs=build/gcp-inspec-attributes.yaml.yaml -t gcp:// --no-distinct-exit
+popd
+popd
