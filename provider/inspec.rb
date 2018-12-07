@@ -40,6 +40,8 @@ module Provider
       end
     end
 
+    generation_steps([:generate_objects, :copy_files, :compile_changelog, :compile_files])
+
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
@@ -124,6 +126,18 @@ module Provider
         doc_generation: true,
         default_template: 'templates/inspec/doc_template.md.erb',
         out_file: File.join(docs_folder, "google_#{data[:product_name]}_#{name}.md")
+      )
+    end
+
+    # Generate the CHANGELOG.md file with the history of the module.
+    def compile_changelog(output_folder, _types, _version_name)
+      return if @config.changelog.nil?
+      FileUtils.mkpath output_folder
+      generate_file(
+        changes: @config.changelog,
+        template: 'templates/CHANGELOG.md.erb',
+        output_folder: output_folder,
+        out_file: File.join(output_folder, 'CHANGELOG.md')
       )
     end
 

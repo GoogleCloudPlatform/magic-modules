@@ -304,6 +304,7 @@ module Provider
       private
 
       def generate_datasources(output_folder, types, version_name)
+        return if @config.datasources.nil?
         # We need to apply overrides for datasources
         @config.datasources.validate
 

@@ -33,17 +33,6 @@ module Provider
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    # Generate the CHANGELOG.md file with the history of the module.
-    def compile_changelog(output_folder)
-      FileUtils.mkpath output_folder
-      generate_file(
-        changes: @config.changelog,
-        template: 'templates/CHANGELOG.md.erb',
-        output_folder: output_folder,
-        out_file: File.join(output_folder, 'CHANGELOG.md')
-      )
-    end
-
     def compile_files(output_folder, _types, version_name)
       return if @config.files.nil? || @config.files.compile.nil?
       compile_file_list(output_folder, @config.files.compile, version: version_name)
