@@ -19,46 +19,44 @@
   requires = generate_requires(nested_properties)
 -%>
 <%= lines(emit_requires(requires)) -%>
-module Google
-  module <%= product_ns %>
-    module Property
-      class <%= class_name -%>
+module <%= product_ns %>
+  module Property
+    class <%= class_name -%>
 <% if !nested_properties.empty? -%>
 <% nested_properties.each do |prop| -%>
 
-        attr_reader :<%= prop.out_name %>
+      attr_reader :<%= prop.out_name %>
 <% end # nested_properties.each -%>
 
 <% end # if !nested_properties.empty? -%>
-        def initialize(args = nil)
-          return if args.nil?
+      def initialize(args = nil)
+        return if args.nil?
 <% nested_properties.each do |prop| -%>
 <%
-  if time?(prop)
-      init = "Time.parse(args['#{prop.api_name}'])"
-  elsif primitive?(prop)
-    init = "args['#{prop.api_name}']"
-  elsif typed_array?(prop)
-    init = "#{inspec_property_type(prop)}.parse(args['#{prop.api_name}'])"
-  else 
-    init = "#{inspec_property_type(prop)}.new(args['#{prop.api_name}'])"    
-  end
-  parse_code = "@#{prop.out_name} = #{init}"
+if time?(prop)
+    init = "Time.parse(args['#{prop.api_name}'])"
+elsif primitive?(prop)
+  init = "args['#{prop.api_name}']"
+elsif typed_array?(prop)
+  init = "#{inspec_property_type(prop)}.parse(args['#{prop.api_name}'])"
+else 
+  init = "#{inspec_property_type(prop)}.new(args['#{prop.api_name}'])"    
+end
+parse_code = "@#{prop.out_name} = #{init}"
 -%>
 <%= lines(indent(parse_code, 10)) -%>
 <% end # nested_properties.each -%>
-        end
       end
+    end
 
 <% if emit_array -%>
-      class <%= class_name %>Array
-        def self.parse(value)
-          return if value.nil?
-          return <%= class_name %>.new(value) unless value.is_a?(::Array)
-          value.map { |v| <%= class_name %>.new(v) }
-        end
+    class <%= class_name %>Array
+      def self.parse(value)
+        return if value.nil?
+        return <%= class_name %>.new(value) unless value.is_a?(::Array)
+        value.map { |v| <%= class_name %>.new(v) }
       end
-<% end #if emit_array -%>
     end
+<% end #if emit_array -%>
   end
 end
