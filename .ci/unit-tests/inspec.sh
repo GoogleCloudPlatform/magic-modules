@@ -21,8 +21,13 @@ gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gservi
 
 pushd "magic-modules/build/inspec"
 bundle install
-bundle exec rake test:plan_integration_tests
-pushd "magic-modules/build/inspec/test/integration"
+export GCP_PROJECT_NUMBER=542134042613
+export GCP_PROJECT_ID=graphite-test-sam-chef
+export GCP_PROJECT_NAME=graphite-test-sam-chef
+export GCP_ZONE=europe-west2-a
+export GCP_LOCATION=europe-west2
+bundle exec rake test:generate_integration_test_variables
+pushd "test/integration"
 
 # Generate a rsa private key to use in mocks
 # Due to using gauth library InSpec + train expect to load a service account file from an env variable
@@ -57,12 +62,9 @@ gsutil cp -r gs://magic-modules-inspec-bucket/inspec-cassettes .
 
 function cleanup {
   rm -rf inspec-cassettes
-  rm inspec.json
-  rm inspec.json.erb
-  rm var.rb
 }
 trap cleanup EXIT
 
-inspec exec verify-mm --attrs=build/gcp-inspec-attributes.yaml.yaml -t gcp:// --no-distinct-exit
+inspec exec verify-mm --attrs=build/gcp-inspec-attributes.yaml -t gcp:// --no-distinct-exit
 popd
 popd
