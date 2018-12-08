@@ -284,6 +284,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      address: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
       ipVersion: !ruby/object:Provider::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
       labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
