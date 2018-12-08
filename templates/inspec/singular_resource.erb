@@ -66,9 +66,9 @@ class <%= object.name -%> < GcpResourceBase
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
-      init = "#{prop.property_type}.parse(@fetched['#{prop.api_name}'])"
+      init = "#{inspec_property_type(prop)}.parse(@fetched['#{prop.api_name}'])"
     else
-      init = "#{prop.property_type}.new(@fetched['#{prop.api_name}'])"    
+      init = "#{inspec_property_type(prop)}.new(@fetched['#{prop.api_name}'])"    
     end
     
     assignment = "@#{name} = #{init}"
