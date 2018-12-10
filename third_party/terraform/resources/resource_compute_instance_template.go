@@ -285,10 +285,10 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 						},
 
 						"address": &schema.Schema{
-							Type:       schema.TypeString,
-							Computed:   true,
-							Optional:   true,
-							Removed:    "Please use network_ip",
+							Type:     schema.TypeString,
+							Computed: true,
+							Optional: true,
+							Removed:  "Please use network_ip",
 						},
 					},
 				},
