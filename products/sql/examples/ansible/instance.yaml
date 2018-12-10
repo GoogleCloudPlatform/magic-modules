@@ -14,7 +14,9 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_sql_instance
   code:
-    name: <%= ctx[:name] %>
+    # resource_name shared across entire test suite.
+    # All SQL instances must have unique names
+    name: "{{resource_name}}-2"
     settings:
       ip_configuration:
         authorized_networks:
