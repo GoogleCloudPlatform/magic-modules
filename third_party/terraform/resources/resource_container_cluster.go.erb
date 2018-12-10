@@ -271,6 +271,13 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 			},
 
+<% unless version == 'ga' -%>
+			"tpu_ipv4_cidr_block":  {
+				Computed: true,
+				Type: schema.TypeString,
+			},
+<% end -%>
+
 			"enable_legacy_abac": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -841,6 +848,7 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 <% unless version == 'ga' -%>
 	d.Set("enable_binary_authorization", cluster.BinaryAuthorization != nil && cluster.BinaryAuthorization.Enabled)
 	d.Set("enable_tpu", cluster.EnableTpu)
+	d.Set("tpu_ipv4_cidr_block", cluster.TpuIpv4CidrBlock)
 	if err := d.Set("cluster_autoscaling", flattenClusterAutoscaling(cluster.Autoscaling)); err != nil {
 		return err
 	}
