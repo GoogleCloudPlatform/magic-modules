@@ -175,6 +175,7 @@ resource "google_compute_global_address" "foobar" {
   address_type = "INTERNAL"
   purpose = "VPC_PEERING"
   prefix_length = 24
+	address = "172.20.181.0"
   network = "${google_compute_network.foobar.self_link}"
 }`, acctest.RandString(10), acctest.RandString(10))
 }
