@@ -19,8 +19,6 @@ set +x
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
 set -x
 
-gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
-
 pushd magic-modules-new-prs
 
 # Compile inspec because we are running off of new-prs
@@ -60,8 +58,6 @@ do
 	rm -r inspec-cassettes
 	
 	if inspec exec verify-mm --attrs=attributes/attributes.yaml -t gcp:// --no-distinct-exit; then
-		# Upload cassettes to storage bucket for unit test use
-		gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/inspec-cassettes
 		exit 0
 	fi
 done

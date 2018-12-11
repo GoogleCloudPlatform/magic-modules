@@ -261,31 +261,6 @@ jobs:
                 get_params:
                   skip_clone: true
 
-    - name: inspec-test
-      plan:
-        - get: magic-modules
-          version: every
-          trigger: true
-          params:
-              submodules: [build/inspec]
-          passed: [mm-generate]
-        - task: test
-          file: magic-modules/.ci/unit-tests/inspec.yml
-          params:
-            TERRAFORM_KEY: ((terraform-key))
-          timeout: 30m
-          on_failure:
-              do:
-              - get: magic-modules-new-prs
-                passed: [mm-generate]
-              - put: magic-modules-new-prs
-                params:
-                  status: failure
-                  context: inspec-tests
-                  path: magic-modules-new-prs
-                get_params:
-                  skip_clone: true
-
     - name: create-prs
       plan:
           - get: magic-modules
@@ -297,7 +272,6 @@ jobs:
               - mm-generate
               - terraform-test
               - ansible-test
-              - inspec-test
           - get: mm-initial-pr
             attempts: 2
             resource: magic-modules-new-prs
