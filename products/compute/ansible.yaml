@@ -205,6 +205,8 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       addressType: !ruby/object:Provider::Ansible::PropertyOverride
         version_added: '2.8'
+      address: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   GlobalForwardingRule: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       IPAddress:  !ruby/object:Provider::Ansible::PropertyOverride

@@ -1069,7 +1069,6 @@ objects:
         name: 'address'
         description: |
           The static external IP address represented by this resource.
-        output: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
