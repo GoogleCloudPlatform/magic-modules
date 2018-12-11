@@ -55,10 +55,10 @@ module Provider
           ('required=True' if prop.required && !prop.default_value),
           ("default=#{python_literal(prop.default_value)}" \
            if prop.default_value),
-          "type=#{quote_string(python_type(prop))}",
+          ("type=#{quote_string(python_type(prop))}" if python_type(prop)),
           (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
-            if prop.is_a? Api::Type::Array),
+            if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
           ("aliases=[#{prop.aliases.map { |x| quote_string(x) }.join(', ')}]" \
             if prop.aliases)
         ].compact
