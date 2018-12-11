@@ -18,6 +18,9 @@ export GOPATH=${PWD}/go
 # to disk for use in tests.
 set +x
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
+export GCP_PROJECT_NUMBER=${PROJECT_NUMBER}
+export GCP_PROJECT_ID=${PROJECT_NAME}
+export GCP_PROJECT_NAME=${PROJECT_NAME}
 set -x
 
 pushd magic-modules-new-prs
@@ -31,9 +34,6 @@ done
 pushd build/inspec
 
 # Setup for using current GCP resources
-export GCP_PROJECT_NUMBER=542134042613
-export GCP_PROJECT_ID=graphite-test-sam-chef
-export GCP_PROJECT_NAME=graphite-test-sam-chef
 export GCP_ZONE=europe-west2-a
 export GCP_LOCATION=europe-west2
 

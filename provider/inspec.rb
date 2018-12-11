@@ -270,7 +270,7 @@ module Provider
     end
 
     def inspec_property_type(property)
-      return property.property_type.sub('Google::', 'GoogleInSpec::')
+      property.property_type.sub('Google::', 'GoogleInSpec::')
     end
   end
 end
