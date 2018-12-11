@@ -103,9 +103,9 @@ module Provider
           "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
           'It can be specified in two ways.',
           "First, you can place in the #{prop.imports} of the resource here as a string",
-          "Alternatively, you can add `register: name-of-resource` to a",
+          'Alternatively, you can add `register: name-of-resource` to a',
           "#{module_name(prop.resource_ref)} task",
-          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\"",
+          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\""
         ].join(' ')
       end
 
