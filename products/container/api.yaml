@@ -17,7 +17,11 @@ prefix: gcontainer
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
+    default: true
     base_url: https://container.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://container.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -162,6 +166,20 @@ objects:
           The IP address range of the container pods in this cluster, in CIDR
           notation (e.g. 10.96.0.0/14). Leave blank to have one automatically
           chosen or specify a /14 block in 10.0.0.0/8.
+      - !ruby/object:Api::Type::String
+        name: 'enableTpu'
+        min_version: beta
+        description: |
+          (Optional) Whether to enable Cloud TPU resources in this cluster.
+          See the official documentation - https://cloud.google.com/tpu/docs/kubernetes-engine-setup
+      - !ruby/object:Api::Type::String
+        name: 'tpuIpv4CidrBlock'
+        output: true
+        min_version: beta
+        description: |
+          The IP address range of the Cloud TPUs in this cluster, in
+          [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
+          notation (e.g. `1.2.3.4/29`).
       - !ruby/object:Api::Type::NestedObject
         name: 'addonsConfig'
         description: |
