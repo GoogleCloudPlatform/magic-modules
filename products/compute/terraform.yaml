@@ -986,6 +986,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/vpn_tunnel.erb
+      encoder: templates/terraform/encoders/vpn_tunnel.go.erb
   Zone: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true
 
