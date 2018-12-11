@@ -829,6 +829,40 @@ func TestAccContainerCluster_withLogging(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_updateLoggingAndMonitoring(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withLoggingAndMonitoring(clusterName, "none", "none"),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_logging_monitoring",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withLoggingAndMonitoring(clusterName, "logging.googleapis.com/kubernetes", "monitoring.googleapis.com/kubernetes"),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_logging_monitoring",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func TestAccContainerCluster_withMonitoring(t *testing.T) {
 	t.Parallel()
 
@@ -2155,6 +2189,18 @@ resource "google_container_cluster" "with_monitoring" {
 
 	monitoring_service = "none"
 }`, clusterName)
+}
+
+func testAccContainerCluster_withLoggingAndMonitoring(clusterName, logging, monitoring string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_logging_monitoring" {
+	name               = "cluster-test-%s"
+	zone               = "us-central1-a"
+	initial_node_count = 1
+
+	logging_service    = "%s"
+	monitoring_service = "%s"
+}`, clusterName, logging, monitoring)
 }
 
 func testAccContainerCluster_withNodePoolBasic(cluster, nodePool string) string {
