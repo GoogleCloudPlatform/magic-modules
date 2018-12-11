@@ -1166,6 +1166,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.SetPartial("enable_legacy_abac")
 	}
 
+<% if version == 'ga' -%>
 	if d.HasChange("monitoring_service") {
 		desiredMonitoringService := d.Get("monitoring_service").(string)
 
@@ -1185,6 +1186,65 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		d.SetPartial("monitoring_service")
 	}
+
+	if d.HasChange("logging_service") {
+		logging := d.Get("logging_service").(string)
+
+		req := &containerBeta.SetLoggingServiceRequest{
+			LoggingService: logging,
+		}
+		updateF := func() error {
+			name := containerClusterFullName(project, location, clusterName)
+			op, err := config.clientContainerBeta.Projects.Locations.Clusters.SetLogging(name, req).Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			return containerSharedOperationWait(config, op, project, location, "updating GKE logging service", timeoutInMinutes, 2)
+		}
+
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s: logging service has been updated to %s", d.Id(),
+			logging)
+		d.SetPartial("logging_service")
+	}
+<% else -%>
+	if d.HasChange("monitoring_service") || d.HasChange("logging_service") {
+		logging := d.Get("logging_service").(string)
+		monitoring := d.Get("monitoring_service").(string)
+
+		updateF := func() error {
+			name := containerClusterFullName(project, location, clusterName)
+			req := &containerBeta.UpdateClusterRequest{
+				Update: &containerBeta.ClusterUpdate{
+					DesiredMonitoringService: monitoring,
+					DesiredLoggingService:    logging,
+				},
+			}
+			op, err := config.clientContainerBeta.Projects.Locations.Clusters.Update(name, req).Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			return containerSharedOperationWait(config, op, project, location, "updating GKE logging+monitoring service", timeoutInMinutes, 2)
+		}
+
+		// Call update serially.
+		if err := lockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s: logging service has been updated to %s, monitoring service has been updated to %s", d.Id(), logging, monitoring)
+		d.SetPartial("logging_service")
+		d.SetPartial("monitoring_service")
+	}
+<% end -%>
 
 	if d.HasChange("network_policy") {
 		np := d.Get("network_policy")
@@ -1229,33 +1289,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 		}
 		d.SetPartial("node_pool")
-	}
-
-	if d.HasChange("logging_service") {
-		logging := d.Get("logging_service").(string)
-
-		req := &containerBeta.SetLoggingServiceRequest{
-			LoggingService: logging,
-		}
-		updateF := func() error {
-			name := containerClusterFullName(project, location, clusterName)
-			op, err := config.clientContainerBeta.Projects.Locations.Clusters.SetLogging(name, req).Do()
-			if err != nil {
-				return err
-			}
-
-			// Wait until it's updated
-			return containerSharedOperationWait(config, op, project, location, "updating GKE logging service", timeoutInMinutes, 2)
-		}
-
-		// Call update serially.
-		if err := lockedCall(lockKey, updateF); err != nil {
-			return err
-		}
-
-		log.Printf("[INFO] GKE cluster %s: logging service has been updated to %s", d.Id(),
-			logging)
-		d.SetPartial("logging_service")
 	}
 
 	if d.HasChange("node_config") {
