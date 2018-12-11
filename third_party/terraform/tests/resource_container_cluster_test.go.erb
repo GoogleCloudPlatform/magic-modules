@@ -2191,6 +2191,7 @@ resource "google_container_cluster" "with_monitoring" {
 }`, clusterName)
 }
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withLoggingAndMonitoring(clusterName, logging, monitoring string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_logging_monitoring" {
@@ -2202,6 +2203,7 @@ resource "google_container_cluster" "with_logging_monitoring" {
 	monitoring_service = "%s"
 }`, clusterName, logging, monitoring)
 }
+<% end -%>
 
 func testAccContainerCluster_withNodePoolBasic(cluster, nodePool string) string {
 	return fmt.Sprintf(`
