@@ -3,11 +3,6 @@
 set -e
 set -x
 
-function cleanup {
-	cd $TF_PATH
-	terraform destroy -force -var-file=inspec-gcp.tfvars -auto-approve
-}
-
 # Service account credentials for GCP to allow terraform to work
 export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
 export GOOGLE_APPLICATION_CREDENTIALS="/tmp/google-account.json"
@@ -19,8 +14,6 @@ export GOPATH=${PWD}/go
 set +x
 echo "${TERRAFORM_KEY}" > /tmp/google-account.json
 set -x
-
-gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
 
 pushd magic-modules-new-prs
 
@@ -42,7 +35,11 @@ export GCP_LOCATION=europe-west2
 bundle
 export TF_PATH=${PWD}/test/integration/build
 
-trap cleanup EXIT
-bundle exec rake test:integration
+function cleanup {
+	bundle exec rake test:cleanup_integration_tests
+}
 
-gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/inspec-cassettes
+# Ensure that we terraform destroy even if the tests fail
+trap cleanup EXIT
+
+bundle exec rake test:integration
