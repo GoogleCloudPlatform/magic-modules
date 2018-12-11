@@ -271,13 +271,6 @@ func resourceContainerCluster() *schema.Resource {
 <% end -%>
 			},
 
-<% unless version == 'ga' -%>
-			"tpu_ipv4_cidr_block":  {
-				Computed: true,
-				Type: schema.TypeString,
-			},
-<% end -%>
-
 			"enable_legacy_abac": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -619,6 +612,13 @@ func resourceContainerCluster() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+<% unless version == 'ga' -%>
+			"tpu_ipv4_cidr_block":  {
+				Computed: true,
+				Type: schema.TypeString,
+			},
+<% end -%>
 		},
 	}
 }
