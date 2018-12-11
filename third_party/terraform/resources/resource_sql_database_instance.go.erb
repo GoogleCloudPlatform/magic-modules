@@ -640,7 +640,7 @@ func expandIpConfiguration(configured []interface{}) *sqladmin.IpConfiguration {
 		PrivateNetwork:     _ipConfiguration["private_network"].(string),
 <% end -%>
 		AuthorizedNetworks: expandAuthorizedNetworks(_ipConfiguration["authorized_networks"].(*schema.Set).List()),
-		ForceSendFields:    []string{"Ipv4Enabled"},
+		ForceSendFields:    []string{"Ipv4Enabled", "RequireSsl"},
 	}
 }
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
