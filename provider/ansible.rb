@@ -58,7 +58,7 @@ module Provider
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resource_ref.readonly
 
-          return 'dict'
+          return ''
         end
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
       end
