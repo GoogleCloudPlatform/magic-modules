@@ -270,7 +270,9 @@ module Provider
     end
 
     def inspec_property_type(property)
-      property.property_type.sub('Google::', '')
+      # inspec-gcp repo already uses Google namespace, to prevent sweeping changes
+      # change module for generated nested objects
+      property.property_type.sub('Google::', 'GoogleInSpec::')
     end
   end
 end
