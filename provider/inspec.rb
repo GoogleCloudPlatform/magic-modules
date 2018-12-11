@@ -266,11 +266,11 @@ module Provider
     end
 
     def grab_attributes
-      YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yaml')
+      YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yml')
     end
 
     def inspec_property_type(property)
-      return property.property_type.sub('Google::', '')
+      return property.property_type.sub('Google::', 'GoogleInSpec::')
     end
   end
 end
