@@ -206,8 +206,7 @@ objects:
                 name: 'clientKey'
                 description: |
                   PEM representation of the slave's private key. The
-                  corresponding public key is encoded in the client's asf asd
-                  certificate.
+                  corresponding public key is encoded in the client's certificate.
               - !ruby/object:Api::Type::Integer
                 name: 'connectRetryInterval'
                 description: |
