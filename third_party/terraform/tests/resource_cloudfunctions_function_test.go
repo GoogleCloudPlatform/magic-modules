@@ -594,7 +594,7 @@ resource "google_cloudfunctions_function" "function" {
   name = "%s"
 
   source_repository {
-    url = "https://source.developers.google.com/projects/hc-terraform-testing/repos/cloudfunctions-test-do-not-delete/moveable-aliases/master"
+    url = "https://source.developers.google.com/projects/hc-terraform-testing/repos/cloudfunctions-test-do-not-delete/moveable-aliases/master/paths/"
   }
 
   trigger_http = true
