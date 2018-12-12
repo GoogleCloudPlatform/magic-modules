@@ -68,7 +68,7 @@ module Provider
       # Builds out the RETURNS for a property.
       # This will eventually be converted to YAML
       def returns_for_property(prop)
-        type = python_type(prop)
+        type = python_type(prop) || 'str'
         # Type is a valid AnsibleModule type, but not a valid return type
         type = 'str' if type == 'path'
         # Complex types only mentioned in reference to RETURNS YAML block
