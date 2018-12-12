@@ -19,7 +19,7 @@
   requires = generate_requires(nested_properties)
 -%>
 <%= lines(emit_requires(requires)) -%>
-module Google
+module GoogleInSpec
   module <%= product_ns %>
     module Property
       class <%= class_name -%>
@@ -39,9 +39,9 @@ module Google
   elsif primitive?(prop)
     init = "args['#{prop.api_name}']"
   elsif typed_array?(prop)
-    init = "#{prop.property_type}.parse(args['#{prop.api_name}'])"
+    init = "#{inspec_property_type(prop)}.parse(args['#{prop.api_name}'])"
   else 
-    init = "#{prop.property_type}.new(args['#{prop.api_name}'])"    
+    init = "#{inspec_property_type(prop)}.new(args['#{prop.api_name}'])"    
   end
   parse_code = "@#{prop.out_name} = #{init}"
 -%>

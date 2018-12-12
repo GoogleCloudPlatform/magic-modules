@@ -1,14 +1,13 @@
 <% project_name = grab_attributes['project_name'] -%>
 <% ssl_policy = grab_attributes['ssl_policy'] -%>
-resource = google_compute_ssl_policies({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>})
-describe resource do
+describe google_compute_ssl_policies({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>}) do
   it { should exist }
   its('names') { should include <%= doc_generation ? "'#{ssl_policy['name']}'" : "ssl_policy['name']" -%> }
   its('profiles') { should include <%= doc_generation ? "'#{ssl_policy['profile']}'" : "ssl_policy['profile']" -%> }
   its('count') { should eq 1 }
 end
 
-resource.names.each do |policy_name|
+google_compute_ssl_policies({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>}).names.each do |policy_name|
   describe google_compute_ssl_policy({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: policy_name}) do
     its('min_tls_version') { should cmp <%= doc_generation ? "'#{ssl_policy['min_tls_version']}'" : "ssl_policy['min_tls_version']" -%> }
   end
