@@ -33,6 +33,7 @@ package google
     api_client_name = api_name_lower.downcase
     has_project = object.base_url.include?("{{project}}")
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
+    timeouts = object.async.nil? ? Api::Timeouts.new : object.async.operation.timeouts
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -45,7 +46,7 @@ func resource<%= resource_name -%>() *schema.Resource {
         Delete: resource<%= resource_name -%>Delete,
 <%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
         CustomizeDiff: customdiff.All(
-<%=         
+<%=
             settable_properties.select { |p| p.unordered_list }
                                .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
                                .join(",\n")
@@ -59,11 +60,11 @@ func resource<%= resource_name -%>() *schema.Resource {
 
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= !object.async.nil? ? object.async.operation.timeouts.insert_sec : 300 -%> * time.Second),
+            Create: schema.DefaultTimeout(<%= timeouts.insert_sec  -%> * time.Second),
 <%          if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= !object.async.nil? ? object.async.operation.timeouts.update_sec : 300 -%> * time.Second),
+            Update: schema.DefaultTimeout(<%= timeouts.update_sec -%> * time.Second),
 <%          end -%>
-            Delete: schema.DefaultTimeout(<%= !object.async.nil? ? object.async.operation.timeouts.delete_sec : 300 -%> * time.Second),
+            Delete: schema.DefaultTimeout(<%= timeouts.delete_sec -%> * time.Second),
         },
 
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>

@@ -3,6 +3,7 @@ package google
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -77,6 +78,9 @@ func sendRequestWithTimeout(config *Config, method, rawurl string, body map[stri
 	)
 	if err != nil {
 		return nil, err
+	}
+	if res == nil {
+		return nil, fmt.Errorf("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/terraform-providers/terraform-provider-google/issues.")
 	}
 
 	// The defer call must be made outside of the retryFunc otherwise it's closed too soon.
