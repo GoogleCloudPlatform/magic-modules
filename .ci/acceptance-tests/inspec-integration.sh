@@ -3,11 +3,6 @@
 set -e
 set -x
 
-function cleanup {
-	cd $TF_PATH
-	terraform destroy -force -var-file=inspec-gcp.tfvars -auto-approve
-}
-
 # Service account credentials for GCP to allow terraform to work
 export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
 export GOOGLE_APPLICATION_CREDENTIALS="/tmp/google-account.json"
@@ -38,9 +33,11 @@ export GCP_ZONE=europe-west2-a
 export GCP_LOCATION=europe-west2
 
 bundle
-export TF_PATH=${PWD}/test/integration/build
+
+function cleanup {
+	cd $TF_PATH
+	bundle exec rake test:cleanup_integration_tests
+}
 
 trap cleanup EXIT
 bundle exec rake test:integration
-
-gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/inspec-cassettes
