@@ -79,6 +79,7 @@ func sendRequestWithTimeout(config *Config, method, rawurl string, body map[stri
 	if err != nil {
 		return nil, err
 	}
+
 	if res == nil {
 		return nil, fmt.Errorf("Unable to parse server response. This is most likely a terraform problem, please file a bug at https://github.com/terraform-providers/terraform-provider-google/issues.")
 	}

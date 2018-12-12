@@ -14,7 +14,6 @@
 require 'api/object'
 
 module  Api
-
   # Provides timeout information for the different operation types
   class Timeouts < Api::Object
     # Default timeout for all operation types is 4 minutes. This can be
@@ -43,5 +42,4 @@ module  Api
       check_property :delete_sec, Integer
     end
   end
-
 end
