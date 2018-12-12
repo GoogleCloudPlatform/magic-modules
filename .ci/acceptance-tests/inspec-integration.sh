@@ -35,7 +35,6 @@ export GCP_LOCATION=europe-west2
 bundle
 
 function cleanup {
-	cd $TF_PATH
 	bundle exec rake test:cleanup_integration_tests
 }
 
