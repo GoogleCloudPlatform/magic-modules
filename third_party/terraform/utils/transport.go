@@ -89,6 +89,8 @@ func sendRequestWithTimeout(config *Config, method, rawurl string, body map[stri
 	req.Header = reqHeaders
 
 	if timeout != 0 {
+		// context.TODO is encouraged for cancellable contexts that aren't passed in by the
+		// surrounding function. See https://golang.org/pkg/context/#TODO
 		ctx, cancel := context.WithTimeout(context.TODO(), timeout)
 		// Cancel must always be called to avoid leaking go routines
 		defer cancel()
