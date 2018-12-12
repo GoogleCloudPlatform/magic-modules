@@ -414,6 +414,8 @@ jobs:
           file: magic-modules-new-prs/.ci/acceptance-tests/inspec-integration.yml
           params:
             TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
     - name: ansible-integration-test
       serial: true
       plan:
