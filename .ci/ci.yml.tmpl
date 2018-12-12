@@ -409,9 +409,9 @@ jobs:
     - name: inspec-integration-test
       serial: true
       plan:
-        - get: magic-modules-new-prs
+        - get: magic-modules-gcp
         - task: inspec-integration
-          file: magic-modules-new-prs/.ci/acceptance-tests/inspec-integration.yml
+          file: magic-modules-gcp/.ci/acceptance-tests/inspec-integration.yml
           params:
             TERRAFORM_KEY: ((terraform-key))
             PROJECT_NAME: ((inspec-project-name))
