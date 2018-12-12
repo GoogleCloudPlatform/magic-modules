@@ -67,7 +67,7 @@
   <% unless property.min_size.nil? -%>
       MinItems: <%= property.min_size %>,
   <% end -%>
- <% unless property.max_size.nil? -%>
+  <% unless property.max_size.nil? -%>
       MaxItems: <%= property.max_size %>,
   <% end -%>
   <% if property.item_type.is_a?(Api::Type::NestedObject) -%>
@@ -81,9 +81,6 @@
   <% elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
       Elem: &schema.Schema{
       Type: <%= tf_types[property.item_type] -%>,
-      <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
-        DiffSuppressFunc: compareSelfLinkOrResourceName,
-      <% end -%>
       },
   <% else # array of basic types -%>
       Elem: &schema.Schema{
