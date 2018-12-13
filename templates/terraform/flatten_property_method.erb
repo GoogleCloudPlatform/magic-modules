@@ -40,7 +40,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
   l := v.([]interface{})
 <%   if property.is_set -%>
 <%     if property.set_hash_func.nil? -%>
-  transformed := schema.NewSet(schema.HashResource(<%= prefix -%><%= property.name.camelize -%>Schema()), []interface{}{})
+  transformed := schema.NewSet(schema.HashResource(<%= prefix.camelize(:lower) -%><%= property.name.camelize -%>Schema()), []interface{}{})
 <%     else -%>
   transformed := schema.NewSet(<%= property.set_hash_func -%>, []interface{}{})
 <%     end -%>
