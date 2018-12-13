@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'api/timeout'
 
 module Api
   # Represents an asynchronous operation definition
@@ -41,38 +42,13 @@ module Api
       def validate
         super
 
-        @timeouts ||= Timeouts.new
+        @timeouts ||= Api::Timeouts.new
 
         check_property :kind, String
         check_property :path, String
         check_property :base_url, String
         check_property :wait_ms, Integer
         check_property :timeouts, Timeouts
-      end
-
-      # Provides timeout information for the different operation types
-      class Timeouts < Api::Object
-        # Default timeout for all operation types is 4 minutes. This can be
-        # overridden for each resource.
-        DEFAULT_INSERT_TIMEOUT_SEC = 4 * 60
-        DEFAULT_UPDATE_TIMEOUT_SEC = 4 * 60
-        DEFAULT_DELETE_TIMEOUT_SEC = 4 * 60
-
-        attr_reader :insert_sec
-        attr_reader :update_sec
-        attr_reader :delete_sec
-
-        def validate
-          super
-
-          @insert_sec ||= DEFAULT_INSERT_TIMEOUT_SEC
-          @update_sec ||= DEFAULT_UPDATE_TIMEOUT_SEC
-          @delete_sec ||= DEFAULT_DELETE_TIMEOUT_SEC
-
-          check_property :insert_sec, Integer
-          check_property :update_sec, Integer
-          check_property :delete_sec, Integer
-        end
       end
     end
 
