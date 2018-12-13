@@ -595,7 +595,6 @@ func TestAccSqlDatabaseInstance_basic_with_user_labels(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 	t.Parallel()
 
@@ -619,7 +618,6 @@ func TestAccSqlDatabaseInstance_withPrivateNetwork(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccSqlDatabaseInstanceDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
@@ -741,7 +739,6 @@ resource "google_sql_database_instance" "instance-failover" {
 `, instanceName, failoverName)
 }
 
-<% unless version == 'ga' -%>
 func testAccSqlDatabaseInstance_withPrivateNetwork(databaseName, networkName, addressRangeName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -777,7 +774,6 @@ resource "google_sql_database_instance" "instance" {
 }
 `, networkName, addressRangeName, databaseName)
 }
-<% end -%>
 
 var testGoogleSqlDatabaseInstance_settings = `
 resource "google_sql_database_instance" "instance" {
