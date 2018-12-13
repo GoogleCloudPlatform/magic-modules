@@ -27,9 +27,11 @@ export GCP_LOCATION=europe-west2
 bundle install
 
 function cleanup {
+	cd $INSPEC_DIR
 	bundle exec rake test:cleanup_integration_tests
 }
 
+export INSPEC_DIR=${PWD}
 trap cleanup EXIT
 bundle exec rake test:integration
 popd
