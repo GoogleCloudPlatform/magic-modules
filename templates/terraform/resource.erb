@@ -90,6 +90,11 @@ func resource<%= resource_name -%>() *schema.Resource {
         },
     }
 }
+
+<% properties.select{|p| p.is_a?(Api::Type::Array) && p.is_set && p.item_type.is_a?(Api::Type::NestedObject)}.each do |prop| -%>
+<%= lines(build_subresource_schema(prop, object), 1) -%>
+<% end -%>
+
 <% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
 <%=
