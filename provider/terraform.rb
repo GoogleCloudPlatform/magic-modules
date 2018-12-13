@@ -40,6 +40,12 @@ module Provider
       tf_types[property.class]
     end
 
+    # "Namespace" - prefix with product and resource - a property with
+    # information from the "object" variable
+    def namespace_property_from_object(property, object)
+       "#{object.__product.prefix[1..-1].camelize}#{object.name}#{property.name.camelize}"
+    end
+
     # Converts between the Magic Modules type of an object and its type in the
     # TF schema
     def tf_types
