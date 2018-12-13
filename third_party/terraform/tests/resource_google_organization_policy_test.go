@@ -20,12 +20,13 @@ var DENIED_ORG_POLICIES = []string{
 // avoid race conditions and aborted operations.
 func TestAccOrganizationPolicy(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"boolean":        testAccOrganizationPolicy_boolean,
-		"list_allowAll":  testAccOrganizationPolicy_list_allowAll,
-		"list_allowSome": testAccOrganizationPolicy_list_allowSome,
-		"list_denySome":  testAccOrganizationPolicy_list_denySome,
-		"list_update":    testAccOrganizationPolicy_list_update,
-		"restore_policy": testAccOrganizationPolicy_restore_defaultTrue,
+		"boolean":                testAccOrganizationPolicy_boolean,
+		"list_allowAll":          testAccOrganizationPolicy_list_allowAll,
+		"list_allowSome":         testAccOrganizationPolicy_list_allowSome,
+		"list_denySome":          testAccOrganizationPolicy_list_denySome,
+		"list_update":            testAccOrganizationPolicy_list_update,
+		"list_inheritFromParent": testAccOrganizationPolicyConfig_list_inheritFromParent,
+		"restore_policy":         testAccOrganizationPolicy_restore_defaultTrue,
 	}
 
 	for name, tc := range testCases {
@@ -372,6 +373,25 @@ resource "google_organization_policy" "list" {
                 "replicapoolupdater.googleapis.com",
             ]
         }
+    }
+}
+`, org)
+}
+
+func testAccOrganizationPolicyConfig_list_inheritFromParent(org string) string {
+	return fmt.Sprintf(`
+resource "google_organization_policy" "list" {
+    org_id = "%s"
+    constraint = "serviceuser.services"
+
+    list_policy {
+        deny {
+            values = [
+                "doubleclicksearch.googleapis.com",
+                "replicapoolupdater.googleapis.com",
+            ]
+        }
+        inherit_from_parent = true
     }
 }
 `, org)
