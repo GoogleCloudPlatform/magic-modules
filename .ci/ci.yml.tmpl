@@ -51,7 +51,7 @@ resources:
           authorship_restriction: true
           no_label: automerged
 
-    - name: inspec-integration-timer
+    - name: midnight-timer
       type: time
       source:
         start: 12:00 AM
@@ -417,7 +417,7 @@ jobs:
       serial: true
       plan:
         - get: magic-modules-gcp
-        - get: inspec-integration-timer
+        - get: midnight-timer
           trigger: true
         - task: inspec-integration
           file: magic-modules-gcp/.ci/acceptance-tests/inspec-integration.yml
