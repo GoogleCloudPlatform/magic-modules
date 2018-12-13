@@ -51,6 +51,13 @@ resources:
           authorship_restriction: true
           no_label: automerged
 
+    - name: midnight-timer
+      type: time
+      source:
+        start: 12:00 AM
+        stop: 1:00 AM
+        location: America/Los_Angeles
+
 {% for v in vars.terraform_v.itervalues() %}
     - name: {{ v.short_name }}-intermediate
       type: git-branch
@@ -410,6 +417,8 @@ jobs:
       serial: true
       plan:
         - get: magic-modules-gcp
+        - get: midnight-timer
+          trigger: true
         - task: inspec-integration
           file: magic-modules-gcp/.ci/acceptance-tests/inspec-integration.yml
           params:
