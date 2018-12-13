@@ -25,7 +25,7 @@ func TestAccOrganizationPolicy(t *testing.T) {
 		"list_allowSome":         testAccOrganizationPolicy_list_allowSome,
 		"list_denySome":          testAccOrganizationPolicy_list_denySome,
 		"list_update":            testAccOrganizationPolicy_list_update,
-		"list_inheritFromParent": testAccOrganizationPolicyConfig_list_inheritFromParent,
+		"list_inheritFromParent": testAccOrganizationPolicy_list_inheritFromParent,
 		"restore_policy":         testAccOrganizationPolicy_restore_defaultTrue,
 	}
 
@@ -157,6 +157,25 @@ func testAccOrganizationPolicy_list_update(t *testing.T) {
 			{
 				Config: testAccOrganizationPolicyConfig_list_denySome(org),
 				Check:  testAccCheckGoogleOrganizationListPolicyDeniedValues("list", DENIED_ORG_POLICIES),
+			},
+			{
+				ResourceName:      "google_organization_policy.list",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccOrganizationPolicy_list_inheritFromParent(t *testing.T) {
+	org := getTestOrgTargetFromEnv(t)
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckGoogleOrganizationPolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOrganizationPolicyConfig_list_inheritFromParent(org),
 			},
 			{
 				ResourceName:      "google_organization_policy.list",
