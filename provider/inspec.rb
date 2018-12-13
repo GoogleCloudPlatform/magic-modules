@@ -156,7 +156,7 @@ module Provider
         default_template: 'templates/inspec/integration_test_template.erb',
         out_file: File.join(
           target_folder,
-          'integration/verify-mm/controls',
+          'integration/verify/controls',
           "#{name}.rb"
         )
       )
