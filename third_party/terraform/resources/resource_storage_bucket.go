@@ -51,7 +51,6 @@ func resourceStorageBucket() *schema.Resource {
 			"requester_pays": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  nil,
 			},
 
 			"force_destroy": &schema.Schema{
@@ -492,7 +491,9 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("lifecycle_rule", flattenBucketLifecycle(res.Lifecycle))
 	d.Set("labels", res.Labels)
 
-	if res.Billing != nil {
+	if res.Billing == nil {
+		d.Set("requester_pays", nil)
+	} else {
 		d.Set("requester_pays", res.Billing.RequesterPays)
 	}
 
