@@ -91,7 +91,7 @@ func resource<%= resource_name -%>() *schema.Resource {
     }
 }
 
-<% properties.select{|p| p.is_a?(Api::Type::Array) && p.is_set && p.item_type.is_a?(Api::Type::NestedObject)}.each do |prop| -%>
+<% properties.each do |prop| -%>
 <%= lines(build_subresource_schema(prop, object), 1) -%>
 <% end -%>
 
