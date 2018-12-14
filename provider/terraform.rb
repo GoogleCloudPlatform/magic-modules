@@ -43,7 +43,13 @@ module Provider
     # "Namespace" - prefix with product and resource - a property with
     # information from the "object" variable
     def namespace_property_from_object(property, object)
-      "#{object.__product.prefix[1..-1].camelize(:lower)}#{object.name}#{property.name.camelize}"
+      name = property.name.camelize
+      until property.parent.nil?
+        property = property.parent
+        name = property.name.camelize + name
+      end
+
+      "#{property.__resource.__product.prefix[1..-1].camelize(:lower)}#{object.name}#{name}"
     end
 
     # Converts between the Magic Modules type of an object and its type in the

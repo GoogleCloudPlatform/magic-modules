@@ -12,6 +12,9 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
+<%
+  if property.is_a?(Api::Type::Array) && property.is_set && property.item_type.is_a?(Api::Type::NestedObject)
+-%>
 func <%= namespace_property_from_object(property, object) -%>Schema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -21,7 +24,8 @@ func <%= namespace_property_from_object(property, object) -%>Schema() *schema.Re
 		},
 	}
 }
+<% end %>
 
-<% order_properties(property.item_type.properties.select{|p| p.is_a?(Api::Type::Array) && p.is_set && p.item_type.is_a?(Api::Type::NestedObject)}).each do |prop| -%>
-  <%= lines(build_subresource_schema(prop, object)) -%>
+<% nested_properties(property).each do |prop| -%>
+<%= lines(build_subresource_schema(prop, object), 1) -%>
 <% end -%>
