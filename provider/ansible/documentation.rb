@@ -68,7 +68,7 @@ module Provider
       # Builds out the RETURNS for a property.
       # This will eventually be converted to YAML
       def returns_for_property(prop)
-        type = python_type(prop)
+        type = python_type(prop) || 'str'
         # Type is a valid AnsibleModule type, but not a valid return type
         type = 'str' if type == 'path'
         # Complex types only mentioned in reference to RETURNS YAML block
@@ -102,11 +102,10 @@ module Provider
         [
           "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
           'It can be specified in two ways.',
-          "You can add `register: name-of-resource` to a #{module_name(prop.resource_ref)} task",
-          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\"",
-          "Alternatively, you can set this #{prop.name.underscore} to a dictionary",
-          "with the #{prop.imports} key",
-          "where the value is the #{prop.imports} of your #{prop.resource_ref.name}"
+          "First, you can place in the #{prop.imports} of the resource here as a string",
+          'Alternatively, you can add `register: name-of-resource` to a',
+          "#{module_name(prop.resource_ref)} task",
+          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\""
         ].join(' ')
       end
 
