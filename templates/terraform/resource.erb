@@ -91,6 +91,11 @@ func resource<%= resource_name -%>() *schema.Resource {
         },
     }
 }
+
+<% properties.each do |prop| -%>
+<%= lines(build_subresource_schema(prop, object), 1) -%>
+<% end -%>
+
 <% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
 <%=
