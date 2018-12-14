@@ -63,7 +63,7 @@ func TestAccServiceAccount_basic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// The third step explicitely adds the same default project to the service account configuration
+			// The third step explicitly adds the same default project to the service account configuration
 			// and ensure the service account is not recreated by comparing the value of its unique_id with the one from the previous step
 			{
 				Config: testAccServiceAccountWithProject(project, accountId, displayName2),
