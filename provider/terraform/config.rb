@@ -30,6 +30,9 @@ module Provider
         Provider::Terraform::PropertyOverride
       end
 
+      # These two methods are for the new set of overrides.
+      # They'll replace `resource_override` and `property_override`
+      # when the old overrides are deprecated.
       def new_resource_override
         Provider::Overrides::Terraform::ResourceOverride
       end
