@@ -3,7 +3,7 @@ resource "google_compute_snapshot" "<%= ctx[:primary_resource_id] %>" {
 	source_disk = "${google_compute_disk.persistent.name}"
 	zone = "us-central1-a"
 	labels = {
-		my_label = "%s"
+		my_label = "value"
 	}
 }
 

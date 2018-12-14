@@ -13,8 +13,4 @@
 	# limitations under the License.
 -%>
 d.Set("source_disk_link", ConvertSelfLinkToV1(res["sourceDisk"].(string)))
-if snapshotEncryptionKey := res["snapshotEncryptionKey"]; snapshotEncryptionKey != nil {
-	d.Set("snapshot_encryption_key_sha256", snapshotEncryptionKey.((map[string]interface{}))["sha256"])
-}
-
 return res, nil
