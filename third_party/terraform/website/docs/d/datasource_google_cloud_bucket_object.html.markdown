@@ -9,8 +9,8 @@ description: |-
 
 # google\_storage\_bucket\_object
 
-Gets an existing object inside an existing bucket in Google cloud storage service (GCS).
-[the official documentation](https://cloud.google.com/storage/docs/key-terms#objects)
+Gets an existing object inside an existing bucket in Google Cloud Storage service (GCS).
+See [the official documentation](https://cloud.google.com/storage/docs/key-terms#objects)
 and
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
 
