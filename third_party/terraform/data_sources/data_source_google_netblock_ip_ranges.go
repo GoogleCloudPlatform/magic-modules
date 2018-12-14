@@ -77,7 +77,7 @@ func getCidrBlocks() (map[string][]string, error) {
 		return nil, err
 	}
 
-	splitedResponse := strings.Split(string(response), " ")
+	splitedResponse := strings.Split(response, " ")
 
 	for _, sp := range splitedResponse {
 		if strings.HasPrefix(sp, "include:") {
@@ -99,7 +99,7 @@ func getCidrBlocks() (map[string][]string, error) {
 			return nil, err
 		}
 
-		splitedResponse = strings.Split(string(response), " ")
+		splitedResponse = strings.Split(response, " ")
 
 		for _, sp := range splitedResponse {
 			if strings.HasPrefix(sp, "ip") {
