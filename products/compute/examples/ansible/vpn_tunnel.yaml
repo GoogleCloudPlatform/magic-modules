@@ -49,7 +49,7 @@ dependencies:
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
 task: !ruby/object:Provider::Ansible::Task
-  name: gcp_compute_vpn-tunnel
+  name: gcp_compute_vpn_tunnel
   code:
     name: <%= ctx[:name] %>
     region: us-west1
