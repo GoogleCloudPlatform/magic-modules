@@ -148,6 +148,7 @@ module Provider
           )
         )
 
+        %x(gofmt -w -s #{target_file}) if File.extname(target_file) == '.go'
         %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
       end
     end
