@@ -41,6 +41,10 @@ func sendRequestWithTimeout(config *Config, method, rawurl string, body map[stri
 	reqHeaders.Set("User-Agent", config.userAgent)
 	reqHeaders.Set("Content-Type", "application/json")
 
+	if timeout == 0 {
+		timeout = time.Duration(5) * time.Minute
+	}
+
 	var res *http.Response
 	err := retryTimeDuration(
 		func() error {
