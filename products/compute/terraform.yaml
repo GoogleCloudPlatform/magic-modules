@@ -582,26 +582,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
-        skip_test: true
         primary_resource_id: "snapshot"
         version: <%= version_name %>
         vars:
           snapshot_name: "my-snapshot"
           disk_name: "debian-disk"
-    docs: !ruby/object:Provider::Terraform::Docs
-      optional_properties: |
-        * (Deprecated) `snapshot_encryption_key_raw`: (Optional) This is an alias for
-          `snapshot_encryption_key.0.raw_key`. This field has been deprecated
-          and will be removed in a future provider version.
-        * (Deprecated) `source_disk_encryption_key_raw`: (Optional) This is an alias for
-          `source_disk_encryption_key.0.raw_key`. This field has been deprecated
-          and will be removed in a future provider version.
-      attributes: |
-        * (Deprecated) `snapshot_encryption_key_sha256`: This is an alias for
-        `source_disk_encryption_key.0.sha256`. This attribute has been deprecated
-        and will be removed in a future provider version.
-        * (Deprecated) `source_disk_encryption_key_sha256`: This attribute has never had
-        a value and will be removed in  a future provider version.
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         name: 'snapshot_id'
@@ -609,19 +594,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ignore_read: true
         default_from_api: true
         required: false
-      snapshotEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
-        # there's no default from the API, but we need the top-level List to be computed
-        # so we can always set the inner sha256 field. Long-term, we're going to ForceNew
-        # if we see a sha256 upstream and no value downstream using a CustomizeDiff.
-        # In the short term, we'll ForceNew based on the values of the new and old
-        # convenience field
-        default_from_api: true
-        custom_expand: templates/terraform/custom_expand/snapshot_encryption_key_expand.go.erb
-        update_verb: :NOOP
-        update_url: ""
       snapshotEncryptionKey.rawKey: !ruby/object:Provider::Terraform::PropertyOverride
-        # This is _correct_, but we don't support ignore_read on nested fields.
-        # Use a custom flatten instead & avoid shaving too many yaks in this PR.
+        # This is _correct_, but we don't support ignore_read on nested fields
+        # so we use a custom_flatten for now.
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/1019
         ignore_read: true
         sensitive: true
         custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
@@ -632,17 +608,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
       sourceDiskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
         ignore_read: true
-        custom_expand: templates/terraform/custom_expand/source_disk_encryption_key_expand.go.erb
-        update_verb: :NOOP
-        update_url: ""
       sourceDiskEncryptionKey.rawKey: !ruby/object:Provider::Terraform::PropertyOverride
         sensitive: true
       sourceDiskEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
         # This is a beta field that showed up in GA. Removed from both.
         exclude: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      resource_definition: templates/terraform/resource_definition/snapshot.go.erb
-      constants: templates/terraform/constants/snapshot.erb
       decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
