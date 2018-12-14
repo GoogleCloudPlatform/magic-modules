@@ -139,6 +139,7 @@ module Provider
         out_file: filepath
       )
       # TODO: error check goimports
+      %x(gofmt -w -s #{filepath})
       %x(goimports -w #{filepath})
       generate_documentation(data)
     end
@@ -179,6 +180,7 @@ module Provider
       )
 
       # TODO: error check goimports
+      %x(gofmt -w -s #{filepath})
       %x(goimports -w #{filepath})
     end
   end
