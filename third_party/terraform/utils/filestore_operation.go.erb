@@ -38,10 +38,6 @@ func (w *FilestoreOperationWaiter) Conf() *resource.StateChangeConf {
 	}
 }
 
-func filestoreOperationWait(service *file.Service, op *file.Operation, project, activity string) error {
-	return filestoreOperationWaitTime(service, op, project, activity, 4)
-}
-
 func filestoreOperationWaitTime(service *file.Service, op *file.Operation, project, activity string, timeoutMin int) error {
 	if op.Done {
 		if op.Error != nil {

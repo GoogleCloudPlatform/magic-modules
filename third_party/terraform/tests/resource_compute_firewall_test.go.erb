@@ -357,6 +357,7 @@ func testAccCheckComputeFirewallExists(n string, firewall *compute.Firewall) res
 	}
 }
 
+<% unless version == 'ga' -%>
 func testAccCheckComputeBetaFirewallExists(n string, firewall *computeBeta.Firewall) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -385,6 +386,7 @@ func testAccCheckComputeBetaFirewallExists(n string, firewall *computeBeta.Firew
 		return nil
 	}
 }
+<% end -%>
 
 func testAccCheckComputeFirewallHasPriority(firewall *compute.Firewall, priority int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -441,18 +443,6 @@ func testAccCheckComputeFirewallServiceAccounts(sourceSa, targetSa string, firew
 		}
 		if len(firewall.TargetServiceAccounts) != 1 || firewall.TargetServiceAccounts[0] != targetSa {
 			return fmt.Errorf("Expected targetServiceAccount of %s, got %v", targetSa, firewall.TargetServiceAccounts)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckComputeFirewallBetaApiVersion(firewall *computeBeta.Firewall) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// The self-link of the network field is used to determine which API was used when fetching
-		// the state from the API.
-		if !strings.Contains(firewall.Network, "compute/beta") {
-			return fmt.Errorf("firewall beta API was not used")
 		}
 
 		return nil

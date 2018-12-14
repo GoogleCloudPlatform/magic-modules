@@ -50,8 +50,6 @@ func dataSourceGoogleNetblockIpRangesRead(d *schema.ResourceData, meta interface
 }
 
 func netblock_request(name string) (string, error) {
-	const DNS_URL = "https://dns.google.com/resolve?name=%s&type=TXT"
-
 	response, err := http.Get(fmt.Sprintf("https://dns.google.com/resolve?name=%s&type=TXT", name))
 
 	if err != nil {

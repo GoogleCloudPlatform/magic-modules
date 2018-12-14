@@ -108,21 +108,3 @@ resource "google_service_account" "acceptance" {
 }
 `, project, account, name)
 }
-
-func testAccServiceAccountPolicy(account, project string) string {
-	return fmt.Sprintf(`
-resource "google_service_account" "acceptance" {
-    account_id = "%v"
-    display_name = "%v"
-}
-
-data "google_iam_policy" "service_account" {
-    binding {
-        role = "roles/iam.serviceAccountActor"
-        members = [
-            "serviceAccount:%v@%v.iam.gserviceaccount.com",
-        ]
-    }
-}
-`, account, account, account, project)
-}
