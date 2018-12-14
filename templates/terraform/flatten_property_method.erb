@@ -38,14 +38,26 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     return v
   }
   l := v.([]interface{})
+<%   if property.is_set -%>
+<%     if property.set_hash_func.nil? -%>
+  transformed := schema.NewSet(schema.HashResource(<%= prefix.camelize(:lower) -%><%= property.name.camelize -%>Schema()), []interface{}{})
+<%     else -%>
+  transformed := schema.NewSet(<%= property.set_hash_func -%>, []interface{}{})
+<%     end -%>
+<%   else -%>
   transformed := make([]interface{}, 0, len(l))
+<%   end -%>
   for _, raw := range l {
     original := raw.(map[string]interface{})
     if len(original) < 1 {
       // Do not include empty json objects coming back from the api
       continue
     }
+<%   if property.is_set -%>
+    transformed.Add(map[string]interface{}{
+<%   else -%>
     transformed = append(transformed, map[string]interface{}{
+<%   end -%>
     <% property.item_type.properties.reject(&:ignore_read).each do |prop| -%>
       "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
     <% end -%>
@@ -86,7 +98,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     return v
   }
   return ConvertSelfLinkToV1(v.(string))
-<% elsif property.is_set -%>
+<% elsif property.is_set # item_type won't be NestedObject -%>
   if v == nil {
     return v
   }
