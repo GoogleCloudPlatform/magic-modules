@@ -19,6 +19,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
         version: <%= version_name %>
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_private"
+        primary_resource_id: "private-zone"
+        version: <%= version_name %>
+        skip_test: true
+        vars:
+          zone_name: "private-zone"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -31,6 +40,39 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      privateVisibilityConfig.networks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if url, ok := raw["network_url"]; ok {
+              return selfLinkNameHash(url)
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
+            return hashcode.String(buf.String())
+          }
+        # TODO(drebes) Remove this description override once the Terraform 0.12 SDK is used.
+        description: |
+          {{description}} Until the provider updates to use the Terraform 0.12 SDK in a future release, you
+          may experience issues with this resource while updating. If you've defined a `networks` block and
+          add another `networks` block while keeping the old block, Terraform will see an incorrect diff
+          and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
+          blocks in an update and then apply another update adding all of them back simultaneously.
+      privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      forwardingConfig.targetNameServers: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if address, ok := raw["ipv4_address"]; ok {
+              hashcode.String(address.(string))
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
+            return hashcode.String(buf.String())
+          }
   ResourceRecordSet: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
