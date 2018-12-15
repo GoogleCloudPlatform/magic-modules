@@ -103,7 +103,41 @@ func Provider() terraform.ResourceProvider {
 			"google_storage_project_service_account": dataSourceGoogleStorageProjectServiceAccount(),
 		},
 
-		ResourcesMap: mergeResourceMaps(
+		ResourcesMap: ResourceMap(),
+
+		ConfigureFunc: providerConfigure,
+	}
+}
+
+func mergeResourceMaps(ms ...map[string]*schema.Resource) (map[string]*schema.Resource, error) {
+	merged := make(map[string]*schema.Resource)
+	duplicates := []string{}
+
+	for _, m := range ms {
+		for k, v := range m {
+			if _, ok := merged[k]; ok {
+				duplicates = append(duplicates, k)
+			}
+
+			merged[k] = v
+		}
+	}
+
+	var err error
+	if len(duplicates) > 0 {
+		err = fmt.Errorf("saw duplicates in mergeResourceMaps: %v", duplicates)
+	}
+
+	return merged, err
+}
+
+func ResourceMap() map[string]*schema.Resource {
+	resourceMap, _ := ResourceMapWithErrors()
+	return resourceMap
+}
+
+func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
+	return mergeResourceMaps(
 			<% unless version == 'ga' -%>
 			// start beta-only products
 			GeneratedBinaryAuthorizationResourcesMap,
@@ -260,10 +294,7 @@ func Provider() terraform.ResourceProvider {
 				"google_storage_default_object_acl": resourceStorageDefaultObjectAcl(),
 				"google_storage_notification":       resourceStorageNotification(),
 			},
-		),
-
-		ConfigureFunc: providerConfigure,
-	}
+		)
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {

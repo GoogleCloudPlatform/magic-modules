@@ -348,18 +348,6 @@ func mergeSchemas(a, b map[string]*schema.Schema) map[string]*schema.Schema {
 	return merged
 }
 
-func mergeResourceMaps(ms ...map[string]*schema.Resource) map[string]*schema.Resource {
-	merged := make(map[string]*schema.Resource)
-
-	for _, m := range ms {
-		for k, v := range m {
-			merged[k] = v
-		}
-	}
-
-	return merged
-}
-
 func retry(retryFunc func() error) error {
 	return retryTime(retryFunc, 1)
 }
