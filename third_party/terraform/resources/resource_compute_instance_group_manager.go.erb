@@ -415,6 +415,7 @@ func flattenNamedPortsBeta(namedPorts []*computeBeta.NamedPort) []map[string]int
 
 }
 
+	<% unless version == 'ga' -%>
 func flattenVersions(versions []*computeBeta.InstanceGroupManagerVersion) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, len(versions))
 	for _, version := range versions {
@@ -427,7 +428,9 @@ func flattenVersions(versions []*computeBeta.InstanceGroupManagerVersion) []map[
 
 	return result
 }
+<% end -%>
 
+<% unless version == 'ga' -%>
 func flattenFixedOrPercent(fixedOrPercent *computeBeta.FixedOrPercent) []map[string]interface{} {
 	result := make(map[string]interface{})
 	if value := fixedOrPercent.Percent; value > 0 {
@@ -439,6 +442,7 @@ func flattenFixedOrPercent(fixedOrPercent *computeBeta.FixedOrPercent) []map[str
 	}
 	return []map[string]interface{}{result}
 }
+<% end -%>
 
 func getManager(d *schema.ResourceData, meta interface{}) (*computeBeta.InstanceGroupManager, error) {
 	config := meta.(*Config)
@@ -880,7 +884,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 			return fmt.Errorf("Error, instance group isn't shrinking during delete")
 		}
 
-		log.Printf("[INFO] timeout occured, but instance group is shrinking (%d < %d)", instanceGroupSize, currentSize)
+		log.Printf("[INFO] timeout occurred, but instance group is shrinking (%d < %d)", instanceGroupSize, currentSize)
 		currentSize = instanceGroupSize
 		err = computeSharedOperationWait(config.clientCompute, op, zonalID.Project, "Deleting InstanceGroupManager")
 	}
