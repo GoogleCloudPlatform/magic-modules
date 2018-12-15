@@ -38,10 +38,6 @@ func (w *AccessContextManagerOperationWaiter) Conf() *resource.StateChangeConf {
 	}
 }
 
-func accessContextManagerOperationWait(service *accesscontextmanager.Service, op *accesscontextmanager.Operation, activity string) error {
-	return accessContextManagerOperationWaitTime(service, op, activity, 4)
-}
-
 func accessContextManagerOperationWaitTime(service *accesscontextmanager.Service, op *accesscontextmanager.Operation, activity string, timeoutMin int) error {
 	if op.Done {
 		if op.Error != nil {
