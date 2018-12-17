@@ -12,6 +12,11 @@
 # limitations under the License.
 
 require 'api/compiler'
+require 'provider/config'
+require 'provider/ansible'
+require 'provider/terraform/config'
+require 'provider/terraform/resource_override'
+require 'provider/terraform/property_override'
 
 # Takes in a DiscoveryResource + Api::Resource
 # Loops through all properties of the DiscoveryResource (at any depth)
@@ -28,10 +33,10 @@ class PropertyFetcher
 
     def run_on_properties(discovery_properties, api_properties, prefix, &block)
       discovery_properties.each do |disc_prop|
-        api_props = api_properties.select { |p| p.name == disc_prop.name }
-        raise 'Multiple properties with name' if api_props.length > 1
+        api_props = api_properties&.select { |p| p.name == disc_prop.name }
+        raise 'Multiple properties with name' if api_props && api_props.length > 1
 
-        api_prop = api_props.first
+        api_prop = api_props&.first
         yield(disc_prop, api_prop, "#{prefix}#{disc_prop.name}")
         if disc_prop.nested_properties?
           run_on_properties(disc_prop.nested_properties, nested_properties_for_api(api_prop),
@@ -41,9 +46,9 @@ class PropertyFetcher
     end
 
     def nested_properties_for_api(api)
-      if api.is_a?(Api::Type::NestedObject)
+      if api&.is_a?(Api::Type::NestedObject)
         api.properties
-      elsif api.is_a?(Api::Type::Array) && api.item_type.is_a?(Api::Type::NestedObject)
+      elsif api&.is_a?(Api::Type::Array) && api&.item_type&.is_a?(Api::Type::NestedObject)
         api.item_type.properties
       else
         []
@@ -54,7 +59,18 @@ end
 
 # Gets a Api::Product from a api.yaml filename
 class ApiFetcher
+  # Get api from filename
   def self.api_from_file(filename)
     Api::Compiler.new(filename).run
+  end
+
+  # Get api from filename and apply overrides from a provider.
+  def self.provider_from_file(api_filename, provider_name)
+    api = api_from_file(api_filename)
+    provider_filename = "#{api_filename.split('/')[0..-2].join('/')}/#{provider_name}.yaml"
+    return nil unless File.file?(provider_filename)
+
+    Provider::Config.parse(provider_filename, api, 'ga')
+    api
   end
 end

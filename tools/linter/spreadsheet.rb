@@ -27,20 +27,38 @@ require 'google/logger'
 require 'tools/linter/discovery'
 require 'tools/linter/fetcher'
 require 'tools/linter/tests/test_runner'
+require 'tools/linter/spreadsheet/csv_formatter'
 
 require 'yaml'
 require 'rspec'
 
+# Configuration
+doc_file = 'tools/linter/docs.yaml'
+RSpec.configure do |c|
+  c.add_formatter(CsvFormatterForMM, 'output.csv')
+  c.inclusion_filter = [:property]
+end
 Google::LOGGER.level = Logger::ERROR
 VALID_KEYS = %w[filename url].freeze
 
-doc_file = 'tools/linter/docs.yaml'
+# Running tests.
 docs = YAML.safe_load(File.read(doc_file))
-
 docs.each do |doc|
   raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
 
+  # Run tests on regular API
   api = ApiFetcher.api_from_file(doc['filename'])
+  # Need value in case TF or Ansible file does not exist.
+  prefix = api.prefix
+
   builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
-  run_tests(builder, api, resource: true, property: true)
+  run_tests(builder, api, { property: true }, { provider: :api }, prefix: prefix)
+
+  # Run tests on TF API
+  api = ApiFetcher.provider_from_file(doc['filename'], 'terraform')
+  run_tests(builder, api, { property: true }, { provider: :terraform }, prefix: prefix)
+
+  # Run tests on Ansible API
+  api = ApiFetcher.provider_from_file(doc['filename'], 'ansible')
+  run_tests(builder, api, { property: true }, { provider: :ansible }, prefix: prefix)
 end
