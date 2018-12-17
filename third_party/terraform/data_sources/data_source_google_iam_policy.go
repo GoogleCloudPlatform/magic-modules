@@ -9,6 +9,36 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+var auditConfig *schema.Schema = &schema.Schema{
+	Type:     schema.TypeSet,
+	Optional: true,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"service": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"audit_log_configs": {
+				Type:     schema.TypeSet,
+				Required: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"log_type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"exempted_members": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
 var iamBinding *schema.Schema = &schema.Schema{
 	Type:     schema.TypeSet,
 	Required: true,
@@ -49,6 +79,7 @@ func dataSourceGoogleIamPolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"audit_config": auditConfig,
 		},
 	}
 }
@@ -58,13 +89,17 @@ func dataSourceGoogleIamPolicy() *schema.Resource {
 func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	var policy cloudresourcemanager.Policy
 	var bindings []*cloudresourcemanager.Binding
+	var auditConfigs []*cloudresourcemanager.AuditConfig
 
 	// The schema supports multiple binding{} blocks
 	bset := d.Get("binding").(*schema.Set)
+	aset := d.Get("audit_config").(*schema.Set)
 
 	// All binding{} blocks will be converted and stored in an array
 	bindings = make([]*cloudresourcemanager.Binding, bset.Len())
+	auditConfigs = make([]*cloudresourcemanager.AuditConfig, aset.Len())
 	policy.Bindings = bindings
+	policy.AuditConfigs = auditConfigs
 
 	// Convert each config binding into a cloudresourcemanager.Binding
 	for i, v := range bset.List() {
@@ -72,6 +107,26 @@ func dataSourceGoogleIamPolicyRead(d *schema.ResourceData, meta interface{}) err
 		policy.Bindings[i] = &cloudresourcemanager.Binding{
 			Role:    binding["role"].(string),
 			Members: convertStringSet(binding["members"].(*schema.Set)),
+		}
+	}
+
+	// Convert each audit_config into a cloudresourcemanager.AuditConfig
+	for i, v := range aset.List() {
+		config := v.(map[string]interface{})
+		// build list of audit configs first
+		auditLogConfigSet := config["audit_log_configs"].(*schema.Set)
+		// the array we're going to add to the outgoing resource
+		auditLogConfigs := make([]*cloudresourcemanager.AuditLogConfig, auditLogConfigSet.Len())
+		for x, y := range auditLogConfigSet.List() {
+			logConfig := y.(map[string]interface{})
+			auditLogConfigs[x] = &cloudresourcemanager.AuditLogConfig{
+				LogType:         logConfig["log_type"].(string),
+				ExemptedMembers: convertStringArr(logConfig["exempted_members"].([]interface{})),
+			}
+		}
+		policy.AuditConfigs[i] = &cloudresourcemanager.AuditConfig{
+			Service:         config["service"].(string),
+			AuditLogConfigs: auditLogConfigs,
 		}
 	}
 
