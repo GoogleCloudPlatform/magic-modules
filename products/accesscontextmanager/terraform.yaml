@@ -50,6 +50,28 @@ overrides: !ruby/object:Provider::ResourceOverrides
       pre_update: templates/terraform/pre_update/update_mask.erb
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
+  ServicePerimeter: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_basic"
+        skip_test: true
+        primary_resource_id: "service-perimeter"
+        version: <%= version_name %>
+        vars:
+          access_level_name: "ios_no_lock"
+          service_perimeter_name: "restrict_all"
+    properties:
+      parent: !ruby/object:Provider::Terraform::PropertyOverride
+        ignore_read: true
+      perimeterType: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+        input: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_update: templates/terraform/pre_update/update_mask.erb
+      encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
+      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
