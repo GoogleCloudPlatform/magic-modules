@@ -67,6 +67,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         ignore_read: true
       perimeterType: !ruby/object:Provider::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+        input: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/update_mask.erb
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
