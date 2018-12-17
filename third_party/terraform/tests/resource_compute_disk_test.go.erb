@@ -348,7 +348,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
 	org := getTestOrgFromEnv(t)
-	pid := "tf-test-" + acctest.RandString(10)
+	pid := "tf-acctest-" + acctest.RandString(10)
 	billingAccount := getTestBillingAccountFromEnv(t)
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
