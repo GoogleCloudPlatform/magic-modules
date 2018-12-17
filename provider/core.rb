@@ -41,7 +41,7 @@ module Provider
     # generators, it is okay to ignore Rubocop warnings about method size and
     # complexity.
     #
-    def generate(output_folder, types, version_name)
+    def generate(output_folder, types, version_name, product_path, dump_yaml)
       generate_objects(output_folder, types, version_name)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
@@ -57,6 +57,17 @@ module Provider
 
       generate_datasources(output_folder, types, version_name) \
         unless @config.datasources.nil?
+
+      if dump_yaml
+        raise "Path to output the final yaml was not specified." if \
+          product_path.nil? || product_path == ""
+        # Write a file with the final version of the api, after overrides have been applied.
+        File.open("#{product_path}/final_api.yaml", 'w') do |file|
+          file.write("# This is a generated file, it's contents will be overwritten.\n")
+          file.write(YAML::dump(@api))
+        end
+      end
+
     end
 
     def copy_files(output_folder)
