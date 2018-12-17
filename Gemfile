@@ -9,5 +9,4 @@ group :test do
   gem 'parallel_tests'
   gem 'rspec'
   gem 'rubocop', '~> 0.60.0'
-  gem 'simplecov'
 end

@@ -11,9 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'simplecov'
-SimpleCov.start unless ENV['DISABLE_COVERAGE']
-
 RSpec.configure do |config|
   config.mock_with :mocha
 end
