@@ -51,11 +51,6 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.4.0)
     ruby-progressbar (1.10.0)
-    simplecov (0.16.1)
-      docile (~> 1.1)
-      json (>= 1.8, < 3)
-      simplecov-html (~> 0.10.0)
-    simplecov-html (0.10.2)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
@@ -72,7 +67,6 @@ DEPENDENCIES
   rake
   rspec
   rubocop (~> 0.60.0)
-  simplecov
 
 BUNDLED WITH
    1.16.5
