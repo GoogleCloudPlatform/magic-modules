@@ -12,8 +12,6 @@
 # limitations under the License.
 
 ---
-- url: https://www.googleapis.com/discovery/v1/apis/bigquery/v2/rest
-  filename: products/bigquery/api.yaml
 - url: https://binaryauthorization.googleapis.com/$discovery/rest?version=v1beta1
   filename: products/binaryauthorization/api.yaml
 - url: https://www.googleapis.com/discovery/v1/apis/compute/v1/rest

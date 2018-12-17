@@ -81,14 +81,14 @@ module Discovery
     attr_reader :results
 
     def initialize(url, objects)
+      @url = url
       @resources_in_api_yaml = objects
       @results = fetch_discovery_doc(url)
     end
 
     def resources
-      @results['schemas'].select { |name, _| @resources_in_api_yaml.include?(name) }
-                         .map { |name, _| get_resource(name) }
-                         .compact
+      list_of_resources.map { |name, _| get_resource(name) }
+                       .compact
     end
 
     def get_methods_for_resource(resource)
@@ -98,13 +98,43 @@ module Discovery
     end
 
     def get_resource(resource)
-      Resource.new(@results['schemas'][resource], resource, self)
+      # Region, Global should resolve to normal.
+      original_resource = resource
+      if @results['schemas'][resource]
+        Resource.new(@results['schemas'][resource], resource, self)
+      elsif @results['schemas'][resource.sub('Region', '')]
+        resource = resource.sub('Region', '')
+        Resource.new(@results['schemas'][resource], resource, self)
+      elsif @results['schemas'][resource.sub('Global', '')]
+        resource = resource.sub('Global', '')
+        Resource.new(@results['schemas'][resource], resource, self)
+      else
+        puts "#{original_resource} not found"
+      end
     end
 
     private
 
     def fetch_discovery_doc(url)
       JSON.parse(Net::HTTP.get(URI(url)))
+    end
+
+    def list_of_resources
+      list_of_resource_keys.map do |k|
+        if @results['schemas'][k]
+          k
+        else
+          k.singularize
+        end
+      end.map(&:titleize).map { |k| k.gsub(' ', '') }
+    end
+
+    def list_of_resource_keys
+      if @results['resources'].keys == ['projects']
+        @resources_in_api_yaml
+      else
+        @results['resources'].keys
+      end
     end
   end
 end

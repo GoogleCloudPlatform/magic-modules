@@ -37,12 +37,12 @@ class CsvFormatterForMM
 
   # This property exists in api.yaml
   def example_passed(notification)
-    add_row(test_information(notification).merge(pass: true))
+    add_row(test_information(notification).merge(pass: 1))
   end
 
   # This property does not exist in api.yaml
   def example_failed(notification)
-    add_row(test_information(notification).merge(pass: false))
+    add_row(test_information(notification).merge(pass: 0))
   end
 
   # This test isn't being run.
