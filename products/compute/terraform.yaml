@@ -152,7 +152,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
           These images can be referred by family name here.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
-      post_import: templates/terraform/post_import/disk.erb
       constants: templates/terraform/constants/disk.erb
       encoder: templates/terraform/encoders/disk.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
