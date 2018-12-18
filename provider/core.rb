@@ -58,16 +58,17 @@ module Provider
       generate_datasources(output_folder, types, version_name) \
         unless @config.datasources.nil?
 
-      if dump_yaml
-        raise "Path to output the final yaml was not specified." if \
-          product_path.nil? || product_path == ""
-        # Write a file with the final version of the api, after overrides have been applied.
-        File.open("#{product_path}/final_api.yaml", 'w') do |file|
-          file.write("# This is a generated file, it's contents will be overwritten.\n")
-          file.write(YAML::dump(@api))
-        end
-      end
+      # Write a file with the final version of the api, after overrides
+      # have been applied.
+      return unless dump_yaml
 
+      raise 'Path to output the final yaml was not specified.' \
+        if product_path.nil? || product_path == ''
+
+      File.open("#{product_path}/final_api.yaml", 'w') do |file|
+        file.write("# This is a generated file, its contents will be overwritten.\n")
+        file.write(YAML.dump(@api))
+      end
     end
 
     def copy_files(output_folder)
