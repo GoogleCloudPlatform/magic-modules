@@ -88,10 +88,9 @@ module Provider
       config.validate
       # Use new override system
       if config.overrides.is_a?(Provider::Overrides::ResourceOverrides)
-        runner = Provider::Overrides::Runner.new(api, config.overrides,
-                                                 config.new_resource_override,
-                                                 config.new_property_override)
-        api = runner.build
+        api = Provider::Overrides::Runner.build(api, config.overrides,
+                                                   config.new_resource_override,
+                                                   config.new_property_override)
         config.validate
         config.spread_api config, api, [], '' unless api.nil?
         [api, config]
