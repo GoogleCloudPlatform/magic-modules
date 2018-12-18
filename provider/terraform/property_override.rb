@@ -97,6 +97,7 @@ module Provider
       end
     end
 
+    # Shared code between new property overrides and old.
     module PropertyOverrideSharedCode
       def validate
         super

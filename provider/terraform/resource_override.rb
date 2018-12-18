@@ -46,6 +46,7 @@ module Provider
       attr_reader(*attributes)
     end
 
+    # Shared code between new resource overrides and old.
     module ResourceOverrideSharedCode
       def validate
         super

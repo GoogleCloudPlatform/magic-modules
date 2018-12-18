@@ -90,8 +90,8 @@ module Provider
       if config.overrides.is_a?(Provider::Overrides::ResourceOverrides)
         using_new_overrides = true
         api = Provider::Overrides::Runner.build(api, config.overrides,
-                                                   config.new_resource_override,
-                                                   config.new_property_override)
+                                                config.new_resource_override,
+                                                config.new_property_override)
       # Use old overrides
       # TODO(alexstephen): Remove when old overrides are no longer in use.
       else

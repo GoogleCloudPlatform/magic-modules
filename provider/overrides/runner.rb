@@ -54,7 +54,7 @@ module Provider
                   prop_override_class = Provider::Overrides::PropertyOverride)
           validator = Provider::Overrides::Validator.new(api, overrides)
           validator.run
-          build_product(api, overrides, {resource: res_override_class, property: prop_override_class })
+          build_product(api, overrides, resource: res_override_class, property: prop_override_class)
         end
 
         private
@@ -73,7 +73,10 @@ module Provider
           end
           prod.instance_variable_set('@objects',
                                      old_prod.objects
-                                             .map { |o| build_resource(o, all_overrides[o.name], override_classes) })
+                                             .map do |o|
+                                       build_resource(o, all_overrides[o.name],
+                                                      override_classes)
+                                     end)
           prod
         end
 
@@ -116,21 +119,24 @@ module Provider
                                               override_classes)
           if old_property.is_a?(Api::Type::NestedObject)
             new_props = old_property.properties.map do |p|
-              build_property(p, property_overrides, override_classes, "#{prefix}#{old_property.name}.")
+              build_property(p, property_overrides, override_classes,
+                             "#{prefix}#{old_property.name}.")
             end
             new_prop.instance_variable_set('@properties', new_props)
           elsif old_property.is_a?(Api::Type::Map) && \
                 old_property.value_type.is_a?(Api::Type::NestedObject)
             new_prop.instance_variable_set('@value_type', Api::Type::NestedObject.new)
             new_props = old_property.value_type.properties.map do |p|
-              build_property(p, property_overrides, override_classes, "#{prefix}#{old_property.name}.")
+              build_property(p, property_overrides, override_classes,
+                             "#{prefix}#{old_property.name}.")
             end
             new_prop.value_type.instance_variable_set('@properties', new_props)
           elsif old_property.is_a?(Api::Type::Array) && \
                 old_property.item_type.is_a?(Api::Type::NestedObject)
             new_prop.instance_variable_set('@item_type', Api::Type::NestedObject.new)
             new_props = old_property.item_type.properties.map do |p|
-              build_property(p, property_overrides, override_classes, "#{prefix}#{old_property.name}[].")
+              build_property(p, property_overrides, override_classes,
+                             "#{prefix}#{old_property.name}[].")
             end
             new_prop.item_type.instance_variable_set('@properties', new_props)
           end
@@ -141,7 +147,9 @@ module Provider
         # return a new Api::Type with overrides applied.
         # This will be called by build_property, which handles nesting.
         def build_primitive_property(old_property, prop_override, override_classes)
-          prop_override = override_classes[:property].new if prop_override.nil? || prop_override.empty?
+          prop_override = override_classes[:property].new \
+            if prop_override.nil? || prop_override.empty?
+
           prop_override.validate
           prop_override.apply old_property
 
