@@ -53,7 +53,7 @@ func TestAccComputeInstanceFromTemplate_overrideBootDisk(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeInstanceFromTemplate_overrideBootDisk(templateDisk, overrideDisk, templateName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(resourceName, &instance),
@@ -82,7 +82,7 @@ func TestAccComputeInstanceFromTemplate_overrideAttachedDisk(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeInstanceFromTemplate_overrideAttachedDisk(templateDisk, overrideDisk, templateName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(resourceName, &instance),
@@ -111,7 +111,7 @@ func TestAccComputeInstanceFromTemplate_overrideScratchDisk(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceFromTemplateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeInstanceFromTemplate_overrideScratchDisk(templateDisk, overrideDisk, templateName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(resourceName, &instance),
