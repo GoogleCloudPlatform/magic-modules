@@ -32,7 +32,7 @@ describe Provider::ResourceOverrides do
 
     context 'with overrides' do
       let(:config) do
-        Provider::Config.parse 'spec/data/good-file-config.yaml', product
+        Provider::Config.parse('spec/data/good-file-config.yaml', product)[1]
       end
 
       before(:each) do
@@ -92,7 +92,7 @@ describe Provider::ResourceOverrides do
         let(:config) do
           Provider::Config.parse(
             'spec/data/missing-property-config.yaml', product
-          )
+          )[1]
         end
         before(:each) { allow_open 'spec/data/missing-property-config.yaml' }
         subject { -> { config.validate } }
@@ -104,7 +104,7 @@ describe Provider::ResourceOverrides do
         let(:config) do
           Provider::Config.parse(
             'spec/data/missing-nested-property-config.yaml', product
-          )
+          )[1]
         end
         before(:each) do
           allow_open 'spec/data/missing-nested-property-config.yaml'
@@ -123,7 +123,7 @@ describe Provider::ResourceOverrides do
         let(:config) do
           Provider::Config.parse(
             'spec/data/missing-array-property-config.yaml', product
-          )
+          )[1]
         end
         before(:each) do
           allow_open 'spec/data/missing-array-property-config.yaml'
@@ -142,7 +142,7 @@ describe Provider::ResourceOverrides do
         let(:config) do
           Provider::Config.parse(
             'spec/data/bad-property-reference-config.yaml', product
-          )
+          )[1]
         end
         before(:each) do
           allow_open 'spec/data/bad-property-reference-config.yaml'
