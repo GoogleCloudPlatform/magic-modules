@@ -165,6 +165,9 @@ This resource provides the following
 
 ```
 <% import_id_formats(object).each do |id_format| -%>
-$ terraform import google_<%= resource_name -%>.default <%= id_format %>
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%>google_<%= resource_name -%>.default <%= id_format %>
 <% end -%>
 ```
+
+-> If you're importing a resource with beta features, make sure to include `-provider=google-beta"
+as an argument so that Terraform uses the correct provider to import your resource.
