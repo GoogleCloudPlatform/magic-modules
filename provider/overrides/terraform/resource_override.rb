@@ -21,6 +21,7 @@ module Provider
       # A class to control overridden properties on terraform.yaml in lieu of
       # values from api.yaml.
       class ResourceOverride < Provider::Overrides::ResourceOverride
+        include Provider::Terraform::ResourceOverrideSharedCode
         attr_reader :description
 
         def self.attributes
@@ -28,47 +29,6 @@ module Provider
         end
 
         attr_reader(*attributes)
-
-        def validate
-          super
-
-          @id_format ||= '{{name}}'
-          @import_format ||= []
-          @custom_code ||= Provider::Terraform::CustomCode.new
-          @docs ||= Provider::Terraform::Docs.new
-          @example ||= []
-
-          check_property :id_format, String
-
-          check_optional_property :examples, String
-          check_optional_property_list :example, Provider::Terraform::Examples
-
-          check_optional_property :custom_code, Provider::Terraform::CustomCode
-          check_optional_property :docs, Provider::Terraform::Docs
-          check_property :import_format, Array
-          check_property_list :import_format, String
-        end
-
-        def apply(resource)
-          unless description.nil?
-            @description = format_string(:description, @description,
-                                         resource.description)
-          end
-
-          super
-        end
-
-        private
-
-        # Formats the string and potentially uses its old value as part of the new
-        # value. The marker should be in the form `{{name}}` where `name` is the
-        # field being formatted.
-        #
-        # Note: This function only supports the variable with the same name as the
-        # property being updated.
-        def format_string(name, mask, current_value)
-          mask.gsub "{{#{name.id2name}}}", current_value
-        end
       end
     end
   end

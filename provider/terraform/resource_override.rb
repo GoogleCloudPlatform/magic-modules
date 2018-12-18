@@ -46,11 +46,7 @@ module Provider
       attr_reader(*attributes)
     end
 
-    # A class to control overridden properties on terraform.yaml in lieu of
-    # values from api.yaml.
-    class ResourceOverride < Provider::ResourceOverride
-      include OverrideProperties
-
+    module ResourceOverrideSharedCode
       def validate
         super
 
@@ -82,10 +78,6 @@ module Provider
 
       private
 
-      def overriden
-        Provider::Terraform::OverrideProperties
-      end
-
       # Formats the string and potentially uses its old value as part of the new
       # value. The marker should be in the form `{{name}}` where `name` is the
       # field being formatted.
@@ -94,6 +86,19 @@ module Provider
       # property being updated.
       def format_string(name, mask, current_value)
         mask.gsub "{{#{name.id2name}}}", current_value
+      end
+    end
+
+    # A class to control overridden properties on terraform.yaml in lieu of
+    # values from api.yaml.
+    class ResourceOverride < Provider::ResourceOverride
+      include OverrideProperties
+      include ResourceOverrideSharedCode
+
+      private
+
+      def overriden
+        Provider::Terraform::OverrideProperties
       end
     end
   end

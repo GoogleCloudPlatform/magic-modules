@@ -97,9 +97,7 @@ module Provider
       end
     end
 
-    # Terraform-specific overrides to api.yaml.
-    class PropertyOverride < Provider::PropertyOverride
-      include OverrideFields
+    module PropertyOverrideSharedCode
       def validate
         super
 
@@ -147,10 +145,6 @@ module Provider
 
       private
 
-      def overriden
-        Provider::Terraform::OverrideFields
-      end
-
       # Formats the string and potentially uses its old value as part of the new
       # value. The marker should be in the form `{{name}}` where `name` is the
       # field being formatted.
@@ -159,6 +153,18 @@ module Provider
       # property being updated.
       def format_string(name, mask, current_value)
         mask.gsub "{{#{name.id2name}}}", current_value
+      end
+    end
+
+    # Terraform-specific overrides to api.yaml.
+    class PropertyOverride < Provider::PropertyOverride
+      include OverrideFields
+      include PropertyOverrideSharedCode
+
+      private
+
+      def overriden
+        Provider::Terraform::OverrideFields
       end
     end
   end
