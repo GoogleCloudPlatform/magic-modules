@@ -120,18 +120,11 @@ product_names.each do |product_name|
     next
   end
 
-  provider_config_or_array = \
+  product_api, provider_config, using_new_overrides = \
     Provider::Config.parse(provider_yaml_path, product_api, version)
 
   # TODO(alexstephen): Remove when old overrides are deprecated.
-  if provider_config_or_array.is_a?(Array)
-    # New overrides build a brand new API object and doesn't change the API in-place.
-    product_api, provider_config = provider_config_or_array
-    product_api.validate
-  else
-    # Overrides have been applied in-place to product_api
-    provider_config = provider_config_or_array
-  end
+  product_api.validate if using_new_overrides
 
   pp provider_config if ENV['COMPILER_DEBUG']
 

@@ -88,24 +88,23 @@ module Provider
       config.validate
       # Use new override system
       if config.overrides.is_a?(Provider::Overrides::ResourceOverrides)
+        using_new_overrides = true
         api = Provider::Overrides::Runner.build(api, config.overrides,
                                                    config.new_resource_override,
                                                    config.new_property_override)
-        config.validate
-        config.spread_api config, api, [], '' unless api.nil?
-        [api, config]
       # Use old overrides
       # TODO(alexstephen): Remove when old overrides are no longer in use.
       else
         # Compile step #2: Now that we have the target class, compile with that
         # class features
+        using_new_overrides = false
         source = config.compile(cfg_file)
         config = Google::YamlValidator.parse(source)
         config.overrides
-        config.spread_api config, api, [], '' unless api.nil?
-        config.validate
-        config
       end
+      config.spread_api config, api, [], '' unless api.nil?
+      config.validate
+      [api, config, using_new_overrides]
     end
 
     def provider
