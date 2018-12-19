@@ -29,6 +29,11 @@ objects:
     base_url: 'apps/{{project}}/firewall/ingressRules'
     self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
     update_verb: :PATCH
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
+      api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
     parameters:
       - !ruby/object:Api::Type::Integer
         name: 'priority'

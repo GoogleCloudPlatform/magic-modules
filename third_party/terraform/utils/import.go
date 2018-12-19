@@ -26,23 +26,39 @@ func parseImportId(idRegexes []string, d TerraformResourceData, config *Config) 
 			// Starting at index 1, the first match is the full string.
 			for i := 1; i < len(fieldValues); i++ {
 				fieldName := re.SubexpNames()[i]
-				// Here we have a challenge.  This will work properly in production, but
-				// in testing, we have a problem.  In test mode, instead of returning an
-				// error, a failed d.Set() call will panic.  In production, we catch the
-				// error and retry, but in testing, if we ever have a component of an ID
-				// which is strictly base-10 numeric, we're going to crash with a weird
-				// panic.  At least the panic will be isolated here, so you'll be able to
-				// find this comment.  :)  I promise the error that brought you here is
-				// not one that will show up in production!  Try to change the ID so that
-				// it doesn't contain a strictly numeric component.
+				// This part looks confusing.  Because there is no way to know at
+				// this point whether 'fieldName' corresponds to a TypeString or a
+				// TypeInteger in the resource schema, we need to determine
+				// whether to call d.Set() with 'fieldValues[i]', or with an integer
+				// parsed from 'fieldValues[i]'.  Normally, we would be able to just
+				// use a try/catch pattern - try as a string, and if that doesn't
+				// work, try as an integer, and if that doesn't work, return the
+				// error.  Unfortunately, this is not possible here - during tests,
+				// d.Set(...) will panic if there is an error.  So we need to check
+				// first whether the value can be parsed as an integer.
 				if atoi, atoiErr := strconv.Atoi(fieldValues[i]); atoiErr == nil {
+					// If the value can be parsed as an integer, we try to set the
+					// value as an integer.  *This is a problem*.  During tests, if there
+					// is a TypeString which is being parsed from the import id whose value
+					// is purely numeric, there will be a panic from this line.  The fix,
+					// if you are reaching this comment from that situation, is either
+					// to turn off TF_SCHEMA_PANIC_ON_ERROR in the test, or to
+					// add a non-numeric element to the TypeString which is being imported,
+					// or to swap the TypeString to a TypeInteger.
 					if err = d.Set(fieldName, atoi); err != nil {
-						d.Set(fieldName, fieldValues[i])
-					} else {
-						return err
+						// We catch errors, if they occur, and try to set the value as
+						// a string.
+						if err = d.Set(fieldName, fieldValues[i]); err != nil {
+							// If that does not work, we return the error.
+							return err
+						}
 					}
 				} else {
-					d.Set(fieldName, fieldValues[i])
+					// If the value cannot be parsed as an integer, we just set
+					// it as a string; this is the normal case.
+					if err = d.Set(fieldName, fieldValues[i]); err != nil {
+						return err
+					}
 				}
 			}
 

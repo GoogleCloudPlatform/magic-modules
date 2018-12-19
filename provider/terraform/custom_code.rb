@@ -71,10 +71,10 @@ module Provider
       # insert it into the docs verbatim.
       attr_reader :vars
       # Some variables need to hold special values during tests, and cannot
-      # be autodiscovered for open-in-cloud-shell.  For instance, org_id
+      # be inferred by Open in Cloud Shell.  For instance, org_id
       # needs to be the correct value during integration tests, or else
       # org tests cannot pass. Other examples include an existing project_id,
-      # zone, service account name, etc.
+      # a zone, a service account name, etc.
       #
       # test_env_vars is a Hash from template variable names to one of the
       # following symbols:
@@ -85,7 +85,7 @@ module Provider
       #  - :ORG_TARGET
       #  - :BILLING_ACCT
       #  - :SERVICE_ACCT
-      # This list corresponds to https://bit.ly/2PKfwxP (provider_test.go:150).
+      # This list corresponds to the `get*FromEnv` methods in provider_test.go.
       attr_reader :test_env_vars
 
       # the version (ga, beta, etc.) this example is being generated at
@@ -100,13 +100,13 @@ module Provider
 
       def config_documentation
         docs_defaults = {
-          PROJECT_NAME: '<my-project-name>',
-          CREDENTIALS: '<my-creds>',
+          PROJECT_NAME: 'my-project-name',
+          CREDENTIALS: 'my-creds',
           REGION: 'us-west1',
-          ORG_ID: '<my-org-id>',
-          ORG_TARGET: '<target-org-id>',
-          BILLING_ACCT: '<my-billing-account>',
-          SERVICE_ACCT: '<my-service-account>'
+          ORG_ID: 'my-org-id',
+          ORG_TARGET: 'target-org-id',
+          BILLING_ACCT: 'my-billing-account',
+          SERVICE_ACCT: 'my-service-account'
         }
         @vars ||= {}
         @test_env_vars ||= {}
