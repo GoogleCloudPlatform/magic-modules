@@ -20,58 +20,67 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # Terraform. All fields should be `attr_reader :<property>`
     module OverrideFields
-      attr_reader :diff_suppress_func # Adds a DiffSuppressFunc to the schema
-      attr_reader :state_func # Adds a StateFunc to the schema
-      attr_reader :sensitive # Adds `Sensitive: true` to the schema
-      # Does not set this value to the returned API value.  Useful for fields
-      # like secrets where the returned API value is not helpful.
-      attr_reader :ignore_read
-      attr_reader :validation # Adds a ValidateFunc to the schema
-      # Indicates that this is an Array that should have Set diff semantics.
-      attr_reader :unordered_list
+      def self.attributes
+        [
+          :diff_suppress_func, # Adds a DiffSuppressFunc to the schema
+          :state_func, # Adds a StateFunc to the schema
+          :sensitive, # Adds `Sensitive: true` to the schema
+          # Does not set this value to the returned API value.  Useful for fields
+          # like secrets where the returned API value is not helpful.
+          :ignore_read,
+          :validation, # Adds a ValidateFunc to the schema
+          # Indicates that this is an Array that should have Set diff semantics.
+          :unordered_list,
 
-      attr_reader :is_set # Uses a Set instead of an Array
-      # Optional function to determine the unique ID of an item in the set
-      # If not specified, schema.HashString (when elements are string) or
-      # schema.HashSchema are used.
-      attr_reader :set_hash_func
+          :is_set, # Uses a Set instead of an Array
+          # Optional function to determine the unique ID of an item in the set
+          # If not specified, schema.HashString (when elements are string) or
+          # schema.HashSchema are used.
+          :set_hash_func,
 
-      # if true, then we get the default value from the Google API if no value
-      # is set in the terraform configuration for this field.
-      # It translates to setting the field to Computed & Optional in the schema.
-      attr_reader :default_from_api
+          # if true, then we get the default value from the Google API if no value
+          # is set in the terraform configuration for this field.
+          # It translates to setting the field to Computed & Optional in the schema.
+          :default_from_api,
 
-      # ===========
-      # Custom code
-      # ===========
-      # All custom code attributes are string-typed.  The string should
-      # be the name of a template file which will be compiled in the
-      # specified / described place.
-      #
-      # Property Updates are used when a resource is updateable but
-      # resource.input is true.  In this case, only individual
-      # properties can be updated.  The value of this attribute should
-      # be the path to a template which will be compiled. This code is placed
-      # *inline* in the obj := { ... } definition - it is not a custom
-      # function, it is a custom statement.  Note that this cannot
-      # be used for nested properties, as they are not present in the
-      # obj := {...} statement.  This statement template receives `property`
-      # and `prefix` to aid in code reuse.
-      attr_reader :update_statement
-      # A custom flattener replaces the default flattener for an attribute.
-      # It is called as part of Read.  It can return an object of any
-      # type, and may sometimes need to return an object with non-interface{}
-      # type so that the d.Set() call will succeed, so the function
-      # header *is* a part of the custom code template.  To help with
-      # creating the function header, `property` and `prefix` are available,
-      # just as they are in the standard flattener template.
-      attr_reader :custom_flatten
-      # A custom expander replaces the default expander for an attribute.
-      # It is called as part of Create, and as part of Update if
-      # object.input is false.  It can return an object of any type,
-      # so the function header *is* part of the custom code template.
-      # As with flatten, `property` and `prefix` are available.
-      attr_reader :custom_expand
+          # Names of attributes that can't be set alongside this one
+          :conflicts_with,
+
+          # ===========
+          # Custom code
+          # ===========
+          # All custom code attributes are string-typed.  The string should
+          # be the name of a template file which will be compiled in the
+          # specified / described place.
+          #
+          # Property Updates are used when a resource is updateable but
+          # resource.input is true.  In this case, only individual
+          # properties can be updated.  The value of this attribute should
+          # be the path to a template which will be compiled. This code is placed
+          # *inline* in the obj := { ... } definition - it is not a custom
+          # function, it is a custom statement.  Note that this cannot
+          # be used for nested properties, as they are not present in the
+          # obj := {...} statement.  This statement template receives `property`
+          # and `prefix` to aid in code reuse.
+          :update_statement,
+          # A custom flattener replaces the default flattener for an attribute.
+          # It is called as part of Read.  It can return an object of any
+          # type, and may sometimes need to return an object with non-interface{}
+          # type so that the d.Set() call will succeed, so the function
+          # header *is* a part of the custom code template.  To help with
+          # creating the function header, `property` and `prefix` are available,
+          # just as they are in the standard flattener template.
+          :custom_flatten,
+          # A custom expander replaces the default expander for an attribute.
+          # It is called as part of Create, and as part of Update if
+          # object.input is false.  It can return an object of any type,
+          # so the function header *is* part of the custom code template.
+          # As with flatten, `property` and `prefix` are available.
+          :custom_expand
+        ]
+      end
+
+      attr_reader(*attributes)
     end
 
     # Support for schema ValidateFunc functionality.
@@ -88,9 +97,8 @@ module Provider
       end
     end
 
-    # Terraform-specific overrides to api.yaml.
-    class PropertyOverride < Provider::PropertyOverride
-      include OverrideFields
+    # Shared code between new property overrides and old.
+    module PropertyOverrideSharedCode
       def validate
         super
 
@@ -138,10 +146,6 @@ module Provider
 
       private
 
-      def overriden
-        Provider::Terraform::OverrideFields
-      end
-
       # Formats the string and potentially uses its old value as part of the new
       # value. The marker should be in the form `{{name}}` where `name` is the
       # field being formatted.
@@ -150,6 +154,18 @@ module Provider
       # property being updated.
       def format_string(name, mask, current_value)
         mask.gsub "{{#{name.id2name}}}", current_value
+      end
+    end
+
+    # Terraform-specific overrides to api.yaml.
+    class PropertyOverride < Provider::PropertyOverride
+      include OverrideFields
+      include PropertyOverrideSharedCode
+
+      private
+
+      def overriden
+        Provider::Terraform::OverrideFields
       end
     end
   end

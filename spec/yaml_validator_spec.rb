@@ -53,16 +53,6 @@ describe Google::YamlValidator do
     end
   end
 
-  context 'protects against property conflicts' do
-    subject do
-      -> { object('name: "bar"', 'description: "baz"').set_variable({}, :name) }
-    end
-
-    it do
-      is_expected.to raise_error(StandardError, /Conflict of property 'name'/)
-    end
-  end
-
   context 'do not allow unapproved classes deserialized' do
     subject do
       -> { described_class.parse("--- !ruby/object:Digest::SHA256\na: b") }
