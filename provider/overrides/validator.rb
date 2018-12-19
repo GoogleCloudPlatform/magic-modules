@@ -49,7 +49,7 @@ module Provider
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
-          next if check_if_exists(res, field_symbol)
+          next if check_if_exists(res, field_symbol, overrides.class.attributes)
 
           raise "#{field_name} does not exist on #{res.name}"
         end
@@ -108,7 +108,8 @@ module Provider
                  .each do |field_name|
           # Check override object.
           field_symbol = field_name[1..-1].to_sym
-          next if check_if_exists(property, field_symbol, overrides['@type'])
+          next if check_if_exists(property, field_symbol, overrides.class.attributes,
+                                  overrides['@type'])
 
           raise "#{field_name} does not exist on #{property.name}"
         end
@@ -116,9 +117,11 @@ module Provider
 
       # Check if this field exists on this object.
       # The best way (sadly) to do this is to see if a getter exists.
-      def check_if_exists(obj, field, override_type = nil)
+      def check_if_exists(obj, field, attributes = [], override_type = nil)
         # Not all types share the same values.
         # If we're changing types, the new type's getters matter, not the old type.
+        return true if attributes.include?(field)
+
         if override_type
           Module.const_get(override_type).new.respond_to? field
         else
