@@ -41,11 +41,13 @@ func (w *ComputeOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
 	}
 }
 
-func (w *ComputeOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *ComputeOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"PENDING", "RUNNING"},
-		Target:  []string{"DONE"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"PENDING", "RUNNING"},
+		Target:     []string{"DONE"},
+		Refresh:    w.RefreshFunc(),
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
 }
 
@@ -80,11 +82,7 @@ func computeOperationWaitTime(client *compute.Service, op *compute.Operation, pr
 		Project: project,
 	}
 
-	state := w.Conf()
-	state.Delay = 10 * time.Second
-	state.Timeout = time.Duration(timeoutMin) * time.Minute
-	state.MinTimeout = 2 * time.Second
-	opRaw, err := state.WaitForState()
+	opRaw, err := w.Conf(timeoutMin).WaitForState()
 	if err != nil {
 		return fmt.Errorf("Error waiting for %s: %s", activity, err)
 	}

@@ -14,11 +14,13 @@ type SpannerInstanceOperationWaiter struct {
 	Op      *spanner.Operation
 }
 
-func (w *SpannerInstanceOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *SpannerInstanceOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"false"},
-		Target:  []string{"true"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"false"},
+		Target:     []string{"true"},
+		Refresh:    w.RefreshFunc(),
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
 }
 
@@ -50,11 +52,7 @@ func spannerInstanceOperationWait(config *Config, op *spanner.Operation, activit
 		Op:      op,
 	}
 
-	state := w.Conf()
-	state.Delay = 10 * time.Second
-	state.Timeout = time.Duration(timeoutMin) * time.Minute
-	state.MinTimeout = 2 * time.Second
-	opRaw, err := state.WaitForState()
+	opRaw, err := w.Conf(timeoutMin).WaitForState()
 	if err != nil {
 		return fmt.Errorf("Error waiting for %s: %s", activity, err)
 	}

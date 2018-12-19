@@ -34,11 +34,14 @@ func (w *SqlAdminOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
 	}
 }
 
-func (w *SqlAdminOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *SqlAdminOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"PENDING", "RUNNING"},
-		Target:  []string{"DONE"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"PENDING", "RUNNING"},
+		Target:     []string{"DONE"},
+		Refresh:    w.RefreshFunc(),
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
+		MinTimeout: 2 * time.Second,
+		Delay:      5 * time.Second,
 	}
 }
 
@@ -74,11 +77,7 @@ func sqladminOperationWaitTime(config *Config, op *sqladmin.Operation, project, 
 		Project: project,
 	}
 
-	state := w.Conf()
-	state.Timeout = time.Duration(timeoutMinutes) * time.Minute
-	state.MinTimeout = 2 * time.Second
-	state.Delay = 5 * time.Second
-	opRaw, err := state.WaitForState()
+	opRaw, err := w.Conf(timeoutMinutes).WaitForState()
 	if err != nil {
 		return fmt.Errorf("Error waiting for %s (op %s): %s", activity, op.Name, err)
 	}

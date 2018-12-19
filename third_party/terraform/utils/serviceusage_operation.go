@@ -32,11 +32,13 @@ func (w *serviceUsageOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
 	}
 }
 
-func (w *serviceUsageOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *serviceUsageOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"false"},
-		Target:  []string{"true"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"false"},
+		Target:     []string{"true"},
+		Refresh:    w.RefreshFunc(),
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
 }
 
@@ -57,11 +59,7 @@ func serviceUsageOperationWaitTime(config *Config, op *serviceusage.Operation, a
 		Op:      op,
 	}
 
-	state := w.Conf()
-	state.Delay = 10 * time.Second
-	state.Timeout = time.Duration(timeoutMin) * time.Minute
-	state.MinTimeout = 2 * time.Second
-	opRaw, err := state.WaitForState()
+	opRaw, err := w.Conf(timeoutMin).WaitForState()
 	if err != nil {
 		return nil, fmt.Errorf("Error waiting for %s: %s", activity, err)
 	}

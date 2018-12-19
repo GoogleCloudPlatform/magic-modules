@@ -29,11 +29,13 @@ func (w *ResourceManagerOperationWaiter) RefreshFunc() resource.StateRefreshFunc
 	}
 }
 
-func (w *ResourceManagerOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *ResourceManagerOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"false"},
-		Target:  []string{"true"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"false"},
+		Target:     []string{"true"},
+		Refresh:    w.RefreshFunc(),
+		MinTimeout: 2 * time.Second,
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
 	}
 }
 
@@ -54,11 +56,7 @@ func resourceManagerOperationWaitTime(service *cloudresourcemanager.Service, op 
 		Op:      op,
 	}
 
-	state := w.Conf()
-	state.Delay = 10 * time.Second
-	state.Timeout = time.Duration(timeoutMin) * time.Minute
-	state.MinTimeout = 2 * time.Second
-	opRaw, err := state.WaitForState()
+	opRaw, err := w.Conf(timeoutMin).WaitForState()
 	if err != nil {
 		return fmt.Errorf("Error waiting for %s: %s", activity, err)
 	}

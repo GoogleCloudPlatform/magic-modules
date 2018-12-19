@@ -14,11 +14,13 @@ type DataprocClusterOperationWaiter struct {
 	Op      *dataproc.Operation
 }
 
-func (w *DataprocClusterOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *DataprocClusterOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"false"},
-		Target:  []string{"true"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"false"},
+		Target:     []string{"true"},
+		Refresh:    w.RefreshFunc(),
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
 }
 
@@ -36,7 +38,7 @@ func (w *DataprocClusterOperationWaiter) RefreshFunc() resource.StateRefreshFunc
 	}
 }
 
-func dataprocClusterOperationWait(config *Config, op *dataproc.Operation, activity string, timeoutMinutes, minTimeoutSeconds int) error {
+func dataprocClusterOperationWait(config *Config, op *dataproc.Operation, activity string, timeoutMinutes int) error {
 	if op.Done {
 		if op.Error != nil {
 			return fmt.Errorf("Error code %v, message: %s", op.Error.Code, op.Error.Message)
@@ -49,10 +51,7 @@ func dataprocClusterOperationWait(config *Config, op *dataproc.Operation, activi
 		Op:      op,
 	}
 
-	state := w.Conf()
-	state.Timeout = time.Duration(timeoutMinutes) * time.Minute
-	state.MinTimeout = time.Duration(minTimeoutSeconds) * time.Second
-	opRaw, err := state.WaitForState()
+	opRaw, err := w.Conf(timeoutMinutes).WaitForState()
 	if err != nil {
 		return fmt.Errorf("Error waiting for %s: %s", activity, err)
 	}

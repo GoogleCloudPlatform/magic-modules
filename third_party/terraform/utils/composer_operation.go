@@ -28,11 +28,13 @@ func (w *ComposerOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
 	}
 }
 
-func (w *ComposerOperationWaiter) Conf() *resource.StateChangeConf {
+func (w *ComposerOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Pending: []string{"false"},
-		Target:  []string{"true"},
-		Refresh: w.RefreshFunc(),
+		Pending:    []string{"false"},
+		Target:     []string{"true"},
+		Refresh:    w.RefreshFunc(),
+		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
+		MinTimeout: 2 * time.Second,
 	}
 }
 
@@ -49,10 +51,7 @@ func composerOperationWaitTime(service *composer.Service, op *composer.Operation
 		Op:      op,
 	}
 
-	state := w.Conf()
-	state.Delay = 10 * time.Second
-	state.Timeout = time.Duration(timeoutMin) * time.Minute
-	state.MinTimeout = 2 * time.Second
+	state := w.Conf(timeoutMin)
 	opRaw, err := state.WaitForState()
 	if err != nil {
 		return fmt.Errorf("Error waiting for %s: %s", activity, err)
