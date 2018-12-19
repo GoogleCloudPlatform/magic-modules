@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -25,7 +26,24 @@ func parseImportId(idRegexes []string, d TerraformResourceData, config *Config) 
 			// Starting at index 1, the first match is the full string.
 			for i := 1; i < len(fieldValues); i++ {
 				fieldName := re.SubexpNames()[i]
-				d.Set(fieldName, fieldValues[i])
+				// Here we have a challenge.  This will work properly in production, but
+				// in testing, we have a problem.  In test mode, instead of returning an
+				// error, a failed d.Set() call will panic.  In production, we catch the
+				// error and retry, but in testing, if we ever have a component of an ID
+				// which is strictly base-10 numeric, we're going to crash with a weird
+				// panic.  At least the panic will be isolated here, so you'll be able to
+				// find this comment.  :)  I promise the error that brought you here is
+				// not one that will show up in production!  Try to change the ID so that
+				// it doesn't contain a strictly numeric component.
+				if atoi, atoiErr := strconv.Atoi(fieldValues[i]); atoiErr == nil {
+					if err = d.Set(fieldName, atoi); err != nil {
+						d.Set(fieldName, fieldValues[i])
+					} else {
+						return err
+					}
+				} else {
+					d.Set(fieldName, fieldValues[i])
+				}
 			}
 
 			// The first id format is applied first and contains all the fields.

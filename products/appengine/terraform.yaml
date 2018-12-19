@@ -14,17 +14,20 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Provider::ResourceOverrides
   FirewallRule: !ruby/object:Provider::Terraform::ResourceOverride
-    id_format: "{{project}}/ingressRule/{{priority}}"
+    id_format: "{{project}}/{{priority}}"
+    import_format: ["{{project}}/{{priority}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/update_mask.erb
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "appengine_firewall_rule_basic"
-        primary_resource_id: "default"
+        primary_resource_id: "rule"
         version: <%= version_name %>
         vars:
           project_id: "test-project"
-          org_id: "test-org"
+        # things with org ids don't get open-in-cloud-shell
+        test_env_vars:
+          org_id: :ORG_ID
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

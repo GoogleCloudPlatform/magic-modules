@@ -66,8 +66,27 @@ module Provider
       # }
       attr_reader :primary_resource_id
 
-      # vars is a Hash from template variable names to output variable names
+      # vars is a Hash from template variable names to output variable names.
+      # It will use the provided value as a prefix for generated tests, and
+      # insert it into the docs verbatim.
       attr_reader :vars
+      # Some variables need to hold special values during tests, and cannot
+      # be autodiscovered for open-in-cloud-shell.  For instance, org_id
+      # needs to be the correct value during integration tests, or else
+      # org tests cannot pass. Other examples include an existing project_id,
+      # zone, service account name, etc.
+      #
+      # test_env_vars is a Hash from template variable names to one of the
+      # following symbols:
+      #  - :PROJECT_NAME
+      #  - :CREDENTIALS
+      #  - :REGION
+      #  - :ORG_ID
+      #  - :ORG_TARGET
+      #  - :BILLING_ACCT
+      #  - :SERVICE_ACCT
+      # This list corresponds to https://bit.ly/2PKfwxP (provider_test.go:150).
+      attr_reader :test_env_vars
 
       # the version (ga, beta, etc.) this example is being generated at
       attr_reader :version
@@ -80,9 +99,21 @@ module Provider
       attr_reader :skip_test
 
       def config_documentation
+        docs_defaults = {
+          PROJECT_NAME: '<my-project-name>',
+          CREDENTIALS: '<my-creds>',
+          REGION: 'us-west1',
+          ORG_ID: '<my-org-id>',
+          ORG_TARGET: '<target-org-id>',
+          BILLING_ACCT: '<my-billing-account>',
+          SERVICE_ACCT: '<my-service-account>'
+        }
+        @vars ||= {}
+        @test_env_vars ||= {}
         body = lines(compile_file(
                        {
                          vars: vars,
+                         test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
                          primary_resource_id: primary_resource_id,
                          version: version
                        },
@@ -95,10 +126,12 @@ module Provider
       end
 
       def config_test
-        @vars ||= []
+        @vars ||= {}
+        @test_env_vars ||= {}
         body = lines(compile_file(
                        {
-                         vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
+                         vars: vars.map { |k, str| [k, "#{str}-%{random}"] }.to_h,
+                         test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id,
                          version: version
                        },
