@@ -34,31 +34,28 @@ func parseImportId(idRegexes []string, d TerraformResourceData, config *Config) 
 				// use a try/catch pattern - try as a string, and if that doesn't
 				// work, try as an integer, and if that doesn't work, return the
 				// error.  Unfortunately, this is not possible here - during tests,
-				// d.Set(...) will panic if there is an error.  So we need to check
-				// first whether the value can be parsed as an integer.
-				if atoi, atoiErr := strconv.Atoi(fieldValues[i]); atoiErr == nil {
-					// If the value can be parsed as an integer, we try to set the
-					// value as an integer.  *This is a problem*.  During tests, if there
-					// is a TypeString which is being parsed from the import id whose value
-					// is purely numeric, there will be a panic from this line.  The fix,
-					// if you are reaching this comment from that situation, is either
-					// to turn off TF_SCHEMA_PANIC_ON_ERROR in the test, or to
-					// add a non-numeric element to the TypeString which is being imported,
-					// or to swap the TypeString to a TypeInteger.
-					if err = d.Set(fieldName, atoi); err != nil {
-						// We catch errors, if they occur, and try to set the value as
-						// a string.
-						if err = d.Set(fieldName, fieldValues[i]); err != nil {
-							// If that does not work, we return the error.
-							return err
-						}
-					}
-				} else {
-					// If the value cannot be parsed as an integer, we just set
-					// it as a string; this is the normal case.
+				// d.Set(...) will panic if there is an error.  So we try d.Get(),
+				// relying on the behavior that an unset field will return the empty
+				// value for the appropriate type.  So if the result is a number, we'll
+				// set it as a number, but if it's a string, we'll set it as a string.
+				val, _ := d.GetOk(fieldName)
+				if _, ok := val.(string); val == nil || ok {
 					if err = d.Set(fieldName, fieldValues[i]); err != nil {
 						return err
 					}
+				} else if _, ok := val.(int); ok {
+					if atoi, atoiErr := strconv.Atoi(fieldValues[i]); atoiErr == nil {
+						// If the value can be parsed as an integer, we try to set the
+						// value as an integer.
+						if err = d.Set(fieldName, atoi); err != nil {
+							return err
+						}
+					} else {
+						return fmt.Errorf("%s appears to be an integer, but %v cannot be parsed as an int", fieldName, fieldValues[i])
+					}
+				} else {
+					return fmt.Errorf(
+						"cannot handle %s, which currently has value %v, and should be set to %#v, during import", fieldName, val, fieldValues[i])
 				}
 			}
 
