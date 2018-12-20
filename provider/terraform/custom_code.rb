@@ -101,12 +101,12 @@ module Provider
       def config_documentation
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
-          CREDENTIALS: 'my-creds',
+          CREDENTIALS: 'my/credentials/filename.json',
           REGION: 'us-west1',
-          ORG_ID: 'my-org-id',
-          ORG_TARGET: 'target-org-id',
-          BILLING_ACCT: 'my-billing-account',
-          SERVICE_ACCT: 'my-service-account'
+          ORG_ID: '123456789',
+          ORG_TARGET: '123456789',
+          BILLING_ACCT: '000000-0000000-0000000-000000',
+          SERVICE_ACCT: 'emailAddress:my@service-account.com'
         }
         @vars ||= {}
         @test_env_vars ||= {}
