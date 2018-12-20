@@ -11,12 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-id: !ruby/object:Provider::Terraform::PropertyOverride
+id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   exclude: true
-name: !ruby/object:Provider::Terraform::PropertyOverride
+name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   validation: !ruby/object:Provider::Terraform::Validation
     function: 'validateGCPName'
-autoscalingPolicy.minNumReplicas: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.minNumReplicas: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: minReplicas
   # Even though this field isn't actually required by the API, it makes our
   # lives easier if we treat it as a required field. It has a default that is
@@ -26,23 +26,23 @@ autoscalingPolicy.minNumReplicas: !ruby/object:Provider::Terraform::PropertyOver
   # when our users aren't expecting us to. For more info, see
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/305.
   required: true
-autoscalingPolicy.maxNumReplicas: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.maxNumReplicas: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: maxReplicas
-autoscalingPolicy.coolDownPeriodSec: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.coolDownPeriodSec: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: cooldownPeriod
-autoscalingPolicy.cpuUtilization: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.cpuUtilization: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   default_from_api: true
-autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: target
   required: true # See comment for minReplicas
-autoscalingPolicy.customMetricUtilizations: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: metric
-autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: name
-autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: target
-autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: type
-autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Provider::Terraform::PropertyOverride
+autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: target
   required: true # See comment for minReplicas

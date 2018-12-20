@@ -122,7 +122,7 @@ module Provider
         check_optional_property :custom_expand, String
 
         raise "'default_value' and 'default_from_api' cannot be both set"  \
-          if default_from_api && !default_value.nil?
+          if @default_from_api && !@default_value.nil?
       end
 
       def apply(api_property)

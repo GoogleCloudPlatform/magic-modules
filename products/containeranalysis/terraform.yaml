@@ -13,8 +13,8 @@
 
 --- !ruby/object:Provider::Terraform::Config
 name: ContainerAnalysis
-overrides: !ruby/object:Provider::ResourceOverrides
-  Note: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Note: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/notes/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
@@ -26,7 +26,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         vars:
           note_name: "test-attestor-note"
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
 
 # This is for copying files over
