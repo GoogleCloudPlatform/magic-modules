@@ -1,65 +1,25 @@
 package google
 
 import (
-	"fmt"
-	"log"
-	"time"
-
-	"github.com/hashicorp/terraform/helper/resource"
 	"google.golang.org/api/redis/v1beta1"
 )
 
 type RedisOperationWaiter struct {
 	Service *redis.ProjectsLocationsService
-	Op      *redis.Operation
+	CommonOperationWaiter
 }
 
-func (w *RedisOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		op, err := w.Service.Operations.Get(w.Op.Name).Do()
-
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] Got %v while polling for operation %s's 'done' status", op.Done, w.Op.Name)
-
-		return op, fmt.Sprint(op.Done), nil
-	}
+func (w *RedisOperationWaiter) QueryOp() (interface{}, error) {
+	return w.Service.Operations.Get(w.Op.Name).Do()
 }
 
-func (w *RedisOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{"false"},
-		Target:     []string{"true"},
-		Refresh:    w.RefreshFunc(),
-		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
-		MinTimeout: 2 * time.Second,
-	}
-}
-
-func redisOperationWaitTime(service *redis.Service, op *redis.Operation, project, activity string, timeoutMin int) error {
-	if op.Done {
-		if op.Error != nil {
-			return fmt.Errorf("Error code %v, message: %s", op.Error.Code, op.Error.Message)
-		}
-		return nil
-	}
-
+func redisOperationWaitTime(service *redis.Service, op *redis.Operation, project, activity string, timeoutMinutes int) error {
 	w := &RedisOperationWaiter{
 		Service: service.Projects.Locations,
-		Op:      op,
 	}
-
-	opRaw, err := w.Conf(timeoutMin).WaitForState()
+	err := w.SetOp(op)
 	if err != nil {
-		return fmt.Errorf("Error waiting for %s: %s", activity, err)
+		return err
 	}
-
-	op = opRaw.(*redis.Operation)
-	if op.Error != nil {
-		return fmt.Errorf("Error code %v, message: %s", op.Error.Code, op.Error.Message)
-	}
-
-	return nil
+	return OperationWait(w, activity, timeoutMinutes)
 }

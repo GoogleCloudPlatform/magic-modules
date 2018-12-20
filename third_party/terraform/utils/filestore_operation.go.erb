@@ -3,68 +3,29 @@ package google
 <% unless version == 'ga' -%>
 
 import (
-	"fmt"
-	"log"
-	"time"
-
-	"github.com/hashicorp/terraform/helper/resource"
 	file "google.golang.org/api/file/v1beta1"
 )
 
 type FilestoreOperationWaiter struct {
 	Service *file.ProjectsLocationsService
-	Op      *file.Operation
+	CommonOperationWaiter
 }
 
-func (w *FilestoreOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		op, err := w.Service.Operations.Get(w.Op.Name).Do()
-
-		if err != nil {
-			return nil, "", err
-		}
-
-		log.Printf("[DEBUG] Got %v while polling for operation %s's 'done' status", op.Done, w.Op.Name)
-
-		return op, fmt.Sprint(op.Done), nil
-	}
+func (w *FilestoreOperationWaiter) QueryOp() (interface{}, error) {
+	return w.Service.Operations.Get(w.Op.Name).Do()
 }
 
-func (w *FilestoreOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{"false"},
-		Target:     []string{"true"},
-		Refresh:    w.RefreshFunc(),
-		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
-		MinTimeout: 2 * time.Second,
-	}
-}
-
-func filestoreOperationWaitTime(service *file.Service, op *file.Operation, project, activity string, timeoutMin int) error {
-	if op.Done {
-		if op.Error != nil {
-			return fmt.Errorf("Error code %v, message: %s", op.Error.Code, op.Error.Message)
-		}
-		return nil
-	}
-
+func filestoreOperationWaitTime(service *file.Service, op *file.Operation, project, activity string, timeoutMinutes int) error {
 	w := &FilestoreOperationWaiter{
 		Service: service.Projects.Locations,
-		Op:      op,
 	}
-
-	opRaw, err := w.Conf(timeoutMin).WaitForState()
+	err := w.SetOp(op)
 	if err != nil {
-		return fmt.Errorf("Error waiting for %s: %s", activity, err)
+		return err
 	}
-
-	op = opRaw.(*file.Operation)
-	if op.Error != nil {
-		return fmt.Errorf("Error code %v, message: %s", op.Error.Code, op.Error.Message)
-	}
-
-	return nil
+	return OperationWait(w, activity, timeoutMinutes)
 }
+
 <% else %>
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 <% end -%>

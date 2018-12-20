@@ -2,10 +2,7 @@ package google
 
 import (
 	"fmt"
-	"log"
-	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
 	"google.golang.org/api/container/v1beta1"
 )
 
@@ -16,44 +13,41 @@ type ContainerOperationWaiter struct {
 	Location string
 }
 
-func (w *ContainerOperationWaiter) Conf(timeoutMinutes int) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{"PENDING", "RUNNING"},
-		Target:     []string{"DONE"},
-		Refresh:    w.RefreshFunc(),
-		Timeout:    time.Duration(timeoutMinutes) * time.Minute,
-		MinTimeout: 2 * time.Second,
-	}
+func (w *ContainerOperationWaiter) State() string {
+	return w.Op.Status
 }
 
-func (w *ContainerOperationWaiter) RefreshFunc() resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		name := fmt.Sprintf("projects/%s/locations/%s/operations/%s",
-			w.Project, w.Location, w.Op.Name)
-		resp, err := w.Service.Projects.Locations.Operations.Get(name).Do()
-
-		if err != nil {
-			return nil, "", err
-		}
-
-		if resp.StatusMessage != "" {
-			return resp, resp.Status, fmt.Errorf(resp.StatusMessage)
-		}
-
-		log.Printf("[DEBUG] Progress of operation %q: %q", w.Op.Name, resp.Status)
-
-		return resp, resp.Status, err
+func (w *ContainerOperationWaiter) Error() error {
+	if w.Op.StatusMessage != "" {
+		return fmt.Errorf(w.Op.StatusMessage)
 	}
+	return nil
+}
+
+func (w *ContainerOperationWaiter) SetOp(op interface{}) error {
+	w.Op = op.(*container.Operation)
+	return nil
+}
+
+func (w *ContainerOperationWaiter) QueryOp() (interface{}, error) {
+	name := fmt.Sprintf("projects/%s/locations/%s/operations/%s",
+		w.Project, w.Location, w.Op.Name)
+	return w.Service.Projects.Locations.Operations.Get(name).Do()
+}
+
+func (w *ContainerOperationWaiter) OpName() string {
+	return w.Op.Name
+}
+
+func (w *ContainerOperationWaiter) PendingStates() []string {
+	return []string{"PENDING", "RUNNING"}
+}
+
+func (w *ContainerOperationWaiter) TargetStates() []string {
+	return []string{"DONE"}
 }
 
 func containerOperationWait(config *Config, op *container.Operation, project, location, activity string, timeoutMinutes int) error {
-	if op.Status == "DONE" {
-		if op.StatusMessage != "" {
-			return fmt.Errorf(op.StatusMessage)
-		}
-		return nil
-	}
-
 	w := &ContainerOperationWaiter{
 		Service:  config.clientContainerBeta,
 		Op:       op,
@@ -61,9 +55,9 @@ func containerOperationWait(config *Config, op *container.Operation, project, lo
 		Location: location,
 	}
 
-	_, err := w.Conf(timeoutMinutes).WaitForState()
+	err := w.SetOp(op)
 	if err != nil {
-		return fmt.Errorf("Error waiting for %s: %s", activity, err)
+		return err
 	}
-	return nil
+	return OperationWait(w, activity, timeoutMinutes)
 }
