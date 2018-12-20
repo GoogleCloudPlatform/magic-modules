@@ -89,7 +89,6 @@ func resourceGoogleProjectIamPolicyRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	// we only marshal the bindings and audit configs, because only the bindings and audit configs get set in the config
 	policyBytes, err := json.Marshal(&cloudresourcemanager.Policy{Bindings: policy.Bindings, AuditConfigs: policy.AuditConfigs})
 	if err != nil {
 		return fmt.Errorf("Error marshaling IAM policy: %v", err)
@@ -254,8 +253,8 @@ func compareAuditConfigs(a, b []*cloudresourcemanager.AuditConfig) bool {
 			if len(logConfig.ExemptedMembers) != len(b[i].AuditLogConfigs[x].ExemptedMembers) {
 				return false
 			}
-			for pos, mem := range logConfig.ExemptedMembers {
-				if b[i].AuditLogConfigs[x].ExemptedMembers[pos] != mem {
+			for pos, exemptedMember := range logConfig.ExemptedMembers {
+				if b[i].AuditLogConfigs[x].ExemptedMembers[pos] != exemptedMember {
 					return false
 				}
 			}
