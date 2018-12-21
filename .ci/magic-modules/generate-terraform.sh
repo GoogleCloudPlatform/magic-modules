@@ -30,7 +30,7 @@ go get
 # "-wholename": entire relative path - including directory names - matches following wildcard.
 # "-name": filename alone matches following string.  e.g. -name README.md matches ./README.md *and* ./foo/bar/README.md
 # "-exec": for each file found, execute the command following until the literal ';'
-find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".gometalinter.json" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "main.go" -not -wholename "./scripts*" -not -wholename "./version*" -exec git rm {} \;
+find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".gometalinter.json" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "main.go" -not -name "go.mod" -not -name "go.sum" -not -wholename "./scripts*" -not -wholename "./version*" -exec git rm {} \;
 popd
 
 pushd magic-modules-branched
@@ -58,7 +58,7 @@ git add -A
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "2.0.0"
+apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
 
 popd
 popd

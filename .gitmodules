@@ -5,11 +5,11 @@
 [submodule "build/terraform"]
 	path = build/terraform
 	url = git@github.com:terraform-providers/terraform-provider-google.git
-	branch = 2.0.0
+	branch = master
 [submodule "build/terraform-beta"]
 	path = build/terraform-beta
 	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
-	branch = 2.0.0
+	branch = master
 [submodule "build/inspec"]
 	path = build/inspec
 	url = git@github.com:modular-magician/inspec-gcp.git
