@@ -1,0 +1,216 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Cloud Scheduler
+prefix: gcloudscheduler
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://cloudscheduler.googleapis.com/v1beta1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Job'
+    base_url: projects/{{project}}/locations/{{region}}/jobs
+    self_link: projects/{{project}}/locations/{{region}}/jobs/{{name}}
+    input: true
+    description: |
+      Provides a detailed description of a Job.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/scheduler/'
+      api: 'https://cloud.google.com/scheduler/docs/reference/rest/'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The name of the job.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          The description of the job.
+        required: false
+        input: true
+      - !ruby/object:Api::Type::String
+        name: schedule
+        description: |
+          The schedule (cron) for the job.
+        required: false
+        input: true
+      - !ruby/object:Api::Type::String
+        name: timeZone
+        description: |
+          The time zone the job should run in with respect to the cron time
+        required: false
+        input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: retryConfig
+        description: |
+          The policy of if to and how many times the job should be
+          retried if it fails
+        required: false
+        input: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: retryCount
+            description: |
+              How 
+            required: false
+            input: true
+          - !ruby/object:Api::Type::String
+            name: maxRetryDuration
+            description: |
+              How long the retry should run for in seconds e.g., "30s"
+            required: false
+            input: true
+          - !ruby/object:Api::Type::String
+            name: minBackoffDuration
+            description: |
+              How 
+            required: false
+            input: true
+          - !ruby/object:Api::Type::String
+            name: maxBackoffDuration
+            description: |
+              How 
+            required: false
+            input: true
+          - !ruby/object:Api::Type::Integer
+            name: maxDoublings
+            description: |
+              How 
+            required: false
+            input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: pubsubTarget
+        description: |
+          if the job providers a pubsub_target the cron will publish
+          a message to the provided topic
+        input: true
+        conflicts: 
+          - httpTarget
+          - appEngineHttpTarget
+        properties:
+          - !ruby/object:Api::Type::String
+            name: topicName
+            description: |
+              The human readable name of this Attestation Authority, for
+              example "qa".
+            required: true
+            input: true
+          - !ruby/object:Api::Type::String
+            name: data
+            description: |
+              The data that will be pubished to the topic
+            required: false
+            input: true
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: attributes
+            description: |
+              The data that will be pubished to the topic
+            required: false
+            input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: appEngineHttpTarget
+        description: |
+          if the job providers a app_engine_http_target the cron will 
+          send a request to the service instance
+        input: true
+        conflicts: 
+          - pubsubTarget
+          - httpTarget
+        properties:
+          - !ruby/object:Api::Type::String
+            name: httpMethod
+            description: |
+              The human readable name of this Attestation Authority, for
+              example "qa".
+            required: false
+            input: true
+          - !ruby/object:Api::Type::NestedObject
+            name: appEngineRouting
+            description: |
+              if the job providers a app_engine_http_target the cron will 
+              send a request to the service instance
+            required: false
+            input: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: service
+                description: |
+                  The service within AppEngine to target with the request
+                required: false
+                input: true
+              - !ruby/object:Api::Type::String
+                name: version
+                description: |
+                  The version of AppEngine to target with the request
+                required: false
+                input: true
+              - !ruby/object:Api::Type::String
+                name: instance
+                description: |
+                  The instance of AppEngine to target with the request
+                required: false
+                input: true
+          - !ruby/object:Api::Type::String
+            name: relativeUri
+            description: |
+              the uri to target in the request
+            required: true
+          - !ruby/object:Api::Type::String
+            name: body
+            description: |
+              The data that will be sent in a POST request
+            required: false
+            input: true
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: headers
+            description: |
+              Extra headers to be sent with the request
+            required: false
+            input: true
+      - !ruby/object:Api::Type::NestedObject
+        name: httpTarget
+        description: |
+          if the job providers a http_target the cron will 
+          send a request to the targeted url
+        input: true
+        conflicts: 
+          - pubsubTarget
+          - appEngineHttpTarget
+        properties:
+          - !ruby/object:Api::Type::String
+            name: uri
+            description: |
+              the uri to target in the request
+            required: true
+          - !ruby/object:Api::Type::String
+            name: httpMethod
+            description: |
+              the http method to use for the request
+            required: false
+          - !ruby/object:Api::Type::String
+            name: body
+            description: |
+              The data that will be sent in a POST request
+            required: false
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: headers
+            description: |
+              Extra headers to be sent with the request
+            required: false
