@@ -733,7 +733,7 @@ func TestAccComputeInstance_subnet_xpn(t *testing.T) {
 				Config: testAccComputeInstance_subnet_xpn(org, billingId, projectId, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExistsInProject(
-						"google_compute_instance.foobar", fmt.Sprintf("%s-service", projectName),
+						"google_compute_instance.foobar", fmt.Sprintf("%s-service", projectId),
 						&instance),
 					testAccCheckComputeInstanceHasSubnet(&instance),
 				),

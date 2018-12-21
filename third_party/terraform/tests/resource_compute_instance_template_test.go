@@ -315,7 +315,7 @@ func TestAccComputeInstanceTemplate_subnet_xpn(t *testing.T) {
 				Config: testAccComputeInstanceTemplate_subnet_xpn(org, billingId, projectId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExistsInProject(
-						"google_compute_instance_template.foobar", fmt.Sprintf("%s-service", projectName),
+						"google_compute_instance_template.foobar", fmt.Sprintf("%s-service", projectId),
 						&instanceTemplate),
 					testAccCheckComputeInstanceTemplateSubnetwork(&instanceTemplate),
 				),
