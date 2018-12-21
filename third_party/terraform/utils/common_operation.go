@@ -53,8 +53,7 @@ func (w *CommonOperationWaiter) Error() error {
 }
 
 func (w *CommonOperationWaiter) SetOp(op interface{}) error {
-	err := Convert(op, &w.Op)
-	if err != nil {
+	if err := Convert(op, &w.Op); err != nil {
 		return err
 	}
 	return nil

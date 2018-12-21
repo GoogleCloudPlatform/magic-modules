@@ -17,8 +17,7 @@ func dataprocClusterOperationWait(config *Config, op *dataproc.Operation, activi
 	w := &DataprocClusterOperationWaiter{
 		Service: config.clientDataproc,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

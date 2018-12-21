@@ -23,12 +23,11 @@ func serviceManagementOperationWaitTime(config *Config, op *servicemanagement.Op
 		Service: config.clientServiceMan,
 	}
 
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return nil, err
 	}
-	err = OperationWait(w, activity, timeoutMinutes)
-	if err != nil {
+
+	if err := OperationWait(w, activity, timeoutMinutes); err != nil {
 		return nil, err
 	}
 	return w.Op.Response, nil

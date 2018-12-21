@@ -17,8 +17,7 @@ func cloudFunctionsOperationWait(service *cloudfunctions.Service, op *cloudfunct
 	w := &CloudFunctionsOperationWaiter{
 		Service: service,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, 4)

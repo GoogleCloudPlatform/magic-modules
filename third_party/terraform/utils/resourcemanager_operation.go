@@ -18,8 +18,7 @@ func resourceManagerOperationWaitTime(service *cloudresourcemanager.Service, op 
 	w := &ResourceManagerOperationWaiter{
 		Service: service,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMin)

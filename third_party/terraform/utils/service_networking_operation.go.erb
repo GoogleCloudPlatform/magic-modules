@@ -25,8 +25,7 @@ func serviceNetworkingOperationWaitTime(config *Config, op *servicenetworking.Op
 		Service: config.clientServiceNetworking,
 	}
 
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

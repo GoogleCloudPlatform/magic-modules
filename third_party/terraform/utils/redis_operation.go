@@ -17,8 +17,7 @@ func redisOperationWaitTime(service *redis.Service, op *redis.Operation, project
 	w := &RedisOperationWaiter{
 		Service: service.Projects.Locations,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

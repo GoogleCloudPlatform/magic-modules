@@ -17,8 +17,7 @@ func composerOperationWaitTime(service *composer.Service, op *composer.Operation
 	w := &ComposerOperationWaiter{
 		Service: service.Projects.Locations,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

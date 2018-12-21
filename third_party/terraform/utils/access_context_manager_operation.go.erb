@@ -24,8 +24,7 @@ func accessContextManagerOperationWaitTime(service *accesscontextmanager.Service
 	w := &AccessContextManagerOperationWaiter{
 		Service: service.Operations,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

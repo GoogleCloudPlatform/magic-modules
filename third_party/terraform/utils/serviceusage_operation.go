@@ -21,8 +21,7 @@ func serviceUsageOperationWaitTime(config *Config, op *serviceusage.Operation, a
 	w := &ServiceUsageOperationWaiter{
 		Service: config.clientServiceUsage,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

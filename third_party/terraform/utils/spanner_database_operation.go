@@ -18,8 +18,7 @@ func spannerDatabaseOperationWait(config *Config, op *spanner.Operation, activit
 		Service: config.clientSpanner,
 	}
 
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

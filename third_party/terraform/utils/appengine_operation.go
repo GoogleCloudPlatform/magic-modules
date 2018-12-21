@@ -35,8 +35,7 @@ func appEngineOperationWaitTime(client *appengine.APIService, op *appengine.Oper
 		AppId:   appId,
 	}
 
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

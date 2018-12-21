@@ -54,8 +54,7 @@ func sqladminOperationWaitTime(config *Config, op *sqladmin.Operation, project, 
 		Op:      op,
 		Project: project,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

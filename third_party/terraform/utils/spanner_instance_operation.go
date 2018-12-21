@@ -17,8 +17,7 @@ func spannerInstanceOperationWait(config *Config, op *spanner.Operation, activit
 	w := &SpannerInstanceOperationWaiter{
 		Service: config.clientSpanner,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

@@ -19,11 +19,15 @@ func (w *DataprocJobOperationWaiter) State() string {
 }
 
 func (w *DataprocJobOperationWaiter) Error() error {
+	// The "operation" is just the job, which has no special error field that we
+	// want to expose.
 	return nil
 }
 
 func (w *DataprocJobOperationWaiter) SetOp(job interface{}) error {
-	// w.Job = job.(*dataproc.Job)
+	// The "operation" is just the job. Instead of holding onto the whole job
+	// object, we only care about the state, which gets set in QueryOp, so this
+	// doesn't have to do anything.
 	return nil
 }
 

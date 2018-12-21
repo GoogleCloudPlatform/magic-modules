@@ -55,8 +55,7 @@ func containerOperationWait(config *Config, op *container.Operation, project, lo
 		Location: location,
 	}
 
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

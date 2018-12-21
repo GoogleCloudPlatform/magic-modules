@@ -63,8 +63,7 @@ func computeOperationWaitTime(client *compute.Service, op *compute.Operation, pr
 		Project: project,
 	}
 
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)

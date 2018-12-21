@@ -19,8 +19,7 @@ func filestoreOperationWaitTime(service *file.Service, op *file.Operation, proje
 	w := &FilestoreOperationWaiter{
 		Service: service.Projects.Locations,
 	}
-	err := w.SetOp(op)
-	if err != nil {
+	if err := w.SetOp(op); err != nil {
 		return err
 	}
 	return OperationWait(w, activity, timeoutMinutes)
