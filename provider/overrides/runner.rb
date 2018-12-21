@@ -102,8 +102,8 @@ module Provider
 
           # Using instance_variable_get('properties') to make sure we get `exclude: true` properties
           ['@properties', '@parameters'].each do |val|
-            new_props = (old_resource.instance_variable_get(val) || []).map do |p|
-              build_property(p, res_override[val], override_classes)
+            new_props = ((old_resource.instance_variable_get(val) || [])).map do |p|
+              build_property(p, res_override['properties'], override_classes)
             end
             res.instance_variable_set(val, new_props)
           end
@@ -136,7 +136,7 @@ module Provider
             new_prop.instance_variable_set('@item_type', Api::Type::NestedObject.new)
             new_props = old_property.item_type.properties.map do |p|
               build_property(p, property_overrides, override_classes,
-                             "#{prefix}#{old_property.name}[].")
+                             "#{prefix}#{old_property.name}.")
             end
             new_prop.item_type.instance_variable_set('@properties', new_props)
           end

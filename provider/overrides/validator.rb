@@ -54,9 +54,8 @@ module Provider
           raise "#{field_name} does not exist on #{res.name}"
         end
         # Use instance_variable_get to get excluded properties
-        verify_properties(res.instance_variable_get('@properties'), overrides['properties'],
-                          res.name)
-        verify_properties(res.instance_variable_get('@parameters'), overrides['parameters'],
+        verify_properties((res.instance_variable_get('@properties') || []) +
+                          (res.instance_variable_get('@parameters') || []), overrides['properties'],
                           res.name)
       end
 
@@ -73,16 +72,7 @@ module Provider
       def find_property(properties, path, res_name = '')
         prop = nil
         path.each do |part|
-          # We should substitute the [] brackets away.
-          prop = properties.select { |o| o.name == part.sub('[]', '') }.first
-          # Check that next part is actually an array of nested objects.
-          if !part.include?('[]') && prop.is_a?(Api::Type::Array) && \
-             prop.item_type.is_a?(Api::Type::NestedObject) \
-              && part != path.last
-            raise ["#{path.join('.')} on #{res_name} is incorrectly",
-                   'formatted for Arrays of NestedObjects'].join(' ')
-          end
-
+          prop = properties.select { |o| o.name == part }.first
           properties = if prop.is_a?(Api::Type::NestedObject)
                          prop.properties
                        elsif prop.is_a?(Api::Type::Map) && \
@@ -96,8 +86,7 @@ module Provider
                        end
         end
         unless prop
-          raise ["#{path.join('.')} does not exist on #{res_name}",
-                 '(is it mislabeled as a property, not a parameter?)'].join(' ')
+          raise "#{path.join('.')} does not exist on #{res_name}"
         end
         prop
       end
