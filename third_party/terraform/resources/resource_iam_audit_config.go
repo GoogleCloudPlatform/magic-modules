@@ -145,16 +145,6 @@ func iamAuditConfigImport(resourceIdParser resourceIdParserFunc) schema.StateFun
 		// Set the ID again so that the ID matches the ID it would have if it had been created via TF.
 		// Use the current ID in case it changed in the resourceIdParserFunc.
 		d.SetId(d.Id() + "/audit_config/" + service)
-		// It is possible to return multiple audit configs, since we can learn about all the audit configs
-		// for this resource here.  Unfortunately, `terraform import` has some messy behavior here -
-		// there's no way to know at this point which resource is being imported, so it's not possible
-		// to order this list in a useful way.  In the event of a complex set of audit configs, the user
-		// will have a terribly confusing set of imported resources and no way to know what matches
-		// up to what.  And since the only users who will do a terraform import on their IAM audit configs
-		// are users who aren't too familiar with Google Cloud IAM (because a "create" for audit configs is
-		// idempotent), it's reasonable to expect that the user will be very alarmed by the plan that
-		// terraform will output which mentions destroying a dozen-plus audit configs.  With that
-		// in mind, we return only the audit config that matters.
 		return []*schema.ResourceData{d}, nil
 	}
 }

@@ -191,9 +191,6 @@ func auditConfigToServiceMap(auditConfig []*cloudresourcemanager.AuditConfig) ma
 	ac := make(map[string]map[string]map[string]bool)
 	// Get each config
 	for _, c := range auditConfig {
-		if c == nil {
-			continue
-		}
 		// Initialize service map
 		if _, ok := ac[c.Service]; !ok {
 			ac[c.Service] = map[string]map[string]bool{}
