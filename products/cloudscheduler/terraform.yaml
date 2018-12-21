@@ -22,6 +22,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       httpTarget.body: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/base64_encode_body.erb'
         custom_flatten: 'templates/terraform/custom_flatten/base64_decode_body.erb'
+      pubsubTarget.data: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/base64_encode_body.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/base64_decode_body.erb'
       appEngineHttpTarget.body: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/base64_encode_body.erb'
         custom_flatten: 'templates/terraform/custom_flatten/base64_decode_body.erb'
