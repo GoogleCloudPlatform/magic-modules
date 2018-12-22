@@ -42,63 +42,73 @@ objects:
       - !ruby/object:Api::Type::String
         name: description
         description: |
-          The description of the job.
+          A human-readable description for the job. 
+          This string must not contain more than 500 characters.
         required: false
         input: true
       - !ruby/object:Api::Type::String
         name: schedule
         description: |
-          The schedule (cron) for the job.
+          Describes the schedule on which the job will be executed.
         required: false
         input: true
       - !ruby/object:Api::Type::String
         name: timeZone
         description: |
-          The time zone the job should run in with respect to the cron time
+          Specifies the time zone to be used in interpreting schedule.
+          The value of this field must be a time zone name from the tz database.
         required: false
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
         description: |
-          The policy of if to and how many times the job should be
-          retried if it fails
+          By default, if a job does not complete successfully (meaning that an acknowledgement is not received from the handler, 
+          then it will be retried with exponential backoff according to the settings
         required: false
         input: true
         properties:
           - !ruby/object:Api::Type::Integer
             name: retryCount
             description: |
-              How 
+              The number of attempts that the system will make to run a job using the exponential backoff procedure described by maxDoublings.
+              Values greater than 5 and negative values are not allowed.
             required: false
             input: true
           - !ruby/object:Api::Type::String
             name: maxRetryDuration
             description: |
-              How long the retry should run for in seconds e.g., "30s"
+              The time limit for retrying a failed job, measured from time when an execution was first attempted. 
+              If specified with retryCount, the job will be retried until both limits are reached.
+              A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
             input: true
           - !ruby/object:Api::Type::String
             name: minBackoffDuration
             description: |
-              How 
+              The minimum amount of time to wait before retrying a job after it fails.
+              A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
             input: true
           - !ruby/object:Api::Type::String
             name: maxBackoffDuration
             description: |
-              How 
+              The maximum amount of time to wait before retrying a job after it fails.
+              A duration in seconds with up to nine fractional digits, terminated by 's'.
             required: false
             input: true
           - !ruby/object:Api::Type::Integer
             name: maxDoublings
             description: |
-              How 
+              The time between retries will double maxDoublings times.
+              A job's retry interval starts at minBackoffDuration, then doubles maxDoublings times, then increases linearly, 
+              and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
             required: false
             input: true
       - !ruby/object:Api::Type::NestedObject
         name: pubsubTarget
         description: |
-          if the job providers a pubsub_target the cron will publish
+          Pub/Sub target
+          If the job providers a Pub/Sub target the cron will publish
           a message to the provided topic
         input: true
         conflicts: 
@@ -108,26 +118,29 @@ objects:
           - !ruby/object:Api::Type::String
             name: topicName
             description: |
-              The human readable name of this Attestation Authority, for
-              example "qa".
+              The name of the Cloud Pub/Sub topic to which messages will be published when a job is delivered. 
+              The topic name must be in the same format as required by PubSub's PublishRequest.name, for example projects/PROJECT_ID/topics/TOPIC_ID.
             required: true
             input: true
           - !ruby/object:Api::Type::String
             name: data
             description: |
-              The data that will be pubished to the topic
+              The message payload for PubsubMessage.
+              Pubsub message must contain either non-empty data, or at least one attribute.
             required: false
             input: true
           - !ruby/object:Api::Type::KeyValuePairs
             name: attributes
             description: |
-              The data that will be pubished to the topic
+              Attributes for PubsubMessage.
+              Pubsub message must contain either non-empty data, or at least one attribute.
             required: false
             input: true
       - !ruby/object:Api::Type::NestedObject
         name: appEngineHttpTarget
         description: |
-          if the job providers a app_engine_http_target the cron will 
+          App Engine HTTP target.
+          If the job providers a App Engine HTTP target the cron will 
           send a request to the service instance
         input: true
         conflicts: 
@@ -137,57 +150,67 @@ objects:
           - !ruby/object:Api::Type::String
             name: httpMethod
             description: |
-              The human readable name of this Attestation Authority, for
-              example "qa".
+              Which HTTP method to use for the request.
             required: false
             input: true
           - !ruby/object:Api::Type::NestedObject
             name: appEngineRouting
             description: |
-              if the job providers a app_engine_http_target the cron will 
-              send a request to the service instance
+              App Engine Routing setting for the job.
             required: false
             input: true
             properties:
               - !ruby/object:Api::Type::String
                 name: service
                 description: |
-                  The service within AppEngine to target with the request
+                  App service.
+                  By default, the job is sent to the service which is the default service when the job is attempted.
                 required: false
                 input: true
               - !ruby/object:Api::Type::String
                 name: version
                 description: |
-                  The version of AppEngine to target with the request
+                  App version.
+                  By default, the job is sent to the version which is the default version when the job is attempted.
                 required: false
                 input: true
               - !ruby/object:Api::Type::String
                 name: instance
                 description: |
-                  The instance of AppEngine to target with the request
+                  App instance.
+                  By default, the job is sent to an instance which is available when the job is attempted.
                 required: false
                 input: true
           - !ruby/object:Api::Type::String
             name: relativeUri
             description: |
-              the uri to target in the request
+              The relative URI.
+              The relative URL must begin with "/" and must be a valid HTTP relative URL. 
+              It can contain a path, query string arguments, and \# fragments. 
+              If the relative URL is empty, then the root path "/" will be used. 
+              No spaces are allowed, and the maximum length allowed is 2083 characters
             required: true
           - !ruby/object:Api::Type::String
             name: body
             description: |
-              The data that will be sent in a POST request
+              HTTP request body. 
+              A request body is allowed only if the HTTP method is POST or PUT. 
+              It will result in invalid argument error to set a body on a job with an incompatible HttpMethod.
             required: false
             input: true
           - !ruby/object:Api::Type::KeyValuePairs
             name: headers
             description: |
-              Extra headers to be sent with the request
+              HTTP request headers.
+              This map contains the header field names and values. 
+              Headers can be set when the job is created.
             required: false
             input: true
       - !ruby/object:Api::Type::NestedObject
         name: httpTarget
         description: |
-          if the job providers a http_target the cron will 
+          HTTP target.
+          If the job providers a http_target the cron will 
           send a request to the targeted url
         input: true
         conflicts: 
@@ -197,20 +220,23 @@ objects:
           - !ruby/object:Api::Type::String
             name: uri
             description: |
-              the uri to target in the request
+              The full URI path that the request will be sent to.
             required: true
           - !ruby/object:Api::Type::String
             name: httpMethod
             description: |
-              the http method to use for the request
+              Which HTTP method to use for the request.
             required: false
           - !ruby/object:Api::Type::String
             name: body
             description: |
-              The data that will be sent in a POST request
+              HTTP request body. 
+              A request body is allowed only if the HTTP method is POST, PUT, or PATCH. 
+              It is an error to set body on a job with an incompatible HttpMethod.
             required: false
           - !ruby/object:Api::Type::KeyValuePairs
             name: headers
             description: |
-              Extra headers to be sent with the request
+              This map contains the header field names and values. 
+              Repeated headers are not supported, but a header value can contain commas.
             required: false

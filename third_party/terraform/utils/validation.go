@@ -205,6 +205,25 @@ func validateDuration() schema.SchemaValidateFunc {
 	}
 }
 
+func validateHttpHeaders() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		headers := i.(map[string]interface{})
+		if _, ok := headers["Content-Length"]; ok {
+			es = append(es, fmt.Errorf("Cannot set the Content-Length header on %s", k))
+			return
+		}
+		for key, _ := range headers {
+			match, _ := regexp.MatchString("(X-Google-|X-AppEngine-).*", key)
+			if match {
+				es = append(es, fmt.Errorf("Cannot set the %s header on %s", key, k))
+				return
+			}
+		}
+
+		return
+	}
+}
+
 // StringNotInSlice returns a SchemaValidateFunc which tests if the provided value
 // is of type string and that it matches none of the element in the invalid slice.
 // if ignorecase is true, case is ignored.
