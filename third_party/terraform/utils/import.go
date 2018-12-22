@@ -26,36 +26,34 @@ func parseImportId(idRegexes []string, d TerraformResourceData, config *Config) 
 			// Starting at index 1, the first match is the full string.
 			for i := 1; i < len(fieldValues); i++ {
 				fieldName := re.SubexpNames()[i]
-				// This part looks confusing.  Because there is no way to know at
-				// this point whether 'fieldName' corresponds to a TypeString or a
-				// TypeInteger in the resource schema, we need to determine
-				// whether to call d.Set() with 'fieldValues[i]', or with an integer
-				// parsed from 'fieldValues[i]'.  Normally, we would be able to just
+				fieldValue := fieldValues[i]
+				// Because we do not know at this point whether 'fieldName'
+				// corresponds to a TypeString or a TypeInteger in the resource
+				// schema, we need to determine the type in an unintutitive way.
+				// We call d.Get, because examining the empty value is the easiest
+				// way to get that out.  Normally, we would be able to just
 				// use a try/catch pattern - try as a string, and if that doesn't
 				// work, try as an integer, and if that doesn't work, return the
 				// error.  Unfortunately, this is not possible here - during tests,
-				// d.Set(...) will panic if there is an error.  So we try d.Get(),
-				// relying on the behavior that an unset field will return the empty
-				// value for the appropriate type.  So if the result is a number, we'll
-				// set it as a number, but if it's a string, we'll set it as a string.
+				// d.Set(...) will panic if there is an error.
 				val, _ := d.GetOk(fieldName)
 				if _, ok := val.(string); val == nil || ok {
-					if err = d.Set(fieldName, fieldValues[i]); err != nil {
+					if err = d.Set(fieldName, fieldValue); err != nil {
 						return err
 					}
 				} else if _, ok := val.(int); ok {
-					if atoi, atoiErr := strconv.Atoi(fieldValues[i]); atoiErr == nil {
+					if intVal, atoiErr := strconv.Atoi(fieldValue); atoiErr == nil {
 						// If the value can be parsed as an integer, we try to set the
 						// value as an integer.
-						if err = d.Set(fieldName, atoi); err != nil {
+						if err = d.Set(fieldName, intVal); err != nil {
 							return err
 						}
 					} else {
-						return fmt.Errorf("%s appears to be an integer, but %v cannot be parsed as an int", fieldName, fieldValues[i])
+						return fmt.Errorf("%s appears to be an integer, but %v cannot be parsed as an int", fieldName, fieldValue)
 					}
 				} else {
 					return fmt.Errorf(
-						"cannot handle %s, which currently has value %v, and should be set to %#v, during import", fieldName, val, fieldValues[i])
+						"cannot handle %s, which currently has value %v, and should be set to %#v, during import", fieldName, val, fieldValue)
 				}
 			}
 

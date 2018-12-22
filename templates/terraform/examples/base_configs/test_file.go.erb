@@ -45,7 +45,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name -%>": getTestProjectFromEnv(t),
 		<% end -%>
 	<% end -%>
-			"random": acctest.RandString(10),
+			"random_suffix": acctest.RandString(10),
 	}
 
 	resource.Test(t, resource.TestCase{
