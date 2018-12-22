@@ -27,7 +27,8 @@ objects:
     self_link: projects/{{project}}/locations/{{region}}/jobs/{{name}}
     input: true
     description: |
-      Provides a detailed description of a Job.
+      A scheduled job that can publish a pubsub message or a http request
+      every X interval of time, using crontab format string
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/scheduler/'
