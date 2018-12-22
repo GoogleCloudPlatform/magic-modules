@@ -98,6 +98,7 @@ type Config struct {
 	clientServiceUsage           *serviceusage.Service
 	clientBigQuery               *bigquery.Service
 	clientCloudFunctions         *cloudfunctions.Service
+	clientScheduler         		 *cloudscheduler.Service
 	clientCloudIoT               *cloudiot.Service
 	clientAppEngine              *appengine.APIService
 	<% unless version == 'ga' -%>
