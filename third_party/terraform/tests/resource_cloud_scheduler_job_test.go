@@ -32,7 +32,7 @@ func TestAccCloudSchedulerJob_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(jobResourceName,
 						"description", "test job"),
 					resource.TestCheckResourceAttr(jobResourceName,
-						"schedule", "* * * * *"),
+						"schedule", "*/2 * * * *"),
 					resource.TestCheckResourceAttr(jobResourceName,
 						"time_zone", "Europe/London"),
 					resource.TestCheckResourceAttr(jobResourceName,
@@ -63,7 +63,7 @@ func testAccCloudSchedulerJobExists(n string, job *cloudscheduler.Job) resource.
 		project := rs.Primary.Attributes["project"]
 		region := rs.Primary.Attributes["region"]
 		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
-		found, err := config.clientScheduler.Projects.Locations.Jobs.Get(jobName).Do()
+		found, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
 		if err != nil {
 			return fmt.Errorf("CloudScheduler Job not present")
 		}
@@ -87,7 +87,7 @@ func testAccCheckCloudSchedulerJobDestroy(s *terraform.State) error {
 		region := rs.Primary.Attributes["region"]
 		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
 
-		_, err := config.clientScheduler.Projects.Locations.Jobs.Get(jobName).Do()
+		_, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
 		if err == nil {
 			return fmt.Errorf("Function still exists")
 		}
@@ -106,7 +106,9 @@ resource "google_pubsub_topic" "topic" {
 
 resource "google_cloud_scheduler_job" "job" {
 	name     = "%s"
+	description = "test job"
 	schedule = "*/2 * * * *"
+	time_zone = "Europe/London"
 
 	pubsub_target = {
 		topic_name = "${google_pubsub_topic.topic.name}"

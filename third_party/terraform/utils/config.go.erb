@@ -98,7 +98,7 @@ type Config struct {
 	clientServiceUsage           *serviceusage.Service
 	clientBigQuery               *bigquery.Service
 	clientCloudFunctions         *cloudfunctions.Service
-	clientScheduler         		 *cloudscheduler.Service
+	clientCloudScheduler         *cloudscheduler.Service
 	clientCloudIoT               *cloudiot.Service
 	clientAppEngine              *appengine.APIService
 	<% unless version == 'ga' -%>
@@ -302,6 +302,12 @@ func (c *Config) loadAndValidate() error {
 		return err
 	}
 	c.clientCloudFunctions.UserAgent = userAgent
+
+	log.Printf("[INFO] Instantiating Google Cloud Scheduler Client...")
+ 	c.clientCloudScheduler, err = cloudscheduler.New(client)
+ 	if err != nil {
+ 		return err
+ 	}
 
 	<% unless version == 'ga' -%>
 	log.Printf("[INFO] Instantiating Google Cloud AccessContextManager Client...")
