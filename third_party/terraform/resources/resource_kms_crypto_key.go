@@ -195,7 +195,7 @@ func resourceKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("self_link", cryptoKey.Name)
 
 	if err = d.Set("version_template", flattenVersionTemplate(cryptoKey.VersionTemplate)); err != nil {
-		return fmt.Errorf("Error setting version_tempalte in state: %s", err.Error())
+		return fmt.Errorf("Error setting version_template in state: %s", err.Error())
 	}
 
 	d.SetId(cryptoKeyId.cryptoKeyId())
