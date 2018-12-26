@@ -25,7 +25,8 @@ var (
 			},
 			"source_ip_ranges_to_nat": &schema.Schema{
 				Type:     schema.TypeSet,
-				Optional: true,
+				Required: true,
+				MinItems: 1,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
