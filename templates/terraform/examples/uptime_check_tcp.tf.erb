@@ -2,7 +2,7 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
   display_name = "<%= ctx[:vars]["display_name"] %>"
   timeout = "60s"
 
-  tcp_check = {
+  tcp_check {
     port = 888
   }
 

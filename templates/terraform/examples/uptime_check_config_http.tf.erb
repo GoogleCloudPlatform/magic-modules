@@ -2,7 +2,7 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
   display_name = "<%= ctx[:vars]["display_name"] %>"
   timeout = "60s"
 
-  http_check = {
+  http_check {
     path = "/some-path"
     port = "8010"
   }
@@ -15,7 +15,7 @@ resource "google_monitoring_uptime_check_config" "<%= ctx[:primary_resource_id] 
     }
   }
 
-  content_matchers = {
+  content_matchers {
     content = "example"
   }
 }
