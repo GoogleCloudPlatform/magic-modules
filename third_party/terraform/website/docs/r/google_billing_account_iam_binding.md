@@ -23,7 +23,7 @@ resource "google_billing_account_iam_binding" "binding" {
   role               = "roles/billing.viewer"
 
   members = [
-    "user:jane@example.com",
+    "user:alice@gmail.com",
   ]
 }
 ```
@@ -36,7 +36,7 @@ The following arguments are supported:
 
 * `role` - (Required) The role that should be applied.
 
-* `members` - (Required) A list of users that the role should apply to.
+* `members` - (Required) A list of users that the role should apply to. For more details on format and restrictions see https://cloud.google.com/billing/reference/rest/v1/Policy#Binding
 
 ## Attributes Reference
 

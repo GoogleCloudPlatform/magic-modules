@@ -19,7 +19,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
   role          = "roles/editor"
 
   members = [
-    "user:jane@example.com",
+    "user:alice@gmail.com",
   ]
 }
 ```
@@ -28,7 +28,7 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
 
 The following arguments are supported:
 
-* `members` - (Required) A list of users that the role should apply to.
+* `members` - (Required) A list of users that the role should apply to. For more details on format and restrictions see https://cloud.google.com/billing/reference/rest/v1/Policy#Binding
 
 * `role` - (Required) The role that should be applied. Only one
     `google_kms_crypto_key_iam_binding` can be used per role. Note that custom roles must be of the format
