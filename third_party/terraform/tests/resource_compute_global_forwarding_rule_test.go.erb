@@ -355,7 +355,7 @@ func testAccComputeGlobalForwardingRule_labels(fr, proxy1, proxy2, backend, hc, 
 		port_range = "80"
 		target = "${google_compute_target_http_proxy.foobar1.self_link}"
 
-	    labels {
+	    labels = {
 	        my-label = "my-label-value"
 	        my-second-label = "my-second-label-value"
 	    }
@@ -419,7 +419,7 @@ func testAccComputeGlobalForwardingRule_labelsUpdated(fr, proxy1, proxy2, backen
 		port_range = "80"
 		target = "${google_compute_target_http_proxy.foobar1.self_link}"
 
-	    labels {
+	    labels = {
 	        my-label = "my-label-value"
 	        my-third-label = "my-third-label-value"
 	    }
