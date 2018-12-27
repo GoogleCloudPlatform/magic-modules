@@ -209,3 +209,7 @@ The following exports are allowed:
 [chef-yaml]: docs/chef.yaml.md
 [governance]: GOVERNANCE.md
 [template-sdk]: TEMPLATE_SDK.md
+
+## Misc Help
+
+The ruby files in this project are linted by rubocop as part of the build process. If you want to run rubocop automatically but only when there have been changes to applicable files then run `cp .github/pre-commit .git/hooks` to enable a pre-commit hook that runs rubocop when there are changed .rb files.
