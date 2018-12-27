@@ -39,7 +39,7 @@ resource "google_cloudfunctions_function" "function" {
     my-label = "my-label-value"
   }
   
-  environment_variables = { {
+  environment_variables = {
     MY_ENV_VAR = "my-env-var-value"
   }
 }
