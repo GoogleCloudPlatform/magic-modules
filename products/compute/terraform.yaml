@@ -392,25 +392,30 @@ overrides: !ruby/object:Provider::ResourceOverrides
      sslHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
        default_value: 443
   Image: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      diskSizeGb: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
       deprecated: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       guestOsFeatures: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       imageEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
+      licenses: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
       rawDisk.sha1Checksum: !ruby/object:Provider::Terraform::PropertyOverride
         name: 'sha1'
+      rawDisk.containerType: !ruby/object:Provider::Terraform::PropertyOverride
+        default_value: "TAR"
+      rawDisk: !ruby/object:Provider::Terraform::PropertyOverride
+        ignore_read: true
       sourceDiskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       sourceDiskId: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
       sourceType: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      licenses: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true
   Instance: !ruby/object:Provider::Terraform::ResourceOverride
     exclude: true

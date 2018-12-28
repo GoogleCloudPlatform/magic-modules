@@ -1639,6 +1639,10 @@ objects:
     name: 'Image'
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
+    input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#imageList'
       items: 'items'
@@ -1795,6 +1799,18 @@ objects:
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: Labels to apply to this Snapshot.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource. Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+        update_verb: :POST
         # TODO(alexstephen): Change to ResourceRef with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
