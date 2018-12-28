@@ -28,8 +28,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
     exclude: true
   BackendService: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
-  Disk: !ruby/object:Provider::Inspec::ResourceOverride
-    exclude: true
   DiskType: !ruby/object:Provider::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Inspec::ResourceOverride

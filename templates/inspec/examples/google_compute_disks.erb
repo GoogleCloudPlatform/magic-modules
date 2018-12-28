@@ -1,0 +1,11 @@
+<% project_name = 'chef-inspec-gcp' -%>
+<% zone = 'zone' -%>
+<% disk_name = 'my_disk' -%>
+<% disk_image = 'debian-8-jessie-v20170523' -%>
+<% disk_type = 'gcp_compute_disk_type' -%>
+most_recent_image = google_compute_image({project: <%= doc_generation ? "'#{disk_image.split('/').first}'" : "disk_image.split('/').first" -%>, name: <%= doc_generation ? "'#{disk_image.split('/').last}'" : "disk_image.split('/').last" -%>})
+describe google_compute_disks({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, zone: <%= doc_generation ? "'#{zone}'" : "zone" -%>}) do
+  it { should exist }
+  its('names') { should include <%= doc_generation ? "'#{disk_name}'" : "disk_name" -%> }
+  its('source_images') { should include most_recent_image.self_link }
+end
