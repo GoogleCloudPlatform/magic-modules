@@ -57,11 +57,8 @@ func resourceIamBindingCreate(newUpdaterFunc newResourceIamUpdaterFunc) schema.C
 
 		p := getResourceIamBinding(d)
 		err = iamPolicyReadModifyWrite(updater, func(ep *cloudresourcemanager.Policy) error {
-			// Creating a binding does not remove existing members if they are not in the provided members list.
-			// This prevents removing existing permission without the user's knowledge.
-			// Instead, a diff is shown in that case after creation. Subsequent calls to update will remove any
-			// existing members not present in the provided list.
-			ep.Bindings = mergeBindings(append(ep.Bindings, p))
+			// Creating a binding will overwrite the existing list of members for that role.
+			ep.Bindings = overwriteBinding(ep.Bindings, p)
 			return nil
 		})
 		if err != nil {

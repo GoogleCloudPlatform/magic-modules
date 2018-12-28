@@ -11,6 +11,9 @@ description: |-
 Allows creation and management of a single binding within IAM policy for
 an existing Google Cloud KMS crypto key.
 
+~> **Note:** On create, this resource will overwrite members of any existing roles.
+    Use import if there are existing member that should be preserved.
+
 ## Example Usage
 
 ```hcl

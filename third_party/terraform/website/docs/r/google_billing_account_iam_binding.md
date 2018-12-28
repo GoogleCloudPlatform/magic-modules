@@ -15,6 +15,9 @@ an existing Google Cloud Platform Billing Account.
    `google_billing_account_iam_member` for the __same role__ or they will fight over
    what your policy should be.
 
+~> **Note:** On create, this resource will overwrite members of any existing roles.
+    Use import if there are existing member that should be preserved.
+
 ## Example Usage
 
 ```hcl
