@@ -20,7 +20,7 @@
 
   inside_indent = 8
 
-  requires = generate_requires(object.all_user_properties)
+  requires = generate_requires(object.properties)
   requires << 'gcp_backend'
 -%>
 <%= lines(emit_requires(requires)) -%>
@@ -62,7 +62,7 @@ class <%= object.name -%> < GcpResourceBase
     name = prop.out_name
 
     if time?(prop)
-      init = "Time.parse(@fetched['#{prop.api_name}'])"
+      init = "@fetched['#{prop.api_name}'] ? Time.parse(@fetched['#{prop.api_name}']) : nil"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
