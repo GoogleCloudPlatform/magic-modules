@@ -2974,9 +2974,10 @@ objects:
         description: |
           Network IP address of an instance that should handle matching packets.
         input: true
-      # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'nextHopVpnTunnel'
+        resource: 'VpnTunnel'
+        imports: 'selfLink'
         description: |
           URL to a VpnTunnel that should handle matching packets.
         input: true
@@ -4086,21 +4087,25 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'tunnels'
         description: |
-          A list of references to VpnTunnel resources associated to this VPN gateway.
-        # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
-        item_type: Api::Type::String
+          A list of references to VpnTunnel resources associated with this VPN gateway.
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'tunnel'
+          resource: 'VpnTunnel'
+          imports: 'selfLink'
+          description: |
+            A VpnTunnel resource associated with this VPN gateway.
         output: true
       - !ruby/object:Api::Type::Array
         name: 'forwardingRules'
         description: |
-          A list of references to the ForwardingRule resources associated to this VPN
+          A list of references to the ForwardingRule resources associated with this VPN
           gateway.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'forwardingRule'
           resource: 'ForwardingRule'
           imports: 'selfLink'
           description: |
-            A ForwardingRule resource associated to this VPN gateway.
+            A ForwardingRule resource associated with this VPN gateway.
         output: true
         # status is not useful for state convergence
   - !ruby/object:Api::Resource
