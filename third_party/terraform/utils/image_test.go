@@ -20,9 +20,8 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 	fam := fmt.Sprintf("test-image-family-%s", rand)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeImageDestroy,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeImage_resolving(name, fam),

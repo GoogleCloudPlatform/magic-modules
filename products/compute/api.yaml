@@ -1805,7 +1805,7 @@ objects:
               The name of the encryption key that is stored in Google Cloud KMS.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: Labels to apply to this Snapshot.
+        description: Labels to apply to this Image.
         update_verb: :POST
         update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
       - !ruby/object:Api::Type::Fingerprint
@@ -1852,6 +1852,7 @@ objects:
           # TODO(alexstephen): Figure out cross-module ResourceRefs
           - !ruby/object:Api::Type::String
             name: 'source'
+            required: true
             description: |
               The full Google Cloud Storage URL where disk storage is stored
               You must provide either this property or the sourceDisk property
