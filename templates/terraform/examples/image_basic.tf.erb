@@ -1,0 +1,7 @@
+resource "google_compute_image" "example" {
+  name = "<%= ctx[:vars]['backend_bucket_name'] %>"
+
+  raw_disk {
+    source = "https://storage.googleapis.com/my-bucket/my-disk-image-tarball.tar.gz"
+  }
+}

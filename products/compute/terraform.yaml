@@ -392,6 +392,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
      sslHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
        default_value: 443
   Image: !ruby/object:Provider::Terraform::ResourceOverride
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "image_basic"
+        primary_resource_id: "example"
+        version: <%= version_name %>
+        vars:
+          image_name: "example-image"
     properties:
       id: !ruby/object:Provider::Terraform::PropertyOverride
         exclude: true

@@ -1646,6 +1646,10 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#imageList'
       items: 'items'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/images'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/images'
     description: |
       Represents an Image resource.
 
