@@ -133,24 +133,6 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeImageDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_compute_image" {
-			continue
-		}
-
-		_, err := config.clientCompute.Images.Get(
-			config.Project, rs.Primary.ID).Do()
-		if err == nil {
-			return fmt.Errorf("Image still exists")
-		}
-	}
-
-	return nil
-}
-
 func testAccCheckComputeImageExists(n string, image *compute.Image) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
