@@ -1,0 +1,5 @@
+<% project_name = grab_attributes['project_name'] -%>
+<% subscription = grab_attributes['subscription'] -%>
+describe google_pubsub_subscription({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: <%= doc_generation ? "'#{subscription['name']}'" : "subscription['name']" -%>}) do
+  it { should exist }
+end
