@@ -105,7 +105,8 @@ module Api
 
       return if @conflicts.empty?
 
-      names = @__resource.all_user_properties.map(&:api_name) + @__resource.all_user_properties.map(&:name)
+      names = @__resource.all_user_properties.map(&:api_name) +
+              @__resource.all_user_properties.map(&:name)
       @conflicts.each do |p|
         raise "#{p} does not exist" unless names.include?(p)
       end

@@ -85,9 +85,8 @@ module Provider
                          []
                        end
         end
-        unless prop
-          raise "#{path.join('.')} does not exist on #{res_name}"
-        end
+        raise "#{path.join('.')} does not exist on #{res_name}" unless prop
+
         prop
       end
 
