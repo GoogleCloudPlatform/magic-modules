@@ -170,12 +170,6 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 	name := fmt.Sprintf("test-image-%s", rand)
 	fam := fmt.Sprintf("test-image-family-%s", rand)
 
-	// You'll note that this test does not have a CheckDestroy.  This is not
-	// a typo - the test "creates" an image from a disk which is created from
-	// a public image.  The purpose of the test is to show that we do NOT, in
-	// fact, create a new image in this circumstance.  So, the resources under
-	// test are "the latest public debian image" - which of course we do not
-	// destroy.
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
