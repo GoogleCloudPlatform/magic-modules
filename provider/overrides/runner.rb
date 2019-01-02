@@ -163,7 +163,7 @@ module Provider
           variables = (old_property.instance_variables + prop_override.instance_variables).uniq
 
           # Set api_name with old property so that a potential new name doesn't override it.
-          prop.instance_variable_set('@api_name', old_property.name)
+          prop.instance_variable_set('@api_name', old_property.api_name || old_property.name)
 
           variables.reject { |o| o == :@properties }
                    .each do |var_name|

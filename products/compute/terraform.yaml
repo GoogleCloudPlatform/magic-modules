@@ -185,16 +185,12 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         exclude: true
       allowed: !ruby/object:Provider::Overrides::Terraform::PropertyOverride     
         name: 'allow'
-        conflicts:
-          - deny
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
       allowed.ip_protocol: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         name: 'protocol'
       denied: !ruby/object:Provider::Overrides::Terraform::PropertyOverride     
         name: 'deny'
-        conflicts:
-          - allow
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
       denied.ip_protocol: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
