@@ -53,8 +53,11 @@ func testAcc<%= test_slug -%>(val string) string {
 <%- end %>
 
 func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
+	for name, rs := range s.RootModule().Resources {
 		if rs.Type != "<%= terraform_name -%>" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
 			continue
 		}
 
