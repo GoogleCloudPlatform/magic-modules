@@ -54,7 +54,7 @@ Upgrade topics:
 - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
 - [Resource: `google_storage_default_object_acl`](#resource-google_storage_default_object_acl)
 - [Resource: `google_storage_object_acl`](#resource-google_storage_object_acl)
-- [Resource: `google_*iam_binding`](#resource-TODO)
+- [Resource: `google_*iam_binding`](#google_*_iam_binding)
 
 <!-- /TOC -->
 
@@ -670,9 +670,9 @@ For fine-grained management, use `google_storage_object_access_control`.
 ### Create is now authoritative
 
 Every `iam_binding` resource will overwrite the existing member list for a given
-role on Create. Running `terraform plan` after create has succeeded will not
-result in a diff showing. To ensure existing `members` are preserved use
-`terraform import` instead of creating the resource.
+role on Create. Running `terraform plan` for the first time will not show members
+that have been added via other tools. *To ensure existing `members` are preserved
+use `terraform import` instead of creating the resource.*
 
 Previous versions of `google_*_iam_binding` resources would merge the existing
 members of a role with the members defined in the terraform config. If there was
