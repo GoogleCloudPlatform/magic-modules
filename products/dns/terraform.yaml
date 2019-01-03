@@ -12,28 +12,28 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  ManagedZone: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  ManagedZone: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
         version: <%= version_name %>
     properties:
-      creationTime: !ruby/object:Provider::Terraform::PropertyOverride
+      creationTime: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
-      description: !ruby/object:Provider::Terraform::PropertyOverride
+      description: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         description: |
           A textual description field. Defaults to 'Managed by Terraform'.
         default_value: 'Managed by Terraform'
         required: false
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
-      nameServerSet: !ruby/object:Provider::Terraform::PropertyOverride
+      nameServerSet: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
-  ResourceRecordSet: !ruby/object:Provider::Terraform::ResourceOverride
+  ResourceRecordSet: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
-  Project: !ruby/object:Provider::Terraform::ResourceOverride
+  Project: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
 
 # This is for copying files over

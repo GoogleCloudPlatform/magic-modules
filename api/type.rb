@@ -88,6 +88,8 @@ module Api
         clazz = ::Symbol
       when Api::Type::Boolean
         clazz = :boolean
+      when Api::Type::ResourceRef
+        clazz = ::String
       else
         raise "Update 'check_default_value_property' method to support " \
               "default value for type #{self.class}"
@@ -103,7 +105,8 @@ module Api
 
       return if @conflicts.empty?
 
-      names = @__resource.all_user_properties.map(&:name)
+      names = @__resource.all_user_properties.map(&:api_name) +
+              @__resource.all_user_properties.map(&:name)
       @conflicts.each do |p|
         raise "#{p} does not exist" unless names.include?(p)
       end
@@ -477,8 +480,7 @@ module Api
       def check_resource_ref_exists
         product = @__resource.__product
         resources = product.objects.select { |obj| obj.name == @resource }
-        raise "Missing '#{@resource}'" \
-          if resources.empty? || resources[0].exclude
+        raise "Missing '#{@resource}'" if resources.empty?
       end
 
       def check_resource_ref_property_exists

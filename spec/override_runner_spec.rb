@@ -128,7 +128,7 @@ describe Provider::Overrides::Runner do
         Provider::Overrides::ResourceOverrides.new(
           'AnotherResource' => Provider::Overrides::ResourceOverride.new(
             'properties' => {
-              'array-property[].property1' => Provider::Overrides::PropertyOverride.new(
+              'array-property.property1' => Provider::Overrides::PropertyOverride.new(
                 'type' => 'Api::Type::Integer'
               )
             }

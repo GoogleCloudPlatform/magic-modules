@@ -10,21 +10,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-id: !ruby/object:Provider::Terraform::PropertyOverride
+id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   exclude: true
-sizeGb: !ruby/object:Provider::Terraform::PropertyOverride
+sizeGb: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: size
   default_from_api: true
-sourceSnapshot: !ruby/object:Provider::Terraform::PropertyOverride
+sourceSnapshot: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   name: snapshot
   description: |
     {{description}}* `snapshot`
-type: !ruby/object:Provider::Terraform::PropertyOverride
+type: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   default_value: 'pd-standard'
-name: !ruby/object:Provider::Terraform::PropertyOverride
+name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   input: true
-licenses: !ruby/object:Provider::Terraform::PropertyOverride
+licenses: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   exclude: true
-labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+labelFingerprint: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
   exclude: false
