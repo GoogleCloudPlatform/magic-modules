@@ -19,5 +19,5 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 
   // We can't use a standard name_from_self_link because the name can include /'s
   parts := strings.SplitAfterN(v.(string), "/", 4)
-	return parts[3]
+  return parts[3]
 }
