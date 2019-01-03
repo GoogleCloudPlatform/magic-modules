@@ -17,6 +17,7 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 
 	jobResourceName := "google_cloud_scheduler_job.job"
 	pubSubJobName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	project := getTestProjectFromEnv()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -24,14 +25,13 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 		CheckDestroy: testAccCheckCloudSchedulerJobDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudSchedulerJob_pubSubConfig(pubSubJobName),
+				Config: testAccCloudSchedulerJob_pubSubConfig(pubSubJobName, project),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudSchedulerJobExists(jobResourceName, &job),
 					resource.TestCheckResourceAttr(jobResourceName, "name", pubSubJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/2 * * * *"),
 					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Europe/London"),
-					resource.TestCheckResourceAttr(jobResourceName, "pubsub_target.topic_name", "build-triggers"),
 				),
 			},
 		},
@@ -56,8 +56,9 @@ func TestAccCloudSchedulerJob_http(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudSchedulerJobExists(jobResourceName, &job),
 					resource.TestCheckResourceAttr(jobResourceName, "name", httpJobName),
+					resource.TestCheckResourceAttr(jobResourceName, "description", "test http job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/8 * * * *"),
-					resource.TestCheckResourceAttr(jobResourceName, "http_target.url", "https://example.com/ping"),
+					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Europe/London"),
 				),
 			},
 		},
@@ -82,8 +83,9 @@ func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudSchedulerJobExists(jobResourceName, &job),
 					resource.TestCheckResourceAttr(jobResourceName, "name", appEngineJobName),
+					resource.TestCheckResourceAttr(jobResourceName, "description", "test app engine job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/4 * * * *"),
-					resource.TestCheckResourceAttr(jobResourceName, "app_engine_http_target.relative_uri", "/ping"),
+					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Europe/London"),
 				),
 			},
 		},
@@ -103,11 +105,11 @@ func testAccCloudSchedulerJobExists(n string, job *cloudscheduler.Job) resource.
 		config := testAccProvider.Meta().(*Config)
 		name := rs.Primary.Attributes["name"]
 		project := rs.Primary.Attributes["project"]
-		region := rs.Primary.Attributes["region"]
+		region := getTestRegionFromEnv()
 		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
 		found, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
 		if err != nil {
-			return fmt.Errorf("CloudScheduler Job not present")
+			return fmt.Errorf(fmt.Sprintf("CloudScheduler Job not present %s %s %s", project, region, name))
 		}
 
 		*job = *found
@@ -126,7 +128,7 @@ func testAccCheckCloudSchedulerJobDestroy(s *terraform.State) error {
 
 		name := rs.Primary.Attributes["name"]
 		project := rs.Primary.Attributes["project"]
-		region := rs.Primary.Attributes["region"]
+		region := getTestRegionFromEnv()
 		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
 
 		_, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
@@ -139,7 +141,7 @@ func testAccCheckCloudSchedulerJobDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCloudSchedulerJob_pubSubConfig(name string) string {
+func testAccCloudSchedulerJob_pubSubConfig(name string, project string) string {
 	return fmt.Sprintf(`
 
 resource "google_pubsub_topic" "topic" {
@@ -153,11 +155,12 @@ resource "google_cloud_scheduler_job" "job" {
 	time_zone = "Europe/London"
 
 	pubsub_target = {
-		topic_name = "${google_pubsub_topic.topic.name}"
+		topic_name = "projects/%s/topics/build-triggers"
+		data = "test"
 	}
 }
 
-	`, name)
+	`, name, project)
 }
 
 func testAccCloudSchedulerJob_appEngineConfig(name string) string {
@@ -166,9 +169,16 @@ func testAccCloudSchedulerJob_appEngineConfig(name string) string {
 resource "google_cloud_scheduler_job" "job" {
 	name     = "%s"
 	schedule = "*/4 * * * *"
+	description = "test app engine job"
+	time_zone = "Europe/London"
 
-	// TODO defaults to the default service, investigation required
 	app_engine_http_target = {
+		http_method = "POST"
+    app_engine_routing = {
+      service = "web"
+      version = "prod"
+      instance = "my-instance-001"
+    }
 		relative_uri = "/ping"
 	}
 }
@@ -181,9 +191,12 @@ func testAccCloudSchedulerJob_httpConfig(name string) string {
 
 resource "google_cloud_scheduler_job" "job" {
 	name     = "%s"
+	description = "test http job"
 	schedule = "*/8 * * * *"
+	time_zone = "Europe/London"
 
 	http_target = {
+		http_method = "POST"
 		uri = "https://example.com/ping"
 	}
 }

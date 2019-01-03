@@ -60,6 +60,12 @@ objects:
           The value of this field must be a time zone name from the tz database.
         required: false
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          Region where the schedule job resides.
+        required: false
+        input: true
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
         description: |

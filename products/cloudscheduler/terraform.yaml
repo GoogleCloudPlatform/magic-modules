@@ -36,6 +36,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
+      region: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+
         
 
 # This is for copying files over

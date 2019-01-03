@@ -13,6 +13,9 @@
 	# limitations under the License.
 -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) (interface{}) {
+	if v == nil {
+		return v
+	}
 	data, err := base64.StdEncoding.DecodeString(v.(string))
 	if err != nil {
 		return ""
