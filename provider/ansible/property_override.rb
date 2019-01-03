@@ -21,15 +21,16 @@ module Provider
     # Ansible. All fields should be `attr_reader :<property>`
     module OverrideFields
       def self.attributes
-        [
-          :aliases,
-          :version_added
+        %i[
+          aliases
+          version_added
         ]
       end
 
-      attr_reader(*self.attributes)
+      attr_reader(*attributes)
     end
 
+    # Shared code between new overrides and old
     module PropertyOverrideSharedCode
       def validate
         super

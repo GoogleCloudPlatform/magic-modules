@@ -19,15 +19,16 @@ module Provider
     # inspec specific properties to be added to Api::Resource
     module OverrideProperties
       def self.attributes
-        [
-          :manual,
-          :additional_functions
+        %i[
+          manual
+          additional_functions
         ]
       end
 
-      attr_reader(*self.attributes)
+      attr_reader(*attributes)
     end
 
+    # Shared code between new resource overrides and old overrides
     module ResourceOverrideSharedCode
       def validate
         assign_defaults
@@ -46,6 +47,7 @@ module Provider
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
       include ResourceOverrideSharedCode
+
       private
 
       def overriden

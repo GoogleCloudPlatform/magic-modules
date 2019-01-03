@@ -19,32 +19,33 @@ module Provider
     # Ansible specific properties to be added to Api::Resource
     module OverrideProperties
       def self.attributes
-      [
-        :access_api_results,
-        :collection,
-        :custom_create_resource,
-        :custom_update_resource,
-        :create,
-        :delete,
-        :has_tests,
-        :hidden,
-        :imports,
-        :post_create,
-        :post_action,
-        :provider_helpers,
-        :return_if_object,
-        :template,
-        :unwrap_resource,
-        :update,
-        :version_added,
+        %i[
+          access_api_results
+          collection
+          custom_create_resource
+          custom_update_resource
+          create
+          delete
+          has_tests
+          hidden
+          imports
+          post_create
+          post_action
+          provider_helpers
+          return_if_object
+          template
+          unwrap_resource
+          update
+          version_added
 
-        :facts
-      ]
+          facts
+        ]
       end
 
-      attr_reader(*self.attributes)
+      attr_reader(*attributes)
     end
 
+    # Shared code between new overrides and old
     module ResourceOverrideSharedCode
       def validate
         super
@@ -79,13 +80,13 @@ module Provider
         @facts ||= FactsOverride.new
         check_property :facts, FactsOverride
       end
-
     end
 
     # Product specific overriden properties for Ansible
     class ResourceOverride < Provider::ResourceOverride
       include OverrideProperties
       include ResourceOverrideSharedCode
+
       private
 
       def overriden
