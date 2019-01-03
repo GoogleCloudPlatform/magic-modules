@@ -73,7 +73,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     git checkout -b "$BRANCH_NAME"
     if ANSIBLE_PR=$(hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $ANSIBLE_PR ${NEWLINE}"
-        LABELS="${LABELS}ansible,"
+      LABELS="${LABELS}ansible,"
     else
       echo "Ansible - did not generate a PR."
     fi
@@ -119,9 +119,9 @@ EOF
 
   # Create Labels list with the comma-separated list of labels for this PR
   if [ -z "$LABELS" ]; then
-    printf "%s" "$LABELS" > ./label_file
-  else
     printf "%s" "no-op" > ./label_file
+  else
+    printf "%s" "$LABELS" > ./label_file
   fi
 
 else
