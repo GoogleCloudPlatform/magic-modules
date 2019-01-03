@@ -24,6 +24,8 @@ require 'provider/ansible/resourceref'
 require 'provider/ansible/resource_override'
 require 'provider/ansible/property_override'
 require 'provider/ansible/facts_override'
+require 'provider/overrides/ansible/resource_override'
+require 'provider/overrides/ansible/property_override'
 
 module Provider
   module Ansible
