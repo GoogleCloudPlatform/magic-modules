@@ -182,7 +182,7 @@ func resourceComposerEnvironment() *schema.Resource {
 									"image_version": {
 										Type:     schema.TypeString,
 										Computed: true,
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 										Optional: true,
 										ForceNew: true,
 										ValidateFunc: validateRegexp(composerEnvironmentVersionRegexp),
@@ -555,7 +555,7 @@ func flattenComposerEnvironmentConfigSoftwareConfig(softwareCfg *composer.Softwa
 	}
 	transformed := make(map[string]interface{})
 	transformed["image_version"] = softwareCfg.ImageVersion
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	transformed["python_version"] = softwareCfg.PythonVersion
 <% end -%>
 	transformed["airflow_config_overrides"] = softwareCfg.AirflowConfigOverrides
@@ -760,7 +760,7 @@ func expandComposerEnvironmentConfigSoftwareConfig(v interface{}, d *schema.Reso
 	transformed := &composer.SoftwareConfig{}
 
 	transformed.ImageVersion = original["image_version"].(string)
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 	transformed.PythonVersion = original["python_version"].(string)
 <% end -%>
 	transformed.AirflowConfigOverrides = expandComposerEnvironmentConfigSoftwareConfigStringMap(original, "airflow_config_overrides")
@@ -928,7 +928,7 @@ func validateServiceAccountRelativeNameOrEmail(v interface{}, k string) (ws []st
 	return
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func composerImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	versionRe := regexp.MustCompile(composerEnvironmentVersionRegexp)
 	oldVersions := versionRe.FindStringSubmatch(old)
