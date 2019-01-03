@@ -119,9 +119,9 @@ EOF
 
   # Create Labels list with the comma-separated list of labels for this PR
   if [ -z "$LABELS" ]; then
-    echo $LABELS > ./label_file
+    printf "%s" "$LABELS" > ./label_file
   else
-    echo "no-op" > ./label_file
+    printf "%s" "no-op" > ./label_file
   fi
 
 else
