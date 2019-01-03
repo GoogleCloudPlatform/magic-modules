@@ -110,7 +110,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       sourceImage: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
-        # sourceImage must be overridden first because it creates the 'image' property
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
         description: |
