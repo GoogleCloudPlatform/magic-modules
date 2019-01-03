@@ -13,8 +13,8 @@
 
 --- !ruby/object:Provider::Terraform::Config
 name: AccessContextManager
-overrides: !ruby/object:Provider::ResourceOverrides
-  AccessPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  AccessPolicy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     example:
       - !ruby/object:Provider::Terraform::Examples
@@ -23,14 +23,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
         primary_resource_id: "access-policy"
         version: <%= version_name %>
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
         description: |
           Resource name of the AccessPolicy. Format: {policy_id}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/update_mask.erb
       post_create: templates/terraform/post_create/accesspolicy.erb
-  AccessLevel: !ruby/object:Provider::Terraform::ResourceOverride
+  AccessLevel: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     example:
@@ -42,15 +42,15 @@ overrides: !ruby/object:Provider::ResourceOverrides
       vars:
         access_level_name: "ios_no_lock"
     properties:
-      parent: !ruby/object:Provider::Terraform::PropertyOverride
+      parent: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         ignore_read: true
-      basic.combiningFunction: !ruby/object:Provider::Terraform::PropertyOverride
+      basic.combiningFunction: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: templates/terraform/pre_update/update_mask.erb
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
-  ServicePerimeter: !ruby/object:Provider::Terraform::ResourceOverride
+  ServicePerimeter: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     example:
@@ -63,9 +63,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
           access_level_name: "ios_no_lock"
           service_perimeter_name: "restrict_all"
     properties:
-      parent: !ruby/object:Provider::Terraform::PropertyOverride
+      parent: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         ignore_read: true
-      perimeterType: !ruby/object:Provider::Terraform::PropertyOverride
+      perimeterType: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
         input: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode

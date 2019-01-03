@@ -13,8 +13,8 @@
 
 --- !ruby/object:Provider::Terraform::Config
 name: BinaryAuthorization
-overrides: !ruby/object:Provider::ResourceOverrides
-  Attestor: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Attestor: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/attestors/{{name}}"]
     example:
      - !ruby/object:Provider::Terraform::Examples
@@ -25,9 +25,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         attestor_name: "test-attestor"
         note_name: "test-attestor-note"
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      attestationAuthorityNote.noteReference: !ruby/object:Provider::Terraform::PropertyOverride
+      attestationAuthorityNote.noteReference: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/container_analysis_note.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         description: |
@@ -38,7 +38,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           An attestation by this attestor is stored as a Container Analysis
           ATTESTATION_AUTHORITY Occurrence that names a container image
           and that links to this Note.
-  Policy: !ruby/object:Provider::Terraform::ResourceOverride
+  Policy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{project}}"
     import_format: ["projects/{{project}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -53,7 +53,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         attestor_name: "test-attestor"
         note_name: "test-attestor-note"
     properties:
-      clusterAdmissionRules: !ruby/object:Provider::Terraform::PropertyOverride
+      clusterAdmissionRules: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: |-
           func(v interface{}) int {
@@ -72,7 +72,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
             schema.SerializeResourceForHash(&buf, raw, resourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
             return hashcode.String(buf.String())
           }
-      clusterAdmissionRules.requireAttestationsBy: !ruby/object:Provider::Terraform::PropertyOverride
+      clusterAdmissionRules.requireAttestationsBy: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: selfLinkNameHash
         custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
@@ -87,7 +87,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
 
           Note: this field must be non-empty when the evaluation_mode field
           specifies REQUIRE_ATTESTATION, otherwise it must be empty.
-      defaultAdmissionRule.requireAttestationsBy: !ruby/object:Provider::Terraform::PropertyOverride
+      defaultAdmissionRule.requireAttestationsBy: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: selfLinkNameHash
         custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'

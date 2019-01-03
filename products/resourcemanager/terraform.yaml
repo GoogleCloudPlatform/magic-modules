@@ -13,10 +13,10 @@
 
 --- !ruby/object:Provider::Terraform::Config
 name: ResourceManager
-overrides: !ruby/object:Provider::ResourceOverrides
-  Project: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Project: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
-  Lien: !ruby/object:Provider::Terraform::ResourceOverride
+  Lien: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["{{parent}}/{{name}}"]
     example:
       - !ruby/object:Provider::Terraform::Examples
@@ -27,7 +27,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         vars:
           project_id: "staging-project"
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/lien.erb

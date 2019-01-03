@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  Instance: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Instance: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
     import_format: ["projects/{{project}}/locations/{{region}}/instances/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -33,24 +33,24 @@ overrides: !ruby/object:Provider::ResourceOverrides
           instance_name: "ha-memory-cache"
           network_name: "authorized-network"
     properties:
-      alternativeLocationId: !ruby/object:Provider::Terraform::PropertyOverride
+      alternativeLocationId: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         default_from_api: true
-      authorizedNetwork: !ruby/object:Provider::Terraform::PropertyOverride
+      authorizedNetwork: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/redis_instance_authorized_network.erb'
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-      locationId: !ruby/object:Provider::Terraform::PropertyOverride
+      locationId: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         default_from_api: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/redis_instance_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      redisVersion: !ruby/object:Provider::Terraform::PropertyOverride
+      redisVersion: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         default_from_api: true
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         ignore_read: true
         required: false
         default_from_api: true
-      reservedIpRange: !ruby/object:Provider::Terraform::PropertyOverride
+      reservedIpRange: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         default_from_api: true
 
 # This is for copying files over
