@@ -62,7 +62,7 @@ class <%= object.name -%> < GcpResourceBase
     name = prop.out_name
 
     if time?(prop)
-      init = "@fetched['#{prop.api_name}'].nil? ? Time.parse(@fetched['#{prop.api_name}']) : nil"
+      init = "@fetched['#{prop.api_name}'] ? Time.parse(@fetched['#{prop.api_name}']) : nil"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
