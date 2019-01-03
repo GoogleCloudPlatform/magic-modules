@@ -30,6 +30,7 @@ git checkout -b "$BRANCH_NAME"
 
 if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   DEPENDENCIES=""
+  LABELS=""
   NEWLINE=$'\n'
   # There is no existing PR - this is the first pass through the pipeline and
   # we will need to create a PR using 'hub'.
@@ -51,6 +52,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
       git checkout -b "$BRANCH_NAME"
       if TF_PR=$(hub pull-request -b "$TERRAFORM_REPO_USER/$PROVIDER_NAME:master" -F ./downstream_body); then
         DEPENDENCIES="${DEPENDENCIES}depends: $TF_PR ${NEWLINE}"
+        LABELS="${LABELS}${PROVIDER_NAME},"
       else
         echo "$SUBMODULE_DIR - did not generate a PR."
       fi
@@ -71,6 +73,7 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     git checkout -b "$BRANCH_NAME"
     if ANSIBLE_PR=$(hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $ANSIBLE_PR ${NEWLINE}"
+        LABELS="${LABELS}ansible,"
     else
       echo "Ansible - did not generate a PR."
     fi
@@ -90,12 +93,14 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
     git checkout -b "$BRANCH_NAME"
     if INSPEC_PR=$(hub pull-request -b "$INSPEC_REPO_USER/inspec-gcp:master" -F ./downstream_body); then
       DEPENDENCIES="${DEPENDENCIES}depends: $INSPEC_PR ${NEWLINE}"
+      LABELS="${LABELS}inspec,"
     else
       echo "InSpec - did not generate a PR."
     fi
     popd
   fi
 
+  # Create PR comment with the list of dependencies.
   if [ -z "$DEPENDENCIES" ]; then
     cat << EOF > ./pr_comment
 I am a robot that works on MagicModules PRs!
@@ -110,6 +115,13 @@ I am a robot that works on MagicModules PRs!
 I built this PR into one or more PRs on other repositories, and when those are closed, this PR will also be merged and closed.
 $DEPENDENCIES
 EOF
+  fi
+
+  # Create Labels list with the comma-separated list of labels for this PR
+  if [ -z "$LABELS" ]; then
+    echo $LABELS > ./label_file
+  else
+    echo "no-op" > ./label_file
   fi
 
 else
