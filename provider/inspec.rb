@@ -17,6 +17,8 @@ require 'provider/core'
 require 'provider/inspec/manifest'
 require 'provider/inspec/resource_override'
 require 'provider/inspec/property_override'
+require 'provider/overrides/inspec/resource_override'
+require 'provider/overrides/inspec/property_override'
 require 'active_support/inflector'
 
 module Provider
