@@ -2,7 +2,7 @@
 
 title 'Test GCP <%= name -%> resource.'
 
-<%= compile("templates/inspec/examples/attributes/#{name}.erb") -%>
+<%= compile("templates/inspec/examples/attributes/#{attribute_file_name}.erb") -%>
 
 control '<%= name -%>-1.0' do
   impact 1.0

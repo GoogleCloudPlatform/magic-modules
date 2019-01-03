@@ -33,7 +33,7 @@ Properties that can be accessed from the `<%= resource_underscored_name -%>` res
 
 <% if plural -%>
 See <%= "[#{resource_name(object, product_ns)}.md](#{resource_name(object, product_ns)}.md)" -%> for more detailed information
-<% object.properties.each do |prop| -%>
+<% object.all_user_properties.each do |prop| -%>
   * `<%= "#{prop.out_name.pluralize}" -%>`: an array of `<%= resource_name(object, product_ns) -%>` <%= "#{prop.out_name}" -%>
 
 <% end -%>
@@ -42,7 +42,7 @@ See <%= "[#{resource_name(object, product_ns)}.md](#{resource_name(object, produ
 This resource supports all of the above properties as filter criteria, which can be used
 with `where` as a block or a method.
 <% else # if plural -%>
-<% object.properties.each do |prop| -%>
+<% object.all_user_properties.each do |prop| -%>
   * `<%= "#{prop.out_name}" -%>`: <%= "#{prop.description.split("\n").join(' ')}" -%>
 
 

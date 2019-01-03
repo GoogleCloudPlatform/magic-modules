@@ -1,0 +1,5 @@
+gcp_project_name: chef-gcp-inspec
+gcp_zone: 'zone'
+gcp_compute_disk_name: 'my_disk'
+gcp_compute_disk_image: 'debian/debian-8-jessie-v20170523'
+gcp_compute_disk_type: 'pd-standard'
