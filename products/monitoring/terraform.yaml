@@ -104,6 +104,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
+      pre_update: "templates/terraform/pre_update/update_mask.erb"
     properties:
       httpCheck.authInfo.password: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         sensitive: true
