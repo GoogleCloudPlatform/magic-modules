@@ -62,10 +62,11 @@ module Provider
 
     def generate_properties(data)
       object = data[:object]
-      nested_object_arrays = object.properties.select\
+      props = object.is_a?(::Api::Resource) ? object.all_user_properties : object.properties
+      nested_object_arrays = props.select\
         { |type| typed_array?(type) && nested_object?(type.item_type) }
 
-      nested_objects = object.properties.select { |prop| nested_object?(prop) }
+      nested_objects = props.select { |prop| nested_object?(prop) }
 
       prop_map = nested_objects.map\
         { |nested_object| emit_nested_object(nested_object_data(data, nested_object)) }

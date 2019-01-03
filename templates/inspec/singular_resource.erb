@@ -20,7 +20,7 @@
 
   inside_indent = 8
 
-  requires = generate_requires(object.properties)
+  requires = generate_requires(object.all_user_properties)
   requires << 'gcp_backend'
 -%>
 <%= lines(emit_requires(requires)) -%>
@@ -31,7 +31,7 @@ class <%= object.name -%> < GcpResourceBase
   desc '<%= object.name -%>'
   supports platform: 'gcp'
 
-<% object.properties.each do |prop| -%>
+<% object.all_user_properties.each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>
 
 <% end -%>
@@ -58,7 +58,7 @@ class <%= object.name -%> < GcpResourceBase
 
   def parse
 <%
-  parse_code = object.properties.map do |prop|
+  parse_code = object.all_user_properties.map do |prop|
     name = prop.out_name
 
     if time?(prop)
