@@ -40,6 +40,14 @@ module Provider
       def property_override
         Provider::Inspec::PropertyOverride
       end
+
+      def new_resource_override
+        Provider::Overrides::Inspec::ResourceOverride
+      end
+
+      def new_property_override
+        Provider::Overrides::Inspec::PropertyOverride
+      end
     end
 
     # This function uses the resource templates to create singular and plural
