@@ -258,6 +258,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
       timeoutSec: !ruby/object:Provider::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
+  Image: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      labels: !ruby/object:Provider::Ansible::PropertyOverride
+        version_added: '2.8'
   InstanceGroup: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       instances: !ruby/object:Provider::Ansible::PropertyOverride
