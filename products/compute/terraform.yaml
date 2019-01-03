@@ -411,7 +411,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       rawDisk.sha1Checksum: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         name: 'sha1'
       rawDisk.containerType: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
-        default_value: "TAR"
+        default_value: :TAR
       rawDisk: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         ignore_read: true
       sourceDiskEncryptionKey: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
