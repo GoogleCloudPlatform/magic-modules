@@ -20,19 +20,29 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # Ansible. All fields should be `attr_reader :<property>`
     module OverrideFields
-      attr_reader :aliases
-      attr_reader :version_added
+      def self.attributes
+        [
+          :aliases,
+          :version_added
+        ]
+      end
+
+      attr_reader(*self.attributes)
     end
 
-    # Ansible-specific overrides to api.yaml.
-    class PropertyOverride < Provider::PropertyOverride
-      include OverrideFields
+    module PropertyOverrideSharedCode
       def validate
         super
 
         check_optional_property :aliases, ::Array
         check_optional_property :version_added, ::String
       end
+    end
+
+    # Ansible-specific overrides to api.yaml.
+    class PropertyOverride < Provider::PropertyOverride
+      include OverrideFields
+      include PropertyOverrideSharedCode
 
       private
 
