@@ -13,7 +13,7 @@ describe google_compute_disk({project: <%= doc_generation ? "'#{project_name}'" 
 end
 
 describe.one do
- 	google_compute_disk({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: <%= doc_generation ? "'#{disk_name}'" : "disk_name" -%>, zone: <%= doc_generation ? "'#{zone}'" : "zone" -%>}).labels.each_pair do |key, value|
+  google_compute_disk({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: <%= doc_generation ? "'#{disk_name}'" : "disk_name" -%>, zone: <%= doc_generation ? "'#{zone}'" : "zone" -%>}).labels.each_pair do |key, value|
     describe key do
       it { should cmp "environment" }
     end
