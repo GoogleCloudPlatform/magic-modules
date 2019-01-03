@@ -20,7 +20,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     } else if v.(string) == "Google-Cloud-Scheduler" {
       delete(headers, "User-Agent")
     } else {
-      headers["User-Agent"] = strings.Replace(v.(string), "AppEngine-Google; (+http://code.google.com/appengine)","", -1)
+      headers["User-Agent"] = strings.TrimSpace(strings.Replace(v.(string), "AppEngine-Google; (+http://code.google.com/appengine)","", -1))
     }
   }
   if v, ok := headers["Content-Type"]; ok {
