@@ -1,14 +1,14 @@
-<% project_name = grab_attributes['project_name'] -%>
+<% gcp_project_name = "#{old_attribute('gcp_project_name', doc_generation)}" -%>
 <% ssl_policy = grab_attributes['ssl_policy'] -%>
-describe google_compute_ssl_policies({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>}) do
+describe google_compute_ssl_policies({project: <%= gcp_project_name -%>}) do
   it { should exist }
   its('names') { should include <%= doc_generation ? "'#{ssl_policy['name']}'" : "ssl_policy['name']" -%> }
   its('profiles') { should include <%= doc_generation ? "'#{ssl_policy['profile']}'" : "ssl_policy['profile']" -%> }
   its('count') { should eq 1 }
 end
 
-google_compute_ssl_policies({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>}).names.each do |policy_name|
-  describe google_compute_ssl_policy({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: policy_name}) do
+google_compute_ssl_policies({project: <%= gcp_project_name -%>}).names.each do |policy_name|
+  describe google_compute_ssl_policy({project: <%= gcp_project_name -%>, name: policy_name}) do
     its('min_tls_version') { should cmp <%= doc_generation ? "'#{ssl_policy['min_tls_version']}'" : "ssl_policy['min_tls_version']" -%> }
   end
 end
