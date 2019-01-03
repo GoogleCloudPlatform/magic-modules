@@ -1,4 +1,3 @@
-  return fmt.Sprintf(`
+  return Nprintf(`
 <%= ctx[:content] -%>
-`,<%= " val," * ctx[:count] %>
-  )
+`, context)
