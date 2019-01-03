@@ -23,12 +23,12 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - google-auth >= 1.3.0
   version_added: '2.7'
   author: Google Inc. (@googlecloudplatform)
-datasources: !ruby/object:Provider::ResourceOverrides
-  Instance: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  Instance: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-  Database: !ruby/object:Provider::Ansible::ResourceOverride
+  Database: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
@@ -37,7 +37,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
           "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
-  User: !ruby/object:Provider::Ansible::ResourceOverride
+  User: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
@@ -46,30 +46,30 @@ datasources: !ruby/object:Provider::ResourceOverrides
           "'test-user' in \"{{ results['items'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "'test-user' not in \"{{ results['items'] | map(attribute='name') | list }}\""
-  Tier: !ruby/object:Provider::Ansible::ResourceOverride
+  Tier: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  SslCert: !ruby/object:Provider::Ansible::ResourceOverride
+  SslCert: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  Flag: !ruby/object:Provider::Ansible::ResourceOverride
+  Flag: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-overrides: !ruby/object:Provider::ResourceOverrides
-  Instance: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Instance: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     access_api_results: true
     return_if_object: |
 <%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
-  Database: !ruby/object:Provider::Ansible::ResourceOverride
+  Database: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     return_if_object: |
 <%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
-  User: !ruby/object:Provider::Ansible::ResourceOverride
+  User: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     unwrap_resource: true
     return_if_object: |
 <%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
   # Objects not implmented yet.
-  Tier: !ruby/object:Provider::Ansible::ResourceOverride
+  Tier: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  SslCert: !ruby/object:Provider::Ansible::ResourceOverride
+  SslCert: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  Flag: !ruby/object:Provider::Ansible::ResourceOverride
+  Flag: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   copy:

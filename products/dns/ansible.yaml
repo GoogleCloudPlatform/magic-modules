@@ -24,12 +24,12 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.5'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
-datasources: !ruby/object:Provider::ResourceOverrides
-  Change: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  Change: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  Project: !ruby/object:Provider::Ansible::ResourceOverride
+  Project: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
+  ResourceRecordSet: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
@@ -39,7 +39,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
         does_not_exist: |
           "'www.testzone-4.com.'not in \"{{ results['items'] | map(attribute='name') | list }}\""
     collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
-  ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
+  ManagedZone: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       filter: !ruby/object:Provider::Ansible::FilterProp
@@ -47,12 +47,12 @@ datasources: !ruby/object:Provider::ResourceOverrides
         description: Restricts the list to return only zones with this domain name.
       query_options: false
       filter_api_param: dnsName
-overrides: !ruby/object:Provider::ResourceOverrides
-  ManagedZone: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  ManagedZone: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     properties:
-      labels: !ruby/object:Provider::Ansible::PropertyOverride
+      labels: !ruby/object:Provider::Overrides::Ansible::PropertyOverride
         version_added: '2.8'
-  ResourceRecordSet: !ruby/object:Provider::Ansible::ResourceOverride
+  ResourceRecordSet: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     access_api_results: true
     version_added: '2.6'
     imports:
@@ -89,10 +89,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - unwrap_resource
       - resource_to_request
       - return_if_object
-  Project: !ruby/object:Provider::Ansible::ResourceOverride
+  Project: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     exclude: true
-  Change: !ruby/object:Provider::Ansible::ResourceOverride
+  Change: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:
