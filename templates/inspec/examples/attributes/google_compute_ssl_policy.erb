@@ -1,2 +1,2 @@
-gcp_project_name = attribute(:gcp_project_name, default: '<%= old_attribute('gcp_project_name') -%>')
+gcp_project_id = attribute(:gcp_project_id, default: '<%= old_attribute('gcp_project_id') -%>')
 ssl_policy = attribute('ssl_policy', default: <%= JSON.pretty_generate(grab_attributes['ssl_policy']) -%>)
