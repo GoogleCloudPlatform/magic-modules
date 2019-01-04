@@ -17,6 +17,7 @@ Dir.chdir(File.join(File.dirname(__FILE__), '..', '..'))
 
 require 'optparse'
 require 'compile/core'
+require 'octokit'
 
 # Class to handle Compile include to avoid Rubocop issues.
 class CompileClass
@@ -30,11 +31,11 @@ ANSIBLE_URL = 'git@github.com:ansible/ansible.git'.freeze
 MAGICIAN_GIT = 'git@github.com:modular-magician/ansible.git'.freeze
 
 IGNORED_MODULES = [
-  'lib/ansible/modules/cloud/google/gcp_backend_service.py',
-  'lib/ansible/modules/cloud/google/gcp_forwarding_rule.py',
-  'lib/ansible/modules/cloud/google/gcp_healthcheck.py',
-  'lib/ansible/modules/cloud/google/gcp_target_proxy.py',
-  'lib/ansible/modules/cloud/google/gcp_url_map.py'
+  'gcp_backend_service',
+  'gcp_forwarding_rule',
+  'gcp_healthcheck',
+  'gcp_target_proxy',
+  'gcp_url_map'
 ].freeze
 
 ADDITIONAL_FILES = [
@@ -44,9 +45,8 @@ ADDITIONAL_FILES = [
 
 @options = {
   directory: "#{Dir.pwd}/build/ansible/",
-  ansible_version: '2.8',
   dry_run: false,
-  only_facts: false
+  date: (Time.now - (3600 * 24)).strftime('%Y-%m-%dT%H:%M:%S.%L%z')
 }
 ###########################################################
 # Functions
@@ -58,7 +58,12 @@ def git_run(cmd, silent = false, opts = @options)
     "#{cmd}#{silent_cmd} 2>&1",
     "popd #{opts[:directory]} > /dev/null"
   ]
-  %x(#{command.join('; ')})
+
+  if @options[:dry_run]
+    puts command.join('; ')
+  else
+    %x(#{command.join('; ')})
+  end
 end
 
 # Check that remotes are in order
@@ -78,6 +83,7 @@ def get_all_modules(remote)
   git_run("git checkout #{remote}/devel", true)
   files = git_run('git ls-files -- lib/ansible/modules/cloud/google/gcp_*')
   files.split("\n")
+       .map { |line| %r{lib/ansible/modules/cloud/google/([a-z_]*)\.py}.match(line.strip)[1] }
        .reject { |line| IGNORED_MODULES.include?(line) }
 end
 
@@ -91,14 +97,12 @@ def checkout_file(file)
   git_run("git checkout magician/devel -- #{file}", true)
 end
 
-def commit_message(mod_name)
-  file = "lib/ansible/modules/cloud/google/#{mod_name}.py"
-  status = git_run("git cat-file -e upstream/devel:#{file}")
-  if status.include?('fatal')
-    "New GCP Module: #{mod_name}"
-  else
-    "Bug fixes for #{mod_name}"
-  end
+def get_all_pr_messages
+  # Limit of 50 bug fixes will go into a PR (should never hit this limit)
+  client = Octokit::Client.new(access_token: @options[:creds], per_page: 50)
+  client.list_issues('googlecloudplatform/magic-modules', labels: 'ansible,downstream-generated',
+                            state: 'closed', since: @options[:date])
+        .map { |pr| { title: pr[:title], url: pr[:html_url] } }
 end
 #############################################################
 # Main
@@ -111,20 +115,16 @@ OptionParser.new do |opts|
     @options[:directory] = v
   end
 
-  opts.on('-v', '--version [VERSION]', 'Ansible version') do |v|
-    @options[:ansible_version] = v
-  end
-
   opts.on('-d', '--dry-run', 'Dry run') do |_v|
     @options[:dry_run] = true
   end
 
-  opts.on('-f', '--only-facts', 'Only facts') do |_v|
-    @options[:only_facts] = true
+  opts.on('--date', 'Date for Github sorting') do |v|
+    @options[:date] = v
   end
 
-  opts.on('--files x,y,z', Array, 'Only pick these files') do |list|
-    @options[:files] = list
+  opts.on('--github-creds [CREDS]', 'Github creds') do |v|
+    @options[:creds] = v
   end
 end.parse!
 
@@ -142,7 +142,7 @@ git_run('git fetch upstream devel', true)
 
 puts 'Everything is setup properly'
 
-# Check to see which additional files need to be placed in new PRs.
+# Check to see which additional files need to be placed in all PRs.
 changed_files = []
 ADDITIONAL_FILES.each do |file|
   changed_files << file if check_if_different(file, 'magician', 'upstream')
@@ -150,54 +150,44 @@ end
 
 puts "Files noticed in these additional files: #{changed_files.join(', ')}"
 
-# Find list of all modules.
-files = if @options[:files]
-          @options[:files].map { |x| "lib/ansible/modules/cloud/google/#{x}.py" }
-        else
-          get_all_modules('magician')
-        end
+# Create a Bug Fix PR.
+existing_modules = get_all_modules('upstream')
 
-# Create a PR for each file.
-# rubocop:disable Metrics/BlockLength
-files.each do |mod|
-  mod_name = %r{lib/ansible/modules/cloud/google/([a-z_]*)\.py}.match(mod.strip)[1]
-  next if @options[:only_facts] && !mod_name.include?('facts')
-  puts "Building PR for #{mod_name}"
+puts "Building Bug fix PR"
 
-  # Create a new branch
-  git_run('git checkout upstream/devel', true)
-  git_run("git branch -D #{mod_name}", true)
-  git_run("git checkout -b #{mod_name}", true)
+# Create a new branch
+git_run('git checkout upstream/devel', true)
+git_run("git branch -D bug_fixes", true)
+git_run("git checkout -b bug_fixes", true)
 
-  # Checkout all the files (module, tests, additional files)
+# Checkout all the files (module, tests, additional files)
+existing_modules.each do |mod_name|
   checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
   checkout_file("test/integration/targets/#{mod_name}/")
-  changed_files.each { |file| checkout_file(file) }
-
-  # Make a commit
-  message = commit_message(mod_name)
-  git_run("git commit -m \"#{message}\"", true)
-
-  # Create PR message and save to file.
-  File.write("tools/ansible-pr/templates/#{mod_name}",
-             CompileClass.new.lines(
-               CompileClass.new.compile_file({
-                                               mod_name: mod_name,
-                                               new: message.include?('New GCP'),
-                                               ansible_version: @options[:ansible_version],
-                                               commit_msg: message
-                                             },
-                                             'tools/ansible-pr/template.md.erb')
-             ))
-
-  # Create PR using branch + message.
-  git_run('git push origin HEAD --force')
-  unless @options[:dry_run]
-    repo = 'ansible/ansible:devel'
-    message_loc = "../../tools/ansible-pr/templates/#{mod_name}"
-    output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
-  end
-  puts output
-  puts "PR built for #{mod_name}"
 end
-# rubocop:enable Metrics/BlockLength
+changed_files.each { |file| checkout_file(file) }
+
+# Make a commit
+message = commit_message(mod_name)
+git_run("git commit -m \"Bug fixes for GCP modules (as of #{options[:date]})\"", true)
+
+# Create PR message and save to file.
+File.write("tools/ansible-pr/templates/#{mod_name}",
+           CompileClass.new.lines(
+             CompileClass.new.compile_file({
+                                             commit_msg: message,
+                                             new: false,
+                                             prs: get_all_pr_messages
+                                           },
+                                           'tools/ansible-pr/template.md.erb')
+           ))
+
+# Create PR using branch + message.
+git_run('git push origin HEAD --force')
+
+repo = 'ansible/ansible:devel'
+message_loc = "../../tools/ansible-pr/templates/#{mod_name}"
+output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
+
+puts output
+puts "PR built for bug fixes"

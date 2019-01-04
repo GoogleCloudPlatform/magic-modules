@@ -1,8 +1,14 @@
 <%= ctx[:commit_msg] %>
 
 ##### SUMMARY
-<!--- Describe the change, including rationale and design decisions -->
 <%= ctx[:commit_msg] %>
+<% if ctx[:prs] -%>
+This PR is the result of the following Magic Modules PRs:
+<% ctx[:prs].each do |pr| -%>
+  - [<%= pr[:title] -%>](<%= pr[:url] -%>)
+
+<% end -%>
+<% end -%>
 
 ##### ISSUE TYPE
 <% if ctx[:new] -%>
@@ -10,14 +16,6 @@
 <% else -%>
 - Bugfix Pull Request
 <% end -%>
-
-##### COMPONENT NAME
-<%= ctx[:mod_name] %>
-
-##### ANSIBLE VERSION
-```
-<%= ctx[:ansible_version] %>
-```
 
 ##### ADDITIONAL INFORMATION
 ```
