@@ -12,12 +12,12 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  Bucket: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Bucket: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
-  BucketAccessControl: !ruby/object:Provider::Terraform::ResourceOverride
+  BucketAccessControl: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
-  ObjectAccessControl: !ruby/object:Provider::Terraform::ResourceOverride
+  ObjectAccessControl: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     example:
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_object_access_control_public_object"
@@ -28,13 +28,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
     id_format: "{{bucket}}/{{object}}/{{entity}}"
     import_format: ["{{bucket}}/{{object}}/{{entity}}"]
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
-      bucket: !ruby/object:Provider::Terraform::PropertyOverride
+      bucket: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
-      object: !ruby/object:Provider::Terraform::PropertyOverride
+      object: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         description: The name of the object to apply the access control to.
-  DefaultObjectACL: !ruby/object:Provider::Terraform::ResourceOverride
+  DefaultObjectACL: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     name: "DefaultObjectAccessControl"
     example:
     - !ruby/object:Provider::Terraform::Examples
@@ -45,13 +45,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
     id_format: "{{bucket}}/{{entity}}"
     import_format: ["{{bucket}}/{{entity}}"]
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
-      bucket: !ruby/object:Provider::Terraform::PropertyOverride
+      bucket: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/resourceref_as_string.go.erb'
         # This field is (unexpectedly) not returned from the API
         ignore_read: true
-  Object: !ruby/object:Provider::Terraform::ResourceOverride
+  Object: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
 
 # This is for copying files over

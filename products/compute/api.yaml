@@ -1009,6 +1009,15 @@ objects:
         update_url: 'projects/{{project}}/regions/{{region}}/forwardingRules/{{name}}/setLabels'
         update_verb: :POST
         min_version: beta
+      # While this field doesn't appear in the resource definition in the docs,
+      # it's present in Get and Insert, and the resource has no Update/Patch call.
+      - !ruby/object:Api::Type::Boolean
+        name: 'allPorts'
+        description: |
+          When the load balancing scheme is INTERNAL and protocol is TCP/UDP, omit
+          `port`/`port_range` and specify this field as `true` to allow packets addressed
+          to any ports to be forwarded to the backends configured with this forwarding rule.
+        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
@@ -1630,9 +1639,17 @@ objects:
     name: 'Image'
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
+    input: true
+    exports:
+      - !ruby/object:Api::Type::SelfLink
+        name: 'selfLink'
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#imageList'
       items: 'items'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/images'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/images'
     description: |
       Represents an Image resource.
 
@@ -1786,6 +1803,18 @@ objects:
             min_version: beta
             description: |
               The name of the encryption key that is stored in Google Cloud KMS.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: Labels to apply to this Image.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource. Used
+          internally during updates.
+        update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
+        update_verb: :POST
         # TODO(alexstephen): Change to ResourceRef with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
@@ -1823,6 +1852,7 @@ objects:
           # TODO(alexstephen): Figure out cross-module ResourceRefs
           - !ruby/object:Api::Type::String
             name: 'source'
+            required: true
             description: |
               The full Google Cloud Storage URL where disk storage is stored
               You must provide either this property or the sourceDisk property
@@ -2944,9 +2974,10 @@ objects:
         description: |
           Network IP address of an instance that should handle matching packets.
         input: true
-      # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'nextHopVpnTunnel'
+        resource: 'VpnTunnel'
+        imports: 'selfLink'
         description: |
           URL to a VpnTunnel that should handle matching packets.
         input: true
@@ -4056,21 +4087,25 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'tunnels'
         description: |
-          A list of references to VpnTunnel resources associated to this VPN gateway.
-        # TODO(nelsonjr): Make this a ResourceRef when VpnTunnel is submitted.
-        item_type: Api::Type::String
+          A list of references to VpnTunnel resources associated with this VPN gateway.
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'tunnel'
+          resource: 'VpnTunnel'
+          imports: 'selfLink'
+          description: |
+            A VpnTunnel resource associated with this VPN gateway.
         output: true
       - !ruby/object:Api::Type::Array
         name: 'forwardingRules'
         description: |
-          A list of references to the ForwardingRule resources associated to this VPN
+          A list of references to the ForwardingRule resources associated with this VPN
           gateway.
         item_type: !ruby/object:Api::Type::ResourceRef
           name: 'forwardingRule'
           resource: 'ForwardingRule'
           imports: 'selfLink'
           description: |
-            A ForwardingRule resource associated to this VPN gateway.
+            A ForwardingRule resource associated with this VPN gateway.
         output: true
         # status is not useful for state convergence
   - !ruby/object:Api::Resource

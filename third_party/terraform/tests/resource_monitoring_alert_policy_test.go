@@ -129,10 +129,10 @@ resource "google_monitoring_alert_policy" "basic" {
         per_series_aligner = "%s"
       }
 
-      duration       = "60s"
-      comparison     = "COMPARISON_GT"
-      filter         = "%s"
-      thresholdValue = "0.5"
+      duration        = "60s"
+      comparison      = "COMPARISON_GT"
+      filter          = "%s"
+      threshold_value = "0.5"
     }
   }
 }

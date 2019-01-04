@@ -125,10 +125,12 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			GeneratedAccessContextManagerResourcesMap,
 			// end beta-only products
 			<% end -%>
+			GeneratedAppengineResourcesMap,
 			GeneratedComputeResourcesMap,
 			GeneratedDnsResourcesMap,
 			GeneratedRedisResourcesMap,
 			GeneratedResourceManagerResourcesMap,
+			GeneratedSourcerepoResourcesMap,
 			GeneratedStorageResourcesMap,
 			GeneratedMonitoringResourcesMap,
 			map[string]*schema.Resource{
@@ -147,7 +149,6 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 				"google_compute_attached_disk":                 resourceComputeAttachedDisk(),
 				"google_compute_backend_service":               resourceComputeBackendService(),
 				"google_compute_global_forwarding_rule":        resourceComputeGlobalForwardingRule(),
-				"google_compute_image":                         resourceComputeImage(),
 				"google_compute_instance":                      resourceComputeInstance(),
 				"google_compute_instance_from_template":        resourceComputeInstanceFromTemplate(),
 				"google_compute_instance_group":                resourceComputeInstanceGroup(),
@@ -201,7 +202,6 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 <% unless version == 'ga' -%>
 				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
 <% end -%>
-				"google_sourcerepo_repository":                 resourceSourceRepoRepository(),
 				"google_spanner_instance":                      resourceSpannerInstance(),
 				"google_spanner_instance_iam_binding":          ResourceIamBindingWithImport(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
 				"google_spanner_instance_iam_member":           ResourceIamMemberWithImport(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),

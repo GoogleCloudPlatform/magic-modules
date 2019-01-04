@@ -10,4 +10,4 @@ pip install tox
 
 
 source hacking/env-setup
-ansible-test sanity -v --tox --python 2.7 --base-branch origin/devel lib/ansible/modules/cloud/google/
+ansible-test sanity -v --tox --python 2.7 --base-branch origin/devel lib/ansible/modules/cloud/google/ lib/ansible/module_utils/gcp_utils.py

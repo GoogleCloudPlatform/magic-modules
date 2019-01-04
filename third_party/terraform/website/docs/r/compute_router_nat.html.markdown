@@ -19,21 +19,21 @@ A simple NAT configuration: enable NAT for all Subnetworks associated with
 the Network associated with the given Router.
 
 ```hcl
-resource "google_compute_network" "network" {
+resource "google_compute_network" "default" {
   name = "my-network"
 }
 
-resource "google_compute_subnetwork" "subnetwork" {
+resource "google_compute_subnetwork" "default" {
   name          = "my-subnet"
-  network       = "${google_compute_network.network.self_link}"
+  network       = "${google_compute_network.default.self_link}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
 }
 
 resource "google_compute_router" "router" {
   name    = "router"
-  region  = "${google_compute_subnetwork.foobar.region}"
-  network = "${google_compute_network.foobar.self_link}"
+  region  = "${google_compute_subnetwork.default.region}"
+  network = "${google_compute_network.default.self_link}"
   bgp {
     asn = 64514
   }
@@ -52,21 +52,21 @@ A production-like configuration: enable NAT for one Subnetwork and use a list of
 static external IP address.
 
 ```hcl
-resource "google_compute_network" "network" {
+resource "google_compute_network" "default" {
   name = "my-network"
 }
 
-resource "google_compute_subnetwork" "subnetwork" {
+resource "google_compute_subnetwork" "default" {
   name          = "my-subnet"
-  network       = "${google_compute_network.network.self_link}"
+  network       = "${google_compute_network.default.self_link}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
 }
 
 resource "google_compute_router" "router" {
   name    = "router"
-  region  = "${google_compute_subnetwork.foobar.region}"
-  network = "${google_compute_network.foobar.self_link}"
+  region  = "${google_compute_subnetwork.default.region}"
+  network = "${google_compute_network.default.self_link}"
   bgp {
     asn = 64514
   }
@@ -83,7 +83,7 @@ resource "google_compute_router_nat" "advanced-nat" {
   router                             = "${google_compute_router.router.name}"
   region                             = "us-central1"
   nat_ip_allocate_option             = "MANUAL_ONLY"
-  nat_ips                            = "${google_compute_address.address.*.self_link}"
+  nat_ips                            = ["${google_compute_address.address.*.self_link}"]
   source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
   subnetwork {
     name = "${google_compute_subnetwork.subnetwork.self_link}"

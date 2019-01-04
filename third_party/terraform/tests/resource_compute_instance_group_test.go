@@ -257,7 +257,7 @@ func testAccComputeInstanceGroup_updated(n string, size int64, instanceGroup *co
 		// Cannot check the target pool as the instance creation is asynchronous.  However, can
 		// check the target_size.
 		if instanceGroup.Size != size {
-			return fmt.Errorf("instance count incorrect")
+			return fmt.Errorf("instance count incorrect. saw real value %v instead of expected value %v", instanceGroup.Size, size)
 		}
 
 		return nil
@@ -484,7 +484,7 @@ func testAccComputeInstanceGroup_update(instance string) string {
 		description = "Terraform test instance group"
 		name = "%s"
 		zone = "us-central1-c"
-		instances = "${google_compute_instance.ig_instance.*.self_link}"
+		instances = ["${google_compute_instance.ig_instance.*.self_link}"]
 		named_port {
 			name = "http"
 			port = "8080"
@@ -526,7 +526,7 @@ func testAccComputeInstanceGroup_update2(instance string) string {
 		description = "Terraform test instance group"
 		name = "%s"
 		zone = "us-central1-c"
-		instances = "${google_compute_instance.ig_instance.*.self_link}"
+		instances = ["${google_compute_instance.ig_instance.*.self_link}"]
 
 		named_port {
 			name = "http"
@@ -570,7 +570,7 @@ func testAccComputeInstanceGroup_recreateInstances(instance string) string {
 		description = "Terraform test instance group"
 		name = "%s"
 		zone = "us-central1-c"
-		instances = "${google_compute_instance.ig_instance.*.self_link}"
+		instances = ["${google_compute_instance.ig_instance.*.self_link}"]
 		named_port {
 			name = "http"
 			port = "8080"

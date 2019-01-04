@@ -27,13 +27,34 @@ import (
 func TestAcc<%= test_slug -%>(t *testing.T) {
   t.Parallel()
 
+	context := map[string]interface{} {
+	<% example.test_env_vars.each do |var_name, var_type| -%>
+		<% if var_type == :ORG_ID  -%>
+			"<%= var_name -%>": getTestOrgFromEnv(t),
+		<% elsif var_type == :CREDENTIALS -%>
+			"<%= var_name -%>": getTestCredsFromEnv(t),
+		<% elsif var_type == :REGION -%>
+			"<%= var_name -%>": getTestRegionFromEnv(t),
+		<% elsif var_type == :ORG_TARGET -%>
+			"<%= var_name -%>": getTestOrgTargetFromEnv(t),
+		<% elsif var_type == :BILLING_ACCT -%>
+			"<%= var_name -%>": getTestBillingAccountFromEnv(t),
+		<% elsif var_type == :SERVICE_ACCT -%>
+			"<%= var_name -%>": getTestServiceAccountFromEnv(t),
+		<% elsif var_type == :PROJECT_NAME -%>
+			"<%= var_name -%>": getTestProjectFromEnv(t),
+		<% end -%>
+	<% end -%>
+			"random_suffix": acctest.RandString(10),
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
+				Config: testAcc<%= test_slug -%>(context),
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
@@ -47,14 +68,17 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 	})
 }
 
-func testAcc<%= test_slug -%>(val string) string {
+func testAcc<%= test_slug -%>(context map[string]interface{}) string {
 <%= example.config_test -%>
 }
 <%- end %>
 
 func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
+	for name, rs := range s.RootModule().Resources {
 		if rs.Type != "<%= terraform_name -%>" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
 			continue
 		}
 

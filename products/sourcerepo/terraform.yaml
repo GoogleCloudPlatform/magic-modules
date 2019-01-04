@@ -12,23 +12,23 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-name: ContainerAnalysis
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  Note: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    import_format: ["projects/{{project}}/notes/{{name}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
+overrides: !ruby/object:Provider::ResourceOverrides
+  Repository: !ruby/object:Provider::Terraform::ResourceOverride
+    id_format: '{{project}}/{{name}}'
     example:
       - !ruby/object:Provider::Terraform::Examples
-        name: "container_analysis_note_basic"
-        primary_resource_id: "note"
+        name: "sourcerepo_repository_basic"
+        primary_resource_id: "my-repo"
         version: <%= version_name %>
         vars:
-          note_name: "test-attestor-note"
+          repository_name: "my-repository"
     properties:
-      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/repository_name_from_short_name.go.erb
+        custom_flatten: templates/terraform/custom_flatten/repository_short_name_from_name.go.erb
+        description: |
+          Resource name of the repository, of the form `{{repo}}`.
+          The repo name may contain slashes. eg, `name/with/slash`
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
