@@ -36,7 +36,7 @@ git config --global user.name "Modular Magician"
 
 git add -A
 # Set the "author" to the commit's real author.
-git commit -m "$INSPEC_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
+git commit -m "$INSPEC_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" --signoff || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
 apply_patches "$PATCH_DIR/modular-magician/inspec-gcp" "$INSPEC_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
