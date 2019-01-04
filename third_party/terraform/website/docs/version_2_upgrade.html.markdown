@@ -54,7 +54,7 @@ Upgrade topics:
 - [Resource: `google_sql_database_instance`](#resource-google_sql_database_instance)
 - [Resource: `google_storage_default_object_acl`](#resource-google_storage_default_object_acl)
 - [Resource: `google_storage_object_acl`](#resource-google_storage_object_acl)
-- [Resource: `google_*iam_binding`](#google_*_iam_binding)
+- [Resource: `google_*_iam_binding`](#google_*_iam_binding)
 
 <!-- /TOC -->
 
