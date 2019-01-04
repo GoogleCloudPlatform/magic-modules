@@ -2943,9 +2943,9 @@ objects:
         description: 'A list of instance tags to which this route applies.'
         item_type: Api::Type::String
         input: true
-      # TODO(nelsonjr): Make this a ResourceRef when Gateway is submitted.
       - !ruby/object:Api::Type::String
         name: 'nextHopGateway'
+        input: true
         description: |
           URL to a gateway that should handle matching packets.
 
@@ -2956,10 +2956,11 @@ objects:
           global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
-        input: true
-      # TODO(nelsonjr): Make this a ResourceRef when Instance is submitted.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'nextHopInstance'
+        resource: 'Instance'
+        imports: 'selfLink'
+        input: true
         description: |
           URL to an instance that should handle matching packets.
           You can specify this as a full or partial URL. For example:
@@ -2968,7 +2969,6 @@ objects:
           instances/instance
           * projects/project/zones/zone/instances/instance
           * zones/zone/instances/instance
-        input: true
       - !ruby/object:Api::Type::String
         name: 'nextHopIp'
         description: |
@@ -2978,9 +2978,9 @@ objects:
         name: 'nextHopVpnTunnel'
         resource: 'VpnTunnel'
         imports: 'selfLink'
+        input: true
         description: |
           URL to a VpnTunnel that should handle matching packets.
-        input: true
       - !ruby/object:Api::Type::String
         name: 'nextHopNetwork'
         output: true

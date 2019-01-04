@@ -541,8 +541,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           * `global/gateways/default-internet-gateway`
           * The string `default-internet-gateway`.
       nextHopInstance: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
-        custom_expand: templates/terraform/custom_expand/route_instance.erb
         # Description here is overridden because puppet won't compile if you ask
         # it to include docs greater than 80 characters.
         description: |+
@@ -552,7 +550,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           * `projects/project/zones/zone/instances/instance`
           * `zones/zone/instances/instance`
           * Just the instance name, with the zone in `next_hop_instance_zone`.
-          
       tags: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/set_to_list.erb
         is_set: true
