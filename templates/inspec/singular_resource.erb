@@ -55,7 +55,7 @@ class <%= object.name -%> < GcpResourceBase
       raise 'Not implemented'
     end
 <% end # object.self_link_query.nil? -%>
-
+  # rubocop:disable Metrics/AbcSize
   def parse
 <%
   parse_code = object.all_user_properties.map do |prop|
@@ -76,6 +76,7 @@ class <%= object.name -%> < GcpResourceBase
 -%>
 <%= lines(indent(parse_code, 4)) -%>
   end
+  # rubocop:enable Metrics/AbcSize
 
   def exists?
     !@fetched.nil?

@@ -49,8 +49,8 @@ module GoogleInSpec
 <% end # nested_properties.each -%>
         end
       end
-
 <% if emit_array -%>
+
       class <%= class_name %>Array
         def self.parse(value)
           return if value.nil?
