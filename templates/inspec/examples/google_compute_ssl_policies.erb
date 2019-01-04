@@ -1,4 +1,4 @@
-<% gcp_project_id = "#{old_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% ssl_policy = grab_attributes['ssl_policy'] -%>
 describe google_compute_ssl_policies(project: <%= gcp_project_id -%>) do
   it { should exist }
