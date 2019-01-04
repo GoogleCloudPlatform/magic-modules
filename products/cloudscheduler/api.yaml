@@ -60,6 +60,7 @@ objects:
           The value of this field must be a time zone name from the tz database.
         required: false
         input: true
+        default_value: 'Etc/UTC'
       - !ruby/object:Api::Type::String
         name: 'region'
         description: |

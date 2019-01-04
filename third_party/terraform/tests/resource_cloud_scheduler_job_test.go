@@ -31,7 +31,7 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 					resource.TestCheckResourceAttr(jobResourceName, "name", pubSubJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/2 * * * *"),
-					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Europe/London"),
+					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Etc/UTC"),
 				),
 			},
 		},
@@ -58,7 +58,7 @@ func TestAccCloudSchedulerJob_http(t *testing.T) {
 					resource.TestCheckResourceAttr(jobResourceName, "name", httpJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test http job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/8 * * * *"),
-					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Europe/London"),
+					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "America/New_York"),
 				),
 			},
 		},
@@ -152,7 +152,6 @@ resource "google_cloud_scheduler_job" "job" {
 	name     = "%s"
 	description = "test job"
 	schedule = "*/2 * * * *"
-	time_zone = "Europe/London"
 
 	pubsub_target = {
 		topic_name = "projects/%s/topics/build-triggers"
@@ -193,7 +192,7 @@ resource "google_cloud_scheduler_job" "job" {
 	name     = "%s"
 	description = "test http job"
 	schedule = "*/8 * * * *"
-	time_zone = "Europe/London"
+	time_zone = "America/New_York"
 
 	http_target = {
 		http_method = "POST"
