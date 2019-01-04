@@ -55,14 +55,14 @@ class <%= object.name -%> < GcpResourceBase
       raise 'Not implemented'
     end
 <% end # object.self_link_query.nil? -%>
-  # rubocop:disable Metrics/AbcSize
+
   def parse
 <%
   parse_code = object.all_user_properties.map do |prop|
     name = prop.out_name
 
     if time?(prop)
-      init = "@fetched['#{prop.api_name}'] ? Time.parse(@fetched['#{prop.api_name}']) : nil"
+      init = "parse_time_string(@fetched['#{prop.api_name}'])"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
@@ -76,7 +76,11 @@ class <%= object.name -%> < GcpResourceBase
 -%>
 <%= lines(indent(parse_code, 4)) -%>
   end
-  # rubocop:enable Metrics/AbcSize
+
+  # Handles parsing RFC3339 time string
+  def parse_time_string(time_string)
+    time_string ? Time.parse(time_string) : nil
+  end
 
   def exists?
     !@fetched.nil?
