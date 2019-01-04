@@ -8,4 +8,3 @@ topic:
   name: 'inspec-gcp-topic'
 subscription:
   name: 'inspec-gcp-subscription'
-project_name: 'inspec-gcp-project'

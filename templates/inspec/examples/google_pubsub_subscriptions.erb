@@ -1,13 +1,12 @@
-<% project_name = grab_attributes['project_name'] -%>
-<% topic = grab_attributes['topic'] -%>
-describe google_pubsub_subscriptions({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>}) do
+<% gcp_project_id = grab_attributes['gcp_project_id'] -%>
+<% subscription = grab_attributes['subscription'] -%>
+describe google_pubsub_subscriptions(project: <%= doc_generation ? "'#{gcp_project_id}'" : "gcp_project_id" -%>) do
   it { should exist }
-  its('names') { should include <%= doc_generation ? "'#{topic['name']}'" : "topic['name']" -%> }
   its('count') { should eq 1 }
 end
 
-google_pubsub_subscriptions({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>}).names.each do |subscription_name|
-  describe google_pubsub_topic({project: <%= doc_generation ? "'#{project_name}'" : "project_name" -%>, name: subscription_name}) do
-    its('name') { should eq <%= doc_generation ? "'#{topic['name']}'" : "topic['name']" -%> }
+google_pubsub_subscriptions(project: <%= doc_generation ? "'#{gcp_project_id}'" : "gcp_project_id" -%>).names.each do |subscription_name|
+  describe google_pubsub_subscription(project: <%= doc_generation ? "'#{gcp_project_id}'" : "gcp_project_id" -%>, name: subscription_name) do
+    its('name') { should match /#{<%= doc_generation ? "'#{subscription['name']}'" : "subscription['name']" -%>}/ }
   end
 end
