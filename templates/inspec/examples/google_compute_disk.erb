@@ -3,9 +3,9 @@
 <% gcp_disk_name = "#{old_attribute('gcp_disk_name', doc_generation)}" -%>
 <% gcp_disk_image = "#{old_attribute('gcp_disk_image', doc_generation)}" -%>
 <% gcp_disk_type = "#{old_attribute('gcp_disk_type', doc_generation)}" -%>
-most_recent_image = google_compute_image({project: <%= doc_generation ? "'#{gcp_disk_image.split('/').first}'" : "gcp_disk_image.split('/').first" -%>, name: <%= doc_generation ? "'#{gcp_disk_image.split('/').last}'" : "gcp_disk_image.split('/').last" -%>})
+most_recent_image = google_compute_image(project: <%= doc_generation ? "'#{gcp_disk_image.split('/').first}'" : "gcp_disk_image.split('/').first" -%>, name: <%= doc_generation ? "'#{gcp_disk_image.split('/').last}'" : "gcp_disk_image.split('/').last" -%>)
 
-describe google_compute_disk({project: <%= gcp_project_id -%>, name: <%= gcp_disk_name -%>, zone: <%= gcp_zone -%>}) do
+describe google_compute_disk(project: <%= gcp_project_id -%>, name: <%= gcp_disk_name -%>, zone: <%= gcp_zone -%>) do
   it { should exist }
   # Test that the image is the most recent image for the family
   its('source_image') { should match most_recent_image.self_link }
@@ -13,7 +13,7 @@ describe google_compute_disk({project: <%= gcp_project_id -%>, name: <%= gcp_dis
 end
 
 describe.one do
-  google_compute_disk({project: <%= gcp_project_id -%>, name: <%= gcp_disk_name -%>, zone: <%= gcp_zone -%>}).labels.each_pair do |key, value|
+  google_compute_disk(project: <%= gcp_project_id -%>, name: <%= gcp_disk_name -%>, zone: <%= gcp_zone -%>).labels.each_pair do |key, value|
     describe key do
       it { should cmp "environment" }
     end
