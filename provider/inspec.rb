@@ -271,6 +271,9 @@ module Provider
       YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yml')
     end
 
+    # Returns a variable name OR default value for that variable based on
+    # defaults from the existing inspec-gcp tests that do not exist within MM
+    # Default values are used within documentation to show realistic examples
     def old_attribute(attribute_name, doc_generation = false)
       return attribute_name unless doc_generation
 
