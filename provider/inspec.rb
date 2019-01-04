@@ -274,11 +274,11 @@ module Provider
     # Returns a variable name OR default value for that variable based on
     # defaults from the existing inspec-gcp tests that do not exist within MM
     # Default values are used within documentation to show realistic examples
-    def old_attribute(attribute_name, doc_generation = false)
+    def external_attribute(attribute_name, doc_generation = false)
       return attribute_name unless doc_generation
 
-      old_attribute_file = 'templates/inspec/examples/attributes/old_attributes.yml'
-      "'#{YAML.load_file(old_attribute_file)[attribute_name]}'"
+      external_attribute_file = 'templates/inspec/examples/attributes/external_attributes.yml'
+      "'#{YAML.load_file(external_attribute_file)[attribute_name]}'"
     end
 
     def inspec_property_type(property)

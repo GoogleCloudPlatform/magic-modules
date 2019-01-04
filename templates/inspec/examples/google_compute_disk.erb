@@ -1,8 +1,8 @@
-<% gcp_project_id = "#{old_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_zone = "#{old_attribute('gcp_zone', doc_generation)}" %>
-<% gcp_disk_name = "#{old_attribute('gcp_disk_name', doc_generation)}" -%>
-<% gcp_disk_image = "#{old_attribute('gcp_disk_image', doc_generation)}" -%>
-<% gcp_disk_type = "#{old_attribute('gcp_disk_type', doc_generation)}" -%>
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+<% gcp_disk_name = "#{external_attribute('gcp_disk_name', doc_generation)}" -%>
+<% gcp_disk_image = "#{external_attribute('gcp_disk_image', doc_generation)}" -%>
+<% gcp_disk_type = "#{external_attribute('gcp_disk_type', doc_generation)}" -%>
 most_recent_image = google_compute_image(project: <%= doc_generation ? "'#{gcp_disk_image.split('/').first}'" : "gcp_disk_image.split('/').first" -%>, name: <%= doc_generation ? "'#{gcp_disk_image.split('/').last}'" : "gcp_disk_image.split('/').last" -%>)
 
 describe google_compute_disk(project: <%= gcp_project_id -%>, name: <%= gcp_disk_name -%>, zone: <%= gcp_zone -%>) do
