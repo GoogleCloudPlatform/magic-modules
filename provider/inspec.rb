@@ -273,7 +273,9 @@ module Provider
 
     def old_attribute(attribute_name, doc_generation = false)
       return attribute_name unless doc_generation
-      "'#{YAML.load_file('templates/inspec/examples/attributes/old_attributes.yml')[attribute_name]}'"
+
+      old_attribute_file = 'templates/inspec/examples/attributes/old_attributes.yml'
+      "'#{YAML.load_file(old_attribute_file)[attribute_name]}'"
     end
 
     def inspec_property_type(property)
