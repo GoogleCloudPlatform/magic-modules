@@ -17,7 +17,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
   Job: !ruby/object:Provider::Terraform::ResourceOverride
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/cloud_scheduler_job_name.erb'
+        custom_expand: 'templates/terraform/custom_expand/cloudscheduler_job_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
       httpTarget.body: !ruby/object:Provider::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/base64_encode_body.erb'

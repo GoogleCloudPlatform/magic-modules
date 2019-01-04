@@ -70,7 +70,8 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
         description: |
-          By default, if a job does not complete successfully (meaning that an acknowledgement is not received from the handler, 
+          By default, if a job does not complete successfully, 
+          meaning that an acknowledgement is not received from the handler, 
           then it will be retried with exponential backoff according to the settings
         required: false
         input: true
@@ -78,7 +79,8 @@ objects:
           - !ruby/object:Api::Type::Integer
             name: retryCount
             description: |
-              The number of attempts that the system will make to run a job using the exponential backoff procedure described by maxDoublings.
+              The number of attempts that the system will make to run a 
+              job using the exponential backoff procedure described by maxDoublings.
               Values greater than 5 and negative values are not allowed.
             required: false
             input: true
@@ -108,7 +110,8 @@ objects:
             name: maxDoublings
             description: |
               The time between retries will double maxDoublings times.
-              A job's retry interval starts at minBackoffDuration, then doubles maxDoublings times, then increases linearly, 
+              A job's retry interval starts at minBackoffDuration, 
+              then doubles maxDoublings times, then increases linearly, 
               and finally retries retries at intervals of maxBackoffDuration up to retryCount times.
             required: false
             input: true
@@ -127,7 +130,8 @@ objects:
             name: topicName
             description: |
               The name of the Cloud Pub/Sub topic to which messages will be published when a job is delivered. 
-              The topic name must be in the same format as required by PubSub's PublishRequest.name, for example projects/PROJECT_ID/topics/TOPIC_ID.
+              The topic name must be in the same format as required by PubSub's PublishRequest.name, 
+              for example projects/PROJECT_ID/topics/TOPIC_ID.
             required: true
             input: true
           - !ruby/object:Api::Type::String

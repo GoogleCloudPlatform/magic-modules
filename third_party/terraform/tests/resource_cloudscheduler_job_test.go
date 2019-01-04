@@ -7,13 +7,10 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	cloudscheduler "google.golang.org/api/cloudscheduler/v1beta1"
 )
 
 func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 	t.Parallel()
-
-	var job cloudscheduler.Job
 
 	jobResourceName := "google_cloud_scheduler_job.job"
 	pubSubJobName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -27,7 +24,7 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 			{
 				Config: testAccCloudSchedulerJob_pubSubConfig(pubSubJobName, project),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCloudSchedulerJobExists(jobResourceName, &job),
+					testAccCloudSchedulerJobExists(jobResourceName),
 					resource.TestCheckResourceAttr(jobResourceName, "name", pubSubJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/2 * * * *"),
@@ -41,8 +38,6 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 func TestAccCloudSchedulerJob_http(t *testing.T) {
 	t.Parallel()
 
-	var job cloudscheduler.Job
-
 	jobResourceName := "google_cloud_scheduler_job.job"
 	httpJobName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
@@ -54,7 +49,7 @@ func TestAccCloudSchedulerJob_http(t *testing.T) {
 			{
 				Config: testAccCloudSchedulerJob_httpConfig(httpJobName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCloudSchedulerJobExists(jobResourceName, &job),
+					testAccCloudSchedulerJobExists(jobResourceName),
 					resource.TestCheckResourceAttr(jobResourceName, "name", httpJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test http job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/8 * * * *"),
@@ -68,8 +63,6 @@ func TestAccCloudSchedulerJob_http(t *testing.T) {
 func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 	t.Parallel()
 
-	var job cloudscheduler.Job
-
 	jobResourceName := "google_cloud_scheduler_job.job"
 	appEngineJobName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
@@ -81,7 +74,7 @@ func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 			{
 				Config: testAccCloudSchedulerJob_appEngineConfig(appEngineJobName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCloudSchedulerJobExists(jobResourceName, &job),
+					testAccCloudSchedulerJobExists(jobResourceName),
 					resource.TestCheckResourceAttr(jobResourceName, "name", appEngineJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test app engine job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/4 * * * *"),
@@ -92,7 +85,7 @@ func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 	})
 }
 
-func testAccCloudSchedulerJobExists(n string, job *cloudscheduler.Job) resource.TestCheckFunc {
+func testAccCloudSchedulerJobExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -107,12 +100,10 @@ func testAccCloudSchedulerJobExists(n string, job *cloudscheduler.Job) resource.
 		project := rs.Primary.Attributes["project"]
 		region := getTestRegionFromEnv()
 		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
-		found, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
+		_, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("CloudScheduler Job not present %s %s %s", project, region, name))
 		}
-
-		*job = *found
 
 		return nil
 	}

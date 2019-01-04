@@ -13,23 +13,23 @@
 	# limitations under the License.
 #%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
-  var jobName string
-  project, err := getProject(d, config)
-  if err != nil {
- 		return nil, err
- 	}
+	var jobName string
+	project, err := getProject(d, config)
+	if err != nil {
+		return nil, err
+	}
 
-  region, err := getRegion(d, config)
-  if err != nil {
- 		return nil, err
- 	}
+	region, err := getRegion(d, config)
+	if err != nil {
+		return nil, err
+	}
 
-  if v, ok := d.GetOk("name"); ok {
-    jobName = fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, v.(string))
-  } else {
-    err := fmt.Errorf("The name is missing for the job cannot be empty")
-    return nil, err
-  }
+	if v, ok := d.GetOk("name"); ok {
+		jobName = fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, v.(string))
+	} else {
+		err := fmt.Errorf("The name is missing for the job cannot be empty")
+		return nil, err
+	}
 
-  return jobName, nil
+	return jobName, nil
 }
