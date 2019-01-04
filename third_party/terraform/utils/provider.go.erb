@@ -130,6 +130,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			GeneratedDnsResourcesMap,
 			GeneratedRedisResourcesMap,
 			GeneratedResourceManagerResourcesMap,
+			GeneratedSourcerepoResourcesMap,
 			GeneratedStorageResourcesMap,
 			GeneratedMonitoringResourcesMap,
 			map[string]*schema.Resource{
@@ -201,7 +202,6 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 <% unless version == 'ga' -%>
 				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
 <% end -%>
-				"google_sourcerepo_repository":                 resourceSourceRepoRepository(),
 				"google_spanner_instance":                      resourceSpannerInstance(),
 				"google_spanner_instance_iam_binding":          ResourceIamBindingWithImport(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
 				"google_spanner_instance_iam_member":           ResourceIamMemberWithImport(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
