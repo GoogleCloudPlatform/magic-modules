@@ -67,6 +67,13 @@ link_query = object.self_link_query || object.collection_url_response
       response[wrap_path].each do |hash|
         hash_with_symbols = {}
         hash.each_pair { |k, v| hash_with_symbols[k.to_sym] = v }
+<% object.all_properties.each do |prop|
+	if prop.name_from_self_link
+-%>
+        <%= "hash_with_symbols[:#{prop.out_name}] = name_from_self_link(hash_with_symbols[:#{prop.out_name}])" -%>
+
+<% end 
+end -%>
         converted.push(hash_with_symbols)
       end
     end

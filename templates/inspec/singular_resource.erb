@@ -64,7 +64,11 @@ class <%= object.name -%> < GcpResourceBase
     if time?(prop)
       init = "parse_time_string(@fetched['#{prop.api_name}'])"
     elsif primitive?(prop)
-      init = "@fetched['#{prop.api_name}']"
+      if prop.name_from_self_link
+        init = "name_from_self_link(@fetched['#{prop.api_name}'])"
+      else
+        init = "@fetched['#{prop.api_name}']"
+      end
     elsif typed_array?(prop)
       init = "#{inspec_property_type(prop)}.parse(@fetched['#{prop.api_name}'])"
     else
