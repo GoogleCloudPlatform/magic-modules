@@ -62,10 +62,11 @@ module Provider
 
     def generate_properties(data)
       object = data[:object]
-      nested_object_arrays = object.properties.select\
+      props = object.is_a?(::Api::Resource) ? object.all_user_properties : object.properties
+      nested_object_arrays = props.select\
         { |type| typed_array?(type) && nested_object?(type.item_type) }
 
-      nested_objects = object.properties.select { |prop| nested_object?(prop) }
+      nested_objects = props.select { |prop| nested_object?(prop) }
 
       prop_map = nested_objects.map\
         { |nested_object| emit_nested_object(nested_object_data(data, nested_object)) }
@@ -143,15 +144,16 @@ module Provider
 
       name = "google_#{data[:product_name]}_#{data[:object].name.underscore}"
 
-      generate_inspec_test(data, name, target_folder)
+      generate_inspec_test(data, name, target_folder, name)
 
       # Build test for plural resource
-      generate_inspec_test(data, name.pluralize, target_folder)
+      generate_inspec_test(data, name.pluralize, target_folder, name)
     end
 
-    def generate_inspec_test(data, name, target_folder)
+    def generate_inspec_test(data, name, target_folder, attribute_file_name)
       generate_resource_file data.clone.merge(
         name: name,
+        attribute_file_name: attribute_file_name,
         doc_generation: false,
         default_template: 'templates/inspec/integration_test_template.erb',
         out_file: File.join(
@@ -267,6 +269,16 @@ module Provider
 
     def grab_attributes
       YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yml')
+    end
+
+    # Returns a variable name OR default value for that variable based on
+    # defaults from the existing inspec-gcp tests that do not exist within MM
+    # Default values are used within documentation to show realistic examples
+    def external_attribute(attribute_name, doc_generation = false)
+      return attribute_name unless doc_generation
+
+      external_attribute_file = 'templates/inspec/examples/attributes/external_attributes.yml'
+      "'#{YAML.load_file(external_attribute_file)[attribute_name]}'"
     end
 
     def inspec_property_type(property)
