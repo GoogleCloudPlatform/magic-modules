@@ -35,7 +35,7 @@ module GoogleInSpec
 <% nested_properties.each do |prop| -%>
 <%
   if time?(prop)
-      init = "Time.parse(args['#{prop.api_name}'])"
+      init = "args['#{prop.api_name}'] ? Time.parse(args['#{prop.api_name}']) : nil"
   elsif primitive?(prop)
     init = "args['#{prop.api_name}']"
   elsif typed_array?(prop)
@@ -49,8 +49,8 @@ module GoogleInSpec
 <% end # nested_properties.each -%>
         end
       end
-
 <% if emit_array -%>
+
       class <%= class_name %>Array
         def self.parse(value)
           return if value.nil?

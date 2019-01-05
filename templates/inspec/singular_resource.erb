@@ -31,7 +31,7 @@ class <%= object.name -%> < GcpResourceBase
   desc '<%= object.name -%>'
   supports platform: 'gcp'
 
-<% object.properties.each do |prop| -%>
+<% object.all_user_properties.each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>
 
 <% end -%>
@@ -58,11 +58,11 @@ class <%= object.name -%> < GcpResourceBase
 
   def parse
 <%
-  parse_code = object.properties.map do |prop|
+  parse_code = object.all_user_properties.map do |prop|
     name = prop.out_name
 
     if time?(prop)
-      init = "Time.parse(@fetched['#{prop.api_name}'])"
+      init = "parse_time_string(@fetched['#{prop.api_name}'])"
     elsif primitive?(prop)
       init = "@fetched['#{prop.api_name}']"
     elsif typed_array?(prop)
@@ -75,6 +75,11 @@ class <%= object.name -%> < GcpResourceBase
   end
 -%>
 <%= lines(indent(parse_code, 4)) -%>
+  end
+
+  # Handles parsing RFC3339 time string
+  def parse_time_string(time_string)
+    time_string ? Time.parse(time_string) : nil
   end
 
   def exists?
