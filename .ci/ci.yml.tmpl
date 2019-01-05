@@ -368,6 +368,24 @@ jobs:
                 label_file: magic-modules-with-comment/label_file
             get_params:
                 skip_clone: true
+    - name: terraform-acceptance-tests
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [{{','.join(vars.terraform_submodules)}}]
+          passed: [create-prs]
+        - aggregate:
+          {% for v in vars.terraform_v.itervalues() %}
+          - task: test-{{v.short_name}}
+            file: magic-modules/.ci/acceptance-tests/terraform-acceptance.yml
+            params:
+              PROVIDER_NAME: {{v.provider_name}}
+              SHORT_NAME: {{v.short_name}}
+              TEST_DIR: {{v.test_dir}}
+          {% endfor %}
+
 
     - name: merge-prs
       plan:
