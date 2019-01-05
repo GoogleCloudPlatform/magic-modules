@@ -20,6 +20,13 @@ module Provider
     # Collection of fields allowed in the PropertyOverride section for
     # inspec. All fields should be `attr_reader :<property>`
     module OverrideFields
+      def self.attributes
+        [
+          :name_from_self_link, # Set to convert self link to name
+        ]
+      end
+
+      attr_reader(*attributes)
     end
 
     # inspec-specific overrides to api.yaml.
