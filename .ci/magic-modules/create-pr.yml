@@ -8,7 +8,7 @@ image_resource:
     type: docker-image
     source:
         repository: gcr.io/magic-modules/hub
-        tag: 'latest'
+        tag: '1.0'
 
 inputs:
     - name: magic-modules
