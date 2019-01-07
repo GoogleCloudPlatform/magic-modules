@@ -80,7 +80,6 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'
         description: 'The number of nodes allocated to this instance.'
-      # 'state' not suitable for state convergeance.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -115,6 +114,7 @@ objects:
     base_url: projects/{{project}}/instances/{{instance}}/databases
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
+    input: true
     transport: !ruby/object:Api::Resource::Transport
       decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList
@@ -126,6 +126,7 @@ objects:
         imports: 'name'
         description: 'The instance to create the database on.'
         required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -134,6 +135,8 @@ objects:
           the instance is created. Values are of the form
           projects/<project>/instances/[a-z][-a-z0-9]*[a-z0-9]. The final
           segment of the name must be between 6 and 30 characters in length.
+        input: true
+        required: true
       - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
         name: 'extraStatements'
@@ -143,3 +146,8 @@ objects:
           execute atomically with the creation of the database: if there is an
           error in any statement, the database is not created.
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'state'
+        description: An explanation of the status.
+        output: true
+        exclude: true
