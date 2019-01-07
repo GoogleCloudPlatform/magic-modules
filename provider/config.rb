@@ -26,7 +26,6 @@ module Provider
     # Overrides for datasources
     attr_reader :datasources
     attr_reader :files
-    attr_reader :changelog
     # Product names are complicated in MagicModules.  They are given by
     # product.prefix, which is in the format 'g<nameofproduct>', e.g.
     # gcompute or gresourcemanager.  This is munged in many places.
