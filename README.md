@@ -105,6 +105,19 @@ and using the repository for the `google-beta` provider.
 bundle exec compiler -a -v "beta" -e terraform -o "$GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta"
 ```
 
+### Making changes to resources
+
+TODO
+
+You can modify resources in the `api.yaml` of the GCP product it is a part of as
+well as in the tool-specific yaml file such as `terraform.yaml`.
+
+Most fields in .yaml files are documented in the [`api` package](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/api).
+
+#### Making changes to handwritten files
+
+TODO
+
 ### Testing your changes
 
 Once you've generated your changes for the tool, you can test them by running the
@@ -120,3 +133,45 @@ inspec           | TODO(slevenick): Add this
 terraform        | [`google` provider testing guide](https://github.com/terraform-providers/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/terraform-providers/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
 
+### Submitting a PR
+
+Before creating a commit, if you've modified any .rb files, make sure you run
+`rake test`! That will run rubocop to ensure that the code you've written will
+pass Travis.
+
+Once you've created your commit(s), you can submit the code normally as a PR in
+the GitHub UI. The PR template includes some instructions to make sure we
+generate good PR messages for the tools' repo histories.
+
+Once your PR is submitted, one of the Magic Modules maintainers will review it.
+They'll look over the code before running the "Magician", the Magic Modules CI
+system that generates PRs against each tool. Each review pass, your reviewer
+will run the Magician again to update the PRs against the tools.
+
+If there are multiple tools affected, that first reviewer will be the "primary"
+reviewer, and for each other affected tool a maintainer for that specific tool
+will make a pass. The primary reviewer will make it clear which other
+maintainers need to review, and prompt them to review your code; you will
+communicate primarily with the first reviewer.
+
+Even when multiple tools are affected, this will generally be a quick look by
+that maintainer with no changes needing to be made.
+
+Once you've gotten approvals from the primary reviewer and the reviewers for
+any affected tools, the primary reviewer will merge your changes.
+
+#### Contributor License Agreements
+
+We have a few legal steps to accept most community changes. Please fill out
+either the individual or corporate Contributor License Agreement (CLA).
+
+  * If you are an individual writing original source code and you're sure you
+    own the intellectual property, then you'll need to sign an [individual CLA]
+    (http://code.google.com/legal/individual-cla-v1.0.html).
+  * If you work for a company that wants to allow you to contribute your work,
+    then you'll need to sign a [corporate CLA]
+    (http://code.google.com/legal/corporate-cla-v1.0.html).
+
+Follow either of the two links above to access the appropriate CLA and
+instructions for how to sign and return it. Once we receive it, we'll be able to
+review/accept your PR.
