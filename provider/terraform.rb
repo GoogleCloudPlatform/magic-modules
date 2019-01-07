@@ -69,7 +69,8 @@ module Provider
         Api::Type::Array => 'schema.TypeList',
         Api::Type::KeyValuePairs => 'schema.TypeMap',
         Api::Type::Map => 'schema.TypeSet',
-        Api::Type::Fingerprint => 'schema.TypeString'
+        Api::Type::Fingerprint => 'schema.TypeString',
+        Api::Type::UpdateMask => 'schema.TypeString'
       }
     end
 
