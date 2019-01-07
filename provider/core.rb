@@ -232,8 +232,6 @@ module Provider
       {
         name: object.out_name,
         object: object,
-        tests: (@config.tests || {}).select { |o, _v| o == object.name }
-                                    .fetch(object.name, {}),
         output_folder: output_folder,
         product_name: object.__product.prefix[1..-1],
         version: version
