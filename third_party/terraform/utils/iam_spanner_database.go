@@ -131,26 +131,6 @@ func spannerToResourceManagerPolicy(p *spanner.Policy) (*cloudresourcemanager.Po
 	return out, nil
 }
 
-func buildSpannerDatabaseId(d *schema.ResourceData, config *Config) (*spannerDatabaseId, error) {
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-	database, ok := d.GetOk("name")
-	if !ok {
-		database = d.Get("database")
-	}
-
-	dbName := database.(string)
-	instanceName := d.Get("instance").(string)
-
-	return &spannerDatabaseId{
-		Project:  project,
-		Instance: instanceName,
-		Database: dbName,
-	}, nil
-}
-
 type spannerDatabaseId struct {
 	Project  string
 	Instance string
