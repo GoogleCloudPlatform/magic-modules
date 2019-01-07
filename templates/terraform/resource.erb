@@ -205,7 +205,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         describes a list result from a read. -%>
 <%=     compile_template('templates/terraform/self_link_query.erb',
                          object: object,
-                         object.settable_properties: object.settable_properties,
+                         settable_properties: object.settable_properties,
                          resource_name: resource_name) -%>
 <% end -%>
 
