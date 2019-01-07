@@ -5,22 +5,22 @@ resource_types:
     - name: merged-downstreams
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
-          repository: nmckinley/merged-prs-resource
-          tag: v0.0.7
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/merged-prs-resource
+          tag: '1.0'
 
     - name: git-branch
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
-          repository: nmckinley/concourse-git-resource
-          tag: v0.1.20
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/concourse-git-resource
+          tag: '1.0'
 
     - name: github-pull-request
       type: docker-image
       source:
-          repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.20
+          repository: gcr.io/magic-modules/concourse-github-pr-resource
+          tag: '1.0'
 
 resources:
     - name: magic-modules

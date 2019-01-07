@@ -57,11 +57,11 @@ Concourse has three primitives - Resources, Jobs, and Tasks.
 
 Concourse is strongly based on containers, and consequently it's worth keeping track of which containers the pipeline uses.
 
-### nmckinley/concourse-github-pr-resource
-This is based on https://github.com/jtarchie/github-pullrequest-resource.  It contains a few features that haven't been merged into that repo yet, which you can see at this fork: https://github.com/ndmckinley/github-pullrequest-resource.  It is probably not necessary to update this container often.  The credhub instance associated with sunrise contains the username / password for that dockerhub account.
+### gcr.io/magic-modules/concourse-github-pr-resource
+This is based on https://github.com/jtarchie/github-pullrequest-resource.  It contains a few features that haven't been merged into that repo yet, which you can see at this fork: https://github.com/ndmckinley/github-pullrequest-resource.  It is probably not necessary to update this container often.
 
-### nmckinley/concourse-git-resource
-This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  It is probably not necessary to update this container ever, but if for some reason you did need to do that, you would want to rebase the changes in that pull request onto the new master of `concourse/git-resource` and push a new version.  The credhub instance associated with sunrise contains the username / password for that dockerhub account.
+### gcr.io/magic-modules/concourse-git-resource
+This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  It is probably not necessary to update this container ever, but if for some reason you did need to do that, you would want to rebase the changes in that pull request onto the new master of `concourse/git-resource` and push a new version.
 
 -------
 

@@ -4,8 +4,8 @@ inputs:
 image_resource:
   type: docker-image
   source:
-    repository: nmckinley/inspec
-    tag: '3.0.52'
+      repository: gcr.io/magic-modules/terraform-gcloud-inspec
+      tag: '0.11.10-3.0.0'
 run:
   path: magic-modules/.ci/unit-tests/inspec.sh
 params:
