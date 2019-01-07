@@ -24,31 +24,16 @@ def wait_for_operation(module, response):
     wait_for_completion(status, op_result, module)
 <%=
   obj_kind = quote_string(object.kind)
-  lines(format(
-    [
-      [
-        "return fetch_wrapped_resource(module, #{obj_kind},",
-        ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?),
-        "'#{object.self_link_query.items}')"
-      ].join(' '),
-      [
-        [
-         "return fetch_wrapped_resource(resource, #{obj_kind},",
-         ("'#{object.self_link_query.kind}'," if object.self_link_query.kind?)
-        ].join(' '),
-        indent([
-          "'#{object.self_link_query.items}')"
-        ], 23) # 23 = align with ( previous line
-      ],
-      [
-        "return fetch_wrapped_resource(resource, #{obj_kind},",
-        indent([
-          "'#{object.self_link_query.kind}',",
-          "'#{object.self_link_query.items}')"
-        ], 23) # 31 = align with ( previous line
-      ]
-    ], 4
-  ))
+  lines([
+          "return fetch_wrapped_resource(",
+          indent([
+            "resource,",
+            "#{obj_kind},",
+            "'#{object.self_link_query.kind}',",
+            "'#{object.self_link_query.items}')"
+          ], 23) # 31 = align with ( previous line
+        ].join("\n")
+  )
 -%>
 <% end # object.self_link_query.nil? -%>
 

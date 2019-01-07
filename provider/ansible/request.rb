@@ -72,38 +72,18 @@ module Provider
 
       private
 
-      def request_property(prop, hash_name, module_name, indent)
-        format(
-          [
-            [
-              [
-                "#{unicode_string(prop.api_name)}:",
-                request_output(prop, hash_name, module_name).to_s
-              ].join(' ')
-            ],
-            [
-              "#{unicode_string(prop.api_name)}:",
-              indent(request_output(prop, hash_name, module_name).to_s, 4)
-            ]
-          ], 0, indent, 160
-        )
+      def request_property(prop, hash_name, module_name, indent_width)
+        indent([
+                 "#{unicode_string(prop.api_name)}:",
+                 indent(request_output(prop, hash_name, module_name).to_s, 4)
+               ], indent_width)
       end
 
-      def response_property(prop, hash_name, module_name, indent)
-        format(
-          [
-            [
-              [
-                "#{unicode_string(prop.api_name)}:",
-                response_output(prop, hash_name, module_name).to_s
-              ].join(' ')
-            ],
-            [
-              "#{unicode_string(prop.api_name)}:",
-              indent(response_output(prop, hash_name, module_name).to_s, 4)
-            ]
-          ], 0, indent, 160
-        )
+      def response_property(prop, hash_name, module_name, indent_width)
+        indent([
+                 "#{unicode_string(prop.api_name)}:",
+                 indent(response_output(prop, hash_name, module_name).to_s, 4)
+               ], indent_width)
       end
 
       def response_output(prop, hash_name, module_name)

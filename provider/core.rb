@@ -285,46 +285,6 @@ module Provider
       (code + (self_code || [])).join("\n")
     end
 
-    # Formats the code and returns the first candidate that fits the alloted
-    # column limit.
-    def format(sources, indent = 0, start_indent = 0,
-               max_columns = @max_columns)
-      format2(sources, indent: indent,
-                       start_indent: start_indent,
-                       max_columns: max_columns)
-    end
-
-    # TODO(nelsonjr): Make format2 into format and fix all references throughout
-    # the code base.
-    def format2(sources, overrides = {})
-      options = DEFAULT_FORMAT_OPTIONS.merge(overrides)
-      output = ''
-      avail_columns = options[:max_columns] - options[:start_indent]
-      sources.each do |attempt|
-        output = indent(attempt, options[:indent])
-        return output if format_fits?(output, options[:start_indent],
-                                      options[:max_columns])
-      end
-      unless options[:on_misfit].nil?
-        (alt_fit, alt_output) = options[:on_misfit].call(sources, output,
-                                                         options, avail_columns)
-        return alt_output if alt_fit
-      end
-
-      indent([
-               '# rubocop:disable Metrics/LineLength',
-               sources.last,
-               '# rubocop:enable Metrics/LineLength'
-             ], options[:indent])
-    end
-
-    def format_fits?(output, start_indent,
-                     max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns])
-      output = output.flatten.join("\n") if output.is_a?(::Array)
-      output = output.split("\n") unless output.is_a?(::Array)
-      output.select { |l| l.length > (max_columns - start_indent) }.empty?
-    end
-
     def relative_path(target, base)
       Pathname.new(target).relative_path_from(Pathname.new(base))
     end

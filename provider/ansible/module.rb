@@ -70,22 +70,18 @@ module Provider
         type = "type=#{quote_string(python_type(prop))}"
         # + 6 for =dict(
         choices_indent = spaces + name.length + type.length + 6
-        format([
-                 [
-                   "choices=[#{prop.values.map do |x|
-                                 quote_string(x.to_s)
-                               end.join(', ')}]"
-                 ],
-                 [
-                   "choices=['#{prop.values[0]}',",
-                   prop.values[1..-2].map do |x|
-                     "#{indent(quote_string(x.to_s), choices_indent + 11)},"
-                   end,
-                   # + 11 for ' choices='
-                   indent("#{quote_string(prop.values[-1].to_s)}]",
-                          choices_indent + 11)
-                 ]
-               ], 0, choices_indent)
+        indent(
+          [
+            "choices=['#{prop.values[0]}',",
+            prop.values[1..-2].map do |x|
+              "#{indent(quote_string(x.to_s), choices_indent + 11)},"
+            end,
+            # + 11 for ' choices='
+            indent("#{quote_string(prop.values[-1].to_s)}]",
+                   choices_indent + 11)
+          ],
+          choices_indent
+        )
       end
     end
   end
