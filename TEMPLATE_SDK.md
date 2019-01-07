@@ -3,6 +3,37 @@
 This document describes in detail the resources available to build a new
 resource using Magic Module template system.
 
+## Types
+
+When defining a property you have to specify its type. Although some products
+may not care about types and may convert from/to strings, it is important to
+know the type so the compiler can do the best job possible to validate the
+input, ensure consistency, etc.
+
+Currently MM supports the following types:
+
+-  `Api::Type::Array`: Represents an array of values. The type of the values is
+   identified by the `item\_type`property.
+-  `Api::Type::Boolean`: A boolean (true or false) value.
+-  `Api::Type::Constant`: A constant that will be passed to the API.
+-  `Api::Type::Double`: A double number.
+-  `Api::Type::Enum`: Input is allowed only from a fixed list of values,
+   specified by the `values` property.
+-  `Api::Type::Integer`: An integer number.
+-  `Api::Type::Long`: A long number
+-  `Api::Type::KeyValuePairs`: A string -> string key -> value pair such as
+   labels
+-  `Api::Type::Map`: A string -> `Api::Type::NestedObject` map.
+-  `Api::Type::NestedObject`: A composite field, composed of inner fields. This
+   is used for structures that are nested.
+-  <a id="resource-ref"></a>`Api::Type::ResourceRef`: A reference to another object described in the
+   product. This is used to create strong relationship binding between the
+   objects, where the generated code will make sure the object depended upon
+   exists. A `ResourceRef` also specifies which property from the dependent
+   object we are interested to fetch, by specifying the `resource` and `imports`
+   fields.
+-  `Api::Type::String`: A string field.
+-  `Api::Type::Time`: An RFC 3339 representation of a time stamp.
 
 ## Variables
 
