@@ -164,11 +164,14 @@ wrapping those lines of code in version guards;
 
 ### Testing your changes
 
-Once you've generated your changes for the tool, you can test them by running the
-tool-specific tests as if you were submitting a PR against that tool.
+Once you've made changes to resource definition, you can run Magic Modules
+to generate changes to your tool; see "Generating downstream tools" above if
+you need a refresher. Once it's generated, you should run the tool-specific
+tests as if you were submitting a PR against that tool.
 
-You can run tests in the `{{output_folder}}` from above. See the following for
-more details;
+You can run tests in the `{{output_folder}}` you generated the tool in.
+See the following tool-specific documentation for more details on testing that
+tool;
 
 Tool             | Testing Guide
 -----------------|--------------
@@ -176,6 +179,10 @@ ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_gui
 inspec           | TODO(slevenick): Add this
 terraform        | [`google` provider testing guide](https://github.com/terraform-providers/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/terraform-providers/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
+
+Don't worry about testing every tool, only the primary tool you're making
+changes against. The Magic Modules maintainers will ensure your changes work
+against each tool.
 
 ### Submitting a PR
 
