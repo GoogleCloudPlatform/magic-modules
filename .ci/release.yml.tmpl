@@ -4,8 +4,8 @@ resource_types:
     - name: git-branch
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
-          repository: nmckinley/concourse-git-resource
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/concourse-git-resource
           tag: v0.1.7
 
     - name: gcs-resource
