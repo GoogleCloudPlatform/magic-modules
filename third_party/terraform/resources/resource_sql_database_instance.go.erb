@@ -784,10 +784,10 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	var op *sqladmin.Operation
-	err = retryTime(func() error {
+	err = retryTimeDuration(func() error {
 		op, err = config.clientSqlAdmin.Instances.Delete(project, d.Get("name").(string)).Do()
 		return err
-	}, 5)
+	}, d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete instance %s: %s", d.Get("name").(string), err)

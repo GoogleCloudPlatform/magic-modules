@@ -208,10 +208,10 @@ func resourceSqlUserDelete(d *schema.ResourceData, meta interface{}) error {
 	defer mutexKV.Unlock(instanceMutexKey(project, instance))
 
 	var op *sqladmin.Operation
-	err = retryTime(func() error {
+	err = retryTimeDuration(func() error {
 		op, err = config.clientSqlAdmin.Users.Delete(project, instance, host, name).Do()
 		return err
-	}, 5 /* minutes */)
+	}, d.Timeout(schema.TimeoutDelete))
 
 	if err != nil {
 		return fmt.Errorf("Error, failed to delete"+
