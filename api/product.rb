@@ -18,10 +18,25 @@ require 'compile/core'
 module Api
   # Repesents a product to be managed
   class Product < Api::Object::Named
+
+    # Inherited:
+    # The full name of the product: `Google Compute Engine`
+    # attr_reader :name
+
     attr_reader :objects
+
+    # The prefix to uniquely identify the types
     attr_reader :prefix
+
+    # The list of permission scopes available for the service
+    # For example: `https://www.googleapis.com/auth/compute`
     attr_reader :scopes
+
+    # The API versions of this product
     attr_reader :versions
+
+    # The base URL for the service API endpoint
+    # For example: `https://www.googleapis.com/compute/v1/`
     attr_reader :base_url
 
     include Compile::Core

@@ -23,7 +23,9 @@ module Api
       include Api::Object::Named::Properties
 
       attr_reader :description
+      # GCP kind, e.g. `compute#disk`
       attr_reader :kind
+      # URI: relative to `@api.base_url` or absolute
       attr_reader :base_url
       # URL to use for creating the resource. If not specified, the
       # collection url (when create_verb is default or :POST) or
@@ -56,6 +58,7 @@ module Api
       attr_reader :readonly
       attr_reader :exports
       attr_reader :transport
+      # Documentation references
       attr_reader :references
       attr_reader :create_verb
       attr_reader :delete_verb
@@ -116,7 +119,12 @@ module Api
 
     # Represents a list of documentation links.
     class ReferenceLinks < Api::Object
+      # Hash containing
+      # name: The title of the link
+      # value: The URL to navigate on click
       attr_reader :guides
+
+      # the url of the API guide
       attr_reader :api
 
       def validate
