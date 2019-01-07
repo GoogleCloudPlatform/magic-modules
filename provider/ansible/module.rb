@@ -75,7 +75,7 @@ module Provider
           [
             'choices=[',
             prop.values.map do |x|
-              "#{indent(quote_string(x.to_s), 11)},"
+              "#{indent(quote_string(x.to_s), 10)},"
             end,
             indent(']', 8)
           ],
