@@ -189,14 +189,22 @@ def main():
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <%   elsif  !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% method_args = ['link'] -%>
+<%= update_mask = object.all_user_properties.select { |v| v.is_a?(Api::Type::UpdateMask) }.first -%>
+<% if update_mask -%>
+    update_request = <%= update_request -%>(module)
+    update_request['<%= update_mask.name -%>'] = update_mask(resource_to_request(module), response_to_hash(module, fetch)
+<% method_args.append('update_request') -%>
+<%     else # no update mask -%>
+<% method_args.append("#{update_request}(module)") -%>
+<% end # update mask -%>
 <%
   update_verb = object.update_verb.to_s.downcase
   method = method_call(
     object.async ? 'wait_for_operation' : 'return_if_object',
     [
      'module',
-     method_call("auth.#{update_verb}",
-                 ['link', "#{update_request}(module)"]),
+     method_call("auth.#{update_verb}", method_args),
      ('kind' if !object.async && object.kind?)
    ]
   )
@@ -248,6 +256,9 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
 
 <% end -%>
 <% end # unless update_props.empty? -%>
+<% if update_mask -%>
+<%= lines(compile('templates/ansible/update_mask.erb')) -%>
+<% end # if update_mask -%>
 <%=
   lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
                                ('fetch' if object.access_api_results)]))
