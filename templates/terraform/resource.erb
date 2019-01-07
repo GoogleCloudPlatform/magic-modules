@@ -22,11 +22,9 @@ package google
     resource_name = product_ns + object.name
     properties = object.all_user_properties
     # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
-    # can just be read in anyways, and after a Read they will need to be set in every Update.
-    settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
     # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
-    update_body_properties = settable_properties
-    update_body_properties = settable_properties.reject(&:input) if object.update_verb == :PATCH
+    update_body_properties = object.settable_properties
+    update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
@@ -44,10 +42,10 @@ func resource<%= resource_name -%>() *schema.Resource {
         Update: resource<%= resource_name -%>Update,
 <%      end -%>
         Delete: resource<%= resource_name -%>Delete,
-<%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+<%      if object.settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
         CustomizeDiff: customdiff.All(
 <%=
-            settable_properties.select { |p| p.unordered_list }
+            object.settable_properties.select { |p| p.unordered_list }
                                .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
                                .join(",\n")
 -%>
@@ -96,7 +94,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%= lines(build_subresource_schema(prop, object), 1) -%>
 <% end -%>
 
-<% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
+<% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template('templates/terraform/unordered_list_customize_diff.erb',
@@ -110,7 +108,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     config := meta.(*Config)
 
     obj := make(map[string]interface{})
-<%  settable_properties.each do |prop| -%>
+<%  object.settable_properties.each do |prop| -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return err
@@ -207,7 +205,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         describes a list result from a read. -%>
 <%=     compile_template('templates/terraform/self_link_query.erb',
                          object: object,
-                         settable_properties: settable_properties,
+                         object.settable_properties: object.settable_properties,
                          resource_name: resource_name) -%>
 <% end -%>
 
@@ -498,7 +496,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>
 <% end -%>
 
-<% settable_properties.each do |prop| -%>
+<% object.settable_properties.each do |prop| -%>
 <%= lines(build_expand_method(resource_name, prop), 1) -%>
 <% end -%>
 

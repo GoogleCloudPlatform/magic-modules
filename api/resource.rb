@@ -358,6 +358,15 @@ module Api
                    .gsub('{{zone}}', '[a-z1-9\-]*')
     end
 
+    # All setable properties in the resource.
+    # Fingerprints aren't *really" settable properties, but they behave like one.
+    # At Create, they have no value but they can just be read in anyways, and after a Read
+    # they will need ot be set in every Update.
+    def settable_properties
+      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
+                         .reject(&:url_param_only)
+    end
+
     private
 
     # Given an array of properties, return all ResourceRefs contained within
