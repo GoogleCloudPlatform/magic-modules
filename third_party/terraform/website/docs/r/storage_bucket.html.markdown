@@ -18,7 +18,7 @@ For more information see
 and
 [API](https://cloud.google.com/storage/docs/json_api/v1/buckets).
 
-**Note**: If you are importing a bucket resource or are falling back on the default provider project for bucket creation, you will need to enable the Compute API. This is indicated by an error with a link to the enablement page. If you would prefer not to enable the Compute API, ensure you are explicitly  setting `project` on the bucket resource.
+**Note**: When importing a bucket or using only the default provider project for bucket creation, you will need to enable the Compute API and will otherwise get an error with a link to the API enablement page. If you would prefer not to enable the Compute API, make sure to explicitly set `project` on the bucket resource.
 
 ## Example Usage
 
