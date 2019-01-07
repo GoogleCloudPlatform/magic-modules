@@ -1,4 +1,4 @@
-FROM nmckinley/go-ruby:1.11-2.5.1
+FROM gcr.io/magic-modules/go-ruby:1.11-2.5.1
 
 # Install python & python libraries.
 RUN apt-get update

@@ -1,4 +1,4 @@
-FROM nmckinley/go-ruby-python:1.11-2.5.1-2.7
+FROM gcr.io/magic-modules/go-ruby-python:1.11-2.5.1-2.7
 
 RUN apt-get install unzip
 RUN curl https://releases.hashicorp.com/terraform/0.11.10/terraform_0.11.10_linux_amd64.zip > terraform_0.11.10_linux_amd64.zip

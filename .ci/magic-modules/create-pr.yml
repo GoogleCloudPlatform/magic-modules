@@ -7,7 +7,7 @@ platform: linux
 image_resource:
     type: docker-image
     source:
-        repository: nmckinley/hub
+        repository: gcr.io/magic-modules/hub
         tag: 'latest'
 
 inputs:

@@ -1,5 +1,0 @@
-source 'https://rubygems.org'
-
-gem 'puppet', '<6.0.0'
-gem 'puppet_forge'
-gem 'puppet-blacksmith'
