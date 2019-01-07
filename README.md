@@ -25,9 +25,6 @@ other tool.
 
 ## Getting Started with Magic Modules
 
-Using Magic Modules to make changes to the generated tools might seem
-intimidating, but we're here to help you get familiar with our tooling.
-
 We've prepared an interactive tutorial that you can try out with Open in Cloud
 Shell below; if you're getting set up on a local workstation, this guide serves
 as a reference.
