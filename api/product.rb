@@ -18,7 +18,6 @@ require 'compile/core'
 module Api
   # Repesents a product to be managed
   class Product < Api::Object::Named
-
     # Inherited:
     # The full name of the product: `Google Compute Engine`
     # attr_reader :name
