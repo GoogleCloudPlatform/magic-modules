@@ -16,9 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{priority}}"
     import_format: ["{{project}}/{{priority}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
-    examples:
+    example:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_firewall_rule_basic"
         primary_resource_id: "rule"

@@ -169,3 +169,6 @@ objects:
           Server-specified ETag for the instance resource to prevent
           simultaneous updates from overwriting each other.
         output: true
+      - !ruby/object:Api::Type::UpdateMask
+        name: 'updateMask'
+        description: The list of fields being updated.

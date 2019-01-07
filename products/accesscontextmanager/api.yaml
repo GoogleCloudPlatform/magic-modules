@@ -65,6 +65,9 @@ objects:
         description: |
           Time the AccessPolicy was updated in UTC.
         output: true
+      - !ruby/object:Api::Type::UpdateMask
+        name: 'updateMask'
+        description: The list of fields being updated.
   - !ruby/object:Api::Resource
     name: 'AccessLevel'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -259,6 +262,9 @@ objects:
                         - :DESKTOP_CHROME_OS
                         - :ANDROID
                         - :IOS
+      - !ruby/object:Api::Type::UpdateMask
+        name: 'updateMask'
+        description: The list of fields being updated.
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -410,3 +416,6 @@ objects:
               empty is invalid as well. "restrictedServices" can be empty if and
               only if "unrestrictedServices" list contains a "*" wildcard.
             item_type: Api::Type::String
+      - !ruby/object:Api::Type::UpdateMask
+        name: 'updateMask'
+        description: The list of fields being updated.

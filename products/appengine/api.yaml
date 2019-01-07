@@ -62,3 +62,6 @@ objects:
           - UNSPECIFIED_ACTION
           - ALLOW
           - DENY
+      - !ruby/object:Api::Type::UpdateMask
+        name: 'updateMask'
+        description: The list of fields being updated.
