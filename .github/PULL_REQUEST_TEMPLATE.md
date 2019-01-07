@@ -1,20 +1,13 @@
-<!-- A summary of the changes in this commit goes here -->
+<!-- Your regular pull request body goes here -->
 
 <!--
-Changes per downstream repository.  For each repository that you
-expect to have changed, find the [tag] and write your commit
-message beneath it.  More-specific tags replace less-specific tags.
-For example, if you provide a message under [all], a message under
-[puppet], and a message under [puppet-dns], the Terraform repository
-will have the resulting commit made using the [all] message, the
-Puppet Compute repository will have its commit made using [puppet],
-and the Puppet DNS repository will have its commit made using
-[puppet-dns].  You can delete unused tags, but you don't need to.
+For each repository you expect to modify with this PR, fill in a repo-specific
+PR title under the corresponding tag. We use repo-specified PR titles to ensure
+that each downstream has a clear, easy to understand history.
 
-The structure of the PR body is important to our CI system!
-The comments can be deleted, but if you want to make the downstream
-commits sensible, you'll need to leave the dashed line separating
-this PR's changes from the commit messages for downstream commits.
+If the Magician generates a PR for a repo with no specified title, it will use
+the title of this PR. [terraform-beta] will inherit the title of [terraform]
+if it has no specified title.
 -->
 
 <!-- 
