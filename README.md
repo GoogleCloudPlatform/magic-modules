@@ -190,6 +190,12 @@ Before creating a commit, if you've modified any .rb files, make sure you run
 `rake test`! That will run rubocop to ensure that the code you've written will
 pass Travis.
 
+To run rubocop automatically before committing, add a Git pre-commit hook with:
+
+```bash
+cp .github/pre-commit .git/hooks
+```
+
 Once you've created your commit(s), you can submit the code normally as a PR in
 the GitHub UI. The PR template includes some instructions to make sure we
 generate good PR messages for the tools' repo histories.
@@ -210,6 +216,10 @@ that maintainer with no changes needing to be made.
 
 Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
+
+### Pre-commit rubocop hook
+
+
 
 #### Contributor License Agreements
 
