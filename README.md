@@ -40,7 +40,7 @@ To get started, you'll need:
 
 * Ruby 2.5.0
   * You can use `rbenv` to manage your Ruby version(s)
-* The [`bundler`](https://github.com/bundler/bundler) gem
+* [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
 
 ### Preparing Magic Modules / One-time setup
