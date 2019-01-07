@@ -63,6 +63,9 @@ This is based on https://github.com/jtarchie/github-pullrequest-resource.  It co
 ### gcr.io/magic-modules/concourse-git-resource
 This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  It is probably not necessary to update this container ever, but if for some reason you did need to do that, you would want to rebase the changes in that pull request onto the new master of `concourse/git-resource` and push a new version.
 
+### Updating Containers
+Containers are stored in the `magic-modules` GCP project using GCR. Information on using GCR can be found here: https://cloud.google.com/container-registry/docs/pushing-and-pulling. Upon modifying an image please update the Dockerfile within the relevant sub-directory.
+
 -------
 
 #### A side note on tracking submodules
