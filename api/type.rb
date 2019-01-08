@@ -267,6 +267,7 @@ module Api
       def validate
         super
         @output = true if @output.nil?
+        @url_param_only = true if @url_param_only.nil?
       end
     end
 
