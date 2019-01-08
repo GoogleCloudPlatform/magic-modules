@@ -7,21 +7,24 @@
 
 ## Overview
 
-Magic Modules is a tool we use to autogenerate infrastructure-as-code tools for
-Google Cloud Platform. GCP ["resources"](https://cloud.google.com/docs/overview/#gcp_resources)
-are encoded in a shared data file, and that data is used to fill in
-"Mad Libs"-style templates across each of the tools Magic Modules generates.
+Magic Modules is a tool used to autogenerate support in a variety of open source DevOps
+tools for Google Cloud Platform. [GCP "resource"](https://cloud.google.com/docs/overview/#gcp_resources)
+definitions are encoded in a shared data file, and that data is used to fill in
+tool-specific templates across each of the tools Magic Modules
+generates.
 
-They include:
+Magic Modules generates GCP support for:
 
 * Terraform
 * Ansible
 * InSpec
 
-Not only is Magic Modules a force multiplier for our developers, Magic Modules
-allows us to preemptively solve issues by encoding field-tested learnings about
-the GCP API into each tool; issues solved for one tool will be fixed in each
-other tool.
+Importantly, Magic Modules *isn't* full code generation. Every change is made
+manually; more than a code generator, Magic Modules is a force multiplier for 
+development. While many Magic Modules resources are defined exactly based on the
+GCP API, we use Magic Modules to preemptively solve issues across each tool by
+encoding our field-tested learnings from other tools in those definitions. In
+effect, an issue solved in one tool will be solved for each other tool.
 
 ## Getting Started with Magic Modules
 
