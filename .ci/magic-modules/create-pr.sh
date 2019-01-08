@@ -158,7 +158,8 @@ I just wanted to let you know that your changes (as of commit $(git rev-parse --
 EOF
 
   # Create blank label file
-  printf "%s" "$LABELS" > ./label_file
-
+  # This blank file is needed because the `out` command on the GH PR Resource
+  # requires a file in all cases (not just if new labels are being added)
+  printf "%s" "" > ./label_file
 
 fi
