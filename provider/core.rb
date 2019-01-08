@@ -399,9 +399,10 @@ module Provider
     end
 
     def generate_file_write(ctx, data)
-      if File.mtime(data[:out_file]) > @start_time
+      if File.exist?(data[:out_file]) && File.mtime(data[:out_file]) > @start_time
         raise "#{data[:out_file]} was already modified during this run"
       end
+
       enforce_file_expectations data[:out_file] do
         Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
         write_file data[:out_file], compile_file(ctx, data[:template])

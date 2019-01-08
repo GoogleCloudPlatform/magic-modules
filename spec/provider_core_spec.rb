@@ -15,7 +15,7 @@ require 'spec_helper'
 
 describe Provider::Core do
   context '#format' do
-    subject { described_class.new(mock('config'), mock('api')) }
+    subject { described_class.new(mock('config'), mock('api'), Time.now) }
 
     it 'does not fail if cannot fit' do
       expect(
@@ -37,11 +37,11 @@ describe Provider::Core do
 
     context 'fits 100 chars' do
       subject do
-        described_class.new(nil, nil).format([
-                                               ['x' * 100],
-                                               ['y' * 100],
-                                               ['z' * 100]
-                                             ])
+        described_class.new(nil, nil, nil).format([
+                                                    ['x' * 100],
+                                                    ['y' * 100],
+                                                    ['z' * 100]
+                                                  ])
       end
 
       it { is_expected.to include 'x' }
@@ -91,11 +91,11 @@ describe Provider::Core do
 
     context 'selects second option' do
       subject do
-        described_class.new(nil, nil).format([
-                                               ['x' * 101],
-                                               ['y' * 80],
-                                               ['z' * 80]
-                                             ])
+        described_class.new(nil, nil, nil).format([
+                                                    ['x' * 101],
+                                                    ['y' * 80],
+                                                    ['z' * 80]
+                                                  ])
       end
 
       it { is_expected.to include 'y' }
