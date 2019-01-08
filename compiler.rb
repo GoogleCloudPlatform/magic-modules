@@ -36,6 +36,7 @@ require 'pp' if ENV['COMPILER_DEBUG']
 
 product_names = nil
 all_products = false
+yaml_dump = false
 output_path = nil
 provider_name = nil
 force_provider = nil
@@ -52,6 +53,9 @@ OptionParser.new do |opt|
   end
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
     all_products = true
+  end
+  opt.on('-y', '--yaml-dump', 'Dump the final api.yaml output to a file.') do
+    yaml_dump = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
     output_path = o
@@ -144,7 +148,7 @@ product_names.each do |product_name|
       override_providers[force_provider].new(provider_config, product_api)
   end
 
-  provider.generate output_path, types_to_generate, version
+  provider.generate output_path, types_to_generate, version, product_name, yaml_dump
 end
 
 # In order to only copy/compile files once per provider this must be called outside
