@@ -37,8 +37,8 @@ module Provider
       @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
 
       # The compiler will error out if a file has been written in this compiler
-      # run already. Instead of storing all the modified files in state, use
-      # we'll use the time the file was modified.
+      # run already. Instead of storing all the modified files in state we'll
+      # use the time the file was modified.
       @start_time = start_time
     end
 
@@ -399,6 +399,8 @@ module Provider
     end
 
     def generate_file_write(ctx, data)
+      # If we've modified a file since starting an MM run, it's a reasonable
+      # assumption that it was this run that modified it.
       if File.exist?(data[:out_file]) && File.mtime(data[:out_file]) > @start_time
         raise "#{data[:out_file]} was already modified during this run"
       end
