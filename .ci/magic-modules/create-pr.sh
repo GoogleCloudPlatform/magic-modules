@@ -157,4 +157,8 @@ I am (still) a robot that works on MagicModules PRs!
 I just wanted to let you know that your changes (as of commit $(git rev-parse --short HEAD~1)) have been included in your existing downstream PRs.
 EOF
 
+  # Create blank label file
+  printf "%s" "$LABELS" > ./label_file
+
+
 fi
