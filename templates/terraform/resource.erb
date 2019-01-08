@@ -21,8 +21,6 @@ package google
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
-    # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
-    # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
     update_body_properties = object.settable_properties
     update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
@@ -380,7 +378,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
-<%= lines(compile('templates/terraform/pre_update/update_mask.erb')) if object.all_user_properties.select { |v| v.is_a?(Api::Type::UpdateMask) }.first -%>
+<%= lines(compile('templates/terraform/update_mask.erb')) if object.all_user_properties.select { |v| v.is_a?(Api::Type::UpdateMask) }.first -%>
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%  if object.async.nil? -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))

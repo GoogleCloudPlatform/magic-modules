@@ -358,7 +358,7 @@ module Api
                    .gsub('{{zone}}', '[a-z1-9\-]*')
     end
 
-    # All setable properties in the resource.
+    # All settable properties in the resource.
     # Fingerprints aren't *really" settable properties, but they behave like one.
     # At Create, they have no value but they can just be read in anyways, and after a Read
     # they will need ot be set in every Update.
