@@ -1,0 +1,42 @@
+#!/bin/bash
+# Runs initial set up tasks for Magic Modules. This script
+# if safe to run multiple times.
+
+set -e
+
+trap 'traperror' ERR
+
+function traperror () {
+    echo "Failed to run one or more steps. You can run './tools/doctor'"
+    echo "to check that your build environment is correct for Magic Modules."
+}
+
+# Change the the Magic Modules root directory
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+cd "${dir}/.."
+
+# Check out the Terraform providers
+if [[ -z "${GOPATH}" ]]; then
+    if [ -x "$(command -v go)" ]; then
+        GOPATH=$(go env GOPATH)
+    fi
+fi
+if [[ -z "${GOPATH}" ]]; then
+  echo "Skipping Terraform as GOPATH could not be determined"
+else
+    if [ ! -d "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google" ]; then
+        git clone https://github.com/terraform-providers/terraform-provider-google.git \
+            $GOPATH/src/github.com/terraform-providers/terraform-provider-google
+    fi
+    if [ ! -d "${GOPATH}/src/github.com/terraform-providers/terraform-provider-google-beta" ]; then
+        git clone https://github.com/terraform-providers/terraform-provider-google-beta.git \
+            $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
+    fi
+fi
+
+# Check out the Ansible and Inspec providers
+git submodule update --init
+
+# Download additional ruby code.
+bundle install
+
