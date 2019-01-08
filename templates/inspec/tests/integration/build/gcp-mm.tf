@@ -27,5 +27,5 @@ resource "google_pubsub_subscription" "default" {
   project              = "${var.gcp_project_id}"
   name                 = "${var.subscription["name"]}"
   topic                = "${google_pubsub_topic.topic.name}"
-  ack_deadline_seconds = 20
+  ack_deadline_seconds = "${var.subscription["ack_deadline_seconds"]}"
 }
