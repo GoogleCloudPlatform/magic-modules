@@ -217,10 +217,6 @@ that maintainer with no changes needing to be made.
 Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
 
-### Pre-commit rubocop hook
-
-
-
 #### Contributor License Agreements
 
 We have a few legal steps to accept most community changes. Please fill out
