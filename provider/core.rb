@@ -397,6 +397,8 @@ module Provider
       enforce_file_expectations data[:out_file] do
         Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
         write_file data[:out_file], compile_file(ctx, data[:template])
+        old_mode = File.stat(data[:template]).mode
+        FileUtils.chmod(old_mode, data[:out_file])
       end
     end
 
