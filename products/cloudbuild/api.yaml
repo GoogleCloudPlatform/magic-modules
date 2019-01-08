@@ -12,8 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Cloud Build
-prefix: gcloudbuild
+name: CloudBuild
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

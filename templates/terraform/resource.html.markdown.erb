@@ -36,20 +36,24 @@
     directly inserted from YAML.
 -%>
 <%
-  resource_name = product_ns.underscore.downcase + '_' + object.name.underscore
+  if @config.legacy_name.nil?
+    terraform_name = "google_" + (product_ns + object.name).underscore
+  else
+    terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+  end
   properties = object.all_user_properties
   timeouts = object.async.nil? ? Api::Timeouts.new : object.async.operation.timeouts
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
 layout: "google"
-page_title: "Google: google_<%= resource_name -%>"
-sidebar_current: "docs-google-<%= resource_name.gsub("_", "-") -%>"
+page_title: "Google: <%= terraform_name -%>"
+sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
 description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# google\_<%= resource_name.gsub("_", "\\_") %>
+# <%= terraform_name.gsub("_", "\\_") %>
 
 <%= lines(object.description) -%>
 
@@ -165,7 +169,7 @@ This resource provides the following
 
 ```
 <% import_id_formats(object).each do |id_format| -%>
-$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%>google_<%= resource_name -%>.default <%= id_format %>
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= terraform_name -%>.default <%= id_format %>
 <% end -%>
 ```
 

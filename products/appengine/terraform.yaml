@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+legacy_name: "appengine"
 overrides: !ruby/object:Provider::ResourceOverrides
   FirewallRule: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{project}}/{{priority}}"

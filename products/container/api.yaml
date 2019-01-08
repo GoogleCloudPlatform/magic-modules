@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Container Engine
-prefix: gcontainer
+name: Container
+display_name: Google Kubernetes Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

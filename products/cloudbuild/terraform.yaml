@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+legacy_name: 'cloudbuild'
 overrides: !ruby/object:Provider::ResourceOverrides
   Trigger: !ruby/object:Provider::Terraform::ResourceOverride
     # import by default only works with old-style self links ending in a name

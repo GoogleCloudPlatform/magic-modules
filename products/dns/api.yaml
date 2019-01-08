@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud DNS
-prefix: gdns
+name: Dns
+display_name: Google Cloud DNS
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
