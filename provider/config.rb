@@ -30,6 +30,8 @@ module Provider
     # others use spaces. Eg: "app_engine" vs "appengine".
     attr_reader :legacy_name
 
+    attr_reader :overrides
+
     # List of files to copy or compile into target module
     class Files < Api::Object
       attr_reader :compile
@@ -72,7 +74,7 @@ module Provider
     def validate
       super
 
-      overrides
+      default_value_property :overrides, Provider::Overrides::ResourceOverrides.new
 
       check_optional_property :files, Provider::Config::Files
       check_property :overrides, Provider::Overrides::ResourceOverrides
@@ -92,11 +94,6 @@ module Provider
           if var_value.respond_to?(:consume_config)
         spread_api(var_value, api, visited, indent)
       end
-    end
-
-    # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
-    def overrides
-      @overrides ||= Provider::ResourceOverrides.new
     end
   end
 end
