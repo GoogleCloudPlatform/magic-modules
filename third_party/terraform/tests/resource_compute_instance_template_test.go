@@ -476,7 +476,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 	t.Parallel()
 
 	var instanceTemplate compute.InstanceTemplate
-	kms := bootstrapKMSKey(t)
+	kms := BootstrapKMSKey(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

@@ -9,16 +9,6 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-/**
-* bootstrapKMSkey will return a KMS key that can be used in tests that are
-* testing KMS integration with other resources.
-*
-* This will either return an existing key or create one if it hasn't been created
-* in the project yet. The motivation is because keyrings don't get deleted and we
-* don't want a linear growth of disabled keyrings in a project. We also don't want
-* to incur the overhead of creating a new project for each test that needs to use
-* a KMS key.
-**/
 var SharedKeyRing = "tftest-shared-keyring-1"
 var SharedCyptoKey = "tftest-shared-key-1"
 
@@ -27,7 +17,17 @@ type bootstrappedKMS struct {
 	*cloudkms.CryptoKey
 }
 
-func bootstrapKMSKey(t *testing.T) bootstrappedKMS {
+/**
+* BootstrapKMSkey will return a KMS key that can be used in tests that are
+* testing KMS integration with other resources.
+*
+* This will either return an existing key or create one if it hasn't been created
+* in the project yet. The motivation is because keyrings don't get deleted and we
+* don't want a linear growth of disabled keyrings in a project. We also don't want
+* to incur the overhead of creating a new project for each test that needs to use
+* a KMS key.
+**/
+func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 	if v := os.Getenv("TF_ACC"); v == "" {
 		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
 
