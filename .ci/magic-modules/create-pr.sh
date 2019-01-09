@@ -133,22 +133,7 @@ EOF
   fi
 
 else
-  # This is the second-or-more pass through the pipeline - we need to overwrite
-  # the codegen-pr-* branch with the new updated code to update the existing
-  # PR, rather than create a new one.
-  git branch -f "$ORIGINAL_PR_BRANCH"
-
-  if [ -n "$TERRAFORM_REPO_USER" ]; then
-    for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
-      IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
-      PROVIDER_NAME="${TERRAFORM_DATA[0]}"
-      SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
-      pushd "build/$SUBMODULE_DIR"
-      git branch -f "$ORIGINAL_PR_BRANCH"
-      popd
-    done
-  fi
-
+  # Just create the comment stating that existing PRs have been updated.
   # Note - we're interested in HEAD~1 here, not HEAD, because HEAD is the
   # generated code commit.  :)
   cat << EOF > ./pr_comment
