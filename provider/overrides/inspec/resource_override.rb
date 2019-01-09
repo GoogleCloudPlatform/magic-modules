@@ -12,7 +12,6 @@
 # limitations under the License.
 
 require 'provider/overrides/resources'
-require 'provider/inspec/resource_override'
 
 module Provider
   module Overrides
@@ -20,13 +19,27 @@ module Provider
       # A class to control overridden properties on inspec.yaml in lieu of
       # values from api.yaml.
       class ResourceOverride < Provider::Overrides::ResourceOverride
-        include Provider::Inspec::ResourceOverrideSharedCode
 
         def self.attributes
-          Provider::Inspec::OverrideProperties.attributes
+          %i[
+            manual
+            additional_functions
+          ]
         end
 
-        attr_reader(*attributes)
+        attr_reader(*self.attributes)
+
+        def validate
+          assign_defaults
+
+          super
+          check_property :manual, :boolean
+          check_optional_property :additional_functions, String
+        end
+
+        def assign_defaults
+          default_value_property :manual, false
+        end
       end
     end
   end
