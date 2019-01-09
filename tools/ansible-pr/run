@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', '..')
-Dir.chdir(File.join(File.dirname(__FILE__), '..', '..'))
-
 require 'optparse'
-require 'compile/core'
+require_relative '../../compile/core'
 require 'octokit'
+require 'time'
 
 # Class to handle Compile include to avoid Rubocop issues.
 class CompileClass
@@ -47,7 +45,7 @@ ADDITIONAL_FILES = [
   directory: "#{Dir.pwd}/build/ansible/",
   dry_run: false,
   # Get all PRs from one day ago.
-  date: (Time.now - (3600 * 24)).strftime('%Y-%m-%dT%H:%M:%S.%L%z')
+  date: (Time.now - (3600 * 24)).iso8601
 }
 ###########################################################
 # Functions
@@ -69,8 +67,8 @@ end
 
 def new_branch(branch_name, silent = true)
   git_run('git checkout upstream/devel', silent)
-  git_run("git branch -D #{mod_name}", silent)
-  git_run("git checkout -b #{mod_name}", silent)
+  git_run("git branch -D #{branch_name}", silent)
+  git_run("git checkout -b #{branch_name}", silent)
 end
 
 # Check that remotes are in order
@@ -108,7 +106,7 @@ def get_all_pr_messages
   # Limit of 50 bug fixes will go into a PR (should never hit this limit)
   client = Octokit::Client.new(access_token: @options[:creds], per_page: 50)
   client.list_issues('googlecloudplatform/magic-modules', labels: 'ansible,downstream-generated',
-                            state: 'closed', since: @options[:date])
+                     state: 'closed', since: @options[:date].strip)
         .map { |pr| { title: pr[:title], url: pr[:html_url] } }
 end
 #############################################################
@@ -126,7 +124,7 @@ OptionParser.new do |opts|
     @options[:dry_run] = true
   end
 
-  opts.on('--date', 'Date for Github sorting') do |v|
+  opts.on('--date [DATE (as ISO8601 String)]', 'Date for Github sorting') do |v|
     @options[:date] = v
   end
 
@@ -155,7 +153,7 @@ ADDITIONAL_FILES.each do |file|
   changed_files << file if check_if_different(file, 'magician', 'upstream')
 end
 
-puts "Files noticed in these additional files: #{changed_files.join(', ')}"
+puts "Changes noticed in these additional files: #{changed_files.join(', ')}"
 
 # Create a Bug Fix PR.
 existing_modules = get_all_modules('upstream')
@@ -175,7 +173,8 @@ end
 changed_files.each { |file| checkout_file(file) }
 
 # Make a commit
-git_run("git commit -m \"Bug fixes for GCP modules (as of #{options[:date]})\"", true)
+message = "Bug fixes for GCP modules (as of #{@options[:date]})"
+git_run("git commit -m \"#{message}\"", true)
 
 # Create PR message and save to file.
 File.write("tools/ansible-pr/templates/bug_fixes",
@@ -205,14 +204,14 @@ new_modules.each do |mod_name|
   checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
   checkout_file("test/integration/targets/#{mod_name}/")
   changed_files.each { |file| checkout_file(file) }
-  git_run("git commit -m \"New module: #{mod_name}\"", true)
+  message = "New GCP module: #{mod_name}"
+  git_run("git commit -m \"#{message}\"", true)
   # Create PR message and save to file.
-  File.write("tools/ansible-pr/templates/bug_fixes",
+  File.write("tools/ansible-pr/templates/#{mod_name}",
              CompileClass.new.lines(
                CompileClass.new.compile_file({
                                                commit_msg: message,
                                                new: true,
-                                               prs: get_all_pr_messages
                                              },
                                              'tools/ansible-pr/template.md.erb')
              ))
