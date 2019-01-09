@@ -50,7 +50,6 @@ module Provider
       generate_objects(output_folder, types, version_name)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
-      compile_changelog(output_folder) unless @config.changelog.nil?
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
@@ -126,17 +125,6 @@ module Provider
           ["examples/#{file}",
            "products/#{@api.prefix[1..-1]}/files/examples~#{file}"]
         end
-      )
-    end
-
-    # Generate the CHANGELOG.md file with the history of the module.
-    def compile_changelog(output_folder)
-      FileUtils.mkpath output_folder
-      generate_file(
-        changes: @config.changelog,
-        template: 'templates/CHANGELOG.md.erb',
-        output_folder: output_folder,
-        out_file: File.join(output_folder, 'CHANGELOG.md')
       )
     end
 
@@ -232,8 +220,6 @@ module Provider
       {
         name: object.out_name,
         object: object,
-        tests: (@config.tests || {}).select { |o, _v| o == object.name }
-                                    .fetch(object.name, {}),
         output_folder: output_folder,
         product_name: object.__product.prefix[1..-1],
         version: version
