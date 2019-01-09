@@ -23,16 +23,16 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - google-auth >= 1.3.0
   version_added: '2.8'
   author: Google Inc. (@googlecloudplatform)
-datasources: !ruby/object:Provider::ResourceOverrides
-  Project: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  Project: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-  Lien: !ruby/object:Provider::Ansible::ResourceOverride
+  Lien: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-overrides: !ruby/object:Provider::ResourceOverrides
-  Lien: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Lien: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  Project: !ruby/object:Provider::Ansible::ResourceOverride
+  Project: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     return_if_object: |
 <%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 6)) -%>
 files: !ruby/object:Provider::Config::Files

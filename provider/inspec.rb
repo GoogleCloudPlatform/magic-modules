@@ -17,6 +17,8 @@ require 'provider/core'
 require 'provider/inspec/manifest'
 require 'provider/inspec/resource_override'
 require 'provider/inspec/property_override'
+require 'provider/overrides/inspec/resource_override'
+require 'provider/overrides/inspec/property_override'
 require 'active_support/inflector'
 
 module Provider
@@ -37,6 +39,14 @@ module Provider
 
       def property_override
         Provider::Inspec::PropertyOverride
+      end
+
+      def new_resource_override
+        Provider::Overrides::Inspec::ResourceOverride
+      end
+
+      def new_property_override
+        Provider::Overrides::Inspec::PropertyOverride
       end
     end
 

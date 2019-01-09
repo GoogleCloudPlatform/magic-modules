@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'provider/overrides/runner'
 
 module Provider
   module Ansible
@@ -49,6 +50,12 @@ module Provider
         check_property :query_options, :boolean
         check_property :filter_api_param, ::String
         check_optional_property :test, AnsibleFactsTestInformation
+
+        # We have to apply the property overrides and validate
+        # the filtering property
+        @filter = Provider::Overrides::Runner.build_single_property(
+          @filter, {}, Provider::Overrides::Ansible::PropertyOverride
+        )
       end
     end
     # This is a property exclusive to Ansible filters.
