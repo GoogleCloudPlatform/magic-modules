@@ -57,6 +57,10 @@ module Provider
           build_product(api, overrides, resource: res_override_class, property: prop_override_class)
         end
 
+        def build_single_property(api_property, property_override, prop_override_class)
+          build_property(api_property, property_override, { property: prop_override_class }, '')
+        end
+
         private
 
         # Given a old Api::Product, and Provider::Overrides::ResourceOverrides,

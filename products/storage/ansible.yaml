@@ -24,29 +24,29 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
-datasources: !ruby/object:Provider::ResourceOverrides
-  BucketAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  BucketAccessControl: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  Bucket: !ruby/object:Provider::Ansible::ResourceOverride
+  Bucket: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  Object: !ruby/object:Provider::Ansible::ResourceOverride
+  Object: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+  ObjectAccessControl: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
+  DefaultObjectACL: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-overrides: !ruby/object:Provider::ResourceOverrides
-  Bucket: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Bucket: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     properties:
-      defaultObjectAcl: !ruby/object:Provider::Ansible::PropertyOverride
+      defaultObjectAcl: !ruby/object:Provider::Overrides::Ansible::PropertyOverride
         version_added: '2.7'
-  Object: !ruby/object:Provider::Ansible::ResourceOverride
+  Object: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     template: 'products/storage/helpers/ansible/object_template.erb'
     version_added: '2.8'
     has_tests: false
-  ObjectAccessControl: !ruby/object:Provider::Ansible::ResourceOverride
+  ObjectAccessControl: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-  DefaultObjectACL: !ruby/object:Provider::Ansible::ResourceOverride
+  DefaultObjectACL: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:

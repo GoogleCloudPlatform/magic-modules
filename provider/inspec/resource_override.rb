@@ -18,14 +18,18 @@ module Provider
   class Inspec < Provider::Core
     # inspec specific properties to be added to Api::Resource
     module OverrideProperties
-      attr_reader :manual
-      attr_reader :additional_functions
+      def self.attributes
+        %i[
+          manual
+          additional_functions
+        ]
+      end
+
+      attr_reader(*attributes)
     end
 
-    # Product specific overriden properties for inspec
-    class ResourceOverride < Provider::ResourceOverride
-      include OverrideProperties
-
+    # Shared code between new resource overrides and old overrides
+    module ResourceOverrideSharedCode
       def validate
         assign_defaults
 
@@ -34,11 +38,17 @@ module Provider
         check_optional_property :additional_functions, String
       end
 
-      private
-
       def assign_defaults
         default_value_property :manual, false
       end
+    end
+
+    # Product specific overriden properties for inspec
+    class ResourceOverride < Provider::ResourceOverride
+      include OverrideProperties
+      include ResourceOverrideSharedCode
+
+      private
 
       def overriden
         Provider::Inspec::OverrideProperties

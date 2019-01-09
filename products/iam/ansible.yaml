@@ -24,17 +24,17 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.8'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
-datasources: !ruby/object:Provider::ResourceOverrides
-  ServiceAccount: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  ServiceAccount: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-  ServiceAccountKey: !ruby/object:Provider::Ansible::ResourceOverride
+  ServiceAccountKey: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-overrides: !ruby/object:Provider::ResourceOverrides
-  ServiceAccount: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  ServiceAccount: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     provider_helpers:
       - 'products/iam/helpers/python/provider_service_account.py'
-  ServiceAccountKey: !ruby/object:Provider::Ansible::ResourceOverride
+  ServiceAccountKey: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     template: 'products/iam/helpers/ansible/service_account_key_template.erb'
     has_tests: false
 files: !ruby/object:Provider::Config::Files

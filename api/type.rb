@@ -89,7 +89,7 @@ module Api
       when Api::Type::Boolean
         clazz = :boolean
       when Api::Type::ResourceRef
-        clazz = ::String
+        clazz = [::String, ::Hash]
       else
         raise "Update 'check_default_value_property' method to support " \
               "default value for type #{self.class}"

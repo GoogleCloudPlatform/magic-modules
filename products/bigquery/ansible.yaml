@@ -24,23 +24,23 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   version_added: '2.8'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
-datasources: !ruby/object:Provider::ResourceOverrides
-  Table: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  Table: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-  Dataset: !ruby/object:Provider::Ansible::ResourceOverride
+  Dataset: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-overrides: !ruby/object:Provider::ResourceOverrides
-  Dataset: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Dataset: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     properties:
-      access.view.tableId: !ruby/object:Provider::Ansible::PropertyOverride
+      access.view.tableId: !ruby/object:Provider::Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
         description: >
           The ID of the table. The ID must contain only letters (a-z,
           A-Z), numbers (0-9), or underscores. The maximum length
           is 1,024 characters.
-      datasetReference.datasetId: !ruby/object:Provider::Ansible::PropertyOverride
+      datasetReference.datasetId: !ruby/object:Provider::Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
         description: >
           A unique ID for this dataset, without the project name. The ID

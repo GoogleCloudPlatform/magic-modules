@@ -23,8 +23,8 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - google-auth >= 1.3.0
   version_added: '2.7'
   author: Google Inc. (@googlecloudplatform)
-datasources: !ruby/object:Provider::ResourceOverrides
-  Instance: !ruby/object:Provider::Ansible::ResourceOverride
+datasources: !ruby/object:Provider::Overrides::ResourceOverrides
+  Instance: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
@@ -33,7 +33,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
           "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
-  Database: !ruby/object:Provider::Ansible::ResourceOverride
+  Database: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
@@ -43,22 +43,22 @@ datasources: !ruby/object:Provider::ResourceOverrides
         does_not_exist: |
           "'webstore' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   # Virtual => true objects that don't need dedicated resources.
-  InstanceConfig: !ruby/object:Provider::Ansible::ResourceOverride
+  InstanceConfig: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
-overrides: !ruby/object:Provider::ResourceOverrides
-  Instance: !ruby/object:Provider::Ansible::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Instance: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     custom_create_resource: true
     custom_update_resource: true
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
-  Database: !ruby/object:Provider::Ansible::ResourceOverride
+  Database: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_response
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
   # Virtual => true objects that don't need dedicated resources.
-  InstanceConfig: !ruby/object:Provider::Ansible::ResourceOverride
+  InstanceConfig: !ruby/object:Provider::Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:
