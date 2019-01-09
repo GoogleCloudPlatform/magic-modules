@@ -19,7 +19,6 @@ module Provider
       # A class to control overridden properties on inspec.yaml in lieu of
       # values from api.yaml.
       class ResourceOverride < Provider::Overrides::ResourceOverride
-
         def self.attributes
           %i[
             manual
@@ -27,7 +26,7 @@ module Provider
           ]
         end
 
-        attr_reader(*self.attributes)
+        attr_reader(*attributes)
 
         def validate
           assign_defaults

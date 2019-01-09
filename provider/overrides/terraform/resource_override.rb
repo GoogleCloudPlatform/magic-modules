@@ -43,7 +43,7 @@ module Provider
           ]
         end
 
-        attr_reader(*self.attributes)
+        attr_reader(*attributes)
         attr_reader :description
 
         def validate

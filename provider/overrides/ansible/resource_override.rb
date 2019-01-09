@@ -44,7 +44,7 @@ module Provider
           ]
         end
 
-        attr_reader(*self.attributes)
+        attr_reader(*attributes)
         def validate
           super
 
