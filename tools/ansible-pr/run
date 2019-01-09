@@ -110,6 +110,18 @@ def all_pr_messages
                      state: 'closed', since: @options[:date].strip)
         .map { |pr| { title: pr[:title], url: pr[:html_url] } }
 end
+
+def create_branch_and_add_modules(branch_name, modules, static_files)
+  # Create a new branch
+  new_branch(branch_name)
+
+  # Checkout all the files (module, tests, additional files)
+  modules.each do |mod_name|
+    checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
+    checkout_file("test/integration/targets/#{mod_name}/")
+  end
+  static_files.each { |file| checkout_file(file) }
+end
 #############################################################
 # Main
 #############################################################
@@ -160,44 +172,49 @@ puts "Changes noticed in these additional files: #{changed_files.join(', ')}"
 # Create a Bug Fix PR.
 existing_modules = get_all_modules('upstream')
 
-puts 'Building Bug fix PR'
 
 # Create a new branch
-git_run('git checkout upstream/devel', true)
-git_run('git branch -D bug_fixes', true)
-git_run('git checkout -b bug_fixes', true)
+# Each batch should be 25 modules at most (assuming 2 file changes per module)
+# minus any static files.
+batch_size = 25 - changed_files.length
+existing_modules.each_slide(batch_size).with_index do |part, index|
+  puts "Building Bug fix PR #{index}"
+  git_run('git checkout upstream/devel', true)
+  git_run("git branch -D bug_fixes#{index}", true)
+  git_run("git checkout -b bug_fixes#{index}", true)
 
-# Checkout all the files (module, tests, additional files)
-existing_modules.each do |mod_name|
-  checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
-  checkout_file("test/integration/targets/#{mod_name}/")
+  # Checkout all the files (module, tests, additional files)
+  part.each do |mod_name|
+    checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
+    checkout_file("test/integration/targets/#{mod_name}/")
+  end
+  changed_files.each { |file| checkout_file(file) }
+
+  # Make a commit
+  message = "Bug fixes for GCP modules (as of #{@options[:date]})"
+  git_run("git commit -m \"#{message}\"", true)
+
+  # Create PR message and save to file.
+  File.write("tools/ansible-pr/templates/bug_fixes#{index}",
+             CompileClass.new.lines(
+               CompileClass.new.compile_file({
+                                               commit_msg: message,
+                                               new: false,
+                                               prs: all_pr_messages
+                                             },
+                                             'tools/ansible-pr/template.md.erb')
+             ))
+
+  # Create PR using branch + message.
+  git_run('git push origin HEAD --force')
+
+  repo = 'ansible/ansible:devel'
+  message_loc = "../../tools/ansible-pr/templates/bug_fixes#{index}"
+  output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
+
+  puts output
+  puts "PR built for bug fixes #{index}"
 end
-changed_files.each { |file| checkout_file(file) }
-
-# Make a commit
-message = "Bug fixes for GCP modules (as of #{@options[:date]})"
-git_run("git commit -m \"#{message}\"", true)
-
-# Create PR message and save to file.
-File.write('tools/ansible-pr/templates/bug_fixes',
-           CompileClass.new.lines(
-             CompileClass.new.compile_file({
-                                             commit_msg: message,
-                                             new: false,
-                                             prs: all_pr_messages
-                                           },
-                                           'tools/ansible-pr/template.md.erb')
-           ))
-
-# Create PR using branch + message.
-git_run('git push origin HEAD --force')
-
-repo = 'ansible/ansible:devel'
-message_loc = '../../tools/ansible-pr/templates/bug_fixes'
-output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
-
-puts output
-puts 'PR built for bug fixes'
 
 puts 'Building individual PRs'
 new_modules = get_all_modules('magician') - get_all_modules('upstream')
