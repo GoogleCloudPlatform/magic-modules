@@ -25,10 +25,7 @@ module Provider
 
     # Overrides for datasources
     attr_reader :datasources
-    attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
-    attr_reader :tests
     attr_reader :files
-    attr_reader :changelog
     # Product names are complicated in MagicModules.  They are given by
     # product.prefix, which is in the format 'g<nameofproduct>', e.g.
     # gcompute or gresourcemanager.  This is munged in many places.
@@ -52,27 +49,6 @@ module Provider
         super
         check_optional_property :compile, Hash
         check_optional_property :copy, Hash
-      end
-    end
-
-    # Identifies all changes releted to a release of the compiled artifact.
-    class Changelog < Api::Object
-      attr_reader :version
-      attr_reader :date
-      attr_reader :general
-      attr_reader :features
-      attr_reader :fixes
-
-      def validate
-        super
-        check_property :version, String
-        check_property :date, Time
-        check_optional_property :general, String
-        check_property_list :features, String
-        check_property_list :fixes, String
-
-        raise "Required general/features/fixes for change #{@version}." \
-          if @general.nil? && @features.nil? && @fixes.nil?
       end
     end
 
@@ -123,8 +99,6 @@ module Provider
       check_optional_property :files, Provider::Config::Files
       check_property :overrides, [Provider::ResourceOverrides,
                                   Provider::Overrides::ResourceOverrides]
-      check_property_list :changelog, Provider::Config::Changelog \
-        unless @changelog.nil?
     end
 
     # Provides the API object to any type that requires, e.g. for validation
