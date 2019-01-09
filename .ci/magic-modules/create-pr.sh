@@ -157,4 +157,9 @@ I am (still) a robot that works on MagicModules PRs!
 I just wanted to let you know that your changes (as of commit $(git rev-parse --short HEAD~1)) have been included in your existing downstream PRs.
 EOF
 
+  # Create blank label file
+  # This blank file is needed because the `out` command on the GH PR Resource
+  # requires a file in all cases (not just if new labels are being added)
+  printf "%s" "" > ./label_file
+
 fi
