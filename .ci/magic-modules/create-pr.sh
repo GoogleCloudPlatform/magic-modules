@@ -34,6 +34,14 @@ if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   NEWLINE=$'\n'
   # There is no existing PR - this is the first pass through the pipeline and
   # we will need to create a PR using 'hub'.
+
+  # Check the files between this commit and HEAD
+  # If they're only contained in third_party, add the third_party label.
+  if ! git diff --name-only HEAD^1 | grep -v "third_party"; then
+    LABELS="${LABELS}only_third_party,"
+  fi
+
+  # Terraform
   if [ -n "$TERRAFORM_REPO_USER" ]; then
     for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
       IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
