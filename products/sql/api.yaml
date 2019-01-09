@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: SQL
+name: Sql
 display_name: Google Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
