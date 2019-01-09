@@ -13,7 +13,6 @@
 --- !ruby/object:Api::Product
 name: Monitoring
 display_name: Stackdriver Monitoring and Alerting
-prefix: gmonitoring
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

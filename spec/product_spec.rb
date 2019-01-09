@@ -15,7 +15,7 @@ require 'spec_helper'
 
 describe Api::Product do
   context 'requires name' do
-    subject { -> { product('prefix: "bar"').validate } }
+    subject { -> { product('display_name: "Bar"').validate } }
     it { is_expected.to raise_error(StandardError, /Missing 'name'/) }
   end
 
@@ -25,7 +25,7 @@ describe Api::Product do
         product('name: "foo"',
                 'scopes:',
                 '  - link/to/scope',
-                'prefix: "bar"',
+                'name: "Bar"',
                 'objects:',
                 '  - !ruby/object:Api::Resource',
                 '    kind: foo#resource',
@@ -48,7 +48,7 @@ describe Api::Product do
         product('name: "foo"',
                 'scopes:',
                 '  - link/to/scope',
-                'prefix: "bar"',
+                'name: "Bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
                 '    name: ga',
@@ -83,7 +83,7 @@ describe Api::Product do
         product('name: "foo"',
                 'scopes:',
                 '  - link/to/scope',
-                'prefix: "bar"',
+                'name: "Bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
                 '    name: ga',
@@ -114,7 +114,7 @@ describe Api::Product do
     subject do
       lambda do
         product('name: "foo"',
-                'prefix: "bar"',
+                'name: "Bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
                 '    name: ga',
@@ -128,7 +128,7 @@ describe Api::Product do
     subject do
       lambda do
         product('name: "foo"',
-                'prefix: "bar"',
+                'name: "Bar"',
                 'versions:',
                 '  - !ruby/object:Api::Product::Version',
                 '    name: ga',

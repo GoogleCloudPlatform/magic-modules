@@ -12,5 +12,4 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Bundle
-name: Google Cloud Platform
-prefix: cloud
+name: GoogleCloudPlatform
