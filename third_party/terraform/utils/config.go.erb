@@ -380,9 +380,14 @@ func (c *Config) loadAndValidate() error {
 
 func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, error) {
 	if c.AccessToken != "" {
-		log.Printf("[INFO] Using configured Google access token (length %d)", len(c.AccessToken))
+		contents, _, err := pathorcontents.Read(c.AccessToken)
+		if err != nil {
+			return nil, fmt.Errorf("Error loading access token: %s", err)
+		}
+
+		log.Printf("[INFO] Using configured Google access token (length %d)", len(contents))
 		log.Printf("[INFO]   -- Scopes: %s", clientScopes)
-		token := &oauth2.Token{AccessToken: c.AccessToken}
+		token := &oauth2.Token{AccessToken: contents}
 		return oauth2.StaticTokenSource(token), nil
 	}
 
