@@ -1,11 +1,14 @@
 package google
 
 import (
+	"context"
+	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"testing"
 )
 
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
+const testOauthScope = "https://www.googleapis.com/auth/compute"
 
 func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 	config := Config{
@@ -74,7 +77,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	creds := getTestCredsFromEnv()
 	proj := getTestProjectFromEnv()
 
-	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), iam.CloudPlatformScope)
+	c, err := google.CredentialsFromJSON(context.Background(), []byte(creds), testOauthScope)
 	if err != nil {
 		t.Fatalf("invalid test credentials: %s", err)
 	}
