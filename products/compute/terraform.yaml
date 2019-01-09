@@ -442,19 +442,15 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       interconnect: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-    examples: |
-      ```hcl
-      resource "google_compute_router" "foobar" {
-        name    = "my-router"
-        network = "${google_compute_network.foobar.name}"
-      }
-
-      resource "google_compute_interconnect_attachment" "default" {
-        name         = "test-interconnect"
-        interconnect = "my-interconnect-id"
-        router       = "${google_compute_router.foobar.self_link}"
-      }
-      ```
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "interconnect_attachment_basic"
+        primary_resource_id: "on_prem"
+        skip_test: true
+        version: <%= version_name %>
+        vars:
+          interconnect_attachment_name: "on-prem-attachment"
+          router_name: "router"
   License: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
@@ -782,28 +778,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         name: proxyId
   TargetPool: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
-    examples: |
-      ```hcl
-      resource "google_compute_target_pool" "default" {
-        name = "instance-pool"
-
-        instances = [
-          "us-central1-a/myinstance1",
-          "us-central1-b/myinstance2",
-        ]
-
-        health_checks = [
-          "${google_compute_http_health_check.default.name}",
-        ]
-      }
-
-      resource "google_compute_http_health_check" "default" {
-        name               = "default"
-        request_path       = "/"
-        check_interval_sec = 1
-        timeout_sec        = 1
-      }
-      ```
     properties:
       id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
