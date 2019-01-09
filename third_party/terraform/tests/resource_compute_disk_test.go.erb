@@ -681,24 +681,19 @@ resource "google_compute_disk" "foobar" {
 
 func testAccComputeDisk_encryptionKMS(pid, diskName, kmsKey string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {
+	project_id = "%s"
+}
+
 data "google_compute_image" "my_image" {
   family  = "debian-9"
   project = "debian-cloud"
 }
 
 resource "google_project_iam_member" "kms-project-binding" {
-  project = "%s"
+  project = "${data.google_project.project.project_id}"
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-811756235447@compute-system.iam.gserviceaccount.com"
-}
-
-resource "google_kms_crypto_key_iam_binding" "kms-key-binding" {
-  crypto_key_id = "%s"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  members = [
-    "serviceAccount:service-811756235447@compute-system.iam.gserviceaccount.com",
-  ]
+  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_compute_disk" "foobar" {
@@ -712,7 +707,7 @@ resource "google_compute_disk" "foobar" {
     kms_key_self_link = "%s"
   }
 }
-`, pid, kmsKey, diskName, kmsKey)
+`, pid, diskName, kmsKey)
 }
 
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
