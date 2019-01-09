@@ -57,6 +57,6 @@ exported:
 A policy can be imported using the `folder`, e.g.
 
 ```
-$ terraform import google_folder_iam_policy.my-folder-policy my-folder-name
+$ terraform import google_folder_iam_policy.my-folder-policy {{folder_id}}
 ```
 
