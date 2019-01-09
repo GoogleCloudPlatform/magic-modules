@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud BigQuery
-prefix: gbigquery
+name: BigQuery
+display_name: Google Cloud BigQuery
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

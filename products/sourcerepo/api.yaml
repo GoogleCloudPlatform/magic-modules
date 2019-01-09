@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Cloud Source Repositories
-prefix: gsourcerepo
+name: SourceRepo
+display_name: Cloud Source Repositories
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

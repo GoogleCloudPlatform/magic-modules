@@ -11,7 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 --- !ruby/object:Api::Product
-name: Stackdriver Monitoring and Alerting
+name: Monitoring
+display_name: Stackdriver Monitoring and Alerting
 prefix: gmonitoring
 versions:
   - !ruby/object:Api::Product::Version

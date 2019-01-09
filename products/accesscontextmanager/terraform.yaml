@@ -12,7 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-name: AccessContextManager
 overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   AccessPolicy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]

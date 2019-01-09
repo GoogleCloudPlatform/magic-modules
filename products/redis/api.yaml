@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Memorystore for Redis
-prefix: gredis
+name: Redis
+display_name: Google Cloud Memorystore for Redis
 versions:
   - !ruby/object:Api::Product::Version
     name: beta

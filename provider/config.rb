@@ -26,19 +26,11 @@ module Provider
     # Overrides for datasources
     attr_reader :datasources
     attr_reader :files
-    # Product names are complicated in MagicModules.  They are given by
-    # product.prefix, which is in the format 'g<nameofproduct>', e.g.
-    # gcompute or gresourcemanager.  This is munged in many places.
-    # Some examples:
-    #   - prefix[1:-1] ('compute' / 'resourcemanager') for the
-    #     directory to fetch chef / puppet examples.
-    #   - camelCase(prefix[1:-1]) for resource namespaces.
-    #   - TitleCase(prefix[1:-1]) for resource names in terraform.
-    #   - prefix[1:-1] again, for working with libraries directly.
-    # This override does not change any of those inner workings, but
-    # instead is passed directly to the template as `product_ns` if
-    # set.  Otherwise, the normal logic applies.
-    attr_reader :name
+
+    # Some tool-specific names may be in use, and they won't all match;
+    # For Terraform, some products use the API client name w/o spaces and
+    # others use spaces. Eg: "app_engine" vs "appengine".
+    attr_reader :legacy_name
 
     # List of files to copy or compile into target module
     class Files < Api::Object

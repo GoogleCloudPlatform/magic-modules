@@ -12,14 +12,14 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Filestore
 # There is a problem here - the generated api is called 'file', and that's
-# a bad name for the library.  So we set the name to gfilestore, and
+# a bad name for the library.  So we set the name to Filestore, and
 # that means that Terraform in particular is going to try to import
 # 'filestore'.  But the library is called 'file', so instead we need to
 # include a small hack to rename the library - see
 # templates/terraform/constants/filestore.erb.
-prefix: gfilestore
+name: Filestore
+display_name: Google Cloud Filestore
 versions:
   - !ruby/object:Api::Product::Version
     name: beta

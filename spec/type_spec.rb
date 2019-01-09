@@ -243,23 +243,4 @@ describe Api::Type::ResourceRef do
 
     it { is_expected.to raise_error(StandardError, error) }
   end
-
-  context 'returns referenced type' do
-    let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
-
-    before { product.validate }
-
-    subject do
-      product.objects.collect(&:parameters)
-             .flatten
-             .select { |p| p.class <= Api::Type::ResourceRef }
-    end
-
-    it { is_expected.to have_attributes(length: 1) }
-    it 'matches reference type' do
-      is_expected.to satisfy do |value|
-        value[0].out_type == 'myproduct_referenced_resource'
-      end
-    end
-  end
 end

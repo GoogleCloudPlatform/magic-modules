@@ -19,29 +19,6 @@ describe Api::Product do
     it { is_expected.to raise_error(StandardError, /Missing 'name'/) }
   end
 
-  context 'requires prefix' do
-    subject do
-      lambda do
-        product('name: "foo"',
-                'versions:',
-                '  - !ruby/object:Api::Product::Version',
-                '    name: ga',
-                '    base_url: "http://foo/var/"',
-                'objects:',
-                '  - !ruby/object:Api::Resource',
-                '    kind: foo#resource',
-                '    base_url: myres/',
-                '    description: foo',
-                '    name: "res1"',
-                '    properties:',
-                '      - !ruby/object:Api::Type',
-                '        description: foo',
-                '        name: var').validate
-      end
-    end
-    it { is_expected.to raise_error(StandardError, /Missing 'prefix'/) }
-  end
-
   context 'requires versions' do
     subject do
       lambda do

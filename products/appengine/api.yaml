@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google App Engine
-prefix: gappengine
+name: AppEngine
+display_name: Google App Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

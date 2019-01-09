@@ -422,10 +422,6 @@ module Api
       end
       include Fields
 
-      def out_type
-        resource_ref.out_name
-      end
-
       def validate
         super
         @name = @resource if @name.nil?

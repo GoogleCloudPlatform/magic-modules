@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Resource Manager
-prefix: gresourcemanager
+name: ResourceManager
+display_name: Google Cloud Resource Manager
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
