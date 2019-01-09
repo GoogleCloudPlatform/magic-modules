@@ -28,8 +28,6 @@ if [ -z "$INSPEC_COMMIT_MSG" ]; then
 fi
 
 pushd "build/inspec"
-# We are not ready to overwrite changelog yet.
-git checkout HEAD -- CHANGELOG.md
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
