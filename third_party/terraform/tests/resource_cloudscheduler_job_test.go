@@ -146,7 +146,7 @@ resource "google_cloud_scheduler_job" "job" {
 
 	pubsub_target = {
 		topic_name = "projects/%s/topics/build-triggers"
-		data = "test"
+		data = "${base64encode("test")}"
 	}
 }
 
