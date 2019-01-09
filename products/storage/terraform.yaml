@@ -18,7 +18,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   BucketAccessControl: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
   ObjectAccessControl: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_object_access_control_public_object"
       primary_resource_id: "public_rule"
@@ -36,7 +36,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         description: The name of the object to apply the access control to.
   DefaultObjectACL: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     name: "DefaultObjectAccessControl"
-    example:
+    examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "storage_default_object_access_control_public"
       primary_resource_id: "public_rule"

@@ -17,7 +17,7 @@ else
 	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
 end
 %>
-<% object.example.reject(&:skip_test).each do |example| -%>
+<% object.examples.reject(&:skip_test).each do |example| -%>
 <%
 	# {Compute}{Address}_{addressBasic}
 	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"

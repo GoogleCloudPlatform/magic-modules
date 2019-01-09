@@ -16,7 +16,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_alert_policy_basic"
         primary_resource_id: "alert_policy"
@@ -30,7 +30,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
         primary_resource_id: "basic"
@@ -55,7 +55,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/notifications/{{project}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         version: <%= version_name %>
         name: "notification_channel_basic"
@@ -69,7 +69,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   UptimeCheckConfig: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         version: <%= version_name %>
         name: "uptime_check_config_http"

@@ -80,13 +80,8 @@ To get more information about <%= object.name -%>, see:
 ~> **Warning:** <%= object.docs.warning -%>
 <%- end -%>
 
-<% unless object.examples.nil? -%>
-## Example Usage
-<%= "\n" + object.examples -%>
-
-<% end -%>
-<% unless object.example.empty? -%>
-  <%- object.example.each do |example| -%>
+<% unless object.examples.empty? -%>
+  <%- object.examples.each do |example| -%>
     <%- unless example.skip_test -%>
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="<%= example.oics_link %>" target="_blank">

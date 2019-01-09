@@ -16,7 +16,7 @@ legacy_name: 'sourcerepo'
 overrides: !ruby/object:Provider::ResourceOverrides
   Repository: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: '{{project}}/{{name}}'
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
         primary_resource_id: "my-repo"

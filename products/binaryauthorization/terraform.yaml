@@ -15,7 +15,7 @@
 overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Attestor: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["projects/{{project}}/attestors/{{name}}"]
-    example:
+    examples:
      - !ruby/object:Provider::Terraform::Examples
       name: "binary_authorization_attestor_basic"
       primary_resource_id: "attestor"
@@ -43,7 +43,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
       pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.erb'
-    example:
+    examples:
      - !ruby/object:Provider::Terraform::Examples
       name: "binary_authorization_policy_basic"
       primary_resource_id: "policy"
