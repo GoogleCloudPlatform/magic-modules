@@ -100,6 +100,6 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 
 	_, err = config.clientCompute.Zones.Get(proj, "us-central1-a").Do()
 	if err != nil {
-		t.Fatalf("expected call with loaded config client to work, got error: %s", err)
+		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
 }
