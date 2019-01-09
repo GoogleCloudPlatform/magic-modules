@@ -1,0 +1,7 @@
+<% managed_zone = grab_attributes['managed_zone'] -%>
+describe google_dns_managed_zones(project: <%= "#{external_attribute('gcp_project_id', doc_generation)}" -%>) do
+  its('count') { should eq 1 }
+  its('names') { should include <%= doc_generation ? "'#{managed_zone['name']}'" : "managed_zone['name']" -%> }
+  its('dns_names') { should include <%= doc_generation ? "'#{managed_zone['dns_name']}'" : "managed_zone['dns_name']" -%> }
+  its('descriptions') { should include <%= doc_generation ? "'#{managed_zone['description']}'" : "managed_zone['description']" -%> }
+end
