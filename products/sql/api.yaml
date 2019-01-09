@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud SQL
-prefix: gsql
+name: Sql
+display_name: Google Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

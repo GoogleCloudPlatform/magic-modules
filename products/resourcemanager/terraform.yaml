@@ -12,7 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-name: ResourceManager
 overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Project: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true

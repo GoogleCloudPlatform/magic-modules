@@ -12,6 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
+legacy_name: 'sourcerepo'
 overrides: !ruby/object:Provider::ResourceOverrides
   Repository: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: '{{project}}/{{name}}'

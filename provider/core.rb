@@ -148,8 +148,7 @@ module Provider
             compiler: compiler,
             output_folder: output_folder,
             out_file: target_file,
-            prop_ns_dir: @api.prefix[1..-1].downcase,
-            product_ns: @api.prefix[1..-1].camelize(:upper)
+            product_ns: @api.name
           )
         )
 
@@ -227,11 +226,7 @@ module Provider
     end
 
     def generate_resource_file(data)
-      product_ns = if @config.name.nil?
-                     data[:object].__product.prefix[1..-1].camelize(:upper)
-                   else
-                     @config.name
-                   end
+      product_ns = data[:object].__product.name.delete(' ')
       generate_file(data.clone.merge(
         # Override with provider specific template for this object, if needed
         template: data[:default_template],

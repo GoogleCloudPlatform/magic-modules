@@ -14,8 +14,8 @@
 # TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
-name: Google Cloud IAM
-prefix: giam
+name: Iam
+display_name: Google Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

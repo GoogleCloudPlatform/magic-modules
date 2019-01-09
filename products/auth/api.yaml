@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Bundle
-name: Google Cloud Auth
-prefix: gauth
+name: Auth
+display_name: Google Cloud Auth
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

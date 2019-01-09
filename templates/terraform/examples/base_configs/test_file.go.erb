@@ -10,9 +10,12 @@ import (
   "github.com/hashicorp/terraform/helper/resource"
 )
 <%
-  api_name = @config.name || product_ns
-	resource_name = api_name + object.name
-  terraform_name = "google_" + resource_name.underscore
+resource_name = product_ns + object.name
+if @config.legacy_name.nil?
+	terraform_name = "google_" + (product_ns + object.name).underscore
+else
+	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+end
 %>
 <% object.example.reject(&:skip_test).each do |example| -%>
 <%
