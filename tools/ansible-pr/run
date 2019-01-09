@@ -46,6 +46,7 @@ ADDITIONAL_FILES = [
 @options = {
   directory: "#{Dir.pwd}/build/ansible/",
   dry_run: false,
+  # Get all PRs from one day ago.
   date: (Time.now - (3600 * 24)).strftime('%Y-%m-%dT%H:%M:%S.%L%z')
 }
 ###########################################################
@@ -64,6 +65,12 @@ def git_run(cmd, silent = false, opts = @options)
   else
     %x(#{command.join('; ')})
   end
+end
+
+def new_branch(branch_name, silent = true)
+  git_run('git checkout upstream/devel', silent)
+  git_run("git branch -D #{mod_name}", silent)
+  git_run("git checkout -b #{mod_name}", silent)
 end
 
 # Check that remotes are in order
@@ -168,11 +175,10 @@ end
 changed_files.each { |file| checkout_file(file) }
 
 # Make a commit
-message = commit_message(mod_name)
 git_run("git commit -m \"Bug fixes for GCP modules (as of #{options[:date]})\"", true)
 
 # Create PR message and save to file.
-File.write("tools/ansible-pr/templates/#{mod_name}",
+File.write("tools/ansible-pr/templates/bug_fixes",
            CompileClass.new.lines(
              CompileClass.new.compile_file({
                                              commit_msg: message,
@@ -186,8 +192,38 @@ File.write("tools/ansible-pr/templates/#{mod_name}",
 git_run('git push origin HEAD --force')
 
 repo = 'ansible/ansible:devel'
-message_loc = "../../tools/ansible-pr/templates/#{mod_name}"
+message_loc = "../../tools/ansible-pr/templates/bug_fixes"
 output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
 
 puts output
 puts "PR built for bug fixes"
+
+puts "Building individual PRs"
+new_modules = get_all_modules('magician') - get_all_modules('upstream')
+new_modules.each do |mod_name|
+  new_branch(mod_name)
+  checkout_file("lib/ansible/modules/cloud/google/#{mod_name}.py")
+  checkout_file("test/integration/targets/#{mod_name}/")
+  changed_files.each { |file| checkout_file(file) }
+  git_run("git commit -m \"New module: #{mod_name}\"", true)
+  # Create PR message and save to file.
+  File.write("tools/ansible-pr/templates/bug_fixes",
+             CompileClass.new.lines(
+               CompileClass.new.compile_file({
+                                               commit_msg: message,
+                                               new: true,
+                                               prs: get_all_pr_messages
+                                             },
+                                             'tools/ansible-pr/template.md.erb')
+             ))
+
+  # Create PR using branch + message.
+  git_run('git push origin HEAD --force')
+
+  repo = 'ansible/ansible:devel'
+  message_loc = "../../tools/ansible-pr/templates/#{mod_name}"
+  output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
+
+  puts output
+  puts "PR built for #{mod_name}"
+end

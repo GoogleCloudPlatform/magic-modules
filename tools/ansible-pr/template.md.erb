@@ -2,7 +2,7 @@
 
 ##### SUMMARY
 <%= ctx[:commit_msg] %>
-<% if ctx[:prs] -%>
+<% if ctx[:prs] && !ctx[:prs].empty?-%>
 This PR is the result of the following Magic Modules PRs:
 <% ctx[:prs].each do |pr| -%>
   - [<%= pr[:title] -%>](<%= pr[:url] -%>)
