@@ -52,27 +52,6 @@ module Provider
       end
     end
 
-    # Identifies all changes releted to a release of the compiled artifact.
-    class Changelog < Api::Object
-      attr_reader :version
-      attr_reader :date
-      attr_reader :general
-      attr_reader :features
-      attr_reader :fixes
-
-      def validate
-        super
-        check_property :version, String
-        check_property :date, Time
-        check_optional_property :general, String
-        check_property_list :features, String
-        check_property_list :fixes, String
-
-        raise "Required general/features/fixes for change #{@version}." \
-          if @general.nil? && @features.nil? && @fixes.nil?
-      end
-    end
-
     def self.parse(cfg_file, api = nil, version_name = 'ga')
       raise 'Version passed to the compiler cannot be nil' if version_name.nil?
 
@@ -120,8 +99,6 @@ module Provider
       check_optional_property :files, Provider::Config::Files
       check_property :overrides, [Provider::ResourceOverrides,
                                   Provider::Overrides::ResourceOverrides]
-      check_property_list :changelog, Provider::Config::Changelog \
-        unless @changelog.nil?
     end
 
     # Provides the API object to any type that requires, e.g. for validation
