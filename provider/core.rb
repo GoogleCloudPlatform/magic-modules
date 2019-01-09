@@ -124,7 +124,7 @@ module Provider
         @config.examples,
         lambda do |_object, file|
           ["examples/#{file}",
-           "products/#{@api.prefix[1..-1]}/files/examples~#{file}"]
+           "products/#{@api.api_name}/files/examples~#{file}"]
         end
       )
     end
@@ -133,7 +133,7 @@ module Provider
       files.each do |target, source|
         Google::LOGGER.debug "Compiling #{source} => #{target}"
         target_file = File.join(output_folder, target)
-                          .gsub('{{product_name}}', @api.prefix[1..-1])
+                          .gsub('{{product_name}}', @api.api_name)
 
         manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
         generate_file(
@@ -224,7 +224,7 @@ module Provider
         name: object.out_name,
         object: object,
         output_folder: output_folder,
-        product_name: object.__product.prefix[1..-1],
+        product_name: object.__product.api_name,
         version: version
       }
     end

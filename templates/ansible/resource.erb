@@ -154,7 +154,7 @@ def main():
     module.exit_json(**fetch)
 
 
-<% prod_name = object.__product.prefix[1..-1] -%>
+<% prod_name = object.__product.api_name -%>
 <% unless object.readonly -%>
 <%# TODO: kind param not always needed.
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45

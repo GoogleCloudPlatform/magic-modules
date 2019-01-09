@@ -51,7 +51,7 @@ module Provider
         name = property.name.camelize + name
       end
 
-      "#{property.__resource.__product.prefix[1..-1].camelize(:lower)}#{object.name}#{name}"
+      "#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
     end
 
     # Converts between the Magic Modules type of an object and its type in the
