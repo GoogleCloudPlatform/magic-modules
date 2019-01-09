@@ -31,10 +31,15 @@ module Provider
   class Core
     include Compile::Core
 
-    def initialize(config, api)
+    def initialize(config, api, start_time)
       @config = config
       @api = api
       @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
+
+      # The compiler will error out if a file has been written in this compiler
+      # run already. Instead of storing all the modified files in state we'll
+      # use the time the file was modified.
+      @start_time = start_time
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
@@ -394,6 +399,12 @@ module Provider
     end
 
     def generate_file_write(ctx, data)
+      # If we've modified a file since starting an MM run, it's a reasonable
+      # assumption that it was this run that modified it.
+      if File.exist?(data[:out_file]) && File.mtime(data[:out_file]) > @start_time
+        raise "#{data[:out_file]} was already modified during this run"
+      end
+
       enforce_file_expectations data[:out_file] do
         Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
         write_file data[:out_file], compile_file(ctx, data[:template])

@@ -96,6 +96,8 @@ if all_products
   raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
 end
 
+start_time = Time.now
+
 provider = nil
 # rubocop:disable Metrics/BlockLength
 product_names.each do |product_name|
@@ -133,7 +135,7 @@ product_names.each do |product_name|
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api)
+    provider = provider_config.provider.new(provider_config, product_api, start_time)
 
   else
     override_providers = {
@@ -145,7 +147,7 @@ product_names.each do |product_name|
       if provider_class.nil?
 
     provider = \
-      override_providers[force_provider].new(provider_config, product_api)
+      override_providers[force_provider].new(provider_config, product_api, start_time)
   end
 
   provider.generate output_path, types_to_generate, version, product_name, yaml_dump

@@ -45,8 +45,8 @@ module Provider
       include Provider::Ansible::Module
       include Provider::Ansible::Request
 
-      def initialize(config, api)
-        super(config, api)
+      def initialize(config, api, start_time)
+        super(config, api, start_time)
         @max_columns = 160
       end
 
