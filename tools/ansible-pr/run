@@ -28,12 +28,12 @@ end
 ANSIBLE_URL = 'git@github.com:ansible/ansible.git'.freeze
 MAGICIAN_GIT = 'git@github.com:modular-magician/ansible.git'.freeze
 
-IGNORED_MODULES = [
-  'gcp_backend_service',
-  'gcp_forwarding_rule',
-  'gcp_healthcheck',
-  'gcp_target_proxy',
-  'gcp_url_map'
+IGNORED_MODULES = %w[
+  gcp_backend_service
+  gcp_forwarding_rule
+  gcp_healthcheck
+  gcp_target_proxy
+  gcp_url_map
 ].freeze
 
 ADDITIONAL_FILES = [
@@ -102,10 +102,11 @@ def checkout_file(file)
   git_run("git checkout magician/devel -- #{file}", true)
 end
 
-def get_all_pr_messages
+def all_pr_messages
   # Limit of 50 bug fixes will go into a PR (should never hit this limit)
   client = Octokit::Client.new(access_token: @options[:creds], per_page: 50)
-  client.list_issues('googlecloudplatform/magic-modules', labels: 'ansible,downstream-generated',
+  client.list_issues('googlecloudplatform/magic-modules',
+                     labels: 'ansible,downstream-generated',
                      state: 'closed', since: @options[:date].strip)
         .map { |pr| { title: pr[:title], url: pr[:html_url] } }
 end
@@ -137,6 +138,7 @@ end.parse!
 # Check if everything is installed properly.
 %x(which hub)
 raise 'Please install the hub CLI' unless $?.success?
+
 check_remotes
 # rubocop:enable Style/SpecialGlobalVars
 
@@ -158,12 +160,12 @@ puts "Changes noticed in these additional files: #{changed_files.join(', ')}"
 # Create a Bug Fix PR.
 existing_modules = get_all_modules('upstream')
 
-puts "Building Bug fix PR"
+puts 'Building Bug fix PR'
 
 # Create a new branch
 git_run('git checkout upstream/devel', true)
-git_run("git branch -D bug_fixes", true)
-git_run("git checkout -b bug_fixes", true)
+git_run('git branch -D bug_fixes', true)
+git_run('git checkout -b bug_fixes', true)
 
 # Checkout all the files (module, tests, additional files)
 existing_modules.each do |mod_name|
@@ -177,12 +179,12 @@ message = "Bug fixes for GCP modules (as of #{@options[:date]})"
 git_run("git commit -m \"#{message}\"", true)
 
 # Create PR message and save to file.
-File.write("tools/ansible-pr/templates/bug_fixes",
+File.write('tools/ansible-pr/templates/bug_fixes',
            CompileClass.new.lines(
              CompileClass.new.compile_file({
                                              commit_msg: message,
                                              new: false,
-                                             prs: get_all_pr_messages
+                                             prs: all_pr_messages
                                            },
                                            'tools/ansible-pr/template.md.erb')
            ))
@@ -191,13 +193,13 @@ File.write("tools/ansible-pr/templates/bug_fixes",
 git_run('git push origin HEAD --force')
 
 repo = 'ansible/ansible:devel'
-message_loc = "../../tools/ansible-pr/templates/bug_fixes"
+message_loc = '../../tools/ansible-pr/templates/bug_fixes'
 output = git_run("hub pull-request -b #{repo} -F #{message_loc}")
 
 puts output
-puts "PR built for bug fixes"
+puts 'PR built for bug fixes'
 
-puts "Building individual PRs"
+puts 'Building individual PRs'
 new_modules = get_all_modules('magician') - get_all_modules('upstream')
 new_modules.each do |mod_name|
   new_branch(mod_name)
@@ -211,7 +213,7 @@ new_modules.each do |mod_name|
              CompileClass.new.lines(
                CompileClass.new.compile_file({
                                                commit_msg: message,
-                                               new: true,
+                                               new: true
                                              },
                                              'tools/ansible-pr/template.md.erb')
              ))
