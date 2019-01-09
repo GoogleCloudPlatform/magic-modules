@@ -105,8 +105,3 @@ overrides: !ruby/object:Provider::ResourceOverrides
 files: !ruby/object:Provider::Config::Files
   copy:
     'Gemfile': 'provider/inspec/Gemfile'
-changelog:
-  - !ruby/object:Provider::Config::Changelog
-    version: '0.1.0'
-    date: 2017-10-04T10:00:00-0700
-    general: 'Initial release'
