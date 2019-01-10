@@ -50,10 +50,28 @@ class <%= object.name -%> < GcpResourceBase
     parse unless @fetched.nil?
   end
 <% else # object.self_link_query.nil? -%>
-    # TODO(slevenick) for other products
-    def initialize(params)
-      raise 'Not implemented'
-    end
+  def initialize(params)
+    super(params.merge({ use_http_transport: true }))
+    fetched = @connection.fetch(base, url, params)
+    @fetched = unwrap(fetched, params)
+    parse unless @fetched.nil?
+  end
+
+  def identity
+    [
+<% object.identity.each do |id| -%>
+      '<%= id.out_name -%>',
+<% end # object.identity.each -%>
+    ]
+  end
+
+  def collection_item
+    '<%= object.collection_url_response.items -%>'
+  end
+
+  def unwrap(fetched, params)
+    fetched[collection_item].find{|y| identity.all? {|id| y[id.to_sym] == params[id]} }
+  end
 <% end # object.self_link_query.nil? -%>
 
   def parse
