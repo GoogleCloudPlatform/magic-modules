@@ -2,9 +2,13 @@ package google
 
 import (
 	"context"
-	"golang.org/x/oauth2/google"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"golang.org/x/oauth2/google"
 )
 
 const testFakeCredentialsPath = "./test-fixtures/fake_account.json"
@@ -53,6 +57,10 @@ func TestConfigLoadAndValidate_accountFileJSONInvalid(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_credentials(t *testing.T) {
+	if os.Getenv(resource.TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", resource.TestEnvVar))
+	}
+
 	creds := getTestCredsFromEnv()
 	proj := getTestProjectFromEnv()
 
@@ -74,6 +82,10 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 }
 
 func TestAccConfigLoadValidate_accessToken(t *testing.T) {
+	if os.Getenv(resource.TestEnvVar) == "" {
+		t.Skip(fmt.Sprintf("Network access not allowed; use %s=1 to enable", resource.TestEnvVar))
+	}
+
 	creds := getTestCredsFromEnv()
 	proj := getTestProjectFromEnv()
 
