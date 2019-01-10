@@ -23,7 +23,9 @@ module Provider
         # Collection of fields allowed in the PropertyOverride section for
         # Inspec. All fields should be `attr_reader :<property>`
         def self.attributes
-          []
+          [
+            :name_from_self_link, # Set to convert self link to name
+          ]
         end
       end
     end

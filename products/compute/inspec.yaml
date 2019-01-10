@@ -13,9 +13,6 @@
 
 --- !ruby/object:Provider::Inspec::Config
 manifest: !ruby/object:Provider::Inspec::Manifest
-  version: '0.1.0'
-  source: 'FIXME'
-  issues: 'FIXME'
   summary: 'InSpec resources for verifying GCP infrastructure'
   description: |
     InSpec resources for verifying GCP infrastructure
