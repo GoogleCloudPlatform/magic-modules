@@ -39,12 +39,12 @@ RSpec.configure do |c|
   c.inclusion_filter = [:property]
 end
 Google::LOGGER.level = Logger::ERROR
-VALID_KEYS = %w[filename url].freeze
+VALID_KEYS = %w[filename url product version].freeze
 
 # Running tests.
 docs = YAML.safe_load(File.read(doc_file))
 docs.each do |doc|
-  raise "#{doc.keys} not in #{VALID_KEYS}" unless doc.keys.sort == %w[filename url]
+  raise "#{doc.keys} not in #{VALID_KEYS}" unless (doc.keys - VALID_KEYS).empty?
 
   # Run tests on regular API
   api = ApiFetcher.api_from_file(doc['filename'])
