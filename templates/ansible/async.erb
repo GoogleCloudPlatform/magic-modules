@@ -27,7 +27,7 @@ def wait_for_operation(module, response):
   indent(lines([
           "return fetch_wrapped_resource(",
           indent([
-            "resource,",
+            "module,",
             "#{obj_kind},",
             "'#{object.self_link_query.kind}',",
             "'#{object.self_link_query.items}')"
