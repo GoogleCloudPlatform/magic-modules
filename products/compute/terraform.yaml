@@ -537,6 +537,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           * `global/gateways/default-internet-gateway`
           * The string `default-internet-gateway`.
       nextHopInstance: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/route_instance.erb
         # Description here is overridden because puppet won't compile if you ask
         # it to include docs greater than 80 characters.
         description: |+
