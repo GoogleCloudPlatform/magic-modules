@@ -12,7 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-legacy_name: "appengine"
 overrides: !ruby/object:Provider::ResourceOverrides
   FirewallRule: !ruby/object:Provider::Terraform::ResourceOverride
     id_format: "{{project}}/{{priority}}"
@@ -21,7 +20,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       pre_update: templates/terraform/pre_update/update_mask.erb
     example:
       - !ruby/object:Provider::Terraform::Examples
-        name: "appengine_firewall_rule_basic"
+        name: "app_engine_firewall_rule_basic"
         primary_resource_id: "rule"
         version: <%= version_name %>
         vars:
