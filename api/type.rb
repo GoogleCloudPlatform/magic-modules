@@ -141,7 +141,7 @@ module Api
     def requires
       File.join(
         'google',
-        @__resource.__product.prefix[1..-1],
+        @__resource.__product.api_name,
         'property',
         type
       ).downcase
@@ -245,7 +245,7 @@ module Api
       def requires
         File.join(
           'google',
-          @__resource.__product.prefix[1..-1],
+          @__resource.__product.api_name,
           'property',
           'string'
         ).downcase
@@ -254,7 +254,7 @@ module Api
       def property_type
         [
           'Google',
-          @__resource.__product.prefix[1..-1].camelize(:upper),
+          @__resource.__product.api_name.camelize(:upper),
           'Property',
           'String'
         ].join('::')
@@ -330,7 +330,7 @@ module Api
 
       def property_file
         File.join(
-          'google', @__resource.__product.prefix[1..-1], 'property',
+          'google', @__resource.__product.api_name, 'property',
           [get_type(@item_type).new(@name).type, 'array'].join('_')
         ).downcase
       end
@@ -384,7 +384,7 @@ module Api
           super
         else
           File.join(
-            'google', @__resource.__product.prefix[1..-1], 'property',
+            'google', @__resource.__product.api_name, 'property',
             "#{@__resource.name}_#{@name}".underscore
           ).downcase
         end
@@ -463,7 +463,7 @@ module Api
       end
 
       def property_file
-        File.join('google', @__resource.__product.prefix[1..-1], 'property',
+        File.join('google', @__resource.__product.api_name, 'property',
                   "#{resource}_#{@imports}").downcase
       end
 
@@ -517,7 +517,7 @@ module Api
 
       def property_file
         File.join(
-          'google', @__resource.__product.prefix[1..-1], 'property',
+          'google', @__resource.__product.api_name, 'property',
           [@__resource.name, @name.underscore].join('_')
         ).downcase
       end
@@ -593,7 +593,7 @@ module Api
     def property_ns_prefix
       [
         'Google',
-        @__resource.__product.prefix[1..-1].camelize(:upper),
+        @__resource.__product.api_name.camelize(:upper),
         'Property'
       ]
     end

@@ -325,7 +325,7 @@ module Provider
 
       def build_test(state, object, noop = false)
         @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
-        @name = ["gcp_#{object.__product.prefix[1..-1]}",
+        @name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
                  'facts'].join('_')
         super(state, object, noop)
@@ -333,7 +333,7 @@ module Provider
 
       def build_example(state, object)
         @code = build_code(object, EXAMPLE_DEFAULTS)
-        @name = ["gcp_#{object.__product.prefix[1..-1]}",
+        @name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
                  'facts'].join('_')
         super(state, object)

@@ -15,7 +15,7 @@ require 'tools/linter/tests/tests'
 
 def run_tests(discovery_doc, api, filters, tags = {}, **kwargs)
   # First context: product name
-  RSpec.describe(kwargs[:prefix] || api.prefix) do
+  RSpec.describe(kwargs[:api_name] || api.api_name) do
     discovery_doc.resources.each do |disc_resource|
       api_obj = api&.objects&.select { |p| p.name == disc_resource.name }&.first
       # Second context: resource name

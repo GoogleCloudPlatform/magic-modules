@@ -245,7 +245,7 @@ module Provider
     def array_requires(type)
       File.join(
         'google',
-        type.__resource.__product.prefix[1..-1],
+        type.__resource.__product.api_name,
         'property',
         [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
       )
@@ -254,7 +254,7 @@ module Provider
     def nested_object_requires(nested_object_type)
       File.join(
         'google',
-        nested_object_type.__resource.__product.prefix[1..-1],
+        nested_object_type.__resource.__product.api_name,
         'property',
         [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
       ).downcase

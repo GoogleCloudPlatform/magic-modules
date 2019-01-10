@@ -64,7 +64,7 @@ module Provider
 
                      [product, config]
                    end
-        Hash[prod_map.sort_by { |p| p[0].prefix }]
+        Hash[prod_map.sort_by { |p| p[0].api_name }]
       end
     end
   end

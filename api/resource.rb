@@ -138,10 +138,6 @@ module Api
       end
     end
 
-    def out_name
-      [@__product.prefix, @name.underscore].join('_')
-    end
-
     def identity
       props = all_user_properties
       if @identity.nil?
