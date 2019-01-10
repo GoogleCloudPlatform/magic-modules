@@ -63,7 +63,7 @@ def main():
     )
 
     if not module.params['scopes']:
-        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
+        module.params['scopes'] = <%= python_literal(object.__product.scopes, 34) %>
 
     state = module.params['state']
 <% if object.kind? -%>
@@ -259,7 +259,7 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
             "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
         ]).format(**module.params),
         {
-<%= lines(request_properties(props, 12)) -%>
+<%= lines(request_properties(props, 6)) -%>
         }
     )
 
@@ -301,7 +301,7 @@ def resource_to_request(module):
 <% if object.kind? -%>
         u'kind': <%= quote_string(object.kind) -%>,
 <% end # if object.kind? -%>
-<%= lines(indent(request_properties(properties_in_request, 4), 4)) -%>
+<%= lines(indent(request_properties(properties_in_request, 4), 0)) -%>
     }
 <% if object.encoder? -%>
     request = <%= object.transport.encoder -%>(request, module)
@@ -411,7 +411,7 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return {
-<%= lines(response_properties(object.properties, 8)) -%>
+<%= lines(response_properties(object.properties, 4)) -%>
     }
 <% readonly_selflink_rrefs.each do |resource| -%>
 

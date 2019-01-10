@@ -73,11 +73,13 @@ module Provider
         choices_indent = prop.out_name.underscore.length + 6
         indent(
           [
-            'choices=[',
-            prop.values.map do |x|
-              "#{indent(quote_string(x.to_s), 10)},"
-            end,
-            indent(']', 8)
+            "choices=[#{quote_string(prop.values.first.to_s)},"
+          ] +
+            prop.values[1..-2].map do |x|
+              "#{indent(quote_string(x.to_s), 9)},"
+            end +
+          [
+            "#{indent(quote_string(prop.values.last.to_s), 9)}]"
           ],
           choices_indent
         )
