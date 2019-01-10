@@ -98,7 +98,7 @@
           - !ruby/object:Api::Type::ResourceRef
             name: 'diskType'
             description: |
-              Reference to a gcompute_disk_type resource.
+              Reference to a disk type.
               Specifies the disk type to use to create the instance.
               If not specified, the default is pd-standard.
             resource: 'DiskType'
@@ -166,7 +166,7 @@
         resource: 'Disk'
         imports: 'name'
         description: |
-          Reference to a gcompute_disk resource. When creating a new instance,
+          Reference to a disk. When creating a new instance,
           one of initializeParams.sourceImage or disks.source is required.
 
           If desired, you can also attach existing non-root
@@ -181,7 +181,7 @@
         resource: 'Disk'
         imports: 'selfLink'
         description: |
-          Reference to a gcompute_disk resource. When creating a new instance,
+          Reference to a disk. When creating a new instance,
           one of initializeParams.sourceImage or disks.source is required.
 
           If desired, you can also attach existing non-root

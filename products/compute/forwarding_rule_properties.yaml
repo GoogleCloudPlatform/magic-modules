@@ -24,9 +24,7 @@
   name: 'id'
   description: 'The unique identifier for the resource.'
   output: true
-# TODO(nelsonjr): Make IPAddress work as a resource reference that works
-# for both Address and GlobalAddress. (and deprecate gcompute_address_ref
-# function)
+# This is a multi-resource resource reference (Address, GlobalAddress)
 - !ruby/object:Api::Type::String
   name: 'IPAddress'
   description: |
