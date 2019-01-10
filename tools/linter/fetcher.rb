@@ -62,6 +62,7 @@ class ApiFetcher
   # Get api from filename
   def self.api_from_file(filename)
     return FakeApi.new(filename) unless File.file?(filename)
+
     Api::Compiler.new(filename).run
   end
 
@@ -76,6 +77,8 @@ class ApiFetcher
   end
 end
 
+# A Fake version of an API object designed to mimic api.yaml when
+# none exists
 class FakeApi
   attr_reader :objects
   attr_reader :api_name

@@ -120,13 +120,14 @@ module Discovery
     end
 
     def list_of_resources
-      list_of_resource_keys.map do |k|
+      resources = list_of_resource_keys.map do |k|
         if @results['schemas'][k]
           k
         else
           k.singularize
         end
-      end.map(&:titleize).map { |k| k.gsub(' ', '') }
+      end
+      resources.map { |k| k.titleize.delete(' ') }
     end
 
     def list_of_resource_keys
