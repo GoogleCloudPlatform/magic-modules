@@ -78,10 +78,10 @@ end
 
 class FakeApi
   attr_reader :objects
-  attr_reader :prefix
+  attr_reader :api_name
 
   def initialize(filename)
     @objects = []
-    @prefix = filename.split('/')[1]
+    @api_name = filename.split('/')[1].delete(' ').downcase
   end
 end

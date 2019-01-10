@@ -48,6 +48,7 @@ docs.each do |doc|
 
   # Run tests on regular API
   api = ApiFetcher.api_from_file(doc['filename'])
+
   # Need value in case TF or Ansible file does not exist.
   api_name = api.api_name
 
