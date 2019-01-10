@@ -17,7 +17,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     import_format: ["projects/{{project}}/notes/{{name}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_update: 'templates/terraform/pre_update/containeranalysis_note.erb'
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "container_analysis_note_basic"
         primary_resource_id: "note"

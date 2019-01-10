@@ -33,13 +33,9 @@ module Provider
           # resource.
           :mutex,
 
-          # Deprecated - examples in documentation
-          # TODO(rileykarson): Remove examples and replace them with new examples
-          :examples,
-
-          # New examples in documentation - will take the "examples" name when
-          # old-style examples are gone.
-          :example
+          # Examples in documentation. Backed by generated tests, and have
+          # corresponding OiCS walkthroughs.
+          :examples
         ]
       end
 
@@ -55,12 +51,10 @@ module Provider
         @import_format ||= []
         @custom_code ||= Provider::Terraform::CustomCode.new
         @docs ||= Provider::Terraform::Docs.new
-        @example ||= []
+        @examples ||= []
 
         check_property :id_format, String
-
-        check_optional_property :examples, String
-        check_optional_property_list :example, Provider::Terraform::Examples
+        check_optional_property_list :examples, Provider::Terraform::Examples
 
         check_optional_property :custom_code, Provider::Terraform::CustomCode
         check_optional_property :docs, Provider::Terraform::Docs

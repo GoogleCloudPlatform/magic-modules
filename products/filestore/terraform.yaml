@@ -16,7 +16,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Instance: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{name}}"
     import_format: ["projects/{{project}}/locations/{{zone}}/instances/{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_basic"
         primary_resource_id: "instance"

@@ -15,7 +15,7 @@
 overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Address: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "address_basic"
         primary_resource_id: "ip_address"
@@ -68,7 +68,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/labels.erb
   Autoscaler: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{zone}}/{{name}}"
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_basic"
         primary_resource_id: "foobar"
@@ -86,7 +86,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         required: false
         default_from_api: true
   BackendBucket: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_basic"
         primary_resource_id: "image_backend"
@@ -158,7 +158,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
         primary_resource_id: "default"
@@ -168,7 +168,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   DiskType: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
         primary_resource_id: "default"
@@ -220,7 +220,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       targetTags: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         is_set: true
   ForwardingRule: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_basic"
         primary_resource_id: "default"
@@ -269,7 +269,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
   GlobalAddress: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "global_address_basic"
         primary_resource_id: "default"
@@ -302,7 +302,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "http_health_check_basic"
         primary_resource_id: "default"
@@ -333,7 +333,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "https_health_check_basic"
         primary_resource_id: "default"
@@ -356,7 +356,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       unhealthyThreshold: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         default_value: 2
   HealthCheck: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "health_check_basic"
         primary_resource_id: "internal-health-check"
@@ -388,7 +388,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
      sslHealthCheck.port: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
        default_value: 443
   Image: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "image_basic"
         primary_resource_id: "example"
@@ -442,19 +442,15 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       interconnect: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-    examples: |
-      ```hcl
-      resource "google_compute_router" "foobar" {
-        name    = "my-router"
-        network = "${google_compute_network.foobar.name}"
-      }
-
-      resource "google_compute_interconnect_attachment" "default" {
-        name         = "test-interconnect"
-        interconnect = "my-interconnect-id"
-        router       = "${google_compute_router.foobar.self_link}"
-      }
-      ```
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "interconnect_attachment_basic"
+        primary_resource_id: "on_prem"
+        skip_test: true
+        version: <%= version_name %>
+        vars:
+          interconnect_attachment_name: "on-prem-attachment"
+          router_name: "router"
   License: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
@@ -465,7 +461,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     exclude: true
   RegionAutoscaler: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_autoscaler_basic"
         primary_resource_id: "foobar"
@@ -499,7 +495,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_basic"
         primary_resource_id: "regiondisk"
@@ -511,7 +507,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   RegionDiskType: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
   Route: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
         primary_resource_id: "default"
@@ -565,7 +561,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   Router: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     mutex: router/{{region}}/{{name}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "router_basic"
         primary_resource_id: "foobar"
@@ -585,7 +581,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     create_url: projects/{{project}}/zones/{{zone}}/disks/{{source_disk}}/createSnapshot
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "snapshot_basic"
         primary_resource_id: "snapshot"
@@ -627,7 +623,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       optional_properties: |
         * `name_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. Conflicts with `name`.
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_basic"
         primary_resource_id: "default"
@@ -665,7 +661,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         sensitive: true
         ignore_read: true
   SslPolicy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_policy_basic"
         primary_resource_id: "prod-ssl-policy"
@@ -743,7 +739,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb
       resource_definition: templates/terraform/resource_definition/subnetwork.erb
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_basic"
         primary_resource_id: "network-with-private-secondary-ip-ranges"
@@ -752,7 +748,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
   TargetHttpProxy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_http_proxy_basic"
         primary_resource_id: "default"
@@ -766,7 +762,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         name: proxyId
   TargetHttpsProxy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_https_proxy_basic"
         primary_resource_id: "default"
@@ -782,28 +778,6 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         name: proxyId
   TargetPool: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     exclude: true
-    examples: |
-      ```hcl
-      resource "google_compute_target_pool" "default" {
-        name = "instance-pool"
-
-        instances = [
-          "us-central1-a/myinstance1",
-          "us-central1-b/myinstance2",
-        ]
-
-        health_checks = [
-          "${google_compute_http_health_check.default.name}",
-        ]
-      }
-
-      resource "google_compute_http_health_check" "default" {
-        name               = "default"
-        request_path       = "/"
-        check_interval_sec = 1
-        timeout_sec        = 1
-      }
-      ```
     properties:
       id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
@@ -814,7 +788,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       # TODO: Custom code needed for updating `instances` and `healthCheck`.
       #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
   TargetSslProxy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_ssl_proxy_basic"
         primary_resource_id: "default"
@@ -832,7 +806,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       service: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         name: backendService
   TargetTcpProxy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_tcp_proxy_basic"
         primary_resource_id: "default"
@@ -850,7 +824,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         default_value: :NONE
   TargetVpnGateway: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_vpn_gateway_basic"
         primary_resource_id: "target_gateway"
@@ -876,7 +850,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       tunnels: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         exclude: true
   UrlMap: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "url_map_basic"
         primary_resource_id: "urlmap"
@@ -917,7 +891,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       tests: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
         name: "test"
   VpnTunnel: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vpn_tunnel_basic"
         primary_resource_id: "tunnel1"

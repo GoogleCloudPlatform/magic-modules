@@ -162,7 +162,7 @@ module Provider
     end
 
     def generate_resource_tests(data)
-      return if data[:object].example.reject(&:skip_test).empty?
+      return if data[:object].examples.reject(&:skip_test).empty?
 
       dir = data[:version] == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data[:output_folder], dir)
