@@ -231,3 +231,16 @@ that maintainer with no changes needing to be made.
 
 Once you've gotten approvals from the primary reviewer and the reviewers for
 any affected tools, the primary reviewer will merge your changes.
+
+## Glossary
+The maintainers of the repository will tend to use specific jargon to describe
+concepts related to Magic Modules; here's a quick reference of what some of
+those terms are.
+
+Term          | Definition
+--------------|--------------
+tool          | One of the OSS DevOps projects Magic Modules generates GCP support in
+provider      | Synonym for tool as referred to inside the codebase
+downstream(s) | A PR created by the Magician against a tool
+upstream      | A PR created against Magic Modules or the Magic Modules repo
+The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
