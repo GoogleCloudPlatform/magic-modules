@@ -13,26 +13,18 @@
 
 --- !ruby/object:Provider::Inspec::Config
 manifest: !ruby/object:Provider::Inspec::Manifest
-  version: '0.1.0'
-  source: 'FIXME'
-  issues: 'FIXME'
   summary: 'InSpec resources for verifying GCP infrastructure'
   description: |
     InSpec resources for verifying GCP infrastructure
-overrides: !ruby/object:Provider::ResourceOverrides
-  Topic: !ruby/object:Provider::Inspec::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  Topic: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
     properties:
-      name: !ruby/object:Provider::Inspec::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Inspec::PropertyOverride
         name_from_self_link: true
-  Subscription: !ruby/object:Provider::Inspec::ResourceOverride
+  Subscription: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
     properties:
-      name: !ruby/object:Provider::Inspec::PropertyOverride
+      name: !ruby/object:Provider::Overrides::Inspec::PropertyOverride
         name_from_self_link: true
 files: !ruby/object:Provider::Config::Files
   copy:
     'Gemfile': 'provider/inspec/Gemfile'
-changelog:
-  - !ruby/object:Provider::Config::Changelog
-    version: '0.1.0'
-    date: 2019-01-01T10:00:00-0700
-    general: 'Initial release'
