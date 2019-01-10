@@ -45,6 +45,16 @@ To get started, you'll need:
 
 ### Preparing Magic Modules / One-time setup
 
+To get started right away, use the bootstrap script with:
+
+```bash
+./tools/bootstrap
+```
+
+---
+
+Otherwise, follow the manual steps below:
+
 If you're developing Ansible or Inspec, we use submodules to manage the Magic
 Modules generated outputs:
 
@@ -68,6 +78,11 @@ finish getting Magic Modules set up by installing the Ruby gems it needs to run:
 bundle install
 ```
 
+Now, you can verify you're ready with:
+
+```bash
+./tools/doctor
+```
 
 ### Generating downstream tools
 
