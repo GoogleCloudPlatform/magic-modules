@@ -49,7 +49,7 @@ Each doc must contain a `url` key (URL of the discovery doc) and `filename` key
 
 ### Property not found
 ```
-gdns ManagedZone labels should exist
+dns ManagedZone labels should exist
 ```
 Each property is tested to see if it exists.
 If a property does not exist, RSpec will print the following message.

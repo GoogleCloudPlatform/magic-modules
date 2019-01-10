@@ -43,7 +43,7 @@
              resource: 'Address'
              imports: 'address'
              description: |
-               Specifies the title of a gcompute_address.
+               Reference to an address.
                An external IP address associated with this instance.
                Specify an unused static external IP address available to
                the project or leave this field undefined to use an IP
@@ -94,7 +94,7 @@
         resource: 'Network'
         imports: 'selfLink'
         description: |
-          Specifies the title of an existing gcompute_network.  When creating
+          Specifies the title of an existing network.  When creating
           an instance, if neither the network nor the subnetwork is specified,
           the default network global/networks/default is used; if the network
           is not specified but the subnetwork is specified, the network is
@@ -111,7 +111,7 @@
         resource: 'Subnetwork'
         imports: 'selfLink'
         description: |
-          Reference to a gcompute_subnetwork resource.
+          Reference to a VPC network.
           If the network resource is in legacy mode, do not
           provide this property.  If the network is in auto
           subnet mode, providing the subnetwork is optional. If

@@ -149,17 +149,12 @@ objects:
         values:
           - 'monitoring.googleapis.com'
           - 'none'
-      # TODO(nelsonjr): This is a ResourceRef but on a resource on another
-      # product (Compute). Figure out how to represent/implement this. For now
-      # making it a string.
+      # This is an x-product resource reference.
       - !ruby/object:Api::Type::String
         name: 'network'
         description: |
           The name of the Google Compute Engine network to which the cluster is
           connected. If left unspecified, the default network will be used.
-
-          To ensure it exists and it is operations, configure the network
-          using 'gcompute_network' resource.
       - !ruby/object:Api::Type::String
         name: 'clusterIpv4Cidr'
         description: |
