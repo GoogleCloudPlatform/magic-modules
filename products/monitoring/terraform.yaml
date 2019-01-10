@@ -16,39 +16,21 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
-    examples: |
-      ### Basic Usage
-      ```hcl
-      resource "google_monitoring_alert_policy" "basic" {
-        display_name = "Test Policy Basic"
-        combiner = "OR"
-        conditions = [
-          {
-            display_name = "test condition"
-            condition_threshold {
-              filter = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
-              duration = "60s"
-              comparison = "COMPARISON_GT"
-              aggregations = [
-                {
-                  alignment_period = "60s"
-                  per_series_aligner = "ALIGN_RATE"
-                }
-              ]
-            }
-          }
-        ]
-      }
-      ```
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_alert_policy_basic"
+        primary_resource_id: "alert_policy"
+        version: <%= version_name %>
+        vars:
+          alert_policy_display_name: "My Alert Policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
-
   Group: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
         primary_resource_id: "basic"
@@ -73,7 +55,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/notifications/{{project}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         version: <%= version_name %>
         name: "notification_channel_basic"
@@ -87,7 +69,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   UptimeCheckConfig: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         version: <%= version_name %>
         name: "uptime_check_config_http"

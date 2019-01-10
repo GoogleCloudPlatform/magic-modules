@@ -19,7 +19,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     import_format: ["projects/{{project}}/triggers/{{trigger_id}}"]
     id_format: '{{project}}/{{trigger_id}}'
     self_link: 'projects/{{project}}/triggers/{{trigger_id}}'
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_filename"
         primary_resource_id: "filename-trigger"

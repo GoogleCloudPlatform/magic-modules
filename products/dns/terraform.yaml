@@ -14,7 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   ManagedZone: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"

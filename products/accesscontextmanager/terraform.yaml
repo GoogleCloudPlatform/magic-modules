@@ -15,7 +15,7 @@
 overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   AccessPolicy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "access_context_manager_access_policy_basic"
         skip_test: true
@@ -32,7 +32,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   AccessLevel: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    example:
+    examples:
     - !ruby/object:Provider::Terraform::Examples
       name: "access_context_manager_access_level_basic"
       skip_test: true
@@ -52,7 +52,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
   ServicePerimeter: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "access_context_manager_service_perimeter_basic"
         skip_test: true
