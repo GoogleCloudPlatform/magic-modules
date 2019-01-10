@@ -95,5 +95,13 @@ module Provider
         spread_api(var_value, api, visited, indent)
       end
     end
+
+    def resource_override
+      Provider::Overrides::ResourceOverride
+    end
+
+    def property_override
+      Provider::Overrides::PropertyOverride
+    end
   end
 end
