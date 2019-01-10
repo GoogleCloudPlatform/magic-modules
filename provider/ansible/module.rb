@@ -70,19 +70,23 @@ module Provider
 
       # Returns a formatted string represented the choices of an enum
       def choices_enum(prop)
-        choices_indent = prop.out_name.underscore.length + 6
-        indent(
-          [
-            "choices=[#{quote_string(prop.values.first.to_s)},"
-          ] +
-            prop.values[1..-2].map do |x|
-              "#{indent(quote_string(x.to_s), 9)},"
-            end +
-          [
-            "#{indent(quote_string(prop.values.last.to_s), 9)}]"
-          ],
-          choices_indent
-        )
+        if prop.values.size == 1
+          "choices=[#{quote_string(prop.values.first.to_s)}]"
+        else
+          choices_indent = prop.out_name.underscore.length + 6
+          indent(
+            [
+              "choices=[#{quote_string(prop.values.first.to_s)},"
+            ] +
+              prop.values[1..-2].map do |x|
+                "#{indent(quote_string(x.to_s), 9)},"
+              end +
+            [
+              "#{indent(quote_string(prop.values.last.to_s), 9)}]"
+            ],
+            choices_indent
+          )
+        end
       end
     end
   end
