@@ -24,7 +24,7 @@ def wait_for_operation(module, response):
     wait_for_completion(status, op_result, module)
 <%=
   obj_kind = quote_string(object.kind)
-  lines([
+  indent(lines([
           "return fetch_wrapped_resource(",
           indent([
             "resource,",
@@ -33,7 +33,7 @@ def wait_for_operation(module, response):
             "'#{object.self_link_query.items}')"
           ], 23) # 31 = align with ( previous line
         ].join("\n")
-  )
+  ), 4)
 -%>
 <% end # object.self_link_query.nil? -%>
 
