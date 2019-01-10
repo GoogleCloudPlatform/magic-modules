@@ -203,7 +203,7 @@ module Compile
     # Includes a require clause and schedules library to be copied, potentially
     # with its dependencies & tests.
     def emit_google_lib(ctx, lib, file)
-      product_ns = ctx.local_variable_get(:object).__product.prefix[1..-1]
+      product_ns = ctx.local_variable_get(:object).__product.api_name
 
       files = case lib
               when Libraries::NETWORK

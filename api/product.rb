@@ -33,12 +33,6 @@ module Api
       name.delete(' ').downcase
     end
 
-    # The prefix to uniquely identify the types. This is mostly a legacy thing.
-    # It will output the name in all lowercase and no spaces, prefix with a g
-    def prefix
-      'g' + name.delete(' ').downcase
-    end
-
     # The product full name is the "display name" in string form intended for
     # users to read in documentation; "Google Compute Engine", "Cloud Bigtable"
     def product_full_name

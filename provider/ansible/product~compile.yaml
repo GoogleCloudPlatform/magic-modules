@@ -26,7 +26,7 @@
                     .select { |o| !excludes.include?(o.name) }
                     .select { |o| !o.exclude_if_not_in_version(version) }
                     .map do |object|
-                      ["gcp_#{object.__product.prefix[1..-1]}",
+                      ["gcp_#{object.__product.api_name}",
                        object.name.underscore].join('_')
                     end
 -%>
