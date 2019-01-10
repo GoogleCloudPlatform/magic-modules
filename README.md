@@ -240,7 +240,7 @@ those terms are.
 Term          | Definition
 --------------|--------------
 tool          | One of the OSS DevOps projects Magic Modules generates GCP support in
-provider      | Synonym for tool
+provider      | Synonym for tool as referred to inside the codebase
 downstream(s) | A PR created by the Magician against a tool
 upstream      | A PR created against Magic Modules or the Magic Modules repo
 The Magician  | The Magic Modules CI system that drives the GitHub robot `modular-magician`
