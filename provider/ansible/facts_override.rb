@@ -25,8 +25,8 @@ module Provider
       attr_reader :does_not_exist
       def validate
         super
-        check_optional_property :exists, ::String
-        check_optional_property :does_not_exist, ::String
+        check :exists, type: ::String, required: false
+        check :does_not_exist, type: ::String, required: false
       end
     end
 

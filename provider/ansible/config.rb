@@ -34,7 +34,7 @@ module Provider
 
       def validate
         super
-        check_optional_property :manifest, Provider::Ansible::Manifest
+        check :manifest, type: Provider::Ansible::Manifest, required: false
       end
     end
   end

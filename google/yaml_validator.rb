@@ -71,15 +71,6 @@ module Google
 
     private
 
-    def check_types(objects, type)
-      return if objects.nil?
-
-      objects.each do |object|
-        log_check_type object
-        check_type object, type
-      end
-    end
-
     def check_type(name, object, type)
       if type == :boolean
         return unless [TrueClass, FalseClass].find_index(object.class).nil?
@@ -103,24 +94,12 @@ module Google
       check_property_value property, instance_variable_get("@#{property}"), type
     end
 
-    def check_optional_property(property, type = nil)
-      value = instance_variable_get("@#{property}")
-      return if value.nil?
-
-      check_property_value property, value, type
-    end
-
     def check_property_value(property, prop_value, type)
       Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
       raise "Missing '#{property}' on #{object_display_name}" if prop_value.nil?
 
       check_type property, prop_value, type unless type.nil?
       prop_value.validate if prop_value.is_a?(Api::Object)
-    end
-
-    def default_value_property(property, def_value)
-      value = instance_variable_get("@#{property}")
-      instance_variable_set("@#{property}", def_value) if value.nil?
     end
 
     def check_extraneous_properties
@@ -132,54 +111,6 @@ module Google
         raise "Extraneous variable '#{var_name}' in #{object_display_name}" \
           unless methods.include?(var_name.intern)
       end
-    end
-
-    def check_property_list(name, type = nil)
-      obj_list = instance_variable_get("@#{name}")
-      if obj_list.nil?
-        Google::LOGGER.debug "No next level @ #{object_display_name}: #{name}"
-      else
-        Google::LOGGER.debug \
-          "Checking next level for #{object_display_name}: #{name}"
-        obj_list.each { |o| check_property_value "#{name}:item", o, type }
-      end
-    end
-
-    def check_optional_property_list(name, type = nil)
-      obj_list = instance_variable_get("@#{name}")
-      return if obj_list.nil?
-
-      check_property_list(name, type)
-    end
-
-    # Verifies if a property is of a given type and its value are one of the
-    # valid possibilities.
-    def check_property_oneof(property, valid_values, type = nil)
-      check_property(property, type)
-      prop_value = instance_variable_get("@#{property}")
-      raise "Invalid #{property} #{prop_value}" \
-        unless valid_values.include?(prop_value)
-    end
-
-    # Similar to 'check_property_oneof' but assigns a default value if missing.
-    def check_property_oneof_default(prop, valid_values, default, type = nil)
-      prop_value = instance_variable_get("@#{prop}")
-      instance_variable_set("@#{prop}", if prop_value.nil?
-                                          default
-                                        else
-                                          prop_value
-                                        end)
-      check_property_oneof prop, valid_values, type
-    end
-
-    # Similar to 'check_property_oneof_default' but allows the default value to
-    # also be nil with the property being effectively optional.
-    def check_optional_property_oneof_default(prop, valid_values, default,
-                                              type = nil)
-      prop_value = instance_variable_get("@#{prop}")
-      return if prop_value.nil? && default.nil?
-
-      check_property_oneof_default(prop, valid_values, default, type)
     end
 
     def set_variables(objects, property)

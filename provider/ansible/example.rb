@@ -74,13 +74,11 @@ module Provider
 
       def validate
         super
-        default_value_property :facts, FactsTask.new
-        default_value_property :verifier, FactsVerifier.new
 
-        check_property :task, Task
-        check_optional_property :verifier, Verifier
-        check_optional_property_list :dependencies, Task
-        check_optional_property :facts, Task
+        check :task, type: Task
+        check :verifier, type: Verifier, default: FactsVerifier.new
+        check :dependencies, list_type: Task, type: Array
+        check :facts, type: Task, default: FactsTask.new
 
         @facts&.set_variable(self, :__example)
         @verifier.set_variable(self, :__example) if @verifier.respond_to?(:__example)
@@ -98,9 +96,9 @@ module Provider
 
       def validate
         super
-        check_property :name, String
-        check_property :code, Hash
-        check_optional_property_list :scopes, ::String
+        check :name, type: String
+        check :code, type: Hash
+        check :scopes, type: Array, list_type: ::String, required: false
       end
 
       def build_test(state, object, noop = false)
@@ -152,8 +150,8 @@ module Provider
       def validate
         @failure ||= FailureCondition.new
 
-        check_property :command, String
-        check_property :failure, FailureCondition
+        check :command, type: String
+        check :failure, type: FailureCondition, default: FailureCondition.new
       end
 
       # All of the arguments are used inside the ERB file, so we need
@@ -261,15 +259,10 @@ module Provider
       attr_reader :test
 
       def validate
-        check_optional_property :name, ::String
-        check_optional_property :enabled, [TrueClass, FalseClass]
-        check_optional_property :test, ::String
-
-        @enabled ||= true
-        @name ||= '{{ resource_name }}'
+        check :name, type: ::String, default: '{{ resource_name }}'
         @error ||= "#{@name} was not found."
-        @test ||= "\"\\\"#{@error.strip}\\\" in results.stderr\""
-        true
+        check :enabled, type: [TrueClass, FalseClass], default: true
+        check :test, type: ::String, default: "\"\\\"#{@error.strip}\\\" in results.stderr\""
       end
     end
 
@@ -282,7 +275,7 @@ module Provider
         raise 'Region must be slash delineated (e.g. regions/us-west1)' \
           unless @region == 'global' || @region.match?(%r{.*\/.*})
 
-        check_optional_property :type, ::String
+        check :type, type: ::String, required: false
 
         @name ||= '{{ resource_name }}'
         @error = [
@@ -299,8 +292,8 @@ module Provider
       attr_reader :plural
 
       def validate
-        check_optional_property :single, ::String
-        check_optional_property :plural, ::String
+        check :single, type: ::String, required: false
+        check :plural, type: ::String, required: false
 
         @name ||= '{{ resource_name }}'
         @error = [
