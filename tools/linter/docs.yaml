@@ -28,18 +28,10 @@
   product: binaryauthorization
   version: v1beta1
   filename: products/binaryauthorization/api.yaml
-- url: https://classroom.googleapis.com/$discovery/rest?version=v1
-  product: classroom
-  version: v1
-  filename: products/classroom/api.yaml
 - url: https://cloudasset.googleapis.com/$discovery/rest?version=v1beta1
   product: cloudasset
   version: v1beta1
   filename: products/cloudasset/api.yaml
-- url: https://cloudbilling.googleapis.com/$discovery/rest?version=v1
-  product: cloudbilling
-  version: v1
-  filename: products/cloudbilling/api.yaml
 - url: https://cloudbuild.googleapis.com/$discovery/rest?version=v1
   product: cloudbuild
   version: v1
@@ -80,18 +72,6 @@
   product: cloudscheduler
   version: v1beta1
   filename: products/cloudscheduler/api.yaml
-- url: https://cloudsearch.googleapis.com/$discovery/rest?version=v1
-  product: cloudsearch
-  version: v1
-  filename: products/cloudsearch/api.yaml
-- url: https://cloudshell.googleapis.com/$discovery/rest?version=v1alpha1
-  product: cloudshell
-  version: v1alpha1
-  filename: products/cloudshell/api.yaml
-- url: https://cloudshell.googleapis.com/$discovery/rest?version=v1
-  product: cloudshell
-  version: v1
-  filename: products/cloudshell/api.yaml
 - url: https://cloudtasks.googleapis.com/$discovery/rest?version=v2beta3
   product: cloudtasks
   version: v2beta3
@@ -196,10 +176,6 @@
   product: runtimeconfig
   version: v1
   filename: products/runtimeconfig/api.yaml
-- url: https://script.googleapis.com/$discovery/rest?version=v1
-  product: script
-  version: v1
-  filename: products/script/api.yaml
 - url: https://sourcerepo.googleapis.com/$discovery/rest?version=v1
   product: sourcerepo
   version: v1
@@ -224,15 +200,7 @@
   product: tpu
   version: v1
   filename: products/tpu/api.yaml
-- url: https://vault.googleapis.com/$discovery/rest?version=v1
-  product: vault
-  version: v1
-  filename: products/vault/api.yaml
 - url: https://videointelligence.googleapis.com/$discovery/rest?version=v1
   product: videointelligence
   version: v1
   filename: products/videointelligence/api.yaml
-- url: https://vision.googleapis.com/$discovery/rest?version=v1
-  product: vision
-  version: v1
-  filename: products/vision/api.yaml
