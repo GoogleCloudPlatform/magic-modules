@@ -51,12 +51,12 @@ module Overrides
         @examples ||= []
 
         check :id_format, type: String, default: '{{name}}'
-        check :examples, list_type: Provider::Terraform::Examples, type: Array, default: []
+        check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
 
         check :custom_code, type: Provider::Terraform::CustomCode, default: Provider::Terraform::CustomCode.new
         check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
         check :import_format, type: Array, default: []
-        check :import_format, type: Array, list_type: String
+        check :import_format, type: Array, item_type: String
       end
 
       def apply(resource)

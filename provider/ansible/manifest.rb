@@ -26,9 +26,9 @@ module Provider
 
       def validate
         check :metadata_version, type: String
-        check :status, type: Array, list_type: String
+        check :status, type: Array, item_type: String
         check :supported_by, type: String
-        check :requirements, type: Array, list_type: String
+        check :requirements, type: Array, item_type: String
         check :version_added, type: String
         check :author, type: String
       end

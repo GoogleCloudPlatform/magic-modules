@@ -162,7 +162,7 @@ module Api
       check :description, type: String
       check :exclude, required: false, type: :boolean
       check :kind, required: false, type: String
-      check :parameters, required: false, type: Array, list_type: Api::Type
+      check :parameters, required: false, type: Array, item_type: Api::Type
 
       check :exports, required: false, type: Array
       check :self_link, type: String, required: false
@@ -183,7 +183,7 @@ module Api
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
 
-      check :properties, type: Array, list_type: Api::Type unless @exclude
+      check :properties, type: Array, item_type: Api::Type unless @exclude
 
       check_identity unless @identity.nil?
     end
@@ -242,7 +242,7 @@ module Api
     end
 
     def check_identity
-      check :identity, type: Array, list_type: String
+      check :identity, type: Array, item_type: String
 
       # Ensures we have all properties defined
       @identity.each do |i|

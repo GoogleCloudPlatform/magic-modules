@@ -502,7 +502,7 @@ module Api
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
         end
-        check :properties, type: ::Array, list_type: Api::Type
+        check :properties, type: ::Array, item_type: Api::Type
       end
 
       def property_class

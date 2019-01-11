@@ -197,7 +197,7 @@ module Provider
         check :name, type: String
         check :primary_resource_id, type: String, required: false
         check :vars, type: Hash, required: false
-        check :ignore_read_extra, type: Array, list_type: String
+        check :ignore_read_extra, type: Array, item_type: String
         check :skip_test, type: TrueClass, required: false
       end
     end

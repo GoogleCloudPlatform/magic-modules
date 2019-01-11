@@ -77,7 +77,7 @@ module Provider
 
         check :task, type: Task
         check :verifier, type: Verifier, default: FactsVerifier.new
-        check :dependencies, list_type: Task, type: Array, required: false
+        check :dependencies, item_type: Task, type: Array, required: false
         check :facts, type: Task, default: FactsTask.new
 
         @facts&.set_variable(self, :__example)
@@ -98,7 +98,7 @@ module Provider
         super
         check :name, type: String
         check :code, type: Hash
-        check :scopes, type: Array, list_type: ::String, required: false
+        check :scopes, type: Array, item_type: ::String, required: false
       end
 
       def build_test(state, object, noop = false)

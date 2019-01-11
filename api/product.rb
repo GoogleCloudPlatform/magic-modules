@@ -62,8 +62,8 @@ module Api
       super
       set_variables @objects, :__product
       check :display_name, required: false, type: String
-      check :objects, type: Array, list_type: Api::Resource
-      check :scopes, type: Array, list_type: String
+      check :objects, type: Array, item_type: Api::Resource
+      check :scopes, type: Array, item_type: String
 
       check_versions
     end
@@ -141,7 +141,7 @@ module Api
     private
 
     def check_versions
-      check :versions, type: Array, list_type: Api::Product::Version
+      check :versions, type: Array, item_type: Api::Product::Version
 
       # Confirm that at most one version is the default
       defaults = 0
