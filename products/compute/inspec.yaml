@@ -16,88 +16,88 @@ manifest: !ruby/object:Provider::Inspec::Manifest
   summary: 'InSpec resources for verifying GCP infrastructure'
   description: |
     InSpec resources for verifying GCP infrastructure
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  Address: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Address: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Autoscaler: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Autoscaler: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  BackendBucket: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  BackendBucket: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  BackendService: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  BackendService: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  DiskType: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Firewall: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
     additional_functions: |
       def custom
         # TODO: actually add code here
       end
-  ForwardingRule: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  GlobalAddress: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  GlobalAddress: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  GlobalForwardingRule: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  GlobalForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  HealthCheck: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  HealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  HttpHealthCheck: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  HttpHealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  HttpsHealthCheck: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  HttpsHealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Image: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Image: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Instance: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Instance: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  InstanceGroup: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  InstanceGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  InstanceGroupManager: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  InstanceGroupManager: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  InstanceTemplate: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  InstanceTemplate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  InterconnectAttachment: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  InterconnectAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  License: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  License: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  MachineType: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Network: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Network: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Region: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Region: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  RegionAutoscaler: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  RegionAutoscaler: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  RegionDisk: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  RegionDisk: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  RegionDiskType: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Route: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Route: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Router: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Router: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Snapshot: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Snapshot: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  SslCertificate: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  SslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Subnetwork: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetHttpProxy: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  TargetHttpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetHttpsProxy: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  TargetHttpsProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetPool: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetTcpProxy: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  TargetTcpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetVpnGateway: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetSslProxy: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  TargetSslProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  UrlMap: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  UrlMap: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  VpnTunnel: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  VpnTunnel: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Zone: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Zone: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   copy:

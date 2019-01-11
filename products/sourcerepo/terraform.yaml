@@ -13,8 +13,8 @@
 
 --- !ruby/object:Provider::Terraform::Config
 legacy_name: 'sourcerepo'
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  Repository: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Repository: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: '{{project}}/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -24,7 +24,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         vars:
           repository_name: "my-repository"
     properties:
-      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/repository_name_from_short_name.go.erb
         custom_flatten: templates/terraform/custom_flatten/repository_short_name_from_name.go.erb
         description: |
