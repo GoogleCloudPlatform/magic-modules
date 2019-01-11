@@ -58,8 +58,8 @@ module Overrides
         check :has_tests, type: :boolean, default: true
         check :hidden, type: ::Array, required: false
         check :imports, type: ::Array, default: []
-        check :post_create, type: ::String, required: true
-        check :post_action, type: ::String, required: true
+        check :post_create, type: ::String, required: false
+        check :post_action, type: ::String, required: false
         check :provider_helpers, type: ::Array, default: []
         check :return_if_object, type: ::String, required: false
         check :template, type: ::String, required: false

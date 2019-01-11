@@ -77,7 +77,7 @@ module Provider
 
         check :task, type: Task
         check :verifier, type: Verifier, default: FactsVerifier.new
-        check :dependencies, list_type: Task, type: Array
+        check :dependencies, list_type: Task, type: Array, required: false
         check :facts, type: Task, default: FactsTask.new
 
         @facts&.set_variable(self, :__example)

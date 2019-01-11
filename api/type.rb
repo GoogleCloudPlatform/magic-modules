@@ -65,8 +65,7 @@ module Api
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
 
-      check_optional_property_oneof_default \
-        :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
+      check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE], default: @__resource&.update_verb, required: false
 
       check :update_url, type: ::String, required: false
 
