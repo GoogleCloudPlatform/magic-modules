@@ -22,12 +22,6 @@ scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 objects:
   - !ruby/object:Api::Resource
-    # We are not exposing Change directly to the customer, as we cannot
-    # guarantee idempotency of it given its transactional nature.
-    name: 'Change'
-    description: 'An atomic update to a collection of ResourceRecordSets.'
-    exclude: true
-  - !ruby/object:Api::Resource
     name: 'ManagedZone'
     kind: 'dns#managedZone'
     base_url: 'projects/{{project}}/managedZones'
