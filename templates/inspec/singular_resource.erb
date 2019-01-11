@@ -57,12 +57,9 @@ class <%= object.name -%> < GcpResourceBase
     parse unless @fetched.nil?
   end
 
+<% identity_outs = object.identity.map { |id| id.out_name } -%>
   def identity
-    [
-<% object.identity.each do |id| -%>
-      '<%= id.out_name -%>',
-<% end # object.identity.each -%>
-    ]
+    %w{<%= identity_outs.join(' ') -%>}
   end
 
   def collection_item
@@ -70,7 +67,7 @@ class <%= object.name -%> < GcpResourceBase
   end
 
   def unwrap(fetched, params)
-    fetched[collection_item].find{|y| identity.all? {|id| y[id.to_sym] == params[id]} }
+    fetched[collection_item].find { |result| identity.all? { |id| result[id.to_sym] == params[id] } }
   end
 <% end # object.self_link_query.nil? -%>
 
