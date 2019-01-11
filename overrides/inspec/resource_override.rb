@@ -17,7 +17,7 @@ module Overrides
   module Inspec
     # A class to control overridden properties on inspec.yaml in lieu of
     # values from api.yaml.
-    class ResourceOverride < Provider::Overrides::ResourceOverride
+    class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         %i[
           manual

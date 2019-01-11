@@ -53,8 +53,8 @@ module Provider
 
         # We have to apply the property overrides and validate
         # the filtering property
-        @filter = Provider::Overrides::Runner.build_single_property(
-          @filter, {}, Provider::Overrides::Ansible::PropertyOverride
+        @filter = Overrides::Runner.build_single_property(
+          @filter, {}, Overrides::Ansible::PropertyOverride
         )
       end
     end

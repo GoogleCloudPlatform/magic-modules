@@ -22,10 +22,10 @@ class File
   end
 end
 
-describe Provider::Overrides::Terraform::ResourceOverride do
+describe Overrides::Terraform::ResourceOverride do
   context 'good resource' do
     let(:resource) do
-      Provider::Overrides::Terraform::ResourceOverride.parse(
+      Overrides::Terraform::ResourceOverride.parse(
         IO.read('spec/data/good-resource.yaml')
       )
     end
@@ -65,7 +65,7 @@ describe Provider::Overrides::Terraform::ResourceOverride do
 
   def create_override(property_name, override_val)
     Google::YamlValidator.parse(
-      ['--- !ruby/object:Provider::Overrides::Terraform::ResourceOverride',
+      ['--- !ruby/object:Overrides::Terraform::ResourceOverride',
        "#{property_name}: '#{override_val}'"].join("\n")
     )
   end

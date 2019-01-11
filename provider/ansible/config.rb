@@ -25,11 +25,11 @@ module Provider
       end
 
       def resource_override
-        Provider::Overrides::Ansible::ResourceOverride
+        Overrides::Ansible::ResourceOverride
       end
 
       def property_override
-        Provider::Overrides::Ansible::PropertyOverride
+        Overrides::Ansible::PropertyOverride
       end
 
       def validate

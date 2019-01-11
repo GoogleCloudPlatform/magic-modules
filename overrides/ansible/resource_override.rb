@@ -18,7 +18,7 @@ module Overrides
   module Ansible
     # A class to control overridden properties on ansible.yaml in lieu of
     # values from api.yaml.
-    class ResourceOverride < Provider::Overrides::ResourceOverride
+    class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         %i[
           access_api_results

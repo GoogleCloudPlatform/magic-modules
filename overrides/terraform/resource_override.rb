@@ -18,7 +18,7 @@ module Overrides
   module Terraform
     # A class to control overridden properties on terraform.yaml in lieu of
     # values from api.yaml.
-    class ResourceOverride < Provider::Overrides::ResourceOverride
+    class ResourceOverride < Overrides::ResourceOverride
       def self.attributes
         [
           # The Terraform resource id format used when calling #setId(...).

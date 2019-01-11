@@ -16,13 +16,13 @@ require 'overrides/resources'
 require 'overrides/validator'
 
 module Overrides
-  # This runner takes an Api::Product and applies a set of Provider::Overrides::ResourceOverrides
+  # This runner takes an Api::Product and applies a set of Overrides::ResourceOverrides
   # It does this by building a brand new Api::Product object from scratch, using
   # the values from either the original Api::Product or the override values.
   # Example usage in a provider.yaml file where you want to extend a resource
   # description:
   #
-  # overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  # overrides: !ruby/object:Overrides::ResourceOverrides
   #   SomeResource: !ruby/object:Provider::MyProvider::ResourceOverride
   #     description: '{{description}} A tool-specific description complement'
   #     parameters:
@@ -41,17 +41,17 @@ module Overrides
   class Runner
     class << self
       def initialize(api, overrides,
-                     res_override_class = Provider::Overrides::ResourceOverride,
-                     prop_override_class = Provider::Overrides::PropertyOverride)
+                     res_override_class = Overrides::ResourceOverride,
+                     prop_override_class = Overrides::PropertyOverride)
         @api = api
         @overrides = overrides
         @res_override_class = res_override_class
         @prop_override_class = prop_override_class
       end
 
-      def build(api, overrides, res_override_class = Provider::Overrides::ResourceOverride,
-                prop_override_class = Provider::Overrides::PropertyOverride)
-        validator = Provider::Overrides::Validator.new(api, overrides)
+      def build(api, overrides, res_override_class = Overrides::ResourceOverride,
+                prop_override_class = Overrides::PropertyOverride)
+        validator = Overrides::Validator.new(api, overrides)
         validator.run
         build_product(api, overrides, resource: res_override_class, property: prop_override_class)
       end
@@ -62,7 +62,7 @@ module Overrides
 
       private
 
-      # Given a old Api::Product, and Provider::Overrides::ResourceOverrides,
+      # Given a old Api::Product, and Overrides::ResourceOverrides,
       # returns a new Api::Product with overrides applied
       def build_product(old_prod, all_overrides, override_classes)
         prod = Api::Product.new

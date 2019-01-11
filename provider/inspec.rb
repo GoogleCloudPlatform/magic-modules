@@ -32,11 +32,11 @@ module Provider
       end
 
       def resource_override
-        Provider::Overrides::Inspec::ResourceOverride
+        Overrides::Inspec::ResourceOverride
       end
 
       def property_override
-        Provider::Overrides::Inspec::PropertyOverride
+        Overrides::Inspec::PropertyOverride
       end
     end
 

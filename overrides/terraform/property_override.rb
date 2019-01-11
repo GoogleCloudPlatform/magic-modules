@@ -35,7 +35,7 @@ end
 module Overrides
   module Terraform
     # Terraform-specific overrides to api.yaml.
-    class PropertyOverride < Provider::Overrides::PropertyOverride
+    class PropertyOverride < Overrides::PropertyOverride
       # Collection of fields allowed in the PropertyOverride section for
       # Terraform. All fields should be `attr_reader :<property>`
       def self.attributes
