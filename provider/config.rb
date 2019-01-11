@@ -13,7 +13,7 @@
 
 require 'api/object'
 require 'compile/core'
-require 'provider/overrides/runner'
+require 'overrides/runner'
 
 module Provider
   # Settings for the provider

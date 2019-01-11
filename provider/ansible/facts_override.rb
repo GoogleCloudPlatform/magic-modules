@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
-require 'provider/overrides/runner'
+require 'overrides/runner'
 
 module Provider
   module Ansible

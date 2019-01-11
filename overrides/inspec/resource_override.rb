@@ -11,34 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/overrides/resources'
+require 'overrides/resources'
 
-module Provider
-  module Overrides
-    module Inspec
-      # A class to control overridden properties on inspec.yaml in lieu of
-      # values from api.yaml.
-      class ResourceOverride < Provider::Overrides::ResourceOverride
-        def self.attributes
-          %i[
-            manual
-            additional_functions
-          ]
-        end
+module Overrides
+  module Inspec
+    # A class to control overridden properties on inspec.yaml in lieu of
+    # values from api.yaml.
+    class ResourceOverride < Provider::Overrides::ResourceOverride
+      def self.attributes
+        %i[
+          manual
+          additional_functions
+        ]
+      end
 
-        attr_reader(*attributes)
+      attr_reader(*attributes)
 
-        def validate
-          assign_defaults
+      def validate
+        assign_defaults
 
-          super
-          check_property :manual, :boolean
-          check_optional_property :additional_functions, String
-        end
+        super
+        check_property :manual, :boolean
+        check_optional_property :additional_functions, String
+      end
 
-        def assign_defaults
-          default_value_property :manual, false
-        end
+      def assign_defaults
+        default_value_property :manual, false
       end
     end
   end

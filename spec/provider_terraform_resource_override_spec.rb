@@ -13,7 +13,7 @@
 
 require 'spec_helper'
 require 'google/yaml_validator'
-require 'provider/overrides/terraform/resource_override'
+require 'overrides/terraform/resource_override'
 
 class File
   class << self

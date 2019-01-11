@@ -12,20 +12,18 @@
 # limitations under the License.
 
 require 'api/object'
-require 'provider/overrides/resources'
+require 'overrides/resources'
 
-module Provider
-  module Overrides
-    module Inspec
-      # Inspec-specific overrides to api.yaml.
-      class PropertyOverride < Provider::Overrides::PropertyOverride
-        # Collection of fields allowed in the PropertyOverride section for
-        # Inspec. All fields should be `attr_reader :<property>`
-        def self.attributes
-          [
-            :name_from_self_link, # Set to convert self link to name
-          ]
-        end
+module Overrides
+  module Inspec
+    # Inspec-specific overrides to api.yaml.
+    class PropertyOverride < Provider::Overrides::PropertyOverride
+      # Collection of fields allowed in the PropertyOverride section for
+      # Inspec. All fields should be `attr_reader :<property>`
+      def self.attributes
+        [
+          :name_from_self_link, # Set to convert self link to name
+        ]
       end
     end
   end

@@ -15,8 +15,8 @@ require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
 require 'provider/inspec/manifest'
-require 'provider/overrides/inspec/resource_override'
-require 'provider/overrides/inspec/property_override'
+require 'overrides/inspec/resource_override'
+require 'overrides/inspec/property_override'
 require 'active_support/inflector'
 
 module Provider
