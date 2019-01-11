@@ -37,10 +37,10 @@ module Provider
 
       def validate
         super
-        check_optional_property :warning, String
-        check_optional_property :required_properties, String
-        check_optional_property :optional_properties, String
-        check_optional_property :attributes, String
+        check :warning, type: String, required: false
+        check :required_properties, required: false, type: String
+        check :optional_properties, required: false, type: String
+        check :attributes, required: false, type: String
       end
     end
 
@@ -194,11 +194,11 @@ module Provider
         super
         @ignore_read_extra ||= []
 
-        check_property :name, String
-        check_property :primary_resource_id, String
-        check_optional_property :vars, Hash
-        check_optional_property_list :ignore_read_extra, String
-        check_optional_property :skip_test, TrueClass
+        check :name, type: String
+        check :primary_resource_id, type: String, required: false
+        check :vars, type: Hash, required: false
+        check :ignore_read_extra, type: Array, list_type: String
+        check :skip_test, type: TrueClass, required: false
       end
     end
 
@@ -287,18 +287,18 @@ module Provider
       def validate
         super
 
-        check_optional_property :extra_schema_entry, String
-        check_optional_property :resource_definition, String
-        check_optional_property :encoder, String
-        check_optional_property :update_encoder, String
-        check_optional_property :decoder, String
-        check_optional_property :constants, String
-        check_optional_property :post_create, String
-        check_optional_property :pre_update, String
-        check_optional_property :post_update, String
-        check_optional_property :pre_delete, String
-        check_optional_property :custom_import, String
-        check_optional_property :post_import, String
+        check :extra_schema_entry, type: String, required: false
+        check :resource_definition, type: String, required: false
+        check :encoder, type: String, required: false
+        check :update_encoder, type: String, required: false
+        check :decoder, type: String, required: false
+        check :constants, type: String, required: false
+        check :post_create, type: String, required: false
+        check :pre_update, type: String, required: false
+        check :post_update, type: String, required: false
+        check :pre_delete, type: String, required: false
+        check :custom_import, type: String, required: false
+        check :post_import, type: String, required: false
       end
     end
   end

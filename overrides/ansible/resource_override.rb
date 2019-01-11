@@ -47,35 +47,40 @@ module Overrides
       def validate
         super
 
-        default_value_property :access_api_results, false
-        default_value_property :custom_create_resource, false
-        default_value_property :custom_update_resource, false
-        default_value_property :exclude, false
-        default_value_property :has_tests, true
-        default_value_property :imports, []
-        default_value_property :provider_helpers, []
-        default_value_property :unwrap_resource, false
+        @exclude ||= false
 
-        check_property :access_api_results, :boolean
-        check_optional_property :collection, ::String
-        check_property :custom_create_resource, :boolean
-        check_property :custom_update_resource, :boolean
-        check_optional_property :create, ::String
-        check_optional_property :delete, ::String
-        check_property :has_tests, :boolean
-        check_optional_property :hidden, ::Array
-        check_property :imports, ::Array
-        check_optional_property :post_create, ::String
-        check_optional_property :post_action, ::String
-        check_property :provider_helpers, ::Array
-        check_optional_property :return_if_object, ::String
-        check_optional_property :template, ::String
-        check_optional_property :update, ::String
-        check_optional_property :unwrap_resource, :boolean
-        check_optional_property :version_added, ::String
+        check :access_api_results, type: :boolean, default: false
+        check :collection, required: false, type: ::String
+        check :custom_create_resource, type: :boolean, default: false
+        check :custom_update_resource, type: :boolean, default: false
+        check :create, type: ::String, required: false
+        check :delete, type: ::String, required: false
+        check :has_tests, type: :boolean, default: true
+        check :hidden, type: ::Array, required: false
+        check :imports, type: ::Array, default: []
+        check :post_create, type: ::String, required: true
+        check :post_action, type: ::String, required: true
+        check :provider_helpers, type: ::Array, default: []
+        check :return_if_object, type: ::String, required: false
+        check :template, type: ::String, required: false
+        check :update, type: ::String, required: false
+        check :unwrap_resource, type: :boolean, default: false
+        check :version_added, type: ::String, required: false
 
-        @facts ||= Provider::Ansible::FactsOverride.new
-        check_property :facts, Provider::Ansible::FactsOverride
+        check :facts, type: FactsOverride, default: FactsOverride.new
+      end
+    end
+
+    # Product specific overriden properties for Ansible
+    class ResourceOverride < Provider::ResourceOverride
+      include OverrideProperties
+      include ResourceOverrideSharedCode
+
+      private
+
+      def overriden
+        Provider::Ansible::OverrideProperties
+>>>>>>> more conversions have happened:provider/ansible/resource_override.rb
       end
     end
   end
