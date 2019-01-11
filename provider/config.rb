@@ -55,8 +55,8 @@ module Provider
 
       config.validate
       api = Overrides::Runner.build(api, config.overrides,
-                                              config.resource_override,
-                                              config.property_override)
+                                    config.resource_override,
+                                    config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
       api.validate

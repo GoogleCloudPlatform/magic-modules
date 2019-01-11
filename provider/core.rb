@@ -189,8 +189,8 @@ module Provider
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
       @api = Overrides::Runner.build(@api, @config.datasources,
-                                               @config.resource_override,
-                                               @config.property_override)
+                                     @config.resource_override,
+                                     @config.property_override)
       @api.validate
 
       version = @api.version_obj_or_default(version_name)
