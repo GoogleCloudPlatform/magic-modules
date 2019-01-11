@@ -107,7 +107,7 @@ module Api
       def validate
         super
 
-        check :item, default: 'items', type: ::String
+        check :items, default: 'items', type: ::String
         check :kind, type: ::String, required: false
       end
 
@@ -168,7 +168,7 @@ module Api
       check :self_link, type: String, required: false
       check :self_link_query, required: false, type: Api::Resource::ResponseList
       check :readonly, required: false, type: :boolean
-      check :transport, required: false, type: :Transport
+      check :transport, required: false, type: Transport
       check :references, required: false, type: ReferenceLinks
 
       check :collection_url_response, default: Api::Resource::ResponseList.new, type: Api::Resource::ResponseList

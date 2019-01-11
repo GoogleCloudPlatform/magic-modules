@@ -51,14 +51,18 @@ module Google
     # :required - is the variable required? (defaults: true)
     def check(variable, **opts)
       value = instance_variable_get("@#{variable}")
-      instance_variable_set(variable, opts[:default]) if opts[:default] && value.nil?
+
+      # Set default value.
+      if !opts[:default].nil? && value.nil?
+        instance_variable_set("@#{variable}", opts[:default])
+        value = instance_variable_get("@#{variable}")
+      end
 
       return if value.nil? && opts[:required] == false
 
-      check_property_type(variable, value, opts[:type]) if opts[:type]
+      check_property_value(variable, value, opts[:type]) if opts[:type]
 
-      raise "Arrays must have a type" if opts[:type] == Array && !opts[:list_type]
-      value.each_with_index { |o, index| check_property_type("#{variable}[#{index}]", o, opts[:list_type]) } if opts[:list_type]
+      value.each_with_index { |o, index| check_property_value("#{variable}[#{index}]", o, opts[:list_type]) } if value.is_a?(Array)
 
       if opts[:allowed]
         raise "#{value} on #{variable} should be one of #{opts[:allowed]}" unless opts[:allowed].include?(value)

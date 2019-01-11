@@ -55,8 +55,8 @@ module Api
 
     def validate
       super
-      @exclude ||= false
       check :description, type: ::String
+      check :exclude, type: :boolean, default: false
       check :min_version, required: false, type: ::String
       check :output, type: :boolean, required: false
       check :required, type: :boolean, required: false
@@ -221,6 +221,10 @@ module Api
     # Properties that are fetched externally
     class FetchedExternal < Type
       attr_writer :resource
+
+      def validate
+        @conflicts ||= []
+      end
 
       def api_name
         name
