@@ -28,7 +28,7 @@ module Provider
       end
 
       def run
-        verify_resources(@api.objects)
+        verify_resources(@api.objects) if @api.objects
       end
 
       private

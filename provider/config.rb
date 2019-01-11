@@ -13,8 +13,6 @@
 
 require 'api/object'
 require 'compile/core'
-require 'provider/resource_override'
-require 'provider/resource_overrides'
 require 'provider/overrides/runner'
 
 module Provider
@@ -31,6 +29,8 @@ module Provider
     # For Terraform, some products use the API client name w/o spaces and
     # others use spaces. Eg: "app_engine" vs "appengine".
     attr_reader :legacy_name
+
+    attr_reader :overrides
 
     # List of files to copy or compile into target module
     class Files < Api::Object
@@ -54,25 +54,13 @@ module Provider
         unless config.class <= Provider::Config
 
       config.validate
-      # Use new override system
-      if config.overrides.is_a?(Provider::Overrides::ResourceOverrides)
-        using_new_overrides = true
-        api = Provider::Overrides::Runner.build(api, config.overrides,
-                                                config.new_resource_override,
-                                                config.new_property_override)
-      # Use old overrides
-      # TODO(alexstephen): Remove when old overrides are no longer in use.
-      else
-        # Compile step #2: Now that we have the target class, compile with that
-        # class features
-        using_new_overrides = false
-        source = config.compile(cfg_file)
-        config = Google::YamlValidator.parse(source)
-        config.overrides
-      end
+      api = Provider::Overrides::Runner.build(api, config.overrides,
+                                              config.resource_override,
+                                              config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
-      [api, config, using_new_overrides]
+      api.validate
+      [api, config]
     end
 
     def provider
@@ -86,11 +74,10 @@ module Provider
     def validate
       super
 
-      overrides
+      default_value_property :overrides, Provider::Overrides::ResourceOverrides.new
 
       check_optional_property :files, Provider::Config::Files
-      check_property :overrides, [Provider::ResourceOverrides,
-                                  Provider::Overrides::ResourceOverrides]
+      check_property :overrides, Provider::Overrides::ResourceOverrides
     end
 
     # Provides the API object to any type that requires, e.g. for validation
@@ -109,9 +96,12 @@ module Provider
       end
     end
 
-    # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
-    def overrides
-      @overrides ||= Provider::ResourceOverrides.new
+    def resource_override
+      Provider::Overrides::ResourceOverride
+    end
+
+    def property_override
+      Provider::Overrides::PropertyOverride
     end
   end
 end

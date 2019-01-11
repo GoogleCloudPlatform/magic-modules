@@ -60,9 +60,15 @@ describe Provider::Terraform do
     end
 
     def resource(*data)
-      Google::YamlValidator.parse(['--- !ruby/object:Api::Resource']
-                                    .concat(data)
-                                    .join("\n"))
+      res = Google::YamlValidator.parse(['--- !ruby/object:Api::Resource']
+                                 .concat(["name: 'testobject'"])
+                                 .concat(data)
+                                 .join("\n"))
+      product.objects.append(res)
+      new_product = Provider::Overrides::Runner.build(product, config.overrides,
+                                                      config.resource_override,
+                                                      config.property_override)
+      new_product.objects.last
     end
   end
 end
