@@ -42,6 +42,27 @@ module Google
       instance_variable_set("@#{property}", value)
     end
 
+    # Does all validation checking for a particular variable.
+    # options:
+    # :default - the default value for this variable if its nil
+    # :type - the allowed types (single or array) that this value can be
+    # :list_type - the allowed types that all values in this array should be (impllied that type == array)
+    # :allowed - the allowed values that this non-array variable should be.
+    # :required - is the variable required? (defaults: true)
+    def check(variable, **opts)
+      value = instance_variable_get("@#{variable}")
+      instance_variable_set(variable, opts[:default]) if opts[:default] && value.nil?
+
+      return if value.nil? && opts[:required] == false
+
+      check_property_type(variable, value, opts[:type]) if opts[:type]
+      value.each_with_index { |o, index| check_property_type("#{variable}[#{index}]", o, opts[:list_type]) } if opts[:list_type]
+
+      if opts[:allowed]
+        raise "#{value} on #{variable} should be one of #{opts[:allowed]}" unless opts[:allowed].include?(value)
+      end
+    end
+
     private
 
     def check_types(objects, type)
