@@ -13,6 +13,7 @@
 
 require 'binding_of_caller'
 require 'erb'
+require 'ostruct'
 
 module Compile
   # Unique ID for the Google libraries to be compiled/used by modules
