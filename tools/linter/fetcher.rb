@@ -15,8 +15,8 @@ require 'api/compiler'
 require 'provider/config'
 require 'provider/ansible'
 require 'provider/terraform/config'
-require 'provider/terraform/resource_override'
-require 'provider/terraform/property_override'
+require 'provider/overrides/terraform/resource_override'
+require 'provider/overrides/terraform/property_override'
 
 # Takes in a DiscoveryResource + Api::Resource
 # Loops through all properties of the DiscoveryResource (at any depth)
@@ -61,6 +61,8 @@ end
 class ApiFetcher
   # Get api from filename
   def self.api_from_file(filename)
+    return FakeApi.new(filename) unless File.file?(filename)
+
     Api::Compiler.new(filename).run
   end
 
@@ -72,5 +74,17 @@ class ApiFetcher
 
     Provider::Config.parse(provider_filename, api, 'ga')
     api
+  end
+end
+
+# A Fake version of an API object designed to mimic api.yaml when
+# none exists
+class FakeApi
+  attr_reader :objects
+  attr_reader :api_name
+
+  def initialize(filename)
+    @objects = []
+    @api_name = filename.split('/')[1].delete(' ').downcase
   end
 end
