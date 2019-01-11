@@ -23,6 +23,10 @@ func dataSourceGoogleKmsKeyRing() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"self_link": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -48,6 +52,7 @@ func dataSourceGoogleKmsKeyRingRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error reading KeyRing: %s", err)
 	}
 
+	d.SetId(keyRingId.keyRingId())
 	d.Set("project", project)
 	d.Set("self_link", keyRing.Name)
 
