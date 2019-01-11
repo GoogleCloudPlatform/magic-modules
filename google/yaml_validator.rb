@@ -56,6 +56,8 @@ module Google
       return if value.nil? && opts[:required] == false
 
       check_property_type(variable, value, opts[:type]) if opts[:type]
+
+      raise "Arrays must have a type" if opts[:type] == Array && !opts[:list_type]
       value.each_with_index { |o, index| check_property_type("#{variable}[#{index}]", o, opts[:list_type]) } if opts[:list_type]
 
       if opts[:allowed]

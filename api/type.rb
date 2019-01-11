@@ -56,21 +56,19 @@ module Api
     def validate
       super
       @exclude ||= false
-
-      check_property :description, ::String
-      check_property :exclude, :boolean
-      check_optional_property :min_version, ::String
-
-      check_optional_property :output, :boolean
-      check_optional_property :required, :boolean
-      check_optional_property :url_param_only, :boolean
+      check :description, type: ::String
+      check :min_version, required: false, type: ::String
+      check :output, type: :boolean, required: false
+      check :required, type: :boolean, required: false
+      check :url_param_only, type: :boolean, required: false
 
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
 
       check_optional_property_oneof_default \
         :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
-      check_optional_property :update_url, ::String
+
+      check :update_url, type: ::String, required: false
 
       check_default_value_property
       check_conflicts
@@ -95,13 +93,12 @@ module Api
               "default value for type #{self.class}"
       end
 
-      check_optional_property :default_value, clazz
+      check :default_value, type: clazz, required: false
     end
 
     # Checks that all conflicting properties actually exist.
     def check_conflicts
-      default_value_property :conflicts, []
-      check_property :conflicts, ::Array
+      check :conflicts, type: ::Array, default: []
 
       return if @conflicts.empty?
 
@@ -294,14 +291,15 @@ module Api
           @item_type.set_variable(@__resource, :__resource)
           @item_type.set_variable(self, :__parent)
         end
-        check_property :item_type, [::String, NestedObject, ResourceRef, Enum]
+        check :item_type, type: [::String, NestedObject, ResourceRef, Enum]
+
         unless @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef) \
             || @item_type.is_a?(Enum) || type?(@item_type)
           raise "Invalid type #{@item_type}"
         end
 
-        check_optional_property :min_size, ::Integer
-        check_optional_property :max_size, ::Integer
+        check :min_size, type: ::Integer, required: false
+        check :max_size, type: ::Integer, required: false
       end
 
       def item_type_class
@@ -392,7 +390,7 @@ module Api
 
       def validate
         super
-        check_property :values, ::Array
+        check :values, type: ::Array
       end
     end
 
@@ -430,8 +428,8 @@ module Api
 
         return if @__resource.nil? || @__resource.exclude || @exclude
 
-        check_property :resource, ::String
-        check_property :imports, ::String
+        check :resource, type: ::String
+        check :imports, type: ::String
         check_resource_ref_exists
         check_resource_ref_property_exists
       end
@@ -501,7 +499,7 @@ module Api
           p.set_variable(@__resource, :__resource)
           p.set_variable(self, :__parent)
         end
-        check_property_list :properties, Api::Type
+        check :properties, type: ::Array, list_type: Api::Type
       end
 
       def property_class
@@ -571,13 +569,13 @@ module Api
 
       def validate
         super
-        check_property :key_name, ::String
-        check_optional_property :key_description, ::String
+        check :key_name, type: ::String
+        check :key_description, type::String, required: false
 
         @value_type.set_variable(@name, :__name)
         @value_type.set_variable(@__resource, :__resource)
         @value_type.set_variable(self, :__parent)
-        check_property :value_type, Api::Type::NestedObject
+        check :value_type, type: Api::Type::NestedObject
         raise "Invalid type #{@value_type}" unless type?(@value_type)
       end
     end
