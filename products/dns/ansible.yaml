@@ -90,8 +90,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     exclude: true
-  Change: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:
 <%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
