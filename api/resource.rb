@@ -155,14 +155,13 @@ module Api
     def validate
       super
       check :async, required: false, type: Api::Async
-      check :base_url, type: String
+      check :base_url, type: String, required: false
       check :create_url, type: String, required: false
       check :delete_url, type: String, required: false
       check :update_url, type: String, required: false
       check :description, type: String
       check :exclude, required: false, type: :boolean
       check :kind, required: false, type: String
-      check :parameters, required: false, type: Array, item_type: Api::Type
 
       check :exports, required: false, type: Array
       check :self_link, type: String, required: false
@@ -184,6 +183,7 @@ module Api
       set_variables(@properties, :__resource)
 
       check :properties, type: Array, item_type: Api::Type unless @exclude
+      check :parameters, required: false, type: Array, item_type: Api::Type unless @exclude
 
       check_identity unless @identity.nil?
     end
