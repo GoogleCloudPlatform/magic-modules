@@ -4,6 +4,6 @@ describe google_dns_resource_record_sets(project: <%= "#{external_attribute('gcp
 	its('count') { should eq 3 }
   its('types') { should include <%= doc_generation ? "'#{record_set['type']}'" : "record_set['type']" -%> }
   its('ttls') { should include <%= doc_generation ? "'#{record_set['ttl']}'" : "record_set['ttl']" -%> }
-  its('targets') { should include <%= doc_generation ? "'#{record_set['rrdatas1']}'" : "record_set['rrdatas1']" -%> }
-  its('targets') { should include <%= doc_generation ? "'#{record_set['rrdatas2']}'" : "record_set['rrdatas2']" -%> }
+  its('targets.flatten') { should include <%= doc_generation ? "'#{record_set['rrdatas1']}'" : "record_set['rrdatas1']" -%> }
+  its('targets.flatten') { should include <%= doc_generation ? "'#{record_set['rrdatas2']}'" : "record_set['rrdatas2']" -%> }
 end

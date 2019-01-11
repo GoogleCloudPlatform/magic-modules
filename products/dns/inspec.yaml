@@ -17,6 +17,8 @@ manifest: !ruby/object:Provider::Inspec::Manifest
   description: |
     InSpec resources for verifying GCP infrastructure
 overrides: !ruby/object:Provider::ResourceOverrides
+  ManagedZone: !ruby/object:Provider::Inspec::ResourceOverride
+    exclude: true
   ResourceRecordSet: !ruby/object:Provider::Inspec::ResourceOverride
     base_url: projects/{{project}}/managedZones/{{managed_zone}}/rrsets
   Project: !ruby/object:Provider::Inspec::ResourceOverride
