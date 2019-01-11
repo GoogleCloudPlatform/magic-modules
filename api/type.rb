@@ -573,7 +573,7 @@ module Api
       def validate
         super
         check :key_name, type: ::String
-        check :key_description, type::String, required: false
+        check :key_description, type: ::String, required: false
 
         @value_type.set_variable(@name, :__name)
         @value_type.set_variable(@__resource, :__resource)
