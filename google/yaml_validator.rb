@@ -44,11 +44,12 @@ module Google
 
     # Does all validation checking for a particular variable.
     # options:
-    # :default - the default value for this variable if its nil
-    # :type - the allowed types (single or array) that this value can be
-    # :item_type - the allowed types that all values in this array should be (impllied that type == array)
-    # :allowed - the allowed values that this non-array variable should be.
-    # :required - is the variable required? (defaults: true)
+    # :default   - the default value for this variable if its nil
+    # :type      - the allowed types (single or array) that this value can be
+    # :item_type - the allowed types that all values in this array should be
+    #              (impllied that type == array)
+    # :allowed   - the allowed values that this non-array variable should be.
+    # :required  - is the variable required? (defaults: true)
     def check(variable, **opts)
       value = instance_variable_get("@#{variable}")
 
@@ -62,11 +63,15 @@ module Google
 
       check_property_value(variable, value, opts[:type]) if opts[:type]
 
-      value.each_with_index { |o, index| check_property_value("#{variable}[#{index}]", o, opts[:item_type]) } if value.is_a?(Array)
-
-      if opts[:allowed]
-        raise "#{value} on #{variable} should be one of #{opts[:allowed]}" unless opts[:allowed].include?(value)
+      if value.is_a?(Array)
+        value.each_with_index do |o, index|
+          check_property_value("#{variable}[#{index}]", o, opts[:item_type])
+        end
       end
+
+      return unless opts[:allowed]
+      raise "#{value} on #{variable} should be one of #{opts[:allowed]}" \
+        unless opts[:allowed].include?(value)
     end
 
     private

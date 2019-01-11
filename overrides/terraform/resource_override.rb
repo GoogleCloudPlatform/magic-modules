@@ -53,7 +53,8 @@ module Overrides
         check :id_format, type: String, default: '{{name}}'
         check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
 
-        check :custom_code, type: Provider::Terraform::CustomCode, default: Provider::Terraform::CustomCode.new
+        check :custom_code, type: Provider::Terraform::CustomCode,
+                            default: Provider::Terraform::CustomCode.new
         check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
         check :import_format, type: Array, default: []
         check :import_format, type: Array, item_type: String

@@ -32,7 +32,6 @@ module Overrides
         super
         check :additional_functions, type: String, required: false
       end
-
     end
   end
 end

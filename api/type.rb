@@ -65,7 +65,8 @@ module Api
       raise 'Property cannot be output and required at the same time.' \
         if @output && @required
 
-      check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE], default: @__resource&.update_verb, required: false
+      check :update_verb, type: Symbol, allowed: %i[POST PUT PATCH NONE],
+                          default: @__resource&.update_verb, required: false
 
       check :update_url, type: ::String, required: false
 
@@ -155,11 +156,9 @@ module Api
       end
     end
 
-    # rubocop:disable Naming/MemoizedInstanceVariableName
     def exclude_if_not_in_version(version)
       @exclude ||= version < min_version
     end
-    # rubocop:enable Naming/MemoizedInstanceVariableName
 
     # Overriding is_a? to enable class overrides.
     # Ruby does not let you natively change types, so this is the next best

@@ -170,7 +170,8 @@ module Api
       check :transport, required: false, type: Transport
       check :references, required: false, type: ReferenceLinks
 
-      check :collection_url_response, default: Api::Resource::ResponseList.new, type: Api::Resource::ResponseList
+      check :collection_url_response, default: Api::Resource::ResponseList.new,
+                                      type: Api::Resource::ResponseList
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
