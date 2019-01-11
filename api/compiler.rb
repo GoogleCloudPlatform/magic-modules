@@ -12,7 +12,6 @@
 # limitations under the License.
 
 require 'api/async'
-require 'api/bundle'
 require 'api/product'
 require 'api/resource'
 require 'api/type'
