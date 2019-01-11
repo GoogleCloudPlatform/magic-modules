@@ -13,7 +13,6 @@
 
 require 'api/object'
 require 'provider/overrides/resources'
-require 'provider/inspec/property_override'
 
 module Provider
   module Overrides

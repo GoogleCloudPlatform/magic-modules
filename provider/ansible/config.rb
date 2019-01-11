@@ -25,21 +25,10 @@ module Provider
       end
 
       def resource_override
-        Provider::Ansible::ResourceOverride
-      end
-
-      def property_override
-        Provider::Ansible::PropertyOverride
-      end
-
-      # These two methods are for the new set of overrides.
-      # They'll replace `resource_override` and `property_override`
-      # when the old overrides are deprecated.
-      def new_resource_override
         Provider::Overrides::Ansible::ResourceOverride
       end
 
-      def new_property_override
+      def property_override
         Provider::Overrides::Ansible::PropertyOverride
       end
 

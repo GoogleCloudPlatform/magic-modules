@@ -126,11 +126,8 @@ product_names.each do |product_name|
     next
   end
 
-  product_api, provider_config, using_new_overrides = \
+  product_api, provider_config, = \
     Provider::Config.parse(provider_yaml_path, product_api, version)
-
-  # TODO(alexstephen): Remove when old overrides are deprecated.
-  product_api.validate if using_new_overrides
 
   pp provider_config if ENV['COMPILER_DEBUG']
 

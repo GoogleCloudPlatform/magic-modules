@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  FirewallRule: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Provider::Overrides::ResourceOverrides
+  FirewallRule: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{priority}}"
     import_format: ["{{project}}/{{priority}}"]
     custom_code: !ruby/object:Provider::Terraform::CustomCode
