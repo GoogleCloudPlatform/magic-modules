@@ -18,6 +18,7 @@ require 'google/logger'
 require 'google/hash_utils'
 require 'pathname'
 require 'provider/overrides/runner'
+require 'json'
 
 module Provider
   DEFAULT_FORMAT_OPTIONS = {
