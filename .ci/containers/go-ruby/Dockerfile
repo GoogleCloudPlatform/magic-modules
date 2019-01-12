@@ -1,4 +1,4 @@
-from golang:1.11 as resource
+from golang:1.11-stretch as resource
 
 RUN go get golang.org/x/tools/cmd/goimports
 
