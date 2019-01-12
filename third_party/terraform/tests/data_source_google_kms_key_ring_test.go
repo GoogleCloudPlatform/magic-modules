@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccDataSourceKmsKeyRing_basic(t *testing.T) {
+func TestAccDataSourceGoogleKmsKeyRing_basic(t *testing.T) {
 	projectId := "terraform-" + acctest.RandString(10)
 	projectOrg := getTestOrgFromEnv(t)
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
@@ -20,7 +20,7 @@ func TestAccDataSourceKmsKeyRing_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceKmsKeyRing_basic(projectId, projectOrg, projectBillingAccount, keyRingName),
+				Config: testAccDataSourceGoogleKmsKeyRing_basic(projectId, projectOrg, projectBillingAccount, keyRingName),
 				Check:  resource.TestMatchResourceAttr("data.google_kms_key_ring.kms_key_ring", "name", regexp.MustCompile(keyRingName)),
 			},
 		},
@@ -30,7 +30,7 @@ func TestAccDataSourceKmsKeyRing_basic(t *testing.T) {
 /*
 	This test should run in its own project, because keys and key rings are not deletable
 */
-func testAccDataSourceKmsKeyRing_basic(projectId, projectOrg, projectBillingAccount, keyRingName string) string {
+func testAccDataSourceGoogleKmsKeyRing_basic(projectId, projectOrg, projectBillingAccount, keyRingName string) string {
 	return fmt.Sprintf(`
 resource "google_project" "acceptance" {
 	name			= "%s"
