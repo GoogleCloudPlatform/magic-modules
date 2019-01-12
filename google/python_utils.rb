@@ -65,14 +65,7 @@ module Google
     end
 
     def array_format(values, spaces_to_use)
-      if values.size == 1 && values.first.include?("\n")
-        # A multiline value inside an array usually means another complex datastructure.
-        # That's a problem for us - it probably already has indentation, so we need to
-        # figure out what to do with it.
-        ['[',
-         indent(strip_indent(values.first), spaces_to_use + 4),
-         indent(']', spaces_to_use - 1)].join("\n")
-      elsif values.size == 1
+      if values.size == 1
         "[#{values.first}]"
       else
         ['[',
