@@ -16,14 +16,14 @@ manifest: !ruby/object:Provider::Inspec::Manifest
   summary: 'InSpec resources for verifying GCP infrastructure'
   description: |
     InSpec resources for verifying GCP infrastructure
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  Topic: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Topic: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
-      name: !ruby/object:Provider::Overrides::Inspec::PropertyOverride
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
-  Subscription: !ruby/object:Provider::Overrides::Inspec::ResourceOverride
+  Subscription: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
-      name: !ruby/object:Provider::Overrides::Inspec::PropertyOverride
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
         name_from_self_link: true
 files: !ruby/object:Provider::Config::Files
   copy:

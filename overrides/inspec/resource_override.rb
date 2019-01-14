@@ -11,30 +11,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/config'
-require 'provider/core'
+require 'overrides/resources'
 
-module Provider
-  module Ansible
-    # Settings for the Ansible provider
-    class Config < Provider::Config
-      attr_reader :manifest
-
-      def provider
-        Provider::Ansible::Core
+module Overrides
+  module Inspec
+    # A class to control overridden properties on inspec.yaml in lieu of
+    # values from api.yaml.
+    class ResourceOverride < Overrides::ResourceOverride
+      def self.attributes
+        %i[
+          manual
+          additional_functions
+        ]
       end
 
-      def resource_override
-        Overrides::Ansible::ResourceOverride
-      end
-
-      def property_override
-        Overrides::Ansible::PropertyOverride
-      end
+      attr_reader(*attributes)
 
       def validate
+        assign_defaults
+
         super
-        check_optional_property :manifest, Provider::Ansible::Manifest
+        check_property :manual, :boolean
+        check_optional_property :additional_functions, String
+      end
+
+      def assign_defaults
+        default_value_property :manual, false
       end
     end
   end

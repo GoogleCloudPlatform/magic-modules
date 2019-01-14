@@ -13,8 +13,8 @@
 
 --- !ruby/object:Provider::Terraform::Config
 legacy_name: 'cloudbuild'
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  Trigger: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Trigger: !ruby/object:Overrides::Terraform::ResourceOverride
     # import by default only works with old-style self links ending in a name
     import_format: ["projects/{{project}}/triggers/{{trigger_id}}"]
     id_format: '{{project}}/{{trigger_id}}'
@@ -25,11 +25,11 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
         primary_resource_id: "filename-trigger"
         version: <%= version_name %>
     properties:
-      id: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
-      build.steps: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      build.steps: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'step'
-      triggerTemplate.projectId: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      triggerTemplate.projectId: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/cloudbuild_trigger_id.go.erb

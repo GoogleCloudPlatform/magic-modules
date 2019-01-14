@@ -17,8 +17,8 @@ require 'google/extensions'
 require 'google/logger'
 require 'google/hash_utils'
 require 'pathname'
-require 'provider/overrides/runner'
 require 'json'
+require 'overrides/runner'
 
 module Provider
   DEFAULT_FORMAT_OPTIONS = {
@@ -188,9 +188,9 @@ module Provider
 
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
-      @api = Provider::Overrides::Runner.build(@api, @config.datasources,
-                                               @config.resource_override,
-                                               @config.property_override)
+      @api = Overrides::Runner.build(@api, @config.datasources,
+                                     @config.resource_override,
+                                     @config.property_override)
       @api.validate
 
       version = @api.version_obj_or_default(version_name)
