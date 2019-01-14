@@ -57,21 +57,10 @@ module Google
 
     private
 
-    def strip_indent(multiline_string)
-      outermost_indent = multiline_string.split("\n").map { |x| x[/\A */].size } [1..-1].min
-      multiline_string.split("\n").map do |x|
-        x.start_with?(' ') ? x[outermost_indent..-1] : x
-      end.join("\n")
-    end
-
     def array_format(values, spaces_to_use)
-      if values.size == 1
-        "[#{values.first}]"
-      else
-        ['[',
-         values.map { |x| "#{indent(x, spaces_to_use + 4)}," },
-         indent(']', spaces_to_use)].join("\n")
-      end
+      ['[',
+       values.map { |x| "#{indent(x, spaces_to_use + 4)}," },
+       indent(']', spaces_to_use)].join("\n")
     end
   end
 end

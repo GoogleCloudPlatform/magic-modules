@@ -56,37 +56,19 @@ module Provider
           ("default=#{python_literal(prop.default_value)}" \
            if prop.default_value),
           ("type=#{quote_string(python_type(prop))}" if python_type(prop)),
-          # Choices enum always starts on a new line.
-          ("\n" + choices_enum(prop) if prop.is_a? Api::Type::Enum),
+          (choices_enum(prop) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
             if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
           ("aliases=[#{prop.aliases.map { |x| quote_string(x) }.join(', ')}]" \
             if prop.aliases)
-        ].compact.reduce do |prev, nxt|
-          # Avoid trailing spaces if we are about to have a newline.
-          nxt.start_with?("\n") ? prev + ',' + nxt : prev + ', ' + nxt
-        end
+        ].compact.join(', ')
       end
 
       # Returns a formatted string represented the choices of an enum
       def choices_enum(prop)
-        if prop.values.size == 1
-          "choices=[#{quote_string(prop.values.first.to_s)}]"
-        else
-          choices_indent = prop.out_name.underscore.length + 6
-          indent(
-            [
-              "choices=[#{quote_string(prop.values.first.to_s)},"
-            ] +
-              prop.values[1..-2].map do |x|
-                "#{indent(quote_string(x.to_s), 9)},"
-              end +
-            [
-              "#{indent(quote_string(prop.values.last.to_s), 9)}]"
-            ],
-            choices_indent
-          )
-        end
+        'choices=[' + prop.values.map do |x|
+          quote_string(x.to_s)
+        end.join(', ') + ']'
       end
     end
   end
