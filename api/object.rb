@@ -34,7 +34,7 @@ module Api
 
       def validate
         super
-        check :name, type: String
+        check :name, type: String, required: true
         check :api_name, type: String, default: @name
       end
     end

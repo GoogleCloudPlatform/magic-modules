@@ -59,17 +59,23 @@ module Google
         value = instance_variable_get("@#{variable}")
       end
 
-      raise "Value must be included" if value.nil? && opts[:required]
+      # Check if value is required.
+      raise "Missing '#{variable}'" if value.nil? && opts[:required]
+      return if value.nil?
 
+      # Check type
       check_property_value(variable, value, opts[:type]) if opts[:type]
 
+      # Check item_type
       if value.is_a?(Array)
         raise "#{variable} must have item_type on arrays" unless opts[:item_type]
+
         value.each_with_index do |o, index|
           check_property_value("#{variable}[#{index}]", o, opts[:item_type])
         end
       end
 
+      # Check if value is allowed
       return unless opts[:allowed]
       raise "#{value} on #{variable} should be one of #{opts[:allowed]}" \
         unless opts[:allowed].include?(value)
@@ -81,7 +87,7 @@ module Google
       if type == :boolean
         return unless [TrueClass, FalseClass].find_index(object.class).nil?
       elsif type.is_a? ::Array
-        return if type.find_index(:boolean) and [TrueClass, FalseClass].find_index(object.class)
+        return if type.find_index(:boolean) && [TrueClass, FalseClass].find_index(object.class)
         return unless type.find_index(object.class).nil?
       elsif object.is_a?(type)
         return
@@ -99,8 +105,6 @@ module Google
 
     def check_property_value(property, prop_value, type)
       Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
-      raise "Missing '#{property}' on #{object_display_name}" if prop_value.nil?
-
       check_type property, prop_value, type unless type.nil?
       prop_value.validate if prop_value.is_a?(Api::Object)
     end

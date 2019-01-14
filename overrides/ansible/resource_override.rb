@@ -68,7 +68,7 @@ module Overrides
         check :unwrap_resource, type: :boolean, default: false
         check :version_added, type: ::String
 
-        check :facts, type: Provider::Ansible::FactsOverride, 
+        check :facts, type: Provider::Ansible::FactsOverride,
                       default: Provider::Ansible::FactsOverride.new
       end
     end

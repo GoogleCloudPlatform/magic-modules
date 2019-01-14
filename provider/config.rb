@@ -75,7 +75,8 @@ module Provider
       super
 
       check :files, type: Provider::Config::Files
-      check :overrides, type: Overrides::ResourceOverrides, default: Overrides::ResourceOverrides.new
+      check :overrides, type: Overrides::ResourceOverrides,
+                        default: Overrides::ResourceOverrides.new
     end
 
     # Provides the API object to any type that requires, e.g. for validation

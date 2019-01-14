@@ -392,7 +392,7 @@ module Api
 
       def validate
         super
-        check :values, type: ::Array, item_type: [Symbol, ::String], required: true
+        check :values, type: ::Array, item_type: [Symbol, ::String, ::Integer], required: true
       end
     end
 

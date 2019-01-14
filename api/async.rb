@@ -29,7 +29,6 @@ module Api
       check :result, type: Result, required: true
       check :status, type: Status, required: true
       check :error, type: Error, required: true
-
     end
 
     # Represents the operations (requests) issues to watch for completion
