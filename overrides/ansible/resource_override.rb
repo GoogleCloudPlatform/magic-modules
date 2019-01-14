@@ -44,6 +44,7 @@ module Overrides
       end
 
       attr_reader(*attributes)
+
       def validate
         super
 
@@ -67,20 +68,8 @@ module Overrides
         check :unwrap_resource, type: :boolean, default: false
         check :version_added, type: ::String, required: false
 
-        check :facts, type: FactsOverride, default: FactsOverride.new
-      end
-    end
-
-    # Product specific overriden properties for Ansible
-    class ResourceOverride < Provider::ResourceOverride
-      include OverrideProperties
-      include ResourceOverrideSharedCode
-
-      private
-
-      def overriden
-        Provider::Ansible::OverrideProperties
->>>>>>> more conversions have happened:provider/ansible/resource_override.rb
+        check :facts, type: Provider::Ansible::FactsOverride, 
+                      default: Provider::Ansible::FactsOverride.new
       end
     end
   end

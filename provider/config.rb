@@ -74,10 +74,8 @@ module Provider
     def validate
       super
 
-      default_value_property :overrides, Overrides::ResourceOverrides.new
-
       check :files, type: Provider::Config::Files, required: false
-      check :overrides, type: Overrides::ResourceOverrides
+      check :overrides, type: Overrides::ResourceOverrides, default: Overrides::ResourceOverrides.new
     end
 
     # Provides the API object to any type that requires, e.g. for validation
