@@ -37,10 +37,10 @@ module Provider
 
       def validate
         super
-        check_optional_property :warning, String
-        check_optional_property :required_properties, String
-        check_optional_property :optional_properties, String
-        check_optional_property :attributes, String
+        check :warning, type: String
+        check :required_properties, type: String
+        check :optional_properties, type: String
+        check :attributes, type: String
       end
     end
 
@@ -192,13 +192,11 @@ module Provider
 
       def validate
         super
-        @ignore_read_extra ||= []
-
-        check_property :name, String
-        check_property :primary_resource_id, String
-        check_optional_property :vars, Hash
-        check_optional_property_list :ignore_read_extra, String
-        check_optional_property :skip_test, TrueClass
+        check :name, type: String, required: true
+        check :primary_resource_id, type: String
+        check :vars, type: Hash
+        check :ignore_read_extra, type: Array, item_type: String, default: []
+        check :skip_test, type: TrueClass
       end
     end
 
@@ -287,18 +285,18 @@ module Provider
       def validate
         super
 
-        check_optional_property :extra_schema_entry, String
-        check_optional_property :resource_definition, String
-        check_optional_property :encoder, String
-        check_optional_property :update_encoder, String
-        check_optional_property :decoder, String
-        check_optional_property :constants, String
-        check_optional_property :post_create, String
-        check_optional_property :pre_update, String
-        check_optional_property :post_update, String
-        check_optional_property :pre_delete, String
-        check_optional_property :custom_import, String
-        check_optional_property :post_import, String
+        check :extra_schema_entry, type: String
+        check :resource_definition, type: String
+        check :encoder, type: String
+        check :update_encoder, type: String
+        check :decoder, type: String
+        check :constants, type: String
+        check :post_create, type: String
+        check :pre_update, type: String
+        check :post_update, type: String
+        check :pre_delete, type: String
+        check :custom_import, type: String
+        check :post_import, type: String
       end
     end
   end

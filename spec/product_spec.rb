@@ -141,7 +141,7 @@ describe Api::Product do
     it do
       is_expected
         .to raise_error(StandardError,
-                        /Property.*objects:item.*instead.*Api::Resource/)
+                        /Property.*objects.*instead.*Api::Resource/)
     end
   end
 

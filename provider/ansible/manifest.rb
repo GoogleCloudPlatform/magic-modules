@@ -25,14 +25,12 @@ module Provider
       attr_reader :author
 
       def validate
-        check_property :metadata_version, String
-        check_property :status, Array
-        check_property_list :status, String
-        check_property :supported_by, String
-        check_property :requirements, Array
-        check_property_list :requirements, String
-        check_property :version_added, String
-        check_property :author, String
+        check :metadata_version, type: String
+        check :status, type: Array, item_type: String
+        check :supported_by, type: String
+        check :requirements, type: Array, item_type: String
+        check :version_added, type: String
+        check :author, type: String
       end
 
       # Get value from config and fallback to manifest.

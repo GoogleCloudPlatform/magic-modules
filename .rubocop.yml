@@ -28,6 +28,9 @@ Metrics/ModuleLength:
 Metrics/PerceivedComplexity:
   Enabled: false
 
+Naming/MemoizedInstanceVariableName:
+  Enabled: false
+
 Style/FrozenStringLiteralComment:
   Enabled: false
 

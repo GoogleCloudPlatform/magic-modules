@@ -48,20 +48,15 @@ module Overrides
       def validate
         super
 
-        @id_format ||= '{{name}}'
-        @import_format ||= []
-        @custom_code ||= Provider::Terraform::CustomCode.new
-        @docs ||= Provider::Terraform::Docs.new
         @examples ||= []
 
-        check_property :id_format, String
+        check :id_format, type: String, default: '{{name}}'
+        check :examples, item_type: Provider::Terraform::Examples, type: Array, default: []
 
-        check_optional_property_list :examples, Provider::Terraform::Examples
-
-        check_optional_property :custom_code, Provider::Terraform::CustomCode
-        check_optional_property :docs, Provider::Terraform::Docs
-        check_property :import_format, Array
-        check_property_list :import_format, String
+        check :custom_code, type: Provider::Terraform::CustomCode,
+                            default: Provider::Terraform::CustomCode.new
+        check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
+        check :import_format, type: Array, item_type: String, default: []
       end
 
       def apply(resource)

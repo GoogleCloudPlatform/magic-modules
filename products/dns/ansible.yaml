@@ -25,8 +25,6 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
-  Change: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ResourceRecordSet: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -91,8 +89,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - return_if_object
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
-    exclude: true
-  Change: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:

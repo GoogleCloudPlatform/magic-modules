@@ -84,8 +84,8 @@ module Api
 
       def validate
         super
-        check_optional_property :encoder, ::String
-        check_optional_property :decoder, ::String
+        check :encoder, type: ::String
+        check :decoder, type: ::String
       end
     end
 
@@ -95,7 +95,7 @@ module Api
 
       def validate
         super
-        check_property :create, ::String
+        check :create, type: ::String, required: true
       end
     end
 
@@ -106,10 +106,9 @@ module Api
 
       def validate
         super
-        default_value_property :items, 'items'
 
-        check_optional_property :kind, String
-        check_property :items, String
+        check :items, default: 'items', type: ::String, required: true
+        check :kind, type: ::String
       end
 
       def kind?
@@ -130,11 +129,8 @@ module Api
       def validate
         super
 
-        @guides ||= {}
-
-        check_property :guides, Hash
-
-        check_optional_property :api, String
+        check :guides, type: Hash, default: {}, required: true
+        check :api, type: String
       end
     end
 
@@ -158,43 +154,38 @@ module Api
     #
     def validate
       super
-      check_optional_property :async, Api::Async
-      check_optional_property :base_url, String
-      check_optional_property :create_url, String
-      check_optional_property :delete_url, String
-      check_optional_property :update_url, String
-      check_property :description, String
-      check_optional_property :exclude, :boolean
-      check_optional_property :kind, String
-      check_optional_property :parameters, Array
-      check_optional_property :exports, Array
-      check_optional_property :self_link, String
-      check_optional_property :self_link_query, Api::Resource::ResponseList
-      check_optional_property :readonly, :boolean
-      check_optional_property :transport, Transport
-      check_optional_property :references, ReferenceLinks
+      check :async, type: Api::Async
+      check :base_url, type: String
+      check :create_url, type: String
+      check :delete_url, type: String
+      check :update_url, type: String
+      check :description, type: String, required: true
+      check :exclude, type: :boolean
+      check :kind, type: String
 
-      default_value_property :collection_url_response,
-                             Api::Resource::ResponseList.new
-      check_property :collection_url_response, Api::Resource::ResponseList
-      default_value_property :collection_url_response,
-                             Api::Resource::ResponseList.new
+      check :exports, type: Array,
+                      item_type: [String, Api::Type::FetchedExternal, Api::Type::SelfLink]
+      check :self_link, type: String
+      check :self_link_query, type: Api::Resource::ResponseList
+      check :readonly, type: :boolean
+      check :transport, type: Transport
+      check :references, type: ReferenceLinks
 
-      check_property_oneof_default :create_verb, %i[POST PUT], :POST, Symbol
-      check_property_oneof_default \
-        :delete_verb, %i[POST PUT PATCH DELETE], :DELETE, Symbol
-      check_property_oneof_default \
-        :update_verb, %i[POST PUT PATCH], :PUT, Symbol
-      check_optional_property :input, :boolean
-      check_optional_property :min_version, String
+      check :collection_url_response, default: Api::Resource::ResponseList.new,
+                                      type: Api::Resource::ResponseList
+
+      check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
+      check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
+      check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
+
+      check :input, type: :boolean
+      check :min_version, type: String
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
 
-      check_property_list :parameters, Api::Type
-
-      check_property :properties, Array unless @exclude
-      check_property_list :properties, Api::Type
+      check :properties, type: Array, item_type: Api::Type, required: true unless @exclude
+      check :parameters, type: Array, item_type: Api::Type unless @exclude
 
       check_identity unless @identity.nil?
     end
@@ -253,8 +244,7 @@ module Api
     end
 
     def check_identity
-      check_property :identity, Array
-      check_property_list :identity, String
+      check :identity, type: Array, item_type: String, required: true
 
       # Ensures we have all properties defined
       @identity.each do |i|

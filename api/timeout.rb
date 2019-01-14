@@ -33,13 +33,9 @@ module  Api
     def validate
       super
 
-      @insert_sec ||= DEFAULT_INSERT_TIMEOUT_SEC
-      @update_sec ||= DEFAULT_UPDATE_TIMEOUT_SEC
-      @delete_sec ||= DEFAULT_DELETE_TIMEOUT_SEC
-
-      check_property :insert_sec, Integer
-      check_property :update_sec, Integer
-      check_property :delete_sec, Integer
+      check :insert_sec, type: Integer, default: DEFAULT_INSERT_TIMEOUT_SEC
+      check :update_sec, type: Integer, default: DEFAULT_UPDATE_TIMEOUT_SEC
+      check :delete_sec, type: Integer, default: DEFAULT_DELETE_TIMEOUT_SEC
     end
   end
 end

@@ -32,8 +32,8 @@ module Overrides
       def validate
         super
 
-        check_optional_property :aliases, ::Array
-        check_optional_property :version_added, ::String
+        check :aliases, type: ::Array, item_type: ::String
+        check :version_added, type: ::String
       end
     end
   end
