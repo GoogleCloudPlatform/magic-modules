@@ -167,11 +167,6 @@ module Compile
       raise e
     end
 
-    def compile_if(config, node)
-      file = Google::HashUtils.navigate(config, node)
-      compile(file, 2) unless file.nil?
-    end
-
     def indent(text, spaces, filler = ' ')
       indent_array(text, spaces, filler).join("\n")
     end
@@ -286,14 +281,6 @@ module Compile
       lines = lines.drop(1) while lines[0].start_with?(comment_marker)
       lines = lines.drop(1) while lines[0].strip.empty?
       lines.join("\n")
-    end
-
-    def emit_libraries(output_folder, product_name, files)
-      product_ns = product_name.downcase
-      compile_file_list(output_folder, files,
-                        product_ns: Google::StringUtils.camelize(product_name,
-                                                                 :upper),
-                        product_ns_dir: product_ns)
     end
   end
 end
