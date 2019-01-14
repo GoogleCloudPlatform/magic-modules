@@ -45,9 +45,9 @@ base = "'#{object.self_link_url[0].join}'"
   def url
     '<%= format_url(object.base_url) %>'
   end
-
 <% has_modified_api_name = object.all_user_properties.any? {|prop| prop.api_name != prop.name } -%>
 <% if has_modified_api_name -%>
+
   def api_names
     {
 <% object.all_user_properties.each do |prop| -%>
