@@ -42,6 +42,28 @@ module Provider
       # run already. Instead of storing all the modified files in state we'll
       # use the time the file was modified.
       @start_time = start_time
+      @py_format_enabled = check_pyformat
+      @go_format_enabled = check_goformat
+    end
+
+    def check_pyformat
+      if system('python3 -m black --help > /dev/null')
+        true
+      else
+        Google::LOGGER.warn 'Either python3 or black is not installed; python ' \
+          'code will be poorly formatted and may not pass linter checks.'
+        false
+      end
+    end
+
+    def check_goformat
+      if system('which gofmt > /dev/null') && system('which goimports > /dev/null')
+        true
+      else
+        Google::LOGGER.warn 'Either gofmt or goimports is not installed; go ' \
+          'code will be poorly formatted and will likely not compile.'
+        false
+      end
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
@@ -342,6 +364,7 @@ module Provider
       ctx = binding
       data.each { |name, value| ctx.local_variable_set(name, value) }
       generate_file_write ctx, data
+      format_output_file(data[:out_file])
     end
 
     def generate_file_write(ctx, data)
@@ -365,6 +388,15 @@ module Provider
       }
       yield
       raise "#{filename} missing autogen" unless @file_expectations[:autogen]
+    end
+
+    def format_output_file(path)
+      if path.end_with?('.py') && @py_format_enabled
+        %x(python3 -m black --line-length 160 -S #{path} 2> /dev/null)
+      elsif path.end_with?('.go') && @go_format_enabled
+        %x(gofmt -w -s #{filepath})
+        %x(goimports -w #{filepath})
+      end
     end
 
     # Write the output to a file. We write one line at a time so tests can
