@@ -61,11 +61,9 @@ module Api
     def validate
       super
       set_variables @objects, :__product
-      check_optional_property :display_name, String
-      check_property :objects, Array
-      check_property_list :objects, Api::Resource
-      check_property :scopes, ::Array
-      check_property_list :scopes, String
+      check :display_name, type: String
+      check :objects, type: Array, item_type: Api::Resource, required: true
+      check :scopes, type: Array, item_type: String, required: true
 
       check_versions
     end
@@ -81,14 +79,9 @@ module Api
 
       def validate
         super
-        @default ||= false
-
-        check_property :base_url, String
-        check_property :name, String
-        check_property :default, :boolean
-
-        raise "API Version must be one of #{ORDER}" \
-          unless ORDER.include?(@name)
+        check :default, type: :boolean, default: false
+        check :base_url, type: String, required: true
+        check :name, type: String, allowed: ORDER, required: true
       end
 
       def <=>(other)
@@ -148,8 +141,7 @@ module Api
     private
 
     def check_versions
-      check_property :versions, Array
-      check_property_list :versions, Api::Product::Version
+      check :versions, type: Array, item_type: Api::Product::Version, required: true
 
       # Confirm that at most one version is the default
       defaults = 0

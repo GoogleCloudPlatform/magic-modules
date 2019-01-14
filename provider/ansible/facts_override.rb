@@ -25,8 +25,8 @@ module Provider
       attr_reader :does_not_exist
       def validate
         super
-        check_optional_property :exists, ::String
-        check_optional_property :does_not_exist, ::String
+        check :exists, type: ::String
+        check :does_not_exist, type: ::String
       end
     end
 
@@ -40,16 +40,11 @@ module Provider
 
       def validate
         super
-        default_value_property :has_filters, true
-        default_value_property :filter, FilterProp.new
-        default_value_property :query_options, true
-        default_value_property :filter_api_param, 'filter'
-
-        check_property :has_filters, :boolean
-        check_property :filter, Api::Object
-        check_property :query_options, :boolean
-        check_property :filter_api_param, ::String
-        check_optional_property :test, AnsibleFactsTestInformation
+        check :has_filters, type: :boolean, default: true
+        check :filter, type: Api::Object, default: FilterProp.new
+        check :query_options, type: :boolean, default: true
+        check :filter_api_param, type: ::String, default: 'filter'
+        check :test, type: AnsibleFactsTestInformation
 
         # We have to apply the property overrides and validate
         # the filtering property

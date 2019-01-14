@@ -33,10 +33,9 @@ module Api
       attr_reader :api_name
 
       def validate
-        @api_name ||= name
-
         super
-        check_property :name, String
+        check :name, type: String, required: true
+        check :api_name, type: String, default: @name
       end
     end
 

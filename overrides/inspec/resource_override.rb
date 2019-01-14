@@ -28,15 +28,9 @@ module Overrides
       attr_reader(*attributes)
 
       def validate
-        assign_defaults
-
+        check :manual, type: :boolean, default: false
         super
-        check_property :manual, :boolean
-        check_optional_property :additional_functions, String
-      end
-
-      def assign_defaults
-        default_value_property :manual, false
+        check :additional_functions, type: String
       end
     end
   end

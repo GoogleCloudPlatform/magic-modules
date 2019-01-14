@@ -44,38 +44,32 @@ module Overrides
       end
 
       attr_reader(*attributes)
+
       def validate
         super
 
-        default_value_property :access_api_results, false
-        default_value_property :custom_create_resource, false
-        default_value_property :custom_update_resource, false
-        default_value_property :exclude, false
-        default_value_property :has_tests, true
-        default_value_property :imports, []
-        default_value_property :provider_helpers, []
-        default_value_property :unwrap_resource, false
+        @exclude ||= false
 
-        check_property :access_api_results, :boolean
-        check_optional_property :collection, ::String
-        check_property :custom_create_resource, :boolean
-        check_property :custom_update_resource, :boolean
-        check_optional_property :create, ::String
-        check_optional_property :delete, ::String
-        check_property :has_tests, :boolean
-        check_optional_property :hidden, ::Array
-        check_property :imports, ::Array
-        check_optional_property :post_create, ::String
-        check_optional_property :post_action, ::String
-        check_property :provider_helpers, ::Array
-        check_optional_property :return_if_object, ::String
-        check_optional_property :template, ::String
-        check_optional_property :update, ::String
-        check_optional_property :unwrap_resource, :boolean
-        check_optional_property :version_added, ::String
+        check :access_api_results, type: :boolean, default: false
+        check :collection, type: ::String
+        check :custom_create_resource, type: :boolean, default: false
+        check :custom_update_resource, type: :boolean, default: false
+        check :create, type: ::String
+        check :delete, type: ::String
+        check :has_tests, type: :boolean, default: true
+        check :hidden, type: ::Array, item_type: String
+        check :imports, type: ::Array, default: [], item_type: String
+        check :post_create, type: ::String
+        check :post_action, type: ::String
+        check :provider_helpers, type: ::Array, default: [], item_type: String
+        check :return_if_object, type: ::String
+        check :template, type: ::String
+        check :update, type: ::String
+        check :unwrap_resource, type: :boolean, default: false
+        check :version_added, type: ::String
 
-        @facts ||= Provider::Ansible::FactsOverride.new
-        check_property :facts, Provider::Ansible::FactsOverride
+        check :facts, type: Provider::Ansible::FactsOverride,
+                      default: Provider::Ansible::FactsOverride.new
       end
     end
   end

@@ -25,8 +25,8 @@ module Provider
       def validate
         super
 
-        check_optional_property :regex, String
-        check_optional_property :function, String
+        check :regex, type: String
+        check :function, type: String
       end
     end
   end
@@ -107,24 +107,19 @@ module Overrides
       def validate
         super
 
-        # Ensures boolean values are set to false if nil
-        @sensitive ||= false
-        @is_set ||= false
-        @unordered_list ||= false
-        @default_from_api ||= false
+        check :sensitive, type: :boolean, default: false
+        check :is_set, type: :boolean, default: false
+        check :default_from_api, type: :boolean, default: false
+        check :unordered_list, type: :boolean, default: false
 
-        check_property :sensitive, :boolean
-        check_property :is_set, :boolean
-        check_property :default_from_api, :boolean
+        check :diff_suppress_func, type: String
+        check :state_func, type: String
+        check :validation, type: Provider::Terraform::Validation
+        check :set_hash_func, type: String
 
-        check_optional_property :diff_suppress_func, String
-        check_optional_property :state_func, String
-        check_optional_property :validation, Provider::Terraform::Validation
-        check_optional_property :set_hash_func, String
-
-        check_optional_property :update_statement, String
-        check_optional_property :custom_flatten, String
-        check_optional_property :custom_expand, String
+        check :update_statement, type: String
+        check :custom_flatten, type: String
+        check :custom_expand, type: String
 
         raise "'default_value' and 'default_from_api' cannot be both set"  \
           if @default_from_api && !@default_value.nil?
