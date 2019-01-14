@@ -11,30 +11,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/config'
-require 'provider/core'
+require 'api/object'
+require 'overrides/resources'
 
-module Provider
+module Overrides
   module Ansible
-    # Settings for the Ansible provider
-    class Config < Provider::Config
-      attr_reader :manifest
-
-      def provider
-        Provider::Ansible::Core
+    # Ansible-specific overrides to api.yaml.
+    class PropertyOverride < Overrides::PropertyOverride
+      # Collection of fields allowed in the PropertyOverride section for
+      # Ansible. All fields should be `attr_reader :<property>`
+      def self.attributes
+        %i[
+          aliases
+          version_added
+        ]
       end
 
-      def resource_override
-        Overrides::Ansible::ResourceOverride
-      end
-
-      def property_override
-        Overrides::Ansible::PropertyOverride
-      end
+      attr_reader(*attributes)
 
       def validate
         super
-        check_optional_property :manifest, Provider::Ansible::Manifest
+
+        check_optional_property :aliases, ::Array
+        check_optional_property :version_added, ::String
       end
     end
   end

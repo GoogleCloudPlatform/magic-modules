@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  AlertPolicy: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  AlertPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
@@ -26,7 +26,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
-  Group: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+  Group: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/groups/{{project}}
@@ -45,13 +45,13 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
           display_name: "New Test SubGroup"
           display_name2: "New Test SubGroup"
     properties:
-      parentName: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      parentName: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 
-  NotificationChannel: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+  NotificationChannel: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: stackdriver/notifications/{{project}}
@@ -66,7 +66,7 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 
-  UptimeCheckConfig: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+  UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     examples:
@@ -88,12 +88,12 @@ overrides: !ruby/object:Provider::Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
       pre_update: "templates/terraform/pre_update/update_mask.erb"
     properties:
-      httpCheck.authInfo.password: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      httpCheck.authInfo.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
-      httpCheck.port: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      httpCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      resourceGroup.groupId: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      resourceGroup.groupId: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
         custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
 

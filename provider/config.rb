@@ -13,7 +13,7 @@
 
 require 'api/object'
 require 'compile/core'
-require 'provider/overrides/runner'
+require 'overrides/runner'
 
 module Provider
   # Settings for the provider
@@ -54,9 +54,9 @@ module Provider
         unless config.class <= Provider::Config
 
       config.validate
-      api = Provider::Overrides::Runner.build(api, config.overrides,
-                                              config.resource_override,
-                                              config.property_override)
+      api = Overrides::Runner.build(api, config.overrides,
+                                    config.resource_override,
+                                    config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
       api.validate
@@ -74,10 +74,10 @@ module Provider
     def validate
       super
 
-      default_value_property :overrides, Provider::Overrides::ResourceOverrides.new
+      default_value_property :overrides, Overrides::ResourceOverrides.new
 
       check_optional_property :files, Provider::Config::Files
-      check_property :overrides, Provider::Overrides::ResourceOverrides
+      check_property :overrides, Overrides::ResourceOverrides
     end
 
     # Provides the API object to any type that requires, e.g. for validation
@@ -97,11 +97,11 @@ module Provider
     end
 
     def resource_override
-      Provider::Overrides::ResourceOverride
+      Overrides::ResourceOverride
     end
 
     def property_override
-      Provider::Overrides::PropertyOverride
+      Overrides::PropertyOverride
     end
   end
 end

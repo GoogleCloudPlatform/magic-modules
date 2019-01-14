@@ -15,8 +15,8 @@ require 'api/compiler'
 require 'provider/config'
 require 'provider/ansible'
 require 'provider/terraform/config'
-require 'provider/overrides/terraform/resource_override'
-require 'provider/overrides/terraform/property_override'
+require 'overrides/terraform/resource_override'
+require 'overrides/terraform/property_override'
 
 # Takes in a DiscoveryResource + Api::Resource
 # Loops through all properties of the DiscoveryResource (at any depth)

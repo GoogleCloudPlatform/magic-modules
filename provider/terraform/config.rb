@@ -23,11 +23,11 @@ module Provider
       end
 
       def resource_override
-        Provider::Overrides::Terraform::ResourceOverride
+        Overrides::Terraform::ResourceOverride
       end
 
       def property_override
-        Provider::Overrides::Terraform::PropertyOverride
+        Overrides::Terraform::PropertyOverride
       end
     end
   end
