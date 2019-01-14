@@ -176,8 +176,7 @@ module Provider
           )
         )
 
-        %x(gofmt -w -s #{target_file}) if File.extname(target_file) == '.go'
-        %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
+        format_output_file(target_file)
       end
     end
 
@@ -394,8 +393,8 @@ module Provider
       if path.end_with?('.py') && @py_format_enabled
         %x(python3 -m black --line-length 160 -S #{path} 2> /dev/null)
       elsif path.end_with?('.go') && @go_format_enabled
-        %x(gofmt -w -s #{filepath})
-        %x(goimports -w #{filepath})
+        %x(gofmt -w -s #{path})
+        %x(goimports -w #{path})
       end
     end
 

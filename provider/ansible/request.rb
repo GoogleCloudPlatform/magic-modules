@@ -73,37 +73,17 @@ module Provider
       private
 
       def request_property(prop, hash_name, module_name, indent_width)
-        # We are still, somewhat in the code-formatting business.  This code is
-        # here because autopep8 cannot handle one particular case: a function call
-        # inside a function call inside a dictionary, where the first line of
-        # the continuation is too long, but the second line is not.
-        if request_output(prop, hash_name, module_name).size < 100
-          indent(
-            ["#{unicode_string(prop.api_name)}: #{request_output(prop, hash_name, module_name)}"],
-            indent_width
-          )
-        else
-          indent(
-            ["#{unicode_string(prop.api_name)}:",
-             indent(request_output(prop, hash_name, module_name), 4)],
-            indent_width
-          )
-        end
+        indent(
+          ["#{unicode_string(prop.api_name)}: #{request_output(prop, hash_name, module_name)}"],
+          indent_width
+        )
       end
 
       def response_property(prop, hash_name, module_name, indent_width)
-        if response_output(prop, hash_name, module_name).size < 100
-          indent(
-            ["#{unicode_string(prop.api_name)}: #{response_output(prop, hash_name, module_name)}"],
-            indent_width
-          )
-        else
-          indent(
-            ["#{unicode_string(prop.api_name)}:",
-             indent(response_output(prop, hash_name, module_name), 4)],
-            indent_width
-          )
-        end
+        indent(
+          ["#{unicode_string(prop.api_name)}: #{response_output(prop, hash_name, module_name)}"],
+          indent_width
+        )
       end
 
       def response_output(prop, hash_name, module_name)
