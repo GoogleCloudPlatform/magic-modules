@@ -24,7 +24,7 @@ module Google
     # quotes becomes a ruby string without quotes unless you explicitly set
     # quotes in the string like "\"foo\"" which is not a pattern we want to
     # see in our yaml config files.
-    def python_literal(value, spaces_to_use = 0)
+    def python_literal(value)
       if value.is_a?(String) || value.is_a?(Symbol)
         "'#{value}'"
       elsif value.is_a?(Numeric)
@@ -32,8 +32,8 @@ module Google
       elsif value.is_a?(Hash) && (value.keys.length == 1)
         "{#{quote_string(value.keys.first)}: #{python_literal(value[value.keys.first])}}"
       elsif value.is_a?(Array)
-        values = value.map { |x| python_literal(x, 0) }
-        array_format(values, spaces_to_use)
+        values = value.map { |x| python_literal(x) }
+        array_format(values)
       elsif value == true
         'True'
       elsif value == false
@@ -57,10 +57,8 @@ module Google
 
     private
 
-    def array_format(values, spaces_to_use)
-      ['[',
-       values.map { |x| "#{indent(x, spaces_to_use + 4)}," },
-       indent(']', spaces_to_use)].join("\n")
+    def array_format(values)
+      '[' + values.join(', ') + ']'
     end
   end
 end
