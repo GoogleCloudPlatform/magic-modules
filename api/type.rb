@@ -98,7 +98,7 @@ module Api
 
     # Checks that all conflicting properties actually exist.
     def check_conflicts
-      check :conflicts, type: ::Array, default: []
+      check :conflicts, type: ::Array, default: [], item_type: ::String
 
       return if @conflicts.empty?
 
@@ -392,7 +392,7 @@ module Api
 
       def validate
         super
-        check :values, type: ::Array
+        check :values, type: ::Array, item_type: [Symbol, ::String]
       end
     end
 

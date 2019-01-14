@@ -56,8 +56,7 @@ module Overrides
         check :custom_code, type: Provider::Terraform::CustomCode,
                             default: Provider::Terraform::CustomCode.new
         check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
-        check :import_format, type: Array, default: []
-        check :import_format, type: Array, item_type: String
+        check :import_format, type: Array, item_type: String, default: []
       end
 
       def apply(resource)

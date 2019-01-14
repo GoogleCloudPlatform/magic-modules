@@ -72,7 +72,7 @@ module Api
       def validate
         super
         check :path, type: String
-        check :allowed, type: Array
+        check :allowed, type: Array, item_type: [::String, :boolean]
       end
     end
 

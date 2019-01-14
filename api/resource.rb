@@ -163,7 +163,9 @@ module Api
       check :exclude, required: false, type: :boolean
       check :kind, required: false, type: String
 
-      check :exports, required: false, type: Array
+      check :exports, required: false,
+                      type: Array,
+                      item_type: [String, Api::Type::FetchedExternal, Api::Type::SelfLink]
       check :self_link, type: String, required: false
       check :self_link_query, required: false, type: Api::Resource::ResponseList
       check :readonly, required: false, type: :boolean

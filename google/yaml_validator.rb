@@ -64,6 +64,7 @@ module Google
       check_property_value(variable, value, opts[:type]) if opts[:type]
 
       if value.is_a?(Array)
+        raise "#{variable} must have item_type on arrays" unless opts[:item_type]
         value.each_with_index do |o, index|
           check_property_value("#{variable}[#{index}]", o, opts[:item_type])
         end
@@ -80,6 +81,7 @@ module Google
       if type == :boolean
         return unless [TrueClass, FalseClass].find_index(object.class).nil?
       elsif type.is_a? ::Array
+        return if type.find_index(:boolean) and [TrueClass, FalseClass].find_index(object.class)
         return unless type.find_index(object.class).nil?
       elsif object.is_a?(type)
         return
@@ -93,10 +95,6 @@ module Google
       else
         Google::LOGGER.debug "Checking object #{object}"
       end
-    end
-
-    def check_property(property, type = nil)
-      check_property_value property, instance_variable_get("@#{property}"), type
     end
 
     def check_property_value(property, prop_value, type)

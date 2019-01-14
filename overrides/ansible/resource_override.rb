@@ -57,11 +57,11 @@ module Overrides
         check :create, type: ::String, required: false
         check :delete, type: ::String, required: false
         check :has_tests, type: :boolean, default: true
-        check :hidden, type: ::Array, required: false
-        check :imports, type: ::Array, default: []
+        check :hidden, type: ::Array, required: false, item_type: String
+        check :imports, type: ::Array, default: [], item_type: String
         check :post_create, type: ::String, required: false
         check :post_action, type: ::String, required: false
-        check :provider_helpers, type: ::Array, default: []
+        check :provider_helpers, type: ::Array, default: [], item_type: String
         check :return_if_object, type: ::String, required: false
         check :template, type: ::String, required: false
         check :update, type: ::String, required: false
