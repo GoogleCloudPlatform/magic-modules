@@ -25,8 +25,8 @@ module Provider
       def validate
         super
 
-        check :regex, required: false, type: String
-        check :function, required: false, type: String
+        check :regex, type: String
+        check :function, type: String
       end
     end
   end
@@ -112,14 +112,14 @@ module Overrides
         check :default_from_api, type: :boolean, default: false
         check :unordered_list, type: :boolean, default: false
 
-        check :diff_suppress_func, type: String, required: false
-        check :state_func, type: String, required: false
-        check :validation, type: Provider::Terraform::Validation, required: false
-        check :set_hash_func, type: String, required: false
+        check :diff_suppress_func, type: String
+        check :state_func, type: String
+        check :validation, type: Provider::Terraform::Validation
+        check :set_hash_func, type: String
 
-        check :update_statement, type: String, required: false
-        check :custom_flatten, type: String, required: false
-        check :custom_expand, type: String, required: false
+        check :update_statement, type: String
+        check :custom_flatten, type: String
+        check :custom_expand, type: String
 
         raise "'default_value' and 'default_from_api' cannot be both set"  \
           if @default_from_api && !@default_value.nil?

@@ -39,8 +39,8 @@ module Provider
 
       def validate
         super
-        check :compile, type: Hash, required: false
-        check :copy, type: Hash, required: false
+        check :compile, type: Hash
+        check :copy, type: Hash
       end
     end
 
@@ -74,7 +74,7 @@ module Provider
     def validate
       super
 
-      check :files, type: Provider::Config::Files, required: false
+      check :files, type: Provider::Config::Files
       check :overrides, type: Overrides::ResourceOverrides, default: Overrides::ResourceOverrides.new
     end
 

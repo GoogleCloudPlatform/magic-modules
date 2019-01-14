@@ -32,8 +32,8 @@ module Overrides
       def validate
         super
 
-        check :aliases, type: ::Array, required: false, item_type: ::String
-        check :version_added, type: ::String, required: false
+        check :aliases, type: ::Array, item_type: ::String
+        check :version_added, type: ::String
       end
     end
   end

@@ -49,7 +49,7 @@ module Google
     # :item_type - the allowed types that all values in this array should be
     #              (impllied that type == array)
     # :allowed   - the allowed values that this non-array variable should be.
-    # :required  - is the variable required? (defaults: true)
+    # :required  - is the variable required? (defaults: false)
     def check(variable, **opts)
       value = instance_variable_get("@#{variable}")
 
@@ -59,7 +59,7 @@ module Google
         value = instance_variable_get("@#{variable}")
       end
 
-      return if value.nil? && opts[:required] == false
+      raise "Value must be included" if value.nil? && opts[:required]
 
       check_property_value(variable, value, opts[:type]) if opts[:type]
 

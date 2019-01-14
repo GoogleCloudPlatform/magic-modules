@@ -37,10 +37,10 @@ module Provider
 
       def validate
         super
-        check :warning, type: String, required: false
-        check :required_properties, required: false, type: String
-        check :optional_properties, required: false, type: String
-        check :attributes, required: false, type: String
+        check :warning, type: String
+        check :required_properties, type: String
+        check :optional_properties, type: String
+        check :attributes, type: String
       end
     end
 
@@ -192,13 +192,11 @@ module Provider
 
       def validate
         super
-        @ignore_read_extra ||= []
-
-        check :name, type: String
-        check :primary_resource_id, type: String, required: false
-        check :vars, type: Hash, required: false
-        check :ignore_read_extra, type: Array, item_type: String
-        check :skip_test, type: TrueClass, required: false
+        check :name, type: String, required: true
+        check :primary_resource_id, type: String
+        check :vars, type: Hash
+        check :ignore_read_extra, type: Array, item_type: String, default: []
+        check :skip_test, type: TrueClass
       end
     end
 
@@ -287,18 +285,18 @@ module Provider
       def validate
         super
 
-        check :extra_schema_entry, type: String, required: false
-        check :resource_definition, type: String, required: false
-        check :encoder, type: String, required: false
-        check :update_encoder, type: String, required: false
-        check :decoder, type: String, required: false
-        check :constants, type: String, required: false
-        check :post_create, type: String, required: false
-        check :pre_update, type: String, required: false
-        check :post_update, type: String, required: false
-        check :pre_delete, type: String, required: false
-        check :custom_import, type: String, required: false
-        check :post_import, type: String, required: false
+        check :extra_schema_entry, type: String
+        check :resource_definition, type: String
+        check :encoder, type: String
+        check :update_encoder, type: String
+        check :decoder, type: String
+        check :constants, type: String
+        check :post_create, type: String
+        check :pre_update, type: String
+        check :post_update, type: String
+        check :pre_delete, type: String
+        check :custom_import, type: String
+        check :post_import, type: String
       end
     end
   end

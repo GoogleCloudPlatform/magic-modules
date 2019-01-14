@@ -25,10 +25,11 @@ module Api
     def validate
       super
 
-      check :operation, type: Operation
-      check :result, type: Result
-      check :status, type: Status
-      check :error, type: Error
+      check :operation, type: Operation, required: true
+      check :result, type: Result, required: true
+      check :status, type: Status, required: true
+      check :error, type: Error, required: true
+
     end
 
     # Represents the operations (requests) issues to watch for completion
@@ -42,10 +43,10 @@ module Api
       def validate
         super
 
-        check :kind, type: String
-        check :path, type: String
-        check :base_url, type: String
-        check :wait_ms, type: Integer
+        check :kind, type: String, required: true
+        check :path, type: String, required: true
+        check :base_url, type: String, required: true
+        check :wait_ms, type: Integer, required: true
         check :timeouts, type: Timeouts, default: Api::Timeouts.new
       end
     end
@@ -58,7 +59,7 @@ module Api
       def validate
         super
         check :resource_inside_response, type: :boolean, default: false
-        check :path, type: String, required: false
+        check :path, type: String
       end
     end
 
@@ -71,8 +72,8 @@ module Api
 
       def validate
         super
-        check :path, type: String
-        check :allowed, type: Array, item_type: [::String, :boolean]
+        check :path, type: String, required: true
+        check :allowed, type: Array, item_type: [::String, :boolean], required: true
       end
     end
 
@@ -83,8 +84,8 @@ module Api
 
       def validate
         super
-        check :path, type: String
-        check :message, type: String
+        check :path, type: String, required: true
+        check :message, type: String, required: true
       end
     end
   end

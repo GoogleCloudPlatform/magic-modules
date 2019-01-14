@@ -75,9 +75,9 @@ module Provider
       def validate
         super
 
-        check :task, type: Task
+        check :task, type: Task, required: true
         check :verifier, type: Verifier, default: FactsVerifier.new
-        check :dependencies, item_type: Task, type: Array, required: false
+        check :dependencies, item_type: Task, type: Array
         check :facts, type: Task, default: FactsTask.new
 
         @facts&.set_variable(self, :__example)
@@ -96,9 +96,9 @@ module Provider
 
       def validate
         super
-        check :name, type: String
-        check :code, type: Hash
-        check :scopes, type: Array, item_type: ::String, required: false
+        check :name, type: String, required: true
+        check :code, type: Hash, required: true
+        check :scopes, type: Array, item_type: ::String
       end
 
       def build_test(state, object, noop = false)
@@ -150,7 +150,7 @@ module Provider
       def validate
         @failure ||= FailureCondition.new
 
-        check :command, type: String
+        check :command, type: String, required: true
         check :failure, type: FailureCondition, default: FailureCondition.new
       end
 
@@ -275,7 +275,7 @@ module Provider
         raise 'Region must be slash delineated (e.g. regions/us-west1)' \
           unless @region == 'global' || @region.match?(%r{.*\/.*})
 
-        check :type, type: ::String, required: false
+        check :type, type: ::String
 
         @name ||= '{{ resource_name }}'
         @error = [
@@ -292,8 +292,8 @@ module Provider
       attr_reader :plural
 
       def validate
-        check :single, type: ::String, required: false
-        check :plural, type: ::String, required: false
+        check :single, type: ::String
+        check :plural, type: ::String
 
         @name ||= '{{ resource_name }}'
         @error = [

@@ -51,22 +51,22 @@ module Overrides
         @exclude ||= false
 
         check :access_api_results, type: :boolean, default: false
-        check :collection, required: false, type: ::String
+        check :collection, type: ::String
         check :custom_create_resource, type: :boolean, default: false
         check :custom_update_resource, type: :boolean, default: false
-        check :create, type: ::String, required: false
-        check :delete, type: ::String, required: false
+        check :create, type: ::String
+        check :delete, type: ::String
         check :has_tests, type: :boolean, default: true
-        check :hidden, type: ::Array, required: false, item_type: String
+        check :hidden, type: ::Array, item_type: String
         check :imports, type: ::Array, default: [], item_type: String
-        check :post_create, type: ::String, required: false
-        check :post_action, type: ::String, required: false
+        check :post_create, type: ::String
+        check :post_action, type: ::String
         check :provider_helpers, type: ::Array, default: [], item_type: String
-        check :return_if_object, type: ::String, required: false
-        check :template, type: ::String, required: false
-        check :update, type: ::String, required: false
+        check :return_if_object, type: ::String
+        check :template, type: ::String
+        check :update, type: ::String
         check :unwrap_resource, type: :boolean, default: false
-        check :version_added, type: ::String, required: false
+        check :version_added, type: ::String
 
         check :facts, type: Provider::Ansible::FactsOverride, 
                       default: Provider::Ansible::FactsOverride.new

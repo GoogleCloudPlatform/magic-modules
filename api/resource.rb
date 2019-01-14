@@ -84,8 +84,8 @@ module Api
 
       def validate
         super
-        check :encoder, required: false, type: ::String
-        check :decoder, required: false, type: ::String
+        check :encoder, type: ::String
+        check :decoder, type: ::String
       end
     end
 
@@ -95,7 +95,7 @@ module Api
 
       def validate
         super
-        check :create, type: ::String
+        check :create, type: ::String, required: true
       end
     end
 
@@ -107,8 +107,8 @@ module Api
       def validate
         super
 
-        check :items, default: 'items', type: ::String
-        check :kind, type: ::String, required: false
+        check :items, default: 'items', type: ::String, required: true
+        check :kind, type: ::String
       end
 
       def kind?
@@ -129,8 +129,8 @@ module Api
       def validate
         super
 
-        check :guides, type: Hash, default: {}
-        check :api, required: false, type: String
+        check :guides, type: Hash, default: {}, required: true
+        check :api, type: String
       end
     end
 
@@ -154,23 +154,22 @@ module Api
     #
     def validate
       super
-      check :async, required: false, type: Api::Async
-      check :base_url, type: String, required: false
-      check :create_url, type: String, required: false
-      check :delete_url, type: String, required: false
-      check :update_url, type: String, required: false
-      check :description, type: String
-      check :exclude, required: false, type: :boolean
-      check :kind, required: false, type: String
+      check :async, type: Api::Async
+      check :base_url, type: String
+      check :create_url, type: String
+      check :delete_url, type: String
+      check :update_url, type: String
+      check :description, type: String, required: true
+      check :exclude, type: :boolean
+      check :kind, type: String
 
-      check :exports, required: false,
-                      type: Array,
+      check :exports, type: Array,
                       item_type: [String, Api::Type::FetchedExternal, Api::Type::SelfLink]
-      check :self_link, type: String, required: false
-      check :self_link_query, required: false, type: Api::Resource::ResponseList
-      check :readonly, required: false, type: :boolean
-      check :transport, required: false, type: Transport
-      check :references, required: false, type: ReferenceLinks
+      check :self_link, type: String
+      check :self_link_query, type: Api::Resource::ResponseList
+      check :readonly, type: :boolean
+      check :transport, type: Transport
+      check :references, type: ReferenceLinks
 
       check :collection_url_response, default: Api::Resource::ResponseList.new,
                                       type: Api::Resource::ResponseList
@@ -179,14 +178,14 @@ module Api
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
 
-      check :input, required: false, type: :boolean
-      check :min_version, required: false, type: String
+      check :input, type: :boolean
+      check :min_version, type: String
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
 
-      check :properties, type: Array, item_type: Api::Type unless @exclude
-      check :parameters, required: false, type: Array, item_type: Api::Type unless @exclude
+      check :properties, type: Array, item_type: Api::Type, required: true unless @exclude
+      check :parameters, type: Array, item_type: Api::Type unless @exclude
 
       check_identity unless @identity.nil?
     end
@@ -245,7 +244,7 @@ module Api
     end
 
     def check_identity
-      check :identity, type: Array, item_type: String
+      check :identity, type: Array, item_type: String, required: true
 
       # Ensures we have all properties defined
       @identity.each do |i|

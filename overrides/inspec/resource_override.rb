@@ -30,7 +30,7 @@ module Overrides
       def validate
         check :manual, type: :boolean, default: false
         super
-        check :additional_functions, type: String, required: false
+        check :additional_functions, type: String
       end
     end
   end
