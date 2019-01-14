@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Cloud Scheduler
-prefix: gcloudscheduler
+name: CloudScheduler
+display_name: Cloud Scheduler
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
