@@ -3,3 +3,7 @@
 describe google_pubsub_subscription(project: <%= doc_generation ? "'#{gcp_project_id}'" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{subscription['name']}'" : "subscription['name']" -%>) do
   it { should exist }
 end
+
+describe google_pubsub_subscription(project: <%= doc_generation ? "'#{gcp_project_id}'" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
