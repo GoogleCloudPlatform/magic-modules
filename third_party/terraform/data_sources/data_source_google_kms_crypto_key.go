@@ -16,7 +16,6 @@ func dataSourceGoogleKmsCryptoKey() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"key_ring": {
 				Type:             schema.TypeString,
@@ -34,13 +33,12 @@ func dataSourceGoogleKmsCryptoKey() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"algorithm": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:    schema.TypeString,
+							Compute: true,
 						},
 						"protection_level": {
 							Type:         schema.TypeString,
-							Optional:     true,
-							ForceNew:     true,
+							Commpute:     true,
 							Default:      "SOFTWARE",
 							ValidateFunc: validation.StringInSlice([]string{"SOFTWARE", "HSM", ""}, false),
 						},
