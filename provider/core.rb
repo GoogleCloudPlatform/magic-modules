@@ -42,6 +42,28 @@ module Provider
       # run already. Instead of storing all the modified files in state we'll
       # use the time the file was modified.
       @start_time = start_time
+      @py_format_enabled = check_pyformat
+      @go_format_enabled = check_goformat
+    end
+
+    def check_pyformat
+      if system('python3 -m black --help > /dev/null')
+        true
+      else
+        Google::LOGGER.warn 'Either python3 or black is not installed; python ' \
+          'code will be poorly formatted and may not pass linter checks.'
+        false
+      end
+    end
+
+    def check_goformat
+      if system('which gofmt > /dev/null') && system('which goimports > /dev/null')
+        true
+      else
+        Google::LOGGER.warn 'Either gofmt or goimports is not installed; go ' \
+          'code will be poorly formatted and will likely not compile.'
+        false
+      end
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
@@ -154,8 +176,7 @@ module Provider
           )
         )
 
-        %x(gofmt -w -s #{target_file}) if File.extname(target_file) == '.go'
-        %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
+        format_output_file(target_file)
       end
     end
 
@@ -285,46 +306,6 @@ module Provider
       (code + (self_code || [])).join("\n")
     end
 
-    # Formats the code and returns the first candidate that fits the alloted
-    # column limit.
-    def format(sources, indent = 0, start_indent = 0,
-               max_columns = @max_columns)
-      format2(sources, indent: indent,
-                       start_indent: start_indent,
-                       max_columns: max_columns)
-    end
-
-    # TODO(nelsonjr): Make format2 into format and fix all references throughout
-    # the code base.
-    def format2(sources, overrides = {})
-      options = DEFAULT_FORMAT_OPTIONS.merge(overrides)
-      output = ''
-      avail_columns = options[:max_columns] - options[:start_indent]
-      sources.each do |attempt|
-        output = indent(attempt, options[:indent])
-        return output if format_fits?(output, options[:start_indent],
-                                      options[:max_columns])
-      end
-      unless options[:on_misfit].nil?
-        (alt_fit, alt_output) = options[:on_misfit].call(sources, output,
-                                                         options, avail_columns)
-        return alt_output if alt_fit
-      end
-
-      indent([
-               '# rubocop:disable Metrics/LineLength',
-               sources.last,
-               '# rubocop:enable Metrics/LineLength'
-             ], options[:indent])
-    end
-
-    def format_fits?(output, start_indent,
-                     max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns])
-      output = output.flatten.join("\n") if output.is_a?(::Array)
-      output = output.split("\n") unless output.is_a?(::Array)
-      output.select { |l| l.length > (max_columns - start_indent) }.empty?
-    end
-
     def relative_path(target, base)
       Pathname.new(target).relative_path_from(Pathname.new(base))
     end
@@ -382,6 +363,7 @@ module Provider
       ctx = binding
       data.each { |name, value| ctx.local_variable_set(name, value) }
       generate_file_write ctx, data
+      format_output_file(data[:out_file])
     end
 
     def generate_file_write(ctx, data)
@@ -405,6 +387,15 @@ module Provider
       }
       yield
       raise "#{filename} missing autogen" unless @file_expectations[:autogen]
+    end
+
+    def format_output_file(path)
+      if path.end_with?('.py') && @py_format_enabled
+        %x(python3 -m black --line-length 160 -S #{path} 2> /dev/null)
+      elsif path.end_with?('.go') && @go_format_enabled
+        %x(gofmt -w -s #{path})
+        %x(goimports -w #{path})
+      end
     end
 
     # Write the output to a file. We write one line at a time so tests can

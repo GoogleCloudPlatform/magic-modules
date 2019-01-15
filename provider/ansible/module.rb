@@ -29,7 +29,7 @@ module Provider
           nested_obj_dict(prop, object, prop.properties, spaces)
         else
           name = prop.out_name.underscore
-          "#{name}=dict(#{prop_options(prop, object, spaces).join(', ')})"
+          "#{name}=dict(#{prop_options(prop, object)})"
         end
       end
 
@@ -39,7 +39,7 @@ module Provider
       # for validation.
       def nested_obj_dict(prop, object, properties, spaces)
         name = prop.out_name.underscore
-        options = prop_options(prop, object, spaces).join(', ')
+        options = prop_options(prop, object)
         [
           "#{name}=dict(#{options}, options=dict(",
           indent_list(properties.map do |p|
@@ -50,42 +50,25 @@ module Provider
       end
 
       # Returns an array of all base options for a given property.
-      def prop_options(prop, _object, spaces)
+      def prop_options(prop, _object)
         [
           ('required=True' if prop.required && !prop.default_value),
           ("default=#{python_literal(prop.default_value)}" \
            if prop.default_value),
           ("type=#{quote_string(python_type(prop))}" if python_type(prop)),
-          (choices_enum(prop, spaces) if prop.is_a? Api::Type::Enum),
+          (choices_enum(prop) if prop.is_a? Api::Type::Enum),
           ("elements=#{quote_string(python_type(prop.item_type))}" \
             if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
           ("aliases=[#{prop.aliases.map { |x| quote_string(x) }.join(', ')}]" \
             if prop.aliases)
-        ].compact
+        ].compact.join(', ')
       end
 
       # Returns a formatted string represented the choices of an enum
-      def choices_enum(prop, spaces)
-        name = prop.out_name.underscore
-        type = "type=#{quote_string(python_type(prop))}"
-        # + 6 for =dict(
-        choices_indent = spaces + name.length + type.length + 6
-        format([
-                 [
-                   "choices=[#{prop.values.map do |x|
-                                 quote_string(x.to_s)
-                               end.join(', ')}]"
-                 ],
-                 [
-                   "choices=['#{prop.values[0]}',",
-                   prop.values[1..-2].map do |x|
-                     "#{indent(quote_string(x.to_s), choices_indent + 11)},"
-                   end,
-                   # + 11 for ' choices='
-                   indent("#{quote_string(prop.values[-1].to_s)}]",
-                          choices_indent + 11)
-                 ]
-               ], 0, choices_indent)
+      def choices_enum(prop)
+        'choices=[' + prop.values.map do |x|
+          quote_string(x.to_s)
+        end.join(', ') + ']'
       end
     end
   end

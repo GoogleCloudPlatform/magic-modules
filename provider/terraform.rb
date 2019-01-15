@@ -138,9 +138,6 @@ module Provider
         default_template: 'templates/terraform/resource.erb',
         out_file: filepath
       )
-      # TODO: error check goimports
-      %x(gofmt -w -s #{filepath})
-      %x(goimports -w #{filepath})
       generate_documentation(data)
     end
 
@@ -178,10 +175,6 @@ module Provider
         default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
         out_file: filepath
       )
-
-      # TODO: error check goimports
-      %x(gofmt -w -s #{filepath})
-      %x(goimports -w #{filepath})
     end
   end
 end
