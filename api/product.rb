@@ -14,6 +14,7 @@
 require 'api/object'
 require 'google/logger'
 require 'compile/core'
+require 'json'
 
 module Api
   # Repesents a product to be managed
@@ -31,6 +32,23 @@ module Api
     # The name of the product's API; "compute", "accesscontextmanager"
     def api_name
       name.downcase
+    end
+
+    def to_json(opts = nil)
+      json_out = {}
+
+      instance_variables.each do |v|
+        if v == :@objects
+          json_out['@resources'] = objects.map { |o| [o.name, o] }.to_h
+        elsif instance_variable_get(v) == false || instance_variable_get(v).nil?
+          # ignore false or missing because omitting them cleans up result
+          # and both are the effective defaults of their types
+        else
+          json_out[v] = instance_variable_get(v)
+        end
+      end
+
+      JSON.generate(json_out, opts)
     end
 
     # The product full name is the "display name" in string form intended for
@@ -82,6 +100,12 @@ module Api
         check :default, type: :boolean, default: false
         check :base_url, type: String, required: true
         check :name, type: String, allowed: ORDER, required: true
+      end
+
+      def to_s
+        str = "#{name}: #{base_url}"
+        str += ' (default)' if default
+        str
       end
 
       def <=>(other)

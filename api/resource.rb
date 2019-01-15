@@ -135,6 +135,21 @@ module Api
       end
     end
 
+    def to_json(opts = nil)
+      # ignore fields that will contain references to parent resources
+      ignored_fields = %i[@__product @__parent @__resource @api_name @collection_url_response]
+      json_out = {}
+
+      instance_variables.each do |v|
+        json_out[v] = instance_variable_get(v) unless ignored_fields.include? v
+      end
+
+      json_out[:@properties] = properties.map { |p| [p.name, p] }.to_h
+      json_out[:@parameters] = parameters.map { |p| [p.name, p] }.to_h
+
+      JSON.generate(json_out, opts)
+    end
+
     def identity
       props = all_user_properties
       if @identity.nil?
