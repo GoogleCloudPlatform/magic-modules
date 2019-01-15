@@ -56,7 +56,7 @@ def main():
 <%= lines(indent_list(mod_props, 12)) -%>
 <% unless conflicting.empty? -%>
         ),
-        mutually_exclusive=<%= python_literal(conflicting, 28) %>
+        mutually_exclusive=<%= python_literal(conflicting) %>
 <% else -%>
         )
 <% end -%>
