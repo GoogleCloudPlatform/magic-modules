@@ -47,17 +47,7 @@ import base64
 def main():
     """Main function"""
 
-<%
-  mod_props = object.all_user_properties.reject(&:output).map do |prop|
-    python_dict_for_property(prop, object)
-  end
--%>
-    module = GcpModule(
-        argument_spec=dict(
-            state=dict(default='present', choices=['present', 'absent'], type='str'),
-<%= lines(indent_list(mod_props, 12)) -%>
-        )
-    )
+<%= lines(indent(compile('templates/ansible/module.erb'), 4)) -%>
 
     if not module.params['scopes']:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
