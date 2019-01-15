@@ -50,24 +50,18 @@ module Provider
 
       private
 
+      # This is outputting code and code is easier to read on one line.
+      # rubocop:disable Metrics/LineLength
       def response_output(prop, hash_name, module_name)
         # If input true, treat like request, but use module names.
         return request_output(prop, "#{module_name}.params", module_name) \
           if prop.input
 
         if prop.is_a? Api::Type::NestedObject
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{unicode_string(prop.name)}, {})",
-            ", #{module_name}).from_response()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.name)}, {}), #{module_name}).from_response()"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::NestedObject)
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{unicode_string(prop.name)}, [])",
-            ", #{module_name}).from_response()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.name)}, []), #{module_name}).from_response()"
         else
           "#{hash_name}.get(#{unicode_string(prop.name)})"
         end
@@ -78,45 +72,24 @@ module Provider
           if prop.is_a? Api::Type::FetchedExternal
 
         if prop.is_a? Api::Type::NestedObject
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{quote_string(prop.out_name)}, {})",
-            ", #{module_name}).to_request()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{quote_string(prop.out_name)}, {}), #{module_name}).to_request()"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::NestedObject)
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{quote_string(prop.out_name)}, [])",
-            ", #{module_name}).to_request()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{quote_string(prop.out_name)}, []), #{module_name}).to_request()"
         elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
-          prop_name = prop.name.underscore
-          [
-            "replace_resource_dict(#{hash_name}",
-            ".get(#{unicode_string(prop_name)}, {}), ",
-            "#{quote_string(prop.imports)})"
-          ].join
+          "replace_resource_dict(#{hash_name}.get(#{unicode_string(prop.name.underscore)}, {}), #{quote_string(prop.imports)})"
         elsif prop.is_a?(Api::Type::ResourceRef) && \
               prop.resource_ref.readonly && prop.imports == 'selfLink'
-          func = "#{prop.resource.underscore}_selflink"
-          [
-            "#{func}(#{hash_name}.get(#{quote_string(prop.out_name)}),",
-            "#{module_name}.params)"
-          ].join(' ')
+          "#{prop.resource.underscore}_selflink(#{hash_name}.get(#{quote_string(prop.out_name)}), #{module_name}.params)"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::ResourceRef) && \
               !prop.item_type.resource_ref.readonly
-          prop_name = prop.name.underscore
-          [
-            "replace_resource_dict(#{hash_name}",
-            ".get(#{quote_string(prop_name)}, []), ",
-            "#{quote_string(prop.item_type.imports)})"
-          ].join
+          "replace_resource_dict(#{hash_name}.get(#{quote_string(prop.name.underscore)}, []), #{quote_string(prop.item_type.imports)})"
         else
           "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
       end
+      # rubocop:enable Metrics/LineLength
     end
   end
 end
