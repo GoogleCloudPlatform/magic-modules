@@ -1,0 +1,16 @@
+<% conflicting = conflicting_property_batches(object) -%>
+module = GcpModule(
+<%=
+  indent(remove_outside_dict(python_literal({
+    'argument_spec'=> {
+      'state' => {
+        'default' => 'present',
+        'choices' => ['present', 'absent'],
+        'type' => 'str'
+      }
+    }.merge(ansible_module(object.all_user_properties)),
+    'mutually_exclusive' => (conflicting_property_batches(object) \
+      unless conflicting_property_batches(object).empty?)
+  })), 4)
+-%>
+)
