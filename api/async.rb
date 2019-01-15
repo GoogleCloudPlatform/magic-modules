@@ -42,7 +42,7 @@ module Api
       def validate
         super
 
-        check :kind, type: String, required: true
+        check :kind, type: String
         check :path, type: String, required: true
         check :base_url, type: String, required: true
         check :wait_ms, type: Integer, required: true
