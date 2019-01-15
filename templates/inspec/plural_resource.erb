@@ -97,4 +97,14 @@ end -%>
 
     converted
   end
+
+  # rubocop:disable Metrics/AbcSize
+  def transformers
+    {
+<% object.all_user_properties.each do |prop| -%>
+      '<%= prop.out_name -%>' => ->(obj) { <%= "#{parse_code(prop, 'obj')}" -%> },
+<% end # object.all_user_properties.each -%>
+    }
+  end
+  # rubocop:enable Metrics/AbcSize
 end
