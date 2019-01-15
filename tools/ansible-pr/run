@@ -137,7 +137,8 @@ OptionParser.new do |opts|
     @options[:dry_run] = true
   end
 
-  opts.on('--date [DATE (as ISO8601 String)]', 'Date for Github sorting') do |v|
+  opts.on('--date [DATE (as ISO8601 String)]',
+          'Find all GitHub issues with Ansible label after this date') do |v|
     @options[:date] = v
   end
 
@@ -172,12 +173,11 @@ puts "Changes noticed in these additional files: #{changed_files.join(', ')}"
 # Create a Bug Fix PR.
 existing_modules = get_all_modules('upstream')
 
-
 # Create a new branch
 # Each batch should be 25 modules at most (assuming 2 file changes per module)
 # minus any static files.
 batch_size = 25 - changed_files.length
-existing_modules.each_slide(batch_size).with_index do |part, index|
+existing_modules.each_slice(batch_size).with_index do |part, index|
   puts "Building Bug fix PR #{index}"
   git_run('git checkout upstream/devel', true)
   git_run("git branch -D bug_fixes#{index}", true)

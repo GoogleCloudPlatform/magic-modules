@@ -7,5 +7,6 @@ By default, the origin remote points to MM's version of Ansible
 
 ## Requirements
 * `hub` CLI
-* `build/ansible` has the origin remote to whatever fork of ansible
-  you want PRs to appear as coming from (usually, your personal fork)
+* The origin fork on 'build/ansible' points to your fork of Ansible.
+  All PRs to upstream Ansible will come from the owner of this origin
+  remote fork.
