@@ -13,5 +13,5 @@ describe google_compute_instance_group_manager(project: <%= doc_generation ? "#{
 end
 
 describe google_compute_instance_group_manager(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, zone: <%= doc_generation ? "#{gcp_zone}" : "gcp_zone" -%>, name: 'nonexistent') do
-	it { should_not exist }
+  it { should_not exist }
 end
