@@ -50,6 +50,10 @@ module Provider
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
       config = Google::YamlValidator.parse(source)
+      # Compile step 2: compile with target class (this is in case the config
+      # requires info from the config to compile)
+      source = config.compile(cfg_file)
+      config = Google::YamlValidator.parse(source)
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
 

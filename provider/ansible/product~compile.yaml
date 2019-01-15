@@ -13,12 +13,17 @@
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
 
+<% unless config.nil? -%>
 <%
   return unless api.objects.first.__product
   version = api.version_obj_or_default(version_name)
   # Overrides have not been assembled yet.
+  overrides = config.overrides
+  excludes = overrides.instance_variables
+                      .select { |x| overrides.instance_variable_get(x).instance_variable_get('@exclude') }
+                      .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
-                    .reject(&:exclude)
+                    .select { |o| !excludes.include?(o.name) }
                     .select { |o| !o.exclude_if_not_in_version(version) }
                     .map do |object|
                       ["gcp_#{object.__product.api_name}",
@@ -31,3 +36,4 @@
 'test/integration/targets/<%= obj_name -%>/meta/main.yml': 'provider/ansible/blank_file.yaml'
 <% end -%>
 
+<% end # unless config.nil? -%>
