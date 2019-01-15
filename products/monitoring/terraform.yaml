@@ -65,6 +65,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
+    properties:
+      labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: "templates/terraform/custom_flatten/monitoring_obfuscated_labels.go.erb"
 
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
