@@ -30,16 +30,20 @@ module Provider
         {
           prop.name.underscore => {
             'required' => (true if prop.required && !prop.default_value),
-            'default' => (prop.default_value if prop.default_value),
-            'type' => (python_type(prop) if python_type(prop)),
+            'default' => prop.default_value,
+            'type' => python_type(prop),
             'choices' => (prop.values if prop.is_a?(Api::Type::Enum)),
             'elements' => (python_type(prop.item_type) \
               if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
-            'aliases' => (prop.aliases if prop.aliases),
-            'options' => (if prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                            prop.item_type.properties.map { |x| python_dict_for_property(x) }.reduce({}, :merge)
+            'aliases' => prop.aliases,
+            'options' => (if prop.is_a?(Api::Type::Array) && \
+                          prop.item_type.is_a?(Api::Type::NestedObject)
+                            prop.item_type.properties
+                                          .map { |x| python_dict_for_property(x) }
+                                          .reduce({}, :merge)
                           elsif prop.is_a?(Api::Type::NestedObject)
-                            prop.properties.map { |x| python_dict_for_property(x) }.reduce({}, :merge)
+                            prop.properties.map { |x| python_dict_for_property(x) }
+                                           .reduce({}, :merge)
                           end)
           }.reject { |_, v| v.nil? }
         }
