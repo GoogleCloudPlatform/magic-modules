@@ -2501,7 +2501,7 @@ objects:
           All prefixes must be within link-local address space (169.254.0.0/16)
           and must be /29 or shorter (/28, /27, etc). Google will attempt to select
           an unused /29 from the supplied candidate prefix(es). The request will
-          fail if all possible /29s are in use on Google’s edge. If not supplied,
+          fail if all possible /29s are in use on Google's edge. If not supplied,
           Google will randomly select an unused /29 from all of link-local space.
         item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
