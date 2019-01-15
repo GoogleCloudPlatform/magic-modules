@@ -18,16 +18,16 @@ module Provider
     module Request
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
-      def request_properties(properties, hash_name='module.params', module_name='module')
-          properties.map do |prop|
-            {
-              Google::PythonUtils::UnicodeString.new(prop.api_name) =>
-              Google::PythonUtils::PythonCode.new(request_output(prop, hash_name, module_name))
-            }
-          end.reduce({}, :merge)
+      def request_properties(properties, hash_name = 'module.params', module_name = 'module')
+        properties.map do |prop|
+          {
+            Google::PythonUtils::UnicodeString.new(prop.api_name) =>
+            Google::PythonUtils::PythonCode.new(request_output(prop, hash_name, module_name))
+          }
+        end.reduce({}, :merge)
       end
 
-      def response_properties(properties, hash_name='response', module_name='module')
+      def response_properties(properties, hash_name = 'response', module_name = 'module')
         properties.map do |prop|
           {
             Google::PythonUtils::UnicodeString.new(prop.api_name) =>

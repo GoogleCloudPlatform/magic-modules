@@ -56,7 +56,7 @@ module Google
         value
       elsif value.is_a?(Numeric)
         value.to_s
-      elsif value.is_a?(Hash) and opts[:use_hash_brackets]
+      elsif value.is_a?(Hash) && opts[:use_hash_brackets]
         hash_format(value)
       elsif value.is_a?(Hash)
         "dict(#{value.map { |k, v| "#{k}=#{python_literal(v)}" if v }.compact.join(', ')})"
@@ -93,6 +93,7 @@ module Google
     def hash_format(value)
       hash_vals = value.map do |k, v|
         next if v.nil?
+
         if k.is_a?(UnicodeString)
           "u'#{k}': #{python_literal(v)}"
         else
