@@ -51,7 +51,7 @@ Each resource contains a list of
 </walkthrough-editor-select-regex>
 on the resource that a user might set when creating the resource, or access when reading it.
 
-See the [Developer Guide](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/DEVELOPER.md)
+See the [property type fields](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/api/resource.rb#L22)
 for more information about the values that can be set on properties.
 
 ## [provider].yaml
@@ -119,6 +119,3 @@ cd build/ansible && git diff
 <walkthrough-conclusion-trophy></walkthrough-conclusion-trophy>
 
 You've successfully made a change to a resource in Magic Modules.
-
-See the [Developer Guide](https://github.com/GoogleCloudPlatform/magic-modules/blob/master/DEVELOPER.md)
-for more information on contributing.
