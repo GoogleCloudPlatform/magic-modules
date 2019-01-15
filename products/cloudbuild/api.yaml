@@ -63,7 +63,6 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'ignoredFiles'
         item_type: Api::Type::String
-        input: true
         description: |
           ignoredFiles and includedFiles are file glob matches using http://godoc/pkg/path/filepath#Match
           extended with support for "**".
@@ -77,7 +76,6 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'includedFiles'
         item_type: Api::Type::String
-        input: true
         description: |
           ignoredFiles and includedFiles are file glob matches using http://godoc/pkg/path/filepath#Match
           extended with support for "**".
