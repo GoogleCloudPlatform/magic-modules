@@ -18,44 +18,22 @@ module Provider
     module Request
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
-      def request_properties(properties, indent)
-        indent_list(
+      def request_properties(properties, hash_name='module.params', module_name='module')
           properties.map do |prop|
-            request_property(prop, 'module.params', 'module', indent)
-          end,
-          indent
-        )
+            {
+              Google::PythonUtils::UnicodeString.new(prop.api_name) =>
+              Google::PythonUtils::PythonCode.new(request_output(prop, hash_name, module_name))
+            }
+          end.reduce({}, :merge)
       end
 
-      def response_properties(properties, indent)
-        indent_list(
-          properties.map do |prop|
-            response_property(prop, 'response', 'module', indent)
-          end,
-          indent
-        )
-      end
-
-      def request_properties_in_classes(properties, indent,
-                                        hash_name = 'self.request',
-                                        module_name = 'self.module')
-        indent_list(
-          properties.map do |prop|
-            request_property(prop, hash_name, module_name, indent)
-          end,
-          indent
-        )
-      end
-
-      def response_properties_in_classes(properties, indent,
-                                         hash_name = 'self.request',
-                                         module_name = 'self.module')
-        indent_list(
-          properties.map do |prop|
-            response_property(prop, hash_name, module_name, indent)
-          end,
-          indent
-        )
+      def response_properties(properties, hash_name='response', module_name='module')
+        properties.map do |prop|
+          {
+            Google::PythonUtils::UnicodeString.new(prop.api_name) =>
+            Google::PythonUtils::PythonCode.new(response_output(prop, hash_name, module_name))
+          }
+        end.reduce({}, :merge)
       end
 
       # This returns a list of properties that require classes being built out.
@@ -71,20 +49,6 @@ module Provider
       end
 
       private
-
-      def request_property(prop, hash_name, module_name, indent_width)
-        indent(
-          ["#{unicode_string(prop.api_name)}: #{request_output(prop, hash_name, module_name)}"],
-          indent_width
-        )
-      end
-
-      def response_property(prop, hash_name, module_name, indent_width)
-        indent(
-          ["#{unicode_string(prop.api_name)}: #{response_output(prop, hash_name, module_name)}"],
-          indent_width
-        )
-      end
 
       def response_output(prop, hash_name, module_name)
         # If input true, treat like request, but use module names.

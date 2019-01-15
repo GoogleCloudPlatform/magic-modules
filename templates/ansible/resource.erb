@@ -242,9 +242,7 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
             "<%= object.__product.base_url -%>",
             "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
         ]).format(**module.params),
-        {
-<%= lines(request_properties(props, 12)) -%>
-        }
+<%= lines(python_literal(request_properties(props), use_hash_brackets: true)) -%>
     )
 
 
@@ -281,12 +279,12 @@ def resource_to_request(module):
     object.properties.reject(&:output)
   ].flatten.compact
 -%>
-    request = {
-<% if object.kind? -%>
-        u'kind': <%= quote_string(object.kind) -%>,
-<% end # if object.kind? -%>
-<%= lines(indent(request_properties(properties_in_request, 4), 4)) -%>
-    }
+<%
+  request_hash = {
+    Google::PythonUtils::UnicodeString.new('kind') => object.kind
+}.merge(request_properties(properties_in_request))
+-%>
+    request = <%= lines(python_literal(request_hash, use_hash_brackets: true)) -%>
 <% if object.encoder? -%>
     request = <%= object.transport.encoder -%>(request, module)
 <% end -%>
@@ -394,9 +392,7 @@ def is_different(module, response):
 # Remove unnecessary properties from the response.
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
-    return {
-<%= lines(response_properties(object.properties, 8)) -%>
-    }
+    return <%= lines(python_literal(response_properties(object.properties), use_hash_brackets: true)) -%>
 <% readonly_selflink_rrefs.each do |resource| -%>
 
 
