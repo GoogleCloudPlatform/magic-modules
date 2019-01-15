@@ -78,15 +78,15 @@ import json
 
 def main():
 <%
-  mod_props = object.facts.has_filters ? [python_dict_for_property(object.facts.filter, object)] : []
-  mod_props += uri_props.map do |prop|
-    python_dict_for_property(prop, object)
-  end
+  mod_props = object.facts.has_filters ? [object.facts.filter] : []
+  mod_props += uri_props
 -%>
     module = GcpModule(
-        argument_spec=dict(
-<%= lines(indent_list(mod_props, 12)) -%>
-        )
+<%=
+  indent(remove_outside_dict(python_literal({
+    'argument_spec'=> ansible_module(mod_props),
+  })), 12)
+-%>
     )
 
     if not module.params['scopes']:
