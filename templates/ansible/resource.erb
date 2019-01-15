@@ -44,22 +44,21 @@ import json
 def main():
     """Main function"""
 
-<%
-  mod_props = object.all_user_properties.reject(&:output).map do |prop|
-    python_dict_for_property(prop, object)
-  end
--%>
 <% conflicting = conflicting_property_batches(object) -%>
     module = GcpModule(
-        argument_spec=dict(
-            state=dict(default='present', choices=['present', 'absent'], type='str'),
-<%= lines(indent_list(mod_props, 12)) -%>
-<% unless conflicting.empty? -%>
-        ),
-        mutually_exclusive=<%= python_literal(conflicting) %>
-<% else -%>
-        )
-<% end -%>
+<%=
+  indent(remove_outside_dict(python_literal({
+    'argument_spec'=> {
+      'state' => {
+        'default' => 'present',
+        'choices' => ['present', 'absent'],
+        'type' => 'str'
+      }
+    }.merge(ansible_module(object.all_user_properties)),
+    'mutually_exclusive' => (conflicting_property_batches(object) \
+      unless conflicting_property_batches(object).empty?)
+  })), 12)
+-%>
     )
 
     if not module.params['scopes']:

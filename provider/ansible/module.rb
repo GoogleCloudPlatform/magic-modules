@@ -19,56 +19,36 @@ module Provider
     # AnsibleModule is responsible for input validation.
     module Module
       include Google::PythonUtils
-      # Returns the Python dictionary representing a simple property for
-      # validation.
-      def python_dict_for_property(prop, object, spaces = 0)
-        if prop.is_a?(Api::Type::Array) && \
-           prop.item_type.is_a?(Api::Type::NestedObject)
-          nested_obj_dict(prop, object, prop.item_type.properties, spaces)
-        elsif prop.is_a? Api::Type::NestedObject
-          nested_obj_dict(prop, object, prop.properties, spaces)
-        else
-          name = prop.out_name.underscore
-          "#{name}=dict(#{prop_options(prop, object)})"
-        end
-      end
-
-      private
-
-      # Creates a Python dictionary representing a nested object property
-      # for validation.
-      def nested_obj_dict(prop, object, properties, spaces)
-        name = prop.out_name.underscore
-        options = prop_options(prop, object)
-        [
-          "#{name}=dict(#{options}, options=dict(",
-          indent_list(properties.map do |p|
-            python_dict_for_property(p, object, spaces + 4)
-          end, 4),
-          '))'
-        ]
-      end
-
       # Returns an array of all base options for a given property.
-      def prop_options(prop, _object)
-        [
-          ('required=True' if prop.required && !prop.default_value),
-          ("default=#{python_literal(prop.default_value)}" \
-           if prop.default_value),
-          ("type=#{quote_string(python_type(prop))}" if python_type(prop)),
-          (choices_enum(prop) if prop.is_a? Api::Type::Enum),
-          ("elements=#{quote_string(python_type(prop.item_type))}" \
-            if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
-          ("aliases=[#{prop.aliases.map { |x| quote_string(x) }.join(', ')}]" \
-            if prop.aliases)
-        ].compact.join(', ')
+      def ansible_module(properties)
+        properties.reject(&:output)
+                  .map { |x| python_dict_for_property(x) }
+                  .reduce({}, :merge)
       end
 
-      # Returns a formatted string represented the choices of an enum
-      def choices_enum(prop)
-        'choices=[' + prop.values.map do |x|
-          quote_string(x.to_s)
-        end.join(', ') + ']'
+      def python_dict_for_property(prop)
+        {
+          prop.name.underscore => {
+            'required' => (true if prop.required && !prop.default_value),
+            'default' => (prop.default_value if prop.default_value),
+            'type' => (python_type(prop) if python_type(prop)),
+            'choices' => (prop.values if prop.is_a?(Api::Type::Enum)),
+            'elements' => (python_type(prop.item_type) \
+              if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
+            'aliases' => (prop.aliases if prop.aliases),
+            'options' => (if prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
+                            prop.item_type.properties.map { |x| python_dict_for_property(x) }.reduce({}, :merge)
+                          elsif prop.is_a?(Api::Type::NestedObject)
+                            prop.properties.map { |x| python_dict_for_property(x) }.reduce({}, :merge)
+                          end)
+          }.reject { |_, v| v.nil? }
+        }
+      end
+
+      # GcpModule is acting as a dictionary and doesn't need the dict() notation on
+      # the first level.
+      def remove_outside_dict(contents)
+        contents.sub('dict(', '').chomp(')')
       end
     end
   end
