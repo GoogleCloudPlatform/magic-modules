@@ -22,6 +22,10 @@ variable "instance_group_manager" {
   type = "map"
 }
 
+variable "autoscaler" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -74,5 +78,22 @@ resource "google_compute_instance_group_manager" "gcp-inspec-igm" {
   named_port {
     name = "${var.instance_group_manager["named_port_name"]}"
     port = "${var.instance_group_manager["named_port_port"]}"
+  }
+}
+
+resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
+  project = "${var.gcp_project_id}"
+  name    = "${var.autoscaler["name"]}"
+  zone    = "${var.gcp_zone}"
+  target  = "${google_compute_instance_group_manager.gcp-inspec-igm.self_link}"
+
+  autoscaling_policy = {
+    max_replicas    = "${var.autoscaler["max_replicas"]}"
+    min_replicas    = "${var.autoscaler["min_replicas"]}"
+    cooldown_period = "${var.autoscaler["cooldown_period"]}"
+
+    cpu_utilization {
+      target = "${var.autoscaler["cpu_utilization_target"]}"
+    }
   }
 }
