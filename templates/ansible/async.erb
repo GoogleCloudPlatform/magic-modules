@@ -1,6 +1,9 @@
 <% if object.async -%>
 <%
-  stat_path = path2navigate(object.async.status.path)
+  stat_path = python_literal(object.async.status.path.split('/'))
+  op_path = python_literal(object.async.operation.path.split('/'))
+  err_path = python_literal(object.async.error.path.split('/'))
+  err_msg = object.async.error.message
 -%>
 <%=
   lines(emit_link('async_op_url', build_url(object.async_operation_url, true), object, true), 2)
@@ -15,9 +18,10 @@ def wait_for_operation(module, response):
 <% if object.self_link_query.nil? -%>
     wait_done = wait_for_completion(status, op_result, module)
 <% if object.async.result.resource_inside_response -%>
+    raise_if_errors(op_result, <%= err_path -%>, module)
     return navigate_hash(wait_done, ['response'])
 <% else #if object.async.result.resource_inside_response -%>
-<% res_path = path2navigate(object.async.result.path) -%>
+<% res_path = python_literal(object.async.result.path.split('/')) -%>
     return <%= method_call('fetch_resource', ['module', "navigate_hash(wait_done, #{res_path})", (quote_string(object.kind) if object.kind?)]) %>
 <% end #if object.async.result.resource_inside_response -%>
 <% else # object.self_link_query.nil? -%>
@@ -38,9 +42,6 @@ def wait_for_operation(module, response):
 
 def wait_for_completion(status, op_result, module):
 <%
-  op_path = path2navigate(object.async.operation.path)
-  err_path = path2navigate(object.async.error.path)
-  err_msg = object.async.error.message
 -%>
     op_id = navigate_hash(op_result, <%= op_path -%>)
     op_uri = async_op_url(module, {'op_id': op_id})
@@ -49,7 +50,7 @@ def wait_for_completion(status, op_result, module):
 <% else -%>
     while status != <%= python_literal(object.async.status.complete) -%>:
 <% end -%>
-        raise_if_errors(op_result, <%= err_path -%>, '<%= err_msg -%>')
+        raise_if_errors(op_result, <%= err_path -%>, module)
         time.sleep(<%= sprintf('%.1f', object.async.operation.wait_ms / 1000.0) %>)
         op_result = <%= method_call('fetch_resource', ['module', 'op_uri', ("'#{object.async.operation.kind}'" if object.kind?)]) %>
         status = navigate_hash(op_result, <%= stat_path -%>)
