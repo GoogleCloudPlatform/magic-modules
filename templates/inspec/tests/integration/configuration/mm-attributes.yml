@@ -25,3 +25,9 @@ record_set:
   ttl: 300
   rrdatas1: '8.8.8.8'
   rrdatas2: '8.8.4.4'
+
+instance_group_manager:
+  name: 'inspec-gcp-igm'
+  base_instance_name: 'igm'
+  named_port_name: 'port'
+  named_port_port: 80
