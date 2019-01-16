@@ -31,9 +31,6 @@ objects:
       - !ruby/object:Api::Type::FetchedExternal
         name: name
     readonly: true
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -54,8 +51,6 @@ objects:
       hosted.
     exports:
       - name
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'instances'
     properties:
@@ -115,8 +110,6 @@ objects:
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
     input: true
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'databases'
     references: !ruby/object:Api::Resource::ReferenceLinks

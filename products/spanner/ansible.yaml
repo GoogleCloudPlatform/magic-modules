@@ -52,9 +52,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
   # Virtual => true objects that don't need dedicated resources.

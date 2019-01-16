@@ -36,8 +36,6 @@ objects:
         name: masterAuth
       - name
     description: 'A Google Container Engine cluster.'
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'clusters'
     parameters:
@@ -298,8 +296,6 @@ objects:
       set of Kubernetes labels applied to them, which may be used to reference
       them during pod scheduling. They may also be resized up or down, to
       accommodate the workload.
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'nodePools'
     parameters:
