@@ -109,7 +109,7 @@ module Discovery
         resource = resource.sub('Global', '')
         Resource.new(@results['schemas'][resource], resource, self)
       else
-        puts "#{original_resource} not found"
+        puts "#{original_resource} not found - #{@url}"
       end
     end
 
