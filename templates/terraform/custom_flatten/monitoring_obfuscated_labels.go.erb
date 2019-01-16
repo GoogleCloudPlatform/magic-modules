@@ -42,7 +42,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	return readLabels
 }
 
-func is<%= prefix -%><%= titlelize_property(property) -%>Obfuscated(stateLabel, serverLabel string) bool {
+func is<%= prefix -%><%= titlelize_property(property) -%>Obfuscated(serverLabel, stateLabel string) bool {
 	if stateLabel == serverLabel {
 		return false
 	}
