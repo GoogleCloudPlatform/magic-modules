@@ -391,10 +391,18 @@ module Provider
 
     def format_output_file(path)
       if path.end_with?('.py') && @py_format_enabled
-        %x(python3 -m black --line-length 160 -S #{path} 2> /dev/null)
+        run_formatter("python3 -m black --line-length 160 -S #{path}")
       elsif path.end_with?('.go') && @go_format_enabled
-        %x(gofmt -w -s #{path})
-        %x(goimports -w #{path})
+        run_formatter("gofmt -w -s #{path}")
+        run_formatter("goimports -w #{path}")
+      end
+    end
+
+    def run_formatter(command)
+      output = `#{command} 2>&1`
+
+      if $?.exitstatus != 0
+        Google::LOGGER.error output
       end
     end
 
