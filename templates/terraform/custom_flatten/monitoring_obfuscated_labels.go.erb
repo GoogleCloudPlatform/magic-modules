@@ -15,6 +15,7 @@
 // Some labels are obfuscated for monitoring channels - this method
 // checks to see if the value read from the server looks like the obfuscated
 // version of the state value, and will just use the state value if so.
+// e.g. if the value is "SECRET", the server will return "**CRET"
 // This avoids a permadiff.
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
 	if v == nil {
@@ -22,36 +23,40 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
 	}
 	readLabels := v.(map[string]interface{})
 
-	stateV, ok := d.GetOk("labels")
+	stateLabelsRaw, ok := d.GetOk("labels")
 	if !ok {
 		return v
 	}
-	stateLabels := stateV.(map[string]interface{})
+	stateLabels := stateLabelsRaw.(map[string]interface{})
 
 	for k, serverV := range readLabels {
-		stateRawV, ok := stateLabels[k]
+		stateV, ok := stateLabels[k]
 		if !ok {
 			continue
 		}
-
-		serverLabel := serverV.(string)
-		stateLabel := stateRawV.(string)
-		if stateLabel == serverLabel {
-			continue
-		}
-		if len(stateLabel) != len(serverLabel) {
-			continue
-		}
-
-		replace := true
-		for i := 0; i < len(stateLabel); i++ {
-			if serverLabel[i] != '*' && stateLabel[i] != serverLabel[i] {
-				replace = false
-			}
-		}
-		if replace {
-			readLabels[k] = stateLabel
+		useStateV := is<%= prefix -%><%= titlelize_property(property) -%>Obfuscated(serverV.(string), stateV.(string))
+		if useStateV {
+			readLabels[k] = stateV.(string)
 		}
 	}
 	return readLabels
+}
+
+func is<%= prefix -%><%= titlelize_property(property) -%>Obfuscated(stateLabel, serverLabel string) bool {
+	if stateLabel == serverLabel {
+		return false
+	}
+
+	if len(stateLabel) != len(serverLabel) {
+		return false
+	}
+
+	// Check if value read from GCP has either the same character or replaced 
+	// it with '*'
+	for i := 0; i < len(stateLabel); i++ {
+		if serverLabel[i] != '*' && stateLabel[i] != serverLabel[i] {
+			return false
+		}
+	}
+	return true
 }
