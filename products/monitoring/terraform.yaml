@@ -67,6 +67,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
       labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Configuration fields that define the channel and its behavior. The
+          permissible and required labels are specified in the
+          NotificationChannelDescriptor corresponding to the type field.
+
+          **Note**: Some NotificationChannelDescriptor labels are
+          sensitive and the API will return an partially-obfuscated value.
+          For example, for `"type": "slack"` channels, an `auth_token`
+          label with value "SECRET" will be obfuscated as "**CRET". In order
+          to avoid a diff, Terraform will use the state value if it appears
+          that the obfuscated value matches the state value in
+          length/unobfuscated characters. However, Terraform will not detect a
+          a diff if the obfuscated portion of the value was changed outside of
+          Terraform.
         custom_flatten: "templates/terraform/custom_flatten/monitoring_obfuscated_labels.go.erb"
 
   UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride

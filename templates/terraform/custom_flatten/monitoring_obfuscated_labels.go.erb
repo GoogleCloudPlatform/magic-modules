@@ -12,11 +12,11 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// Some labels are obfuscated for monitoring channels - this method
-// checks to see if the value read from the server looks like the obfuscated
-// version of the state value, and will just use the state value if so.
+// Some labels are obfuscated for monitoring channels
 // e.g. if the value is "SECRET", the server will return "**CRET"
-// This avoids a permadiff.
+// This method checks to see if the value read from the server looks like
+// the obfuscated version of the state value. If so, it will just use the state
+// value to avoid permadiff.
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
 	if v == nil {
 		return v
@@ -51,8 +51,8 @@ func is<%= prefix -%><%= titlelize_property(property) -%>Obfuscated(serverLabel,
 		return false
 	}
 
-	// Check if value read from GCP has either the same character or replaced 
-	// it with '*'
+	// Check if value read from GCP has either the same character or replaced
+	// it with '*'.
 	for i := 0; i < len(stateLabel); i++ {
 		if serverLabel[i] != '*' && stateLabel[i] != serverLabel[i] {
 			return false
