@@ -7,6 +7,6 @@ end
 
 google_pubsub_subscriptions(project: <%= gcp_project_id -%>).names.each do |subscription_name|
   describe google_pubsub_subscription(project: <%= gcp_project_id -%>, name: subscription_name) do
-    its('name') { should match /<%= doc_generation ? "#{subscription['name']}" : "subscription['name']" -%>/ }
+    it { should exist }
   end
 end
