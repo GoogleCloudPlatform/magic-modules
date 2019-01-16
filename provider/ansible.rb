@@ -183,11 +183,6 @@ module Provider
               .reject { |prop| prop.resource_ref.readonly }
       end
 
-      # Converts a path in the form a/b/c/d into ['a', 'b', 'c', 'd']
-      def path2navigate(path)
-        "[#{path.split('/').map { |x| "'#{x}'" }.join(', ')}]"
-      end
-
       # TODO(alexstephen): Standardize on one version and move to provider/core
       # https://github.com/GoogleCloudPlatform/magic-modules/issues/30
       def wrap_field(field, spaces)
