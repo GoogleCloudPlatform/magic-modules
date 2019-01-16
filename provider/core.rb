@@ -399,11 +399,9 @@ module Provider
     end
 
     def run_formatter(command)
-      output = `#{command} 2>&1`
+      output = %x(#{command} 2>&1)
 
-      if $?.exitstatus != 0
-        Google::LOGGER.error output
-      end
+      Google::LOGGER.error output if $CHILD_STATUS.exitstatus != 0
     end
 
     # Write the output to a file. We write one line at a time so tests can
