@@ -198,10 +198,10 @@ module Api
       (@parameters || []).reject(&:exclude)
     end
 
-    def exclude_if_not_in_version(version)
+    def exclude_if_not_in_version!(version)
       @exclude ||= version < min_version
-      @properties&.each { |p| p.exclude_if_not_in_version(version) }
-      @parameters&.each { |p| p.exclude_if_not_in_version(version) }
+      @properties&.each { |p| p.exclude_if_not_in_version!(version) }
+      @parameters&.each { |p| p.exclude_if_not_in_version!(version) }
 
       @exclude
     end

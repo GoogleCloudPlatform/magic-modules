@@ -184,11 +184,15 @@ module Provider
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
       (@api.objects || []).each do |object|
+        # exclude_if_not_in_version is destructive for 'object' and will remove
+        # properties that are not the required version.
+        excluded = object.exclude_if_not_in_version!(version)
+
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && object.exclude_if_not_in_version(version)
+        elsif types.empty? && excluded
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
           # version_name will differ from version.name if the resource is being
