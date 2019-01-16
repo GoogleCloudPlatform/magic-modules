@@ -25,6 +25,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/spanner_database.go.erb
       decoder: templates/terraform/decoders/spanner_database.go.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_database_basic"
+        primary_resource_id: "database"
+        version: <%= version_name %>
+        vars:
+          database_name: "mydatabase"
+  InstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
