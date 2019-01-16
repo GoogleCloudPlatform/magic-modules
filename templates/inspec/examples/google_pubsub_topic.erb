@@ -1,4 +1,4 @@
-<% gcp_project_id = grab_attributes['gcp_project_id'] -%>
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
 <% topic = grab_attributes['topic'] -%>
 describe google_pubsub_topic(project: <%= doc_generation ? "'#{gcp_project_id}'" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{topic['name']}'" : "topic['name']" -%>) do
   it { should exist }
