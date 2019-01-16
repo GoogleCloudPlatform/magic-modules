@@ -12,20 +12,20 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  Database: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Database: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{instance}}/{{name}}"
-    import_format: ["instances/{{instance}}/databases/{{name}}", "{{instance}}/{{name}}"]
+    import_format: ["instances/{{instance}}/databases/{{name}}", "{{project}}/{{instance}}/{{name}}", "{{instance}}/{{name}}"]
     properties:
-      extraStatements: !ruby/object:Provider::Terraform::PropertyOverride
+      extraStatements: !ruby/object:Overrides::Terraform::PropertyOverride
         name: ddl
         ignore_read: true
-      state: !ruby/object:Provider::Terraform::PropertyOverride
+      state: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/spanner_database.go.erb
       decoder: templates/terraform/decoders/spanner_database.go.erb
-  Instance: !ruby/object:Provider::Terraform::ResourceOverride
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
 # This is for copying files over

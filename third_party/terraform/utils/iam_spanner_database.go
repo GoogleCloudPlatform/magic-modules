@@ -51,8 +51,7 @@ func NewSpannerDatabaseIamUpdater(d *schema.ResourceData, config *Config) (Resou
 }
 
 func SpannerDatabaseIdParseFunc(d *schema.ResourceData, config *Config) error {
-	_, err := resourceSpannerDatabaseImport(d, config)
-	return err
+	return parseImportId([]string{"(?P<project>[^/]+)/(?P<instance>[^/]+)/(?P<database>[^/]+)"}, d, config)
 }
 
 func (u *SpannerDatabaseIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
