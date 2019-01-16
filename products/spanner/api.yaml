@@ -80,7 +80,6 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'nodeCount'
         description: 'The number of nodes allocated to this instance.'
-      # 'state' not suitable for state convergeance.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
@@ -115,10 +114,15 @@ objects:
     base_url: projects/{{project}}/instances/{{instance}}/databases
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
+    input: true
     transport: !ruby/object:Api::Resource::Transport
       decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'databases'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/spanner/'
+      api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
@@ -126,14 +130,18 @@ objects:
         imports: 'name'
         description: 'The instance to create the database on.'
         required: true
+        input: true
     properties:
+      # This resource returns only one attribute ("name") from which we parse
+      # "instance", "name", and "project".  You will need custom code handling
+      # to deal with this resource.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
           A unique identifier for the database, which cannot be changed after
-          the instance is created. Values are of the form
-          projects/<project>/instances/[a-z][-a-z0-9]*[a-z0-9]. The final
-          segment of the name must be between 6 and 30 characters in length.
+          the instance is created. Values are of the form [a-z][-a-z0-9]*[a-z0-9].
+        input: true
+        required: true
       - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
         name: 'extraStatements'
@@ -143,3 +151,13 @@ objects:
           execute atomically with the creation of the database: if there is an
           error in any statement, the database is not created.
         input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: An explanation of the status of the database.
+        output: true
+        # This attribute is not useful - we include it in Terraform for historical
+        # reasons, but you should most likely not use it.
+        exclude: true
+        values:
+          - :READY
+          - :CREATING
