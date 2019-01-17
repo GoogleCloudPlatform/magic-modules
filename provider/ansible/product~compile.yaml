@@ -20,7 +20,7 @@
   # Overrides have not been assembled yet.
   overrides = config.overrides
   excludes = overrides.instance_variables
-                      .select { |x| overrides.instance_variable_get(x).exclude }
+                      .select { |x| overrides.instance_variable_get(x).instance_variable_get('@exclude') }
                       .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
                     .select { |o| !excludes.include?(o.name) }
