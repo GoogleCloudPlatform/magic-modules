@@ -74,23 +74,7 @@ class <%= object.name -%> < GcpResourceBase
   def parse
 <%
   parse_code = object.all_user_properties.map do |prop|
-    name = prop.out_name
-
-    if time?(prop)
-      init = "parse_time_string(@fetched['#{prop.api_name}'])"
-    elsif primitive?(prop)
-      if prop.name_from_self_link
-        init = "name_from_self_link(@fetched['#{prop.api_name}'])"
-      else
-        init = "@fetched['#{prop.api_name}']"
-      end
-    elsif typed_array?(prop)
-      init = "#{inspec_property_type(prop)}.parse(@fetched['#{prop.api_name}'])"
-    else
-      init = "#{inspec_property_type(prop)}.new(@fetched['#{prop.api_name}'])"    
-    end
-    
-    assignment = "@#{name} = #{init}"
+    assignment = "@#{prop.out_name} = #{parse_code(prop, '@fetched')}"
   end
 -%>
 <%= lines(indent(parse_code, 4)) -%>

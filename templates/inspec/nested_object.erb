@@ -34,16 +34,7 @@ module GoogleInSpec
           return if args.nil?
 <% nested_properties.each do |prop| -%>
 <%
-  if time?(prop)
-      init = "args['#{prop.api_name}'] ? Time.parse(args['#{prop.api_name}']) : nil"
-  elsif primitive?(prop)
-    init = "args['#{prop.api_name}']"
-  elsif typed_array?(prop)
-    init = "#{inspec_property_type(prop)}.parse(args['#{prop.api_name}'])"
-  else 
-    init = "#{inspec_property_type(prop)}.new(args['#{prop.api_name}'])"    
-  end
-  parse_code = "@#{prop.out_name} = #{init}"
+  parse_code = "@#{prop.out_name} = #{parse_code(prop, 'args')}"
 -%>
 <%= lines(indent(parse_code, 10)) -%>
 <% end # nested_properties.each -%>

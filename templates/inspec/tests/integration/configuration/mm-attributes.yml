@@ -31,3 +31,9 @@ instance_group_manager:
   base_instance_name: 'igm'
   named_port_name: 'port'
   named_port_port: 80
+autoscaler:
+  name: 'inspec-gcp-autoscaler'
+  max_replicas: 5
+  min_replicas: 1
+  cooldown_period: 60
+  cpu_utilization_target: 0.5

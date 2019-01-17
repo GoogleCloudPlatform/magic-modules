@@ -1,0 +1,16 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" -%>
+<% autoscaler = grab_attributes['autoscaler'] -%>
+describe google_compute_autoscaler(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, zone: <%= doc_generation ? "#{gcp_zone}" : "gcp_zone" -%>, name: <%= doc_generation ? "'#{autoscaler['name']}'" : "autoscaler['name']" -%>) do
+  it { should exist }
+
+  its('target') { should match /\/<%= "#{grab_attributes['instance_group_manager']['name']}" -%>$/ }
+  its('autoscaling_policy.max_num_replicas') { should eq <%= doc_generation ? "'#{autoscaler['max_replicas']}'" : "autoscaler['max_replicas']" -%> }
+  its('autoscaling_policy.min_num_replicas') { should eq <%= doc_generation ? "'#{autoscaler['min_replicas']}'" : "autoscaler['min_replicas']" -%> }
+  its('autoscaling_policy.cool_down_period_sec') { should eq <%= doc_generation ? "'#{autoscaler['cooldown_period']}'" : "autoscaler['cooldown_period']" -%> }
+  its('autoscaling_policy.cpu_utilization.utilization_target') { should eq <%= doc_generation ? "'#{autoscaler['cpu_utilization_target']}'" : "autoscaler['cpu_utilization_target']" -%> }
+end
+
+describe google_compute_autoscaler(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, zone: <%= doc_generation ? "#{gcp_zone}" : "gcp_zone" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
