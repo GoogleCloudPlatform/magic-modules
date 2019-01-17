@@ -37,7 +37,7 @@ The following arguments are supported:
 * `name` - (Required) The CryptoKey's name.
     A CryptoKey’s name belonging to the specified Google Cloud Platform KeyRing and match the regular expression `[a-zA-Z0-9_-]{1,63}`
 
-* `key_ring` - (Required) The `self_link` of the Google Cloud Platform KeyRing to which the key shall belong.
+* `key_ring` - (Required) The `self_link` of the Google Cloud Platform KeyRing to which the key belongs.
 
 ## Attributes Reference
 
@@ -47,8 +47,6 @@ exported:
 * `rotation_period` - Every time this period passes, generate a new CryptoKeyVersion and set it as
     the primary. The first rotation will take place after the specified period. The rotation period has the format
     of a decimal number with up to 9 fractional digits, followed by the letter s (seconds).
-
-* `version_template` - A template describing settings for new crypto key versions. See [google_kms_crypto_key](https://www.terraform.io/docs/providres/google/r/google_kms_crypto_key.html) resource for more information.
 
 * `self_link` - The self link of the created CryptoKey. Its format is `projects/{projectId}/locations/{location}/keyRings/{keyRingName}/cryptoKeys/{cryptoKeyName}`.
 
