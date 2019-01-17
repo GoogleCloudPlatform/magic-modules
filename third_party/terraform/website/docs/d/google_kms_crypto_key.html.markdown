@@ -1,7 +1,7 @@
 ---
 layout: "google"
 page_title: "Google: google_kms_crypto_key"
-sidebar_current: "docs-google-kms-crypto-key-x"
+sidebar_current: "docs-google-datasource-kms-crypto-key"
 description: |-
  Provides access to KMS key data with Google Cloud KMS.
 ---
@@ -9,7 +9,7 @@ description: |-
 # google\_kms\_crypto\_key
 
 Provides access to a Google Cloud Platform KMS CryptoKey. For more information see
-[the official documentation](https://cloud.google.com/kms/docs/object-hierarchy#cryptokey)
+[the official documentation](https://cloud.google.com/kms/docs/object-hierarchy#key)
 and
 [API](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys).
 
@@ -37,7 +37,7 @@ The following arguments are supported:
 * `name` - (Required) The CryptoKey's name.
     A CryptoKey’s name belonging to the specified Google Cloud Platform KeyRing and match the regular expression `[a-zA-Z0-9_-]{1,63}`
 
-* `key_ring` - (Required) The id of the Google Cloud Platform KeyRing to which the key shall belong.
+* `key_ring` - (Required) The `self_link` of the Google Cloud Platform KeyRing to which the key shall belong.
 
 ## Attributes Reference
 

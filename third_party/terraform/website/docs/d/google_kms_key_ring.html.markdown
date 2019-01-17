@@ -1,7 +1,7 @@
 ---
 layout: "google"
 page_title: "Google: google_kms_key_ring"
-sidebar_current: "docs-google-kms-key-ring-x"
+sidebar_current: "docs-google-datasource-kms-key-ring"
 description: |-
  Provides access to KMS key ring data with Google Cloud KMS.
 ---
@@ -9,7 +9,7 @@ description: |-
 # google\_kms\_key\_ring
 
 Provides access to Google Cloud Platform KMS KeyRing. For more information see
-[the official documentation](https://cloud.google.com/kms/docs/object-hierarchy#keyring)
+[the official documentation](https://cloud.google.com/kms/docs/object-hierarchy#key_ring)
 and
 [API](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings).
 
