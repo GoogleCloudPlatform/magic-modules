@@ -281,7 +281,7 @@ module Provider
     end
 
     # Replaces Google module name within InSpec resources with GoogleInSpec
-    # to alleviate module namespace conflicts due to dependencies on 
+    # to alleviate module namespace conflicts due to dependencies on
     # Google SDKs
     def inspec_property_type(property)
       property.property_type.sub('Google::', 'GoogleInSpec::')
@@ -291,19 +291,17 @@ module Provider
     # This is used in several places that need to parse an arbitrary property
     # from a JSON representation
     def parse_code(property, hash_name)
-      if time?(property)
-        init = "parse_time_string(#{hash_name}['#{property.api_name}'])"
-      elsif primitive?(property)
-        if property.name_from_self_link
-          init = "name_from_self_link(#{hash_name}['#{property.api_name}'])"
-        else
-          init = "#{hash_name}['#{property.api_name}']"
-        end
+      return "parse_time_string(#{hash_name}['#{property.api_name}'])" if time?(property)
+
+      if primitive?(property)
+        return "name_from_self_link(#{hash_name}['#{property.api_name}'])" \
+          if property.name_from_self_link
+
+        return "#{hash_name}['#{property.api_name}']"
       elsif typed_array?(property)
-        init = "#{inspec_property_type(property)}.parse(#{hash_name}['#{property.api_name}'])"
-      else
-        init = "#{inspec_property_type(property)}.new(#{hash_name}['#{property.api_name}'])"    
+        return "#{inspec_property_type(property)}.parse(#{hash_name}['#{property.api_name}'])"
       end
+      "#{inspec_property_type(property)}.new(#{hash_name}['#{property.api_name}'])"
     end
   end
 end

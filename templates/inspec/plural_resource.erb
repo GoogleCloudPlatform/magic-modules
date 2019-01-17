@@ -29,7 +29,7 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   filter_table_config = FilterTable.create
 <% object.all_user_properties.each do |prop| -%>
 
-  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.name})" -%>
+  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>
 
 
@@ -79,6 +79,10 @@ link_query = object.self_link_query || object.collection_url_response
       next if response.nil? || !response.key?(wrap_path)
       response[wrap_path].each do |hash|
         hash_with_symbols = {}
+        hash.each_pair do |k, v|
+          name, value = transform(k, hash)
+          hash_with_symbols[name] = value
+        end
 <% if has_modified_api_name -%>
         hash.each_pair { |k, v| api_names.key?(k) ? hash_with_symbols[api_names[k].to_sym] = v : hash_with_symbols[k.to_sym] = v }
 <% else -%>
@@ -98,11 +102,22 @@ end -%>
     converted
   end
 
+  def transform(key, value)
+    return transformers[key].call(value) if transformers.key?(key)
+
+    return key.to_sym, value
+  end
+
   def transformers
     {
 <% object.all_user_properties.each do |prop| -%>
-      '<%= prop.out_name -%>' => ->(obj) { <%= "#{parse_code(prop, 'obj')}" -%> },
+      '<%= prop.api_name -%>' => ->(obj) { <%= "return :#{prop.out_name}, #{parse_code(prop, 'obj')}" -%> },
 <% end # object.all_user_properties.each -%>
     }
+  end
+
+  # Handles parsing RFC3339 time string
+  def parse_time_string(time_string)
+    time_string ? Time.parse(time_string) : nil
   end
 end
