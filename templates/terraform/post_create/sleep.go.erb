@@ -1,0 +1,3 @@
+// Spanner instances are, ironically, eventually consistent.
+// We ensure that the Read sees the instance as created by sleeping, briefly.
+time.Sleep(5 * time.Second)
