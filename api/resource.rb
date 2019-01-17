@@ -198,7 +198,7 @@ module Api
       (@parameters || []).reject(&:exclude)
     end
 
-    def below_version?(version)
+    def not_in_version?(version)
       version < min_version
     end
 
@@ -206,7 +206,7 @@ module Api
     # 'exclude' instance variable if the property is at a version below the
     # one that is passed in.
     def exclude_if_not_in_version!(version)
-      @exclude ||= below_version? version
+      @exclude ||= not_in_version? version
       @properties&.each { |p| p.exclude_if_not_in_version!(version) }
       @parameters&.each { |p| p.exclude_if_not_in_version!(version) }
 
