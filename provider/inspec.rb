@@ -281,7 +281,61 @@ module Provider
     end
 
     def inspec_property_type(property)
-      property.property_type.sub('Google::', 'GoogleInSpec::')
+      PropertyNamespace.property_type(property)
+    end
+
+    # Generates the namespace for a function call in the
+    # type system (ex. GoogleInspec::Property::String)
+    module PropertyNamespace
+      def property_type(property)
+        if property.is_a?(Api::Type::Primitive)
+          prefix(property).concat([property.type])
+        elsif property.is_a?(Api::Type::Fingerprint)
+          prefix(property).concat(['String'])
+        elsif property.is_a?(Api::Type::Array)
+          array_class(property)
+        end.join('::')
+      end
+
+      private
+
+      def prefix(property)
+        ['GoogleInspec', property.__resource.api_name.camelize(:upper), 'Property']
+      end
+
+      def array_class(property)
+        if property.item_type.is_a?(Api::Type::NestedObject)
+          type = nestedobject_class(property.item_type)
+        elsif property.item_type.is_a?(Api::Type::ResourceRef)
+          type = resourceref_class(property.item_type)
+        else
+          type = prefix(property).concat(Module.const_get(property.type).new(property.name).type)
+        end
+        type[-1] = "#{type[-1].camelize(:upper)}Array"
+        type
+      end
+
+      # TODO: evaluate if this is intended behavior
+      def enum_class(property)
+        if @default_value.nil?
+          prefix(property).concat(['Enum'])
+        else
+          camelized_name = property.name.camelize(:upper)
+          prefix(property).concat["#{camelized_name}Enum"]
+        end
+      end
+
+      def resourceref_class(property)
+        type = prefix(property).append([property.resource, property.imports, 'Ref'])
+        type[-1] = type[-1].join('_').camelize(:upper)
+        type
+      end
+
+      def nestedobject_class(property)
+        type = prefix(property).append([property.__resource.name, property.name])
+        type[-1] = type[-1].join('_').camelize(:upper)
+        type
+      end
     end
   end
 end

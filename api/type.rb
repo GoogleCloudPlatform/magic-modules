@@ -121,15 +121,6 @@ module Api
       self.class.name.split('::').last
     end
 
-    # This is only used in puppet and chef, and it is the name of the Ruby type
-    # which is meant to parse the value of the property.  Usually it is 'Enum'
-    # or 'Integer' or 'String', unless complex logic is needed.  If so, a
-    # class will be generated specific to that type (e.g. AddressAddressType),
-    # and this must return the fully qualified name of that class.
-    def property_type
-      property_ns_prefix.concat([type]).join('::')
-    end
-
     # This is only used in puppet and chef, and it is the string that must be
     # used in a 'require' statement in order to use this property.  This is
     # usually, e.g. 'google/compute/property/enum', but in the event that a
@@ -249,15 +240,6 @@ module Api
           'string'
         ).downcase
       end
-
-      def property_type
-        [
-          'Google',
-          @__resource.__product.api_name.camelize(:upper),
-          'Property',
-          'String'
-        ].join('::')
-      end
     end
 
     # Represents a timestamp
@@ -311,23 +293,6 @@ module Api
         get_type("Api::Type::#{@item_type}")
       end
 
-      def property_class
-        if @item_type.is_a?(NestedObject) || @item_type.is_a?(ResourceRef)
-          type = @item_type.property_class
-        elsif @item_type.is_a?(Enum)
-          raise 'aaaa'
-        else
-          type = property_ns_prefix
-          type << get_type(@item_type).new(@name).type
-        end
-        type[-1] = "#{type[-1].camelize(:upper)}Array"
-        type
-      end
-
-      def property_type
-        property_class.join('::')
-      end
-
       def property_file
         File.join(
           'google', @__resource.__product.api_name, 'property',
@@ -361,19 +326,6 @@ module Api
         # which can only be done in a unique enum class.  We only need a unique
         # enum class if the default value is non-nil.
         !@default_value.nil?
-      end
-
-      def property_type
-        # 'super' here means 'use the default Enum class', and
-        # the other branch means 'use a different unique Enum class'.  This
-        # doesn't do anything to actually generate the unique Enum class - that
-        # happens in overrides of provider's 'generate_enum_properties'.
-        if !generate_unique_enum_class
-          super
-        else
-          camelized_name = @name.camelize(:upper)
-          property_ns_prefix.concat(["#{camelized_name}Enum"]).join('::')
-        end
       end
 
       def requires
@@ -451,17 +403,6 @@ module Api
         resources[0]
       end
 
-      def property_class
-        type = property_ns_prefix
-        type << [@resource, @imports, 'Ref']
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
-      end
-
-      def property_type
-        property_class.join('::')
-      end
-
       def property_file
         File.join('google', @__resource.__product.api_name, 'property',
                   "#{resource}_#{@imports}").downcase
@@ -502,17 +443,6 @@ module Api
           p.set_variable(self, :__parent)
         end
         check :properties, type: ::Array, item_type: Api::Type, required: true
-      end
-
-      def property_class
-        type = property_ns_prefix
-        type << [@__resource.name, @name]
-        type[-1] = type[-1].join('_').camelize(:upper)
-        type
-      end
-
-      def property_type
-        property_class.join('::')
       end
 
       def property_file
