@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"strings"
-
 	"google.golang.org/api/googleapi"
 )
 
@@ -45,20 +43,6 @@ func TestSpannerInstanceId_parentProjectUri(t *testing.T) {
 	actual := id.parentProjectUri()
 	expected := "projects/project123"
 	expectEquals(t, expected, actual)
-}
-
-func expectInvalidSpannerInstanceImport(t *testing.T, sid *spannerInstanceId, e error) {
-	if sid != nil {
-		t.Errorf("Expected spannerInstanceId to be nil")
-		return
-	}
-	if e == nil {
-		t.Errorf("Expected an Error but did not get one")
-		return
-	}
-	if !strings.HasPrefix(e.Error(), "Invalid spanner instance specifier") {
-		t.Errorf("Expecting Error starting with 'Invalid spanner instance specifier'")
-	}
 }
 
 func expectEquals(t *testing.T, expected, actual string) {

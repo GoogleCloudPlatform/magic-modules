@@ -43,15 +43,18 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # This is appropriate for a datasource - doesn't have a create method.
     exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}/{{instance}}/{{name}}"
+    id_format: "{{project}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{name}}"
       - "{{project}}/{{name}}"
       - "{{name}}"
     properties:
+      displayName: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-_a-z0-9]{2,28}[a-z0-9])?)$'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
-          regex: '^(?:[a-z](?:[-_a-z0-9]{0,28}[a-z0-9])?)$'
+          regex: '^(?:[a-z](?:[-_a-z0-9]{4,28}[a-z0-9])?)$'
         # This resource supports a sort of odd autogenerate-if-not-set
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
