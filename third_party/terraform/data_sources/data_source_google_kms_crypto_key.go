@@ -24,16 +24,12 @@ func dataSourceGoogleKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) 
 		return err
 	}
 
-	cryptoKeyId := &kmsCryptoKeyId{
+	cryptoKeyId := kmsCryptoKeyId{
 		KeyRingId: *keyRingId,
 		Name:      d.Get("name").(string),
 	}
 
 	d.SetId(cryptoKeyId.cryptoKeyId())
 
-	err = resourceKmsCryptoKeyRead(d, meta)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resourceKmsCryptoKeyRead(d, meta)
 }

@@ -24,17 +24,12 @@ func dataSourceGoogleKmsKeyRingRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
-	keyRingId := &kmsKeyRingId{
+	keyRingId := kmsKeyRingId{
 		Name:     d.Get("name").(string),
 		Location: d.Get("location").(string),
 		Project:  project,
 	}
 	d.SetId(keyRingId.terraformId())
 
-	err = resourceKmsKeyRingRead(d, meta)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return resourceKmsKeyRingRead(d, meta)
 }
