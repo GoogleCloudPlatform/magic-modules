@@ -66,8 +66,8 @@ link_query = object.self_link_query || object.collection_url_response
       next if response.nil? || !response.key?(wrap_path)
       response[wrap_path].each do |hash|
         hash_with_symbols = {}
-        hash.each_pair do |k, v|
-          name, value = transform(k, hash)
+        hash.each_key do |key|
+          name, value = transform(key, hash)
           hash_with_symbols[name] = value
         end
 <% object.all_properties.each do |prop|
@@ -87,7 +87,7 @@ end -%>
   def transform(key, value)
     return transformers[key].call(value) if transformers.key?(key)
 
-    return key.to_sym, value
+    [key.to_sym, value]
   end
 
   def transformers
