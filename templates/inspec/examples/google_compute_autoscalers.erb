@@ -1,0 +1,14 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" -%>
+<% autoscaler = grab_attributes['autoscaler'] -%>
+autoscalers = google_compute_autoscalers(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, zone: <%= doc_generation ? "#{gcp_zone}" : "gcp_zone" -%>)
+describe.one do
+  autoscalers.autoscaling_policies.each do |autoscaling_policy|
+    describe autoscaling_policy do
+        its('max_num_replicas') { should eq <%= doc_generation ? "'#{autoscaler['max_replicas']}'" : "autoscaler['max_replicas']" -%> }
+        its('min_num_replicas') { should eq <%= doc_generation ? "'#{autoscaler['min_replicas']}'" : "autoscaler['min_replicas']" -%> }
+        its('cool_down_period_sec') { should eq <%= doc_generation ? "'#{autoscaler['cooldown_period']}'" : "autoscaler['cooldown_period']" -%> }
+        its('cpu_utilization.utilization_target') { should eq <%= doc_generation ? "'#{autoscaler['cpu_utilization_target']}'" : "autoscaler['cpu_utilization_target']" -%> }
+    end
+  end
+end
