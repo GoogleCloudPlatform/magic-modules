@@ -24,7 +24,7 @@
                       .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
                     .select { |o| !excludes.include?(o.name) }
-                    .select { |o| !o.exclude_if_not_in_version(version) }
+                    .select { |o| !o.exclude_if_not_in_version!(version) }
                     .map do |object|
                       ["gcp_#{object.__product.api_name}",
                        object.name.underscore].join('_')
