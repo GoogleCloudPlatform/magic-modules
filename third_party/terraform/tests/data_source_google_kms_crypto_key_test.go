@@ -5,24 +5,22 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
 func TestAccDataSourceGoogleKmsCryptoKey_basic(t *testing.T) {
-	projectId := "terraform-" + acctest.RandString(10)
+	kms := BootstrapKMSKey(t)
+	projectId := getTestProjectFromEnv()
 	projectOrg := getTestOrgFromEnv(t)
 	projectBillingAccount := getTestBillingAccountFromEnv(t)
-	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	cryptoKeyName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName),
-				Check:  resource.TestMatchResourceAttr("data.google_kms_crypto_key", "name", regexp.MustCompile(cryptoKeyName)),
+				Config: testAccDataSourceGoogleKmsCryptoKey_basic(projectId, projectOrg, projectBillingAccount, kms.KeyRing.Name, kms.CryptoKey.Name),
+				Check:  resource.TestMatchResourceAttr("data.google_kms_crypto_key", "name", regexp.MustCompile(kms.CryptoKey.Name)),
 			},
 		},
 	})
