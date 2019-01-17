@@ -156,7 +156,7 @@ module Api
       end
     end
 
-    def exclude_if_not_in_version(version)
+    def exclude_if_not_in_version!(version)
       @exclude ||= version < min_version
     end
 
@@ -344,9 +344,9 @@ module Api
         [property_file]
       end
 
-      def exclude_if_not_in_version(version)
+      def exclude_if_not_in_version!(version)
         super
-        @item_type.exclude_if_not_in_version(version) \
+        @item_type.exclude_if_not_in_version!(version) \
           if @item_type.is_a? NestedObject
       end
     end
@@ -536,9 +536,9 @@ module Api
         @properties.reject(&:exclude)
       end
 
-      def exclude_if_not_in_version(version)
+      def exclude_if_not_in_version!(version)
         super
-        @properties.each { |p| p.exclude_if_not_in_version(version) }
+        @properties.each { |p| p.exclude_if_not_in_version!(version) }
       end
     end
 

@@ -27,7 +27,7 @@ describe Api::Resource do
     context 'ga' do
       it do
         version = product.version_obj('ga')
-        subject.exclude_if_not_in_version(version)
+        subject.exclude_if_not_in_version!(version)
         is_expected.not_to(contain_property_with_name('beta-property'))
         is_expected.to(contain_property_with_name('property1'))
       end
@@ -36,7 +36,7 @@ describe Api::Resource do
     context 'beta' do
       it do
         version = product.version_obj('beta')
-        subject.exclude_if_not_in_version(version)
+        subject.exclude_if_not_in_version!(version)
         is_expected.to(contain_property_with_name('beta-property'))
         is_expected.to(contain_property_with_name('property1'))
       end

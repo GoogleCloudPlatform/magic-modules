@@ -188,9 +188,14 @@ module Provider
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && object.exclude_if_not_in_version(version)
+        elsif types.empty? && object.not_in_version?(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
+          Google::LOGGER.info "Generating #{object.name}"
+          # exclude_if_not_in_version must be called in order to filter out
+          # beta properties that are nested within GA resrouces
+          object.exclude_if_not_in_version!(version)
+
           # version_name will differ from version.name if the resource is being
           # generated at its default version instead of the one that was passed
           # in to the compiler. Terraform needs to know which version was passed
@@ -225,7 +230,7 @@ module Provider
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API catalog"
           )
-        elsif types.empty? && object.exclude_if_not_in_version(version)
+        elsif types.empty? && object.not_in_version?(version)
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API version"
           )
