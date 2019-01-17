@@ -12,21 +12,21 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::Overrides::ResourceOverrides
-  Job: !ruby/object:Provider::Overrides::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Job: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-      name: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/cloudscheduler_job_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      httpTarget.headers: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      httpTarget.headers: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
-      appEngineHttpTarget.headers: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      appEngineHttpTarget.headers: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/http_headers.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateHttpHeaders()'
-      region: !ruby/object:Provider::Overrides::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
 
         
