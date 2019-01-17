@@ -304,13 +304,13 @@ module Provider
       end
 
       def array_class(property)
-        if property.item_type.is_a?(Api::Type::NestedObject)
-          type = nestedobject_class(property.item_type)
-        elsif property.item_type.is_a?(Api::Type::ResourceRef)
-          type = resourceref_class(property.item_type)
-        else
-          type = prefix(property).concat(Module.const_get(property.type).new(property.name).type)
-        end
+        type = if property.item_type.is_a?(Api::Type::NestedObject)
+                 nestedobject_class(property.item_type)
+               elsif property.item_type.is_a?(Api::Type::ResourceRef)
+                 resourceref_class(property.item_type)
+               else
+                 prefix(property).concat(Module.const_get(property.type).new(property.name).type)
+               end
         type[-1] = "#{type[-1].camelize(:upper)}Array"
         type
       end
