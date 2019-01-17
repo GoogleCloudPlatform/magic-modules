@@ -519,13 +519,5 @@ module Api
     def get_type(type)
       Module.const_get(type)
     end
-
-    def property_ns_prefix
-      [
-        'Google',
-        @__resource.__product.api_name.camelize(:upper),
-        'Property'
-      ]
-    end
   end
 end
