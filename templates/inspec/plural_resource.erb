@@ -70,13 +70,6 @@ link_query = object.self_link_query || object.collection_url_response
           name, value = transform(key, hash)
           hash_with_symbols[name] = value
         end
-<% object.all_properties.each do |prop|
-	if prop.name_from_self_link
--%>
-        <%= "hash_with_symbols[:#{prop.out_name}] = name_from_self_link(hash_with_symbols[:#{prop.out_name}])" -%>
-
-<% end 
-end -%>
         converted.push(hash_with_symbols)
       end
     end
