@@ -1,33 +1,18 @@
 package google
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func dataSourceGoogleKmsKeyRing() *schema.Resource {
+	dsSchema := datasourceSchemaFromResourceSchema(resourceKmsKeyRing().Schema)
+	addRequiredFieldsToSchema(dsSchema, "name")
+	addRequiredFieldsToSchema(dsSchema, "location")
+	addOptionalFieldsToSchema(dsSchema, "project")
+
 	return &schema.Resource{
-		Read: dataSourceGoogleKmsKeyRingRead,
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"location": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"self_link": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
+		Read:   dataSourceGoogleKmsKeyRingRead,
+		Schema: dsSchema,
 	}
 }
 
@@ -44,17 +29,12 @@ func dataSourceGoogleKmsKeyRingRead(d *schema.ResourceData, meta interface{}) er
 		Location: d.Get("location").(string),
 		Project:  project,
 	}
-	log.Printf("[DEBUG] Executing read for KMS KeyRing %s", keyRingId.keyRingId())
+	d.SetId(keyRingId.terraformId())
 
-	keyRing, err := config.clientKms.Projects.Locations.KeyRings.Get(keyRingId.keyRingId()).Do()
-
+	err = resourceKmsKeyRingRead(d, meta)
 	if err != nil {
-		return fmt.Errorf("Error reading KeyRing: %s", err)
+		return err
 	}
-
-	d.SetId(keyRingId.keyRingId())
-	d.Set("project", project)
-	d.Set("self_link", keyRing.Name)
 
 	return nil
 }
