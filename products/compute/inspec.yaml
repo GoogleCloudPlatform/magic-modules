@@ -81,8 +81,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   TargetHttpsProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   TargetTcpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
