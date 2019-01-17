@@ -188,7 +188,7 @@ module Provider
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && object.is_below_version(version)
+        elsif types.empty? && object.below_version?(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
           Google::LOGGER.info "Generating #{object.name}"
@@ -230,7 +230,7 @@ module Provider
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API catalog"
           )
-        elsif types.empty? && object.exclude_if_not_in_version(version)
+        elsif types.empty? && object.below_version?(version)
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API version"
           )

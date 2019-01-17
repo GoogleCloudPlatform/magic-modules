@@ -202,15 +202,15 @@ module Api
       version < min_version
     end
 
-    # Recurses through all nested properties and paramters and changes their
+    # Recurses through all nested properties and parameters and changes their
     # 'exclude' instance variable if the property is at a version below the
     # one that is passed in.
     def exclude_if_not_in_version!(version)
-      @exclude ||= version < min_version
+      @exclude ||= below_version? version
       @properties&.each { |p| p.exclude_if_not_in_version!(version) }
       @parameters&.each { |p| p.exclude_if_not_in_version!(version) }
 
-      @exclude
+      nil
     end
 
     # Returns all properties and parameters including the ones that are
