@@ -2,15 +2,10 @@ package google
 
 import (
 	"fmt"
-	"net/http"
 	"testing"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-
-	"google.golang.org/api/googleapi"
 )
 
 // Unit Tests
@@ -129,44 +124,6 @@ func TestAccSpannerInstance_update(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckSpannerInstanceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_spanner_instance" {
-			continue
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("Unable to verify delete of spanner instance, ID is empty")
-		}
-
-		instanceName := rs.Primary.Attributes["name"]
-		project, err := getTestProject(rs.Primary, config)
-		if err != nil {
-			return err
-		}
-
-		id := spannerInstanceId{
-			Project:  project,
-			Instance: instanceName,
-		}
-		_, err = config.clientSpanner.Projects.Instances.Get(
-			id.instanceUri()).Do()
-
-		if err == nil {
-			return fmt.Errorf("Spanner instance still exists")
-		}
-
-		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == http.StatusNotFound {
-			return nil
-		}
-		return errwrap.Wrapf("Error verifying spanner instance deleted: {{err}}", err)
-	}
-
-	return nil
 }
 
 func testAccSpannerInstance_basic(name string) string {
