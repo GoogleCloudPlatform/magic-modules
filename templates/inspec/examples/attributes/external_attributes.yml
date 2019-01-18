@@ -4,3 +4,5 @@ gcp_compute_disk_name: 'my_disk'
 gcp_compute_disk_image: 'debian/debian-8-jessie-v20170523'
 gcp_compute_disk_type: 'pd-standard'
 gcp_lb_mig1_name: 'gcp-managed-group-name'
+gcp_ext_vm_name: 'gcp_ext_vm_name'
+gcp_location: europe-west2
