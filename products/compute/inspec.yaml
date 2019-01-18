@@ -83,11 +83,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
-      RSpec::Matchers.alias_matcher :has_target_instance, :be_has_target_instance
-
-      def has_target_instance?(name, zone)
-        instances.any? { |instance_self_link| instance_self_link.end_with?("zones/#{zone}/instances/#{name}") }
-      end
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_target_pool.rb'), 6)) -%>
   TargetTcpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
