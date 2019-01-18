@@ -26,6 +26,10 @@ variable "autoscaler" {
   type = "map"
 }
 
+variable "target_pool" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -96,4 +100,14 @@ resource "google_compute_autoscaler" "gcp-inspec-autoscaler" {
       target = "${var.autoscaler["cpu_utilization_target"]}"
     }
   }
+}
+
+resource "google_compute_target_pool" "gcp-inspec-target-pool" {
+  project = "${var.gcp_project_id}"
+  name = "${var.target_pool["name"]}"
+  session_affinity = "${var.target_pool["session_affinity"]}"
+  
+  instances = [
+    "${var.gcp_zone}/${var.gcp_ext_vm_name}",
+  ]
 }
