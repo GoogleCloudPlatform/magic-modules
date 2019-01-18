@@ -41,6 +41,7 @@ resources:
           repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
+          community_only: true
 
     - name: magic-modules-new-prs
       type: github-pull-request
