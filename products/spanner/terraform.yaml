@@ -53,15 +53,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "spanner_instance_basic"
         primary_resource_id: "example"
         version: <%= version_name %>
-    description: |
-      {{description}}
-
-      If not provided, a random string starting with `tf-` will be selected.
     properties:
       displayName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-zA-Z](?:[- _a-zA-Z0-9]{2,28}[a-zA-Z0-9])?)$'
       name: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+
+          If not provided, a random string starting with `tf-` will be selected.
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-_a-z0-9]{4,28}[a-z0-9])?)$'
         # This resource supports a sort of odd autogenerate-if-not-set
