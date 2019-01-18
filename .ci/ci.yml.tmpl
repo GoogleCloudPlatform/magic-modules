@@ -98,10 +98,29 @@ resources:
         token: ((github-account.password))
 
 jobs:
+    - name: respond-to-community-pr
+      plan:
+          - get: magic-modules-external-prs
+            trigger: true
+          - get: magic-modules-gcp
+            # NOTE: we do NOT run a script from the external PR!
+          - task: write-welcome-message
+            file: magic-modules-gcp/.ci/magic-modules/welcome-contributor.yml
+          - put: magic-modules-external-prs
+            params:
+                status: pending
+                path: magic-modules-external-prs
+                label: community
+                comment: comment/pr_comment
+                assignee_file: comment/assignee
+            get_params:
+                skip_clone: true
+
     - name: authorize-single-rev
       plan:
           - get: magic-modules-external-prs
             trigger: false
+            passed: [respond-to-community-pr]
           - put: magic-modules-new-prs
             params:
                 status: pending
