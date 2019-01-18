@@ -117,7 +117,7 @@ objects:
           Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
       - !ruby/object:Api::Type::Enum
         name: 'state'
-        description: An explanation of the status of the instance.
+        description: Instance status: `CREATING` or `READY`.
         output: true
         # This attribute is not useful - we include it in Terraform for historical
         # reasons, but you should most likely not use it.
