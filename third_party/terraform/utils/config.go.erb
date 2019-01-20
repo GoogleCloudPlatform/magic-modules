@@ -21,7 +21,6 @@ import (
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudbuild/v1"
 	"google.golang.org/api/cloudfunctions/v1"
-	"google.golang.org/api/cloudscheduler/v1beta1"
 	"google.golang.org/api/cloudiot/v1"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -99,7 +98,6 @@ type Config struct {
 	clientServiceUsage           *serviceusage.Service
 	clientBigQuery               *bigquery.Service
 	clientCloudFunctions         *cloudfunctions.Service
-	clientCloudScheduler         *cloudscheduler.Service
 	clientCloudIoT               *cloudiot.Service
 	clientAppEngine              *appengine.APIService
 	<% unless version == 'ga' -%>
@@ -303,12 +301,6 @@ func (c *Config) loadAndValidate() error {
 		return err
 	}
 	c.clientCloudFunctions.UserAgent = userAgent
-
-	log.Printf("[INFO] Instantiating Google Cloud Scheduler Client...")
- 	c.clientCloudScheduler, err = cloudscheduler.New(client)
- 	if err != nil {
- 		return err
- 	}
 
 	<% unless version == 'ga' -%>
 	log.Printf("[INFO] Instantiating Google Cloud AccessContextManager Client...")

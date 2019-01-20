@@ -2,10 +2,12 @@ package google
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 )
 
@@ -24,7 +26,6 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 			{
 				Config: testAccCloudSchedulerJob_pubSubConfig(pubSubJobName, project),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCloudSchedulerJobExists(jobResourceName),
 					resource.TestCheckResourceAttr(jobResourceName, "name", pubSubJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/2 * * * *"),
@@ -49,7 +50,6 @@ func TestAccCloudSchedulerJob_http(t *testing.T) {
 			{
 				Config: testAccCloudSchedulerJob_httpConfig(httpJobName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCloudSchedulerJobExists(jobResourceName),
 					resource.TestCheckResourceAttr(jobResourceName, "name", httpJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test http job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/8 * * * *"),
@@ -74,7 +74,6 @@ func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 			{
 				Config: testAccCloudSchedulerJob_appEngineConfig(appEngineJobName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCloudSchedulerJobExists(jobResourceName),
 					resource.TestCheckResourceAttr(jobResourceName, "name", appEngineJobName),
 					resource.TestCheckResourceAttr(jobResourceName, "description", "test app engine job"),
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/4 * * * *"),
@@ -85,48 +84,23 @@ func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 	})
 }
 
-func testAccCloudSchedulerJobExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-		config := testAccProvider.Meta().(*Config)
-		name := rs.Primary.Attributes["name"]
-		project := rs.Primary.Attributes["project"]
-		region := getTestRegionFromEnv()
-		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
-		_, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
-		if err != nil {
-			return fmt.Errorf(fmt.Sprintf("CloudScheduler Job not present %s %s %s", project, region, name))
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckCloudSchedulerJobDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "google_cloud_scheduler_job" {
 			continue
 		}
 
-		name := rs.Primary.Attributes["name"]
-		project := rs.Primary.Attributes["project"]
-		region := getTestRegionFromEnv()
-		jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", project, region, name)
+		config := testAccProvider.Meta().(*Config)
 
-		_, err := config.clientCloudScheduler.Projects.Locations.Jobs.Get(jobName).Do()
-		if err == nil {
-			return fmt.Errorf("Function still exists")
+		url, err := replaceVarsForTest(rs, "https://cloudscheduler.googleapis.com/v1beta1/projects/{{project}}/locations/{{region}}/jobs/{{name}}")
+		if err != nil {
+			return err
 		}
 
+		_, err = sendRequest(config, "GET", url, nil)
+		if err == nil {
+			return fmt.Errorf("Function still exists at %s", url)
+		}
 	}
 
 	return nil
@@ -192,4 +166,91 @@ resource "google_cloud_scheduler_job" "job" {
 }
 
 	`, name)
+}
+
+func TestFlattenHttpHeaders(t *testing.T) {
+
+	cases := []struct {
+		Input  map[string]interface{}
+		Output map[string]interface{}
+	}{
+		// simple, no headers included
+		{
+			Input: map[string]interface{}{
+				"My-Header": "my-header-value",
+			},
+			Output: map[string]interface{}{
+				"My-Header": "my-header-value",
+			},
+		},
+
+		// include the User-Agent header value Google-Cloud-Scheduler
+		// Tests Removing User-Agent header
+		{
+			Input: map[string]interface{}{
+				"User-Agent": "Google-Cloud-Scheduler",
+				"My-Header":  "my-header-value",
+			},
+			Output: map[string]interface{}{
+				"My-Header": "my-header-value",
+			},
+		},
+
+		// include the User-Agent header
+		// Tests removing value AppEngine-Google; (+http://code.google.com/appengine)
+		{
+			Input: map[string]interface{}{
+				"User-Agent": "My-User-Agent AppEngine-Google; (+http://code.google.com/appengine)",
+				"My-Header":  "my-header-value",
+			},
+			Output: map[string]interface{}{
+				"User-Agent": "My-User-Agent",
+				"My-Header":  "my-header-value",
+			},
+		},
+
+		// include the Content-Type header value application/octet-stream.
+		// Tests Removing Content-Type header
+		{
+			Input: map[string]interface{}{
+				"Content-Type": "application/octet-stream",
+				"My-Header":    "my-header-value",
+			},
+			Output: map[string]interface{}{
+				"My-Header": "my-header-value",
+			},
+		},
+
+		// include the Content-Length header
+		// Tests Removing Content-Length header
+		{
+			Input: map[string]interface{}{
+				"Content-Length": 7,
+				"My-Header":      "my-header-value",
+			},
+			Output: map[string]interface{}{
+				"My-Header": "my-header-value",
+			},
+		},
+
+		// include the X-Google- header
+		// Tests Removing X-Google- header
+		{
+			Input: map[string]interface{}{
+				"X-Google-My-Header": "x-google-my-header-value",
+				"My-Header":          "my-header-value",
+			},
+			Output: map[string]interface{}{
+				"My-Header": "my-header-value",
+			},
+		},
+	}
+
+	for _, c := range cases {
+		d := &schema.ResourceData{}
+		output := flattenCloudSchedulerJobAppEngineHttpTargetHeaders(c.Input, d)
+		if !reflect.DeepEqual(output, c.Output) {
+			t.Fatalf("Error matching output and expected: %#v vs %#v", output, c.Output)
+		}
+	}
 }
