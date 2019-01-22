@@ -1,0 +1,19 @@
+project, err := getProject(d, meta.(*Config))
+if err != nil {
+	return nil, err
+}
+obj["name"] = fmt.Sprintf("projects/%s/instances/%s", project, obj["name"])
+newObj := make(map[string]interface{})
+newObj["instance"] = obj
+updateMask := make([]string, 0)
+if d.HasChange("num_nodes") {
+	updateMask = append(updateMask, "nodeCount")
+}
+if d.HasChange("display_name") {
+	updateMask = append(updateMask, "displayName")
+}
+if d.HasChange("labels") {
+	updateMask = append(updateMask, "labels")
+}
+newObj["fieldMask"] = strings.Join(updateMask, ",")
+return newObj, nil
