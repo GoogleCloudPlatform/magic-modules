@@ -41,3 +41,9 @@ autoscaler:
 target_pool:
   name: 'inspec-gcp-target-pool'
   session_affinity: CLIENT_IP
+
+trigger:
+  trigger_template_project: trigger-project
+  trigger_template_branch: trigger-branch
+  trigger_template_repo: trigger-repo
+  filename: cloudbuild.yaml

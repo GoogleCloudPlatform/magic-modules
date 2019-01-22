@@ -593,7 +593,7 @@ module Api
     def property_ns_prefix
       [
         'Google',
-        @__resource.__product.api_name.camelize(:upper),
+        @__resource.__product.name.camelize(:upper),
         'Property'
       ]
     end
