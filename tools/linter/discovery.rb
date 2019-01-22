@@ -109,7 +109,7 @@ module Discovery
         resource = resource.sub('Global', '')
         Resource.new(@results['schemas'][resource], resource, self)
       else
-        puts "#{original_resource} not found - #{@url}"
+        puts "#{original_resource} from api.yaml not found in discovery docs - #{@url}"
       end
     end
 
@@ -134,7 +134,7 @@ module Discovery
       if @results['resources'].keys == ['projects']
         @resources_in_api_yaml
       else
-        @results['resources'].keys
+        @results['resources'].keys.reject { |o| o.downcase.include?('operation') }
       end
     end
   end
