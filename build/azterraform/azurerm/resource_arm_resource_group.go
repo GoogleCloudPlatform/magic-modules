@@ -17,11 +17,12 @@ package azurerm
 
 
 
+
 func resourceArmResourceGroup() *schema.Resource {
     return &schema.Resource{
-        Create: resourceArmResourceGroupCreateOrUpdate,
+        Create: resourceArmResourceGroupCreateUpdate,
         Read: resourceArmResourceGroupRead,
-        Update: resourceArmResourceGroupCreateOrUpdate,
+        Update: resourceArmResourceGroupCreateUpdate,
         Delete: resourceArmResourceGroupDelete,
 
         Importer: &schema.ResourceImporter{
@@ -37,7 +38,7 @@ func resourceArmResourceGroup() *schema.Resource {
     }
 }
 
-func resourceArmResourceGroupCreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceArmResourceGroupCreateUpdate(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).resourceGroupsClient
     ctx := meta.(*ArmClient).StopContext
 
@@ -96,6 +97,7 @@ func resourceArmResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
 
     return nil
 }
+
 
 func resourceArmResourceGroupDelete(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).resourceGroupsClient

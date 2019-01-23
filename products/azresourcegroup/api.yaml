@@ -14,8 +14,9 @@ objects:
     name: 'ResourceGroup'
     api_name: ResourceGroups
     base_url: NotUsedInAzure
-    azure_create_or_update_verb: CreateOrUpdate
-    azure_get_verb: Get
+    azure_create_verb: CreateOrUpdate
+    azure_update_verb: CreateOrUpdate
+    azure_read_verb: Get
     azure_delete_verb: Delete
     azure_delete_async: true
     azure_parameters_type: ResourceGroup

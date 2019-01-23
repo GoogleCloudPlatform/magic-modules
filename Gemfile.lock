@@ -61,6 +61,7 @@ GEM
 
 PLATFORMS
   ruby
+  x64-mingw32
 
 DEPENDENCIES
   activesupport
@@ -73,4 +74,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   1.16.5
+   1.17.1

@@ -40,12 +40,18 @@ package azurerm
     azure_client_name = "#{object.api_name}Client".camelcase(:lower)
 -%>
 
+<%
+    combine_create_update = (object.azure_create_verb == object.azure_update_verb)
+    create_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Create")
+    update_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Update")
+-%>
+
 func resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
-        Create: resource<%= resource_name -%>CreateOrUpdate,
+        Create: resource<%= resource_name -%><%= create_func_name_postfix -%>,
         Read: resource<%= resource_name -%>Read,
 <%      if updatable?(object, properties) -%>
-        Update: resource<%= resource_name -%>CreateOrUpdate,
+        Update: resource<%= resource_name -%><%= update_func_name_postfix -%>,
 <%      end -%>
         Delete: resource<%= resource_name -%>Delete,
 <%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
@@ -105,7 +111,7 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 }
 <% end -%>
 
-func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta interface{}) error {
+func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= azure_client_name -%>
 
     ctx := meta.(*ArmClient).StopContext
@@ -143,7 +149,7 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
 <%  end -%>
 
 <%  unless object.azure_create_async -%>
-    if _, err := client.<%= object.azure_create_or_update_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters); err != nil {
+    if _, err := client.<%= object.azure_create_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters); err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %+v", err)
     }
 <%  else -%>
@@ -152,7 +158,7 @@ func resource<%= resource_name -%>CreateOrUpdate(d *schema.ResourceData, meta in
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    resp, err := client.<%= object.azure_get_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    resp, err := client.<%= object.azure_read_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         return err
     }
@@ -177,7 +183,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     // TODO: Get name out
 <%  end -%>
 
-    resp, err := client.<%= object.azure_get_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    resp, err := client.<%= object.azure_read_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] <%= object.name -%> %q does not exist - removing from state", d.Id())
@@ -210,6 +216,12 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
     return nil
 }
+
+<%  if !combine_create_update -%>
+func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
+    // TODO: Complete Update Function
+}
+<%  end -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= azure_client_name -%>
