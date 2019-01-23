@@ -15,15 +15,16 @@
 package azurerm
 
 import (
-	"fmt"
-	"testing"
+  "fmt"
+  "testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-	"github.com/hashicorp/terraform/helper/resource"
+  "github.com/hashicorp/terraform/helper/acctest"
+  "github.com/hashicorp/terraform/helper/resource"
 )
 
+
 func TestAccArmResourceGroup_resourceGroupExample(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -43,7 +44,7 @@ func TestAccArmResourceGroup_resourceGroupExample(t *testing.T) {
 }
 
 func testAccArmResourceGroup_resourceGroupExample(val string) string {
-	return fmt.Sprintf(`
+  return fmt.Sprintf(`
 resource "azurerm_resource_group" "example" {
   name     = "ExampleRG-%s"
   location = "West US"
@@ -53,8 +54,9 @@ resource "azurerm_resource_group" "example" {
   }
 }
 `, val,
-	)
+  )
 }
+
 
 func testAccCheckArmResourceGroupDestroy(s *terraform.State) error {
 	for _, rs := range s.RootModule().Resources {
@@ -62,15 +64,15 @@ func testAccCheckArmResourceGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		config := testAccProvider.Meta().(*Config)
+	config := testAccProvider.Meta().(*Config)
 
-		url, err := replaceVarsForTest(rs, "NotUsedInAzureNotUsedInAzure/{{name}}")
-		if err != nil {
-			return err
-		}
+	url, err := replaceVarsForTest(rs, "NotUsedInAzureNotUsedInAzure/{{name}}")
+	if err != nil {
+		return err
+	}
 
-		_, err = sendRequest(config, "GET", url, nil)
-		if err == nil {
+	_, err = sendRequest(config, "GET", url, nil)
+	if err == nil {
 			return fmt.Errorf("ArmResourceGroup still exists at %s", url)
 		}
 	}
