@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -9,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"google.golang.org/api/cloudkms/v1"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 func TestAccKmsSecret_basic(t *testing.T) {
@@ -71,19 +72,19 @@ func testAccEncryptSecretDataWithCryptoKey(s *terraform.State, cryptoKeyResource
 		return "", nil, err
 	}
 
-	kmsEncryptRequest := &cloudkms.EncryptRequest{
-		Plaintext: base64.StdEncoding.EncodeToString([]byte(plaintext)),
-	}
-
-	encryptResponse, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Encrypt(cryptoKeyId.cryptoKeyId(), kmsEncryptRequest).Do()
+	ctx := context.Background()
+	encryptResp, err := config.clientKms.Encrypt(ctx, &kmspb.EncryptRequest{
+		Name:      cryptoKeyId.cryptoKeyId(),
+		Plaintext: []byte(plaintext),
+	})
 
 	if err != nil {
 		return "", nil, fmt.Errorf("Error encrypting plaintext: %s", err)
 	}
 
-	log.Printf("[INFO] Successfully encrypted plaintext and got ciphertext: %s", encryptResponse.Ciphertext)
+	log.Printf("[INFO] Successfully encrypted plaintext and got ciphertext: %s", encryptResp.Ciphertext)
 
-	return encryptResponse.Ciphertext, cryptoKeyId, nil
+	return base64.StdEncoding.EncodeToString(encryptResp.Ciphertext), cryptoKeyId, nil
 }
 
 func testGoogleKmsSecret_datasource(cryptoKeyTerraformId, ciphertext string) string {

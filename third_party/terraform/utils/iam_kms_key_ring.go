@@ -1,12 +1,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 
+	"cloud.google.com/go/iam"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
-	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/grpc/metadata"
 )
 
 var IamKmsKeyRingSchema = map[string]*schema.Schema{
@@ -19,6 +22,7 @@ var IamKmsKeyRingSchema = map[string]*schema.Schema{
 
 type KmsKeyRingIamUpdater struct {
 	resourceId string
+	iamHandle  *iam.Handle
 	Config     *Config
 }
 
@@ -32,7 +36,10 @@ func NewKmsKeyRingIamUpdater(d *schema.ResourceData, config *Config) (ResourceIa
 
 	return &KmsKeyRingIamUpdater{
 		resourceId: keyRingId.keyRingId(),
-		Config:     config,
+		iamHandle: config.clientKms.KeyRingIAM(&kmspb.KeyRing{
+			Name: keyRingId.keyRingId(),
+		}),
+		Config: config,
 	}, nil
 }
 
@@ -48,14 +55,14 @@ func KeyRingIdParseFunc(d *schema.ResourceData, config *Config) error {
 }
 
 func (u *KmsKeyRingIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	p, err := u.Config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(u.resourceId).Do()
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(),
+		"x-goog-request-params", fmt.Sprintf("name=%v", u.resourceId))
+	p, err := u.iamHandle.Policy(ctx)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
 	cloudResourcePolicy, err := kmsToResourceManagerPolicy(p)
-
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -65,16 +72,13 @@ func (u *KmsKeyRingIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Pol
 
 func (u *KmsKeyRingIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	kmsPolicy, err := resourceManagerToKmsPolicy(policy)
-
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	_, err = u.Config.clientKms.Projects.Locations.KeyRings.SetIamPolicy(u.resourceId, &cloudkms.SetIamPolicyRequest{
-		Policy: kmsPolicy,
-	}).Do()
-
-	if err != nil {
+	ctx := metadata.AppendToOutgoingContext(context.Background(),
+		"x-goog-request-params", fmt.Sprintf("name=%v", u.resourceId))
+	if err := u.iamHandle.SetPolicy(ctx, kmsPolicy); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
@@ -93,20 +97,18 @@ func (u *KmsKeyRingIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("KMS KeyRing %q", u.resourceId)
 }
 
-func resourceManagerToKmsPolicy(p *cloudresourcemanager.Policy) (*cloudkms.Policy, error) {
-	out := &cloudkms.Policy{}
-	err := Convert(p, out)
-	if err != nil {
+func resourceManagerToKmsPolicy(p *cloudresourcemanager.Policy) (*iam.Policy, error) {
+	var out iam.Policy
+	if err := Convert(p, out); err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a kms policy: {{err}}", err)
 	}
-	return out, nil
+	return &out, nil
 }
 
-func kmsToResourceManagerPolicy(p *cloudkms.Policy) (*cloudresourcemanager.Policy, error) {
-	out := &cloudresourcemanager.Policy{}
-	err := Convert(p, out)
-	if err != nil {
+func kmsToResourceManagerPolicy(p *iam.Policy) (*cloudresourcemanager.Policy, error) {
+	var out cloudresourcemanager.Policy
+	if err := Convert(p, out); err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a kms policy to a v1 policy: {{err}}", err)
 	}
-	return out, nil
+	return &out, nil
 }

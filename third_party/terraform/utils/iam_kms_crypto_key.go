@@ -1,12 +1,15 @@
 package google
 
 import (
+	"context"
 	"fmt"
 
+	"cloud.google.com/go/iam"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
-	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/grpc/metadata"
 )
 
 var IamKmsCryptoKeySchema = map[string]*schema.Schema{
@@ -19,6 +22,7 @@ var IamKmsCryptoKeySchema = map[string]*schema.Schema{
 
 type KmsCryptoKeyIamUpdater struct {
 	resourceId string
+	iamHandle  *iam.Handle
 	Config     *Config
 }
 
@@ -32,7 +36,10 @@ func NewKmsCryptoKeyIamUpdater(d *schema.ResourceData, config *Config) (Resource
 
 	return &KmsCryptoKeyIamUpdater{
 		resourceId: cryptoKeyId.cryptoKeyId(),
-		Config:     config,
+		iamHandle: config.clientKms.CryptoKeyIAM(&kmspb.CryptoKey{
+			Name: cryptoKeyId.cryptoKeyId(),
+		}),
+		Config: config,
 	}, nil
 }
 
@@ -47,14 +54,14 @@ func CryptoIdParseFunc(d *schema.ResourceData, config *Config) error {
 }
 
 func (u *KmsCryptoKeyIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	p, err := u.Config.clientKms.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(u.resourceId).Do()
-
+	ctx := metadata.AppendToOutgoingContext(context.Background(),
+		"x-goog-request-params", fmt.Sprintf("name=%v", u.resourceId))
+	p, err := u.iamHandle.Policy(ctx)
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
 	cloudResourcePolicy, err := kmsToResourceManagerPolicy(p)
-
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
@@ -64,16 +71,13 @@ func (u *KmsCryptoKeyIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.P
 
 func (u *KmsCryptoKeyIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
 	kmsPolicy, err := resourceManagerToKmsPolicy(policy)
-
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	_, err = u.Config.clientKms.Projects.Locations.KeyRings.CryptoKeys.SetIamPolicy(u.resourceId, &cloudkms.SetIamPolicyRequest{
-		Policy: kmsPolicy,
-	}).Do()
-
-	if err != nil {
+	ctx := metadata.AppendToOutgoingContext(context.Background(),
+		"x-goog-request-params", fmt.Sprintf("name=%v", u.resourceId))
+	if err := u.iamHandle.SetPolicy(ctx, kmsPolicy); err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 

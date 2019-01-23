@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -8,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"google.golang.org/api/iterator"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 func TestCryptoKeyIdParsing(t *testing.T) {
@@ -78,34 +81,18 @@ func TestCryptoKeyNextRotationCalculation(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now().UTC()
-	period, _ := time.ParseDuration("1000000s")
 
-	expected := now.Add(period).Format(time.RFC3339Nano)
-
-	timestamp, err := kmsCryptoKeyNextRotation(now, "1000000s")
-
+	rotationPeriod, timestamp, err := kmsCryptoKeyNextRotation("1000000s", now)
 	if err != nil {
-		t.Fatalf("unexpected failure parsing time %s and duration 1000s: %s", now, err.Error())
+		t.Fatal(err)
 	}
 
-	if expected != timestamp {
-		t.Fatalf("expected %s to equal %s", timestamp, expected)
-	}
-}
-
-func TestCryptoKeyNextRotationCalculation_validation(t *testing.T) {
-	t.Parallel()
-
-	_, errs := validateKmsCryptoKeyRotationPeriod("86399s", "rotation_period")
-
-	if len(errs) == 0 {
-		t.Fatalf("Periods of less than a day should be invalid")
+	if act, exp := rotationPeriod.RotationPeriod.Seconds, int64(1000000); act != exp {
+		t.Errorf("expected %d to be %d", act, exp)
 	}
 
-	_, errs = validateKmsCryptoKeyRotationPeriod("100000.0000000001s", "rotation_period")
-
-	if len(errs) == 0 {
-		t.Fatalf("Numbers with more than 9 fractional digits are invalid")
+	if act, exp := timestamp.Seconds, now.Add(1000000*time.Second).Unix(); act != exp {
+		t.Errorf("expected %d to be %d", act, exp)
 	}
 }
 
@@ -221,17 +208,24 @@ func testAccCheckGoogleKmsCryptoKeyVersionsDestroyed(projectId, location, keyRin
 		config := testAccProvider.Meta().(*Config)
 		gcpResourceUri := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectId, location, keyRingName, cryptoKeyName)
 
-		response, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(gcpResourceUri).Do()
+		ctx := context.Background()
+		it := config.clientKms.ListCryptoKeyVersions(ctx, &kmspb.ListCryptoKeyVersionsRequest{
+			Parent: gcpResourceUri,
+		})
 
-		if err != nil {
-			return fmt.Errorf("Unexpected failure to list versions: %s", err)
-		}
+		for {
+			ckv, err := it.Next()
+			if err != nil {
+				if err == iterator.Done {
+					break
+				}
+				return fmt.Errorf("Failed to list crypto key versions: %s", err)
+			}
 
-		versions := response.CryptoKeyVersions
-
-		for _, v := range versions {
-			if v.State != "DESTROY_SCHEDULED" && v.State != "DESTROYED" {
-				return fmt.Errorf("CryptoKey %s should have no versions, but version %s has state %s", cryptoKeyName, v.Name, v.State)
+			if ckv.State != kmspb.CryptoKeyVersion_DESTROYED &&
+				ckv.State != kmspb.CryptoKeyVersion_DESTROY_SCHEDULED {
+				return fmt.Errorf("CryptoKey %s should have no versions, but version %s has state %s",
+					cryptoKeyName, ckv.Name, ckv.State)
 			}
 		}
 
@@ -271,8 +265,8 @@ resource "google_kms_crypto_key" "crypto_key" {
 	key_ring        = "${google_kms_key_ring.key_ring.self_link}"
 	rotation_period = "1000000s"
 	version_template {
-		algorithm =        "GOOGLE_SYMMETRIC_ENCRYPTION"
-		protection_level = "SOFTWARE"
+		algorithm =        "symmetric_encryption"
+		protection_level = "software"
 	}
 }
 	`, projectId, projectId, projectOrg, projectBillingAccount, keyRingName, cryptoKeyName)

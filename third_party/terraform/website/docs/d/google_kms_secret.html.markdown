@@ -81,10 +81,12 @@ This will result in a Cloud SQL user being created with password `my-secret-pass
 
 The following arguments are supported:
 
-* `ciphertext` (Required) - The ciphertext to be decrypted, encoded in base64
+* `ciphertext` (Required) - Base64 encoded ciphertext to be decrypted
 * `crypto_key` (Required) - The id of the CryptoKey that will be used to
   decrypt the provided ciphertext. This is represented by the format
   `{projectId}/{location}/{keyRingName}/{cryptoKeyName}`.
+* `additional_authenticated_data` (Optional) - Base64-encded additional
+  authenticated data that was supplied during encryption.
 
 ## Attributes Reference
 

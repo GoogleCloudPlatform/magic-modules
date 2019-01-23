@@ -55,10 +55,22 @@ The following arguments are supported:
 
 - - -
 
-* `rotation_period` - (Optional) Every time this period passes, generate a new CryptoKeyVersion and set it as
-    the primary. The first rotation will take place after the specified period. The rotation period has the format
-    of a decimal number with up to 9 fractional digits, followed by the letter s (seconds). It must be greater than
-    a day (ie, 86400).
+* `rotation_period` - (Optional) Every time this period passes, generate a new
+  CryptoKeyVersion and set it as the primary. The first rotation will take place
+  after the specified period. The rotation period has the format of a time
+  duration with a suffix (e.g. 72h32m or 5s). This value must be greater than 24
+  hours.
+
+* `purpose` - (Optional) Purpose of the crypto key. The default value is
+  "encrypt_decrypt". Possible values include:
+
+  * `asymmetric_decrypt`
+  * `asymmetric_sign`
+  * `encrypt_decrypt`
+
+  Please see the [Cloud KMS crypto key
+  purpose reference](https://cloud.google.com/kms/docs/reference/rpc/google.cloud.kms.v1#google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose)
+  documentation for the latest available options.
 
 * `version_template` - (Optional) A template describing settings for new crypto key versions. Structure is documented below.
 
@@ -66,17 +78,45 @@ The following arguments are supported:
 
 The `version_template` block supports:
 
-* `algorithm` - (Required)  The algorithm to use when creating a version based on this template.
-See the [algorithm reference](https://cloud.google.com/kms/docs/reference/rest/v1/CryptoKeyVersionAlgorithm)
-for possible inputs.
+* `algorithm` - (Required)  The algorithm to use when creating a version based
+  on this template. Possible values include:
 
-* `protection_level` - (Optional) The protection level to use when creating a version based on this template.
-One of `SOFTWARE`, or `HSM`.
+  * `symmetric_encryption`
+  * `rsa_sign_pss_2048_sha256`
+  * `rsa_sign_pss_3072_sha256`
+  * `rsa_sign_pss_4096_sha256`
+  * `rsa_sign_pkcs1_2048_sha256`
+  * `rsa_sign_pkcs1_3072_sha256`
+  * `rsa_sign_pkcs1_4096_sha256`
+  * `rsa_decrypt_oaep_2048_sha256`
+  * `rsa_decrypt_oaep_3072_sha256`
+  * `rsa_decrypt_oaep_4096_sha256`
+  * `ec_sign_p256_sha256`
+  * `ec_sign_p384_sha384`
+
+  Please see the [Cloud KMS crypto key algorithm reference](https://cloud.google.com/kms/docs/reference/rpc/google.cloud.kms.v1#google.cloud.kms.v1.CryptoKeyVersion.CryptoKeyVersionAlgorithm)
+  for the latest available options.
+
+* `protection_level` - (Optional) The protection level to use when creating a
+  version based on this template. Possible values include:
+
+  * `hsm`
+  * `software`
+
+  Please see the [Cloud KMS crypto key purpose reference](https://cloud.google.com/kms/docs/reference/rpc/google.cloud.kms.v1#google.cloud.kms.v1.ProtectionLevel)
+  for the latest available options.
+
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `next_rotation_rfc3339` - The next time the crypto key will be rotated, in RFC3339 format.
+
+* `next_rotation_seconds` - The next time the crypto key will be rotated, in Unix epoch seconds.
+
+* `rotation_period_seconds` - The rotation period, converted to complete seconds as an integer.
 
 * `self_link` - The self link of the created CryptoKey. Its format is `projects/{projectId}/locations/{location}/keyRings/{keyRingName}/cryptoKeys/{cryptoKeyName}`.
 

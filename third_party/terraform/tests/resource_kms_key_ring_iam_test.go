@@ -1,14 +1,17 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
 	"testing"
 
+	"cloud.google.com/go/iam"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 const DEFAULT_KMS_TEST_LOCATION = "us-central1"
@@ -140,25 +143,24 @@ func TestAccKmsKeyRingIamPolicy(t *testing.T) {
 func testAccCheckGoogleKmsKeyRingIam(keyRingId, role string, members []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		p, err := config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(keyRingId).Do()
+		ctx := context.Background()
+
+		p, err := config.clientKms.KeyRingIAM(&kmspb.KeyRing{
+			Name: keyRingId,
+		}).Policy(ctx)
 		if err != nil {
 			return err
 		}
 
-		for _, binding := range p.Bindings {
-			if binding.Role == role {
-				sort.Strings(members)
-				sort.Strings(binding.Members)
+		bindingMembers := p.Members(iam.RoleName(role))
+		sort.Strings(members)
+		sort.Strings(bindingMembers)
 
-				if reflect.DeepEqual(members, binding.Members) {
-					return nil
-				}
-
-				return fmt.Errorf("Binding found but expected members is %v, got %v", members, binding.Members)
-			}
+		if !reflect.DeepEqual(members, bindingMembers) {
+			return fmt.Errorf("expected %q to be %q", bindingMembers, members)
 		}
 
-		return fmt.Errorf("No binding for role %q", role)
+		return nil
 	}
 }
 
@@ -190,8 +192,8 @@ resource "google_service_account" "test_account" {
 }
 
 resource "google_kms_key_ring" "key_ring" {
-  project      = "${google_project_services.test_project.project}"
-  location = "us-central1"
+  project  = "${google_project_services.test_project.project}"
+  location = "%s"
   name     = "%s"
 }
 
@@ -200,7 +202,7 @@ resource "google_kms_key_ring_iam_binding" "foo" {
   role        = "%s"
   members     = ["serviceAccount:${google_service_account.test_account.email}"]
 }
-`, projectId, orgId, billingAccount, account, keyRingName, roleId)
+`, projectId, orgId, billingAccount, account, DEFAULT_KMS_TEST_LOCATION, keyRingName, roleId)
 }
 
 func testAccKmsKeyRingIamBinding_update(projectId, orgId, billingAccount, account, keyRingName, roleId string) string {

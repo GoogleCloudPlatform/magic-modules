@@ -181,12 +181,26 @@ func ipCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
+// caseLowerStateFunc is a schema.StateFunc that converts the input to lowercase
+// before storing it in the state.
+func caseLowerStateFunc(i interface{}) string {
+	return strings.ToLower(i.(string))
+}
+
+// caseUpperStateFunc is a schema.StateFunc that converts the input to lowercase
+// before storing it in the state.
+func caseUpperStateFunc(i interface{}) string {
+	return strings.ToLower(i.(string))
+}
+
 // sha256DiffSuppress
 // if old is the hex-encoded sha256 sum of new, treat them as equal
 func sha256DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return hex.EncodeToString(sha256.New().Sum([]byte(old))) == new
 }
 
+// caseDiffSuppress is a schema.DiffSuppressFunc that ignores case when
+// comparing items.
 func caseDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.ToUpper(old) == strings.ToUpper(new)
 }

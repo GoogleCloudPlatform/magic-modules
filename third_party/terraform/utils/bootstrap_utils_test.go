@@ -1,20 +1,21 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"testing"
 
-	"google.golang.org/api/cloudkms/v1"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 var SharedKeyRing = "tftest-shared-keyring-1"
-var SharedCyptoKey = "tftest-shared-key-1"
+var SharedCryptoKey = "tftest-shared-key-1"
 
 type bootstrappedKMS struct {
-	*cloudkms.KeyRing
-	*cloudkms.CryptoKey
+	*kmspb.KeyRing
+	*kmspb.CryptoKey
 }
 
 /**
@@ -33,8 +34,8 @@ func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 
 		// If not running acceptance tests, return an empty object
 		return bootstrappedKMS{
-			&cloudkms.KeyRing{},
-			&cloudkms.CryptoKey{},
+			&kmspb.KeyRing{},
+			&kmspb.CryptoKey{},
 		}
 	}
 
@@ -43,7 +44,7 @@ func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 	keyRingParent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
 	keyRingName := fmt.Sprintf("%s/keyRings/%s", keyRingParent, SharedKeyRing)
 	keyParent := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", projectID, locationID, SharedKeyRing)
-	keyName := fmt.Sprintf("%s/cryptoKeys/%s", keyParent, SharedCyptoKey)
+	keyName := fmt.Sprintf("%s/cryptoKeys/%s", keyParent, SharedCryptoKey)
 
 	config := Config{
 		Credentials: getTestCredsFromEnv(),
@@ -57,12 +58,17 @@ func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 	}
 
 	// Get or Create the hard coded shared keyring for testing
+	ctx := context.Background()
 	kmsClient := config.clientKms
-	keyRing, err := kmsClient.Projects.Locations.KeyRings.Get(keyRingName).Do()
+	keyRing, err := kmsClient.GetKeyRing(ctx, &kmspb.GetKeyRingRequest{
+		Name: keyRingName,
+	})
 	if err != nil {
 		if isGoogleApiErrorWithCode(err, 404) {
-			keyRing, err = kmsClient.Projects.Locations.KeyRings.Create(keyRingParent, &cloudkms.KeyRing{}).
-				KeyRingId(SharedKeyRing).Do()
+			keyRing, err = kmsClient.CreateKeyRing(ctx, &kmspb.CreateKeyRingRequest{
+				Parent:    keyRingParent,
+				KeyRingId: SharedKeyRing,
+			})
 			if err != nil {
 				t.Errorf("Unable to bootstrap KMS key. Cannot create keyRing: %s", err)
 			}
@@ -76,15 +82,18 @@ func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 	}
 
 	// Get or Create the hard coded, shared crypto key for testing
-	cryptoKey, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.Get(keyName).Do()
+	cryptoKey, err := kmsClient.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{
+		Name: keyName,
+	})
 	if err != nil {
 		if isGoogleApiErrorWithCode(err, 404) {
-			newKey := cloudkms.CryptoKey{
-				Purpose: "ENCRYPT_DECRYPT",
-			}
-
-			cryptoKey, err = kmsClient.Projects.Locations.KeyRings.CryptoKeys.Create(keyParent, &newKey).
-				CryptoKeyId(SharedCyptoKey).Do()
+			cryptoKey, err = kmsClient.CreateCryptoKey(ctx, &kmspb.CreateCryptoKeyRequest{
+				Parent:      keyParent,
+				CryptoKeyId: SharedCryptoKey,
+				CryptoKey: &kmspb.CryptoKey{
+					Purpose: kmspb.CryptoKey_ENCRYPT_DECRYPT,
+				},
+			})
 			if err != nil {
 				t.Errorf("Unable to bootstrap KMS key. Cannot create new CryptoKey: %s", err)
 			}

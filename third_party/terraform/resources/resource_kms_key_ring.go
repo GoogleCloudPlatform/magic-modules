@@ -1,14 +1,18 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"google.golang.org/api/cloudkms/v1"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	grpccodes "google.golang.org/grpc/codes"
+	grpcstatus "google.golang.org/grpc/status"
 )
 
 func resourceKmsKeyRing() *schema.Resource {
@@ -45,24 +49,6 @@ func resourceKmsKeyRing() *schema.Resource {
 	}
 }
 
-type kmsKeyRingId struct {
-	Project  string
-	Location string
-	Name     string
-}
-
-func (s *kmsKeyRingId) keyRingId() string {
-	return fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", s.Project, s.Location, s.Name)
-}
-
-func (s *kmsKeyRingId) parentId() string {
-	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Location)
-}
-
-func (s *kmsKeyRingId) terraformId() string {
-	return fmt.Sprintf("%s/%s/%s", s.Project, s.Location, s.Name)
-}
-
 func resourceKmsKeyRingCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -71,30 +57,34 @@ func resourceKmsKeyRingCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	keyRingId := &kmsKeyRingId{
+	tfKeyRing := &kmsKeyRingId{
 		Project:  project,
 		Location: d.Get("location").(string),
 		Name:     d.Get("name").(string),
 	}
 
-	// This resource is often created just after a project, and requires
-	// billing support, which is eventually consistent.  We attempt to
-	// wait on billing support in the project resource, but we can't
-	// always get it right - this retry fixes a lot of flaky tests we were
-	// noticing.
-	err = retryTimeDuration(func() error {
-		keyRing, err := config.clientKms.Projects.Locations.KeyRings.Create(keyRingId.parentId(), &cloudkms.KeyRing{}).KeyRingId(keyRingId.Name).Do()
-
+	// This resource is often created just after a project, and requires billing
+	// support, which is eventually consistent.  We attempt to wait on billing
+	// support in the project resource, but we can't always get it right - this
+	// retry fixes a lot of flaky tests we were noticing.
+	if err := resource.Retry(30*time.Second, func() *resource.RetryError {
+		ctx := context.Background()
+		keyRing, err := config.clientKms.CreateKeyRing(ctx, &kmspb.CreateKeyRingRequest{
+			Parent:    tfKeyRing.parentId(),
+			KeyRingId: tfKeyRing.Name,
+		})
 		if err != nil {
-			return fmt.Errorf("Error creating KeyRing: %s", err)
+			if terr, ok := grpcstatus.FromError(err); ok && terr.Code() == grpccodes.FailedPrecondition {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(fmt.Errorf("Error creating KeyRing: %s", err))
 		}
 
 		log.Printf("[DEBUG] Created KeyRing %s", keyRing.Name)
 
-		d.SetId(keyRingId.keyRingId())
+		d.SetId(keyRing.Name)
 		return nil
-	}, 30*time.Second)
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -109,15 +99,17 @@ func resourceKmsKeyRingRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	keyRingId, err := parseKmsKeyRingId(d.Id(), config)
+	tfKeyRing, err := parseKmsKeyRingId(d.Id(), config)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Executing read for KMS KeyRing %s", keyRingId.keyRingId())
+	log.Printf("[DEBUG] Executing read for KMS KeyRing %s", tfKeyRing.keyRingId())
 
-	keyRing, err := config.clientKms.Projects.Locations.KeyRings.Get(keyRingId.keyRingId()).Do()
-
+	ctx := context.Background()
+	keyRing, err := config.clientKms.GetKeyRing(ctx, &kmspb.GetKeyRingRequest{
+		Name: tfKeyRing.keyRingId(),
+	})
 	if err != nil {
 		return fmt.Errorf("Error reading KeyRing: %s", err)
 	}
@@ -136,16 +128,54 @@ func resourceKmsKeyRingRead(d *schema.ResourceData, meta interface{}) error {
 func resourceKmsKeyRingDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	keyRingId, err := parseKmsKeyRingId(d.Id(), config)
+	tfKeyRing, err := parseKmsKeyRingId(d.Id(), config)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[WARNING] KMS KeyRing resources cannot be deleted from GCP. This KeyRing %s will be removed from Terraform state, but will still be present on the server.", keyRingId.keyRingId())
+	log.Printf("[WARNING] KMS KeyRing resources cannot be deleted from GCP. This KeyRing %s will be removed from Terraform state, but will still be present on the server.", tfKeyRing.keyRingId())
 
 	d.SetId("")
 
 	return nil
+}
+
+func resourceKmsKeyRingImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*Config)
+
+	tfKeyRing, err := parseKmsKeyRingId(d.Id(), config)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("name", tfKeyRing.Name)
+	d.Set("location", tfKeyRing.Location)
+
+	if config.Project != tfKeyRing.Project {
+		d.Set("project", tfKeyRing.Project)
+	}
+
+	d.SetId(tfKeyRing.keyRingId())
+
+	return []*schema.ResourceData{d}, nil
+}
+
+type kmsKeyRingId struct {
+	Project  string
+	Location string
+	Name     string
+}
+
+func (s *kmsKeyRingId) keyRingId() string {
+	return fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", s.Project, s.Location, s.Name)
+}
+
+func (s *kmsKeyRingId) parentId() string {
+	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Location)
+}
+
+func (s *kmsKeyRingId) terraformId() string {
+	return fmt.Sprintf("%s/%s/%s", s.Project, s.Location, s.Name)
 }
 
 func parseKmsKeyRingId(id string, config *Config) (*kmsKeyRingId, error) {
@@ -183,24 +213,4 @@ func parseKmsKeyRingId(id string, config *Config) (*kmsKeyRingId, error) {
 		}, nil
 	}
 	return nil, fmt.Errorf("Invalid KeyRing id format, expecting `{projectId}/{locationId}/{keyRingName}` or `{locationId}/{keyRingName}.`")
-}
-
-func resourceKmsKeyRingImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	config := meta.(*Config)
-
-	keyRingId, err := parseKmsKeyRingId(d.Id(), config)
-	if err != nil {
-		return nil, err
-	}
-
-	d.Set("name", keyRingId.Name)
-	d.Set("location", keyRingId.Location)
-
-	if config.Project != keyRingId.Project {
-		d.Set("project", keyRingId.Project)
-	}
-
-	d.SetId(keyRingId.keyRingId())
-
-	return []*schema.ResourceData{d}, nil
 }

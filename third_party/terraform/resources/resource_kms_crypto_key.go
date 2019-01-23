@@ -1,16 +1,25 @@
 package google
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"regexp"
-	"strconv"
+	"runtime"
+	"sort"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/gammazero/workerpool"
+	"github.com/golang/protobuf/ptypes/duration"
+	"github.com/golang/protobuf/ptypes/timestamp"
+	multierror "github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform/helper/schema"
-	"google.golang.org/api/cloudkms/v1"
+	"github.com/hashicorp/terraform/helper/validation"
+	"google.golang.org/api/iterator"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/genproto/protobuf/field_mask"
 )
 
 func resourceKmsCryptoKey() *schema.Resource {
@@ -29,17 +38,30 @@ func resourceKmsCryptoKey() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+
 			"key_ring": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: kmsCryptoKeyRingsEquivalent,
 			},
+
 			"rotation_period": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validateKmsCryptoKeyRotationPeriod,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: kmsCryptoKeyRotationPeriodsEquivalent,
 			},
+
+			"purpose": {
+				Type:             schema.TypeString,
+				ForceNew:         true,
+				Optional:         true,
+				Default:          "encrypt_decrypt",
+				ValidateFunc:     validation.StringInSlice(kmsPurposeNames(), true),
+				StateFunc:        caseLowerStateFunc,
+				DiffSuppressFunc: caseDiffSuppress,
+			},
+
 			"version_template": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -48,19 +70,43 @@ func resourceKmsCryptoKey() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"algorithm": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:             schema.TypeString,
+							ForceNew:         true,
+							Optional:         true,
+							Default:          "symmetric_encryption",
+							ValidateFunc:     validation.StringInSlice(kmsAlgorithmNames(), true),
+							StateFunc:        caseLowerStateFunc,
+							DiffSuppressFunc: caseDiffSuppress,
 						},
+
 						"protection_level": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ForceNew:     true,
-							Default:      "SOFTWARE",
-							ValidateFunc: validation.StringInSlice([]string{"SOFTWARE", "HSM", ""}, false),
+							Type:             schema.TypeString,
+							ForceNew:         true,
+							Optional:         true,
+							Default:          "software",
+							ValidateFunc:     validation.StringInSlice(kmsProtectionLevelNames(), true),
+							StateFunc:        caseLowerStateFunc,
+							DiffSuppressFunc: caseDiffSuppress,
 						},
 					},
 				},
 			},
+
+			"next_rotation_rfc3339": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"next_rotation_seconds": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
+			"rotation_period_seconds": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
 			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -69,64 +115,43 @@ func resourceKmsCryptoKey() *schema.Resource {
 	}
 }
 
-func kmsCryptoKeyRingsEquivalent(k, old, new string, d *schema.ResourceData) bool {
-	keyRingIdWithSpecifiersRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-])+/keyRings/([a-zA-Z0-9_-]{1,63})$")
-	normalizedKeyRingIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})$")
-	if matches := keyRingIdWithSpecifiersRegex.FindStringSubmatch(new); matches != nil {
-		normMatches := normalizedKeyRingIdRegex.FindStringSubmatch(old)
-		return normMatches != nil && normMatches[1] == matches[1] && normMatches[2] == matches[2] && normMatches[3] == matches[3]
-	}
-	return false
-}
-
-type kmsCryptoKeyId struct {
-	KeyRingId kmsKeyRingId
-	Name      string
-}
-
-func (s *kmsCryptoKeyId) cryptoKeyId() string {
-	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
-}
-
-func (s *kmsCryptoKeyId) terraformId() string {
-	return fmt.Sprintf("%s/%s", s.KeyRingId.terraformId(), s.Name)
-}
-
 func resourceKmsCryptoKeyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	keyRingId, err := parseKmsKeyRingId(d.Get("key_ring").(string), config)
-
+	tfKeyRing, err := parseKmsKeyRingId(d.Get("key_ring").(string), config)
 	if err != nil {
 		return err
 	}
 
 	cryptoKeyId := &kmsCryptoKeyId{
-		KeyRingId: *keyRingId,
+		KeyRingId: *tfKeyRing,
 		Name:      d.Get("name").(string),
 	}
 
-	key := cloudkms.CryptoKey{
-		Purpose:         "ENCRYPT_DECRYPT",
+	key := &kmspb.CryptoKey{
+		Purpose:         kmsPurposes[strings.ToLower(d.Get("purpose").(string))],
 		VersionTemplate: expandVersionTemplate(d.Get("version_template").([]interface{})),
 	}
 
 	if d.Get("rotation_period") != "" {
-		rotationPeriod := d.Get("rotation_period").(string)
-		nextRotation, err := kmsCryptoKeyNextRotation(time.Now(), rotationPeriod)
-
+		rotationPeriodStr := d.Get("rotation_period").(string)
+		rotationSchedule, nextRotationTime, err := kmsCryptoKeyNextRotation(rotationPeriodStr, time.Now())
 		if err != nil {
-			return fmt.Errorf("Error setting CryptoKey rotation period: %s", err.Error())
+			return fmt.Errorf("Failed to parse rotation_period: %s", err)
 		}
 
-		key.NextRotationTime = nextRotation
-		key.RotationPeriod = rotationPeriod
+		key.RotationSchedule = rotationSchedule
+		key.NextRotationTime = nextRotationTime
 	}
 
-	cryptoKey, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Create(cryptoKeyId.KeyRingId.keyRingId(), &key).CryptoKeyId(cryptoKeyId.Name).Do()
-
+	ctx := context.Background()
+	cryptoKey, err := config.clientKms.CreateCryptoKey(ctx, &kmspb.CreateCryptoKeyRequest{
+		Parent:      tfKeyRing.keyRingId(),
+		CryptoKeyId: cryptoKeyId.Name,
+		CryptoKey:   key,
+	})
 	if err != nil {
-		return fmt.Errorf("Error creating CryptoKey: %s", err.Error())
+		return fmt.Errorf("Error creating CryptoKey: %s", err)
 	}
 
 	log.Printf("[DEBUG] Created CryptoKey %s", cryptoKey.Name)
@@ -144,26 +169,36 @@ func resourceKmsCryptoKeyUpdate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	key := cloudkms.CryptoKey{}
+	var key kmspb.CryptoKey
+	var updatedFields []string
 
-	if d.HasChange("rotation_period") && d.Get("rotation_period") != "" {
-		rotationPeriod := d.Get("rotation_period").(string)
-		nextRotation, err := kmsCryptoKeyNextRotation(time.Now(), rotationPeriod)
+	key.Name = cryptoKeyId.cryptoKeyId()
 
-		if err != nil {
-			return fmt.Errorf("Error setting CryptoKey rotation period: %s", err.Error())
+	if d.HasChange("rotation_period") {
+		if d.Get("rotation_period") != "" {
+			rotationPeriodStr := d.Get("rotation_period").(string)
+			rotationSchedule, nextRotationTime, err := kmsCryptoKeyNextRotation(rotationPeriodStr, time.Now())
+			if err != nil {
+				return fmt.Errorf("Failed to parse rotation_period: %s", err)
+			}
+
+			key.RotationSchedule = rotationSchedule
+			key.NextRotationTime = nextRotationTime
 		}
 
-		key.NextRotationTime = nextRotation
-		key.RotationPeriod = rotationPeriod
+		// If the rotation period changed but was empty, still send the update
+		// fields which triggers a removal of the rotation period.
+		updatedFields = append(updatedFields, "rotation_period")
+		updatedFields = append(updatedFields, "next_rotation_time")
 	}
 
-	if d.HasChange("version_template") {
-		key.VersionTemplate = expandVersionTemplate(d.Get("version_template").([]interface{}))
-	}
-
-	cryptoKey, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Patch(cryptoKeyId.cryptoKeyId(), &key).UpdateMask("rotation_period,next_rotation_time").Do()
-
+	ctx := context.Background()
+	cryptoKey, err := config.clientKms.UpdateCryptoKey(ctx, &kmspb.UpdateCryptoKeyRequest{
+		CryptoKey: &key,
+		UpdateMask: &field_mask.FieldMask{
+			Paths: updatedFields,
+		},
+	})
 	if err != nil {
 		return fmt.Errorf("Error updating CryptoKey: %s", err.Error())
 	}
@@ -185,13 +220,35 @@ func resourceKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Executing read for KMS CryptoKey %s", cryptoKeyId.cryptoKeyId())
 
-	cryptoKey, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Get(cryptoKeyId.cryptoKeyId()).Do()
+	ctx := context.Background()
+	cryptoKey, err := config.clientKms.GetCryptoKey(ctx, &kmspb.GetCryptoKeyRequest{
+		Name: cryptoKeyId.cryptoKeyId(),
+	})
 	if err != nil {
 		return fmt.Errorf("Error reading CryptoKey: %s", err)
 	}
-	d.Set("key_ring", cryptoKeyId.KeyRingId.terraformId())
 	d.Set("name", cryptoKeyId.Name)
-	d.Set("rotation_period", cryptoKey.RotationPeriod)
+	d.Set("key_ring", cryptoKeyId.KeyRingId.terraformId())
+
+	if rotationPeriod := cryptoKey.GetRotationPeriod(); rotationPeriod != nil {
+		sec := rotationPeriod.GetSeconds()
+		d.Set("rotation_period", fmt.Sprintf("%ds", sec))
+		d.Set("rotation_period_seconds", sec)
+	} else {
+		d.Set("rotation_period", "")
+		d.Set("rotation_period_seconds", 0)
+	}
+
+	if nextRotationTime := cryptoKey.GetNextRotationTime(); nextRotationTime != nil {
+		sec := nextRotationTime.GetSeconds()
+		d.Set("next_rotation_rfc3339", time.Unix(sec, 0).Format(time.RFC3339))
+		d.Set("next_rotation_seconds", sec)
+	} else {
+		d.Set("next_rotation_rfc3339", "")
+		d.Set("next_rotation_seconds", 0)
+	}
+
+	d.Set("purpose", kmsPurposeToString(cryptoKey.Purpose))
 	d.Set("self_link", cryptoKey.Name)
 
 	if err = d.Set("version_template", flattenVersionTemplate(cryptoKey.VersionTemplate)); err != nil {
@@ -199,27 +256,6 @@ func resourceKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(cryptoKeyId.cryptoKeyId())
-
-	return nil
-}
-
-func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, config *Config) error {
-	versionsClient := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions
-
-	versionsResponse, err := versionsClient.List(cryptoKeyId.cryptoKeyId()).Do()
-
-	if err != nil {
-		return err
-	}
-
-	for _, version := range versionsResponse.CryptoKeyVersions {
-		request := &cloudkms.DestroyCryptoKeyVersionRequest{}
-		_, err = versionsClient.Destroy(version.Name, request).Do()
-
-		if err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
@@ -238,13 +274,50 @@ func resourceKmsCryptoKeyDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	log.Printf(`
-[WARNING] KMS CryptoKey resources cannot be deleted from GCP. The CryptoKey %s will be removed from Terraform state,
-and all its CryptoKeyVersions will be destroyed, but it will still be present on the server.`, cryptoKeyId.cryptoKeyId())
+	log.Printf("[WARN] Cloud KMS CryptoKey resources cannot be deleted. "+
+		"The CryptoKey %s will be removed from Terraform state, and all its "+
+		"CryptoKeyVersions will be destroyed, but it will still be present on "+
+		"the server.", cryptoKeyId.cryptoKeyId())
 
-	err = clearCryptoKeyVersions(cryptoKeyId, config)
+	var ckvs []string
+	ctx := context.Background()
+	it := config.clientKms.ListCryptoKeyVersions(ctx, &kmspb.ListCryptoKeyVersionsRequest{
+		Parent: cryptoKeyId.cryptoKeyId(),
+	})
+	for {
+		resp, err := it.Next()
+		if err != nil {
+			if err == iterator.Done {
+				break
+			}
+			return fmt.Errorf("Failed to list crypto key versions: %s", err)
+		}
 
-	if err != nil {
+		if resp.State != kmspb.CryptoKeyVersion_DESTROYED &&
+			resp.State != kmspb.CryptoKeyVersion_DESTROY_SCHEDULED {
+			ckvs = append(ckvs, resp.Name)
+		}
+	}
+
+	var mu sync.Mutex
+	var errs *multierror.Error
+	pool := workerpool.New(runtime.NumCPU() - 1)
+	for _, ckv := range ckvs {
+		ckv := ckv
+
+		pool.Submit(func() {
+			if _, err := config.clientKms.DestroyCryptoKeyVersion(ctx, &kmspb.DestroyCryptoKeyVersionRequest{
+				Name: ckv,
+			}); err != nil {
+				mu.Lock()
+				errs = multierror.Append(errs, fmt.Errorf("Failed to destroy crypto key version %s: %s", ckv, err))
+				mu.Unlock()
+			}
+		})
+	}
+	pool.StopWait()
+
+	if err := errs.ErrorOrNil(); err != nil {
 		return err
 	}
 
@@ -252,74 +325,186 @@ and all its CryptoKeyVersions will be destroyed, but it will still be present on
 	return nil
 }
 
-func expandVersionTemplate(configured []interface{}) *cloudkms.CryptoKeyVersionTemplate {
+func expandVersionTemplate(configured []interface{}) *kmspb.CryptoKeyVersionTemplate {
 	if configured == nil || len(configured) == 0 {
 		return nil
 	}
 
 	data := configured[0].(map[string]interface{})
-	return &cloudkms.CryptoKeyVersionTemplate{
-		Algorithm:       data["algorithm"].(string),
-		ProtectionLevel: data["protection_level"].(string),
+	return &kmspb.CryptoKeyVersionTemplate{
+		Algorithm:       kmsAlgorithms[strings.ToLower(data["algorithm"].(string))],
+		ProtectionLevel: kmsProtectionLevels[strings.ToLower(data["protection_level"].(string))],
 	}
 }
 
-func flattenVersionTemplate(versionTemplate *cloudkms.CryptoKeyVersionTemplate) []map[string]interface{} {
+func flattenVersionTemplate(versionTemplate *kmspb.CryptoKeyVersionTemplate) []map[string]interface{} {
 	if versionTemplate == nil {
 		return nil
 	}
 
 	versionTemplateSchema := make([]map[string]interface{}, 0, 1)
 	data := map[string]interface{}{
-		"algorithm":        versionTemplate.Algorithm,
-		"protection_level": versionTemplate.ProtectionLevel,
+		"algorithm":        kmsAlgorithmToString(versionTemplate.Algorithm),
+		"protection_level": kmsProtectionLevelToString(versionTemplate.ProtectionLevel),
 	}
 
 	versionTemplateSchema = append(versionTemplateSchema, data)
 	return versionTemplateSchema
 }
 
-func validateKmsCryptoKeyRotationPeriod(value interface{}, _ string) (ws []string, errors []error) {
-	period := value.(string)
-	pattern := regexp.MustCompile("^([0-9.]*\\d)s$")
-	match := pattern.FindStringSubmatch(period)
-
-	if len(match) == 0 {
-		errors = append(errors, fmt.Errorf("Invalid rotation period format: %s", period))
-		// Cannot continue to validate because we cannot extract a number.
-		return
-	}
-
-	number := match[1]
-	seconds, err := strconv.ParseFloat(number, 64)
-
+// kmsCryptoKeyNextRotation accepts a period as parseable by time.ParseDuration
+// and returns the appropriate protos for the rotation period and next rotation
+// time. If an error occurs, it is returned and the protos will be nil.
+func kmsCryptoKeyNextRotation(periodStr string, now time.Time) (*kmspb.CryptoKey_RotationPeriod, *timestamp.Timestamp, error) {
+	dur, err := time.ParseDuration(periodStr)
 	if err != nil {
-		errors = append(errors, err)
-	} else {
-		if seconds < 86400.0 {
-			errors = append(errors, fmt.Errorf("Rotation period must be greater than one day"))
-		}
-
-		parts := strings.Split(number, ".")
-
-		if len(parts) > 1 && len(parts[1]) > 9 {
-			errors = append(errors, fmt.Errorf("Rotation period cannot have more than 9 fractional digits"))
-		}
+		return nil, nil, err
 	}
 
-	return
+	rotationPeriod := &kmspb.CryptoKey_RotationPeriod{
+		RotationPeriod: &duration.Duration{
+			Seconds: int64(dur.Seconds()),
+		},
+	}
+
+	nextRotationTime := &timestamp.Timestamp{
+		Seconds: now.UTC().Add(dur).Unix(),
+	}
+
+	return rotationPeriod, nextRotationTime, nil
 }
 
-func kmsCryptoKeyNextRotation(now time.Time, period string) (result string, err error) {
-	var duration time.Duration
+// kmsCryptoKeyRingsEquivalent determines if the two keyrings are equivalent,
+// taking into account short vs long names.
+//
+// The following KMS key rings are equivalent:
+//
+//     projects/my-project/locations/us-east4/keyRings/my-keyring
+//     my-project/us-east4/my-keyring
+//
+// This function compares the values to see if they are equivalent.
+func kmsCryptoKeyRingsEquivalent(k, old, new string, d *schema.ResourceData) bool {
+	keyRingIdWithSpecifiersRegex := regexp.MustCompile("^projects/(" + ProjectRegex + ")/locations/([a-z0-9-])+/keyRings/([a-zA-Z0-9_-]{1,63})$")
+	normalizedKeyRingIdRegex := regexp.MustCompile("^(" + ProjectRegex + ")/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})$")
+	if matches := keyRingIdWithSpecifiersRegex.FindStringSubmatch(new); matches != nil {
+		normMatches := normalizedKeyRingIdRegex.FindStringSubmatch(old)
+		return normMatches != nil && normMatches[1] == matches[1] && normMatches[2] == matches[2] && normMatches[3] == matches[3]
+	}
+	return false
+}
 
-	duration, err = time.ParseDuration(period)
-
-	if err == nil {
-		result = now.UTC().Add(duration).Format(time.RFC3339Nano)
+// kmsCryptoKeyRotationPeriodsEquivalent determines if two rotation periods are
+// equivalent. Since the API converts the duration into seconds, the user might
+// specify 24h, but that will come back as 86400s. This checks if both values
+// are equivalent and suppresses the diff if so.
+func kmsCryptoKeyRotationPeriodsEquivalent(k, old, new string, d *schema.ResourceData) bool {
+	oldD, err := time.ParseDuration(old)
+	if err != nil {
+		return false
 	}
 
-	return
+	newD, err := time.ParseDuration(new)
+	if err != nil {
+		return false
+	}
+
+	return oldD == newD
+}
+
+// kmsPurposes is the list of purposes to key types
+var kmsPurposes = map[string]kmspb.CryptoKey_CryptoKeyPurpose{
+	"asymmetric_decrypt": kmspb.CryptoKey_ASYMMETRIC_DECRYPT,
+	"asymmetric_sign":    kmspb.CryptoKey_ASYMMETRIC_SIGN,
+	"encrypt_decrypt":    kmspb.CryptoKey_ENCRYPT_DECRYPT,
+	"unspecified":        kmspb.CryptoKey_CRYPTO_KEY_PURPOSE_UNSPECIFIED,
+}
+
+// kmsPurposeNames returns the list of key purposes.
+func kmsPurposeNames() []string {
+	list := make([]string, 0, len(kmsPurposes))
+	for k := range kmsPurposes {
+		list = append(list, k)
+	}
+	sort.Strings(list)
+	return list
+}
+
+// kmsPurposeToString accepts a kmspb and maps that to the user readable purpose.
+// Instead of maintaining two maps, this iterates over the purposes map because
+// N will always be ridiculously small.
+func kmsPurposeToString(p kmspb.CryptoKey_CryptoKeyPurpose) string {
+	for k, v := range kmsPurposes {
+		if p == v {
+			return k
+		}
+	}
+	return "unspecified"
+}
+
+// kmsAlgorithms is the list of key algorithms.
+var kmsAlgorithms = map[string]kmspb.CryptoKeyVersion_CryptoKeyVersionAlgorithm{
+	"symmetric_encryption":         kmspb.CryptoKeyVersion_GOOGLE_SYMMETRIC_ENCRYPTION,
+	"rsa_sign_pss_2048_sha256":     kmspb.CryptoKeyVersion_RSA_SIGN_PSS_2048_SHA256,
+	"rsa_sign_pss_3072_sha256":     kmspb.CryptoKeyVersion_RSA_SIGN_PSS_3072_SHA256,
+	"rsa_sign_pss_4096_sha256":     kmspb.CryptoKeyVersion_RSA_SIGN_PSS_4096_SHA256,
+	"rsa_sign_pkcs1_2048_sha256":   kmspb.CryptoKeyVersion_RSA_SIGN_PKCS1_2048_SHA256,
+	"rsa_sign_pkcs1_3072_sha256":   kmspb.CryptoKeyVersion_RSA_SIGN_PKCS1_3072_SHA256,
+	"rsa_sign_pkcs1_4096_sha256":   kmspb.CryptoKeyVersion_RSA_SIGN_PKCS1_4096_SHA256,
+	"rsa_decrypt_oaep_2048_sha256": kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_2048_SHA256,
+	"rsa_decrypt_oaep_3072_sha256": kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_3072_SHA256,
+	"rsa_decrypt_oaep_4096_sha256": kmspb.CryptoKeyVersion_RSA_DECRYPT_OAEP_4096_SHA256,
+	"ec_sign_p256_sha256":          kmspb.CryptoKeyVersion_EC_SIGN_P256_SHA256,
+	"ec_sign_p384_sha384":          kmspb.CryptoKeyVersion_EC_SIGN_P384_SHA384,
+}
+
+// kmsAlgorithmNames returns the list of key algorithms.
+func kmsAlgorithmNames() []string {
+	list := make([]string, 0, len(kmsAlgorithms))
+	for k := range kmsAlgorithms {
+		list = append(list, k)
+	}
+	sort.Strings(list)
+	return list
+}
+
+// kmsAlgorithmToString accepts a kmspb and maps that to the user readable algorithm.
+// Instead of maintaining two maps, this iterates over the algorithms map because
+// N will always be ridiculously small.
+func kmsAlgorithmToString(p kmspb.CryptoKeyVersion_CryptoKeyVersionAlgorithm) string {
+	for k, v := range kmsAlgorithms {
+		if p == v {
+			return k
+		}
+	}
+	return "unspecified"
+}
+
+// kmsProtectionLevels is the list of key protection levels.
+var kmsProtectionLevels = map[string]kmspb.ProtectionLevel{
+	"hsm":      kmspb.ProtectionLevel_HSM,
+	"software": kmspb.ProtectionLevel_SOFTWARE,
+}
+
+// kmsProtectionLevelNames returns the list of key protection levels.
+func kmsProtectionLevelNames() []string {
+	list := make([]string, 0, len(kmsProtectionLevels))
+	for k := range kmsProtectionLevels {
+		list = append(list, k)
+	}
+	sort.Strings(list)
+	return list
+}
+
+// kmsProtectionLevelToString accepts a kmspb and maps that to the user readable algorithm.
+// Instead of maintaining two maps, this iterates over the algorithms map because
+// N will always be ridiculously small.
+func kmsProtectionLevelToString(p kmspb.ProtectionLevel) string {
+	for k, v := range kmsProtectionLevels {
+		if p == v {
+			return k
+		}
+	}
+	return "unknown"
 }
 
 func parseKmsCryptoKeyId(id string, config *Config) (*kmsCryptoKeyId, error) {
@@ -366,4 +551,17 @@ func parseKmsCryptoKeyId(id string, config *Config) (*kmsCryptoKeyId, error) {
 		}, nil
 	}
 	return nil, fmt.Errorf("Invalid CryptoKey id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}` or `{locationId}/{keyRingName}/{cryptoKeyName}.`")
+}
+
+type kmsCryptoKeyId struct {
+	KeyRingId kmsKeyRingId
+	Name      string
+}
+
+func (s *kmsCryptoKeyId) cryptoKeyId() string {
+	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
+}
+
+func (s *kmsCryptoKeyId) terraformId() string {
+	return fmt.Sprintf("%s/%s", s.KeyRingId.terraformId(), s.Name)
 }

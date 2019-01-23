@@ -1,14 +1,17 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
 	"testing"
 
+	"cloud.google.com/go/iam"
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 func TestAccKmsCryptoKeyIamBinding(t *testing.T) {
@@ -108,30 +111,27 @@ func testAccCheckGoogleKmsCryptoKeyIamBindingExists(bindingResourceName, roleId 
 
 		config := testAccProvider.Meta().(*Config)
 		cryptoKeyId, err := parseKmsCryptoKeyId(bindingRs.Primary.Attributes["crypto_key_id"], config)
-
 		if err != nil {
 			return err
 		}
 
-		p, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
+		ctx := context.Background()
+		p, err := config.clientKms.CryptoKeyIAM(&kmspb.CryptoKey{
+			Name: cryptoKeyId.cryptoKeyId(),
+		}).Policy(ctx)
 		if err != nil {
 			return err
 		}
 
-		for _, binding := range p.Bindings {
-			if binding.Role == roleId {
-				sort.Strings(members)
-				sort.Strings(binding.Members)
+		bindingMembers := p.Members(iam.RoleName(roleId))
+		sort.Strings(members)
+		sort.Strings(bindingMembers)
 
-				if reflect.DeepEqual(members, binding.Members) {
-					return nil
-				}
-
-				return fmt.Errorf("Binding found but expected members is %v, got %v", members, binding.Members)
-			}
+		if !reflect.DeepEqual(members, bindingMembers) {
+			return fmt.Errorf("expected %q to be %q", bindingMembers, members)
 		}
 
-		return fmt.Errorf("No binding for role %q", roleId)
+		return nil
 	}
 }
 
@@ -149,24 +149,21 @@ func testAccCheckGoogleKmsCryptoKeyIamMemberExists(n, role, member string) resou
 			return err
 		}
 
-		p, err := config.clientKms.Projects.Locations.KeyRings.GetIamPolicy(cryptoKeyId.cryptoKeyId()).Do()
+		ctx := context.Background()
+		p, err := config.clientKms.KeyRingIAM(&kmspb.KeyRing{
+			Name: cryptoKeyId.cryptoKeyId(),
+		}).Policy(ctx)
 		if err != nil {
 			return err
 		}
 
-		for _, binding := range p.Bindings {
-			if binding.Role == role {
-				for _, m := range binding.Members {
-					if m == member {
-						return nil
-					}
-				}
-
-				return fmt.Errorf("Missing member %q, got %v", member, binding.Members)
-			}
+		if !p.HasRole(member, iam.RoleName(role)) {
+			bindingMembers := p.Members(iam.RoleName(role))
+			sort.Strings(bindingMembers)
+			return fmt.Errorf("missing member %s in %q", member, bindingMembers)
 		}
 
-		return fmt.Errorf("No binding for role %q", role)
+		return nil
 	}
 }
 
