@@ -79,7 +79,41 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           target_pool_name: "my-target-pool"
           igm_name: "my-igm"
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: minReplicas
+        # Even though this field isn't actually required by the API, it makes our
+        # lives easier if we treat it as a required field. It has a default that is
+        # set by the API based on the value of maxNumReplicas. Normally in this case
+        # we would just set it to Optional+Computed. However, this currently doesn't
+        # work with nested fields. Make it required so we don't set the field to zero
+        # when our users aren't expecting us to. For more info, see
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/305.
+        required: true
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: maxReplicas
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: cooldownPeriod
+      autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: metric
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: name
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: type
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
       target: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -104,7 +138,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: size
+        default_from_api: true
+      sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: snapshot
+        description: |
+          {{description}}* `snapshot`
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        default_value: 'pd-standard'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        input: true
+      licenses: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
@@ -477,7 +528,41 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           target_pool_name: "my-target-pool"
           rigm_name: "my-region-igm"
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: minReplicas
+        # Even though this field isn't actually required by the API, it makes our
+        # lives easier if we treat it as a required field. It has a default that is
+        # set by the API based on the value of maxNumReplicas. Normally in this case
+        # we would just set it to Optional+Computed. However, this currently doesn't
+        # work with nested fields. Make it required so we don't set the field to zero
+        # when our users aren't expecting us to. For more info, see
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/305.
+        required: true
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: maxReplicas
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: cooldownPeriod
+      autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: metric
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: name
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: type
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
       target: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -485,7 +570,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   RegionDisk: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: size
+        default_from_api: true
+      sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: snapshot
+        description: |
+          {{description}}* `snapshot`
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        default_value: 'pd-standard'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        input: true
+      licenses: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
