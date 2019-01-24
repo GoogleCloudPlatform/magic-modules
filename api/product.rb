@@ -25,12 +25,12 @@ module Api
     # Example inputs: "Compute", "AccessContextManager"
     # attr_reader :name
 
-    # The full name of the GCP product; eg "Google Cloud Bigtable"
+    # The full name of the GCP product; eg "Cloud Bigtable"
     attr_reader :display_name
 
     # The name of the product's API; "compute", "accesscontextmanager"
     def api_name
-      name.delete(' ').downcase
+      name.downcase
     end
 
     # The product full name is the "display name" in string form intended for

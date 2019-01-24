@@ -90,7 +90,7 @@ module Provider
         data = super
 
         prod_name = data[:object].name.underscore
-        path = ["products/#{data[:product_name]}",
+        path = ["products/#{data[:product].api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
         data.merge(example: (get_example(path) if File.file?(path)))
@@ -240,7 +240,7 @@ module Provider
 
       def example_defaults(data)
         obj_name = data[:object].name.underscore
-        path = ["products/#{data[:product_name]}",
+        path = ["products/#{data[:product].api_name}",
                 "examples/ansible/#{obj_name}.yaml"].join('/')
 
         compile_file(EXAMPLE_DEFAULTS, path) if File.file?(path)
@@ -248,7 +248,7 @@ module Provider
 
       def generate_resource_tests(data)
         prod_name = data[:object].name.underscore
-        path = ["products/#{data[:product_name]}",
+        path = ["products/#{data[:product].api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
         return unless data[:object].has_tests
