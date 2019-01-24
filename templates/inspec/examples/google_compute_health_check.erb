@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% health_check = grab_attributes['health_check'] -%>
+describe google_compute_health_check(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{health_check['name']}'" : "health_check['name']" -%>) do
+  it { should exist }
+  its('timeout_sec') { should eq <%= doc_generation ? "'#{health_check['timeout_sec']}'" : "health_check['timeout_sec']" -%> }
+  its('tcp_health_check.port') { should eq <%= doc_generation ? "'#{health_check['tcp_health_check_port']}'" : "health_check['tcp_health_check_port']" -%> }
+end
+
+describe google_compute_health_check(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

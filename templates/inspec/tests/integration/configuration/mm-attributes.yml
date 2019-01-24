@@ -47,3 +47,9 @@ trigger:
   trigger_template_branch: trigger-branch
   trigger_template_repo: trigger-repo
   filename: cloudbuild.yaml
+
+health_check:
+  name: inspec-gcp-health-check
+  timeout_sec: 10
+  check_interval_sec: 10
+  tcp_health_check_port: 80
