@@ -118,6 +118,16 @@ module Provider
     end
     # rubocop:enable Lint/UnusedMethodArgument
 
+    def copy_file_list(output_folder, files)
+      files.each do |target, source|
+        target_file = File.join(output_folder, target)
+        target_dir = File.dirname(target_file)
+        Google::LOGGER.debug "Copying #{source} => #{target}"
+        FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+        FileUtils.copy_entry source, target_file
+      end
+    end
+
     def compile_files(output_folder, version_name)
       compile_file_list(output_folder, @config.files.compile, version: version_name)
     end
@@ -129,27 +139,6 @@ module Provider
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
       compile_file_list(output_folder, files, version: version_name)
-    end
-
-    def copy_file_list(output_folder, files)
-      files.each do |target, source|
-        target_file = File.join(output_folder, target)
-        target_dir = File.dirname(target_file)
-        Google::LOGGER.debug "Copying #{source} => #{target}"
-        FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
-        FileUtils.copy_entry source, target_file
-      end
-    end
-
-    def compile_examples(output_folder)
-      compile_file_map(
-        output_folder,
-        @config.examples,
-        lambda do |_object, file|
-          ["examples/#{file}",
-           "products/#{@api.api_name}/files/examples~#{file}"]
-        end
-      )
     end
 
     def compile_file_list(output_folder, files, data = {})
@@ -357,38 +346,50 @@ module Provider
        (args_list[2] if extra_data)]
     end
 
+    # Given the data object for a file, write that file and verify that it
+    # passes these conditions:
+    #
+    # - The file has not been generated already this run
+    # - The file has an autogen exception or an autogen notice defined
+    #
+    # Once the file's contents are written, set the proper [chmod] mode and
+    # format the file with a language-appropriate formatter.
     def generate_file(data)
-      file_folder = File.dirname(data[:out_file])
-      # This variable looks unused, but is used in ansible/resource.erb
-      file_relative = relative_path(data[:out_file], data[:output_folder]).to_s
-      FileUtils.mkpath file_folder unless Dir.exist?(file_folder)
-      ctx = binding
-      data.each { |name, value| ctx.local_variable_set(name, value) }
-      generate_file_write ctx, data
-      format_output_file(data[:out_file])
-    end
+      path = data[:out_file]
+      folder = File.dirname(path)
+      FileUtils.mkpath folder unless Dir.exist?(folder)
 
-    def generate_file_write(ctx, data)
+      # This variable looks unused, but is used in ansible/resource.erb
+      file_relative = relative_path(path, data[:output_folder]).to_s
+
       # If we've modified a file since starting an MM run, it's a reasonable
       # assumption that it was this run that modified it.
-      if File.exist?(data[:out_file]) && File.mtime(data[:out_file]) > @start_time
-        raise "#{data[:out_file]} was already modified during this run"
+      if File.exist?(path) && File.mtime(path) > @start_time
+        raise "#{path} was already modified during this run"
       end
 
-      enforce_file_expectations data[:out_file] do
-        Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
-        write_file data[:out_file], compile_file(ctx, data[:template])
-        old_mode = File.stat(data[:template]).mode
-        FileUtils.chmod(old_mode, data[:out_file])
-      end
-    end
+      # You're looking at some magic here!
+      # This is how variables are made available in templates; we iterate
+      # through each key:value pair in the common `data` object, and we set them
+      # in the scope of the .erb files.
+      ctx = binding
+      data.each { |name, value| ctx.local_variable_set(name, value) }
 
-    def enforce_file_expectations(filename)
+      # Use an (essentially) global variable to record whether a file has
+      # either generated an autogen header, or explicitly opted out.
       @file_expectations = {
         autogen: false
       }
-      yield
-      raise "#{filename} missing autogen" unless @file_expectations[:autogen]
+
+      Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, data[:template]) }
+
+      raise "#{path} missing autogen" unless @file_expectations[:autogen]
+
+      old_file_chmod_mode = File.stat(data[:template]).mode
+      FileUtils.chmod(old_file_chmod_mode, path)
+
+      format_output_file(path)
     end
 
     def format_output_file(path)
@@ -402,14 +403,7 @@ module Provider
 
     def run_formatter(command)
       output = %x(#{command} 2>&1)
-
       Google::LOGGER.error output if $CHILD_STATUS && $CHILD_STATUS.exitstatus != 0
-    end
-
-    # Write the output to a file. We write one line at a time so tests can
-    # reason about what's being written and validate the output.
-    def write_file(out_file, output)
-      File.open(out_file, 'w') { |f| output.each { |l| f.write("#{l}\n") } }
     end
 
     def wrap_field(field, spaces)

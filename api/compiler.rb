@@ -40,8 +40,7 @@ module Api
       # Compile step #2: Now that we have the target class, compile with that
       # class features
       source = config.compile(@catalog, 0)
-      config = Google::YamlValidator.parse(source)
-      config
+      Google::YamlValidator.parse(source)
     end
   end
 end
