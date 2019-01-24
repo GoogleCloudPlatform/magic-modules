@@ -156,8 +156,6 @@ module Provider
       files.each do |target, source|
         Google::LOGGER.debug "Compiling #{source} => #{target}"
         target_file = File.join(output_folder, target)
-                          .gsub('{{product_name}}', @api.api_name)
-
         manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
         generate_file(
           data.clone.merge(
@@ -250,18 +248,17 @@ module Provider
       {
         name: object.out_name,
         object: object,
+        product: object.__product,
         output_folder: output_folder,
-        product_name: object.__product.api_name,
         version: version
       }
     end
 
     def generate_resource_file(data)
-      product_ns = data[:object].__product.name.delete(' ')
       generate_file(data.clone.merge(
         # Override with provider specific template for this object, if needed
         template: data[:default_template],
-        product_ns: product_ns
+        product_ns: data[:object].__product.name
       ))
     end
 
