@@ -22,42 +22,43 @@ func TestComputeInstanceMigrateState(t *testing.T) {
 		Attributes   map[string]string
 		Expected     map[string]string
 	}{
-		// "v0.4.2 and earlier": {
-		// 	StateVersion: 0,
-		// 	Attributes: map[string]string{
-		// 		"disk.#":               "0",
-		// 		"metadata.#":           "2",
-		// 		"metadata.0.foo":       "bar",
-		// 		"metadata.1.baz":       "qux",
-		// 		"metadata.2.with.dots": "should.work",
-		// 	},
-		// 	Expected: map[string]string{
-		// 		"metadata.foo":       "bar",
-		// 		"metadata.baz":       "qux",
-		// 		"metadata.with.dots": "should.work",
-		// 	},
-		// },
-		// "change scope from list to set": {
-		// 	StateVersion: 1,
-		// 	Attributes: map[string]string{
-		// 		"service_account.#":          "1",
-		// 		"service_account.0.email":    "xxxxxx-compute@developer.gserviceaccount.com",
-		// 		"service_account.0.scopes.#": "4",
-		// 		"service_account.0.scopes.0": "https://www.googleapis.com/auth/compute",
-		// 		"service_account.0.scopes.1": "https://www.googleapis.com/auth/datastore",
-		// 		"service_account.0.scopes.2": "https://www.googleapis.com/auth/devstorage.full_control",
-		// 		"service_account.0.scopes.3": "https://www.googleapis.com/auth/logging.write",
-		// 	},
-		// 	Expected: map[string]string{
-		// 		"service_account.#":                   "1",
-		// 		"service_account.0.email":             "xxxxxx-compute@developer.gserviceaccount.com",
-		// 		"service_account.0.scopes.#":          "4",
-		// 		"service_account.0.scopes.1693978638": "https://www.googleapis.com/auth/devstorage.full_control",
-		// 		"service_account.0.scopes.172152165":  "https://www.googleapis.com/auth/logging.write",
-		// 		"service_account.0.scopes.299962681":  "https://www.googleapis.com/auth/compute",
-		// 		"service_account.0.scopes.3435931483": "https://www.googleapis.com/auth/datastore",
-		// 	},
-		// },
+		"v0.4.2 and earlier": {
+			StateVersion: 0,
+			Attributes: map[string]string{
+				"disk.#":               "0",
+				"metadata.#":           "2",
+				"metadata.0.foo":       "bar",
+				"metadata.1.baz":       "qux",
+				"metadata.2.with.dots": "should.work",
+			},
+			Expected: map[string]string{
+				"create_timeout":     "4",
+				"metadata.foo":       "bar",
+				"metadata.baz":       "qux",
+				"metadata.with.dots": "should.work",
+			},
+		},
+		"change scope from list to set": {
+			StateVersion: 1,
+			Attributes: map[string]string{
+				"service_account.#":          "1",
+				"service_account.0.email":    "xxxxxx-compute@developer.gserviceaccount.com",
+				"service_account.0.scopes.#": "4",
+				"service_account.0.scopes.0": "https://www.googleapis.com/auth/compute",
+				"service_account.0.scopes.1": "https://www.googleapis.com/auth/datastore",
+				"service_account.0.scopes.2": "https://www.googleapis.com/auth/devstorage.full_control",
+				"service_account.0.scopes.3": "https://www.googleapis.com/auth/logging.write",
+			},
+			Expected: map[string]string{
+				"service_account.#":                   "1",
+				"service_account.0.email":             "xxxxxx-compute@developer.gserviceaccount.com",
+				"service_account.0.scopes.#":          "4",
+				"service_account.0.scopes.1693978638": "https://www.googleapis.com/auth/devstorage.full_control",
+				"service_account.0.scopes.172152165":  "https://www.googleapis.com/auth/logging.write",
+				"service_account.0.scopes.299962681":  "https://www.googleapis.com/auth/compute",
+				"service_account.0.scopes.3435931483": "https://www.googleapis.com/auth/datastore",
+			},
+		},
 		"add new create_timeout attribute": {
 			StateVersion: 2,
 			Attributes:   map[string]string{},
@@ -65,16 +66,16 @@ func TestComputeInstanceMigrateState(t *testing.T) {
 				"create_timeout": "4",
 			},
 		},
-		// "remove empty initialize_params": {
-		// 	StateVersion: 5,
-		// 	Attributes: map[string]string{
-		// 		"boot_disk.0.initialize_params.#":      "1",
-		// 		"boot_disk.0.initialize_params.0.size": "0",
-		// 	},
-		// 	Expected: map[string]string{
-		// 		"boot_disk.0.initialize_params.#": "0",
-		// 	},
-		// },
+		"remove empty initialize_params": {
+			StateVersion: 5,
+			Attributes: map[string]string{
+				"boot_disk.0.initialize_params.#":      "1",
+				"boot_disk.0.initialize_params.0.size": "0",
+			},
+			Expected: map[string]string{
+				"boot_disk.0.initialize_params.#": "0",
+			},
+		},
 	}
 
 	config := getInitializedConfig(t)
