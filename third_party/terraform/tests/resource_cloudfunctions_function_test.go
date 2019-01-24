@@ -597,8 +597,8 @@ resource "google_cloudfunctions_function" "function" {
   source_repository {
     // There isn't yet an API that'll allow us to create a source repository and
     // put code in it, so we created this repository outside the test to be used
-    // here. If this test is run outside of CI, it may fail because of permissions
-    // errors.
+    // here. If this test is run outside of CI, you may need to create your own
+    // source repo.
     url = "https://source.developers.google.com/projects/%s/repos/cloudfunctions-test-do-not-delete/moveable-aliases/master/paths/"
   }
 
