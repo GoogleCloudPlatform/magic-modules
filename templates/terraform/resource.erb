@@ -117,7 +117,8 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.each do |prop| -%>
-<%=   lines(build_schema_property_get('d', prop.name.camelcase(:lower), prop, object, 4)) -%>
+<%    output_var = (prop.name == "resourceGroupName" ? "resourceGroup" : prop.name.camelcase(:lower)) -%>
+<%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
     parameters := <%= azure_resource_go_package(object.__product) -%>.<%= object.azure_parameters_type -%>{
@@ -153,7 +154,13 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
         return fmt.Errorf("Error creating <%= object.name -%>: %+v", err)
     }
 <%  else -%>
-    // TODO: Async CreateOrUpdate Operation
+    future, err := client.<%= object.azure_create_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters)
+    if err != nil {
+        return fmt.Errorf("Error creating <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
+    }
+    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+        return fmt.Errorf("Error waiting for creation of <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
+    }
 <%  end -%>
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
@@ -161,6 +168,9 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     resp, err := client.<%= object.azure_read_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
     if err != nil {
         return err
+    }
+    if read.ID == nil {
+        return fmt.Errorf("Cannot read <%= object.name -%> %q", name)
     }
     d.SetId(*resp.ID)
 
@@ -180,7 +190,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     name := id.ResourceGroup
 <%  else -%>
     resourceGroup := id.ResourceGroup
-    // TODO: Get name out
+    name := id.Path["<%= object.azure_id_portion -%>"]
 <%  end -%>
 
     resp, err := client.<%= object.azure_read_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
@@ -211,7 +221,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  properties.each do |prop| -%>
-<%=   lines(build_schema_property_set("resp.#{prop.azure_api_path.camelcase(:upper)}", 'd', prop, object, 4)) -%>
+<%    input_var = (prop.name == "resourceGroupName" ? "resourceGroup" : "resp.#{prop.azure_api_path.camelcase(:upper)}") -%>
+<%=   lines(build_schema_property_set(input_var, 'd', prop, object, 4)) -%>
 <%  end -%>
 
     return nil
@@ -245,7 +256,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     name := id.ResourceGroup
 <%  else -%>
     resourceGroup := id.ResourceGroup
-    // TODO: Get name out
+    name := id.Path["<%= object.azure_id_portion -%>"]
 <%  end -%>
 
 <%  unless object.azure_delete_async -%>

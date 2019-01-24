@@ -64,6 +64,7 @@ module Api
       attr_reader :min_version # Minimum API version this resource is in
 
       # Azure Specific Attributes
+      attr_reader :azure_id_portion
       attr_reader :azure_create_async
       attr_reader :azure_delete_async
       attr_reader :azure_create_verb
@@ -263,6 +264,7 @@ module Api
       check_optional_property :input, :boolean
       check_optional_property :min_version, String
 
+      check_optional_property :azure_id_portion, String
       check_optional_property :azure_create_async, :boolean
       check_optional_property :azure_delete_async, :boolean
       check_optional_property :azure_create_verb, String

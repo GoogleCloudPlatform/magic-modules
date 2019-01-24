@@ -35,6 +35,7 @@ func resourceArmContainerRegistry() *schema.Resource {
             "name": {
                 Type: schema.TypeString,
                 Required: true,
+              ForceNew: true,
             },
             "resource_group_name": resourceGroupNameSchema(),
             "admin_enabled": {
@@ -66,7 +67,7 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
     ctx := meta.(*ArmClient).StopContext
 
     name := d.Get("name").(string)
-    resourceGroupName := d.Get("resource_group_name").(string)
+    resourceGroup := d.Get("resource_group_name").(string)
     location := azureRMNormalizeLocation(d.Get("location").(string))
     // TODO: Property 'sku' of type Api::Type::Enum is not supported
     // TODO: Property 'admin_enabled' of type Api::Type::Boolean is not supported
@@ -74,7 +75,6 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := containerRegistry.Registry{
-        Rgname: expandArmContainerRegistryResource_group_name(resourceGroupName),
         Location: utils.String(location),
         Sku: expandArmContainerRegistrySku(sku),
         RegistryProperties: utils.Bool(adminEnabled),
@@ -84,14 +84,21 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
 
 
 
-    if _, err := client.Create(ctx, resourceGroup, name, parameters); err != nil {
-        return fmt.Errorf("Error creating ContainerRegistry: %+v", err)
+    future, err := client.Create(ctx, resourceGroup, name, parameters)
+    if err != nil {
+        return fmt.Errorf("Error creating ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+    }
+    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+        return fmt.Errorf("Error waiting for creation of ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
 
 
     resp, err := client.Get(ctx, resourceGroup, name)
     if err != nil {
         return err
+    }
+    if read.ID == nil {
+        return fmt.Errorf("Cannot read ContainerRegistry %q", name)
     }
     d.SetId(*resp.ID)
 
@@ -107,7 +114,7 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
         return fmt.Errorf("Error parsing ContainerRegistry ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
-    // TODO: Get name out
+    name := id.Path["registries"]
 
     resp, err := client.Get(ctx, resourceGroup, name)
     if err != nil {
@@ -122,7 +129,7 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 
 
     d.Set("name", resp.Name)
-    d.Set("resource_group_name", resp.Rgname)
+    d.Set("resource_group_name", resourceGroup)
     if location := resp.Location; location != nil {
         d.Set("location", azureRMNormalizeLocation(*location))
     }
@@ -149,7 +156,7 @@ func resourceArmContainerRegistryDelete(d *schema.ResourceData, meta interface{}
         return fmt.Errorf("Error parsing ContainerRegistry ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
-    // TODO: Get name out
+    name := id.Path["registries"]
 
     future, err := client.Delete(ctx, resourceGroup, name)
     if err != nil {

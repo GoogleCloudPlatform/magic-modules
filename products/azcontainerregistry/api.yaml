@@ -14,7 +14,9 @@ objects:
     name: ContainerRegistry
     api_name: ContainerRegistry
     base_url: NotUsedInAzure
+    azure_id_portion: registries
     azure_create_verb: Create
+    azure_create_async: true
     azure_update_verb: Update
     azure_read_verb: Get
     azure_delete_verb: Delete
@@ -27,9 +29,10 @@ objects:
         name: 'name'
         description: 'The name of the container registry.'
         required: true
+        input: true
         azure_api_path: 'name'
       - !ruby/object:Api::Azure::Type::ResourceGroupName
-        name: 'resource_group_name'
+        name: 'resourceGroupName'
         description: 'The resource group name of the container registry.'
         required: true
         input: true
@@ -51,16 +54,16 @@ objects:
         default_value: :Classic
         azure_api_path: 'sku'
       - !ruby/object:Api::Type::Boolean
-        name: 'admin_enabled'
+        name: 'adminEnabled'
         description: 'Specifies whether admin is enabled of this container registry.'
         default_value: false
         azure_api_path: 'registryProperties'
       - !ruby/object:Api::Type::String
-        name: 'storage_account_id'
+        name: 'storageAccountId'
         description: 'The storage account ID of the container registry.'
         azure_api_path: 'storageAccount.id'
       - !ruby/object:Api::Type::String
-        name: 'login_server'
+        name: 'loginServer'
         description: 'The login server of the container registry.'
         output: true
         azure_api_path: 'loginServer'
