@@ -199,6 +199,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       direction: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        # Because most fields on this resource are `Computed`, it is easy
+        # for a user to wind up in a broken state if they switch a rule from
+        # being ingress to egress without examining the diff carefully.
+        # See terraform issue #2713 for more context.
+        input: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
