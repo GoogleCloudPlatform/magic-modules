@@ -52,7 +52,7 @@ def wait_for_completion(status, op_result, module):
 <% end -%>
         raise_if_errors(op_result, <%= err_path -%>, module)
         time.sleep(<%= sprintf('%.1f', object.async.operation.wait_ms / 1000.0) %>)
-        op_result = <%= method_call('fetch_resource', ['module', 'op_uri', ("'#{object.async.operation.kind}'" if object.kind?)]) %>
+        op_result = <%= method_call('fetch_resource', ['module', 'op_uri', ("'#{object.async.operation.kind}'" if object.kind?), 'False']) %>
         status = navigate_hash(op_result, <%= stat_path -%>)
     return op_result
 
