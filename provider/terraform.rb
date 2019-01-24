@@ -132,7 +132,7 @@ module Provider
       target_folder = File.join(data[:output_folder], dir)
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
+      product_name = data[:product].name.underscore
       filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
       generate_resource_file data.clone.merge(
         default_template: 'templates/terraform/resource.erb',
@@ -146,7 +146,7 @@ module Provider
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
+      product_name = data[:product].name.underscore
 
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
@@ -163,14 +163,14 @@ module Provider
       target_folder = File.join(data[:output_folder], dir)
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
+      product_name = data[:product].name.underscore
       filepath =
         File.join(
           target_folder,
           "resource_#{product_name}_#{name}_generated_test.go"
         )
       generate_resource_file data.clone.merge(
-        product: data[:product_name].camelize(:upper),
+        product: data[:product].name,
         resource_name: data[:object].name.camelize(:upper),
         default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
         out_file: filepath

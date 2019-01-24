@@ -48,12 +48,12 @@ module Provider
       name = data[:object].name.underscore
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/singular_resource.erb',
-        out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}.rb")
+        out_file: File.join(target_folder, "google_#{data[:product].api_name}_#{name}.rb")
       )
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/plural_resource.erb',
         out_file: \
-          File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
+          File.join(target_folder, "google_#{data[:product].api_name}_#{name}".pluralize + '.rb')
       )
       generate_documentation(data, name, false)
       generate_documentation(data, name, true)
@@ -107,7 +107,7 @@ module Provider
           data[:output_folder],
           { prop[:target] => prop[:source] },
           {
-            product_ns: data[:product_name].camelize(:upper)
+            product_ns: data[:product].api_name.camelize(:upper)
           }.merge((prop[:overrides] || {}))
         )
       end
@@ -123,7 +123,7 @@ module Provider
         plural: plural,
         doc_generation: true,
         default_template: 'templates/inspec/doc_template.md.erb',
-        out_file: File.join(docs_folder, "google_#{data[:product_name]}_#{name}.md")
+        out_file: File.join(docs_folder, "google_#{data[:product].api_name}_#{name}.md")
       )
     end
 
@@ -141,7 +141,7 @@ module Provider
 
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
 
-      name = "google_#{data[:product_name]}_#{data[:object].name.underscore}"
+      name = "google_#{data[:product].api_name}_#{data[:object].name.underscore}"
 
       generate_inspec_test(data, name, target_folder, name)
 
@@ -180,7 +180,7 @@ module Provider
       data.clone.merge(
         api_name: data[:api_name].camelize(:upper),
         object_type: data[:obj_name].camelize(:upper),
-        product_ns: data[:product_name].camelize(:upper),
+        product_ns: data[:product].api_name.camelize(:upper),
         class_name: if data[:emit_array]
                       data[:property].item_type.property_class.last
                     else
