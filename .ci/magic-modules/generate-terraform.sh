@@ -60,7 +60,7 @@ git checkout -B "$(cat ../../branchname)"
 
 apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
 
-go mod vendor
+GO111MODULE=on go mod vendor
 
 popd
 popd
