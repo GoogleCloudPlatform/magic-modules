@@ -1,0 +1,70 @@
+--- !ruby/object:Api::Product
+name: Azure Container Registry
+prefix: arm
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: NotUsedInAzure
+scopes:
+  - NotUsedInAzure
+azure_namespace: 'Microsoft.ContainerRegistry'
+azure_version: 'stable/2018-09-01'
+objects:
+  - !ruby/object:Api::Resource
+    name: ContainerRegistry
+    api_name: ContainerRegistry
+    base_url: NotUsedInAzure
+    azure_create_verb: Create
+    azure_update_verb: Update
+    azure_read_verb: Get
+    azure_delete_verb: Delete
+    azure_delete_async: true
+    azure_parameters_type: Registry
+    description: |
+      Manages a container registry on Azure.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'The name of the container registry.'
+        required: true
+        azure_api_path: 'name'
+      - !ruby/object:Api::Azure::Type::ResourceGroupName
+        name: 'resource_group_name'
+        description: 'The resource group name of the container registry.'
+        required: true
+        input: true
+        azure_api_path: 'rgname'
+      - !ruby/object:Api::Azure::Type::Location
+        name: 'location'
+        description: 'The location where the container registry should be created.'
+        required: true
+        input: true
+        azure_api_path: 'location'
+      - !ruby/object:Api::Type::Enum
+        name: 'sku'
+        values:
+          - :Classic
+          - :Basic
+          - :Standard
+          - :Premium
+        description: 'The sku of the container registry.'
+        default_value: :Classic
+        azure_api_path: 'sku'
+      - !ruby/object:Api::Type::Boolean
+        name: 'admin_enabled'
+        description: 'Specifies whether admin is enabled of this container registry.'
+        default_value: false
+        azure_api_path: 'registryProperties'
+      - !ruby/object:Api::Type::String
+        name: 'storage_account_id'
+        description: 'The storage account ID of the container registry.'
+        azure_api_path: 'storageAccount.id'
+      - !ruby/object:Api::Type::String
+        name: 'login_server'
+        description: 'The login server of the container registry.'
+        output: true
+        azure_api_path: 'loginServer'
+      - !ruby/object:Api::Azure::Type::Tags
+        name: 'tags'
+        description: 'A mapping of tags to assign to the container registry.'
+        azure_api_path: 'tags'

@@ -1,0 +1,5 @@
+--- !ruby/object:Provider::Terraform::Config
+name: Arm
+overrides: !ruby/object:Provider::ResourceOverrides
+  ContainerRegistry: !ruby/object:Provider::Terraform::ResourceOverride
+    example:
