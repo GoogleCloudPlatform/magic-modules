@@ -74,6 +74,10 @@ variable "target_tcp_proxy" {
   type = "map"
 }
 
+variable "regional_cluster" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -308,4 +312,11 @@ resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
   name            = "${var.target_tcp_proxy["name"]}"
   proxy_header    = "${var.target_tcp_proxy["proxy_header"]}"
   backend_service = "${google_compute_backend_service.gcp-inspec-tcp-backend-service.self_link}"
+}
+
+resource "google_container_cluster" "gcp-inspec-regional-cluster" {
+  project = "${var.gcp_project_id}"
+  name = "${var.regional_cluster["name"]}"
+  region = "${var.regional_cluster["region"]}"
+  initial_node_count = "${var.regional_cluster["initial_node_count"]}"
 }

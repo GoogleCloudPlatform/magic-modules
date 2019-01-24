@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% regional_cluster = grab_attributes['regional_cluster'] -%>
+describe google_container_regional_cluster(project: <%= gcp_project_id -%>, location: <%= doc_generation ? "'#{regional_cluster['region']}'" : "regional_cluster['region']" -%>, name: <%= doc_generation ? "'#{regional_cluster['name']}'" : "regional_cluster['name']" -%>) do
+  it { should exist }
+  its('initial_node_count') { should eq <%= doc_generation ? "'#{regional_cluster['initial_node_count']}'" : "regional_cluster['initial_node_count']" -%>}
+end
