@@ -32,13 +32,9 @@ module Overrides
           # resource.
           :mutex,
 
-          # Deprecated - examples in documentation
-          # TODO(rileykarson): Remove examples and replace them with new examples
-          :examples,
-
-          # New examples in documentation - will take the "examples" name when
-          # old-style examples are gone.
-          :example
+          # Examples in documentation. Backed by generated tests, and have
+          # corresponding OiCS walkthroughs.
+          :examples
         ]
       end
 
