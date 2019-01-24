@@ -482,7 +482,7 @@ objects:
       # being NodePool will be described outside in their own resource, reaching
       # the same behavior and also compliant with the current API.
       - !ruby/object:Api::Type::Array
-        name: 'location'
+        name: 'locations'
         description: |
           The list of Google Compute Engine locations in which the cluster's
           nodes should be located.
