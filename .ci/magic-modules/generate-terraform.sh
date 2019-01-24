@@ -20,7 +20,7 @@ popd
 
 pushd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
-go get
+GO111MODULE=on go get
 # This line removes every file which is not specified here.
 # If you add files to Terraform which are not generated, you have to add them here.
 # It uses the somewhat obtuse 'find' command.  To explain:
