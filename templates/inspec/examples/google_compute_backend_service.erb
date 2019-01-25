@@ -1,0 +1,14 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% backend_service = grab_attributes['backend_service'] -%>
+describe google_compute_backend_service(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{backend_service['name']}'" : "backend_service['name']" -%>) do
+  it { should exist }
+  its('description') { should eq <%= doc_generation ? "'#{backend_service['description']}'" : "backend_service['description']" -%> }
+  its('port_name') { should eq <%= doc_generation ? "'#{backend_service['port_name']}'" : "backend_service['port_name']" -%> }
+  its('protocol') { should eq <%= doc_generation ? "'#{backend_service['protocol']}'" : "backend_service['protocol']" -%> }
+  its('timeout_sec') { should eq <%= doc_generation ? "'#{backend_service['timeout_sec']}'" : "backend_service['timeout_sec']" -%> }
+  its('enable_cdn') { should eq <%= doc_generation ? "'#{backend_service['enable_cdn']}'" : "backend_service['enable_cdn']" -%> }
+end
+
+describe google_compute_backend_service(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
