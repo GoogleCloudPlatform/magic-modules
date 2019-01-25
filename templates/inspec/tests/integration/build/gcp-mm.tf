@@ -38,6 +38,10 @@ variable "health_check" {
   type = "map"
 }
 
+variable "backend_service" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -140,4 +144,20 @@ resource "google_compute_health_check" "gcp-inspec-health-check" {
  tcp_health_check {
    port = "${var.health_check["tcp_health_check_port"]}"
  }
+}
+
+resource "google_compute_backend_service" "gcp-inspec-backend-service" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.backend_service["name"]}"
+  description = "${var.backend_service["description"]}"
+  port_name   = "${var.backend_service["port_name"]}"
+  protocol    = "${var.backend_service["protocol"]}"
+  timeout_sec = "${var.backend_service["timeout_sec"]}"
+  enable_cdn  = "${var.backend_service["enable_cdn"]}"
+
+  backend {
+    group = "${google_compute_instance_group_manager.gcp-inspec-igm.instance_group}"
+  }
+
+  health_checks = ["${google_compute_health_check.gcp-inspec-health-check.self_link}"]
 }
