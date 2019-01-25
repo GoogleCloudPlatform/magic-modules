@@ -67,3 +67,10 @@ http_health_check:
   request_path: /health_check
   timeout_sec: 20
   check_interval_sec: 20
+
+https_health_check:
+  name: inspec-gcp-https-health-check
+  request_path: /https_health_check
+  timeout_sec: 15
+  check_interval_sec: 15
+  unhealthy_threshold: 3
