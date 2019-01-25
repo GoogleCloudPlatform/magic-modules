@@ -42,11 +42,11 @@ variable "backend_service" {
   type = "map"
 }
 
-<<<<<<< HEAD
 variable "http_health_check" {
-=======
+  type = "map"
+}
+
 variable "https_health_check" {
->>>>>>> Add HTTPS health check to InSpec
   type = "map"
 }
 
