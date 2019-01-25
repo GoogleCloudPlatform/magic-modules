@@ -53,3 +53,11 @@ health_check:
   timeout_sec: 10
   check_interval_sec: 10
   tcp_health_check_port: 80
+
+backend_service:
+  name: inspec-gcp-backend-service
+  description: A description
+  port_name: http
+  protocol: HTTP
+  timeout_sec: 10
+  enable_cdn: true
