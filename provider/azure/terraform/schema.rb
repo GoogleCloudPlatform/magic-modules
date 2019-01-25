@@ -5,7 +5,9 @@ module Provider
 
         def go_type(property)
           case property
-          when Api::Type::String
+          when Api::Type::Boolean
+            'bool'
+          when Api::Type::Enum, Api::Type::String
             'string'
           when Api::Type::KeyValuePairs
             'map[string]interface{}'
@@ -46,7 +48,7 @@ module Provider
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_get.erb'
-          when Api::Type::String, Api::Type::KeyValuePairs
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
             'templates/terraform/schemas/basic_get.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
@@ -59,7 +61,7 @@ module Provider
             'templates/azure/terraform/schemas/location_set.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags_set.erb'
-          when Api::Type::String
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String
             'templates/terraform/schemas/basic_set.erb'
           else
             'templates/terraform/schemas/unsupport.erb'

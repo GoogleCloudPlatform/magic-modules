@@ -20,6 +20,7 @@ require 'compile/core'
 require 'google/yaml_validator'
 
 require 'api/azure/type'
+require 'api/azure/sdk_typedef'
 
 module Api
   # Process <product>.yaml and produces output module

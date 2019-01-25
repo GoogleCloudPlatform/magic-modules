@@ -121,6 +121,20 @@ module Google
       check_property_list(name, type)
     end
 
+    def check_property_hash(name, keyType = nil, valType = nil)
+      obj_hash = instance_variable_get("@#{name}")
+      if obj_hash.nil?
+        Google::LOGGER.debug "No next level @ #{object_display_name}: #{name}"
+      else
+        Google::LOGGER.debug \
+          "Checking next level for #{object_display_name}: #{name}"
+          obj_hash.each do |k, v|
+            check_property_value "#{name}:key", k, keyType
+            check_property_value "#{name}:value", v, valType
+          end
+      end
+    end
+
     # Verifies if a property is of a given type and its value are one of the
     # valid possibilities.
     def check_property_oneof(property, valid_values, type = nil)

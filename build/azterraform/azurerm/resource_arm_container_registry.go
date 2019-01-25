@@ -69,15 +69,15 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
     name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
     location := azureRMNormalizeLocation(d.Get("location").(string))
-    // TODO: Property 'sku' of type Api::Type::Enum is not supported
-    // TODO: Property 'admin_enabled' of type Api::Type::Boolean is not supported
+    sku := d.Get("sku").(string)
+    adminEnabled := d.Get("admin_enabled").(bool)
     storageAccountId := d.Get("storage_account_id").(string)
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := containerRegistry.Registry{
         Location: utils.String(location),
         Sku: expandArmContainerRegistrySku(sku),
-        RegistryProperties: utils.Bool(adminEnabled),
+        Properties::Adminuserenabled: utils.Bool(adminEnabled),
         StorageAccount.id: utils.String(storageAccountId),
         Tags: expandTags(tags),
     }
@@ -133,8 +133,8 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
     if location := resp.Location; location != nil {
         d.Set("location", azureRMNormalizeLocation(*location))
     }
-    // TODO: Property 'sku' of type Api::Type::Enum is not supported
-    // TODO: Property 'admin_enabled' of type Api::Type::Boolean is not supported
+    d.Set("sku", resp.Sku)
+    d.Set("admin_enabled", resp.Properties::Adminuserenabled)
     d.Set("storage_account_id", resp.StorageAccount.id)
     d.Set("login_server", resp.LoginServer)
     flattenAndSetTags(d, resp.Tags)
@@ -143,6 +143,16 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).containerRegistryClient
+    ctx := meta.(*ArmClient).StopContext
+
+    id, err := parseAzureResourceID(d.Id())
+    if err != nil {
+        return fmt.Errorf("Error parsing ContainerRegistry ID %q: %+v", d.Id(), err)
+    }
+    resourceGroup := id.ResourceGroup
+    name := id.Path["registries"]
+
     // TODO: Complete Update Function
 }
 
