@@ -35,8 +35,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   GlobalForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  HttpsHealthCheck: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
