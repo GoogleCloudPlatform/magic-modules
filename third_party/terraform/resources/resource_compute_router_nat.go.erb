@@ -378,6 +378,9 @@ func flattenRouterNatSubnetworkToNatBeta(subnetworksToNat []*computeBeta.RouterN
 		stnMap := make(map[string]interface{})
 		stnMap["name"] = ConvertSelfLinkToV1(subnetworkToNat.Name)
 		stnMap["source_ip_ranges_to_nat"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SourceIpRangesToNat))
+		if stnMap["source_ip_ranges_to_nat"].Len() == 0 {
+			stnMap["source_ip_ranges_to_nat"].add("ALL_IP_RANGES")
+		}
 		stnMap["secondary_ip_range_names"] = schema.NewSet(schema.HashString, convertStringArrToInterface(subnetworkToNat.SecondaryIpRangeNames))
 		result = append(result, stnMap)
 	}
