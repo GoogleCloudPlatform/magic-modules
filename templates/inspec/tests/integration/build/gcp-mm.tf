@@ -46,6 +46,10 @@ variable "http_health_check" {
   type = "map"
 }
 
+variable "https_health_check" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -173,4 +177,14 @@ resource "google_compute_http_health_check" "gcp-inspec-http-health-check" {
 
   timeout_sec        = "${var.http_health_check["timeout_sec"]}"
   check_interval_sec = "${var.http_health_check["check_interval_sec"]}"
+}
+
+resource "google_compute_https_health_check" "gcp-inspec-https-health-check" {
+  project      = "${var.gcp_project_id}"
+  name         = "${var.https_health_check["name"]}"
+  request_path = "${var.https_health_check["request_path"]}"
+
+  timeout_sec         = "${var.https_health_check["timeout_sec"]}"
+  check_interval_sec  = "${var.https_health_check["check_interval_sec"]}"
+  unhealthy_threshold = "${var.https_health_check["unhealthy_threshold"]}"
 }
