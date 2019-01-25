@@ -144,7 +144,7 @@ module Compile
       content = ctx.local_variable_get(:_erbout) if has_erbout # save code
       ctx.local_variable_set(:compiler, compiler)
       Google::LOGGER.debug "Compiling #{file}"
-      input = ERB.new get_helper_file(file), nil, '-%>'
+      input = ERB.new get_helper_file(file), trim_mode: '->'
       compiled = input.result(ctx)
       ctx.local_variable_set(:_erbout, content) if has_erbout # restore code
       compiled
@@ -226,9 +226,9 @@ module Compile
     # The key-value pair may be a Hash or a Binding
     def compile_string(ctx, source)
       if ctx.is_a? Binding
-        ERB.new(source, nil, '-%>').result(ctx).split("\n")
+        ERB.new(source, trim_mode: '->').result(ctx).split("\n")
       elsif ctx.is_a? Hash
-        ERB.new(source, nil, '-%>').result(
+        ERB.new(source, trim_mode: '->').result(
           OpenStruct.new(ctx).instance_eval { binding.of_caller(1) }
         ).split("\n")
       else
