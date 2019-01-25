@@ -48,6 +48,9 @@ if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
 fi
 
 pushd "build/$SHORT_NAME"
+
+GO111MODULE=on go mod vendor
+
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
@@ -58,8 +61,6 @@ git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # 
 git checkout -B "$(cat ../../branchname)"
 
 apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
-
-GO111MODULE=on go mod vendor
 
 popd
 popd
