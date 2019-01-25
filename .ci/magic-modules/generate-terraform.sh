@@ -20,7 +20,6 @@ popd
 
 pushd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 
-go get
 # This line removes every file which is not specified here.
 # If you add files to Terraform which are not generated, you have to add them here.
 # It uses the somewhat obtuse 'find' command.  To explain:
@@ -49,6 +48,9 @@ if [ -z "$TERRAFORM_COMMIT_MSG" ]; then
 fi
 
 pushd "build/$SHORT_NAME"
+
+GO111MODULE=on go mod vendor
+
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
