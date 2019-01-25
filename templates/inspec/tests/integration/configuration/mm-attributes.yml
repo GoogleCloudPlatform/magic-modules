@@ -61,3 +61,9 @@ backend_service:
   protocol: HTTP
   timeout_sec: 10
   enable_cdn: true
+
+http_health_check:
+  name: inspec-gcp-http-health-check
+  request_path: /health_check
+  timeout_sec: 20
+  check_interval_sec: 20
