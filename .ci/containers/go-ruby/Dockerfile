@@ -34,3 +34,4 @@ RUN gem install bundler --version "$BUNDLER_VERSION" --force
 
 ADD Gemfile Gemfile
 RUN bundle install
+RUN rbenv rehash

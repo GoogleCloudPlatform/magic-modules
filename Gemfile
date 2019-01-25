@@ -8,5 +8,5 @@ group :test do
   gem 'mocha', '~> 1.3.0'
   gem 'parallel_tests'
   gem 'rspec'
-  gem 'rubocop', '~> 0.60.0'
+  gem 'rubocop', '~> 0.63.1'
 end
