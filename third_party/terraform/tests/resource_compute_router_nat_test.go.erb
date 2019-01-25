@@ -195,7 +195,6 @@ func testAccComputeRouterNatWithManualIpAndSubnetConfiguration(testId string) st
 			source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
 			subnetwork {
 			  name                    = "${google_compute_subnetwork.foobar.self_link}"
-			  source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
 			}
 		}
 	`, testId, testId, testId, testId, testId)
