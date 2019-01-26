@@ -209,7 +209,7 @@ module Api
     # Represents a string
     class String < Primitive
       def initialize(name = nil)
-        @name ||= name
+        @name = name
       end
 
       PROJECT = Api::Type::String.new('project')
