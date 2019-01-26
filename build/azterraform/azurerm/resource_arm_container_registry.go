@@ -16,8 +16,6 @@ package azurerm
 
 
 
-
-
 func resourceArmContainerRegistry() *schema.Resource {
     return &schema.Resource{
         Create: resourceArmContainerRegistryCreate,
@@ -76,9 +74,15 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
 
     parameters := containerRegistry.Registry{
         Location: utils.String(location),
-        Sku: expandArmContainerRegistrySku(sku),
-        Properties::Adminuserenabled: utils.Bool(adminEnabled),
-        StorageAccount.id: utils.String(storageAccountId),
+        Sku: &containerRegistry.Sku{
+            Name: expandArmContainerRegistrySku(sku),
+        }
+        RegistryProperties: &containerRegistry.RegistryProperties{
+            AdminUserEnabled: utils.Bool(adminEnabled),
+        }
+        StorageAccount: &containerRegistry.StorageAccountProperties{
+            ID: utils.String(storageAccountId),
+        }
         Tags: expandTags(tags),
     }
 
@@ -130,14 +134,14 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 
     d.Set("name", resp.Name)
     d.Set("resource_group_name", resourceGroup)
-    if location := resp.Location; location != nil {
+    if location := resp.::Location; location != nil {
         d.Set("location", azureRMNormalizeLocation(*location))
     }
-    d.Set("sku", resp.Sku)
-    d.Set("admin_enabled", resp.Properties::Adminuserenabled)
-    d.Set("storage_account_id", resp.StorageAccount.id)
-    d.Set("login_server", resp.LoginServer)
-    flattenAndSetTags(d, resp.Tags)
+    d.Set("sku", resp.::Sku::Name)
+    d.Set("admin_enabled", resp.::Properties::Adminuserenabled)
+    d.Set("storage_account_id", resp.::Storageaccount::Id)
+    d.Set("login_server", resp.::Loginserver)
+    flattenAndSetTags(d, resp.::Tags)
 
     return nil
 }

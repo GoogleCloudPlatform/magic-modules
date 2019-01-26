@@ -34,12 +34,11 @@ package azurerm
     has_project = object.base_url.include?("{{project}}")
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
-
 <%
     azure_is_resource_group = object.name == "ResourceGroup"
     azure_client_name = "#{object.api_name}Client".camelcase(:lower)
+    sdk_package = azure_resource_go_package(object.__product)
 -%>
-
 <%
     combine_create_update = (object.azure_create_verb == object.azure_update_verb)
     create_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Create")
@@ -121,17 +120,8 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
-    parameters := <%= azure_resource_go_package(object.__product) -%>.<%= object.azure_parameters_type -%>{
-<%  settable_properties.each do |prop| -%>
-<%    unless prop.name == "name" || prop.name == "resourceGroupName" -%>
-<%      if expand_funcs.include?(prop.class) -%>
-        <%= prop.azure_api_path.camelcase(:upper) -%>: <%= expand_func(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
-<%      else -%>
-        <%= prop.azure_api_path.camelcase(:upper) -%>: expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= prop.name.camelcase(:lower) -%>),
-<%      end -%>
-<%    end -%>
-<%  end -%>
-    }
+<%  sdk_type_def = object.azure_sdk_type_defs["/"] -%>
+<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object)) -%>
 
 <%  if object.custom_code.encoder -%>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)

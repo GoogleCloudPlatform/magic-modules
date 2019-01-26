@@ -7,7 +7,7 @@ module Api
 
       def validate
         super
-        check_property :go_field_name
+        check_optional_property :go_field_name
       end
 
       class BooleanObject < SDKTypeDefinition

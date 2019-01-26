@@ -1,0 +1,18 @@
+<%= output_statement -%><%= sdk_obj_path == "/" ? "" : "&" -%><%= sdk_package_name -%>.<%= sdk_type_def.go_type_name -%>{
+<%
+    one_level_props = Hash.new
+    properties.select { |p| p.azure_api_path.start_with?(sdk_obj_path) }.each do |prop|
+      prop_key = prop.azure_api_path[sdk_obj_path.length..-1].split("/")[0]
+      prop_list = one_level_props[prop_key] || Array.new
+      one_level_props[prop_key] = prop_list << prop
+    end
+-%>
+<%
+    one_level_props.each do |prop_name, prop_list|
+      sdk_path = sdk_obj_path + prop_name
+      sdk_type_def = object.azure_sdk_type_defs[sdk_path]
+      output = sdk_type_def.go_field_name + ": "
+-%>
+<%=   lines(build_property_to_sdk_object(output, sdk_path + "/", sdk_type_def, sdk_package_name, resource_name, properties, object)) -%>
+<%  end -%>
+}

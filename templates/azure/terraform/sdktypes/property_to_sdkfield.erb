@@ -1,0 +1,6 @@
+<%  property = properties.find { |p| p.azure_api_path == sdk_obj_path[0..-2] } -%>
+<%  if expand_funcs.include?(property.class) -%>
+<%=   output_statement -%><%= expand_func(property) -%>(<%= property.name.camelcase(:lower) -%>),
+<%  else -%>
+<%=   output_statement -%>expand<%= resource_name -%><%= titlelize_property(property) -%>(<%= property.name.camelcase(:lower) -%>),
+<%  end -%>

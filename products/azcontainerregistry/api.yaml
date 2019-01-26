@@ -16,25 +16,29 @@ objects:
     base_url: NotUsedInAzure
 
     azure_sdk_type_defs:
-      'location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+      '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+        go_type_name: Registry
+      '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
         go_field_name: Location
-      'properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+      '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
         go_field_name: RegistryProperties
         go_type_name: RegistryProperties
-      'properties/adminUserEnabled': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
+      '/properties/adminUserEnabled': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
         go_field_name: AdminUserEnabled
-      'sku': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+      '/sku': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
         go_field_name: Sku
         go_type_name: Sku
-      'sku/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+      '/sku/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
         go_field_name: Name
-      'sku/tier': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+      '/sku/tier': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
         go_field_name: Tier
-      'storageAccount': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+      '/storageAccount': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
         go_field_name: StorageAccount
         go_type_name: StorageAccountProperties
-      'storageAccount/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+      '/storageAccount/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
         go_field_name: ID
+      '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+        go_field_name: Tags
 
     azure_id_portion: registries
     azure_create_verb: Create
@@ -65,7 +69,7 @@ objects:
         description: 'The location where the container registry should be created.'
         required: true
         input: true
-        azure_api_path: 'location'
+        azure_api_path: '/location'
       - !ruby/object:Api::Type::Enum
         name: 'sku'
         values:
@@ -75,22 +79,22 @@ objects:
           - :Premium
         description: 'The sku of the container registry.'
         default_value: :Classic
-        azure_api_path: 'sku/name'
+        azure_api_path: '/sku/name'
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
         description: 'Specifies whether admin is enabled of this container registry.'
         default_value: false
-        azure_api_path: 'properties/adminUserEnabled'
+        azure_api_path: '/properties/adminUserEnabled'
       - !ruby/object:Api::Type::String
         name: 'storageAccountId'
         description: 'The storage account ID of the container registry.'
-        azure_api_path: 'storageAccount/id'
+        azure_api_path: '/storageAccount/id'
       - !ruby/object:Api::Type::String
         name: 'loginServer'
         description: 'The login server of the container registry.'
         output: true
-        azure_api_path: 'loginServer'
+        azure_api_path: '/loginServer'
       - !ruby/object:Api::Azure::Type::Tags
         name: 'tags'
         description: 'A mapping of tags to assign to the container registry.'
-        azure_api_path: 'tags'
+        azure_api_path: '/tags'
