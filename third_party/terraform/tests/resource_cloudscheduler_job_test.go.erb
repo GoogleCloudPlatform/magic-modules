@@ -34,6 +34,11 @@ func TestAccCloudSchedulerJob_pubsub(t *testing.T) {
 					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Etc/UTC"),
 				),
 			},
+			{
+				ResourceName: jobResourceName,
+				ImportState:  true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -58,6 +63,11 @@ func TestAccCloudSchedulerJob_http(t *testing.T) {
 					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "America/New_York"),
 				),
 			},
+			{
+				ResourceName: jobResourceName,
+				ImportState:  true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -81,6 +91,11 @@ func TestAccCloudSchedulerJob_appEngine(t *testing.T) {
 					resource.TestCheckResourceAttr(jobResourceName, "schedule", "*/4 * * * *"),
 					resource.TestCheckResourceAttr(jobResourceName, "time_zone", "Europe/London"),
 				),
+			},
+			{
+				ResourceName: jobResourceName,
+				ImportState:  true,
+				ImportStateVerify: true,
 			},
 		},
 	})
