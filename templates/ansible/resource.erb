@@ -277,7 +277,7 @@ def resource_to_request(module):
   properties_in_request = [
     object&.parameters&.select { |p| p.input },
     object.properties.reject(&:output)
-  ].flatten.compact
+  ].flatten.compact.reject(&:url_param_only)
 -%>
 <%
   request_hash = {
