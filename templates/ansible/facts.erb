@@ -113,11 +113,7 @@ def main():
     module.exit_json(**return_value)
 
 
-<% if object.collection -%>
-<%= lines(emit_link('collection', build_url(object.collection), object)) -%>
-<% else # object.collection -%>
 <%= lines(emit_link('collection', build_url(object.collection_url), object)) -%>
-<% end # object.collection -%>
 
 
 <%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
