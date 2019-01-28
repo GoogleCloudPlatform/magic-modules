@@ -16,7 +16,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   FirewallRule: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{priority}}"
     import_format: ["{{project}}/{{priority}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_firewall_rule_basic"
         primary_resource_id: "rule"
