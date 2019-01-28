@@ -85,7 +85,7 @@ func TestAccProjectService_disableDependentServices(t *testing.T) {
 			},
 			{
 				Config:      testAccProjectService_dependencyRemoved(services, pid, pname, org),
-				ExpectError: regexp.MustCompile("Please use disable_dependent_services flag if you want to proceed"),
+				ExpectError: regexp.MustCompile("Please specify disable_dependent_services=true if you want to proceed with disabling all services."),
 			},
 			{
 				Config: testAccProjectService_disableDependentServices(services, pid, pname, org, "true"),
