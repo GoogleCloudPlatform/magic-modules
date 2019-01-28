@@ -54,6 +54,10 @@ variable "instance_template" {
   type = "map"
 }
 
+variable "global_address" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -223,4 +227,10 @@ resource "google_compute_instance_template" "gcp-inspec-instance-template" {
   service_account {
     scopes = ["${var.instance_template["service_account_scope"]}"]
   }
+}
+
+resource "google_compute_global_address" "gcp-inspec-global-address" {
+  project = "${var.gcp_project_id}"
+  name = "${var.global_address["name"]}"
+  ip_version = "${var.global_address["ip_version"]}"
 }
