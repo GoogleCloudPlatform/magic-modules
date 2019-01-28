@@ -16,8 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
     import_format: ["projects/{{project}}/locations/{{region}}/instances/{{name}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: 'templates/terraform/pre_update/redis_instance.erb'
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "redis_instance_basic"
