@@ -1,0 +1,38 @@
+<%# The license inside this block applies to this file.
+	# Copyright 2018 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) (interface{}) {
+  var headers = v.(map[string]interface{})
+  if v, ok := headers["User-Agent"]; ok {
+    if v.(string) == "AppEngine-Google; (+http://code.google.com/appengine)" {
+      delete(headers, "User-Agent")
+    } else if v.(string) == "Google-Cloud-Scheduler" {
+      delete(headers, "User-Agent")
+    } else {
+      headers["User-Agent"] = strings.TrimSpace(strings.Replace(v.(string), "AppEngine-Google; (+http://code.google.com/appengine)","", -1))
+    }
+  }
+  if v, ok := headers["Content-Type"]; ok {
+    if v.(string) == "application/octet-stream" {
+      delete(headers, "Content-Type")
+    }
+  }
+  for key, _ := range headers {
+    match, _ := regexp.MatchString("(X-Google-|X-AppEngine-|Content-Length).*", key)
+    if match {
+      delete(headers, key)
+    }
+  }
+	return headers
+}
