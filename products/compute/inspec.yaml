@@ -41,8 +41,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   InstanceGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  InstanceTemplate: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   InterconnectAttachment: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Inspec::ResourceOverride

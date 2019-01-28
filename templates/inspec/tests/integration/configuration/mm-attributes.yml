@@ -74,3 +74,18 @@ https_health_check:
   timeout_sec: 15
   check_interval_sec: 15
   unhealthy_threshold: 3
+
+instance_template:
+  name: inspec-gcp-instance-template
+  description: A description of the instance template
+  instance_description: A description of the instance itself
+  machine_type: n1-standard-1
+  tag: foo
+  can_ip_forward: false
+  scheduling_automatic_restart: true
+  scheduling_on_host_maintenance: MIGRATE
+  disk_source_image: debian-cloud/debian-9
+  disk_auto_delete: true
+  disk_boot: true
+  network_interface_network: default
+  service_account_scope: storage-ro

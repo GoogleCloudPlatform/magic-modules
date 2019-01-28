@@ -1,0 +1,18 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% instance_template = grab_attributes['instance_template'] -%>
+describe google_compute_instance_template(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{instance_template['name']}'" : "instance_template['name']" -%>) do
+  it { should exist }
+  its('description') { should eq <%= doc_generation ? "'#{instance_template['description']}'" : "instance_template['description']" -%> }
+  its('properties.description') { should eq <%= doc_generation ? "'#{instance_template['instance_description']}'" : "instance_template['instance_description']" -%> }
+  its('properties.machine_type') { should eq <%= doc_generation ? "'#{instance_template['machine_type']}'" : "instance_template['machine_type']" -%> }
+  its('properties.tags.items') { should include <%= doc_generation ? "'#{instance_template['tag']}'" : "instance_template['tag']" -%> }
+  its('properties.disks.count') { should eq 1 }
+  its('properties.disks.first.auto_delete') { should eq <%= doc_generation ? "'#{instance_template['disk_auto_delete']}'" : "instance_template['disk_auto_delete']" -%> }
+  its('properties.disks.first.boot') { should eq <%= doc_generation ? "'#{instance_template['disk_boot']}'" : "instance_template['disk_boot']" -%> }
+  its('properties.network_interfaces.count') { should eq 1 }
+  its('properties.service_accounts.count') { should eq 1 }
+end
+
+describe google_compute_instance_template(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

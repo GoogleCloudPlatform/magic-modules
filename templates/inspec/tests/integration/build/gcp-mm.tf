@@ -50,6 +50,10 @@ variable "https_health_check" {
   type = "map"
 }
 
+variable "instance_template" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -187,4 +191,36 @@ resource "google_compute_https_health_check" "gcp-inspec-https-health-check" {
   timeout_sec         = "${var.https_health_check["timeout_sec"]}"
   check_interval_sec  = "${var.https_health_check["check_interval_sec"]}"
   unhealthy_threshold = "${var.https_health_check["unhealthy_threshold"]}"
+}
+
+resource "google_compute_instance_template" "gcp-inspec-instance-template" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.instance_template["name"]}"
+  description = "${var.instance_template["description"]}"
+
+  tags = ["${var.instance_template["tag"]}"]
+
+  instance_description = "${var.instance_template["instance_description"]}"
+  machine_type         = "${var.instance_template["machine_type"]}"
+  can_ip_forward       = "${var.instance_template["can_ip_forward"]}"
+
+  scheduling {
+    automatic_restart   = "${var.instance_template["scheduling_automatic_restart"]}"
+    on_host_maintenance = "${var.instance_template["scheduling_on_host_maintenance"]}"
+  }
+
+  // Create a new boot disk from an image
+  disk {
+    source_image = "${var.instance_template["disk_source_image"]}"
+    auto_delete  = "${var.instance_template["disk_auto_delete"]}"
+    boot         = "${var.instance_template["disk_boot"]}"
+  }
+
+  network_interface {
+    network = "${var.instance_template["network_interface_network"]}"
+  }
+
+  service_account {
+    scopes = ["${var.instance_template["service_account_scope"]}"]
+  }
 }
