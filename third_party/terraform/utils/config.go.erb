@@ -44,7 +44,7 @@ import (
 <% unless version == 'ga' -%>
 	"google.golang.org/api/servicenetworking/v1beta"
 <% end -%>
-	"google.golang.org/api/serviceusage/v1beta1"
+	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/sourcerepo/v1"
 	"google.golang.org/api/spanner/v1"
 	"google.golang.org/api/sqladmin/v1beta4"
@@ -95,7 +95,7 @@ type Config struct {
 	clientSqlAdmin               *sqladmin.Service
 	clientIAM                    *iam.Service
 	clientServiceMan             *servicemanagement.APIService
-	clientServiceUsage           *serviceusage.APIService
+	clientServiceUsage           *serviceusage.Service
 	clientBigQuery               *bigquery.Service
 	clientCloudFunctions         *cloudfunctions.Service
 	clientCloudIoT               *cloudiot.Service
