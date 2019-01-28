@@ -172,3 +172,7 @@ objects:
           - :STANDARD_HA
         default_value: :BASIC
         input: true
+      - !ruby/object:Api::Type::UpdateMask
+        name: updateMask
+        description: The update mask (internal only)
+        output: true
