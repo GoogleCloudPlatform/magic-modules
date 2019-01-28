@@ -16,11 +16,6 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-var (
-	instanceGroupManagerIdRegex     = regexp.MustCompile("^" + ProjectRegex + "/[a-z0-9-]+/[a-z0-9-]+$")
-	instanceGroupManagerIdNameRegex = regexp.MustCompile("^[a-z0-9-]+$")
-)
-
 func resourceComputeInstanceGroupManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceComputeInstanceGroupManagerCreate,
