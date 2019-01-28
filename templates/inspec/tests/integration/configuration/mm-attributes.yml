@@ -89,3 +89,7 @@ instance_template:
   disk_boot: true
   network_interface_network: default
   service_account_scope: storage-ro
+
+global_address:
+  name: inspec-gcp-global-address
+  ip_version: IPV6
