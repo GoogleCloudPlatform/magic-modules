@@ -62,6 +62,10 @@ variable "url_map" {
   type = "map"
 }
 
+variable "http_proxy" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -266,4 +270,11 @@ resource "google_compute_url_map" "gcp-inspec-url-map" {
     host    = "${var.url_map["test_host"]}"
     path    = "${var.url_map["test_path"]}"
   }
+}
+
+resource "google_compute_target_http_proxy" "gcp-inspec-http-proxy" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.http_proxy["name"]}"
+  url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
+  description = "${var.http_proxy["description"]}"
 }

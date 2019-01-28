@@ -65,8 +65,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  TargetHttpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   TargetHttpsProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
