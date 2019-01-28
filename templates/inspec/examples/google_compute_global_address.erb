@@ -1,0 +1,10 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% global_address = grab_attributes['global_address'] -%>
+describe google_compute_global_address(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{global_address['name']}'" : "global_address['name']" -%>) do
+  it { should exist }
+  its('ip_version') { should eq <%= doc_generation ? "'#{global_address['ip_version']}'" : "global_address['ip_version']" -%> }
+end
+
+describe google_compute_global_address(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

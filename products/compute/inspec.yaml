@@ -31,8 +31,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       end
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  GlobalAddress: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   GlobalForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
