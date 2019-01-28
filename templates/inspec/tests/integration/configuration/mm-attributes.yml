@@ -93,3 +93,12 @@ instance_template:
 global_address:
   name: inspec-gcp-global-address
   ip_version: IPV6
+
+url_map:
+  name: inspec-gcp-url-map
+  description: URL map description
+  host_rule_host: site.com
+  path_matcher_name: allpaths
+  path_rule_path: /home
+  test_host: test.com
+  test_path: /home

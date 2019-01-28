@@ -58,6 +58,10 @@ variable "global_address" {
   type = "map"
 }
 
+variable "url_map" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -233,4 +237,33 @@ resource "google_compute_global_address" "gcp-inspec-global-address" {
   project = "${var.gcp_project_id}"
   name = "${var.global_address["name"]}"
   ip_version = "${var.global_address["ip_version"]}"
+}
+
+resource "google_compute_url_map" "gcp-inspec-url-map" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.url_map["name"]}"
+  description = "${var.url_map["description"]}"
+
+  default_service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+
+  host_rule {
+    hosts        = ["${var.url_map["host_rule_host"]}"]
+    path_matcher = "${var.url_map["path_matcher_name"]}"
+  }
+
+  path_matcher {
+    name            = "${var.url_map["path_matcher_name"]}"
+    default_service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+
+    path_rule {
+      paths   = ["${var.url_map["path_rule_path"]}"]
+      service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+    }
+  }
+
+  test {
+    service = "${google_compute_backend_service.gcp-inspec-backend-service.self_link}"
+    host    = "${var.url_map["test_host"]}"
+    path    = "${var.url_map["test_path"]}"
+  }
 }
