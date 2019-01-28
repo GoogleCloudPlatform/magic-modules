@@ -190,12 +190,19 @@ def main():
     module.fail_json(msg="<%= object.name -%> cannot be edited")
 <%   elsif  !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-<% method_args = ['link', "#{update_request}(module)"] -%>
+<% method_args = ['link'] -%>
 <% if update_mask -%>
     params = {
         'updateMask': updateMask(resource_to_request(module), response_to_hash(module, fetch))
     }
-<% method_args.append("params=params") -%>
+    request = resource_to_request(module)
+    del request['name']
+<%
+  method_args.append("request")
+  method_args.append("params=params")
+-%>
+<% else # update mask -%>, 
+<% method_args.append("#{update_request}(module)") -%>
 <% end # update mask -%>
 <%
   update_verb = object.update_verb.to_s.downcase
