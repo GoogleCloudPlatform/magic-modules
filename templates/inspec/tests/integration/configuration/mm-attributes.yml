@@ -102,3 +102,7 @@ url_map:
   path_rule_path: /home
   test_host: test.com
   test_path: /home
+
+http_proxy:
+  name: inspec-gcp-http-proxy
+  description: A HTTP proxy
