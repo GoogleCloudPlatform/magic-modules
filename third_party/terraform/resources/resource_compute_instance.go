@@ -541,7 +541,6 @@ func resourceComputeInstance() *schema.Resource {
 			"hostname": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				ForceNew: true,
 			},
 		},
