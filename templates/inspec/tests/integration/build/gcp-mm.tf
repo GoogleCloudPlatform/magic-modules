@@ -66,6 +66,10 @@ variable "http_proxy" {
   type = "map"
 }
 
+variable "global_forwarding_rule" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -277,4 +281,11 @@ resource "google_compute_target_http_proxy" "gcp-inspec-http-proxy" {
   name        = "${var.http_proxy["name"]}"
   url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
   description = "${var.http_proxy["description"]}"
+}
+
+resource "google_compute_global_forwarding_rule" "gcp-inspec-global-forwarding-rule" {
+  project    = "${var.gcp_project_id}"
+  name       = "${var.global_forwarding_rule["name"]}"
+  target     = "${google_compute_target_http_proxy.gcp-inspec-http-proxy.self_link}"
+  port_range = "${var.global_forwarding_rule["port_range"]}"
 }
