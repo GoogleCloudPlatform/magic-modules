@@ -132,6 +132,22 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 
 
 
+    if location := resp.Location; location != nil {
+        d.Set("location", azureRMNormalizeLocation(*location))
+    }
+    if sku := resp.Sku; sku != nil {
+        d.Set("sku", sku.Name)
+    }
+    if registryProperties := resp.RegistryProperties; registryProperties != nil {
+        d.Set("admin_enabled", registryProperties.AdminUserEnabled)
+    }
+    if storageAccount := resp.StorageAccount; storageAccount != nil {
+        d.Set("storage_account_id", storageAccount.ID)
+    }
+    d.Set("login_server", resp.LoginServer)
+    flattenAndSetTags(d, resp.Tags)
+
+/*
     d.Set("name", resp.Name)
     d.Set("resource_group_name", resourceGroup)
     if location := resp.::Location; location != nil {
@@ -142,6 +158,7 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
     d.Set("storage_account_id", resp.::Storageaccount::Id)
     d.Set("login_server", resp.::Loginserver)
     flattenAndSetTags(d, resp.::Tags)
+*/
 
     return nil
 }

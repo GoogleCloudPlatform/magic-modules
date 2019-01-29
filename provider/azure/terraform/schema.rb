@@ -79,6 +79,17 @@ module Provider
           end
         end
 
+        def sdk_object_to_property_template(sdktype)
+          case sdktype
+          when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
+            'templates/azure/terraform/sdktypes/sdkfield_to_property.erb'
+          when Api::Azure::SDKTypeDefinition::ComplexObject
+            'templates/azure/terraform/sdktypes/sdkobject_to_property.erb'
+          else
+            'templates/azure/terraform/sdktypes/unsupport.erb'
+          end
+        end
+
       end
     end
   end

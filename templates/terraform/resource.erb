@@ -210,10 +210,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-<%  properties.each do |prop| -%>
-<%    input_var = (prop.name == "resourceGroupName" ? "resourceGroup" : "resp.#{prop.azure_api_path.camelcase(:upper)}") -%>
-<%=   lines(build_schema_property_set(input_var, 'd', prop, object, 4)) -%>
-<%  end -%>
+<%  sdk_type_def = object.azure_sdk_type_defs["/"] -%>
+<%= lines(build_sdk_object_to_property("resp", "/", sdk_type_def, properties, object)) -%>
 
     return nil
 }

@@ -20,6 +20,8 @@ objects:
         go_type_name: Registry
       '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
         go_field_name: Location
+      '/loginServer': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+        go_field_name: LoginServer
       '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
         go_field_name: RegistryProperties
         go_type_name: RegistryProperties

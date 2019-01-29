@@ -1,0 +1,24 @@
+<%
+    temp_var_name = (sdk_obj_path == "/" ? input_statement : sdk_type_def.go_field_name.camelcase(:lower))
+-%>
+<%  if sdk_obj_path != "/" -%>
+if <%= temp_var_name -%> := <%= input_statement -%>.<%= sdk_type_def.go_field_name -%>; <%= temp_var_name -%> != nil {
+<%  end -%>
+<%
+    one_level_props = Hash.new
+    properties.select { |p| p.azure_api_path.start_with?(sdk_obj_path) }.each do |prop|
+      prop_key = prop.azure_api_path[sdk_obj_path.length..-1].split("/")[0]
+      prop_list = one_level_props[prop_key] || Array.new
+      one_level_props[prop_key] = prop_list << prop
+    end
+-%>
+<%
+    one_level_props.each do |prop_name, prop_list|
+      sdk_path = sdk_obj_path + prop_name
+      sdk_type_def = object.azure_sdk_type_defs[sdk_path]
+-%>
+<%=   lines(build_sdk_object_to_property(temp_var_name, sdk_path + "/", sdk_type_def, properties, object, (sdk_obj_path == "/" ? 0 : 4))) -%>
+<%  end -%>
+<%  if sdk_obj_path != "/" -%>
+}
+<%  end -%>

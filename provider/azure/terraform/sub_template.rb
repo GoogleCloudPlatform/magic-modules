@@ -35,6 +35,16 @@ module Provider
                            object: object
         end
 
+        def build_sdk_object_to_property(input, sdk_path, sdk_type_def, properties, object, indentation = 4)
+          compile_template sdk_object_to_property_template(sdk_type_def),
+                           indentation: indentation,
+                           input_statement: input,
+                           sdk_obj_path: sdk_path,
+                           sdk_type_def: sdk_type_def,
+                           properties: properties,
+                           object: object
+        end
+
       end
     end
   end
