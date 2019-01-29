@@ -106,3 +106,7 @@ url_map:
 http_proxy:
   name: inspec-gcp-http-proxy
   description: A HTTP proxy
+
+global_forwarding_rule:
+  name: inspec-gcp-global-forwarding-rule
+  port_range: 80-80
