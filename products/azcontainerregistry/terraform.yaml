@@ -3,3 +3,8 @@ name: Arm
 overrides: !ruby/object:Provider::ResourceOverrides
   ContainerRegistry: !ruby/object:Provider::Terraform::ResourceOverride
     example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "container_registry"
+        primary_resource_id: "example"
+        vars:
+          rg_name: "example-rg"

@@ -20,6 +20,7 @@ description: |-
 ---
 
 # azurerm_resource_group
+
 Manages a resource group on Azure.
 
 
@@ -42,12 +43,12 @@ resource "azurerm_resource_group" "example" {
 
 The following arguments are supported:
 
+* `name` - (Required) The name of the resource group. Changing this forces a new resource to be created.
 
-* `name` - (Required) The name of the resource group.
-
-* `location` - (Required) The location where the resource group should be created.
+* `location` - (Required) The location where the resource group should be created. Changing this forces a new resource to be created.
 
 * `tags` - (Optional) A mapping of tags to assign to the resource group.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -56,11 +57,8 @@ The following attributes are exported:
 
 
 
-
 ## Import
 
 ResourceGroup can be imported using the `resource id`, e.g.
-
 ```shell
-$ terraform import azurerm_resource_group.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example
-```
+$ terraform import azurerm_resource_group.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg```

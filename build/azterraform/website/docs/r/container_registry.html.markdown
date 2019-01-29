@@ -20,43 +20,68 @@ description: |-
 ---
 
 # azurerm_container_registry
+
 Manages a container registry on Azure.
 
 
+
+## Example Usage - Container Registry
+
+
+```hcl
+resource "azurerm_resource_group" "example" {
+  name     = "example-rg"
+  location = "West US"
+}
+
+resource "azurerm_storage_account" "example" {
+  name                     = "tfexamplesa"
+  resource_group_name      = "${azurerm_resource_group.example.name}"
+  location                 = "${azurerm_resource_group.example.location}"
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+}
+
+resource "azurerm_container_registry" "example" {
+  name                = "tf-example-acr"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  location            = "${azurerm_resource_group.example.location}"
+  admin_enabled       = true
+  sku                 = "Classic"
+  storage_account_id  = "${azurerm_storage_account.example.id}"
+}
+```
 
 ## Argument Reference
 
 The following arguments are supported:
 
+* `name` - (Required) Specifies the name of the Container Registry. Changing this forces a new resource to be created.
 
-* `name` - (Required) The name of the container registry.
+* `resource_group_name` - (Required) The name of the resource group in which to create the Container Registry. Changing this forces a new resource to be created.
 
-* `resource_group_name` - (Required) The resource group name of the container registry.
+* `location` - (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created.
 
-* `location` - (Required) The location where the container registry should be created.
+* `sku` - (Optional) The SKU name of the the container registry. Defaults to `Classic`.
 
-* `sku` - (Optional) The sku of the container registry.
+* `admin_enabled` - (Optional) Specifies whether the admin user is enabled. Defaults to `false`.
 
-* `admin_enabled` - (Optional) Specifies whether admin is enabled of this container registry.
-
-* `storage_account_id` - (Optional) The storage account ID of the container registry.
+* `storage_account_id` - (Optional) The ID of a Storage Account which must be located in the same Azure Region as the Container Registry.
 
 * `tags` - (Optional) A mapping of tags to assign to the container registry.
+
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The container registry ID.
 
-
-* `login_server` - (Optional) The login server of the container registry.
+* `login_server` - The URL that can be used to log into the container registry.
 
 
 
 ## Import
 
 ContainerRegistry can be imported using the `resource id`, e.g.
-
 ```shell
-$ terraform import azurerm_container_registry.example /subscriptions/00000000-0000-0000-0000-000000000000/containerRegistrys/example
-```
+$ terraform import azurerm_container_registry.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.ContainerRegistry/registries/example```

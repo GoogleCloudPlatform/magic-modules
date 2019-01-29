@@ -110,19 +110,19 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'The name of the container registry.'
+        description: 'Specifies the name of the Container Registry.'
         required: true
         input: true
         azure_api_path: 'name'
       - !ruby/object:Api::Azure::Type::ResourceGroupName
         name: 'resourceGroupName'
-        description: 'The resource group name of the container registry.'
+        description: 'The name of the resource group in which to create the Container Registry.'
         required: true
         input: true
         azure_api_path: 'rgname'
       - !ruby/object:Api::Azure::Type::Location
         name: 'location'
-        description: 'The location where the container registry should be created.'
+        description: 'Specifies the supported Azure location where the resource exists.'
         required: true
         input: true
         azure_api_path: '/location'
@@ -133,21 +133,21 @@ objects:
           - :Basic
           - :Standard
           - :Premium
-        description: 'The sku of the container registry.'
+        description: 'The SKU name of the the container registry.'
         default_value: :Classic
         azure_api_path: '/sku/name'
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
-        description: 'Specifies whether admin is enabled of this container registry.'
+        description: 'Specifies whether the admin user is enabled.'
         default_value: false
         azure_api_path: '/properties/adminUserEnabled'
       - !ruby/object:Api::Type::String
         name: 'storageAccountId'
-        description: 'The storage account ID of the container registry.'
+        description: 'The ID of a Storage Account which must be located in the same Azure Region as the Container Registry.'
         azure_api_path: '/properties/storageAccount/id'
       - !ruby/object:Api::Type::String
         name: 'loginServer'
-        description: 'The login server of the container registry.'
+        description: 'The URL that can be used to log into the container registry.'
         output: true
         azure_api_path: '/loginServer'
       - !ruby/object:Api::Azure::Type::Tags

@@ -50,6 +50,7 @@ description: |-
 
 # azurerm_<%= resource_name -%>
 
+
 <%= lines(object.description) -%>
 
 
@@ -87,25 +88,24 @@ To get more information about <%= object.name -%>, see:
 ## Argument Reference
 
 The following arguments are supported:
+<% properties.select(&:required).each do |prop| -%>
+<%= lines(build_property_documentation(prop)) -%>
+<% end -%>
+<% properties.select(&:required).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%= lines(build_property_documentation(prop)) -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
 
-<% properties.select(&:required).each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
-<% end -%>
-<% properties.select(&:required).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
-<% end -%>
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
-<% end -%>
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
-<% end -%>
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The <%= resource_name.gsub("_", " ") -%> ID.
-
 <% properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
@@ -136,7 +136,10 @@ This resource provides the following
 ## Import
 
 <%= object.name -%> can be imported using the `resource id`, e.g.
-
+<%
+    resource_id_postfix = ""
+    resource_id_postfix = "/#{object.__product.azure_namespace}/#{object.azure_id_portion}/example" unless object.name == "ResourceGroup"
+-%>
 ```shell
-$ terraform import azurerm_<%= resource_name -%>.example /subscriptions/00000000-0000-0000-0000-000000000000/<%= object.name.camelcase(:lower) -%>s/example
+$ terraform import azurerm_<%= resource_name -%>.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg<%= resource_id_postfix -%>
 ```
