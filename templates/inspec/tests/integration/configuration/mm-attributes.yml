@@ -137,3 +137,7 @@ router:
 
 snapshot:
   name: inspec-gcp-disk-snapshot
+
+https_proxy:
+  name: inspec-gcp-https-proxy
+  description: A HTTPS proxy
