@@ -60,7 +60,7 @@ func resourceArmResourceGroupCreateUpdate(d *schema.ResourceData, meta interface
     if err != nil {
         return err
     }
-    if read.ID == nil {
+    if resp.ID == nil {
         return fmt.Errorf("Cannot read ResourceGroup %q", name)
     }
     d.SetId(*resp.ID)

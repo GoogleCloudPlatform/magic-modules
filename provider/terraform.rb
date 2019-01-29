@@ -70,7 +70,7 @@ module Provider
     # BEGIN Azure Specific Methods
 
     def azure_resource_go_package(product)
-      product.azure_namespace.split('.').last.camelcase(:lower)
+      product.azure_namespace.split('.').last.downcase
     end
 
     # END Azure Specific Methods

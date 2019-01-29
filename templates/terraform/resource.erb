@@ -120,8 +120,8 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
-<%  sdk_type_def = object.azure_sdk_type_defs["/"] -%>
-<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object)) -%>
+<%  sdk_type_def = object.azure_sdk_type_defs.create["/"] -%>
+<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object.azure_sdk_type_defs.create, object)) -%>
 
 <%  if object.custom_code.encoder -%>
     obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
@@ -159,7 +159,7 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     if err != nil {
         return err
     }
-    if read.ID == nil {
+    if resp.ID == nil {
         return fmt.Errorf("Cannot read <%= object.name -%> %q", name)
     }
     d.SetId(*resp.ID)
@@ -214,8 +214,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  if !azure_is_resource_group -%>
     d.Set("resource_group_name", resourceGroup)
 <%  end -%>
-<%  sdk_type_def = object.azure_sdk_type_defs["/"] -%>
-<%= lines(build_sdk_object_to_property("resp", "/", sdk_type_def, properties, object)) -%>
+<%  sdk_type_def = object.azure_sdk_type_defs.read["/"] -%>
+<%= lines(build_sdk_object_to_property("resp", "/", sdk_type_def, properties, object.azure_sdk_type_defs.read, object)) -%>
 
     return nil
 }
@@ -245,10 +245,10 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 <%  end -%>
 
 <%
-    sdk_type_def = object.azure_sdk_type_defs["/"]
+    sdk_type_def = object.azure_sdk_type_defs.update["/"]
     updatable_properties = settable_properties.reject { |p| p.name == "location" }
 -%>
-<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, updatable_properties, object)) -%>
+<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, updatable_properties, object.azure_sdk_type_defs.update, object)) -%>
 
     future, err := client.<%= object.azure_update_verb -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters)
     if err != nil {

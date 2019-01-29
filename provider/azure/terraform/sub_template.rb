@@ -23,7 +23,7 @@ module Provider
                            object: object
         end
 
-        def build_property_to_sdk_object(output, sdk_path, sdk_type_def, sdk_package, resource_name, properties, object, indentation = 4)
+        def build_property_to_sdk_object(output, sdk_path, sdk_type_def, sdk_package, resource_name, properties, sdk_type_defs, object, indentation = 4)
           compile_template property_to_sdk_object_template(sdk_type_def),
                            indentation: indentation,
                            output_statement: output,
@@ -31,16 +31,18 @@ module Provider
                            resource_name: resource_name,
                            sdk_obj_path: sdk_path,
                            sdk_type_def: sdk_type_def,
+                           sdk_type_defs: sdk_type_defs,
                            properties: properties,
                            object: object
         end
 
-        def build_sdk_object_to_property(input, sdk_path, sdk_type_def, properties, object, indentation = 4)
+        def build_sdk_object_to_property(input, sdk_path, sdk_type_def, properties, sdk_type_defs, object, indentation = 4)
           compile_template sdk_object_to_property_template(sdk_type_def),
                            indentation: indentation,
                            input_statement: input,
                            sdk_obj_path: sdk_path,
                            sdk_type_def: sdk_type_def,
+                           sdk_type_defs: sdk_type_defs,
                            properties: properties,
                            object: object
         end

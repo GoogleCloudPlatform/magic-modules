@@ -15,9 +15,9 @@ if <%= temp_var_name -%> := <%= input_statement -%>.<%= sdk_type_def.go_field_na
 <%
     one_level_props.each do |prop_name, prop_list|
       sdk_path = sdk_obj_path + prop_name
-      sdk_type_def = object.azure_sdk_type_defs[sdk_path]
+      sdk_type_def = sdk_type_defs[sdk_path]
 -%>
-<%=   lines(build_sdk_object_to_property(temp_var_name, sdk_path + "/", sdk_type_def, properties, object, (sdk_obj_path == "/" ? 0 : 4))) -%>
+<%=   lines(build_sdk_object_to_property(temp_var_name, sdk_path + "/", sdk_type_def, properties, sdk_type_defs, object, (sdk_obj_path == "/" ? 0 : 4))) -%>
 <%  end -%>
 <%  if sdk_obj_path != "/" -%>
 }

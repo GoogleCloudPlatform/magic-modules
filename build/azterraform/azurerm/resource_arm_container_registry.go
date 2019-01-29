@@ -72,17 +72,17 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
     storageAccountId := d.Get("storage_account_id").(string)
     tags := d.Get("tags").(map[string]interface{})
 
-    parameters := containerRegistry.Registry{
+    parameters := containerregistry.Registry{
         Location: utils.String(location),
-        Sku: &containerRegistry.Sku{
-            Name: expandArmContainerRegistrySku(sku),
-        }
-        RegistryProperties: &containerRegistry.RegistryProperties{
+        Sku: &containerregistry.Sku{
+            Name: containerregistry.SkuName(sku),
+        },
+        RegistryProperties: &containerregistry.RegistryProperties{
             AdminUserEnabled: utils.Bool(adminEnabled),
-        }
-        StorageAccount: &containerRegistry.StorageAccountProperties{
-            ID: utils.String(storageAccountId),
-        }
+            StorageAccount: &containerregistry.StorageAccountProperties{
+                ID: utils.String(storageAccountId),
+            },
+        },
         Tags: expandTags(tags),
     }
 
@@ -101,7 +101,7 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-    if read.ID == nil {
+    if resp.ID == nil {
         return fmt.Errorf("Cannot read ContainerRegistry %q", name)
     }
     d.SetId(*resp.ID)
@@ -138,13 +138,13 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
         d.Set("location", azureRMNormalizeLocation(*location))
     }
     if sku := resp.Sku; sku != nil {
-        d.Set("sku", sku.Name)
+        d.Set("sku", string(sku.Name))
     }
     if registryProperties := resp.RegistryProperties; registryProperties != nil {
         d.Set("admin_enabled", registryProperties.AdminUserEnabled)
-    }
-    if storageAccount := resp.StorageAccount; storageAccount != nil {
-        d.Set("storage_account_id", storageAccount.ID)
+        if storageAccount := registryProperties.StorageAccount; storageAccount != nil {
+            d.Set("storage_account_id", storageAccount.ID)
+        }
     }
     d.Set("login_server", resp.LoginServer)
     flattenAndSetTags(d, resp.Tags)
@@ -168,16 +168,16 @@ func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}
     storageAccountId := d.Get("storage_account_id").(string)
     tags := d.Get("tags").(map[string]interface{})
 
-    parameters := containerRegistry.Registry{
-        Sku: &containerRegistry.Sku{
-            Name: expandArmContainerRegistrySku(sku),
-        }
-        RegistryProperties: &containerRegistry.RegistryProperties{
+    parameters := containerregistry.RegistryUpdateParameters{
+        Sku: &containerregistry.Sku{
+            Name: containerregistry.SkuName(sku),
+        },
+        RegistryPropertiesUpdateParameters: &containerregistry.RegistryPropertiesUpdateParameters{
             AdminUserEnabled: utils.Bool(adminEnabled),
-        }
-        StorageAccount: &containerRegistry.StorageAccountProperties{
-            ID: utils.String(storageAccountId),
-        }
+            StorageAccount: &containerregistry.StorageAccountProperties{
+                ID: utils.String(storageAccountId),
+            },
+        },
         Tags: expandTags(tags),
     }
 

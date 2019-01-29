@@ -10,9 +10,9 @@
 <%
     one_level_props.each do |prop_name, prop_list|
       sdk_path = sdk_obj_path + prop_name
-      sdk_type_def = object.azure_sdk_type_defs[sdk_path]
+      sdk_type_def = sdk_type_defs[sdk_path]
       output = sdk_type_def.go_field_name + ": "
 -%>
-<%=   lines(build_property_to_sdk_object(output, sdk_path + "/", sdk_type_def, sdk_package_name, resource_name, properties, object)) -%>
+<%=   lines(build_property_to_sdk_object(output, sdk_path + "/", sdk_type_def, sdk_package_name, resource_name, properties, sdk_type_defs, object)) -%>
 <%  end -%>
-}
+}<%= "," unless sdk_obj_path == "/" -%>

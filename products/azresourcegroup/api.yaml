@@ -15,13 +15,28 @@ objects:
     api_name: ResourceGroups
     base_url: NotUsedInAzure
 
-    azure_sdk_type_defs:
-      '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-        go_type_name: Group
-      '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-        go_field_name: Location
-      '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-        go_field_name: Tags
+    azure_sdk_type_defs: !ruby/object:Api::Azure::SDKTypeDefinitions
+      create:
+        '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+          go_type_name: Group
+        '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          go_field_name: Location
+        '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          go_field_name: Tags
+      read:
+        '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+          go_type_name: Group
+        '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          go_field_name: Location
+        '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          go_field_name: Tags
+      update:
+        '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+          go_type_name: Group
+        '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          go_field_name: Location
+        '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          go_field_name: Tags
 
     azure_create_verb: CreateOrUpdate
     azure_update_verb: CreateOrUpdate

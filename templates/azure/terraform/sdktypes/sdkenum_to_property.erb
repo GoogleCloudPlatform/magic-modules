@@ -1,0 +1,3 @@
+<%  property = properties.find { |p| p.azure_api_path == sdk_obj_path[0..-2] } -%>
+<%  input_var = "string(" + input_statement + "." + sdk_type_def.go_field_name + ")" -%>
+<%= lines(build_schema_property_set(input_var, 'd', property, object)) -%>

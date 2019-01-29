@@ -265,8 +265,7 @@ module Api
       check_optional_property :input, :boolean
       check_optional_property :min_version, String
 
-      check_property :azure_sdk_type_defs, Hash
-      check_property_hash :azure_sdk_type_defs, String, Api::Azure::SDKTypeDefinition
+      check_property :azure_sdk_type_defs, Api::Azure::SDKTypeDefinitions
       check_optional_property :azure_id_portion, String
       check_optional_property :azure_create_async, :boolean
       check_optional_property :azure_delete_async, :boolean

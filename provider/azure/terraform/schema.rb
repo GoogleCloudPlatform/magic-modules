@@ -71,7 +71,9 @@ module Provider
         def property_to_sdk_object_template(sdktype)
           case sdktype
           when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
-            'templates/azure/terraform/sdktypes/property_to_sdkfield.erb'
+            'templates/azure/terraform/sdktypes/property_to_sdkprimitive.erb'
+          when Api::Azure::SDKTypeDefinition::EnumObject
+            'templates/azure/terraform/sdktypes/property_to_sdkenum.erb'
           when Api::Azure::SDKTypeDefinition::ComplexObject
             'templates/azure/terraform/sdktypes/property_to_sdkobject.erb'
           else
@@ -82,7 +84,9 @@ module Provider
         def sdk_object_to_property_template(sdktype)
           case sdktype
           when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
-            'templates/azure/terraform/sdktypes/sdkfield_to_property.erb'
+            'templates/azure/terraform/sdktypes/sdkprimitive_to_property.erb'
+          when Api::Azure::SDKTypeDefinition::EnumObject
+            'templates/azure/terraform/sdktypes/sdkenum_to_property.erb'
           when Api::Azure::SDKTypeDefinition::ComplexObject
             'templates/azure/terraform/sdktypes/sdkobject_to_property.erb'
           else
