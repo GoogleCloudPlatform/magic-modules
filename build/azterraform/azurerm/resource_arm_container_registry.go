@@ -132,6 +132,8 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 
 
 
+    d.Set("name", resp.Name)
+    d.Set("resource_group_name", resourceGroup)
     if location := resp.Location; location != nil {
         d.Set("location", azureRMNormalizeLocation(*location))
     }
@@ -147,19 +149,6 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
     d.Set("login_server", resp.LoginServer)
     flattenAndSetTags(d, resp.Tags)
 
-/*
-    d.Set("name", resp.Name)
-    d.Set("resource_group_name", resourceGroup)
-    if location := resp.::Location; location != nil {
-        d.Set("location", azureRMNormalizeLocation(*location))
-    }
-    d.Set("sku", resp.::Sku::Name)
-    d.Set("admin_enabled", resp.::Properties::Adminuserenabled)
-    d.Set("storage_account_id", resp.::Storageaccount::Id)
-    d.Set("login_server", resp.::Loginserver)
-    flattenAndSetTags(d, resp.::Tags)
-*/
-
     return nil
 }
 
@@ -174,7 +163,33 @@ func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}
     resourceGroup := id.ResourceGroup
     name := id.Path["registries"]
 
-    // TODO: Complete Update Function
+    sku := d.Get("sku").(string)
+    adminEnabled := d.Get("admin_enabled").(bool)
+    storageAccountId := d.Get("storage_account_id").(string)
+    tags := d.Get("tags").(map[string]interface{})
+
+    parameters := containerRegistry.Registry{
+        Sku: &containerRegistry.Sku{
+            Name: expandArmContainerRegistrySku(sku),
+        }
+        RegistryProperties: &containerRegistry.RegistryProperties{
+            AdminUserEnabled: utils.Bool(adminEnabled),
+        }
+        StorageAccount: &containerRegistry.StorageAccountProperties{
+            ID: utils.String(storageAccountId),
+        }
+        Tags: expandTags(tags),
+    }
+
+    future, err := client.Update(ctx, resourceGroup, name, parameters)
+    if err != nil {
+        return fmt.Errorf("Error updating ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+    }
+    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+        return fmt.Errorf("Error waiting for update of ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+    }
+
+    return resourceArmContainerRegistryRead(d, meta)
 }
 
 func resourceArmContainerRegistryDelete(d *schema.ResourceData, meta interface{}) error {
