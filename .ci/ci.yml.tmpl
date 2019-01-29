@@ -35,6 +35,15 @@ resources:
           uri: git@github.com:GoogleCloudPlatform/magic-modules.git
           private_key: ((repo-key.private_key))
 
+    - name: magic-modules-new-external-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          community_only: true
+          no_label: community
+
     - name: magic-modules-external-prs
       type: github-pull-request
       source:
@@ -109,7 +118,7 @@ jobs:
           - put: magic-modules-external-prs
             params:
                 status: pending
-                path: magic-modules-external-prs
+                path: magic-modules-new-external-prs
                 label: community
                 comment: comment/pr_comment
                 assignee_file: comment/assignee
@@ -120,7 +129,6 @@ jobs:
       plan:
           - get: magic-modules-external-prs
             trigger: false
-            passed: [respond-to-community-pr]
           - put: magic-modules-new-prs
             params:
                 status: pending
