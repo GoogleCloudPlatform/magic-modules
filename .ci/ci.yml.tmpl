@@ -411,6 +411,10 @@ jobs:
       plan:
           - get: mm-approved-prs
             attempts: 2
+          - task: ensure-downstreams-merged
+            file: mm-approved-prs/.ci/magic-modules/ensure-downstreams-merged.yml
+            params:
+                GH_TOKEN: ((github-account.password))
           - put: mark-automerged
             resource: mm-approved-prs
             params:
