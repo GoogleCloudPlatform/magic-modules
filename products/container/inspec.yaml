@@ -18,7 +18,7 @@ manifest: !ruby/object:Provider::Inspec::Manifest
     InSpec resources for verifying GCP infrastructure
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    name: 'RegionalCluster'
   NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   KubeConfig: !ruby/object:Overrides::Inspec::ResourceOverride

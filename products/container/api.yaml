@@ -28,7 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Cluster'
 <%= indent(compile('products/container/async.yaml'), 4) %>
-    base_url: 'projects/{{project}}/location/{{location}}/clusters'
+    base_url: 'projects/{{project}}/locations/{{location}}/clusters'
     exports:
       - !ruby/object:Api::Type::FetchedExternal
         name: endpoint
@@ -219,12 +219,6 @@ objects:
       # have a way to add a compile()/include() to the api.yaml. For the time
       # being NodePool will be described outside in their own resource, reaching
       # the same behavior and also compliant with the current API.
-      - !ruby/object:Api::Type::Array
-        name: 'location'
-        description: |
-          The list of Google Compute Engine locations in which the cluster's
-          nodes should be located.
-        item_type: Api::Type::String
       # 'enableKubernetesAlpha' not supported: we are only producing GA API.
       - !ruby/object:Api::Type::String
         name: 'endpoint'
