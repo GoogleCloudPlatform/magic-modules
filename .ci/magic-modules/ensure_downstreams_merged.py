@@ -1,4 +1,4 @@
-#! python
+#!/usr/bin/env python
 
 import get_downstream_prs
 from github import Github
