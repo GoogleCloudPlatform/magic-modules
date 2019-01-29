@@ -28,8 +28,9 @@ def get_unmerged_prs(g, dependencies):
 if __name__ == '__main__':
   g = Github(os.environ.get('GH_TOKEN'))
   assert len(sys.argv) == 2
+  id_filename = sys.argv[1]
   unmerged = get_unmerged_prs(
           g, get_downstream_prs.get_github_dependencies(
-              g, int(open(sys.argv[1]).read())))
+              g, int(open(id_filename).read())))
   if unmerged:
     raise ValueError("some PRs are unmerged", unmerged)
