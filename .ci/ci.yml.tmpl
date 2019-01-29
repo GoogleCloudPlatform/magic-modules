@@ -109,7 +109,7 @@ resources:
 jobs:
     - name: respond-to-community-pr
       plan:
-          - get: magic-modules-external-prs
+          - get: magic-modules-new-external-prs
             trigger: true
           - get: magic-modules-gcp
             # NOTE: we do NOT run a script from the external PR!
