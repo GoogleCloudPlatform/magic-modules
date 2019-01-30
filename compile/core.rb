@@ -14,6 +14,7 @@
 require 'binding_of_caller'
 require 'erb'
 require 'ostruct'
+require 'psych'
 
 module Compile
   # Unique ID for the Google libraries to be compiled/used by modules
@@ -150,11 +151,11 @@ module Compile
       compiled
     end
 
-    def to_yaml(obj)
+    def to_yaml(obj, options={line_width: 95})
       if obj.is_a?(::Hash)
-        obj.reject { |_, v| v.nil? }.to_yaml.sub("---\n", '')
+        obj.reject { |_, v| v.nil? }.to_yaml(options=options).sub("---\n", '')
       else
-        obj.to_yaml.sub("---\n", '')
+        obj.to_yaml(options=options).sub("---\n", '')
       end
     end
 
