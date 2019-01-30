@@ -177,6 +177,7 @@ existing_modules = get_all_modules('upstream')
 # Each batch should be 25 modules at most (assuming 2 file changes per module)
 # minus any static files.
 batch_size = 25 - changed_files.length
+# rubocop:disable Metrics/BlockLength
 existing_modules.each_slice(batch_size).with_index do |part, index|
   puts "Building Bug fix PR #{index}"
   git_run('git checkout upstream/devel', true)
@@ -215,6 +216,7 @@ existing_modules.each_slice(batch_size).with_index do |part, index|
   puts output
   puts "PR built for bug fixes #{index}"
 end
+# rubocop:enable Metrics/BlockLength
 
 puts 'Building individual PRs'
 new_modules = get_all_modules('magician') - get_all_modules('upstream')
