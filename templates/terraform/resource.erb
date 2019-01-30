@@ -378,7 +378,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
-<%= lines(compile('templates/terraform/update_mask.erb')) if object.all_user_properties.select { |v| v.is_a?(Api::Type::UpdateMask) }.first -%>
+<%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%  if object.async.nil? -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))

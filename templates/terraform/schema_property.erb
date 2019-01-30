@@ -12,7 +12,7 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
-<% if tf_types.include?(property.class) && !property.is_a?(Api::Type::UpdateMask)-%>
+<% if tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
   <% if property.is_set -%>
   Type: schema.TypeSet,
@@ -135,7 +135,6 @@
     ConflictsWith: <%= go_literal(conflicting_props) -%>,
 <% end -%>
 },
-<% elsif property.is_a?(Api::Type::UpdateMask) -%>
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 <% end # tf_types.include?(property.class) -%>

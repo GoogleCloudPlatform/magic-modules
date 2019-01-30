@@ -65,6 +65,7 @@ module Api
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
       attr_reader :min_version # Minimum API version this resource is in
+      attr_reader :update_mask
     end
 
     include Properties
@@ -159,6 +160,7 @@ module Api
       check :create_url, type: String
       check :delete_url, type: String
       check :update_url, type: String
+      check :update_mask, type: :boolean
       check :description, type: String, required: true
       check :exclude, type: :boolean
       check :kind, type: String

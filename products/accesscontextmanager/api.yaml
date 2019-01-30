@@ -25,6 +25,7 @@ objects:
     base_url: accessPolicies
     self_link: "accessPolicies/{{name}}"
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
@@ -65,9 +66,6 @@ objects:
         description: |
           Time the AccessPolicy was updated in UTC.
         output: true
-      - !ruby/object:Api::Type::UpdateMask
-        name: 'updateMask'
-        description: The list of fields being updated.
   - !ruby/object:Api::Resource
     name: 'AccessLevel'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -79,6 +77,7 @@ objects:
     base_url: ""
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
@@ -262,9 +261,6 @@ objects:
                         - :DESKTOP_CHROME_OS
                         - :ANDROID
                         - :IOS
-      - !ruby/object:Api::Type::UpdateMask
-        name: 'updateMask'
-        description: The list of fields being updated.
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -276,6 +272,7 @@ objects:
     base_url: ""
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
@@ -416,6 +413,3 @@ objects:
               empty is invalid as well. "restrictedServices" can be empty if and
               only if "unrestrictedServices" list contains a "*" wildcard.
             item_type: Api::Type::String
-      - !ruby/object:Api::Type::UpdateMask
-        name: 'updateMask'
-        description: The list of fields being updated.

@@ -863,6 +863,7 @@ objects:
   - !ruby/object:Api::Resource
     name: UptimeCheckConfig
     update_verb: :PATCH
+    updaet_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -873,9 +874,6 @@ objects:
     description: This message configures which resources and services to monitor for
       availability.
     properties:
-    - !ruby/object:Api::Type::UpdateMask
-      name: 'updateMask'
-      description: The list of fields being updated.
     - !ruby/object:Api::Type::String
       name: name
       output: true

@@ -260,17 +260,6 @@ module Api
       end
     end
 
-    # An UpdateMask is a list of fields that will be updated
-    # as part of the update call.
-    # This comma-separated list is generated dynamically.
-    class UpdateMask < Primitive
-      def validate
-        super
-        @output = true if @output.nil?
-        @url_param_only = true if @url_param_only.nil?
-      end
-    end
-
     # Represents a timestamp
     class Time < Primitive
     end
