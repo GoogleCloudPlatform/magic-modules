@@ -13,7 +13,6 @@ image_resource:
         tag: '1.0'
 
 inputs:
-    - name: magic-modules-external-prs
     - name: magic-modules-gcp
 
 outputs:
