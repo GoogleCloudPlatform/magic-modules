@@ -68,8 +68,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_target_pool.rb'), 6)) -%>
-  TargetTcpProxy: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   TargetVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetSslProxy: !ruby/object:Overrides::Inspec::ResourceOverride

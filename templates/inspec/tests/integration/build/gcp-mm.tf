@@ -70,6 +70,10 @@ variable "global_forwarding_rule" {
   type = "map"
 }
 
+variable "target_tcp_proxy" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -288,4 +292,20 @@ resource "google_compute_global_forwarding_rule" "gcp-inspec-global-forwarding-r
   name       = "${var.global_forwarding_rule["name"]}"
   target     = "${google_compute_target_http_proxy.gcp-inspec-http-proxy.self_link}"
   port_range = "${var.global_forwarding_rule["port_range"]}"
+}
+
+resource "google_compute_backend_service" "gcp-inspec-tcp-backend-service" {
+  project       = "${var.gcp_project_id}"
+  name          = "${var.target_tcp_proxy["tcp_backend_service_name"]}"
+  protocol      = "TCP"
+  timeout_sec   = 10
+
+  health_checks = ["${google_compute_health_check.gcp-inspec-health-check.self_link}"]
+}
+
+resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
+  project         = "${var.gcp_project_id}"
+  name            = "${var.target_tcp_proxy["name"]}"
+  proxy_header    = "${var.target_tcp_proxy["proxy_header"]}"
+  backend_service = "${google_compute_backend_service.gcp-inspec-tcp-backend-service.self_link}"
 }
