@@ -18,6 +18,9 @@ manifest: !ruby/object:Provider::Inspec::Manifest
     InSpec resources for verifying GCP infrastructure
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Inspec::ResourceOverride
+    # Change the name of the resulting resource. Do this because
+    # there exists a `container_cluster` resource in InSpec already
+    # that can handle zonal resources only
     name: 'RegionalCluster'
   NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
