@@ -25,6 +25,7 @@ objects:
     base_url: accessPolicies
     self_link: "accessPolicies/{{name}}"
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
@@ -76,6 +77,7 @@ objects:
     base_url: ""
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
@@ -270,6 +272,7 @@ objects:
     base_url: ""
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'

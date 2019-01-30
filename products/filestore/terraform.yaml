@@ -31,7 +31,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       networks.reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
       constants: templates/terraform/constants/filestore.erb
 
 # This is for copying files over

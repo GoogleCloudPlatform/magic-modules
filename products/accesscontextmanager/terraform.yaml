@@ -27,7 +27,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           Resource name of the AccessPolicy. Format: {policy_id}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
       post_create: templates/terraform/post_create/accesspolicy.erb
   AccessLevel: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
@@ -46,7 +45,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       basic.combiningFunction: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
   ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -68,7 +66,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
         input: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
       custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
 # This is for copying files over

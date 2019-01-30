@@ -32,8 +32,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
-    # TODO(alexstephen): Create update masks and get Redis update support working
-    input: true
     version_added: '2.8'
 files: !ruby/object:Provider::Config::Files
   compile:

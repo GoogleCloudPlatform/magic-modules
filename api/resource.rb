@@ -65,6 +65,7 @@ module Api
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
       attr_reader :min_version # Minimum API version this resource is in
+      attr_reader :update_mask
     end
 
     include Properties
@@ -159,6 +160,7 @@ module Api
       check :create_url, type: String
       check :delete_url, type: String
       check :update_url, type: String
+      check :update_mask, type: :boolean
       check :description, type: String, required: true
       check :exclude, type: :boolean
       check :kind, type: String
@@ -356,6 +358,15 @@ module Api
       self_link_url.join.gsub('{{project}}', '.*')
                    .gsub('{{name}}', '[a-z1-9\-]*')
                    .gsub('{{zone}}', '[a-z1-9\-]*')
+    end
+
+    # All settable properties in the resource.
+    # Fingerprints aren't *really" settable properties, but they behave like one.
+    # At Create, they have no value but they can just be read in anyways, and after a Read
+    # they will need ot be set in every Update.
+    def settable_properties
+      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
+                         .reject(&:url_param_only)
     end
 
     private

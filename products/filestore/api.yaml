@@ -33,6 +33,7 @@ objects:
       projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{zone}}/instances/{{name}}
     update_verb: :PATCH
+    update_mask: true
     description: |
       A Google Cloud Filestore instance.
     references: !ruby/object:Api::Resource::ReferenceLinks

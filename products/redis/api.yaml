@@ -31,6 +31,7 @@ objects:
       projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
     update_verb: :PATCH
+    update_mask: true
     description: |
       A Google Cloud Redis instance.
     collection_url_response: !ruby/object:Api::Resource::ResponseList
