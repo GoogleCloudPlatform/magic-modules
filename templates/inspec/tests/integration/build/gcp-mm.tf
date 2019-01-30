@@ -78,6 +78,10 @@ variable "regional_cluster" {
   type = "map"
 }
 
+variable "route" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -319,4 +323,14 @@ resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   name = "${var.regional_cluster["name"]}"
   region = "${var.regional_cluster["region"]}"
   initial_node_count = "${var.regional_cluster["initial_node_count"]}"
+}
+
+resource "google_compute_route" "gcp-inspec-route" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.route["name"]}"
+  dest_range  = "${var.route["dest_range"]}"
+  network     = "${google_compute_network.inspec-gcp-network.name}"
+  next_hop_ip = "${var.route["next_hop_ip"]}"
+  priority    = "${var.route["priority"]}"
+  depends_on  = ["google_compute_subnetwork.inspec-gcp-subnetwork"]
 }
