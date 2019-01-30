@@ -41,6 +41,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     version_added: '2.8'
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
+        version_added: '2.8'
         aliases: ["zone", "region"]
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
