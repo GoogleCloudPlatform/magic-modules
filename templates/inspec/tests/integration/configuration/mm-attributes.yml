@@ -115,3 +115,8 @@ target_tcp_proxy:
   name: inspec-gcp-target-tcp-proxy
   proxy_header: NONE
   tcp_backend_service_name: gcp-inspec-tcp-backend-service
+
+regional_cluster:
+  name: inspec-gcp-regional-cluster
+  region: europe-west2
+  initial_node_count: 1
