@@ -32,3 +32,6 @@ ehthumbs.db
 Thumbs.db
 
 final_api.yaml
+# Ansible PR Script
+tools/ansible-pr/templates/*
+!tools/ansible-pr/templates/.keep
