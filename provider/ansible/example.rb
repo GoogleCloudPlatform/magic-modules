@@ -112,11 +112,11 @@ module Provider
 
       private
 
-      def build_task(state, hash, object, noop = false)
+      def build_task(state, hash, _object, noop = false)
         {
-          "name" => message(state, @name, noop),
-          @name => compiled_code(@code, hash).merge({ "state" => state }),
-          "register" => (@register if @register)
+          'name' => message(state, @name, noop),
+          @name => compiled_code(@code, hash).merge('state' => state),
+          'register' => @register
         }.reject { |_, v| v.nil? }
       end
 
