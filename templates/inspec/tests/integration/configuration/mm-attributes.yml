@@ -110,3 +110,8 @@ http_proxy:
 global_forwarding_rule:
   name: inspec-gcp-global-forwarding-rule
   port_range: 80-80
+
+target_tcp_proxy:
+  name: inspec-gcp-target-tcp-proxy
+  proxy_header: NONE
+  tcp_backend_service_name: gcp-inspec-tcp-backend-service
