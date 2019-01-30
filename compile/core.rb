@@ -150,6 +150,14 @@ module Compile
       compiled
     end
 
+    def to_yaml(obj)
+      if obj.is_a?(::Hash)
+        obj.reject { |_, v| v.nil? }.to_yaml.sub("---\n", '')
+      else
+        obj.to_yaml.sub("---\n", '')
+      end
+    end
+
     # Compiles a ERB template from a file.
     #
     # Arguments:

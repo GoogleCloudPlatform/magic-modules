@@ -103,22 +103,49 @@ module Provider
       end
 
       def build_test(state, object, noop = false)
-        build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)
+        to_yaml([build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)])
       end
 
       def build_example(state, object)
-        build_task(state, EXAMPLE_DEFAULTS, object)
+        to_yaml([build_task(state, EXAMPLE_DEFAULTS, object)])
       end
 
       private
 
-      # All of the arguments are used inside the ERB file, so we need
-      # to disable rubocop complaining about unused methods
-      # rubocop:disable Lint/UnusedMethodArgument
       def build_task(state, hash, object, noop = false)
-        compile 'templates/ansible/tasks/task.yaml.erb'
+        {
+          "name" => message(state, @name, noop),
+          @name => compiled_code(@code, hash).merge({ "state" => state }),
+          "register" => (@register if @register)
+        }.reject { |_, v| v.nil? }
       end
-      # rubocop:enable Lint/UnusedMethodArgument
+
+      def message(state, name, noop)
+        verb = {
+          present: 'create',
+          absent: 'delete'
+        }[state.to_sym]
+        again = if noop && state == 'present'
+                  ' that already exists'
+                elsif noop && state == 'absent'
+                  ' that does not exist'
+                else
+                  ''
+                end
+        "#{verb} a #{object_name_from_module_name(name)}#{again}"
+      end
+
+      def compiled_code(code, hash)
+        if code.is_a?(Array)
+          code.map { |x| compiled_code(x, hash) }
+        elsif code.is_a?(Hash)
+          code.map { |k, vv| [k, compiled_code(vv, hash)] }.to_h
+        elsif code.is_a?(TrueClass) || code.is_a?(FalseClass) || code.is_a?(String)
+          compile_string(hash, code.to_s).join
+        else
+          code
+        end
+      end
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
