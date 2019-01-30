@@ -26,6 +26,10 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 datasources: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
     version_added: '2.8'
+    properties:
+      location:
+        aliases:
+          - zone
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
