@@ -332,5 +332,9 @@ resource "google_compute_route" "gcp-inspec-route" {
   network     = "${google_compute_network.inspec-gcp-network.name}"
   next_hop_ip = "${var.route["next_hop_ip"]}"
   priority    = "${var.route["priority"]}"
+  # google_compute_route depends on next_hop_ip belonging to a subnetwork
+  # of the named network in this block. Since inspec-gcp-network does not
+  # automatically create subnetworks, we need to create a dependency so
+  # the route is not created before the subnetwork 
   depends_on  = ["google_compute_subnetwork.inspec-gcp-subnetwork"]
 }
