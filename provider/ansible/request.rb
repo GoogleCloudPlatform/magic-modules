@@ -58,12 +58,12 @@ module Provider
           if prop.input
 
         if prop.is_a? Api::Type::NestedObject
-          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.name)}, {}), #{module_name}).from_response()"
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.api_name)}, {}), #{module_name}).from_response()"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::NestedObject)
-          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.name)}, []), #{module_name}).from_response()"
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.api_name)}, []), #{module_name}).from_response()"
         else
-          "#{hash_name}.get(#{unicode_string(prop.name)})"
+          "#{hash_name}.get(#{unicode_string(prop.api_name)})"
         end
       end
 
