@@ -27,7 +27,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
     version_added: '2.8'
     properties:
-      location:
+      location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - zone
     facts: !ruby/object:Provider::Ansible::FactsOverride
