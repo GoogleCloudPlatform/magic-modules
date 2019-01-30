@@ -39,6 +39,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "'my-cluster' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
     version_added: '2.8'
+    properties:
+      location: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["zone", "region"]
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
