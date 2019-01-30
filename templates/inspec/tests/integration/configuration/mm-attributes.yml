@@ -119,4 +119,4 @@ target_tcp_proxy:
 regional_cluster:
   name: inspec-gcp-regional-cluster
   region: europe-west2
-  initial_node_count: 3
+  initial_node_count: 1
