@@ -23,7 +23,7 @@ def decode_request(response, module):
 
 def encode_request(request, module):
     request['topic'] = '/'.join(['projects', module.params['project'],
-                                 'topics', module.params['topic']['name']])
+                                 'topics', request['topic']])
     request['name'] = '/'.join(['projects', module.params['project'],
                                 'subscriptions', module.params['name']])
 
