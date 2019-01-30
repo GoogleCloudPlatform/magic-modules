@@ -863,7 +863,7 @@ objects:
   - !ruby/object:Api::Resource
     name: UptimeCheckConfig
     update_verb: :PATCH
-    updaet_mask: true
+    update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
