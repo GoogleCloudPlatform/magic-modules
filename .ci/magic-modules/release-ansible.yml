@@ -1,0 +1,20 @@
+---
+# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the patches.
+# It spits out "ansible-generated", a ansible repo on a new branch (named after the
+# HEAD commit on the PR), with the new generated code in it.
+platform: linux
+
+image_resource:
+    type: docker-image
+    source:
+        repository: gcr.io/magic-modules/go-ruby-python
+        tag: '1.11.5-2.6.0-2.7'
+
+inputs:
+    - name: magic-modules-gcp
+
+run:
+    path: magic-modules-branched/.ci/magic-modules/release-ansible.sh
+
+params:
+  GITHUB_TOKEN: ""
