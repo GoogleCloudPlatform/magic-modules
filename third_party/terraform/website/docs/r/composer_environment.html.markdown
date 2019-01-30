@@ -167,7 +167,7 @@ The `config` block supports:
 The `node_config` block supports:
 
 * `zone` -
-  (Optional)
+  (Required)
   The Compute Engine zone in which to deploy the VMs running the
   Apache Airflow software, specified as the zone name or
   relative resource name (e.g. "projects/{project}/zones/{zone}"). Must belong to the enclosing environment's project 
