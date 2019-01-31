@@ -13,12 +13,12 @@
 # limitations under the License.
 -%>
 <% autogen_exception -%>
+<% resource_underscored_name = plural ? resource_name(object, product_ns).pluralize : resource_name(object, product_ns) -%>
 ---
-title: About the <%= object.name -%> resource
+title: About the <%= resource_underscored_name -%> resource
 platform: gcp
 ---
 
-<% resource_underscored_name = plural ? resource_name(object, product_ns).pluralize : resource_name(object, product_ns) %>
 ## Syntax
 A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -%> resource
 
