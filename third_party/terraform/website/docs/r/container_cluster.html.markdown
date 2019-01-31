@@ -16,7 +16,7 @@ and [the API reference](https://cloud.google.com/kubernetes-engine/docs/referenc
 passwords as well as certificate outputs will be stored in the raw state as
 plaintext. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
 
-## Example Usage - With a fine-grained node pool (recommended)
+## Example Usage - with a separately managed node pool (recommended)
 
 ```hcl
 resource "google_container_cluster" "primary" {
@@ -24,7 +24,7 @@ resource "google_container_cluster" "primary" {
   region = "us-central1"
 
   # We can't create a cluster with no node pool defined, but we want to only use
-  # explicitly defined node pools. So, we create the smallest possible default
+  # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count = 1
@@ -62,10 +62,10 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     machine_type = "n1-standard-1"
 
     oauth_scopes = [
-      "compute-rw",
-      "storage-ro",
-      "logging-write",
-      "monitoring",
+      "https://www.googleapis.com/auth/compute",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
     ]
   }
 }
@@ -85,7 +85,7 @@ output "cluster_ca_certificate" {
 }
 ```
 
-## Example Usage - With a default node pool
+## Example Usage - with the default node pool
 
 ```hcl
 resource "google_container_cluster" "primary" {

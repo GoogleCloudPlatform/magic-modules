@@ -8,11 +8,11 @@ description: |-
 
 # google\_container\_node\_pool
 
-Manages a node pool in a Google Kubernetes Engine (GKE) cluster. For more
-information see [the official documentation](https://cloud.google.com/container-engine/docs/node-pools)
+Manages a node pool in a Google Kubernetes Engine (GKE) cluster separately from
+the cluster control plane. For more information see [the official documentation](https://cloud.google.com/container-engine/docs/node-pools)
 and [the API reference](https://cloud.google.com/container-engine/reference/rest/v1/projects.zones.clusters.nodePools).
 
-### Example Usage - Without a default pool (recommended)
+### Example Usage - using a separately managed node pool (recommended)
 
 ```hcl
 resource "google_container_cluster" "primary" {
@@ -20,7 +20,7 @@ resource "google_container_cluster" "primary" {
   region = "us-central1"
   
   # We can't create a cluster with no node pool defined, but we want to only use
-  # explicitly defined node pools. So, we create the smallest possible default
+  # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count = 1
@@ -37,16 +37,16 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     machine_type = "n1-standard-1"
 
     oauth_scopes = [
-      "compute-rw",
-      "storage-ro",
-      "logging-write",
-      "monitoring",
+      "https://www.googleapis.com/auth/compute",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
     ]
   }
 }
 ```
 
-### Example Usage - mixed usage with a default pool and split out node pool
+### Example Usage - 2 node pools, 1 separately managed + the default node pool
 
 ```hcl
 resource "google_container_node_pool" "np" {
