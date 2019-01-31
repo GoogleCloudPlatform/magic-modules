@@ -6,3 +6,4 @@ gcp_compute_disk_type: 'pd-standard'
 gcp_lb_mig1_name: 'gcp-managed-group-name'
 gcp_ext_vm_name: 'gcp_ext_vm_name'
 gcp_location: europe-west2
+gcp_network_name: gcp-inspec-network
