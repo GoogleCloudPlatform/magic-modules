@@ -38,7 +38,7 @@ as a reference.
 
 To get started, you'll need:
 
-* Ruby 2.5.0
+* Ruby 2.6.0
   * You can use `rbenv` to manage your Ruby version(s)
 * [`Bundler`](https://github.com/bundler/bundler)
   * This can be installed with `gem install bundler`
