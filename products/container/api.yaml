@@ -284,7 +284,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'NodePool'
 <%= indent(compile('products/container/async.yaml'), 4) %>
-    base_url: projects/{{project}}/zones/{{zone}}/clusters/{{cluster}}/nodePools
+    base_url: projects/{{project}}/zones/{{location}}/clusters/{{cluster}}/nodePools
     description: |
       NodePool contains the name and configuration for a cluster's node pool.
       Node pools are a set of nodes (i.e. VM's), with a common configuration and
@@ -304,8 +304,8 @@ objects:
         description: 'The cluster this node pool belongs to.'
         required: true
       - !ruby/object:Api::Type::String
-        name: 'zone'
-        description: 'The zone where the node pool is deployed'
+        name: 'location'
+        description: 'The location where the node pool is deployed'
         required: true
     properties:
       - !ruby/object:Api::Type::String
@@ -405,8 +405,8 @@ objects:
       # TODO(nelsonjr): Make 'zone' a ResourceRef once cross-module references
       # are possible.
       - !ruby/object:Api::Type::String
-        name: 'zone'
-        description: 'The zone where the container is deployed'
+        name: 'location'
+        description: 'The location where the container is deployed'
         required: true
       - !ruby/object:Api::Type::String
         name: 'context'
