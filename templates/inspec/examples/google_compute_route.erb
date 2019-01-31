@@ -13,6 +13,6 @@ describe google_compute_route(project: <%= gcp_project_id -%>, name: <%= doc_gen
   its('priority') { should eq <%= doc_generation ? "'#{route['priority']}'" : "route['priority']" -%> }
 end
 
-describe google_compute_route(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+describe google_compute_route(project: <%= gcp_project_id -%>, name: 'nonexistent') do
   it { should_not exist }
 end
