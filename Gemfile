@@ -10,3 +10,7 @@ group :test do
   gem 'rspec'
   gem 'rubocop', '~> 0.63.1'
 end
+
+group :pr_script do
+  gem 'octokit'
+end

@@ -14,7 +14,7 @@ inputs:
     - name: magic-modules-gcp
 
 run:
-    path: magic-modules-branched/.ci/magic-modules/release-ansible.sh
+    path: "pushd magic-modules-gcp/build/ansible; ../../tools/ansible-pr/run.sh"
 
 params:
   GITHUB_TOKEN: ""
