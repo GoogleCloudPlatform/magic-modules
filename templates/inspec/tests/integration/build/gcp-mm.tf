@@ -82,6 +82,10 @@ variable "route" {
   type = "map"
 }
 
+variable "router" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -337,4 +341,21 @@ resource "google_compute_route" "gcp-inspec-route" {
   # automatically create subnetworks, we need to create a dependency so
   # the route is not created before the subnetwork 
   depends_on  = ["google_compute_subnetwork.inspec-gcp-subnetwork"]
+}
+
+resource "google_compute_router" "gcp-inspec-router" {
+  project = "${var.gcp_project_id}"
+  name    = "${var.router["name"]}"
+  network = "${google_compute_network.inspec-gcp-network.name}"
+  bgp {
+    asn               = "${var.router["bgp_asn"]}"
+    advertise_mode    = "${var.router["bgp_advertise_mode"]}"
+    advertised_groups = ["${var.router["bgp_advertised_group"]}"]
+    advertised_ip_ranges {
+      range = "${var.router["bgp_advertised_ip_range1"]}"
+    }
+    advertised_ip_ranges {
+      range = "${var.router["bgp_advertised_ip_range2"]}"
+    }
+  }
 }

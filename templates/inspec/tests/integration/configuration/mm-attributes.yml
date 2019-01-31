@@ -126,3 +126,11 @@ route:
   dest_range: 15.0.0.0/24
   next_hop_ip: 10.2.0.1
   priority: 100
+
+router:
+  name: inspec-gcp-router
+  bgp_asn: 64514
+  bgp_advertise_mode: CUSTOM
+  bgp_advertised_group: "ALL_SUBNETS"
+  bgp_advertised_ip_range1: "1.2.3.4"
+  bgp_advertised_ip_range2: "6.7.0.0/16"
