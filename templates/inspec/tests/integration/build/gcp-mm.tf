@@ -86,6 +86,10 @@ variable "router" {
   type = "map"
 }
 
+variable "snapshot" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -358,4 +362,11 @@ resource "google_compute_router" "gcp-inspec-router" {
       range = "${var.router["bgp_advertised_ip_range2"]}"
     }
   }
+}
+
+resource "google_compute_snapshot" "gcp-inspec-snapshot" {
+  project = "${var.gcp_project_id}"
+  name = "${var.snapshot["name"]}"
+  source_disk = "${google_compute_disk.generic_compute_disk.name}"
+  zone = "${var.gcp_zone}"
 }
