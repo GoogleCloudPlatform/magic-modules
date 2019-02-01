@@ -62,14 +62,14 @@ module Provider
 
     def generate_properties(data, props)
       nested_objects = props.select { |prop| prop.nested_properties? }
+      return if nested_objects.empty?
 
       # Create property files for any nested objects.
-      prop_map = nested_objects.map\
-        { |nested_object| emit_nested_object(data, nested_object) }
+      prop_map = nested_objects.map { |nested_object| emit_nested_object(data, nested_object) }
       generate_property_files(prop_map, data)
 
       # Create property files for any deeper nested objects.
-      nested_objects.map { |prop| generate_properties(data, prop.nested_properties) }
+      nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
     end
 
     def nested_object_data(data, nested_object)
@@ -140,7 +140,7 @@ module Provider
     end
 
     def emit_nested_object(data, property)
-      target = if data[:object].is_a?(Api::Type::Array)
+      target = if property.is_a?(Api::Type::Array)
                  property.item_type.property_file
                else
                  property.property_file
