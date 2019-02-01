@@ -72,12 +72,6 @@ module Provider
       nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
     end
 
-    def nested_object_data(data, nested_object)
-      data.clone.merge(
-        property: nested_object
-      )
-    end
-
     # Generate the files for the properties
     def generate_property_files(prop_map, data)
       prop_map.flatten.compact.each do |prop|
@@ -139,7 +133,7 @@ module Provider
       )
     end
 
-    def emit_nested_object(_data, property)
+    def emit_nested_object(property)
       target = if property.is_a?(Api::Type::Array)
                  property.item_type.property_file
                else

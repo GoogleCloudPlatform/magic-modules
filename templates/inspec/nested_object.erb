@@ -39,7 +39,7 @@ module GoogleInSpec
         attr_reader :<%= prop.out_name %>
 <% end # property.nested_properties.each -%>
 
-<% end # if !nested_properties.empty? -%>
+<% end # if property.nested_properties? -%>
         def initialize(args = nil)
           return if args.nil?
 <% property.nested_properties.each do |prop| -%>
@@ -47,7 +47,7 @@ module GoogleInSpec
   parse_code = "@#{prop.out_name} = #{parse_code(prop, 'args')}"
 -%>
 <%= lines(indent(parse_code, 10)) -%>
-<% end # nested_properties.each -%>
+<% end # property.nested_properties.each -%>
         end
       end
 <% if property.is_a?(Api::Type::Array) -%>
