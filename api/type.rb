@@ -360,7 +360,8 @@ module Api
       end
 
       def nested_properties
-        return @item_type.nested_properties.reject(&:exclude) if @item_type.is_a?(Api::Type::NestedObject)
+        return @item_type.nested_properties.reject(&:exclude) \
+          if @item_type.is_a?(Api::Type::NestedObject)
 
         super
       end
