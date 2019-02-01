@@ -27,8 +27,6 @@ objects:
     create_verb: :PUT
     description: |
       A named resource to which messages are sent by publishers.
-    exports:
-      - name
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

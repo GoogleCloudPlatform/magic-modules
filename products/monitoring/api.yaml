@@ -729,8 +729,6 @@ objects:
     name: 'Group'
     base_url: projects/{{project}}/groups
     self_link: "{{name}}"
-    exports:
-    - name
     update_verb: :PUT
     description: |
       The description of a dynamic collection of monitored resources. Each group
