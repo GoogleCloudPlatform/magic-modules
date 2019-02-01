@@ -28,7 +28,7 @@ package google
     api_name_lower[0] = api_name_lower[0].downcase
     api_client_name = api_name_lower.downcase
     has_project = object.base_url.include?("{{project}}")
-    has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
+    has_self_link = object.self_link
     timeouts = object.async.nil? ? Api::Timeouts.new : object.async.operation.timeouts
 -%>
 
