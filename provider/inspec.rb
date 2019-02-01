@@ -298,9 +298,9 @@ module Provider
         return "name_from_self_link(#{item_from_hash})" \
           if property.name_from_self_link
 
-        return "#{item_from_hash}"
+        return item_from_hash.to_s
       elsif typed_array?(property)
-        return "#{inspec_property_type(property)}.parse(#{item_from_hash}])"
+        return "#{inspec_property_type(property)}.parse(#{item_from_hash})"
       end
       "#{inspec_property_type(property)}.new(#{item_from_hash})"
     end
