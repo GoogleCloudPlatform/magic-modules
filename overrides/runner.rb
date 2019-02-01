@@ -120,27 +120,22 @@ module Overrides
         new_prop = build_primitive_property(old_property,
                                             property_overrides["#{prefix}#{old_property.name}"],
                                             override_classes)
-        if old_property.is_a?(Api::Type::NestedObject)
-          new_props = old_property.properties.map do |p|
+        if old_property.nested_properties?
+          new_props = old_properties.nested_properties.map do |p|
             build_property(p, property_overrides, override_classes,
                            "#{prefix}#{old_property.name}.")
           end
+        end
+
+        if old_property.is_a?(Api::Type::NestedObject)
           new_prop.instance_variable_set('@properties', new_props)
         elsif old_property.is_a?(Api::Type::Map) && \
               old_property.value_type.is_a?(Api::Type::NestedObject)
           new_prop.instance_variable_set('@value_type', Api::Type::NestedObject.new)
-          new_props = old_property.value_type.properties.map do |p|
-            build_property(p, property_overrides, override_classes,
-                           "#{prefix}#{old_property.name}.")
-          end
           new_prop.value_type.instance_variable_set('@properties', new_props)
         elsif old_property.is_a?(Api::Type::Array) && \
               old_property.item_type.is_a?(Api::Type::NestedObject)
           new_prop.instance_variable_set('@item_type', Api::Type::NestedObject.new)
-          new_props = old_property.item_type.properties.map do |p|
-            build_property(p, property_overrides, override_classes,
-                           "#{prefix}#{old_property.name}.")
-          end
           new_prop.item_type.instance_variable_set('@properties', new_props)
         end
         new_prop
