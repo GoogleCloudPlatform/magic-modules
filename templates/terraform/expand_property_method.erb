@@ -63,7 +63,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   v = v.(*schema.Set).List()
 <%     end -%>
 <%
-      nested_properties = property.nested_properties if property.nested_properties?
+       if property.nested_properties?
 -%>
   l := v.([]interface{})
 <%       if property.is_a?(Api::Type::Array) -%>
@@ -81,7 +81,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     original := raw.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-<%       nested_properties.each do |prop| -%>
+<%       property.nested_properties.each do |prop| -%>
       transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name.underscore -%>"], d, config)
       if err != nil {
         return nil, err
@@ -104,7 +104,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <%       end -%>
 }
 
-<%       nested_properties.each do |prop| -%>
+<%       property.nested_properties.each do |prop| -%>
 <%=        lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
 <%       end -%>
 <%     elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
