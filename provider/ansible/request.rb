@@ -39,9 +39,7 @@ module Provider
       # This returns a list of properties that require classes being built out.
       def properties_with_classes(properties)
         properties.map do |p|
-          if p.nested_properties?
-            [p] + properties_with_classes(p.nested_properties)
-          end
+          [p] + properties_with_classes(p.nested_properties) if p.nested_properties?
         end.compact.flatten
       end
 

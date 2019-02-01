@@ -361,6 +361,7 @@ module Api
 
       def nested_properties
         return @item_type.properties if @item_type.is_a?(Api::Type::NestedObject)
+
         super
       end
     end
@@ -600,7 +601,7 @@ module Api
       end
 
       def nested_properties
-        return @value_type.properties
+        @value_type.properties
       end
     end
 

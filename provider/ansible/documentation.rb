@@ -53,9 +53,11 @@ module Provider
             'version_added' => (prop.version_added&.to_f),
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
-                prop.nested_properties.map { |p| documentation_for_property(p) }.reduce({}, :merge) \
                 if prop.nested_properties?
-            )
+                  prop.nested_properties.map { |p| documentation_for_property(p) }
+                                        .reduce({}, :merge)
+                end
+              )
           }.reject { |_, v| v.nil? }
         }
       end
