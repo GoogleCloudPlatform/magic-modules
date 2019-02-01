@@ -53,8 +53,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  Snapshot: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   SslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
