@@ -134,3 +134,6 @@ router:
   bgp_advertised_group: "ALL_SUBNETS"
   bgp_advertised_ip_range1: "1.2.3.4"
   bgp_advertised_ip_range2: "6.7.0.0/16"
+
+snapshot:
+  name: inspec-gcp-disk-snapshot
