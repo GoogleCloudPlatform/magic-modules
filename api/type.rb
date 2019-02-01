@@ -598,6 +598,10 @@ module Api
         check :value_type, type: Api::Type::NestedObject, required: true
         raise "Invalid type #{@value_type}" unless type?(@value_type)
       end
+
+      def nested_properties
+        return @value_type.properties
+      end
     end
 
     def type?(type)

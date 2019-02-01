@@ -72,7 +72,7 @@ module Overrides
       prop = nil
       path.each do |part|
         prop = properties.select { |o| o.name == part }.first
-        properties = prop.nested_properties
+        properties = prop&.nested_properties || []
       end
       raise "#{path.join('.')} does not exist on #{res_name}" unless prop
 
