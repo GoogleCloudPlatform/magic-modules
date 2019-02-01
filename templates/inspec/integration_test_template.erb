@@ -2,11 +2,11 @@
 
 title 'Test GCP <%= name -%> resource.'
 
-<%= compile("templates/inspec/examples/attributes/#{attribute_file_name}.erb") -%>
+<%= compile("templates/inspec/examples/#{attribute_file_name}/#{attribute_file_name}_attributes.erb") -%>
 
 control '<%= name -%>-1.0' do
   impact 1.0
   title '<%= name -%> resource test'
 
-<%= indent(compile("templates/inspec/examples/#{name}.erb"), 2) %>
+<%= indent(compile("templates/inspec/examples/#{attribute_file_name}/#{name}.erb"), 2) %>
 end

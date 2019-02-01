@@ -24,7 +24,7 @@ A `<%= resource_underscored_name -%>` is used to test a Google <%= object.name -
 
 ## Examples
 ```
-<%= compile("templates/inspec/examples/#{resource_underscored_name}.erb") -%>
+<%= compile("templates/inspec/examples/#{resource_name(object, product_ns)}/#{resource_underscored_name}.erb") -%>
 
 ```
 
