@@ -480,7 +480,7 @@ module Api
       end
 
       def property
-        props = resource_ref.exported_properties
+        props = resource_ref.all_user_properties
                             .select { |prop| prop.name == @imports }
         return props.first unless props.empty?
         raise "#{@imports} does not exist on #{@resource}" if props.empty?
@@ -523,7 +523,7 @@ module Api
       end
 
       def check_resource_ref_property_exists
-        exported_props = resource_ref.exported_properties
+        exported_props = resource_ref.all_user_properties
         raise "'#{@imports}' does not exist on '#{@resource}'" \
           if exported_props.none? { |p| p.name == @imports }
       end
