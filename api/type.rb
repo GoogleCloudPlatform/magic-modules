@@ -74,6 +74,33 @@ module Api
       check_conflicts
     end
 
+    def to_s
+      JSON.pretty_generate(self)
+    end
+
+    def to_json(opts = nil)
+      # ignore fields that will contain references to parent resources and
+      # those which will be added later
+      ignored_fields = %i[@resource @__parent @__resource @api_name]
+      json_out = {}
+
+      instance_variables.each do |v|
+        if v == :@conflicts && instance_variable_get(v).empty?
+          # ignore empty conflict arrays
+        elsif instance_variable_get(v) == false || instance_variable_get(v).nil?
+          # ignore false booleans as non-existence indicates falsey
+        elsif !ignored_fields.include? v
+          json_out[v] = instance_variable_get(v)
+        end
+      end
+
+      # convert properties to a hash based on name for nested readability
+      json_out[:@properties] = properties&.map { |p| [p.name, p] }.to_h \
+        if respond_to? 'properties'
+
+      JSON.generate(json_out, opts)
+    end
+
     def check_default_value_property
       return if @default_value.nil?
 
