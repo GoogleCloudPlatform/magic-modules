@@ -291,17 +291,18 @@ module Provider
     # This is used in several places that need to parse an arbitrary property
     # from a JSON representation
     def parse_code(property, hash_name)
-      return "parse_time_string(#{hash_name}['#{property.api_name}'])" if time?(property)
+      item_from_hash = "#{hash_name}['#{property.api_name}']"
+      return "parse_time_string(#{item_from_hash})" if time?(property)
 
       if primitive?(property)
-        return "name_from_self_link(#{hash_name}['#{property.api_name}'])" \
+        return "name_from_self_link(#{item_from_hash})" \
           if property.name_from_self_link
 
-        return "#{hash_name}['#{property.api_name}']"
+        return "#{item_from_hash}"
       elsif typed_array?(property)
-        return "#{inspec_property_type(property)}.parse(#{hash_name}['#{property.api_name}'])"
+        return "#{inspec_property_type(property)}.parse(#{item_from_hash}])"
       end
-      "#{inspec_property_type(property)}.new(#{hash_name}['#{property.api_name}'])"
+      "#{inspec_property_type(property)}.new(#{item_from_hash})"
     end
   end
 end
