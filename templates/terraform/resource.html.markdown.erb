@@ -135,7 +135,7 @@ In addition to the arguments listed above, the following computed attributes are
 <% properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-<% if object.self_link -%>
+<% if object.has_self_link -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
