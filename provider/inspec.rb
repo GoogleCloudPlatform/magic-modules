@@ -220,25 +220,15 @@ module Provider
     # Only arrays of nested objects and nested object properties need require statements
     # for InSpec. Primitives are all handled natively
     def generate_requires(properties)
-      nested_props = properties.select { |type| nested_object?(type) }
-      nested_object_arrays = properties.select\
-        { |type| typed_array?(type) && nested_object?(type.item_type) }
-      nested_array_requires = nested_object_arrays.collect { |type| array_requires(type) }
+      nested_props = properties.select(&:nested_properties?)
+
       # Need to include requires statements for the requirements of a nested object
-      nested_prop_requires = nested_props.map\
-        { |nested_prop| generate_requires(nested_prop.properties) }
+      nested_prop_requires = nested_props.map do |nested_prop|
+        generate_requires(nested_prop.nested_properties) unless nested_prop.is_a?(Api::Type::Array)
+      end.compact
       nested_object_requires = nested_props.map\
         { |nested_object| nested_object_requires(nested_object) }
-      nested_object_requires + nested_prop_requires + nested_array_requires
-    end
-
-    def array_requires(type)
-      File.join(
-        'google',
-        type.__resource.__product.api_name,
-        'property',
-        [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
-      )
+      nested_object_requires + nested_prop_requires
     end
 
     def nested_object_requires(nested_object_type)
