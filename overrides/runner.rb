@@ -121,7 +121,7 @@ module Overrides
                                             property_overrides["#{prefix}#{old_property.name}"],
                                             override_classes)
         if old_property.nested_properties?
-          new_props = old_properties.nested_properties.map do |p|
+          new_props = old_property.nested_properties.map do |p|
             build_property(p, property_overrides, override_classes,
                            "#{prefix}#{old_property.name}.")
           end
