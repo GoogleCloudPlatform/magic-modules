@@ -226,7 +226,6 @@ module Provider
       end
 
       def generate_resource(data)
-        add_datasource_info_to_data(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = module_name(data[:object])
@@ -281,18 +280,20 @@ module Provider
         )
       end
 
-      def add_datasource_info_to_data(data)
+      def generate_objects(output_folder, types, version_name)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
         # information from the datasource overrides.
         # This method will give the regular module data access to the
         # datasource module overrides.
-        name = "@#{data[:object].name}".to_sym
-        facts_info = @config&.datasources&.instance_variable_get(name)&.facts
-        facts_info ||= Provider::Ansible::FactsOverride.new
-        facts_info.validate
-        data[:object].instance_variable_set(:@facts, facts_info)
+        @api.objects.each do |o|
+          facts_info = @config&.datasources&.instance_variable_get("@#{o.name}".to_sym)&.facts
+          facts_info ||= Provider::Ansible::FactsOverride.new
+          facts_info.validate
+          o.instance_variable_set(:@facts, facts_info)
+        end
+        super
       end
     end
   end

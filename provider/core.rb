@@ -183,6 +183,10 @@ module Provider
           # beta properties that are nested within GA resrouces
           object.exclude_if_not_in_version!(version)
 
+          # Make object immutable.
+          object.freeze
+          object.all_user_properties.each(&:freeze)
+
           # version_name will differ from version.name if the resource is being
           # generated at its default version instead of the one that was passed
           # in to the compiler. Terraform needs to know which version was passed
