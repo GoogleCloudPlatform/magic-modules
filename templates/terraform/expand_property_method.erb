@@ -27,7 +27,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     original := raw.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-<%     nested_properties(property.value_type).each do |prop| -%>
+<%     property.nested_properties.each do |prop| -%>
 <%       next if prop.name == property.key_name -%>
     transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
     if err != nil {
@@ -42,7 +42,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   return m, nil
 }
 
-<%   nested_properties(property.value_type).each do |prop| -%>
+<%   property.nested_properties.each do |prop| -%>
 <%     next if prop.name == property.key_name -%>
 <%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
 <%   end -%>
@@ -63,8 +63,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   v = v.(*schema.Set).List()
 <%     end -%>
 <%
-       if !nested_properties(property).empty?
-         nested_properties = nested_properties(property)
+      nested_properties = property.nested_properties if property.nested_properties?
 -%>
   l := v.([]interface{})
 <%       if property.is_a?(Api::Type::Array) -%>
