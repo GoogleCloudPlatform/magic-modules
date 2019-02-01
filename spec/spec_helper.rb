@@ -17,7 +17,6 @@ end
 
 $LOAD_PATH.unshift(File.expand_path('.'))
 
-
 ENV['GOOGLE_LOGGER'] = '0' unless ENV['RSPEC_DEBUG']
 
 %w[api google provider].each do |subsystem|
