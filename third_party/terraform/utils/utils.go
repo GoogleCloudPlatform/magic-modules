@@ -183,7 +183,7 @@ func ipCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 
 // sha256DiffSuppress
 // if old is the hex-encoded sha256 sum of new, treat them as equal
-func alwaysDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+func sha256DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	return hex.EncodeToString(sha256.New().Sum([]byte(old))) == new
 }
 

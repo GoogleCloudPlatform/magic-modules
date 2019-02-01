@@ -769,7 +769,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         sensitive: true
         ignore_read: true
         custom_flatten: 'templates/terraform/custom_flatten/always_empty.erb'
-        diff_suppress_func: 'emptyStateDiffSuppress'
+        diff_suppress_func: 'sha256DiffSuppress'
   SslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
