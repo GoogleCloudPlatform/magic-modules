@@ -20,7 +20,7 @@ def get_unmerged_prs(g, dependencies):
     for pull in pulls:
       # check whether the PR is merged - if it is, add it to the list.
       pr = repo.get_pull(int(pull[1]))
-      if not pr.is_merged():
+      if not pr.is_merged() and not pr.state == "closed":
         unmerged_dependencies.append(pull)
   return unmerged_dependencies
 
