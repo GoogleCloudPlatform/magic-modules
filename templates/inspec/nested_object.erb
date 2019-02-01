@@ -12,27 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
+<%
+  # This template file generates both NestedObjects + Arrays of NestedObjects.
+  nested_property = if property.is_a?(Api::Type::Array)
+                    property.item_type
+                  else
+                    property
+                  end
+  class_name = nested_property.property_class.last
+  product_ns = nested_property.__resource.__product.api_name.camelize(:upper)
+-%>
 # frozen_string_literal: false
 
 <%= lines(autogen_notice :ruby) -%>
 <%
-  requires = generate_requires(nested_properties)
+  requires = generate_requires(nested_property.nested_properties)
 -%>
 <%= lines(emit_requires(requires)) -%>
 module GoogleInSpec
   module <%= product_ns %>
     module Property
       class <%= class_name -%>
-<% if !nested_properties.empty? -%>
-<% nested_properties.each do |prop| -%>
+<% if property.nested_properties? -%>
+<% property.nested_properties.each do |prop| -%>
 
         attr_reader :<%= prop.out_name %>
-<% end # nested_properties.each -%>
+<% end # property.nested_properties.each -%>
 
 <% end # if !nested_properties.empty? -%>
         def initialize(args = nil)
           return if args.nil?
-<% nested_properties.each do |prop| -%>
+<% property.nested_properties.each do |prop| -%>
 <%
   parse_code = "@#{prop.out_name} = #{parse_code(prop, 'args')}"
 -%>
@@ -40,7 +50,7 @@ module GoogleInSpec
 <% end # nested_properties.each -%>
         end
       end
-<% if emit_array -%>
+<% if property.is_a?(Api::Type::Array) -%>
 
       class <%= class_name %>Array
         def self.parse(value)
@@ -49,7 +59,7 @@ module GoogleInSpec
           value.map { |v| <%= class_name %>.new(v) }
         end
       end
-<% end #if emit_array -%>
+<% end #if property is Array -%>
     end
   end
 end
