@@ -360,7 +360,7 @@ module Api
       end
 
       def nested_properties
-        return @item_type.properties if @item_type.is_a?(Api::Type::NestedObject)
+        return @item_type.nested_properties.reject(&:exclude) if @item_type.is_a?(Api::Type::NestedObject)
 
         super
       end
@@ -552,7 +552,7 @@ module Api
       end
 
       def nested_properties
-        @properties
+        properties
       end
 
       def exclude_if_not_in_version!(version)
@@ -601,7 +601,7 @@ module Api
       end
 
       def nested_properties
-        @value_type.properties
+        @value_type.nested_properties.reject(&:exclude)
       end
     end
 
