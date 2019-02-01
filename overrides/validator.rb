@@ -72,17 +72,7 @@ module Overrides
       prop = nil
       path.each do |part|
         prop = properties.select { |o| o.name == part }.first
-        properties = if prop.is_a?(Api::Type::NestedObject)
-                       prop.properties
-                     elsif prop.is_a?(Api::Type::Map) && \
-                           prop.value_type.is_a?(Api::Type::NestedObject)
-                       prop.value_type.properties
-                     elsif prop.is_a?(Api::Type::Array) && \
-                           prop.item_type.is_a?(Api::Type::NestedObject)
-                       prop.item_type.properties
-                     else
-                       []
-                     end
+        properties = prop.nested_properties
       end
       raise "#{path.join('.')} does not exist on #{res_name}" unless prop
 

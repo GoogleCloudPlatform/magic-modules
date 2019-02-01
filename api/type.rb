@@ -178,6 +178,15 @@ module Api
       super
     end
 
+    # Returns nested properties for this property.
+    def nested_properties
+      []
+    end
+
+    def nested_properties?
+      !nested_properties.empty?
+    end
+
     private
 
     # A constant value to be provided as field
@@ -348,6 +357,11 @@ module Api
         super
         @item_type.exclude_if_not_in_version!(version) \
           if @item_type.is_a? NestedObject
+      end
+
+      def nested_properties
+        return @item_type.properties if @item_type.is_a?(Api::Type::NestedObject)
+        super
       end
     end
 
@@ -534,6 +548,10 @@ module Api
 
       def properties
         @properties.reject(&:exclude)
+      end
+
+      def nested_properties
+        @properties
       end
 
       def exclude_if_not_in_version!(version)

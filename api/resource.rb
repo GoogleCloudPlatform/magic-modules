@@ -393,13 +393,10 @@ module Api
           rrefs.concat(resourcerefs_for_properties(p.resource_ref
                                                     .required_properties,
                                                    original_obj))
-        elsif p.is_a? Api::Type::NestedObject
-          rrefs.concat(resourcerefs_for_properties(p.properties, original_obj))
+        elsif p.nested_properties?
+          rrefs.concat(resourcerefs_for_properties(p.nested_properties, original_obj))
         elsif p.is_a? Api::Type::Array
-          if p.item_type.is_a? Api::Type::NestedObject
-            rrefs.concat(resourcerefs_for_properties(p.item_type.properties,
-                                                     original_obj))
-          elsif p.item_type.is_a? Api::Type::ResourceRef
+          if p.item_type.is_a? Api::Type::ResourceRef
             rrefs << p.item_type
             rrefs.concat(resourcerefs_for_properties(p.item_type.resource_ref
                                                       .required_properties,
