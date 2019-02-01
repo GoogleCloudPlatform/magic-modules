@@ -1797,6 +1797,7 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 		enabled = true
 		provider = "CALICO"
 	}
+
 	addons_config {
 		network_policy_config {
 			disabled = false
@@ -1823,7 +1824,7 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 	initial_node_count = 1
 	remove_default_node_pool = true
 
-	network_policy = {}
+	network_policy {}
 }`, clusterName)
 }
 
@@ -1835,7 +1836,8 @@ resource "google_container_cluster" "with_network_policy_enabled" {
 	initial_node_count = 1
 	remove_default_node_pool = true
 
-	network_policy = {}
+	network_policy {}
+
 	addons_config {
 		network_policy_config {
 			disabled = true
@@ -1900,15 +1902,13 @@ func testAccContainerCluster_withMasterAuthorizedNetworksConfig(clusterName stri
 	cidrBlocks := emptyValue
 	if len(cidrs) > 0 {
 		var buf bytes.Buffer
-		buf.WriteString("cidr_blocks = [")
 		for _, c := range cidrs {
 			buf.WriteString(fmt.Sprintf(`
-			{
+			cidr_blocks {
 				cidr_block = "%s"
 				display_name = "disp-%s"
-			},`, c, c))
+			}`, c, c))
 		}
-		buf.WriteString("]")
 		cidrBlocks = buf.String()
 	}
 
@@ -2053,7 +2053,10 @@ resource "google_container_cluster" "with_tpu" {
 		master_ipv4_cidr_block = "10.42.0.0/28"
 	}
 
-	master_authorized_networks_config { cidr_blocks = [] }
+	master_authorized_networks_config {
+		cidr_blocks = []
+	}
+
 	ip_allocation_policy {
 		cluster_secondary_range_name  = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.0.range_name}"
 		services_secondary_range_name = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.1.range_name}"
