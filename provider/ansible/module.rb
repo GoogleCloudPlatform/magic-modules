@@ -36,15 +36,10 @@ module Provider
             'elements' => (python_type(prop.item_type) \
               if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'aliases' => prop.aliases,
-            'options' => (if prop.is_a?(Api::Type::Array) && \
-                          prop.item_type.is_a?(Api::Type::NestedObject)
-                            prop.item_type.properties
-                                          .map { |x| python_dict_for_property(x) }
-                                          .reduce({}, :merge)
-                          elsif prop.is_a?(Api::Type::NestedObject)
-                            prop.properties.map { |x| python_dict_for_property(x) }
-                                           .reduce({}, :merge)
-                          end)
+            'options' => (prop.nested_properties.map { |x| python_dict_for_property(x) }
+                                                .reduce({}, :merge) \
+                          if prop.nested_properties?
+                          )
           }.reject { |_, v| v.nil? }
         }
       end
