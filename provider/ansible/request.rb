@@ -39,12 +39,7 @@ module Provider
       # This returns a list of properties that require classes being built out.
       def properties_with_classes(properties)
         properties.map do |p|
-          if p.is_a? Api::Type::NestedObject
-            [p] + properties_with_classes(p.properties)
-          elsif p.is_a?(Api::Type::Array) && \
-                p.item_type.is_a?(Api::Type::NestedObject)
-            [p] + properties_with_classes(p.item_type.properties)
-          end
+          [p] + properties_with_classes(p.nested_properties) if p.nested_properties?
         end.compact.flatten
       end
 

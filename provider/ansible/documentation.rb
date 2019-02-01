@@ -53,14 +53,11 @@ module Provider
             'version_added' => (prop.version_added&.to_f),
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
-              if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| documentation_for_property(p) }.reduce({}, :merge)
-              elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties
-                              .map { |p| documentation_for_property(p) }
-                              .reduce({}, :merge)
-              end
-            )
+                if prop.nested_properties?
+                  prop.nested_properties.map { |p| documentation_for_property(p) }
+                                        .reduce({}, :merge)
+                end
+              )
           }.reject { |_, v| v.nil? }
         }
       end
@@ -83,11 +80,8 @@ module Provider
             'returned' => 'success',
             'type' => type,
             'contains' => (
-              if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
-              elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
-              end
+              prop.nested_properties.map { |p| returns_for_property(p) }.reduce({}, :merge) \
+              if prop.nested_properties?
             )
           }.reject { |_, v| v.nil? }
         }
