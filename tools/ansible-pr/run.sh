@@ -9,13 +9,6 @@ declare -a ignored_modules=(
   gcp_url_map
 )
 
-new_branch() {
-  branch_name=$1
-  git  checkout upstream/devel
-  git branch -D $branch_name
-  git chkecout -b $branch_name
-}
-
 get_all_modules() {
   remote_name=$1
   file_name=$remote_name
@@ -38,9 +31,11 @@ if ! git remote -v | grep "origin"; then
   exit 1
 fi
 
-if ! git remote -v | grep "upstream.*git@github.com:ansible/ansible.git (fetch)" 2&>1 >/dev/null; then
+if ! git remote -v | grep "upstream.*git@github.com:ansible/ansible\.git \(fetch\)" 2&>1 >/dev/null; then
   git remote add upstream git@github.com:ansible/ansible.git
 fi
+
+set -e
 
 git remote add magician git@github.com:modular-magician/ansible.git
 git fetch magician devel
