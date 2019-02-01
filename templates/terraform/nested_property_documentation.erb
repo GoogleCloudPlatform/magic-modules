@@ -1,6 +1,6 @@
 
 <%
-  if !property.nested_properties?
+  if property.nested_properties?
 -%>
 The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%>:
 <%- if property.is_a?(Api::Type::Map) %>
