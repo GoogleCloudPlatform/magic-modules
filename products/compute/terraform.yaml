@@ -768,6 +768,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       privateKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
+        custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
+        diff_suppress_func: 'sha256DiffSuppress'
   SslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
