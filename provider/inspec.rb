@@ -61,7 +61,7 @@ module Provider
     end
 
     def generate_properties(data, props)
-      nested_objects = props.select { |prop| prop.nested_properties? }
+      nested_objects = props.select(&:nested_properties?)
       return if nested_objects.empty?
 
       # Create property files for any nested objects.
@@ -139,7 +139,7 @@ module Provider
       )
     end
 
-    def emit_nested_object(data, property)
+    def emit_nested_object(_data, property)
       target = if property.is_a?(Api::Type::Array)
                  property.item_type.property_file
                else
