@@ -11,7 +11,7 @@ import (
 	resourceManagerV2Beta1 "google.golang.org/api/cloudresourcemanager/v2beta1"
 )
 
-func TestAccFolderIamPolicy_update(t *testing.T) {
+func TestAccFolderIamPolicy_basic(t *testing.T) {
 	t.Parallel()
 
 	folderDisplayName := "tf-test-" + acctest.RandString(10)
