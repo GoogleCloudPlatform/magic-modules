@@ -144,6 +144,7 @@ https_proxy:
 
 ssl_certificate:
   name: inspec-gcp-ssl-certificate
+  description: A fake ssl certificate (DO NOT USE)
   certificate: |
     -----BEGIN CERTIFICATE-----
     MIICqjCCAk+gAwIBAgIJAIuJ+0352Kq4MAoGCCqGSM49BAMCMIGwMQswCQYDVQQG

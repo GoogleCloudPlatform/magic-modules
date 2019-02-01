@@ -384,6 +384,7 @@ resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
   name        = "${var.ssl_certificate["name"]}"
   private_key = "${var.ssl_certificate["private_key"]}"
   certificate = "${var.ssl_certificate["certificate"]}"
+  description = "${var.ssl_certificate["description"]}"
 }
 
 resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
