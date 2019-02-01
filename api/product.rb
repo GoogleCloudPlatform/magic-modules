@@ -34,6 +34,10 @@ module Api
       name.downcase
     end
 
+    def to_s
+      JSON.pretty_generate(self)
+    end
+
     def to_json(opts = nil)
       json_out = {}
 

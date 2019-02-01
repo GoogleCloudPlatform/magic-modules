@@ -83,7 +83,7 @@ module Api
       instance_variables.each do |v|
         if v == :@conflicts && instance_variable_get(v).empty?
           # ignore empty conflict arrays
-        elsif instance_variable_get(v) == false
+        elsif instance_variable_get(v) == false || instance_variable_get(v).nil?
           # ignore false booleans as non-existence indicates falsey
         elsif !ignored_fields.include? v
           json_out[v] = instance_variable_get(v)

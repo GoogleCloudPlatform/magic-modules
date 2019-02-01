@@ -135,6 +135,10 @@ module Api
       end
     end
 
+    def to_s
+      JSON.pretty_generate(self)
+    end
+
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources
       ignored_fields = %i[@__product @__parent @__resource @api_name @collection_url_response]
