@@ -35,6 +35,7 @@ module Api
     end
 
     def to_s
+      # relies on the custom to_json definitions
       JSON.pretty_generate(self)
     end
 

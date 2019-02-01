@@ -74,6 +74,10 @@ module Api
       check_conflicts
     end
 
+    def to_s
+      JSON.pretty_generate(self)
+    end
+
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources and
       # those which will be added later
