@@ -66,7 +66,6 @@ variable "http_proxy" {
   type = "map"
 }
 
-<<<<<<< HEAD
 variable "global_forwarding_rule" {
   type = "map"
 }
@@ -88,6 +87,10 @@ variable "router" {
 }
 
 variable "https_proxy" {
+  type = "map"
+}
+
+variable "ssl_certificate" {
   type = "map"
 }
 
@@ -363,12 +366,13 @@ resource "google_compute_router" "gcp-inspec-router" {
       range = "${var.router["bgp_advertised_ip_range2"]}"
     }
   }
+}
 
-resource "google_compute_ssl_certificate" "default" {
+resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
   project     = "${var.gcp_project_id}"
-  name        = "my-certificate"
-  private_key = "${file("/Users/slevenick/workspace/inspec-modules/magic-modules/build/inspec/test/integration/build/server.key")}"
-  certificate = "${file("/Users/slevenick/workspace/inspec-modules/magic-modules/build/inspec/test/integration/build/server.crt")}"
+  name        = "${var.ssl_certificate["name"]}"
+  private_key = "${var.ssl_certificate["private_key"]}"
+  certificate = "${var.ssl_certificate["certificate"]}"
 }
 
 resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
@@ -376,5 +380,5 @@ resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
   name        = "${var.https_proxy["name"]}"
   url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
   description = "${var.https_proxy["description"]}"
-  ssl_certificates = ["${google_compute_ssl_certificate.default.self_link}"]
+  ssl_certificates = ["${google_compute_ssl_certificate.gcp-inspec-ssl-certificate.self_link}"]
 }
