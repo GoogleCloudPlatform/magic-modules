@@ -107,21 +107,6 @@ module Provider
       p
     end
 
-    # Returns the nested properties. An empty list is returned if the property
-    # is not a NestedObject or an Array of NestedObjects.
-    def nested_properties(property)
-      if property.is_a?(Api::Type::NestedObject)
-        property.properties
-      elsif property.is_a?(Api::Type::Array) &&
-            property.item_type.is_a?(Api::Type::NestedObject)
-        property.item_type.properties
-      elsif property.is_a?(Api::Type::Map)
-        property.value_type.properties
-      else
-        []
-      end
-    end
-
     private
 
     # This function uses the resource.erb template to create one file
