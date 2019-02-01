@@ -20,7 +20,7 @@
                     property
                   end
   class_name = nested_property.property_class.last
-  product_ns = nested_property.__resource.__product.api_name.camelize(:upper)
+  product_ns = product.name.camelize(:upper)
 -%>
 # frozen_string_literal: false
 
