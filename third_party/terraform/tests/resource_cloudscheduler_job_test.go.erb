@@ -135,7 +135,7 @@ resource "google_cloud_scheduler_job" "job" {
 	description = "test job"
 	schedule = "*/2 * * * *"
 
-	pubsub_target = {
+	pubsub_target {
 		topic_name = "projects/%s/topics/build-triggers"
 		data = "${base64encode("test")}"
 	}
@@ -153,13 +153,14 @@ resource "google_cloud_scheduler_job" "job" {
 	description = "test app engine job"
 	time_zone = "Europe/London"
 
-	app_engine_http_target = {
+	app_engine_http_target {
 		http_method = "POST"
-    app_engine_routing = {
+    app_engine_routing {
       service = "web"
       version = "prod"
       instance = "my-instance-001"
     }
+
 		relative_uri = "/ping"
 	}
 }
@@ -176,7 +177,7 @@ resource "google_cloud_scheduler_job" "job" {
 	schedule = "*/8 * * * *"
 	time_zone = "America/New_York"
 
-	http_target = {
+	http_target {
 		http_method = "POST"
 		uri = "https://example.com/ping"
 	}
