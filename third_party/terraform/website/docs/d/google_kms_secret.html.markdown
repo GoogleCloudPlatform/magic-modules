@@ -85,7 +85,7 @@ The following arguments are supported:
 * `crypto_key` (Required) - The id of the CryptoKey that will be used to
   decrypt the provided ciphertext. This is represented by the format
   `{projectId}/{location}/{keyRingName}/{cryptoKeyName}`.
-* `additional_authenticated_data` (Optional) - Base64-encded additional
+* `additional_authenticated_data` (Optional) - Base64-encoded additional
   authenticated data that was supplied during encryption.
 
 ## Attributes Reference
