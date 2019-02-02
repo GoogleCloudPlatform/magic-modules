@@ -191,7 +191,7 @@ tool;
 Tool             | Testing Guide
 -----------------|--------------
 ansible          | [instructions](https://docs.ansible.com/ansible/devel/dev_guide/testing.html)
-inspec           | TODO(slevenick): Add this
+inspec           | [testing inspec-gcp](https://github.com/inspec/inspec-gcp/#test-inspec-gcp-resources)
 terraform        | [`google` provider testing guide](https://github.com/terraform-providers/terraform-provider-google/blob/master/.github/CONTRIBUTING.md#tests)
 terraform (beta) | [`google-beta` provider testing guide](https://github.com/terraform-providers/terraform-provider-google-beta/blob/master/.github/CONTRIBUTING.md#tests)
 
