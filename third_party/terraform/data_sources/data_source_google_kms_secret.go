@@ -16,20 +16,16 @@ func dataSourceGoogleKmsSecret() *schema.Resource {
 		Read: dataSourceGoogleKmsSecretRead,
 		Schema: map[string]*schema.Schema{
 			"crypto_key": {
-				Type: schema.TypeString,
-				Description: "Full ID of the crypto key to use for decryption in the format" +
-					"(`projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}`",
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"ciphertext": {
-				Type:        schema.TypeString,
-				Description: "Base64-encoded ciphertext",
-				Required:    true,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"additional_authenticated_data": {
-				Type:        schema.TypeString,
-				Description: "Base64-encoded optional data originally supplied during encryption",
-				Optional:    true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"plaintext": {
 				Type:      schema.TypeString,
