@@ -233,20 +233,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      allowed: !ruby/object:Overrides::Terraform::PropertyOverride     
+      allowed: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'allow'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
       allowed.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
-      denied: !ruby/object:Overrides::Terraform::PropertyOverride     
+      denied: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'deny'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
       denied.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
       destinationRanges: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true 
+        is_set: true
         default_from_api: true
       direction: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
@@ -265,14 +265,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 65535)'
       sourceRanges: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true 
+        is_set: true
         default_from_api: true
       sourceTags: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true 
+        is_set: true
       sourceServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true 
+        is_set: true
       targetServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
-        is_set: true 
+        is_set: true
       targetTags: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
   ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
@@ -498,6 +498,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "interconnect_attachment_basic"
