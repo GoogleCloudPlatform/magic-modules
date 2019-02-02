@@ -2429,13 +2429,36 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'interconnect'
         description: |
-          URL of the underlying Interconnect object that this attachment's traffic will
-          traverse through.
-        required: true
+          URL of the underlying Interconnect object that this attachment's
+          traffic will traverse through. Required if type is DEDICATED, must not
+          be set if type is PARTNER.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
           An optional description of this resource.
+      - !ruby/object:Api::Type::String
+        name: 'edgeAvailabilityDomain'
+        description: |
+          Desired availability domain for the attachment. Only available for type
+          PARTNER, at creation time. For improved reliability, customers should
+          configure a pair of attachments with one per availability domain. The
+          selected availability domain will be provided to the Partner via the
+          pairing key so that the provisioned circuit will lie in the specified
+          domain. If not specified, the value will default to AVAILABILITY_DOMAIN_ANY.
+      - !ruby/object:Api::Type::String
+        name: 'pairingKey'
+        description: |
+          [Output only for type PARTNER. Not present for DEDICATED]. The opaque
+          identifier of an PARTNER attachment used to initiate provisioning with
+          a selected partner. Of the form "XXXXX/region/domain"
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'partnerAsn'
+        description: |
+          [Output only for type PARTNER. Not present for DEDICATED]. Optional
+          BGP ASN for the router that should be supplied by a layer 3 Partner if
+          they configured BGP on behalf of the customer.
+        output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'privateInterconnectInfo'
         description: |
@@ -2449,6 +2472,27 @@ objects:
               802.1q encapsulation tag to be used for traffic between
               Google and the customer, going to and from this network and region.
             output: true
+      - !ruby/object:Api::Type::Enum
+        name: 'type'
+        description: |
+          The type of InterconnectAttachment you wish to create. Defaults to
+          DEDICATED.
+        values:
+          - :DEDICATED
+          - :PARTNER
+          - :PARTNER_PROVIDER
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        description: |
+          [Output Only] The current state of this attachment's functionality.
+        values:
+          - :ACTIVE
+          - :DEFUNCT
+          - :PARTNER_REQUEST_RECEIVED
+          - :PENDING_CUSTOMER
+          - :PENDING_PARTNER
+          - :STATE_UNSPECIFIED
+        output: true
       - !ruby/object:Api::Type::String
         name: 'googleReferenceId'
         description: |
