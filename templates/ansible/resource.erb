@@ -67,10 +67,6 @@ def main():
                                    '<%= object.self_link_query.items -%>')
 <% end # object.self_link_query.nil? -%>
     changed = False
-<% if object.readonly -%>
-    if not fetch:
-        module.fail_json(msg="<%= object.name -%> is not valid")
-<% else # object.readonly -%>
 
     if fetch:
         if state == 'present':
@@ -133,13 +129,11 @@ def main():
 <%= lines(indent(object.post_action, 4)) -%>
 <% end # ifobject.post_create -%>
     fetch.update({'changed': changed})
-<% end # object.readonly -%>
 
     module.exit_json(**fetch)
 
 
 <% prod_name = object.__product.api_name -%>
-<% unless object.readonly -%>
 <%# TODO: kind param not always needed.
   # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
 -%>
@@ -287,7 +281,6 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
 <% end # if object.delete.nil? -%>
 
 
-<% end # unless object.readonly -%>
 def resource_to_request(module):
 <%
   properties_in_request = [
