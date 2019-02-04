@@ -44,6 +44,7 @@ module Provider
       # Returns all URI properties minus those ignored.
       def uri_properties(object, ignored_props = [])
         object.uri_properties
+              .compact
               .map(&:name)
               .reject { |x| ignored_props.include? x }
       end
@@ -242,7 +243,7 @@ module Provider
       end
 
       def name_parameter
-        compile_string(INTEGRATION_TEST_DEFAULTS, @__example.task.code['name']).join
+        compile_string(INTEGRATION_TEST_DEFAULTS, (@__example.task.code['name'] || '')).join
       end
     end
 

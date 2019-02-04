@@ -60,7 +60,14 @@ def main():
                                           ('kind' if object.kind?),
                                          ])
 -%>
+<% if object.identity.empty? -%>
+    if module.params['id']:
+        fetch = <%= method %>
+    else:
+        fetch = {}
+<% else #object.identity.empty? -%>
     fetch = <%= method %>
+<% end # object.identity.empty? -%>
 <% else # object.self_link_query.nil? -%>
     fetch = fetch_wrapped_resource(module, '<%= object.kind -%>',
                                    '<%= object.self_link_query.kind -%>',
