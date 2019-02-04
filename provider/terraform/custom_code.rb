@@ -150,6 +150,7 @@ module Provider
 
       def config_example
         @vars ||= []
+        # Examples with test_env_vars are skipped elsewhere
         body = lines(compile_file(
                        {
                          vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
@@ -195,6 +196,7 @@ module Provider
         check :name, type: String, required: true
         check :primary_resource_id, type: String
         check :vars, type: Hash
+        check :test_env_vars, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :skip_test, type: TrueClass
       end
