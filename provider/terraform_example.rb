@@ -18,16 +18,18 @@ module Provider
   class TerraformExample < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
-    def generate(output_folder, types, version_name)
+    def generate(output_folder, types, version_name, _product_path, _dump_yaml)
       version = @api.version_obj_or_default(version_name)
       generate_objects(output_folder, types, version)
     end
 
     # Create a directory of examples per resource
     def generate_resource(data)
-      return if data[:object].example.reject(&:skip_test).empty?
+      examples = data[:object].examples
+                              .reject(&:skip_test)
+                              .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
 
-      data[:object].example.each do |example|
+      examples.each do |example|
         target_folder = data[:output_folder]
         target_folder = File.join(target_folder, example.name)
         FileUtils.mkpath target_folder
