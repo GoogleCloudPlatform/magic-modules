@@ -90,6 +90,14 @@ variable "snapshot" {
   type = "map"
 }
 
+variable "https_proxy" {
+  type = "map"
+}
+
+variable "ssl_certificate" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -369,4 +377,20 @@ resource "google_compute_snapshot" "gcp-inspec-snapshot" {
   name = "${var.snapshot["name"]}"
   source_disk = "${google_compute_disk.generic_compute_disk.name}"
   zone = "${var.gcp_zone}"
+}
+
+resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.ssl_certificate["name"]}"
+  private_key = "${var.ssl_certificate["private_key"]}"
+  certificate = "${var.ssl_certificate["certificate"]}"
+  description = "${var.ssl_certificate["description"]}"
+}
+
+resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.https_proxy["name"]}"
+  url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
+  description = "${var.https_proxy["description"]}"
+  ssl_certificates = ["${google_compute_ssl_certificate.gcp-inspec-ssl-certificate.self_link}"]
 }
