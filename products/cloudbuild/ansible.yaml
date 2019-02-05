@@ -25,7 +25,16 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
+  Trigger: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Trigger: !ruby/object:Overrides::Ansible::ResourceOverride
+    # TODO(alexstephen): Create tests for resources without names.
+    has_tests: false
+    properties:
+      id: !ruby/object:Overrides::Ansible::PropertyOverride
+        output: false
 files: !ruby/object:Provider::Config::Files
   compile:
 <%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
