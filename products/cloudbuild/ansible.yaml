@@ -30,6 +30,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
   Trigger: !ruby/object:Overrides::Ansible::ResourceOverride
+    notes:
+      - The id for this resource is created by the API after you create the resource the first time.
+        If you want to manage this resource after creation, you'll have to copy the generated
+        id into the playbook. If you do not, new triggers will be created on subsequent runs.
     # TODO(alexstephen): Create tests for resources without names.
     has_tests: false
     properties:
