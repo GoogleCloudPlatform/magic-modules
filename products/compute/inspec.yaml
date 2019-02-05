@@ -53,11 +53,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-  SslCertificate: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
-  TargetHttpsProxy: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
