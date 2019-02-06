@@ -17,5 +17,20 @@ manifest: !ruby/object:Provider::Inspec::Manifest
   description: |
     InSpec resources for verifying GCP infrastructure
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Table: !ruby/object:Overrides::Ansible::ResourceOverride
+  Dataset: !ruby/object:Overrides::Inspec::ResourceOverride
+    properties:
+      description: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
+      access: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
+      defaultTableExpirationMs: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
+      creationTime: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
+      lastModifiedTime: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
+
+  Table: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
