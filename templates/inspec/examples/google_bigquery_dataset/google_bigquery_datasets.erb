@@ -4,5 +4,4 @@ describe google_bigquery_datasets(project: <%= doc_generation ? "#{gcp_project_i
   its('count') { should be >= 1 }
   its('friendly_names') { should include <%= doc_generation ? "'#{dataset['friendly_name']}'" : "dataset['friendly_name']" -%> }
   its('locations') { should include <%= doc_generation ? "'#{dataset['location']}'" : "dataset['location']" -%> }
-  its('descriptions') { should include <%= doc_generation ? "'#{dataset['description']}'" : "dataset['description']" -%> }
 end
