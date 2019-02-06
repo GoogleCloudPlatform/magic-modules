@@ -57,47 +57,19 @@ module Provider
       )
       generate_documentation(data, name, false)
       generate_documentation(data, name, true)
-      generate_properties(data)
+      generate_properties(data, data[:object].all_user_properties)
     end
 
-    def generate_properties(data)
-      object = data[:object]
-      props = object.is_a?(::Api::Resource) ? object.all_user_properties : object.properties
-      nested_object_arrays = props.select\
-        { |type| typed_array?(type) && nested_object?(type.item_type) }
+    def generate_properties(data, props)
+      nested_objects = props.select(&:nested_properties?)
+      return if nested_objects.empty?
 
-      nested_objects = props.select { |prop| nested_object?(prop) }
-
-      prop_map = nested_objects.map\
-        { |nested_object| emit_nested_object(nested_object_data(data, nested_object)) }
-
-      prop_map << nested_object_arrays.map\
-        { |array| emit_nested_object(nested_object_array_data(data, array)) }
-
+      # Create property files for any nested objects.
+      prop_map = nested_objects.map { |nested_object| emit_nested_object(nested_object) }
       generate_property_files(prop_map, data)
-      nested_objects.map { |prop| generate_properties(data.clone.merge(object: prop)) }
-      nested_object_arrays.map\
-        { |prop| generate_properties(data.clone.merge(object: prop.item_type)) }
-    end
 
-    def nested_object_data(data, nested_object)
-      data.clone.merge(
-        emit_array: false,
-        api_name: nested_object.name.underscore,
-        property: nested_object,
-        nested_properties: nested_object.properties,
-        obj_name: data[:object].name.underscore
-      )
-    end
-
-    def nested_object_array_data(data, nested_object_array)
-      data.clone.merge(
-        emit_array: true,
-        api_name: nested_object_array.name.underscore,
-        property: nested_object_array,
-        nested_properties: nested_object_array.item_type.properties,
-        obj_name: data[:object].name.underscore
-      )
+      # Create property files for any deeper nested objects.
+      nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
     end
 
     # Generate the files for the properties
@@ -106,9 +78,7 @@ module Provider
         compile_file_list(
           data[:output_folder],
           { prop[:target] => prop[:source] },
-          {
-            product_ns: data[:product].api_name.camelize(:upper)
-          }.merge((prop[:overrides] || {}))
+          prop
         )
       end
     end
@@ -163,30 +133,17 @@ module Provider
       )
     end
 
-    def emit_nested_object(data)
-      target = if data[:emit_array]
-                 data[:property].item_type.property_file
+    def emit_nested_object(property)
+      target = if property.is_a?(Api::Type::Array)
+                 property.item_type.property_file
                else
-                 data[:property].property_file
+                 property.property_file
                end
       {
         source: File.join('templates', 'inspec', 'nested_object.erb'),
         target: "libraries/#{target}.rb",
-        overrides: emit_nested_object_overrides(data)
+        property: property
       }
-    end
-
-    def emit_nested_object_overrides(data)
-      data.clone.merge(
-        api_name: data[:api_name].camelize(:upper),
-        object_type: data[:obj_name].camelize(:upper),
-        product_ns: data[:product].api_name.camelize(:upper),
-        class_name: if data[:emit_array]
-                      data[:property].item_type.property_class.last
-                    else
-                      data[:property].property_class.last
-                    end
-      )
     end
 
     def time?(property)
