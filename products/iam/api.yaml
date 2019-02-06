@@ -31,8 +31,6 @@ objects:
       decoder: decode_response
     description: |
       A service account in the Identity and Access Management API.
-    exports:
-      - name
     properties:
       - !ruby/object:Api::Type::String
         name: name

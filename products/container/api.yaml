@@ -29,12 +29,6 @@ objects:
     name: 'Cluster'
 <%= indent(compile('products/container/async.yaml'), 4) %>
     base_url: 'projects/{{project}}/locations/{{location}}/clusters'
-    exports:
-      - !ruby/object:Api::Type::FetchedExternal
-        name: endpoint
-      - !ruby/object:Api::Type::FetchedExternal
-        name: masterAuth
-      - name
     description: 'A Google Container Engine cluster.'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request

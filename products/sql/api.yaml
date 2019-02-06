@@ -34,8 +34,6 @@ objects:
       Represents a Cloud SQL instance. Cloud SQL instances are SQL databases
       hosted in Google's cloud. The Instances resource provides methods for
       common configuration and management tasks.
-    exports:
-      - name
 <%= indent(compile('templates/async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Enum

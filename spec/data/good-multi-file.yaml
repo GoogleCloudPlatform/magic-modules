@@ -24,8 +24,6 @@ objects:
     name: 'ReferencedResource'
     kind: 'myproduct#referencedresource'
     base_url: 'referencedresource'
-    exports:
-      - name
     description: 'blah blah'
     properties:
       - !ruby/object:Api::Type::String
