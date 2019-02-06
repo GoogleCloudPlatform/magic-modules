@@ -289,6 +289,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/instance_metadata.py'
       - 'products/compute/helpers/python/instance_start.py'
     properties:
+      canIpForward: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["ip_forward"]
+      disks.initializeParams.sourceImage: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["image", "image_family"]
       status: !ruby/object:Overrides::Ansible::PropertyOverride
         version_added: '2.8'
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
