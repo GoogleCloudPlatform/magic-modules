@@ -98,6 +98,10 @@ variable "ssl_certificate" {
   type = "map"
 }
 
+variable "dataset" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -393,4 +397,23 @@ resource "google_compute_target_https_proxy" "gcp-inspec-https-proxy" {
   url_map     = "${google_compute_url_map.gcp-inspec-url-map.self_link}"
   description = "${var.https_proxy["description"]}"
   ssl_certificates = ["${google_compute_ssl_certificate.gcp-inspec-ssl-certificate.self_link}"]
+}
+
+resource "google_bigquery_dataset" "gcp-inspec-dataset" {
+  project                     = "${var.gcp_project_id}"
+  dataset_id                  = "${var.dataset["dataset_id"]}"
+  friendly_name               = "${var.dataset["friendly_name"]}"
+  description                 = "${var.dataset["description"]}"
+  location                    = "${var.dataset["location"]}"
+  default_table_expiration_ms = "${var.dataset["default_table_expiration_ms"]}"
+
+  access {
+    role   = "${var.dataset["access_reader_role"]}"
+    domain = "${var.dataset["access_reader_domain"]}"
+  }
+
+  access {
+    role           = "${var.dataset["access_writer_role"]}"
+    special_group = "${var.dataset["access_writer_special_group"]}"
+  }
 }
