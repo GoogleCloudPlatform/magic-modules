@@ -291,9 +291,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       canIpForward: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["ip_forward"]
-      image: !ruby/object:Overrides::Ansible::PropertyOverride
-        aliases: ["image_family"]
-
+      disks.initializeParams.sourceImage: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ["image", "image_family"]
       status: !ruby/object:Overrides::Ansible::PropertyOverride
         version_added: '2.8'
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
