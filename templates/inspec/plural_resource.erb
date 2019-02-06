@@ -85,7 +85,7 @@ link_query = object.self_link_query || object.collection_url_response
 
   def transformers
     {
-<% object.all_user_properties.reject {|prop| prop.exclude_plural }.each do |prop| -%>
+<% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
       '<%= prop.api_name -%>' => ->(obj) { <%= "return :#{prop.out_name}, #{parse_code(prop, 'obj')}" -%> },
 <% end # object.all_user_properties.each -%>
     }
