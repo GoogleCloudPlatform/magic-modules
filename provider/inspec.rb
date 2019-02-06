@@ -65,7 +65,7 @@ module Provider
       return if nested_objects.empty?
 
       # Create property files for any nested objects.
-      prop_map = nested_objects.map { |nested_object| emit_nested_object(data, nested_object) }
+      prop_map = nested_objects.map { |nested_object| emit_nested_object(nested_object) }
       generate_property_files(prop_map, data)
 
       # Create property files for any deeper nested objects.
