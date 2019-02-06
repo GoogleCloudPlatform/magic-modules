@@ -27,9 +27,6 @@ objects:
     description: |
       A possible configuration for a Cloud Spanner instance. Configurations
       define the geographic placement of nodes and their replication.
-    exports:
-      - !ruby/object:Api::Type::FetchedExternal
-        name: name
     readonly: true
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
@@ -56,8 +53,6 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
-    exports:
-      - name
     transport: !ruby/object:Api::Resource::Transport
       decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList

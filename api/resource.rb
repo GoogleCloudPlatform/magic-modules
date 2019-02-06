@@ -56,7 +56,6 @@ module Api
       attr_reader :exclude
       attr_reader :async
       attr_reader :readonly
-      attr_reader :exports
       attr_reader :transport
       # Documentation references
       attr_reader :references
@@ -66,6 +65,7 @@ module Api
       attr_reader :input # If true, resource is not updatable as a whole unit
       attr_reader :min_version # Minimum API version this resource is in
       attr_reader :update_mask
+      attr_reader :has_self_link
     end
 
     include Properties
@@ -184,8 +184,6 @@ module Api
       check :exclude, type: :boolean
       check :kind, type: String
 
-      check :exports, type: Array,
-                      item_type: [String, Api::Type::FetchedExternal, Api::Type::SelfLink]
       check :self_link, type: String
       check :self_link_query, type: Api::Resource::ResponseList
       check :readonly, type: :boolean
@@ -201,6 +199,8 @@ module Api
 
       check :input, type: :boolean
       check :min_version, type: String
+
+      check :has_self_link, type: :boolean, default: false
 
       set_variables(@parameters, :__resource)
       set_variables(@properties, :__resource)
@@ -248,17 +248,6 @@ module Api
       all_user_properties.select(&:required)
     end
 
-    def exported_properties
-      return [] if @exports.nil?
-
-      from_api = @exports.select { |e| e.is_a?(Api::Type::FetchedExternal) }
-                         .each { |e| e.resource = self }
-      prop_names = @exports - from_api
-      all_user_properties.select { |p| prop_names.include?(p.name) }
-                         .concat(from_api)
-                         .sort_by(&:name)
-    end
-
     # TODO(alexstephen): Update test_constants to use this function.
     # Returns all of the properties that are a part of the self_link or
     # collection URLs
@@ -296,16 +285,6 @@ module Api
 
     def decoder?
       !@transport&.decoder.nil?
-    end
-
-    # Returns true if this resource needs access to the saved API response
-    # This response is stored in the @fetched variable
-    # Requires:
-    #   config: The config for an object
-    #   object: An Api::Resource object
-    def save_api_results?
-      exported_properties.any? { |p| p.is_a? Api::Type::FetchedExternal } \
-        || access_api_results
     end
 
     def min_version

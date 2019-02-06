@@ -24,8 +24,6 @@ objects:
     name: 'ReferencedResource'
     kind: 'myproduct#referencedresource'
     base_url: 'referencedresource'
-    exports:
-      - name
     description: 'blah blah'
     properties:
       - !ruby/object:Api::Type::String
@@ -41,11 +39,6 @@ objects:
     kind: 'myproduct#anotherresource'
     base_url: 'anotherResource'
     description: 'blah blah'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
-      - property1
-      - superLongName
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         resource: 'ReferencedResource'

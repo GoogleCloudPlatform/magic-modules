@@ -52,8 +52,6 @@ objects:
     kind: 'storage#bucket'
     base_url: b?project={{project}}
     self_link: b/{{name}}?projection=full
-    exports:
-      - name
     description: |
       The Buckets resource represents a bucket in Google Cloud Storage. There is
       a single global namespace shared by all buckets. For more information, see

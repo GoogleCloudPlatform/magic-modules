@@ -34,11 +34,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#addressList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::FetchedExternal
-        name: address
-      - !ruby/object:Api::Type::SelfLink
-        name: selfLink
+    has_self_link: true
     input: true
     description: |
       Represents an Address resource.
@@ -155,9 +151,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#autoscalerList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: selfLink
+    has_self_link: true
     description: |
       Represents an Autoscaler resource.
 
@@ -194,9 +188,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#backendBucketLists'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Backend buckets allow you to use Google Cloud Storage buckets with HTTP(S)
       load balancing.
@@ -250,9 +242,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#backendServicesList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Creates a BackendService resource in the specified project using the data
       included in the request.
@@ -564,9 +554,7 @@ objects:
     # the virtual tag
     # | readonly: true
     readonly: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -588,10 +576,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#diskList'
       items: 'items'
-    exports:
-      - 'name'
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Persistent disks are durable storage devices that function similarly to
       the physical disks in a desktop or a server. Compute Engine manages the
@@ -784,9 +769,7 @@ objects:
       kind: 'compute#firewallList'
       items: 'items'
     update_verb: :PATCH
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/vpc/docs/firewalls'
@@ -1031,9 +1014,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#forwardingRuleList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       A ForwardingRule resource. A ForwardingRule resource specifies which pool
       of target virtual machines to forward a packet to if it matches the given
@@ -1135,9 +1116,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#addressList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a Global Address resource. Global addresses are used for
       HTTP(S) load balancing.
@@ -1296,9 +1275,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#httpHealthCheckList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       An HttpHealthCheck resource. This resource defines a template for how
       individual VMs should be checked for health, via HTTP.
@@ -1380,9 +1357,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#httpsHealthCheckList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       An HttpsHealthCheck resource. This resource defines a template for how
       individual VMs should be checked for health, via HTTPS.
@@ -1463,9 +1438,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#healthCheckList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/health-checks'
@@ -1602,9 +1575,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceTemplatesListResponse'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Defines an Instance Template resource that provides configuration settings
       for your virtual machine instances. Instance templates are not tied to the
@@ -1692,9 +1663,7 @@ objects:
       kind: 'compute#TODO???'
       items: 'items'
     readonly: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       A License resource represents a software license. Licenses are used to
       track software usage in images, persistent disks, snapshots, and virtual
@@ -1717,9 +1686,7 @@ objects:
     kind: 'compute#image'
     base_url: projects/{{project}}/global/images
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#imageList'
       items: 'items'
@@ -1987,9 +1954,7 @@ objects:
       kind: 'compute#instanceList'
       items: 'items'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
 <% type = 'Instance' -%>
@@ -2110,9 +2075,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceGroupList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents an Instance Group resource. Instance groups are self-managed
       and can contain identical or different instances. Instance groups do not
@@ -2211,9 +2174,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#instanceGroupManagerList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Creates a managed instance group using the information that you specify in
       the request. After the group is created, it schedules an action to create
@@ -2397,9 +2358,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#interconnectAttachementList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     input: true
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
@@ -2559,10 +2518,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#machineTypeList'
       items: 'items'
-    exports:
-      - 'name'
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     readonly: true
     description: |
       Represents a MachineType resource. Machine types determine the virtualized
@@ -2673,9 +2629,7 @@ objects:
       kind: 'compute#networkList'
       items: 'items'
     update_verb: :PATCH
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
@@ -2786,10 +2740,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#regionList'
       items: 'items'
-    exports:
-      - name
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     readonly: true
     description: |
       Represents a Region resource. A region is a specific geographical
@@ -2867,9 +2818,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#autoscalerList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: selfLink
+    has_self_link: true
     description: |
       Represents an Autoscaler resource.
 
@@ -2912,9 +2861,7 @@ objects:
       the type of disk to use, such as a pd-ssd or pd-standard. To reference a
       disk type, use the disk type's full or partial URL.
     readonly: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -2932,10 +2879,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#diskList'
       items: 'items'
-    exports:
-      - 'name'
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Persistent disks are durable storage devices that function similarly to
       the physical disks in a desktop or a server. Compute Engine manages the
@@ -3082,9 +3026,7 @@ objects:
       kind: 'compute#routeList'
       items: 'items'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a Route resource.
 
@@ -3213,9 +3155,7 @@ objects:
     # router peer, calling PUT on the router will delete the interface and peer.
     # Use patch instead.
     update_verb: :PATCH
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a Router resource.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -3337,9 +3277,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#snapshotList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/disks/create-snapshots'
@@ -3507,9 +3445,7 @@ objects:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       An SslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
@@ -3557,9 +3493,7 @@ objects:
       kind: 'compute#sslPoliciesList'
       items: 'items'
     update_verb: :PATCH
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a SSL policy. SSL policies give you the ability to control the
       features of SSL that your SSL proxy or HTTPS load balancer negotiates.
@@ -3659,9 +3593,7 @@ objects:
       kind: 'compute#subnetworkList'
       items: 'items'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       A VPC network is a virtual version of the traditional physical networks
       that exist within and between physical data centers. A VPC network
@@ -3816,9 +3748,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetHttpProxyList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     input: true
     description: |
       Represents a TargetHttpProxy resource, which is used by one or more global
@@ -3869,9 +3799,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#targetHttpProxyList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     input: true
     description: |
       Represents a TargetHttpsProxy resource, which is used by one or more
@@ -3966,9 +3894,7 @@ objects:
       kind: 'compute#targetPoolList'
       items: 'items'
     description: 'Represents a TargetPool resource, used for Load Balancing.'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
@@ -4093,9 +4019,7 @@ objects:
       kind: 'compute#targetSslProxyList'
       items: 'items'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a TargetSslProxy resource, which is used by one or more
       global forwarding rule to route incoming SSL requests to a backend
@@ -4183,9 +4107,7 @@ objects:
       kind: 'compute#targetTcpProxyList'
       items: 'items'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a TargetTcpProxy resource, which is used by one or more
       global forwarding rule to route incoming TCP requests to a Backend
@@ -4248,9 +4170,7 @@ objects:
       kind: 'compute#targetVpnGatewayList'
       items: 'items'
     input: true
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       Represents a VPN gateway running in GCP. This virtual device is managed
       by Google, but used only by you.
@@ -4329,9 +4249,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#urlMapList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     description: |
       UrlMaps are used to route requests to a backend service based on rules
       that you define for the host and path of an incoming URL.
@@ -4480,9 +4398,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#vpnTunnelList'
       items: 'items'
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
@@ -4596,10 +4512,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#zoneList'
       items: 'items'
-    exports:
-      - name
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
+    has_self_link: true
     readonly: true
     description: 'Represents a Zone resource.'
     properties:
