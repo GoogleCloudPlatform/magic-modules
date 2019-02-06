@@ -34,7 +34,8 @@ DOCUMENTATION = '''
   'notes' => (
     [
       ("API Reference: U(#{object.references.api})" if object.references.api),
-      object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
+      (object.references.guides.map { |guide, link| "#{guide}: U(#{link})" } if object.references),
+      (object.notes if object.notes)
     ].flatten.compact if object.references
   )
 })-%>
