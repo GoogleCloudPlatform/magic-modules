@@ -39,37 +39,75 @@ module Overrides
   #         description: 'baz'
   #   ...
   class Runner
-    class << self
-      def initialize(api, overrides,
-                     res_override_class = Overrides::ResourceOverride,
-                     prop_override_class = Overrides::PropertyOverride)
-        @api = api
-        @overrides = overrides
-        @res_override_class = res_override_class
-        @prop_override_class = prop_override_class
+    # Internal information for applying overrides.
+    class OverrideInfo
+      def initialize(all_overrides, property_class, resource_class)
+        @all_overrides = all_overrides
+        @property_class = property_class
+        @resource_class = resource_class
       end
 
+      def product_overrides
+        return @all_overrides['product'] || {}
+      end
+
+      def resource_overrides(name)
+        unless @all_overrides[name].nil? || @all_overrides[name].empty?
+          @all_overrides[name]
+        else
+          @resource_class.new
+        end
+      end
+
+      def property_overrides(res_name, property_name)
+        res_override = resource_overrides(res_name)
+        return @property_class.new unless res_override['properties']
+        return res_override['properties'][property_name] || @property_class.new
+      end
+    end
+
+    class SinglePropertyOverride
+      def initialize(property_override, property_override_class)
+        @property_override = property_override
+        @property_override_class = property_override_class
+      end
+
+      def property_overrides(_res_name, _prop_name)
+        return @property_override if @property_override
+        @property_override_class.new
+      end
+    end
+
+    class << self
+      # Takes in the old Api::Product object, a set of overrides, and resource/property override classes
+      # and returns a new Api::Product object with all overrides applied.
       def build(api, overrides, res_override_class = Overrides::ResourceOverride,
                 prop_override_class = Overrides::PropertyOverride)
+        override_info = OverrideInfo.new(overrides, prop_override_class, res_override_class)
         validator = Overrides::Validator.new(api, overrides)
         validator.run
-        build_product(api, overrides, resource: res_override_class, property: prop_override_class)
+        build_product(api, override_info)
       end
 
+      # Takes in a single property, single override, and a property override class and returns
+      # a brand new property with overrides applied.
+      # This is used exclusively for Ansible filters, which are regular properties that live
+      # outside of a Api::Product
       def build_single_property(api_property, property_override, prop_override_class)
-        build_property(api_property, property_override, { property: prop_override_class }, '')
+        overrides = SinglePropertyOverride.new(property_override, prop_override_class)
+        build_property(api_property, '', overrides, '')
       end
 
       private
 
       # Given a old Api::Product, and Overrides::ResourceOverrides,
       # returns a new Api::Product with overrides applied
-      def build_product(old_prod, all_overrides, override_classes)
+      def build_product(old_prod, overrides)
         prod = Api::Product.new
         old_prod.instance_variables
                 .reject { |o| o == :@objects }.each do |var_name|
-          if (all_overrides['product'] || {})[var_name]
-            prod.instance_variable_set(var_name, all_overrides['product'][var_name])
+          if overrides.product_overrides[var_name]
+            prod.instance_variable_set(var_name, overrides.product_overrides[var_name])
           else
             prod.instance_variable_set(var_name, old_prod.instance_variable_get(var_name))
           end
@@ -77,22 +115,25 @@ module Overrides
         prod.instance_variable_set('@objects',
                                    old_prod.objects
                                            .map do |o|
-                                     build_resource(o, all_overrides[o.name],
-                                                    override_classes)
+                                     build_resource(o, overrides)
                                    end)
         prod
       end
 
       # Given a Api::Resource and Provider::Override::ResourceOverride,
       # return a new Api::Resource with overrides applied.
-      def build_resource(old_resource, res_override, override_classes)
-        res_override = override_classes[:resource].new if res_override.nil? || res_override.empty?
+      def build_resource(old_resource, overrides)
+        # Set up the ResourceOverride object.
+        res_override = overrides.resource_overrides(old_resource.name)
         res_override.validate
         res_override.apply old_resource
 
+        # Create new Api::Resource + apply all provider-specific values.
         res = Api::Resource.new
         set_additional_values(res, res_override)
 
+        # Loop through all values on the Resource (besides properties + parameters)
+        # and replace with overriden values, if they exist.
         variables = (old_resource.instance_variables + res_override.instance_variables).uniq
         variables.reject { |o| %i[@properties @parameters].include?(o) }
                  .each do |var_name|
@@ -103,10 +144,11 @@ module Overrides
           end
         end
 
+        # Loop through properties + parameters and build those too.
         # Using instance_variable_get('properties') to make sure we get `exclude: true` properties
         ['@properties', '@parameters'].each do |val|
           new_props = ((old_resource.instance_variable_get(val) || [])).map do |p|
-            build_property(p, res_override['properties'], override_classes)
+            build_property(p, old_resource.name, overrides)
           end
           res.instance_variable_set(val, new_props)
         end
@@ -115,15 +157,14 @@ module Overrides
 
       # Given a Api::Type property and a hash of properties, create a new Api::Type property
       # This will handle NestedObjects, Arrays of NestedObjects of arbitrary length
-      def build_property(old_property, property_overrides, override_classes, prefix = '')
-        property_overrides = {} if property_overrides.nil?
-        new_prop = build_primitive_property(old_property,
-                                            property_overrides["#{prefix}#{old_property.name}"],
-                                            override_classes)
+      def build_property(old_property, resource_name, overrides, prefix = '')
+        # Build a new property, minus any nested properties.
+        new_prop = build_primitive_property(old_property, resource_name, overrides)
+
+        # Build all nested properties in a recursive manner.
         if old_property.nested_properties?
           new_props = old_property.nested_properties.map do |p|
-            build_property(p, property_overrides, override_classes,
-                           "#{prefix}#{old_property.name}.")
+            build_property(p, resource_name, overrides, "#{prefix}#{old_property.name}.")
           end
 
           if old_property.is_a?(Api::Type::NestedObject)
@@ -144,13 +185,14 @@ module Overrides
       # Given a primitive Api::Type (string, integers, times, etc) and override,
       # return a new Api::Type with overrides applied.
       # This will be called by build_property, which handles nesting.
-      def build_primitive_property(old_property, prop_override, override_classes)
-        prop_override = override_classes[:property].new \
-          if prop_override.nil? || prop_override.empty?
+      def build_primitive_property(old_property, resource_name, overrides)
+        # Get the property override setup.
+        prop_override = overrides.property_overrides(resource_name, old_property.name)
 
         prop_override.validate
         prop_override.apply old_property
 
+        # If different type, create the new property from that type.
         prop = if prop_override['type']
                  Module.const_get(prop_override['type']).new
                else
@@ -163,6 +205,7 @@ module Overrides
         # Set api_name with old property so that a potential new name doesn't override it.
         prop.instance_variable_set('@api_name', old_property.api_name || old_property.name)
 
+        # Loop through all values and set them according to overrides.
         variables.reject { |o| o == :@properties }
                  .each do |var_name|
           if !prop_override[var_name].nil?
