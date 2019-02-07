@@ -18,6 +18,7 @@ import (
 
 type TerraformResourceData interface {
 	HasChange(string) bool
+	Get(string) interface{}
 	GetOk(string) (interface{}, bool)
 	Set(string, interface{}) error
 	SetId(string)
@@ -211,7 +212,7 @@ func rfc3339TimeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 }
 
 // expandLabels pulls the value of "labels" out of a schema.ResourceData as a map[string]string.
-func expandLabels(d *schema.ResourceData) map[string]string {
+func expandLabels(d TerraformResourceData) map[string]string {
 	return expandStringMap(d, "labels")
 }
 
@@ -221,7 +222,7 @@ func expandEnvironmentVariables(d *schema.ResourceData) map[string]string {
 }
 
 // expandStringMap pulls the value of key out of a schema.ResourceData as a map[string]string.
-func expandStringMap(d *schema.ResourceData, key string) map[string]string {
+func expandStringMap(d TerraformResourceData, key string) map[string]string {
 	v, ok := d.GetOk(key)
 
 	if !ok {

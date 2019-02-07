@@ -21,6 +21,16 @@ func (d *ResourceDataMock) HasChange(key string) bool {
 	return exists
 }
 
+func (d *ResourceDataMock) Get(key string) interface{} {
+	for k, v := range d.FieldsInSchema {
+		if key == k {
+			return v
+		}
+	}
+
+	return nil
+}
+
 func (d *ResourceDataMock) GetOk(key string) (interface{}, bool) {
 	for k, v := range d.FieldsInSchema {
 		if key == k {

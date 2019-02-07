@@ -257,14 +257,10 @@ func resourceStorageBucket() *schema.Resource {
 	}
 }
 
-func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
+// NewResourceStorageBucket creates an API resource from a terraform resource.
+// NOTE: *Config is not used here but it is for other resources so it is here
+// to maintain similar function signatures.
+func NewResourceStorageBucket(d TerraformResourceData, config *Config) (*storage.Bucket, error) {
 	// Get the bucket and location
 	bucket := d.Get("name").(string)
 	location := d.Get("location").(string)
@@ -281,7 +277,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if err := resourceGCSBucketLifecycleCreateOrUpdate(d, sb); err != nil {
-		return err
+		return nil, err
 	}
 
 	if v, ok := d.GetOk("versioning"); ok {
@@ -292,7 +288,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		websites := v.([]interface{})
 
 		if len(websites) > 1 {
-			return fmt.Errorf("At most one website block is allowed")
+			return nil, fmt.Errorf("At most one website block is allowed")
 		}
 
 		sb.Website = &storage.BucketWebsite{}
@@ -326,6 +322,22 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	return sb, nil
+}
+
+func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	sb, err := NewResourceStorageBucket(d, config)
+	if err != nil {
+		return err
+	}
+
 	var res *storage.Bucket
 
 	err = retry(func() error {
@@ -334,7 +346,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 	})
 
 	if err != nil {
-		fmt.Printf("Error creating bucket %s: %v", bucket, err)
+		fmt.Printf("Error creating bucket %s: %v", sb.Name, err)
 		return err
 	}
 
@@ -735,7 +747,7 @@ func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleC
 	return ruleCondition
 }
 
-func resourceGCSBucketLifecycleCreateOrUpdate(d *schema.ResourceData, sb *storage.Bucket) error {
+func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *storage.Bucket) error {
 	if v, ok := d.GetOk("lifecycle_rule"); ok {
 		lifecycle_rules := v.([]interface{})
 
