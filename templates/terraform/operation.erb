@@ -1,0 +1,32 @@
+<%
+  product_name = object.__product.name
+-%>
+<%= lines(autogen_notice :go) -%>
+package google
+
+import (
+  "fmt"
+)
+
+type <%= product_name -%>OperationWaiter struct {
+  Config *Config
+  CommonOperationWaiter
+}
+
+func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
+  if w == nil {
+    return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
+  }
+  // Returns the proper get.
+  return sendRequestWithTimeout(w.Config, "GET", w.CommonOperationWaiter.Op.Name, nil, 4)
+}
+
+func <%= product_name.underscore -%>OperationWaitTime(config *Config, op *<%= product_name.downcase -%>.Operation, project, activity string, timeoutMinutes int) error {
+  w := &<%= product_name -%>OperationWaiter{
+    Config: config,
+  }
+  if err := w.CommonOperationWaiter.SetOp(op); err != nil {
+    return err
+  }
+  return OperationWait(w, activity, timeoutMinutes)
+}

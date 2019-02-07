@@ -34,7 +34,10 @@ module Overrides
 
           # Examples in documentation. Backed by generated tests, and have
           # corresponding OiCS walkthroughs.
-          :examples
+          :examples,
+
+          # TODO(alexstephen): Deprecate once all resources using autogen async.
+          :autogen_async
         ]
       end
 
@@ -53,6 +56,7 @@ module Overrides
                             default: Provider::Terraform::CustomCode.new
         check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
         check :import_format, type: Array, item_type: String, default: []
+        check :autogen_async, type: :boolean, default: false
       end
 
       def apply(resource)

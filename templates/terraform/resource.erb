@@ -165,9 +165,15 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return err
     }
 
+<% if object.autogen_async -%>
+    waitErr := <%= api_name_lower -%>OperationWaitTime(
+    config, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutCreate).Minutes()))
+<% else -%>
     waitErr := <%= api_name_lower -%>OperationWaitTime(
     config.client<%= product_ns -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
+<% end -%>
 
     if waitErr != nil {
         // The resource didn't actually create
@@ -323,10 +329,17 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
             return err
         }
 
+<% if object.autogen_async -%>
+        err = <%= api_name_lower -%>OperationWaitTime(
+            config, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+<% else -%>
         err = <%= api_name_lower -%>OperationWaitTime(
             config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
+<% end -%>
         if err != nil {
             return err
         }
@@ -408,9 +421,15 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         return err
     }
 
+<% if object.autogen_async -%>
+    err = <%= api_name_lower -%>OperationWaitTime(
+    config, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+<% else -%>
     err = <%= api_name_lower -%>OperationWaitTime(
     config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
     int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+<% end -%>
 
     if err != nil {
         return err
@@ -462,9 +481,15 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return err
     }
 
+<% if object.autogen_async -%>
+    err = <%= api_name_lower -%>OperationWaitTime(
+        config, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutDelete).Minutes()))
+<% else -%>
     err = <%= api_name_lower -%>OperationWaitTime(
         config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
+<% end -%>
 
     if err != nil {
         return err
