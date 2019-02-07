@@ -23,18 +23,18 @@ module Overrides
   # description:
   #
   # overrides: !ruby/object:Overrides::ResourceOverrides
+  #   product: # Allows us to override information about the product.
+  #     prefix: magicproduct
   #   SomeResource: !ruby/object:Provider::MyProvider::ResourceOverride
   #     description: '{{description}} A tool-specific description complement'
-  #     parameters:
-  #       someParameter: !ruby/object:Provider::MyProvider::PropertyOverride
-  #         description: 'foobar' # replaces description
   #     properties:
-  #       someProperty: !ruby/object:Provider::MyProvider::PropertyOverride
+  #       someResourceRef: !ruby/object:Provider::MyProvider::PropertyOverride
+  #         type: Api::Type::Integer # changes type to an integer.
   #         description: 'foobar' # replaces description
   #       anotherProperty.someNestedProperty:
   #         !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'baz'
-  #       anotherProperty[].someNestedPropertyInAnArray:
+  #       anotherProperty.someNestedPropertyInAnArray:
   #         !ruby/object:Provider::MyProvider::PropertyOverride
   #         description: 'baz'
   #   ...
@@ -48,24 +48,27 @@ module Overrides
       end
 
       def product_overrides
-        return @all_overrides['product'] || {}
+        @all_overrides['product'] || {}
       end
 
       def resource_overrides(name)
-        unless @all_overrides[name].nil? || @all_overrides[name].empty?
-          @all_overrides[name]
-        else
+        if @all_overrides[name].nil? || @all_overrides[name].empty?
           @resource_class.new
+        else
+          @all_overrides[name]
         end
       end
 
       def property_overrides(res_name, property_name)
         res_override = resource_overrides(res_name)
         return @property_class.new unless res_override['properties']
-        return res_override['properties'][property_name] || @property_class.new
+
+        res_override['properties'][property_name] || @property_class.new
       end
     end
 
+    # A slightly different implementation of OverrideInfo
+    # for Ansible's FilterProperty + `build_single_property`
     class SinglePropertyOverride
       def initialize(property_override, property_override_class)
         @property_override = property_override
@@ -74,13 +77,15 @@ module Overrides
 
       def property_overrides(_res_name, _prop_name)
         return @property_override if @property_override
+
         @property_override_class.new
       end
     end
 
     class << self
-      # Takes in the old Api::Product object, a set of overrides, and resource/property override classes
-      # and returns a new Api::Product object with all overrides applied.
+      # Takes in the old Api::Product object, a set of overrides, and
+      # resource/property override classes and returns a new Api::Product
+      # object with all overrides applied.
       def build(api, overrides, res_override_class = Overrides::ResourceOverride,
                 prop_override_class = Overrides::PropertyOverride)
         override_info = OverrideInfo.new(overrides, prop_override_class, res_override_class)
@@ -144,7 +149,8 @@ module Overrides
           end
         end
 
-        # Loop through properties + parameters and build those too.
+        # Loop through properties + parameters and build new Api::Type properties for each
+        # property/parameter.
         # Using instance_variable_get('properties') to make sure we get `exclude: true` properties
         ['@properties', '@parameters'].each do |val|
           new_props = ((old_resource.instance_variable_get(val) || [])).map do |p|
@@ -155,8 +161,11 @@ module Overrides
         res
       end
 
-      # Given a Api::Type property and a hash of properties, create a new Api::Type property
-      # This will handle NestedObjects, Arrays of NestedObjects of arbitrary length
+      # Given a old_property and our overrides, build a new Api::Type object
+      # that's has all values overriden.
+      # This function takes in a prefix (that's used to allow creation of
+      # nested objects of arbitrary depth) and a resource_name (used to help
+      # identify where in the override object we should get values from)
       def build_property(old_property, resource_name, overrides, prefix = '')
         # Build a new property, minus any nested properties.
         new_prop = build_primitive_property(old_property, overrides, resource_name,
@@ -183,7 +192,7 @@ module Overrides
         new_prop
       end
 
-      # Given a primitive Api::Type (string, integers, times, etc) and override,
+      # Given a primitive Api::Type (string, integers, times, etc) and overrides.
       # return a new Api::Type with overrides applied.
       # This will be called by build_property, which handles nesting.
       def build_primitive_property(old_property, overrides, resource_name, property_name)
@@ -218,9 +227,10 @@ module Overrides
         prop
       end
 
-      # Overrides have additional values inside the override that do not regularly belong
-      # on the Api::* object. These values need to be set + they need getters so they
-      # can be accessed propertly in the templates.
+      # Our overrides include provider_specific values (described in the
+      # `attributes` method on a ResourceOverride or PropertyOverride subclass)
+      # We have to add these objects directly to our new Api::Resource or Api::Type
+      # and then add getters, so that the templates can access these values.
       def set_additional_values(object, override)
         override.class.attributes.each do |o|
           object.instance_variable_set("@#{o}", override[o])
