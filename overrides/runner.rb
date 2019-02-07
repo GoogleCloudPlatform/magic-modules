@@ -159,7 +159,8 @@ module Overrides
       # This will handle NestedObjects, Arrays of NestedObjects of arbitrary length
       def build_property(old_property, resource_name, overrides, prefix = '')
         # Build a new property, minus any nested properties.
-        new_prop = build_primitive_property(old_property, resource_name, overrides)
+        new_prop = build_primitive_property(old_property, overrides, resource_name,
+                                            "#{prefix}#{old_property.name}")
 
         # Build all nested properties in a recursive manner.
         if old_property.nested_properties?
@@ -185,9 +186,9 @@ module Overrides
       # Given a primitive Api::Type (string, integers, times, etc) and override,
       # return a new Api::Type with overrides applied.
       # This will be called by build_property, which handles nesting.
-      def build_primitive_property(old_property, resource_name, overrides)
+      def build_primitive_property(old_property, overrides, resource_name, property_name)
         # Get the property override setup.
-        prop_override = overrides.property_overrides(resource_name, old_property.name)
+        prop_override = overrides.property_overrides(resource_name, property_name)
 
         prop_override.validate
         prop_override.apply old_property
