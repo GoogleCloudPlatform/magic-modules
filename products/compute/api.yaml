@@ -1859,11 +1859,14 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/global/images/{{name}}/setLabels'
         update_verb: :POST
-        # TODO(alexstephen): Change to ResourceRef with array support
       - !ruby/object:Api::Type::Array
         name: 'licenses'
         description: Any applicable license URI.
-        item_type: Api::Type::String
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'license'
+          description: 'An applicable license URI'
+          resource: 'License'
+          imports: 'selfLink'
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
