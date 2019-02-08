@@ -33,7 +33,7 @@ Properties that can be accessed from the `<%= resource_underscored_name -%>` res
 
 <% if plural -%>
 See <%= "[#{resource_name(object, product_ns)}.md](#{resource_name(object, product_ns)}.md)" -%> for more detailed information
-<% object.all_user_properties.each do |prop| -%>
+<% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
   * `<%= "#{prop.out_name.pluralize}" -%>`: an array of `<%= resource_name(object, product_ns) -%>` <%= "#{prop.out_name}" -%>
 
 <% end -%>

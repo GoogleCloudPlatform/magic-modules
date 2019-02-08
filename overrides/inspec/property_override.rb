@@ -22,8 +22,16 @@ module Overrides
       # Inspec. All fields should be `attr_reader :<property>`
       def self.attributes
         [
-          :name_from_self_link # Set to convert self link to name
+          :name_from_self_link, # Set to convert self link to name
+          :exclude_plural
         ]
+      end
+
+      attr_reader(*attributes)
+
+      def self.validate
+        check :name_from_self_link, type: :boolean, default: false
+        check :exclude_plural, type: :boolean, default: false
       end
     end
   end
