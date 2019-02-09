@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: CloudBuild
+display_name: Cloud Build
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

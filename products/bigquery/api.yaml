@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: BigQuery
-display_name: Google Cloud BigQuery
+display_name: BigQuery
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

@@ -13,6 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: AccessContextManager
+display_name: Access Context Manager
 versions:
   - !ruby/object:Api::Product::Version
     name: beta

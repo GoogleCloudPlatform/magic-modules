@@ -15,7 +15,7 @@
 
 --- !ruby/object:Api::Product
 name: Iam
-display_name: Google Cloud IAM
+display_name: Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

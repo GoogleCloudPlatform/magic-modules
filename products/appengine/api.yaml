@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: AppEngine
-display_name: Google App Engine
+display_name: App Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
