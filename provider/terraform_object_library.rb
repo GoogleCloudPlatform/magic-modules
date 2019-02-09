@@ -15,15 +15,55 @@ require 'provider/terraform_example'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
-  class TerraformObjectLibrary < Provider::TerraformExample
+  class TerraformObjectLibrary < Provider::Terraform
+    def generate(output_folder, types, version_name, _product_path, _dump_yaml)
+      version = @api.version_obj_or_default(version_name)
+      generate_objects(output_folder, types, version)
+      copy_utils(output_folder)
+    end
+
     def generate_resource(data)
       target_folder = data[:output_folder]
+      product_ns = data[:object].__product.name
 
       generate_resource_file data.clone.merge(
         object: data[:object],
         default_template: 'templates/terraform/objectlib/base.go.erb',
-        out_file: File.join(target_folder, "google/#{data[:object].name}.go")
+        out_file: File.join(target_folder,
+                            "google/#{product_ns.downcase}_#{data[:object].name.underscore}.go")
       )
     end
+
+    def copy_utils(output_folder)
+      Google::LOGGER.info 'Compiling common files.'
+      compile_file_list(output_folder, [
+                          ['google/config.go', 'third_party/terraform/utils/config.go.erb']
+                        ], version: 'ga')
+      Google::LOGGER.info 'Copying common files.'
+      copy_file_list(output_folder, [
+                       ['google/constants.go',
+                        'third_party/validator/constants.go'],
+                       ['google/image.go',
+                        'third_party/terraform/utils/image.go'],
+                       ['google/disk_type.go',
+                        'third_party/terraform/utils/disk_type.go'],
+                       ['google/validation.go',
+                        'third_party/terraform/utils/validation.go'],
+                       ['google/regional_utils.go',
+                        'third_party/terraform/utils/regional_utils.go'],
+                       ['google/field_helpers.go',
+                        'third_party/terraform/utils/field_helpers.go'],
+                       ['google/self_link_helpers.go',
+                        'third_party/terraform/utils/self_link_helpers.go'],
+                       ['google/utils.go',
+                        'third_party/terraform/utils/utils.go'],
+                       ['google/transport.go',
+                        'third_party/terraform/utils/transport.go'],
+                       ['google/bigtable_client_factory.go',
+                        'third_party/terraform/utils/bigtable_client_factory.go']
+                     ])
+    end
+
+    def generate_resource_tests(data) end
   end
 end

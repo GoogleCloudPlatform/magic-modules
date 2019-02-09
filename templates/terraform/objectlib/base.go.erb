@@ -1,0 +1,44 @@
+<%= lines(autogen_notice :go) -%>
+
+package google
+
+<%
+    resource_name = product_ns + object.name
+    properties = object.all_user_properties
+%>
+
+<%# constants usually contain functions called from inside the setup file. -%>
+<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
+
+func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+    obj := make(map[string]interface{})
+<%  object.settable_properties.each do |prop| -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+    if err != nil {
+        return nil, err
+<%      unless prop.send_empty_value -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%  end -%>
+
+<%  if object.custom_code.encoder -%>
+    return resource<%= resource_name -%>Encoder(d, config, obj)
+<%  else -%>
+    return obj, nil
+<%  end -%>
+}
+
+<% if object.custom_code.encoder -%>
+func resource<%= resource_name -%>Encoder(d TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.encoder)) -%>
+}
+<% end -%>
+
+<% object.settable_properties.each do |prop| -%>
+<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<% end -%>
+
