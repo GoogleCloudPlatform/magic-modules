@@ -476,6 +476,17 @@ jobs:
             TERRAFORM_KEY: ((terraform-key))
             PROJECT_NAME: ((inspec-project-name))
             PROJECT_NUMBER: ((inspec-project-number))
+
+    - name: inspec-unit-test
+      plan:
+        - get: magic-modules-gcp
+        - task: inspec-integration
+          file: magic-modules-gcp/.ci/unit-tests/inspec.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
     - name: ansible-integration-test
       serial: true
       plan:

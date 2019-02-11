@@ -13,5 +13,6 @@ group :development do
   gem 'passgen'
   gem 'pry-coolline'
   gem 'rake'
+  gem 'vcr'
   gem 'webmock'
 end
