@@ -16,15 +16,31 @@ export GCP_PROJECT_ID=${PROJECT_NAME}
 export GCP_PROJECT_NAME=${PROJECT_NAME}
 set -x
 
-pushd magic-modules-gcp
-rm "build/inspec/test/integration/verify/controls/*"
+gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
+PR_ID="$(cat ./magic-modules-new-prs/.git/id)"
+
+
+pushd magic-modules
+rm build/inspec/test/integration/verify/controls/*
 export VCR_MODE=none
-bundle exec compiler -p $i -e inspec -o "build/inspec/"
+bundle install
+bundle exec compiler -a -e inspec -o "build/inspec/"
 
 cp templates/inspec/vcr_config.rb build/inspec
 
 pushd build/inspec
 bundle
+mkdir inspec-cassettes
+# Check if PR_ID folder exists
+set +e
+gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
+if [ $? -eq 0 ]; then
+  gsutil cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/* inspec-cassettes/
+else
+  gsutil cp gs://magic-modules-inspec-bucket/master/inspec-cassettes/* inspec-cassettes/
+fi
+set -e
+bundle exec rake test:generate_integration_test_variables
 bundle exec rake test:run_integration_tests
 
 popd
