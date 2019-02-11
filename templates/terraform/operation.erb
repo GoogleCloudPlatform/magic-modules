@@ -10,6 +10,7 @@ import (
 
 type <%= product_name -%>OperationWaiter struct {
   Config *Config
+  TimeoutMinutes int
   CommonOperationWaiter
 }
 
@@ -18,12 +19,14 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
     return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
   }
   // Returns the proper get.
-  return sendRequestWithTimeout(w.Config, "GET", w.CommonOperationWaiter.Op.Name, nil, 4)
+  url := fmt.Sprintf("<%= build_url([object.__product.base_url, async.operation.base_url]).gsub('{{op_id}}', '%s') -%>", w.CommonOperationWaiter.Op.Name)
+  return sendRequestWithTimeout(w.Config, "GET", url, nil, time.Duration(w.TimeoutMinutes) * time.Minute)
 }
 
 func <%= product_name.underscore -%>OperationWaitTime(config *Config, op *<%= product_name.downcase -%>.Operation, project, activity string, timeoutMinutes int) error {
   w := &<%= product_name -%>OperationWaiter{
     Config: config,
+    TimeoutMinutes: timeoutMinutes,
   }
   if err := w.CommonOperationWaiter.SetOp(op); err != nil {
     return err
