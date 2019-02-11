@@ -98,13 +98,16 @@ update the version constraints in your Terraform configuration and run
 [`terraform init`](https://www.terraform.io/docs/commands/init.html) to download
 the new version.
 
+If you aren't using version constraints, you can use `terraform init -upgrade`
+in order to upgrade your provider to the latest released version.
+
 For example, given this previous configuration:
 
 ```hcl
 provider "google" {
   # ... other configuration ...
 
-  version = "~> 1.19.0"
+  version = "~> 1.20.0"
 }
 ```
 
