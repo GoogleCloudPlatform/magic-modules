@@ -1,8 +1,8 @@
 <%= lines(autogen_notice :ruby) -%>
 <% vcr = ENV['VCR_MODE'] -%>
 <% if vcr -%>
-<%= "require 'vcr'" -%>
-<%= "require 'vcr_config'" -%>
+<%= "require 'vcr'" %>
+<%= "require 'vcr_config'" %>
 <% end # if vcr -%>
 
 title 'Test GCP <%= name -%> resource.'
