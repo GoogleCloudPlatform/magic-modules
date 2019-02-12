@@ -1,7 +1,6 @@
 ---
-# This file takes two inputs: magic-modules-branched in detached-HEAD state, and the patches.
-# It spits out "ansible-generated", a ansible repo on a new branch (named after the
-# HEAD commit on the PR), with the new generated code in it.
+# This file takes one input: magic-modules-branched in detached-HEAD state
+# It will create a series of PRs on Ansible.
 platform: linux
 
 image_resource:
@@ -14,7 +13,7 @@ inputs:
     - name: magic-modules-gcp
 
 run:
-    path: "pushd magic-modules-gcp/build/ansible; ../../tools/ansible-pr/run.sh"
+    path: "magic-modules-gcp/.ci/magic-modules/release-ansible.sh"
 
 params:
   GITHUB_TOKEN: ""
