@@ -23,6 +23,8 @@ PR_ID="$(cat ./magic-modules-new-prs/.git/id)"
 
 pushd magic-modules-new-prs
 export VCR_MODE=all
+# Running other controls may cause caching issues due to underlying clients caching responses
+rm build/inspec/test/integration/verify/controls/*
 bundle install
 bundle exec compiler -a -e inspec -o "build/inspec/"
 cp templates/inspec/vcr_config.rb build/inspec
