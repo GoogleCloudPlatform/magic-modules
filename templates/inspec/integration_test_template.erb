@@ -1,4 +1,9 @@
 <%= lines(autogen_notice :ruby) -%>
+<% vcr = ENV['VCR_MODE'] -%>
+<% if vcr -%>
+<%= "require 'vcr'" -%>
+<%= "require 'vcr_config'" -%>
+<% end # if vcr -%>
 
 title 'Test GCP <%= name -%> resource.'
 
@@ -8,5 +13,11 @@ control '<%= name -%>-1.0' do
   impact 1.0
   title '<%= name -%> resource test'
 
-<%= indent(compile("templates/inspec/examples/#{attribute_file_name}/#{name}.erb"), 2) %>
+<% if vcr -%>
+  VCR.use_cassette('<%= name -%>', :record => :<%= vcr -%>) do
+<% end # if vcr -%>
+<%= indent(compile("templates/inspec/examples/#{attribute_file_name}/#{name}.erb"), vcr ? 4 : 2) %>
+<% if vcr -%>
+	end
+<% end # if vcr -%>
 end

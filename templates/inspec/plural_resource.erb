@@ -16,11 +16,6 @@
 
 <%= lines(autogen_notice :ruby) -%>
 require 'gcp_backend'
-<% vcr = ENV['VCR_MODE'] -%>
-<% if vcr -%>
-require 'vcr'
-require 'vcr_config'
-<% end # if vcr -%>
 class <%= object.name -%>s < GcpResourceBase
 <%
 name = "google_#{product_ns.downcase}_#{object.name.underscore}"
@@ -57,13 +52,7 @@ link_query = object.self_link_query || object.collection_url_response
   def initialize(params = {})
     super(params.merge({ use_http_transport: true }))
     @params = params
-<% if vcr -%>
-    VCR.use_cassette('<%= name.pluralize -%>', :record => :<%= vcr -%>) do
-<% end # if vcr -%>
-<%= indent("@table = fetch_wrapped_resource('#{link_query.items}')", vcr ? 6 : 4) %>
-<% if vcr -%>
-    end
-<% end # if vcr -%>
+<%= indent("@table = fetch_wrapped_resource('#{link_query.items}')", 4) %>
   end
 
   def fetch_wrapped_resource(wrap_path)

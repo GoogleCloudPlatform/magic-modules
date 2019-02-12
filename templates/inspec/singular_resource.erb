@@ -15,7 +15,6 @@
 # frozen_string_literal: false
 
 <%= lines(autogen_notice :ruby) -%>
-<% vcr = ENV['VCR_MODE'] -%>
 <%
   require 'google/string_utils'
 
@@ -24,10 +23,6 @@
 
   requires = generate_requires(object.all_user_properties)
   requires << 'gcp_backend'
-  if vcr
-    requires << 'vcr'
-    requires << 'vcr_config'
-  end
 -%>
 <%= lines(emit_requires(requires)) -%>
 
@@ -52,26 +47,14 @@ class <%= object.name -%> < GcpResourceBase
 <% if object.self_link_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
-<% if vcr -%>
-    VCR.use_cassette('<%= resource_name(object, product_ns) -%>', :record => :<%= vcr -%>) do
-<% end # if vcr -%>
-<%= indent('@fetched = @connection.fetch(base, url, params)', vcr ? 6 : 4) %>
-<% if vcr -%>
-    end
-<% end # if vcr -%>
+<%= indent('@fetched = @connection.fetch(base, url, params)', 4) %>
     parse unless @fetched.nil?
   end
 <% else # object.self_link_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
-<% if vcr -%>
-    VCR.use_cassette('<%= resource_name(object, product_ns) -%>', :record => :<%= vcr -%>) do
-<% end # if vcr -%>
-<%= indent('fetched = @connection.fetch(base, url, params)', vcr ? 6 : 4) %>
-<%= indent('@fetched = unwrap(fetched, params)', vcr ? 6 : 4) %>
-<% if vcr -%>
-    end
-<% end # if vcr -%>
+<%= indent('fetched = @connection.fetch(base, url, params)', 4) %>
+<%= indent('@fetched = unwrap(fetched, params)', 4) %>
     parse unless @fetched.nil?
   end
 
