@@ -276,6 +276,7 @@ jobs:
     - name: ansible-test
       plan:
         - get: magic-modules
+          version: every
           trigger: true
           params:
               submodules: [build/ansible]
