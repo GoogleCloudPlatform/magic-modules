@@ -318,6 +318,35 @@ objects:
               example db-n1-standard-1. For MySQL instances, this field
               determines whether the instance is Second Generation (recommended)
               or First Generation.
+          - !ruby/object:Api::Type::Enum
+            name: 'availabilityType'
+            description: |
+              The availabilityType define if your postgres instance is run zonal 
+              or regional.
+            values:
+            - :ZONAL
+            - :REGIONAL
+          - !ruby/object:Api::Type::NestedObject
+            name: 'backupConfiguration'
+            description: |
+              The daily backup configuration for the instance.
+            properties:
+              #- !ruby/object:Api::Type::Constant
+              #  name: 'kind'
+              #  value: 'sql#backupConfiguration'
+              - !ruby/object:Api::Type::Boolean
+                name: 'enabled'
+                description: |
+                  Enable Autobackup for your instance.
+              - !ruby/object:Api::Type::Boolean
+                name: 'binaryLogEnabled'
+                description: |
+                  Whether binary log is enabled. If backup configuration 
+                  is disabled, binary log must be disabled as well. MySQL only.
+              - !ruby/object:Api::Type::String
+                name: 'startTime'
+                description: |
+                  Define the backup start time in UTC (HH:MM)
           - !ruby/object:Api::Type::Integer
             name: 'settingsVersion'
             output: true
