@@ -41,6 +41,15 @@ resources:
           private_key: ((repo-key.private_key))
 
 jobs:
+    - name: ansible-nightly-release
+      plan:
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/release-ansible.yml
+            params:
+                GITHUB_TOKEN: ((github-account.password))
     - name: nightly-build
       plan:
           - get: night-trigger
