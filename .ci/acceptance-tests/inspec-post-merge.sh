@@ -19,8 +19,17 @@ export GCP_PROJECT_NAME=${PROJECT_NAME}
 set -x
 
 gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
-# TODO(slevenick): Check to see if we have already run this
+
 PR_ID="$(cat ./mm-approved-prs/.git/id)"
+# Check if PR_ID folder exists in the GS bucket.
+set +e
+gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
+if [ $? -ne 0 ]; then
+	# Bucket does not exist, so we did not have to record new cassettes to pass the inspec-test step.
+	# This means no new cassettes need to be generated after this PR is merged.
+	exit 0
+fi
+set -e
 
 pushd mm-approved-prs
 export VCR_MODE=all
@@ -46,22 +55,15 @@ function cleanup {
 export INSPEC_DIR=${PWD}
 trap cleanup EXIT
 
-# Check if PR_ID folder exists
 set +e
-gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
+gsutil ls gs://magic-modules-inspec-bucket/$PR_ID/approved
 if [ $? -eq 0 ]; then
-	gsutil ls gs://magic-modules-inspec-bucket/$PR_ID/approved
-	if [ $? -eq 0 ]; then
-		# We have already recorded new cassettes during the inspec-post-merge step
-		gsutil cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/* gs://magic-modules-inspec-bucket/master/inspec-cassettes
-	else
-		# We need to record new cassettes for this PR
-		bundle exec rake test:integration
-		gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/master/inspec-cassettes/
-	fi
+	# We have already recorded new cassettes during the inspec-post-merge step
+	gsutil cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/* gs://magic-modules-inspec-bucket/master/inspec-cassettes
 else
-	# No new cassettes were needed to pass tests, so no need to update master cassettes
-  exit 0
+	# We need to record new cassettes for this PR
+	bundle exec rake test:integration
+	gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/master/inspec-cassettes/
 fi
 set -e
 

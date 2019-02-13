@@ -22,6 +22,16 @@ gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gservi
 # TODO(slevenick): Check to see if we have already run this
 PR_ID="$(cat ./mm-approved-prs/.git/id)"
 
+# Check if PR_ID folder exists
+set +e
+gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
+if [ $? -ne 0 ]; then
+	# Bucket does not exist, so we did not have to record new cassettes to pass the inspec-test step.
+	# This means no new cassettes need to be generated after this PR is merged.
+  exit 0
+fi
+set -e
+
 pushd mm-approved-prs
 export VCR_MODE=all
 # Running other controls may cause caching issues due to underlying clients caching responses
@@ -46,16 +56,7 @@ function cleanup {
 export INSPEC_DIR=${PWD}
 trap cleanup EXIT
 
-# Check if PR_ID folder exists
-set +e
-gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
-if [ $? -eq 0 ]; then
-	bundle exec rake test:integration
-	gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/
-else
-	# No new cassettes were needed to pass tests, so no need to update master cassettes
-  exit 0
-fi
-set -e
+bundle exec rake test:integration
+gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/
 
 popd
