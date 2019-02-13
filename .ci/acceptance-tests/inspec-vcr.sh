@@ -6,6 +6,8 @@ set -x
 # Service account credentials for GCP to allow terraform to work
 export GOOGLE_CLOUD_KEYFILE_JSON="/tmp/google-account.json"
 export GOOGLE_APPLICATION_CREDENTIALS="/tmp/google-account.json"
+# Setup GOPATH
+export GOPATH=${PWD}/go
 
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
@@ -19,29 +21,30 @@ set -x
 gcloud auth activate-service-account terraform@graphite-test-sam-chef.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
 PR_ID="$(cat ./magic-modules-new-prs/.git/id)"
 
-
-pushd magic-modules
+pushd magic-modules-new-prs
+export VCR_MODE=all
+# Running other controls may cause caching issues due to underlying clients caching responses
 rm build/inspec/test/integration/verify/controls/*
-export VCR_MODE=none
 bundle install
 bundle exec compiler -a -e inspec -o "build/inspec/"
-
 cp templates/inspec/vcr_config.rb build/inspec
 
 pushd build/inspec
-bundle
-mkdir inspec-cassettes
-# Check if PR_ID folder exists
-set +e
-gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
-if [ $? -eq 0 ]; then
-  gsutil cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/* inspec-cassettes/
-else
-  gsutil cp gs://magic-modules-inspec-bucket/master/inspec-cassettes/* inspec-cassettes/
-fi
-set -e
-bundle exec rake test:generate_integration_test_variables
-bundle exec rake test:run_integration_tests
 
-popd
+# Setup for using current GCP resources
+export GCP_ZONE=europe-west2-a
+export GCP_LOCATION=europe-west2
+
+bundle install
+
+function cleanup {
+	cd $INSPEC_DIR
+	bundle exec rake test:cleanup_integration_tests
+}
+
+
+export INSPEC_DIR=${PWD}
+trap cleanup EXIT
+bundle exec rake test:integration
+gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/
 popd

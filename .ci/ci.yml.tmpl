@@ -296,6 +296,24 @@ jobs:
                 get_params:
                   skip_clone: true
 
+    - name: inspec-unit-test
+      plan:
+        - get: magic-modules-new-prs
+          passed: [mm-generate]
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+            submodules: [build/inspec]
+          passed: [mm-generate]
+        - task: test
+          file: magic-modules/.ci/unit-tests/inspec.yml
+          timeout: 30m
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
     - name: create-prs
       plan:
           - get: magic-modules
@@ -466,6 +484,7 @@ jobs:
                 skip_clone: true
     - name: inspec-integration-test
       serial: true
+      serial_groups: [inspec-integration]
       plan:
         - get: magic-modules-gcp
         - get: midnight-timer
@@ -476,6 +495,19 @@ jobs:
             TERRAFORM_KEY: ((terraform-key))
             PROJECT_NAME: ((inspec-project-name))
             PROJECT_NUMBER: ((inspec-project-number))
+
+    - name: inspec-vcr-record
+      serial: true
+      serial_groups: [inspec-integration]
+      plan:
+        - get: magic-modules-new-prs
+        - task: inspec-vcr
+          file: magic-modules-new-prs/.ci/acceptance-tests/inspec-vcr.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
     - name: ansible-integration-test
       serial: true
       plan:

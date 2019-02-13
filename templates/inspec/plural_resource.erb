@@ -52,7 +52,7 @@ link_query = object.self_link_query || object.collection_url_response
   def initialize(params = {})
     super(params.merge({ use_http_transport: true }))
     @params = params
-    @table = fetch_wrapped_resource(<%= "'#{link_query.items}'" -%>)
+<%= indent("@table = fetch_wrapped_resource('#{link_query.items}')", 4) %>
   end
 
   def fetch_wrapped_resource(wrap_path)

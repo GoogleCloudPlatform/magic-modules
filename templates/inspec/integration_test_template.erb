@@ -1,4 +1,10 @@
 <%= lines(autogen_notice :ruby) -%>
+<% vcr_mode = ENV['VCR_MODE'] -%>
+<% raise "Bad VCR_MODE environment variable set. Should be nil, 'none' or 'all'" unless vcr_mode.nil? || vcr_mode == 'all' || vcr_mode == 'none' -%>
+<% if vcr_mode -%>
+<%= "require 'vcr'" %>
+<%= "require 'vcr_config'" %>
+<% end # if vcr_mode -%>
 
 title 'Test GCP <%= name -%> resource.'
 
@@ -8,5 +14,11 @@ control '<%= name -%>-1.0' do
   impact 1.0
   title '<%= name -%> resource test'
 
-<%= indent(compile("templates/inspec/examples/#{attribute_file_name}/#{name}.erb"), 2) %>
+<% if vcr_mode -%>
+  VCR.use_cassette('<%= name -%>', :record => :<%= vcr_mode -%>) do
+<% end # if vcr_mode -%>
+<%= indent(compile("templates/inspec/examples/#{attribute_file_name}/#{name}.erb"), vcr_mode ? 4 : 2) %>
+<% if vcr_mode -%>
+	end
+<% end # if vcr_mode -%>
 end

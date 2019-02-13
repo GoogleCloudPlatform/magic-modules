@@ -8,5 +8,5 @@ RUN echo "deb http://packages.cloud.google.com/apt cloud-sdk-stretch main" >> /e
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 RUN apt-get update && apt-get install google-cloud-sdk -y
 
-# Install inspec
-RUN gem install inspec -v '~> 3.0.0'
+ADD Gemfile Gemfile
+RUN bundle install
