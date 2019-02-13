@@ -484,6 +484,7 @@ jobs:
                 skip_clone: true
     - name: inspec-integration-test
       serial: true
+      serial_groups: [inspec-integration]
       plan:
         - get: magic-modules-gcp
         - get: midnight-timer
@@ -497,6 +498,7 @@ jobs:
 
     - name: inspec-vcr-record
       serial: true
+      serial_groups: [inspec-integration]
       plan:
         - get: magic-modules-new-prs
         - task: inspec-vcr
