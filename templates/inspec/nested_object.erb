@@ -19,7 +19,7 @@
                   else
                     property
                   end
-  class_name = nested_property.property_class.last
+  class_name = qualified_property_class(nested_property).camelize(:upper)
   product_ns = product.name.camelize(:upper)
 -%>
 # frozen_string_literal: false

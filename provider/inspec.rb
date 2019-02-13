@@ -134,14 +134,9 @@ module Provider
     end
 
     def emit_nested_object(property)
-      target = if property.is_a?(Api::Type::Array)
-                 property.item_type.property_file
-               else
-                 property.property_file
-               end
       {
         source: File.join('templates', 'inspec', 'nested_object.erb'),
-        target: "libraries/#{target}.rb",
+        target: "libraries/#{nested_object_requires(property)}.rb",
         property: property
       }
     end
@@ -193,7 +188,7 @@ module Provider
         'google',
         nested_object_type.__resource.__product.api_name,
         'property',
-        [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
+        qualified_property_class(nested_object_type)
       ).downcase
     end
 
@@ -234,6 +229,25 @@ module Provider
       property.property_type.sub('Google::', 'GoogleInSpec::')
     end
 
+    def qualified_property_class(property)
+      name = property.name.underscore
+      other = property.__resource.name
+      until property.parent.nil?
+        property = property.parent
+        next if typed_array?(property)
+
+        name = property.name.underscore + '_' + name
+      end
+
+      other + '_' + name
+    end
+
+    def modularized_property_class(property)
+      class_name = qualified_property_class(property).camelize(:upper)
+      product_name = property.__resource.__product.name.camelize(:upper)
+      "GoogleInSpec::#{product_name}::Property::#{class_name}"
+    end
+
     # Returns Ruby code that will parse the given property from a hash
     # This is used in several places that need to parse an arbitrary property
     # from a JSON representation
@@ -247,9 +261,9 @@ module Provider
 
         return item_from_hash.to_s
       elsif typed_array?(property)
-        return "#{inspec_property_type(property)}.parse(#{item_from_hash})"
+        return "#{modularized_property_class(property.item_type)}Array.parse(#{item_from_hash})"
       end
-      "#{inspec_property_type(property)}.new(#{item_from_hash})"
+      "#{modularized_property_class(property)}.new(#{item_from_hash})"
     end
   end
 end
