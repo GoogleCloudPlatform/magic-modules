@@ -192,6 +192,7 @@ objects:
           - :SOA
           - :SPF
           - :SRV
+          - :TLSA
           - :TXT
         description: One of valid DNS resource types.
         # TODO(nelsonjr): Enforce required in provider manifest
