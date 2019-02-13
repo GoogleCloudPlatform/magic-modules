@@ -43,10 +43,10 @@ timeouts, import, and more.
 ## I accidentally upgraded to 2.0.0, how do I downgrade to `1.X`?
 
 If you've inadvertently upgraded to `2.0.0`, first see the
-[Provider Version Configuration Guide]((#provider-version-configuration)) to
-lock your provider version; if you've constrained the provider to a lower
-version, such as shown in the previous version example, Terraform will pull in a
-`1.X` series release on `terraform init`.
+[Provider Version Configuration Guide](#provider-version-configuration) to lock
+your provider version; if you've constrained the provider to a lower version
+such as shown in the previous version example in that guide, Terraform will pull
+in a `1.X` series release on `terraform init`.
 
 If you've only ran `terraform init` or `terraform plan`, your state will not
 have been modified and downgrading your provider is sufficient.
