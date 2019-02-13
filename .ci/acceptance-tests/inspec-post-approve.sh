@@ -50,21 +50,12 @@ trap cleanup EXIT
 set +e
 gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
 if [ $? -eq 0 ]; then
-	gsutil ls gs://magic-modules-inspec-bucket/$PR_ID/approved
-	if [ $? -eq 0 ]; then
-		# We have already recorded new cassettes during the inspec-post-merge step
-		gsutil cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/* gs://magic-modules-inspec-bucket/master/inspec-cassettes
-	else
-		# We need to record new cassettes for this PR
-		bundle exec rake test:integration
-		gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/master/inspec-cassettes/
-	fi
+	bundle exec rake test:integration
+	gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/
 else
 	# No new cassettes were needed to pass tests, so no need to update master cassettes
   exit 0
 fi
 set -e
 
-# Clean up cassettes for merged PR
-gsutil rm gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/*
 popd
