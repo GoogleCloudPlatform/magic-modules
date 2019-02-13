@@ -102,6 +102,10 @@ variable "dataset" {
   type = "map"
 }
 
+variable "bigquery_table" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -408,12 +412,25 @@ resource "google_bigquery_dataset" "gcp-inspec-dataset" {
   default_table_expiration_ms = "${var.dataset["default_table_expiration_ms"]}"
 
   access {
-    role   = "${var.dataset["access_reader_role"]}"
-    domain = "${var.dataset["access_reader_domain"]}"
+    role          = "${var.dataset["access_writer_role"]}"
+    special_group = "${var.dataset["access_writer_special_group"]}"
   }
 
   access {
-    role           = "${var.dataset["access_writer_role"]}"
-    special_group = "${var.dataset["access_writer_special_group"]}"
+    role          = "OWNER"
+    special_group = "projectOwners"
   }
+}
+
+resource "google_bigquery_table" "gcp-inspec-bigquery-table" {
+  project    = "${var.gcp_project_id}"
+  dataset_id = "${google_bigquery_dataset.gcp-inspec-dataset.dataset_id}"
+  table_id   = "${var.bigquery_table["table_id"]}"
+
+  time_partitioning {
+    type = "${var.bigquery_table["time_partitioning_type"]}"
+  }
+
+  description = "${var.bigquery_table["description"]}"
+  expiration_time = "${var.bigquery_table["expiration_time"]}"
 }

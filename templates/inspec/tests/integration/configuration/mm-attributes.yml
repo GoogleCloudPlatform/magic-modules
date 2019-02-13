@@ -176,7 +176,11 @@ dataset:
   description: Test BigQuery dataset description
   location: EU
   default_table_expiration_ms: 3600000
-  access_reader_role: READER
-  access_reader_domain: example.com
   access_writer_role: WRITER
   access_writer_special_group: projectWriters
+
+bigquery_table:
+  table_id: inspec_gcp_bigquery_table
+  description: A BigQuery table
+  expiration_time: 1738882264000
+  time_partitioning_type: DAY

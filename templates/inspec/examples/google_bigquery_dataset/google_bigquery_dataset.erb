@@ -12,15 +12,6 @@ end
 describe.one do
   google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>).access.each do |dataset_access|
     describe dataset_access do
-      its('role') { should eq <%= doc_generation ? "'#{dataset['access_reader_role']}'" : "dataset['access_reader_role']" -%> }
-      its('domain') { should eq <%= doc_generation ? "'#{dataset['access_reader_domain']}'" : "dataset['access_reader_domain']" -%> }
-    end
-  end
-end
-
-describe.one do
-  google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>).access.each do |dataset_access|
-    describe dataset_access do
       its('role') { should eq <%= doc_generation ? "'#{dataset['access_writer_role']}'" : "dataset['access_writer_role']" -%> }
       its('special_group') { should eq <%= doc_generation ? "'#{dataset['access_writer_special_group']}'" : "dataset['access_writer_special_group']" -%> }
     end
