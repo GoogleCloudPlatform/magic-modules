@@ -508,6 +508,20 @@ jobs:
             PROJECT_NAME: ((inspec-project-name))
             PROJECT_NUMBER: ((inspec-project-number))
 
+    - name: inspec-post-merge
+      serial: true
+      serial_groups: [inspec-integration]
+      plan:
+        - get: mm-approved-prs
+          passed: [merge-prs]
+          trigger: true
+        - task: inspec-post-merge
+          file: mm-approved-prs/.ci/acceptance-tests/inspec-post-merge.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
     - name: ansible-integration-test
       serial: true
       plan:
