@@ -412,17 +412,12 @@ resource "google_bigquery_dataset" "gcp-inspec-dataset" {
   default_table_expiration_ms = "${var.dataset["default_table_expiration_ms"]}"
 
   access {
-    role   = "${var.dataset["access_reader_role"]}"
-    domain = "${var.dataset["access_reader_domain"]}"
-  }
-
-  access {
-    role           = "${var.dataset["access_writer_role"]}"
+    role          = "${var.dataset["access_writer_role"]}"
     special_group = "${var.dataset["access_writer_special_group"]}"
   }
 
   access {
-    role           = "OWNER"
+    role          = "OWNER"
     special_group = "projectOwners"
   }
 }
