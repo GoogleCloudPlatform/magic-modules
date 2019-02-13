@@ -28,7 +28,7 @@ gsutil ls gs://magic-modules-inspec-bucket/$PR_ID
 if [ $? -ne 0 ]; then
 	# Bucket does not exist, so we did not have to record new cassettes to pass the inspec-test step.
 	# This means no new cassettes need to be generated after this PR is merged.
-  exit 0
+	exit 0
 fi
 set -e
 
