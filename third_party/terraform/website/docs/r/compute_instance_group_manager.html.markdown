@@ -93,7 +93,7 @@ The following arguments are supported:
     which all new instances will be created. This field is only present in the
     `google` provider.
 
-* `version` - (Optional for GA, Required for [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Application versions managed by this instance group. Each
+* `version` - (Required, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Application versions managed by this instance group. Each
     version deals with a specific instance template, allowing canary release scenarios.
     Structure is documented below.
 
