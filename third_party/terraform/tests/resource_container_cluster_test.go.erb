@@ -1563,6 +1563,50 @@ func TestAccContainerCluster_withFlexiblePodCIDR(t *testing.T) {
 }
 <% end -%>
 
+func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
+	t.Parallel()
+
+	prefix := acctest.RandString(10)
+	clusterName := fmt.Sprintf("cluster-test-%s", prefix)
+	clusterNameError := fmt.Sprintf("cluster-test-err-%s", prefix)
+
+	config := testAccContainerCluster_withCIDROverlap(clusterName, clusterNameError)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				ExpectError: regexp.MustCompile("Error waiting for creating GKE cluster"),
+			},
+			// If dangling cluster wasn't deleted, this plan will return an error
+			{
+				Config: config,
+				PlanOnly: true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withInvalidName(),
+				ExpectError: regexp.MustCompile("Error waiting for creating GKE cluster"),
+			},
+		},
+	})
+}
+
 func testAccCheckContainerClusterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -3042,3 +3086,49 @@ resource "google_container_cluster" "with_flexible_cidr" {
 `, cluster, cluster)
 }
 <% end -%>
+
+
+func testAccContainerCluster_withCIDROverlap(firstCluster, secondCluster string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cidr_error_test_preempt" {
+  name = "%s"
+  zone = "us-west1-a"
+
+  initial_node_count = 1
+
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block = "10.90.0.0/19"
+    services_ipv4_cidr_block = "10.40.0.0/19"
+  }
+
+}
+
+resource "google_container_cluster" "cidr_error_test" {
+  name = "%s"
+  zone = "us-west1-a"
+
+  initial_node_count = 1
+
+  ip_allocation_policy {
+    cluster_ipv4_cidr_block = "10.90.0.0/19"
+    services_ipv4_cidr_block = "10.40.0.0/19"
+  }
+
+  depends_on = ["google_container_cluster.cidr_error_test_preempt"]
+}
+`, firstCluster, secondCluster)
+}
+
+func testAccContainerCluster_withInvalidName() string {
+	return `
+resource "google_container_cluster" "with_resource_labels" {
+	name = "0invalidname"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+	resource_labels = {
+		created-by = "terraform"
+	}
+}
+`
+}
