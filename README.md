@@ -199,6 +199,11 @@ Don't worry about testing every tool, only the primary tool you're making
 changes against. The Magic Modules maintainers will ensure your changes work
 against each tool.
 
+If your changes have unintended consequences in another tool, a reviewer will
+instruct you to mark the field excluded or provide specific feedback on what
+changes to make to the tool-specific overrides in order for them to work
+correctly.
+
 ### Submitting a PR
 
 Before creating a commit, if you've modified any .rb files, make sure you run
