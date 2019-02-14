@@ -63,7 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
 
           If not provided, a random string starting with `tf-` will be selected.
         validation: !ruby/object:Provider::Terraform::Validation
-          regex: '^(?:[a-z](?:[-_a-z0-9]{4,62}[a-z0-9])?)$'
+          regex: '^(?:[a-z](?:[-_a-z0-9]{0,62}[a-z0-9])?)$'
         # This resource supports a sort of odd autogenerate-if-not-set
         # system, which is done in the encoder.  Consequently we have
         # to interpret "not set" as "use the name in state".
