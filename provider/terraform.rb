@@ -175,7 +175,7 @@ module Provider
       generate_resource_file(data.clone.merge(
                                async: async,
                                object: @api.objects.first,
-                               default_template: 'templates/terraform/operation.erb',
+                               default_template: 'templates/terraform/operation.go.erb',
                                out_file: File.join(target_folder,
                                                    "#{product_name}_operation.go")
                              ))
