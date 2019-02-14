@@ -1582,7 +1582,7 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 				Config: initConfig,
 			},
 			{
-				ResourceName:        "google_container_cluster.cidr_error_test_preempt",
+				ResourceName:        "google_container_cluster.cidr_error_preempt",
 				ImportStateIdPrefix: "us-central1-a/",
 				ImportState:         true,
 				ImportStateVerify:   true,
@@ -3106,8 +3106,8 @@ resource "google_container_cluster" "cidr_error_preempt" {
   initial_node_count = 1
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = "10.91.0.0/19"
-    services_ipv4_cidr_block = "10.41.0.0/19"
+    cluster_ipv4_cidr_block = "10.3.0.0/19"
+    services_ipv4_cidr_block = "10.4.0.0/19"
   }
 }
 `, clusterName)
@@ -3124,8 +3124,8 @@ resource "google_container_cluster" "cidr_error_overlap" {
   initial_node_count = 1
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = "10.91.0.0/19"
-    services_ipv4_cidr_block = "10.41.0.0/19"
+    cluster_ipv4_cidr_block = "10.3.0.0/19"
+    services_ipv4_cidr_block = "10.4.0.0/19"
   }
 }
 `, initConfig, secondCluster)
