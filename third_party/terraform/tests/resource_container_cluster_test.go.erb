@@ -1570,7 +1570,8 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 	clusterName := fmt.Sprintf("cluster-test-%s", prefix)
 	clusterNameError := fmt.Sprintf("cluster-test-err-%s", prefix)
 
-	config := testAccContainerCluster_withCIDROverlap(clusterName, clusterNameError)
+	initConfig := testAccContainerCluster_withInitialCIDR(clusterName)
+	overlapConfig := testAccContainerCluster_withCIDROverlap(initConfig, clusterNameError)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1578,13 +1579,22 @@ func TestAccContainerCluster_errorCleanDanglingCluster(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: config,
+				Config: initConfig,
+			},
+			{
+				ResourceName:        "google_container_cluster.cidr_error_test_preempt",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config:      overlapConfig,
 				ExpectError: regexp.MustCompile("Error waiting for creating GKE cluster"),
 			},
 			// If dangling cluster wasn't deleted, this plan will return an error
 			{
-				Config: config,
-				PlanOnly: true,
+				Config:             overlapConfig,
+				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
 		},
@@ -1600,8 +1610,8 @@ func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withInvalidName(),
-				ExpectError: regexp.MustCompile("Error waiting for creating GKE cluster"),
+				Config:      testAccContainerCluster_withInvalidLocation("wonderland"),
+				ExpectError: regexp.MustCompile(`Location "wonderland" does not exist`),
 			},
 		},
 	})
@@ -3087,48 +3097,46 @@ resource "google_container_cluster" "with_flexible_cidr" {
 }
 <% end -%>
 
-
-func testAccContainerCluster_withCIDROverlap(firstCluster, secondCluster string) string {
+func testAccContainerCluster_withInitialCIDR(clusterName string) string {
 	return fmt.Sprintf(`
-resource "google_container_cluster" "cidr_error_test_preempt" {
+resource "google_container_cluster" "cidr_error_preempt" {
   name = "%s"
-  zone = "us-west1-a"
+  zone = "us-central1-a"
 
   initial_node_count = 1
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = "10.90.0.0/19"
-    services_ipv4_cidr_block = "10.40.0.0/19"
+    cluster_ipv4_cidr_block = "10.91.0.0/19"
+    services_ipv4_cidr_block = "10.41.0.0/19"
   }
-
+}
+`, clusterName)
 }
 
-resource "google_container_cluster" "cidr_error_test" {
+func testAccContainerCluster_withCIDROverlap(initConfig, secondCluster string) string {
+	return fmt.Sprintf(`
+%s
+
+resource "google_container_cluster" "cidr_error_overlap" {
   name = "%s"
-  zone = "us-west1-a"
+  zone = "us-central1-a"
 
   initial_node_count = 1
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = "10.90.0.0/19"
-    services_ipv4_cidr_block = "10.40.0.0/19"
+    cluster_ipv4_cidr_block = "10.91.0.0/19"
+    services_ipv4_cidr_block = "10.41.0.0/19"
   }
-
-  depends_on = ["google_container_cluster.cidr_error_test_preempt"]
 }
-`, firstCluster, secondCluster)
+`, initConfig, secondCluster)
 }
 
-func testAccContainerCluster_withInvalidName() string {
-	return `
+func testAccContainerCluster_withInvalidLocation(location string) string {
+	return fmt.Sprintf(`
 resource "google_container_cluster" "with_resource_labels" {
-	name = "0invalidname"
-	zone = "us-central1-a"
+	name = "invalid-gke-cluster"
+	zone = "%s"
 	initial_node_count = 1
-
-	resource_labels = {
-		created-by = "terraform"
-	}
 }
-`
+`, location)
 }
