@@ -9,7 +9,7 @@ set -e
 set -x
 
 # Get the newest version of Ansible from the PR
-pushd magic-modules-new-prs
+pushd magic-modules-gcp
 bundle install
 for i in $(find products/ -name 'ansible.yaml' -printf '%h\n');
 do
@@ -18,7 +18,7 @@ done
 popd
 
 # Go to the newly-compiled version of Ansible
-pushd magic-modules-new-prs/build/ansible
+pushd magic-modules-gcp/build/ansible
 
 # Setup Cloud configuration template with variables
 cp /tmp/ansible-template.yml test/integration/cloud-config-gcp.yml
