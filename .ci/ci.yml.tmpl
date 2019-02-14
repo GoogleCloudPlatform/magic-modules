@@ -61,13 +61,6 @@ resources:
           authorship_restriction: true
           no_label: automerged
 
-    - name: midnight-timer
-      type: time
-      source:
-        start: 12:00 AM
-        stop: 1:00 AM
-        location: America/Los_Angeles
-
 {% for v in vars.terraform_v.itervalues() %}
     - name: {{ v.short_name }}-intermediate
       type: git-branch
@@ -482,19 +475,6 @@ jobs:
                     commit_msg: mm-output/commit_message
             get_params:
                 skip_clone: true
-    - name: inspec-integration-test
-      serial: true
-      serial_groups: [inspec-integration]
-      plan:
-        - get: magic-modules-gcp
-        - get: midnight-timer
-          trigger: true
-        - task: inspec-integration
-          file: magic-modules-gcp/.ci/acceptance-tests/inspec-integration.yml
-          params:
-            TERRAFORM_KEY: ((terraform-key))
-            PROJECT_NAME: ((inspec-project-name))
-            PROJECT_NUMBER: ((inspec-project-number))
 
     - name: inspec-vcr-record
       serial: true
@@ -534,28 +514,3 @@ jobs:
             TERRAFORM_KEY: ((terraform-key))
             PROJECT_NAME: ((inspec-project-name))
             PROJECT_NUMBER: ((inspec-project-number))
-
-    - name: ansible-integration-test
-      serial: true
-      plan:
-        - get: magic-modules-new-prs
-          trigger: false
-        - task: ansible-integration
-          file: magic-modules-new-prs/.ci/acceptance-tests/ansible-integration.yml
-          params:
-            SERVICE_ACCOUNT_KEY: ((ansible-integration-key))
-            ANSIBLE_TEMPLATE: ((ansible-integration-template))
-            IMAGE_KEY: ((image-key))
-
-{% for v in vars.terraform_v.itervalues() %}
-    - name: {{v.short_name}}-integration-test
-      serial: true
-      plan:
-        - get: magic-modules-gcp
-        - task: {{v.short_name}}-integration
-          file: magic-modules-gcp/.ci/acceptance-tests/terraform-integration.yml
-          params:
-            PROVIDER_NAME: {{v.provider_name}}
-            SHORT_NAME: {{v.short_name}}
-            TEST_DIR: {{v.test_dir}}
-{% endfor %}
