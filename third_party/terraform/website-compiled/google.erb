@@ -321,6 +321,17 @@
     </ul>
     </li>
 
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-cloud-scheduler") %>>
+    <a href="#">Google Cloud Scheduler Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-cloud-scheduler-job") %>>
+      <a href="/docs/providers/google/r/cloud_scheduler_job.html">google_cloud_scheduler_job</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
+
     <li<%%= sidebar_current("docs-google-compute") %>>
     <a href="#">Google Compute Engine Resources</a>
     <ul class="nav nav-visible">
