@@ -14,11 +14,11 @@ cp -r magic-modules/* magic-modules-with-comment
 
 PR_ID="$(cat ./mm-initial-pr/.git/id)"
 ORIGINAL_PR_BRANCH="codegen-pr-$PR_ID"
-echo "$ORIGINAL_PR_BRANCH" > ./original_pr_branch_name
 set +e
 ORIGINAL_PR_USER=$(curl "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/$PR_ID" | jq -r ".user.login")
 set -e
 pushd magic-modules-with-comment
+echo "$ORIGINAL_PR_BRANCH" > ./original_pr_branch_name
 
 # Check out the magic-modules branch with the same name as the current tracked
 # branch of the terraform submodule.  All the submodules will be on the the same
