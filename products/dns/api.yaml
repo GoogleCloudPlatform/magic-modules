@@ -16,8 +16,12 @@ name: Dns
 display_name: Google Cloud DNS
 versions:
   - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://www.googleapis.com/dns/v1beta2/
+  - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/dns/v1/
+    default: true
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 objects:
@@ -83,6 +87,60 @@ objects:
           A set of key/value label pairs to assign to this ManagedZone.
         update_verb: :PATCH
         update_url: 'projects/{{project}}/managedZones/{{name}}'
+      - !ruby/object:Api::Type::Enum
+        name: 'visibility'
+        description: |
+          The zone's visibility: public zones are exposed to the Internet,
+          while private zones are visible only to Virtual Private Cloud resources.
+          Must be one of: `public`, `private`.
+        values:
+        - :private
+        - :public
+        default_value: :public
+        min_version: beta
+      - !ruby/object:Api::Type::NestedObject
+        name: 'privateVisibilityConfig'
+        description: |
+          For privately visible zones, the set of Virtual Private Cloud
+          resources that the zone is visible from.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'networks'
+            description: 'The list of VPC networks that can see this zone.'
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+                # are possible.
+                - !ruby/object:Api::Type::String
+                  name: 'networkUrl'
+                  description: |
+                    The fully qualified URL of the VPC network to bind to.
+                    This should be formatted like
+                    `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+        min_version: beta
+      - !ruby/object:Api::Type::NestedObject
+        name: 'forwardingConfig'
+        description: |
+          The presence for this field indicates that outbound forwarding is enabled
+          for this zone. The value of this field contains the set of destinations
+          to forward to.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'targetNameServers'
+            description: |
+              List of target name servers to forward to. Cloud DNS will
+              select the best available name server if more than
+              one target is given.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'ipv4Address'
+                  description: 'IPv4 address of a target name server.'
+        min_version: beta
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':
