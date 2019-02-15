@@ -45,7 +45,6 @@ import (
 <% end -%>
 	"google.golang.org/api/serviceusage/v1"
 	"google.golang.org/api/sourcerepo/v1"
-	"google.golang.org/api/spanner/v1"
 	"google.golang.org/api/sqladmin/v1beta4"
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
@@ -87,7 +86,6 @@ type Config struct {
 	clientResourceManager        *cloudresourcemanager.Service
 	clientResourceManagerV2Beta1 *resourceManagerV2Beta1.Service
 	clientRuntimeconfig          *runtimeconfig.Service
-	clientSpanner                *spanner.Service
 	clientSourceRepo             *sourcerepo.Service
 	clientStorage                *storage.Service
 	clientSqlAdmin               *sqladmin.Service
@@ -313,13 +311,6 @@ func (c *Config) loadAndValidate() error {
 		return err
 	}
 	c.clientSourceRepo.UserAgent = userAgent
-
-	log.Printf("[INFO] Instantiating Google Cloud Spanner Client...")
-	c.clientSpanner, err = spanner.New(client)
-	if err != nil {
-		return err
-	}
-	c.clientSpanner.UserAgent = userAgent
 
 	log.Printf("[INFO] Instantiating Google Cloud Dataproc Client...")
 	c.clientDataproc, err = dataproc.New(client)
