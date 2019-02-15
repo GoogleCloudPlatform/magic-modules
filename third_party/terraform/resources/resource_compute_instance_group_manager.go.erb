@@ -36,7 +36,7 @@ func resourceComputeInstanceGroupManager() *schema.Resource {
 <% if version.nil? || version == 'ga' -%>
 			"instance_template": &schema.Schema{
 				Type:             schema.TypeString,
-				Optional:         true,
+				Required:         true,
 				DiffSuppressFunc: compareSelfLinkRelativePaths,
 			},
 <% end -%>
