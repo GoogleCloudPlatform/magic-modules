@@ -8,10 +8,10 @@ image_resource:
         tag: '1.0'
 
 inputs:
-    - name: magic-modules-gcp
+    - name: mm-initial-prs
 
 outputs:
-    - name: comment
+    - name: branchname
 
 run:
-    path: magic-modules-gcp/.ci/magic-modules/welcome-contributor.sh
+    path: magic-modules-gcp/.ci/magic-modules/write-branch-name.sh
