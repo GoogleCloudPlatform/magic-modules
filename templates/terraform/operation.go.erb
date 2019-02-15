@@ -1,0 +1,33 @@
+<%
+  product_name = object.__product.name
+-%>
+<%= lines(autogen_notice :go) -%>
+package google
+
+import (
+  "fmt"
+)
+
+type <%= product_name -%>OperationWaiter struct {
+  Config *Config
+  CommonOperationWaiter
+}
+
+func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
+  if w == nil {
+    return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
+  }
+  // Returns the proper get.
+  url := fmt.Sprintf("<%= build_url([object.__product.base_url, async.operation.base_url]).gsub('{{op_id}}', '%s') -%>", w.CommonOperationWaiter.Op.Name)
+  return sendRequest(w.Config, "GET", url, nil)
+}
+
+func <%= product_name.underscore -%>OperationWaitTime(config *Config, op map[string]interface{}, project, activity string, timeoutMinutes int) error {
+  w := &<%= product_name -%>OperationWaiter{
+    Config: config,
+  }
+  if err := w.CommonOperationWaiter.SetOp(op); err != nil {
+    return err
+  }
+  return OperationWait(w, activity, timeoutMinutes)
+}
