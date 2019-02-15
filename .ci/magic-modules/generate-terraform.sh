@@ -29,7 +29,7 @@ pushd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
 # "-wholename": entire relative path - including directory names - matches following wildcard.
 # "-name": filename alone matches following string.  e.g. -name README.md matches ./README.md *and* ./foo/bar/README.md
 # "-exec": for each file found, execute the command following until the literal ';'
-find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".gometalinter.json" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "main.go" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -wholename "./version*" -exec git rm {} \;
+find . -type f -not -wholename "./.git*" -not -wholename "./vendor*" -not -name ".travis.yml" -not -name ".golangci.yml" -not -name "CHANGELOG.md" -not -name GNUmakefile -not -name LICENSE -not -name README.md -not -wholename "./examples*" -not -name "main.go" -not -name "go.mod" -not -name "go.sum" -not -name "staticcheck.conf" -not -wholename "./version*" -exec git rm {} \;
 popd
 
 pushd magic-modules-branched
