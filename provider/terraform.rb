@@ -171,7 +171,7 @@ module Provider
     def generate_operation(output_folder, _types, version_name)
       return if @api.objects.select(&:autogen_async).empty?
 
-      product_name = @api.name.underscore
+      product_name = @api.name.camelize(:lower)
       async = @api.objects.map(&:async).compact.first
 
       data = build_object_data(@api.objects.first, output_folder, version_name)
