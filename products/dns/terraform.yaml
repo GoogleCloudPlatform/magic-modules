@@ -73,6 +73,50 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
             return hashcode.String(buf.String())
           }
+  Policy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_policy_basic"
+        primary_resource_id: "example-policy"
+        version: <%= version_name %>
+        vars:
+          policy_name: "example-policy"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
+    properties:
+      alternativeNameServerConfig.targetNameServers: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if address, ok := raw["ipv4_address"]; ok {
+              hashcode.String(address.(string))
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
+            return hashcode.String(buf.String())
+          }
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          A textual description field. Defaults to 'Managed by Terraform'.
+        default_value: 'Managed by Terraform'
+        required: false
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      networks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if url, ok := raw["network_url"]; ok {
+              return selfLinkNameHash(url)
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
+            return hashcode.String(buf.String())
+          }
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/detach_network.erb
   ResourceRecordSet: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
