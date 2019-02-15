@@ -89,7 +89,7 @@ The following arguments are supported:
     appending a hyphen and a random four-character string to the base instance
     name.
 
-* `instance_template` - (Required, [GA-only](https://terraform.io/docs/providers/google/provider_versions.html)) The
+* `instance_template` - (Required, [GA](https://terraform.io/docs/providers/google/provider_versions.html)) The
   full URL to an instance template from which all new instances
   will be created. This field is only present in the `google` provider.
 
