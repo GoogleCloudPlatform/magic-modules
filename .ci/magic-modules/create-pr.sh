@@ -14,6 +14,7 @@ cp -r magic-modules/* magic-modules-with-comment
 
 PR_ID="$(cat ./mm-initial-pr/.git/id)"
 ORIGINAL_PR_BRANCH="codegen-pr-$PR_ID"
+echo "$ORIGINAL_PR_BRANCH" > ./original_pr_branch_name
 set +e
 ORIGINAL_PR_USER=$(curl "https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/$PR_ID" | jq -r ".user.login")
 set -e
@@ -28,7 +29,7 @@ IFS="," read -ra TERRAFORM_VERSIONS <<< "$TERRAFORM_VERSIONS"
 git checkout -b "$BRANCH_NAME"
 NEWLINE=$'\n'
 MESSAGE="Hi!  I'm the modular magician, I work on Magic Modules.$NEWLINE"
-LAST_USER_COMMIT="$(git rev-parse HEAD~1^1)"
+LAST_USER_COMMIT="$(git rev-parse HEAD~1^2)"
 
 if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
   MESSAGE="${MESSAGE}This PR seems not to have generated downstream PRs before. "
@@ -149,7 +150,7 @@ else
   MESSAGE="${MESSAGE}${NEWLINE}${DEPENDENCIES}"
 fi
 
-echo "MESSAGE" > ./pr_comment
+echo "$MESSAGE" > ./pr_comment
 
 # Create Labels list with the comma-separated list of labels for this PR
 if [ -z "$LABELS" ]; then
