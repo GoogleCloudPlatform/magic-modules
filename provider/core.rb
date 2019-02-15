@@ -387,16 +387,13 @@ module Provider
       ctx = binding
       data.each { |name, value| ctx.local_variable_set(name, value) }
 
-      # Use an (essentially) global variable to record whether a file has
-      # either generated an autogen header, or explicitly opted out.
-      @file_expectations = {
-        autogen: false
-      }
-
       Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
       File.open(path, 'w') { |f| f.puts compile_file(ctx, data[:template]) }
 
-      raise "#{path} missing autogen" unless @file_expectations[:autogen]
+      # Files are often generated in parallel.
+      # We can use thread-local variables to ensure that autogen checking
+      # stays specific to the file each thred represents.
+      raise "#{path} missing autogen" unless Thread.current[:autogen]
 
       old_file_chmod_mode = File.stat(data[:template]).mode
       FileUtils.chmod(old_file_chmod_mode, path)
