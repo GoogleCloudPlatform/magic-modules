@@ -23,7 +23,7 @@ func (w *<%= product_name -%>OperationWaiter) QueryOp() (interface{}, error) {
 }
 
 func <%= product_name.underscore -%>OperationWaitTime(config *Config, op map[string]interface{}, project, activity string, timeoutMinutes int) error {
-  if op.Name == "" {
+  if val, ok := op["name"]; !ok || val == "" {
     // This was a synchronous call - there is no operation to wait for.
     return nil
   }
