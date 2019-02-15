@@ -123,13 +123,15 @@ module Provider
     # rubocop:enable Lint/UnusedMethodArgument
 
     def copy_file_list(output_folder, files)
-      files.each do |target, source|
-        target_file = File.join(output_folder, target)
-        target_dir = File.dirname(target_file)
-        Google::LOGGER.debug "Copying #{source} => #{target}"
-        FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
-        FileUtils.copy_entry source, target_file
-      end
+      files.map do |target, source|
+        Thread.new do
+          target_file = File.join(output_folder, target)
+          target_dir = File.dirname(target_file)
+          Google::LOGGER.debug "Copying #{source} => #{target}"
+          FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+          FileUtils.copy_entry source, target_file
+        end
+      end.map(&:join)
     end
 
     def compile_files(output_folder, version_name)
@@ -146,29 +148,31 @@ module Provider
     end
 
     def compile_file_list(output_folder, files, data = {})
-      files.each do |target, source|
-        Google::LOGGER.debug "Compiling #{source} => #{target}"
-        target_file = File.join(output_folder, target)
-        manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
-        generate_file(
-          data.clone.merge(
-            name: target,
-            product: @api,
-            object: {},
-            config: {},
-            scopes: @api.scopes,
-            manifest: manifest,
-            tests: '',
-            template: source,
-            compiler: compiler,
-            output_folder: output_folder,
-            out_file: target_file,
-            product_ns: @api.name
+      files.map do |target, source|
+        Thread.new do
+          Google::LOGGER.debug "Compiling #{source} => #{target}"
+          target_file = File.join(output_folder, target)
+          manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
+          generate_file(
+            data.clone.merge(
+              name: target,
+              product: @api,
+              object: {},
+              config: {},
+              scopes: @api.scopes,
+              manifest: manifest,
+              tests: '',
+              template: source,
+              compiler: compiler,
+              output_folder: output_folder,
+              out_file: target_file,
+              product_ns: @api.name
+            )
           )
-        )
 
-        format_output_file(target_file)
-      end
+          format_output_file(target_file)
+        end
+      end.map(&:join)
     end
 
     def generate_objects(output_folder, types, version_name)
