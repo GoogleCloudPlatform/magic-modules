@@ -49,8 +49,6 @@ fi
 
 pushd "build/$SHORT_NAME"
 
-GO111MODULE=on go mod vendor
-
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
@@ -61,6 +59,15 @@ git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # 
 git checkout -B "$(cat ../../branchname)"
 
 apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
+
+# We need to vendor after patching in case two simultaneous PRs cause a change in vendored directories, especially
+# removals.
+# This way, the Magician will generate the vendor directory based on the end state of the repo after the PR is merged
+# instead of based on the tentative output of MM.
+GO111MODULE=on go mod vendor
+git add -A
+# Set the "author" to the commit's real author.
+git commit -m "Update vendored dependencies" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 
 popd
 popd
