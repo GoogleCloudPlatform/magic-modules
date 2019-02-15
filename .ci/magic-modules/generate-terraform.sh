@@ -66,8 +66,9 @@ apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT
 # instead of based on the tentative output of MM.
 GO111MODULE=on go mod vendor
 git add -A
+
 # Set the "author" to the commit's real author.
-git commit -m "Update vendored dependencies" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
+git commit --amend --no-edit --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 
 popd
 popd
