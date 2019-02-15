@@ -227,7 +227,6 @@ objects:
         name: 'managed_zone'
         description: |
           Identifies the managed zone addressed by this request.
-          Can be the managed zone name or id.
         required: true
         resource: 'ManagedZone'
         imports: 'name'
