@@ -140,6 +140,7 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set("instance", sslCerts.Instance)
+	d.Set("project", project)
 	d.Set("sha1_fingerprint", sslCerts.Sha1Fingerprint)
 	d.Set("common_name", sslCerts.CommonName)
 	d.Set("cert", sslCerts.Cert)
