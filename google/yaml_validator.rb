@@ -135,6 +135,12 @@ module Google
       end
     end
 
+    def check_optional_property_hash(name, keyType = nil, valType = nil)
+      obj_hash = instance_variable_get("@#{name}")
+      return if obj_hash.nil?
+      check_property_hash(name, keyType, valType)
+    end
+
     # Verifies if a property is of a given type and its value are one of the
     # valid possibilities.
     def check_property_oneof(property, valid_values, type = nil)

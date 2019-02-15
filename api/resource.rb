@@ -64,14 +64,8 @@ module Api
       attr_reader :min_version # Minimum API version this resource is in
 
       # Azure Specific Attributes
-      attr_reader :azure_sdk_type_defs
+      attr_reader :azure_sdk_definition
       attr_reader :azure_id_portion
-      attr_reader :azure_create_async
-      attr_reader :azure_delete_async
-      attr_reader :azure_create_verb
-      attr_reader :azure_read_verb
-      attr_reader :azure_update_verb
-      attr_reader :azure_delete_verb
       attr_reader :azure_parameters_type
     end
 
@@ -265,14 +259,8 @@ module Api
       check_optional_property :input, :boolean
       check_optional_property :min_version, String
 
-      check_property :azure_sdk_type_defs, Api::Azure::SDKTypeDefinitions
+      check_property :azure_sdk_definition, Api::Azure::SDKDefinition
       check_optional_property :azure_id_portion, String
-      check_optional_property :azure_create_async, :boolean
-      check_optional_property :azure_delete_async, :boolean
-      check_optional_property :azure_create_verb, String
-      check_optional_property :azure_read_verb, String
-      check_optional_property :azure_update_verb, String
-      check_optional_property :azure_delete_verb, String
       check_optional_property :azure_parameters_type, String
 
       set_variables(@parameters, :__resource)
