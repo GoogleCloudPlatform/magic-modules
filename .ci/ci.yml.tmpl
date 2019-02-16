@@ -327,6 +327,59 @@ jobs:
           # or, if a PR already exists, it uses 'git branch -f' to update the branch
           # that PR is from to point at the commit generated earlier from this run
           # of the pipeline.
+          - task: write-original-branch-name
+            file: mm-initial-pr/.ci/magic-modules/write-branch-name.yml
+          # This will be a no-op the first time through the pipeline.  This pushes the updated
+          # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
+          # first time through the pipeline, that branch is unchanged by the create-prs task,
+          # because a new PR has just been created from that branch.  The second time through
+          # the pipeline (when a PR needs to be updated), this does that updating by pushing
+          # the new code to the repository/branch from which a pull request is already open.
+          - aggregate:
+            {% for v in vars.terraform_v.itervalues() %}
+            - put: {{v.short_name}}-intermediate
+              params:
+                repository: magic-modules-with-comment/build/{{ v.short_name }}
+                branch_file: branchname/original_pr_branch_name
+                # Every time a change runs through this pipeline, it will generate a commit with
+                # a different hash - the hash includes timestamps.  Therefore, even if there's no
+                # code diff, this push will update terraform's pending PR on every update to the
+                # magic-modules PR.  With this 'only_if_diff' feature, if the change to the
+                # magic-modules PR does not require an update to the terraform PR, this will
+                # not push the update even though the commit hashes are different.
+                only_if_diff: true
+                force: true
+              get_params:
+                  skip_clone: true
+            {% endfor %}
+            - put: ansible-intermediate
+              params:
+                repository: magic-modules-with-comment/build/ansible
+                branch_file: branchname/original_pr_branch_name
+                # See comment on terraform-intermediate
+                only_if_diff: true
+                force: true
+              get_params:
+                  skip_clone: true
+            - put: inspec-intermediate
+              params:
+                repository: magic-modules-with-comment/build/inspec
+                branch_file: branchname/original_pr_branch_name
+                # See comment on terraform-intermediate
+                only_if_diff: true
+                force: true
+              get_params:
+                  skip_clone: true
+          # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
+          # time through, it works the same way as the preceding push.
+          - put: magic-modules
+            params:
+              repository: magic-modules-with-comment/
+              branch_file: branchname/original_pr_branch_name
+              only_if_diff: true
+              force: true
+            get_params:
+                skip_clone: true
           - task: create-or-update-pr
             file: magic-modules/.ci/magic-modules/create-pr.yml
             params:
@@ -345,57 +398,7 @@ jobs:
                   path: mm-initial-pr
               get_params:
                   skip_clone: true
-          # This will be a no-op the first time through the pipeline.  This pushes the updated
-          # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
-          # first time through the pipeline, that branch is unchanged by the create-prs task,
-          # because a new PR has just been created from that branch.  The second time through
-          # the pipeline (when a PR needs to be updated), this does that updating by pushing
-          # the new code to the repository/branch from which a pull request is already open.
-          - aggregate:
-            {% for v in vars.terraform_v.itervalues() %}
-            - put: {{v.short_name}}-intermediate
-              params:
-                repository: magic-modules-with-comment/build/{{ v.short_name }}
-                branch_file: magic-modules-with-comment/original_pr_branch_name
-                # Every time a change runs through this pipeline, it will generate a commit with
-                # a different hash - the hash includes timestamps.  Therefore, even if there's no
-                # code diff, this push will update terraform's pending PR on every update to the
-                # magic-modules PR.  With this 'only_if_diff' feature, if the change to the
-                # magic-modules PR does not require an update to the terraform PR, this will
-                # not push the update even though the commit hashes are different.
-                only_if_diff: true
-                force: true
-              get_params:
-                  skip_clone: true
-            {% endfor %}
-            - put: ansible-intermediate
-              params:
-                repository: magic-modules-with-comment/build/ansible
-                branch_file: magic-modules-with-comment/original_pr_branch_name
-                # See comment on terraform-intermediate
-                only_if_diff: true
-                force: true
-              get_params:
-                  skip_clone: true
-            - put: inspec-intermediate
-              params:
-                repository: magic-modules-with-comment/build/inspec
-                branch_file: magic-modules-with-comment/original_pr_branch_name
-                # See comment on terraform-intermediate
-                only_if_diff: true
-                force: true
-              get_params:
-                  skip_clone: true
-          # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
-          # time through, it works the same way as the preceding push.
-          - put: magic-modules
-            params:
-              repository: magic-modules-with-comment/
-              branch_file: magic-modules-with-comment/original_pr_branch_name
-              only_if_diff: true
-              force: true
-            get_params:
-                skip_clone: true
+
           # Once everything is done and working, post the updated information to the
           # magic-modules PR.
           - put: magic-modules-new-prs
