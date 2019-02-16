@@ -32,7 +32,7 @@ MESSAGE="Hi!  I'm the modular magician, I work on Magic Modules.$NEWLINE"
 LAST_USER_COMMIT="$(git rev-parse HEAD~1^2)"
 
 if [ "$BRANCH_NAME" = "$ORIGINAL_PR_BRANCH" ]; then
-  MESSAGE="${MESSAGE}This PR seems not to have generated downstream PRs before. "
+  MESSAGE="${MESSAGE}This PR seems not to have generated downstream PRs before, as of $LAST_USER_COMMIT. "
 else
   MESSAGE="${MESSAGE}I see that this PR has already had some downstream PRs generated. "
   MESSAGE="${MESSAGE}Any open downstreams are already updated to your most recent commit, $LAST_USER_COMMIT. "
@@ -75,11 +75,9 @@ if [ -n "$TERRAFORM_REPO_USER" ]; then
       if grep "No commits between" ./tf_pr_err; then
         echo "There were no diffs in $SUBMODULE_DIR."
         MESSAGE="$MESSAGE${NEWLINE}No diff detected in $PROVIDER_NAME."
-      elif grep "Already open" ./tf_pr_err; then
+      elif grep "A pull request already exists" ./tf_pr_err; then
         echo "Already have a PR for $SUBMODULE_DIR."
-        # Note: Might be good to check whether there's an existing pr for this
-        # provider in the comment thread - if it has been deleted, we should
-        # consider re-adding it.
+        MESSAGE="$MESSAGE${NEWLINE}$PROVIDER_NAME already has an open PR."
       fi
 
     fi
@@ -106,8 +104,8 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
     if grep "No commits between" ./ansible_pr_err; then
       echo "There were no diffs in Ansible."
       MESSAGE="$MESSAGE${NEWLINE}No diff detected in Ansible."
-    elif grep "Already open" ./ansible_pr_err; then
-      echo "Already have a PR for Ansible."
+    elif grep "A pull request already exists" ./ansible_pr_err; then
+      MESSAGE="$MESSAGE${NEWLINE}Ansible already has an open PR."
     fi
   fi
   popd
@@ -132,8 +130,8 @@ fi
     if grep "No commits between" ./inspec_pr_err; then
       echo "There were no diffs in Inspec."
       MESSAGE="$MESSAGE${NEWLINE}No diff detected in Inspec."
-    elif grep "Already open" ./inspec_pr_err; then
-      echo "Already have a PR for Inspec."
+    elif grep "A pull request already exists" ./inspec_pr_err; then
+      MESSAGE="$MESSAGE${NEWLINE}Ansible already has an open PR."
     fi
   fi
   popd
