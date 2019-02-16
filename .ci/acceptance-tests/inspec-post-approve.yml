@@ -10,4 +10,4 @@ image_resource:
         tag: '0.11.10-3.0.25'
 
 run:
-    path: mm-approved-prs/.ci/acceptance-tests/inspec-post-merge.sh
+    path: mm-approved-prs/.ci/acceptance-tests/inspec-post-approve.sh
