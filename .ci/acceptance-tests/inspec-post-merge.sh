@@ -68,5 +68,5 @@ fi
 set -e
 
 # Clean up cassettes for merged PR
-gsutil -m rm gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/*
+gsutil -m rm -r gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/*
 popd
