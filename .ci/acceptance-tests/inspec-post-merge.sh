@@ -59,14 +59,14 @@ set +e
 gsutil ls gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved
 if [ $? -eq 0 ]; then
 	# We have already recorded new cassettes during the inspec-post-merge step
-	gsutil cp -m gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/* gs://magic-modules-inspec-bucket/master/inspec-cassettes
+	gsutil -m cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/* gs://magic-modules-inspec-bucket/master/inspec-cassettes
 else
 	# We need to record new cassettes for this PR
 	bundle exec rake test:integration
-	gsutil cp -m inspec-cassettes/* gs://magic-modules-inspec-bucket/master/inspec-cassettes/
+	gsutil -m cp inspec-cassettes/* gs://magic-modules-inspec-bucket/master/inspec-cassettes/
 fi
 set -e
 
 # Clean up cassettes for merged PR
-gsutil rm -m gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/*
+gsutil -m rm gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/*
 popd

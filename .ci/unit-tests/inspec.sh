@@ -35,9 +35,9 @@ mkdir inspec-cassettes
 set +e
 gsutil ls -m gs://magic-modules-inspec-bucket/$PR_ID
 if [ $? -eq 0 ]; then
-  gsutil cp -m gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/* inspec-cassettes/
+  gsutil -m cp gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/* inspec-cassettes/
 else
-  gsutil cp -m gs://magic-modules-inspec-bucket/master/inspec-cassettes/* inspec-cassettes/
+  gsutil -m cp gs://magic-modules-inspec-bucket/master/inspec-cassettes/* inspec-cassettes/
 fi
 set -e
 bundle exec rake test:generate_integration_test_variables
