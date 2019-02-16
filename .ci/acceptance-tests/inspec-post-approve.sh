@@ -57,6 +57,6 @@ export INSPEC_DIR=${PWD}
 trap cleanup EXIT
 
 bundle exec rake test:integration
-gsutil cp inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/
+gsutil cp -m inspec-cassettes/* gs://magic-modules-inspec-bucket/$PR_ID/inspec-cassettes/approved/
 
 popd
