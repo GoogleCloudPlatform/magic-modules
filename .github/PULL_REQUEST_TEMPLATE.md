@@ -1,4 +1,17 @@
-<!-- Your regular pull request body goes here -->
+<!-- 
+Note: You may see "This branch is out-of-date with the base branch"
+when you submit a pull request. This is fine! We don't use the GitHub
+merge button to merge PRs, and you can safely ignore that message.
+-->
+
+<!-- Your regular pull request description goes here -->
+
+
+
+
+
+
+
 
 <!--
 For each repository you expect to modify with this PR, fill in a repo-specific
@@ -10,12 +23,7 @@ the title of this PR. [terraform-beta] will inherit the title of [terraform]
 if it has no specified title.
 -->
 
-<!-- 
-Note: You may see "This branch is out-of-date with the base branch"
-when you submit a pull request. This is fine! We don't use the GitHub
-merge button to merge PRs, and you can safely ignore that message.
--->
-
+<!-- Optional PR titles that describe your downstream changes -->
 -----------------------------------------------------------------
 # [all]
 ## [terraform]
