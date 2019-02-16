@@ -14,6 +14,7 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
     id_format: "{{project}}/{{instance}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
@@ -43,6 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # This is appropriate for a datasource - doesn't have a create method.
     exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
     id_format: "{{project}}/{{name}}"
     import_format:
       - "projects/{{project}}/instances/{{name}}"
