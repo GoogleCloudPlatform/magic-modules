@@ -70,17 +70,14 @@ module Overrides
           # All custom code attributes are string-typed.  The string should
           # be the name of a template file which will be compiled in the
           # specified / described place.
-          #
-          # Property Updates are used when a resource is updateable but
-          # resource.input is true.  In this case, only individual
-          # properties can be updated.  The value of this attribute should
-          # be the path to a template which will be compiled. This code is placed
-          # *inline* in the obj := { ... } definition - it is not a custom
-          # function, it is a custom statement.  Note that this cannot
-          # be used for nested properties, as they are not present in the
-          # obj := {...} statement.  This statement template receives `property`
-          # and `prefix` to aid in code reuse.
-          :update_statement,
+
+          # A custom expander replaces the default expander for an attribute.
+          # It is called as part of Create, and as part of Update if
+          # object.input is false.  It can return an object of any type,
+          # so the function header *is* part of the custom code template.
+          # As with flatten, `property` and `prefix` are available.
+          :custom_expand,
+
           # A custom flattener replaces the default flattener for an attribute.
           # It is called as part of Read.  It can return an object of any
           # type, and may sometimes need to return an object with non-interface{}
@@ -88,13 +85,7 @@ module Overrides
           # header *is* a part of the custom code template.  To help with
           # creating the function header, `property` and `prefix` are available,
           # just as they are in the standard flattener template.
-          :custom_flatten,
-          # A custom expander replaces the default expander for an attribute.
-          # It is called as part of Create, and as part of Update if
-          # object.input is false.  It can return an object of any type,
-          # so the function header *is* part of the custom code template.
-          # As with flatten, `property` and `prefix` are available.
-          :custom_expand
+          :custom_flatten
         ]
       end
 
@@ -117,7 +108,6 @@ module Overrides
         check :validation, type: Provider::Terraform::Validation
         check :set_hash_func, type: String
 
-        check :update_statement, type: String
         check :custom_flatten, type: String
         check :custom_expand, type: String
 

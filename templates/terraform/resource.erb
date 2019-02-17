@@ -280,13 +280,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%          else -%>
         } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
 <%          end -%>
-<%          if prop.update_statement -%>
-            obj["<%= prop.api_name -%>"] = <%= compile_template(prop.update_statement,
-                                                                prefix: resource_name,
-                                                                property: prop) -%>
-<%          else -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%          end -%>
         }
 <%      else # if update_body_properties.include? prop -%>
         <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
