@@ -78,9 +78,10 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
-        Schema: map[string]*schema.Schema{
-<%          order_properties(properties).each do |prop| -%>
-<%=             lines(build_schema_property(prop, object, 12)) -%>
+        Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
+<%          order_azure_properties(properties).each do |prop| -%>
+<%=             lines_before(build_schema_property(prop, object, 12)) -%>
+
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
         },

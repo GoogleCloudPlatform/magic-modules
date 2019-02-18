@@ -29,8 +29,10 @@ func resourceArmResourceGroup() *schema.Resource {
 
 
         Schema: map[string]*schema.Schema{
-            "location": locationSchema(),
             "name": resourceGroupNameSchema(),
+
+            "location": locationSchema(),
+
             "tags": tagsSchema(),
         },
     }

@@ -29,29 +29,36 @@ func resourceArmContainerRegistry() *schema.Resource {
 
 
         Schema: map[string]*schema.Schema{
-            "location": locationSchema(),
             "name": {
                 Type: schema.TypeString,
                 Required: true,
               ForceNew: true,
             },
+
             "resource_group_name": resourceGroupNameSchema(),
+
+            "location": locationSchema(),
+
             "admin_enabled": {
                 Type: schema.TypeBool,
                 Optional: true,
                 Default: false,
             },
+
             "sku": {
                 Type: schema.TypeString,
                 Optional: true,
             	ValidateFunc: validation.StringInSlice([]string{"Classic","Basic","Standard","Premium",""}, false),
                 Default: "Classic",
             },
+
             "storage_account_id": {
                 Type: schema.TypeString,
                 Optional: true,
             },
+
             "tags": tagsSchema(),
+
             "login_server": {
                 Type: schema.TypeString,
                 Computed: true,
