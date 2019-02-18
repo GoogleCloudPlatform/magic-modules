@@ -87,7 +87,6 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
     }
 
 
-
     future, err := client.Create(ctx, resourceGroup, name, parameters)
     if err != nil {
         return fmt.Errorf("Error creating ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)

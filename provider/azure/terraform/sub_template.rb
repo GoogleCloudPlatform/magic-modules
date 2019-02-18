@@ -47,6 +47,18 @@ module Provider
                            object: object
         end
 
+        def build_sdk_func_invocation(sdk_op_def)
+          compile_template 'templates/azure/terraform/sdk/function_invocation.erb',
+                           sdk_op_def: sdk_op_def
+        end
+
+        def build_azure_id_parser(sdk_op_def, object, indentation = 4)
+          compile_template 'templates/azure/terraform/sdk/azure_id_parser.erb',
+                           indentation: indentation,
+                           sdk_op_def: sdk_op_def,
+                           object: object
+        end
+
       end
     end
   end

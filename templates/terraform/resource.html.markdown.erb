@@ -138,7 +138,7 @@ This resource provides the following
 <%= object.name -%> can be imported using the `resource id`, e.g.
 <%
     resource_id_postfix = ""
-    resource_id_postfix = "/#{object.__product.azure_namespace}/#{object.azure_id_portion}/example" unless object.name == "ResourceGroup"
+    resource_id_postfix = "/#{object.__product.azure_namespace}/TODO.ID_PORTION/example" unless object.name == "ResourceGroup"
 -%>
 ```shell
 $ terraform import azurerm_<%= resource_name -%>.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg<%= resource_id_postfix -%>

@@ -38,9 +38,6 @@ module Provider
       # New examples in documentation - will take the "examples" name when
       # old-style examples are gone.
       attr_reader :example
-
-      # Azure Specific Properties
-      attr_reader :azure_parameters_type
     end
 
     # A class to control overridden properties on terraform.yaml in lieu of
@@ -64,8 +61,6 @@ module Provider
 
         check_optional_property :custom_code, Provider::Terraform::CustomCode
         check_optional_property :docs, Provider::Terraform::Docs
-
-        check_optional_property :azure_parameters_type, String
 
         check_property :import_format, Array
         check_property_list :import_format, String

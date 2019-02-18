@@ -19,7 +19,11 @@ objects:
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
         request:
+          'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_parameter_expression: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_parameter_expression: parameters
             go_type_name: Group
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
@@ -29,7 +33,8 @@ objects:
         go_func_name: Get
         request:
           'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Name
+            id_portion: resourceGroups
+            go_parameter_expression: name
         response:
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_type_name: Group
@@ -40,7 +45,11 @@ objects:
       update: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
         request:
+          'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_parameter_expression: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_parameter_expression: parameters
             go_type_name: Group
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
@@ -51,9 +60,8 @@ objects:
         async: true
         request:
           'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Name
-
-    azure_parameters_type: ResourceGroup
+            id_portion: resourceGroups
+            go_parameter_expression: name
 
     description: |
       Manages a resource group on Azure.

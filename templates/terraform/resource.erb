@@ -83,20 +83,6 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%=             lines(build_schema_property(prop, object, 12)) -%>
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
-<%          if has_project -%>
-            "project": {
-                Type:     schema.TypeString,
-                Optional: true,
-                Computed: true,
-                ForceNew: true,
-            },
-<%          end -%>
-<%          if has_self_link -%>
-            "self_link": {
-                Type:     schema.TypeString,
-                Computed: true,
-            },
-<%          end -%>
         },
     }
 }
@@ -116,19 +102,13 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.each do |prop| -%>
-<%    output_var = (prop.name == "resourceGroupName" ? "resourceGroup" : prop.name.camelcase(:lower)) -%>
+<%    go_expr = object.azure_sdk_definition.create.request[prop.azure_api_path].go_parameter_expression -%>
+<%    output_var = go_expr.nil? ? prop.name.camelcase(:lower) : go_expr -%>
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
 <%  sdk_type_def = object.azure_sdk_definition.create.request["/"] -%>
-<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object.azure_sdk_definition.create.request, object)) -%>
-
-<%  if object.custom_code.encoder -%>
-    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
-    if err != nil {
-        return err
-    }
-<%  end -%>
+<%= lines(build_property_to_sdk_object("#{sdk_type_def.go_parameter_expression} := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object.azure_sdk_definition.create.request, object)) -%>
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -140,11 +120,12 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%  end -%>
 
 <%  unless object.azure_sdk_definition.create.async -%>
-    if _, err := client.<%= object.azure_sdk_definition.create.go_func_name -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters); err != nil {
+    if _, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.create) -%>; err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %+v", err)
     }
 <%  else -%>
-    future, err := client.<%= object.azure_sdk_definition.create.go_func_name -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters)
+    future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.create) -%>
+
     if err != nil {
         return fmt.Errorf("Error creating <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
@@ -155,7 +136,8 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    resp, err := client.<%= object.azure_sdk_definition.read.go_func_name -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
+
     if err != nil {
         return err
     }
@@ -172,18 +154,11 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
     ctx := meta.(*ArmClient).StopContext
 
-    id, err := parseAzureResourceID(d.Id())
-    if err != nil {
-        return fmt.Errorf("Error parsing <%= object.name -%> ID %q: %+v", d.Id(), err)
-    }
-<%  if azure_is_resource_group -%>
-    name := id.ResourceGroup
-<%  else -%>
-    resourceGroup := id.ResourceGroup
-    name := id.Path["<%= object.azure_id_portion -%>"]
-<%  end -%>
+<%= build_azure_id_parser(object.azure_sdk_definition.read, object) -%>
 
-    resp, err := client.<%= object.azure_sdk_definition.read.go_func_name -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+
+    resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
+
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] <%= object.name -%> %q does not exist - removing from state", d.Id())
@@ -226,16 +201,8 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 
     ctx := meta.(*ArmClient).StopContext
 
-    id, err := parseAzureResourceID(d.Id())
-    if err != nil {
-        return fmt.Errorf("Error parsing <%= object.name -%> ID %q: %+v", d.Id(), err)
-    }
-<%  if azure_is_resource_group -%>
-    name := id.ResourceGroup
-<%  else -%>
-    resourceGroup := id.ResourceGroup
-    name := id.Path["<%= object.azure_id_portion -%>"]
-<%  end -%>
+<%= build_azure_id_parser(object.azure_sdk_definition.update, object) -%>
+
 
 <%  settable_properties.each do |prop| -%>
 <%    if prop.name != "name" && prop.name != "resourceGroupName" && prop.name != "location" -%>
@@ -250,7 +217,8 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 -%>
 <%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, updatable_properties, object.azure_sdk_definition.update.request, object)) -%>
 
-    future, err := client.<%= object.azure_sdk_definition.update.go_func_name -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name, parameters)
+    future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.update) -%>
+
     if err != nil {
         return fmt.Errorf("Error updating <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
@@ -276,21 +244,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    id, err := parseAzureResourceID(d.Id())
-    if err != nil {
-        return fmt.Errorf("Error parsing <%= object.name -%> ID %q: %+v", d.Id(), err)
-    }
-<%  if azure_is_resource_group -%>
-    name := id.ResourceGroup
-<%  else -%>
-    resourceGroup := id.ResourceGroup
-    name := id.Path["<%= object.azure_id_portion -%>"]
-<%  end -%>
+<%= build_azure_id_parser(object.azure_sdk_definition.delete, object) -%>
+
 
 <%  unless object.azure_sdk_definition.delete.async -%>
     // TODO: Synced Delete Operation
 <%  else -%>
-    future, err := client.<%= object.azure_sdk_definition.delete.go_func_name -%>(ctx<%= ", resourceGroup" unless azure_is_resource_group -%>, name)
+    future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>
+
     if err != nil {
         if response.WasNotFound(future.Response()) {
             return nil

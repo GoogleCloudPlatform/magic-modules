@@ -2,7 +2,6 @@
 name: Arm
 overrides: !ruby/object:Provider::ResourceOverrides
   ResourceGroup: !ruby/object:Provider::Terraform::ResourceOverride
-    azure_parameters_type: Group
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_group"

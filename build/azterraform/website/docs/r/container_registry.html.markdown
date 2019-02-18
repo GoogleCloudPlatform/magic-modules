@@ -84,4 +84,4 @@ The following attributes are exported:
 
 ContainerRegistry can be imported using the `resource id`, e.g.
 ```shell
-$ terraform import azurerm_container_registry.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.ContainerRegistry/registries/example```
+$ terraform import azurerm_container_registry.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.ContainerRegistry/TODO.ID_PORTION/example```
