@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Sql
-display_name: Google Cloud SQL
+display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

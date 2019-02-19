@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: Pubsub
-display_name: Google Cloud Pub/Sub
+display_name: Cloud Pub/Sub
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
