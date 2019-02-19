@@ -50,6 +50,7 @@ jobs:
             file: magic-modules-gcp/.ci/magic-modules/release-ansible.yml
             params:
                 GITHUB_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
     - name: nightly-build
       plan:
           - get: night-trigger
