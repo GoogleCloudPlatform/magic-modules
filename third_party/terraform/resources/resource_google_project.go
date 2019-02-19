@@ -227,13 +227,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	d.SetId(pid)
 
 	// Wait for the operation to complete
-  new_op = map[string]interface{}
-  err = Convert(op, new_op)
-  if err != nil {
-    return err
-  }
-
-	waitErr = resourceManagerOperationWaitTime(config, new_op, project, "creating folder", int(d.Timeout(schema.TimeoutCreate).Minutes()))
+	waitErr = resourceManagerOperationWaitTime(config, op, nil, "creating folder", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if waitErr != nil {
 		// The resource wasn't actually created
 		d.SetId("")
