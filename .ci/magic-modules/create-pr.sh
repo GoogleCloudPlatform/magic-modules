@@ -67,7 +67,7 @@ if [ -n "$TERRAFORM_REPO_USER" ]; then
     fi
 
     git checkout -b "$BRANCH_NAME"
-    if hub pull-request -b "$TERRAFORM_REPO_USER/$PROVIDER_NAME:master" -F ./downstream_body > ./tf_pr 2> ./tf_pr_err ; then
+    if hub pull-request -b "$TERRAFORM_REPO_USER/$PROVIDER_NAME:master" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./tf_pr 2> ./tf_pr_err ; then
       DEPENDENCIES="${DEPENDENCIES}depends: $(cat ./tf_pr) ${NEWLINE}"
       LABELS="${LABELS}${PROVIDER_NAME},"
     else
@@ -96,7 +96,7 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
   fi
 
   git checkout -b "$BRANCH_NAME"
-  if hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -F ./downstream_body > ./ansible_pr 2> ./ansible_pr_err ; then
+  if hub pull-request -b "$ANSIBLE_REPO_USER/ansible:devel" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./ansible_pr 2> ./ansible_pr_err ; then
     DEPENDENCIES="${DEPENDENCIES}depends: $(cat ./ansible_pr) ${NEWLINE}"
     LABELS="${LABELS}ansible,"
   else
@@ -122,7 +122,7 @@ fi
   fi
 
   git checkout -b "$BRANCH_NAME"
-  if hub pull-request -b "$INSPEC_REPO_USER/inspec-gcp:master" -F ./downstream_body > ./inspec_pr 2> ./inspec_pr_err ; then
+  if hub pull-request -b "$INSPEC_REPO_USER/inspec-gcp:master" -h "$ORIGINAL_PR_BRANCH" -F ./downstream_body > ./inspec_pr 2> ./inspec_pr_err ; then
     DEPENDENCIES="${DEPENDENCIES}depends: $(cat ./inspec_pr) ${NEWLINE}"
     LABELS="${LABELS}inspec,"
   else

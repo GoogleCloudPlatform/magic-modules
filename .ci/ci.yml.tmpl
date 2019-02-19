@@ -339,7 +339,7 @@ jobs:
             {% for v in vars.terraform_v.itervalues() %}
             - put: {{v.short_name}}-intermediate
               params:
-                repository: magic-modules-with-comment/build/{{ v.short_name }}
+                repository: magic-modules/build/{{ v.short_name }}
                 branch_file: branchname/original_pr_branch_name
                 # Every time a change runs through this pipeline, it will generate a commit with
                 # a different hash - the hash includes timestamps.  Therefore, even if there's no
@@ -354,7 +354,7 @@ jobs:
             {% endfor %}
             - put: ansible-intermediate
               params:
-                repository: magic-modules-with-comment/build/ansible
+                repository: magic-modules/build/ansible
                 branch_file: branchname/original_pr_branch_name
                 # See comment on terraform-intermediate
                 only_if_diff: true
@@ -363,23 +363,13 @@ jobs:
                   skip_clone: true
             - put: inspec-intermediate
               params:
-                repository: magic-modules-with-comment/build/inspec
+                repository: magic-modules/build/inspec
                 branch_file: branchname/original_pr_branch_name
                 # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
               get_params:
                   skip_clone: true
-          # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
-          # time through, it works the same way as the preceding push.
-          - put: magic-modules
-            params:
-              repository: magic-modules-with-comment/
-              branch_file: branchname/original_pr_branch_name
-              only_if_diff: true
-              force: true
-            get_params:
-                skip_clone: true
           - task: create-or-update-pr
             file: magic-modules/.ci/magic-modules/create-pr.yml
             params:
@@ -398,6 +388,15 @@ jobs:
                   path: mm-initial-pr
               get_params:
                   skip_clone: true
+
+          - put: magic-modules
+            params:
+              repository: magic-modules/
+              branch_file: branchname/original_pr_branch_name
+              only_if_diff: true
+              force: true
+            get_params:
+                skip_clone: true
 
           # Once everything is done and working, post the updated information to the
           # magic-modules PR.
