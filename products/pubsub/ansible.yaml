@@ -44,12 +44,18 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      labels: !ruby/object:Overrides::Ansible::PropertyOverride
+        version_added: '2.8'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
     provider_helpers:
       - 'products/pubsub/helpers/python/provider_topic.py'
   Subscription: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      labels: !ruby/object:Overrides::Ansible::PropertyOverride
+        version_added: '2.8'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
