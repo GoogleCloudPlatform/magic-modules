@@ -13,7 +13,7 @@
 
 --- !ruby/object:Api::Product
 name: ResourceManager
-display_name: Google Cloud Resource Manager
+display_name: Resource Manager
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
