@@ -40,13 +40,13 @@ class <%= object.name -%> < GcpResourceBase
 <% if object.self_link_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
-<%= indent('@fetched = @connection.fetch(_base, _url, params)', 4) %>
+<%= indent('@fetched = @connection.fetch(product_url, resource_base_url, params)', 4) %>
     parse unless @fetched.nil?
   end
 <% else # object.self_link_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
-<%= indent('fetched = @connection.fetch(_base, _url, params)', 4) %>
+<%= indent('fetched = @connection.fetch(product_url, resource_base_url, params)', 4) %>
 <%= indent('@fetched = unwrap(fetched, params)', 4) %>
     parse unless @fetched.nil?
   end
@@ -89,11 +89,11 @@ class <%= object.name -%> < GcpResourceBase
 
   private
 
-  def _base
+  def product_url
     '<%= object.self_link_url[0].join %>'
   end
 
-  def _url
+  def resource_base_url
     '<%= format_url(object.self_link_url[1]) %>'
   end
 end
