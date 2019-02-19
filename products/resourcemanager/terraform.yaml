@@ -16,7 +16,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Project: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Lien: !ruby/object:Overrides::Terraform::ResourceOverride
-    autogen_async: true
     import_format: ["{{parent}}/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
