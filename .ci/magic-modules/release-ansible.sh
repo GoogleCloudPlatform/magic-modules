@@ -21,8 +21,8 @@ popd
 
 pushd "magic-modules-gcp/build/ansible"
 # Setup Git config.
-git config --global user.email "alexstephen@google.com"
-git config --global user.name "Alex Stephen"
+git config --global user.email "magic-modules@google.com"
+git config --global user.name "Modular Magician"
 
 # Run creation script.
 ../../tools/ansible-pr/run.sh
