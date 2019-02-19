@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% repository = grab_attributes['repository'] -%>
+describe google_sourcerepo_repositories(project: <%= gcp_project_id -%>) do
+  its('names') { should include <%= doc_generation ? "'#{repository['name']}'" : "repository['name']" -%> }
+  its('sizes') { should include <%= doc_generation ? "'#{repository['size']}'" : "repository['size']" -%> }
+end
