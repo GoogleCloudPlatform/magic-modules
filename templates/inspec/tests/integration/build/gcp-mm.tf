@@ -106,6 +106,10 @@ variable "bigquery_table" {
   type = "map"
 }
 
+variable "repository" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -433,4 +437,9 @@ resource "google_bigquery_table" "gcp-inspec-bigquery-table" {
 
   description = "${var.bigquery_table["description"]}"
   expiration_time = "${var.bigquery_table["expiration_time"]}"
+}
+
+resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
+  project = "${var.gcp_project_id}"
+  name = "${var.repository["name"]}"
 }

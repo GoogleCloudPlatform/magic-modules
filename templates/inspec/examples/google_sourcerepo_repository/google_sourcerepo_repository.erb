@@ -2,7 +2,6 @@
 <% repository = grab_attributes['repository'] -%>
 describe google_sourcerepo_repository(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{repository['name']}'" : "repository['name']" -%>) do
   it { should exist }
-  its('size') { should eq <%= doc_generation ? "'#{repository['size']}'" : "repository['size']" -%> }
 end
 
 describe google_sourcerepo_repository(project: <%= gcp_project_id -%>, name: 'nonexistent') do

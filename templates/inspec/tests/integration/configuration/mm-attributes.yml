@@ -184,3 +184,6 @@ bigquery_table:
   description: A BigQuery table
   expiration_time: 1738882264000
   time_partitioning_type: DAY
+
+repository:
+  name: inspec-gcp-repository
