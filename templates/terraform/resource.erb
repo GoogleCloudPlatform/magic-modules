@@ -35,7 +35,6 @@ package azurerm
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
 <%
-    azure_is_resource_group = object.name == "ResourceGroup"
     azure_client_name = "#{object.api_name}Client".camelcase(:lower)
     sdk_package = azure_resource_go_package(object.__product)
 -%>
@@ -103,13 +102,13 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.each do |prop| -%>
-<%    go_expr = object.azure_sdk_definition.create.request[prop.azure_api_path].go_parameter_expression -%>
-<%    output_var = go_expr.nil? ? prop.name.camelcase(:lower) : go_expr -%>
+<%    var_name = object.azure_sdk_definition.create.request[prop.azure_api_path].go_variable_name -%>
+<%    output_var = var_name.nil? ? prop.name.camelcase(:lower) : var_name -%>
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
 <%  sdk_type_def = object.azure_sdk_definition.create.request["/"] -%>
-<%= lines(build_property_to_sdk_object("#{sdk_type_def.go_parameter_expression} := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object.azure_sdk_definition.create.request, object)) -%>
+<%= lines(build_property_to_sdk_object("#{sdk_type_def.go_variable_name} := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object.azure_sdk_definition.create.request, object)) -%>
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -186,10 +185,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-    d.Set("name", resp.Name)
-<%  if !azure_is_resource_group -%>
-    d.Set("resource_group_name", resourceGroup)
-<%  end -%>
+<%= lines(build_parameters_schema_property_set(object.azure_sdk_definition.read, properties)) -%>
 <%  sdk_type_def = object.azure_sdk_definition.read.response["/"] -%>
 <%= lines(build_sdk_object_to_property("resp", "/", sdk_type_def, properties, object.azure_sdk_definition.read.response, object)) -%>
 
@@ -249,7 +245,9 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 
 <%  unless object.azure_sdk_definition.delete.async -%>
-    // TODO: Synced Delete Operation
+    if _, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>; err != nil {
+        return fmt.Errorf("Error deleting <%= object.name -%> %q: %+v", name, err)
+    }
 <%  else -%>
     future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>
 
@@ -269,21 +267,3 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     return nil
 }
-
-<% if object.custom_code.encoder -%>
-func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.encoder)) -%>
-}
-<% end -%>
-
-<% if object.custom_code.update_encoder-%>
-func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.update_encoder)) -%>
-}
-<% end -%>
-
-<% if object.custom_code.decoder -%>
-func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-<%= lines(compile(object.custom_code.decoder)) -%>
-}
-<% end -%>

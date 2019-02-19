@@ -23,12 +23,12 @@ objects:
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
-            go_parameter_expression: resourceGroup
+            go_variable_name: resourceGroup
           'registryName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: registries
-            go_parameter_expression: name
+            go_variable_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_parameter_expression: parameters
+            go_variable_name: parameters
             go_type_name: Registry
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
@@ -57,10 +57,10 @@ objects:
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
-            go_parameter_expression: resourceGroup
+            go_variable_name: resourceGroup
           'registryName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: registries
-            go_parameter_expression: name
+            go_variable_name: name
         response:
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_type_name: Registry
@@ -93,12 +93,12 @@ objects:
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
-            go_parameter_expression: resourceGroup
+            go_variable_name: resourceGroup
           'registryName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: registries
-            go_parameter_expression: name
+            go_variable_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_parameter_expression: parameters
+            go_variable_name: parameters
             go_type_name: RegistryUpdateParameters
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
@@ -130,10 +130,10 @@ objects:
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
-            go_parameter_expression: resourceGroup
+            go_variable_name: resourceGroup
           'registryName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: registries
-            go_parameter_expression: name
+            go_variable_name: name
 
     description: |
       Manages a container registry on Azure.

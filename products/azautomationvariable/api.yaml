@@ -1,0 +1,138 @@
+--- !ruby/object:Api::Product
+name: Azure Automation Variable
+prefix: arm
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: NotUsedInAzure
+scopes:
+  - NotUsedInAzure
+azure_namespace: 'Microsoft.Automation'
+azure_version: 'stable/2015-10-31'
+objects:
+  - !ruby/object:Api::Resource
+    name: AutomationVariable
+    api_name: AutomationVariable
+    base_url: NotUsedInAzure
+
+    azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
+      provider_name: Microsoft.Automation
+      create: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: CreateOrUpdate
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'automationAccountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: automationAccounts
+            go_variable_name: accountName
+          'variableName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: variables
+            go_variable_name: name
+          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_variable_name: parameters
+            go_type_name: VariableCreateOrUpdateParameters
+          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_field_name: VariableCreateOrUpdateProperties 
+            go_type_name: VariableCreateOrUpdateProperties 
+          '/properties/description': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Description
+          '/properties/isEncrypted': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
+            go_field_name: IsEncrypted
+          '/properties/value': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Value
+      read: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: Get
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'automationAccountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: automationAccounts
+            go_variable_name: accountName
+          'variableName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: variables
+            go_variable_name: name
+        response:
+          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_type_name: Variable
+          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_field_name: VariableProperties
+            go_type_name: VariableProperties
+            go_variable_name: properties
+          '/properties/description': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Description
+          '/properties/isEncrypted': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
+            go_field_name: IsEncrypted
+          '/properties/value': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Value
+      update: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: CreateOrUpdate
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'automationAccountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: automationAccounts
+            go_variable_name: accountName
+          'variableName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: variables
+            go_variable_name: name
+          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_variable_name: parameters
+            go_type_name: VariableCreateOrUpdateParameters
+          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_field_name: VariableCreateOrUpdateProperties 
+            go_type_name: VariableCreateOrUpdateProperties 
+          '/properties/description': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Description
+          '/properties/isEncrypted': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
+            go_field_name: IsEncrypted
+          '/properties/value': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Value
+      delete: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: Delete
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'automationAccountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: automationAccounts
+            go_variable_name: accountName
+          'variableName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: variables
+            go_variable_name: name
+
+    description: |
+      Manages an automation variable on Azure.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'The name of the Automation Variable.'
+        required: true
+        input: true
+        azure_api_path: 'variableName'
+      - !ruby/object:Api::Azure::Type::ResourceGroupName
+        name: 'resourceGroupName'
+        description: 'The name of the resource group in which to create the Automation Variable.'
+        required: true
+        input: true
+        azure_api_path: 'resourceGroupName'
+      - !ruby/object:Api::Type::String
+        name: 'automationAccountName'
+        description: 'The name of the automation account in which the Variable is created.'
+        required: true
+        input: true
+        azure_api_path: 'automationAccountName'
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'The description of the Automation Variable.'
+        azure_api_path: '/properties/description'
+      - !ruby/object:Api::Type::String
+        name: 'value'
+        description: 'The value of the Automation Variable.'
+        azure_api_path: '/properties/value'
+      - !ruby/object:Api::Type::Boolean
+        name: 'encrypted'
+        description: 'The encrypted flag of the Automation Variable.'
+        azure_api_path: '/properties/isEncrypted'

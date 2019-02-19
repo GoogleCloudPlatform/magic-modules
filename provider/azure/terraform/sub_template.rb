@@ -13,14 +13,13 @@ module Provider
                            object: object
         end
 
-        def build_schema_property_set(input, output, property, object, indentation = 0)
+        def build_schema_property_set(input, output, property, indentation = 0)
           compile_template schema_property_set_template(property),
                            indentation: indentation,
                            input_var: input,
                            output_var: output,
                            prop_name: property.name.underscore,
-                           property: property,
-                           object: object
+                           property: property
         end
 
         def build_property_to_sdk_object(output, sdk_path, sdk_type_def, sdk_package, resource_name, properties, sdk_type_defs, object, indentation = 4)
@@ -59,6 +58,12 @@ module Provider
                            object: object
         end
 
+        def build_parameters_schema_property_set(sdk_op_def, properties, indentation = 4)
+          compile_template 'templates/azure/terraform/sdk/parameters_schema_set.erb',
+                           indentation: indentation,
+                           sdk_op_def: sdk_op_def,
+                           properties: properties
+        end
       end
     end
   end
