@@ -110,10 +110,30 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return err
+<%#         We (often) only want to send values that are non-zero to the API.
+            Unfortunately though, Some APIs require you to send zero values-
+            `enable_foo: false`, or `password: ""` while others will return an
+            error if you send an empty value. We require this nuance to
+            be annotated in api.yaml with `send_empty_value`, since it is not
+            discoverable automatically.
+
+            When that's not set, we determine whether to send a value based on a
+            few conditions;
+
+            * if the expanded value is non-empty, AND
+              * the value in config/state is set (has ever been non-empty)
+                * so it can be set in config, have a default, or be set in state
+              * the expanded value and state value are not the same
+
+            `send_empty_value` subsumes both `ForceSendFields` and `NullFields`
+            in the go API client - `NullFields` is a special case where the
+            empty value in question is go's literal nil. If it's set, the value
+            should always be sent.
+-%>
 <%      unless prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+    } else {
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
@@ -269,27 +289,11 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
         if err != nil {
             return err
-<%#         There is some nuance in when we choose to send a value to an update function.
-            This is unfortunate, but it's because of the way that GCP works, so there's
-            no easy way out.  Some APIs require you to send `enable_foo: false`, while
-            others will crash if you send `attribute: ''`.  We require this nuance to
-            be annotated in api.yaml, since it is not discoverable automatically.
-
-            The behavior here, which we believe to be correct, is to send a value if
-            * It is non-empty OR
-            * It is marked send_empty_value in api.yaml.
-            AND
-            * It has been set by the user OR
-            * It has been modified by the expander in any way
-
-            This subsumes both `ForceSendFields` and `NullFields` in the go API client -
-            `NullFields` is a special case of `send_empty_value` where the empty value
-            in question is go's literal nil.
--%>
+<%#         See the equivalent block in Create for context on this block.-%>
 <%          unless prop.send_empty_value -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%          else -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+        } else {
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }
@@ -365,10 +369,11 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return err
+<%#         See the equivalent block in Create for context on this block.-%>
 <%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
 <%      else -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+    } else {
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
