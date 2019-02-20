@@ -87,7 +87,7 @@ for filename in mm-bug*; do
   ruby ../../tools/ansible-pr/generate_template.rb > bug_fixes$filename
 
   # Create PR
-  ssh-agent bash -c "ssh-add ~/github_private_key; git push origin HEAD --force"
+  ssh-agent bash -c "ssh-add ~/github_private_key; git push origin bugfixes$filename --force"
   hub pull-request -b ansible/ansible:devel -F bug_fixes$filename
   set -e
 
@@ -112,11 +112,11 @@ while read module; do
   # Create a PR message + save to file
   set +e
   git commit -m "New Module: $module"
-  ruby ../../tools/ansible-pr/generate_template.rb --new-module-name $module > bug_fixes$filename
+  ruby ../../tools/ansible-pr/generate_template.rb --new-module-name $module > $module
 
   # Create PR
-  ssh-agent bash -c "ssh-add ~/github_private_key; git push origin HEAD --force"
-  hub pull-request -b ansible/ansible:devel -F bug_fixes$filename
+  ssh-agent bash -c "ssh-add ~/github_private_key; git push origin $module --force"
+  hub pull-request -b ansible/ansible:devel -F $module
   set -e
 
   echo "New Module PR built for $module"
