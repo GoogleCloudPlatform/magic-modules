@@ -31,10 +31,10 @@ if ! git remote -v | grep "origin"; then
   exit 1
 fi
 
-git remote add upstream https://github.com/ansible/ansible.git
+git remote add upstream git@github.com:ansible/ansible.git
 
 # Use HTTPS endpoint so we don't have to setup SSH keys.
-git remote add magician https://github.com/modular-magician/ansible.git &>/dev/null
+git remote add magician git@github.com:modular-magician/ansible.git
 git fetch magician devel
 git fetch upstream devel
 echo "Remotes setup properly"
