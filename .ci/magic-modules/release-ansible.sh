@@ -25,4 +25,4 @@ git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
 # Run creation script.
-../../tools/ansible-pr/run.sh
+ssh-agent bash -c "ssh-add ~/github_private_key; ../../tools/ansible-pr/run.sh"
