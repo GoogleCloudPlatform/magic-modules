@@ -31,6 +31,8 @@ if ! git remote -v | grep "origin"; then
   exit 1
 fi
 
+set -e
+
 git remote add upstream git@github.com:ansible/ansible.git
 
 # Use HTTPS endpoint so we don't have to setup SSH keys.
