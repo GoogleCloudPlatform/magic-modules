@@ -52,7 +52,6 @@ for filename in mm-bug*; do
   echo "Building a Bug Fix PR for $filename"
   # Checkout all files that file specifies and create a commit.
   git checkout upstream/devel
-  git branch -D bug_fixes$filename
   git checkout -b bug_fixes$filename
 
 
@@ -80,7 +79,6 @@ comm -3 <(sort magician) <(sort upstream) > new_modules
 while read module; do
   echo "Building a New Module PR for $module"
   git checkout upstream/devel
-  git branch -D $module
   git checkout -b $module
 
   git checkout magician/devel -- "lib/ansible/modules/cloud/google/$module.py"

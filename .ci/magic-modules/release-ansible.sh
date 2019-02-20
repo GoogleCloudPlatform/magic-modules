@@ -16,7 +16,7 @@ echo "$CREDS" > ~/github_private_key
 set -x
 chmod 400 ~/github_private_key
 
-ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --force --init"
+ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/ansible"
 popd
 
 pushd "magic-modules-gcp/build/ansible"
