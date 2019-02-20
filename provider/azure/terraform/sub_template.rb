@@ -64,6 +64,16 @@ module Provider
                            sdk_op_def: sdk_op_def,
                            properties: properties
         end
+
+        def build_errorf_with_resource_name(format_string, include_error, sdk_op_def, properties, object)
+          compile_template 'templates/azure/terraform/sdk/errorf_with_resource_name.erb',
+                           format_string: format_string,
+                           include_error: include_error,
+                           sdk_op_def: sdk_op_def,
+                           properties: properties,
+                           object: object
+        end
+
       end
     end
   end

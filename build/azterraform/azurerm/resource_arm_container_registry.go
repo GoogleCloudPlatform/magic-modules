@@ -96,10 +96,10 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
 
     future, err := client.Create(ctx, resourceGroup, name, parameters)
     if err != nil {
-        return fmt.Errorf("Error creating ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return fmt.Errorf("Error creating Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return fmt.Errorf("Error waiting for creation of ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return fmt.Errorf("Error waiting for creation of Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
 
 
@@ -108,7 +108,7 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
         return err
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read ContainerRegistry %q", name)
+        return fmt.Errorf("Cannot read Container Registry %q", name)
     }
     d.SetId(*resp.ID)
 
@@ -121,7 +121,7 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing ContainerRegistry ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Container Registry ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
     name := id.Path["registries"]
@@ -129,11 +129,11 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
     resp, err := client.Get(ctx, resourceGroup, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
-            log.Printf("[INFO] ContainerRegistry %q does not exist - removing from state", d.Id())
+            log.Printf("[INFO] Container Registry %q does not exist - removing from state", d.Id())
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading ContainerRegistry: %+v", err)
+        return fmt.Errorf("Error reading Container Registry: %+v", err)
     }
 
 
@@ -164,7 +164,7 @@ func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing ContainerRegistry ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Container Registry ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
     name := id.Path["registries"]
@@ -189,10 +189,10 @@ func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}
 
     future, err := client.Update(ctx, resourceGroup, name, parameters)
     if err != nil {
-        return fmt.Errorf("Error updating ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return fmt.Errorf("Error updating Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return fmt.Errorf("Error waiting for update of ContainerRegistry %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return fmt.Errorf("Error waiting for update of Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
 
     return resourceArmContainerRegistryRead(d, meta)
@@ -205,7 +205,7 @@ func resourceArmContainerRegistryDelete(d *schema.ResourceData, meta interface{}
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing ContainerRegistry ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Container Registry ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
     name := id.Path["registries"]
@@ -215,12 +215,12 @@ func resourceArmContainerRegistryDelete(d *schema.ResourceData, meta interface{}
         if response.WasNotFound(future.Response()) {
             return nil
         }
-        return fmt.Errorf("Error deleting ContainerRegistry %q: %+v", name, err)
+        return fmt.Errorf("Error deleting Container Registry %q: %+v", name, err)
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
         if !response.WasNotFound(future.Response()) {
-            return fmt.Errorf("Error waiting for deleting ContainerRegistry %q: %+v", name, err)
+            return fmt.Errorf("Error waiting for deleting Container Registry %q: %+v", name, err)
         }
     }
 

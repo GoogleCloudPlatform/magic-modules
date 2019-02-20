@@ -121,16 +121,19 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 
 <%  unless object.azure_sdk_definition.create.async -%>
     if _, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.create) -%>; err != nil {
-        return fmt.Errorf("Error creating <%= object.name -%>: %+v", err)
+        return <%= build_errorf_with_resource_name("Error creating %s", true, object.azure_sdk_definition.create, properties, object) -%>
+
     }
 <%  else -%>
     future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.create) -%>
 
     if err != nil {
-        return fmt.Errorf("Error creating <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return <%= build_errorf_with_resource_name("Error creating %s", true, object.azure_sdk_definition.create, properties, object) -%>
+
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return fmt.Errorf("Error waiting for creation of <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return <%= build_errorf_with_resource_name("Error waiting for creation of %s", true, object.azure_sdk_definition.create, properties, object) -%>
+
     }
 <%  end -%>
 
@@ -139,10 +142,12 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
 
     if err != nil {
-        return err
+        return <%= build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.create, properties, object) -%>
+
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read <%= object.name -%> %q", name)
+        return <%= build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.create, properties, object) -%>
+
     }
     d.SetId(*resp.ID)
 
@@ -161,11 +166,12 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
-            log.Printf("[INFO] <%= object.name -%> %q does not exist - removing from state", d.Id())
+            log.Printf("[INFO] <%= object.name.titlecase -%> %q does not exist - removing from state", d.Id())
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading <%= object.name -%>: %+v", err)
+        return <%= build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, properties, object) -%>
+
     }
 
 <%  unless object.self_link_query.nil? -%>
@@ -217,10 +223,12 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
     future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.update) -%>
 
     if err != nil {
-        return fmt.Errorf("Error updating <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return <%= build_errorf_with_resource_name("Error updating %s", true, object.azure_sdk_definition.update, properties, object) -%>
+
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return fmt.Errorf("Error waiting for update of <%= object.name -%> %q (Resource Group %q): %+v", name, resourceGroup, err)
+        return <%= build_errorf_with_resource_name("Error waiting for update of %s", true, object.azure_sdk_definition.update, properties, object) -%>
+
     }
 
     return resource<%= resource_name -%>Read(d, meta)
@@ -246,7 +254,8 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%  unless object.azure_sdk_definition.delete.async -%>
     if _, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>; err != nil {
-        return fmt.Errorf("Error deleting <%= object.name -%> %q: %+v", name, err)
+        return <%= build_errorf_with_resource_name("Error deleting %s", true, object.azure_sdk_definition.delete, properties, object) -%>
+
     }
 <%  else -%>
     future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>
@@ -255,12 +264,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         if response.WasNotFound(future.Response()) {
             return nil
         }
-        return fmt.Errorf("Error deleting <%= object.name -%> %q: %+v", name, err)
+        return <%= build_errorf_with_resource_name("Error deleting %s", true, object.azure_sdk_definition.delete, properties, object) -%>
+
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
         if !response.WasNotFound(future.Response()) {
-            return fmt.Errorf("Error waiting for deleting <%= object.name -%> %q: %+v", name, err)
+            return <%= build_errorf_with_resource_name("Error waiting for deleting %s", true, object.azure_sdk_definition.delete, properties, object) -%>
+
         }
     }
 <%  end -%>

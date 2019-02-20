@@ -53,7 +53,7 @@ func resourceArmResourceGroupCreateUpdate(d *schema.ResourceData, meta interface
 
 
     if _, err := client.CreateOrUpdate(ctx, name, parameters); err != nil {
-        return fmt.Errorf("Error creating ResourceGroup: %+v", err)
+        return fmt.Errorf("Error creating Resource Group: %+v", err)
     }
 
 
@@ -62,7 +62,7 @@ func resourceArmResourceGroupCreateUpdate(d *schema.ResourceData, meta interface
         return err
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read ResourceGroup %q", name)
+        return fmt.Errorf("Cannot read Resource Group %q", name)
     }
     d.SetId(*resp.ID)
 
@@ -75,18 +75,18 @@ func resourceArmResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing ResourceGroup ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Resource Group ID %q: %+v", d.Id(), err)
     }
     name := id.ResourceGroup
 
     resp, err := client.Get(ctx, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
-            log.Printf("[INFO] ResourceGroup %q does not exist - removing from state", d.Id())
+            log.Printf("[INFO] Resource Group %q does not exist - removing from state", d.Id())
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading ResourceGroup: %+v", err)
+        return fmt.Errorf("Error reading Resource Group: %+v", err)
     }
 
 
@@ -108,7 +108,7 @@ func resourceArmResourceGroupDelete(d *schema.ResourceData, meta interface{}) er
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing ResourceGroup ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Resource Group ID %q: %+v", d.Id(), err)
     }
     name := id.ResourceGroup
 
@@ -117,12 +117,12 @@ func resourceArmResourceGroupDelete(d *schema.ResourceData, meta interface{}) er
         if response.WasNotFound(future.Response()) {
             return nil
         }
-        return fmt.Errorf("Error deleting ResourceGroup %q: %+v", name, err)
+        return fmt.Errorf("Error deleting Resource Group %q: %+v", name, err)
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
         if !response.WasNotFound(future.Response()) {
-            return fmt.Errorf("Error waiting for deleting ResourceGroup %q: %+v", name, err)
+            return fmt.Errorf("Error waiting for deleting Resource Group %q: %+v", name, err)
         }
     }
 

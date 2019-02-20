@@ -171,7 +171,7 @@ module Provider
       filepath =
         File.join(
           target_folder,
-          "resource_#{product_name}_#{name}_generated_test.go"
+          "resource_#{product_name}_#{name}_test.go"
         )
       generate_resource_file data.clone.merge(
         product: data[:product_name].camelize(:upper),

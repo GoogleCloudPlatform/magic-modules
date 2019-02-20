@@ -1,11 +1,13 @@
 require 'provider/azure/terraform/schema'
 require 'provider/azure/terraform/sub_template'
+require 'provider/azure/terraform/acctest/sub_template'
 
 module Provider
   module Azure
     module Terraform
       include Provider::Azure::Terraform::Schema
       include Provider::Azure::Terraform::SubTemplate
+      include Provider::Azure::Terraform::AccTest::SubTemplate
 
       def order_azure_properties(properties)
         special_props = properties.select{|p| p.name == 'name' || p.name == 'location' || p.name == 'resourceGroupName'}

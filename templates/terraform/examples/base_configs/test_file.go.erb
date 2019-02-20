@@ -3,18 +3,20 @@
 package azurerm
 
 import (
-  "fmt"
-  "testing"
+    "fmt"
+    "testing"
 
-  "github.com/hashicorp/terraform/helper/acctest"
-  "github.com/hashicorp/terraform/helper/resource"
+    "github.com/hashicorp/terraform/helper/acctest"
+    "github.com/hashicorp/terraform/helper/resource"
+    "github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 <%
-  api_name = @config.name || product_ns
-	resource_name = api_name + object.name
-  terraform_name = "google_" + resource_name.underscore
+    resource_name = "AzureRM" + object.name
+    terraform_name = "azurerm_" + object.name.underscore
+    azure_client_name = "#{object.api_name}Client".camelcase(:lower)
+    properties = object.all_user_properties
 %>
-<% object.example.reject(&:skip_test).each do |example| -%>
+<%  object.example.reject(&:skip_test).each do |example| -%>
 <%
 	# {Compute}{Address}_{addressBasic}
 	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
@@ -52,24 +54,51 @@ func testAcc<%= test_slug -%>(val string) string {
 }
 <%- end %>
 
-func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "<%= terraform_name -%>" {
-			continue
-		}
+func testCheck<%= resource_name -%>Exists(resourceName string) resource.TestCheckFunc {
+    return func(s *terraform.State) error {
+        rs, ok := s.RootModule().Resources[resourceName]
+        if !ok {
+            return fmt.Errorf("<%= object.name.titlecase -%> not found: %s", resourceName)
+        }
 
-	config := testAccProvider.Meta().(*Config)
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties, object, true, 8)) -%>
 
-	url, err := replaceVarsForTest(rs, "<%= build_url(object.self_link_url) -%>")
-	if err != nil {
-		return err
-	}
+        client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
 
-	_, err = sendRequest(config, "GET", url, nil)
-	if err == nil {
-			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
-		}
-	}
+        ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
-	return nil
+        if resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>; err != nil {
+            if utils.ResponseWasNotFound(resp.Response) {
+                return <%= build_errorf_with_resource_name("Bad: %s does not exist", false, object.azure_sdk_definition.delete, properties, object) -%>
+
+            }
+            return fmt.Errorf("Bad: Get on <%= azure_client_name -%>: %+v", err)
+        }
+
+        return nil
+    }
+}
+
+func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
+    client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
+
+    ctx := testAccProvider.Meta().(*ArmClient).StopContext
+
+    for _, rs := range s.RootModule().Resources {
+        if rs.Type != "<%= terraform_name -%>" {
+            continue
+        }
+
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties, object)) -%>
+
+        if resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>; err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return err
+            }
+        }
+
+        return nil
+    }
+
+    return nil
 }

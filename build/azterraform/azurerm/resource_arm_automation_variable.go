@@ -82,16 +82,16 @@ func resourceArmAutomationVariableCreateUpdate(d *schema.ResourceData, meta inte
 
 
     if _, err := client.CreateOrUpdate(ctx, resourceGroup, accountName, name, parameters); err != nil {
-        return fmt.Errorf("Error creating AutomationVariable: %+v", err)
+        return fmt.Errorf("Error creating Automation Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
     }
 
 
     resp, err := client.Get(ctx, resourceGroup, accountName, name)
     if err != nil {
-        return err
+        return fmt.Errorf("Error retrieving Automation Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read AutomationVariable %q", name)
+        return fmt.Errorf("Cannot read Automation Variable %q (Resource Group %q, Automation Account Name %q) ID", name, resourceGroup, accountName)
     }
     d.SetId(*resp.ID)
 
@@ -104,7 +104,7 @@ func resourceArmAutomationVariableRead(d *schema.ResourceData, meta interface{})
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing AutomationVariable ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Automation Variable ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
     accountName := id.Path["automationAccounts"]
@@ -113,11 +113,11 @@ func resourceArmAutomationVariableRead(d *schema.ResourceData, meta interface{})
     resp, err := client.Get(ctx, resourceGroup, accountName, name)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
-            log.Printf("[INFO] AutomationVariable %q does not exist - removing from state", d.Id())
+            log.Printf("[INFO] Automation Variable %q does not exist - removing from state", d.Id())
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading AutomationVariable: %+v", err)
+        return fmt.Errorf("Error reading Automation Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
     }
 
 
@@ -142,14 +142,14 @@ func resourceArmAutomationVariableDelete(d *schema.ResourceData, meta interface{
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing AutomationVariable ID %q: %+v", d.Id(), err)
+        return fmt.Errorf("Error parsing Automation Variable ID %q: %+v", d.Id(), err)
     }
     resourceGroup := id.ResourceGroup
     accountName := id.Path["automationAccounts"]
     name := id.Path["variables"]
 
     if _, err := client.Delete(ctx, resourceGroup, accountName, name); err != nil {
-        return fmt.Errorf("Error deleting AutomationVariable %q: %+v", name, err)
+        return fmt.Errorf("Error deleting Automation Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
     }
 
     return nil
