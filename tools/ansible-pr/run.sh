@@ -59,12 +59,14 @@ for filename in mm-bug*; do
 
   while read p; do
     git checkout magician/devel -- "lib/ansible/modules/cloud/google/$p.py"
-    git checkout magician/devel -- "test/integration/targets/$p"
+    if [[ $p != *"facts"* ]]; then
+      git checkout magician/devel -- "test/integration/targets/$p"
+    fi
   done < $filename
 
   git checkout magician/devel -- "lib/ansible/module_utils/gcp_utils.py"
 
-  git commit -m "Bug fixes for GCP modules" >/dev/null
+  git commit -m "Bug fixes for GCP modules"
 
   # Create a PR message + save to file
   ruby ../../tools/ansible-pr/generate_template.rb > bug_fixes$filename
@@ -84,7 +86,9 @@ while read module; do
   git checkout -b $module
 
   git checkout magician/devel -- "lib/ansible/modules/cloud/google/$module.py"
-  git checkout magician/devel -- "test/integration/targets/$module"
+  if [[ $module != *"facts"* ]]; then
+    git checkout magician/devel -- "test/integration/targets/$module"
+  fi
 
   git checkout magician/devel -- "lib/ansible/module_utils/gcp_utils.py"
 
