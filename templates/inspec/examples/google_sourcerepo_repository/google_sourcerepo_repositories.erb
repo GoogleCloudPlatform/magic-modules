@@ -1,0 +1,10 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% repository = grab_attributes['repository'] -%>
+repo_name = <%= doc_generation ? "'#{repository['name']}'" : "repository['name']" %>
+describe.one do
+  google_sourcerepo_repositories(project: <%= gcp_project_id -%>).names.each do |name|
+    describe name do
+      it { should match /\/repos\/#{repo_name}$/ }
+    end
+  end
+end
