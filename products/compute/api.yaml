@@ -3505,11 +3505,17 @@ objects:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslCertificates'
     input: true
+    has_self_link: true
     description: |
       An SslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
       the load balancer to serve secure connections from the user.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+<%= indent(compile_file({timeouts: {
+                        insert_sec: 6 * 60,
+                        update_sec: 6 * 60,
+                        # Deletes can take up to 30 minutes to complete, since they depend
+                        # on the provisioning process either succeeding or failing completely.
+                        delete_sec: 30 * 60}}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'

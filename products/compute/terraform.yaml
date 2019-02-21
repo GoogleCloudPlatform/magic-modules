@@ -728,6 +728,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
+  ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "managed_ssl_certificate_basic"
+        primary_resource_id: "default"
+        version: <%= version_name %>
+        vars:
+          cert_name: "test-cert"
+          proxy_name: "test-proxy"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
+          dns_zone_name: "dnszone"
+          forwarding_rule_name: "forwarding-rule"
+          http_health_check_name: "http-health-check"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'certificate_id'
+        default_from_api: true
+      expireTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   SslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
