@@ -3457,6 +3457,8 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
       the load balancer to serve secure connections from the user.
+      For a certificate managed by Google, see the ManagedSslCertificate
+      resource.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -3487,13 +3489,16 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+
+          These are in the same namespace as the managed SSL certificates.
       - !ruby/object:Api::Type::String
         name: 'privateKey'
         description: 'The write-only private key in PEM format.'
         required: true
         input: true
   - !ruby/object:Api::Resource
-    # This is intentionally out of alphabetic order.
+    # This is intentionally out of alphabetic order because it represents the same
+    # GCP resource as the preceeding certificate object.
     name: 'ManagedSslCertificate'
     kind: 'compute#sslCertificate'
     min_version: beta
@@ -3510,11 +3515,12 @@ objects:
     description: |
       An SslCertificate resource, used for HTTPS load balancing.  This resource
       represents a certificate for which the certificate secrets are created and
-      managed by Google.
+      managed by Google.  For a resource where you provide the key, see the
+      SSL Certificate resource.
 <%= indent(compile_file({timeouts: {
                         insert_sec: 6 * 60,
                         update_sec: 6 * 60,
-                        # Deletes can take up to 30 minutes to complete, since they depend
+                        # Deletes can take 20-30 minutes to complete, since they depend
                         # on the provisioning process either succeeding or failing completely.
                         delete_sec: 30 * 60}}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
@@ -3539,6 +3545,8 @@ objects:
           first character must be a lowercase letter, and all following
           characters must be a dash, lowercase letter, or digit, except the last
           character, which cannot be a dash.
+
+          These are in the same namespace as the unmanaged SSL certificates.
       - !ruby/object:Api::Type::NestedObject
         name: 'managed'
         description: |
