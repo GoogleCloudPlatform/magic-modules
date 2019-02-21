@@ -23,6 +23,8 @@
                       .select { |x| overrides.instance_variable_get(x).instance_variable_get('@exclude') }
                       .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
+                    .reject { |o| o.exclude }
+                    .reject { |o| o.not_in_version?(version) }
                     .select { |o| !excludes.include?(o.name) }
                     .map do |object|
                       ["gcp_#{object.__product.api_name}",
