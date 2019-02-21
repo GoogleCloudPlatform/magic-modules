@@ -78,6 +78,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     version_added: '2.7'
   SslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
     version_added: '2.7'
+  ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   SslPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
     version_added: '2.7'
   Subnetwork: !ruby/object:Overrides::Ansible::ResourceOverride
