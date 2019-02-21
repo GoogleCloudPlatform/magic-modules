@@ -1,7 +1,6 @@
 package google
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -16,14 +15,32 @@ func TestAccDataSourceGoogleClientOpenIDUserinfo_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckGoogleClientOpenIDUserinfo_basic,
-				// While this _should_ pass, we have no way to provide custom default scopes to the test runner
-				// so we won't actually have the necessary scopes to ensure this is working.
-				ExpectError: regexp.MustCompile("Invalid Credentials"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_client_openid_userinfo.me", "email"),
+				),
 			},
 		},
 	})
 }
 
 const testAccCheckGoogleClientOpenIDUserinfo_basic = `
-data "google_client_openid_userinfo" "me" { }
+provider "google" {
+  alias = "google-scoped"
+
+  # We need to add an additional scope to test this; because our tests rely on
+  # every env var being set, we can just add an alias with the appropriate
+  # scopes. This will fail if someone uses an access token instead of creds
+  # unless they've configured the userinfo.email scope.
+  scopes = [
+    "https://www.googleapis.com/auth/compute",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/ndev.clouddns.readwrite",
+    "https://www.googleapis.com/auth/devstorage.full_control",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
+data "google_client_openid_userinfo" "me" {
+  provider = "google.google-scoped"
+}
 `
