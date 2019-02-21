@@ -19,7 +19,7 @@ package google
 import "github.com/hashicorp/terraform/helper/schema"
 
 var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
-<% product.objects.reject { |r| r.exclude }.each do |object| -%>
+<% product.objects.reject { |r| r.exclude || r.not_in_version?(product.version_obj_or_default(version)) }.each do |object| -%>
 <%
 if @config.legacy_name.nil?
 	terraform_name = "google_" + (product_ns + object.name).underscore
