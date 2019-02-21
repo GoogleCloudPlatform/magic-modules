@@ -23,7 +23,7 @@ get_all_modules() {
 }
 
 # Install dependencies for Template Generator
-pushd "magic-modules-new-prs"
+pushd "magic-modules-gcp"
 bundle install
 
 # Setup SSH keys.
@@ -37,7 +37,7 @@ set -x
 chmod 400 ~/github_private_key
 popd
 
-pushd "magic-modules-new-prs/build/ansible"
+pushd "magic-modules-gcp/build/ansible"
 
 # Setup Git config and remotes.
 git config --global user.email "magic-modules@google.com"
