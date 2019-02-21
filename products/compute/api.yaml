@@ -3493,6 +3493,7 @@ objects:
         required: true
         input: true
   - !ruby/object:Api::Resource
+    # This is intentionally out of alphabetic order.
     name: 'ManagedSslCertificate'
     kind: 'compute#sslCertificate'
     min_version: beta
@@ -3507,9 +3508,9 @@ objects:
     input: true
     has_self_link: true
     description: |
-      An SslCertificate resource, used for HTTPS load balancing. This resource
-      provides a mechanism to upload an SSL key and certificate to
-      the load balancer to serve secure connections from the user.
+      An SslCertificate resource, used for HTTPS load balancing.  This resource
+      represents a certificate for which the certificate secrets are created and
+      managed by Google.
 <%= indent(compile_file({timeouts: {
                         insert_sec: 6 * 60,
                         update_sec: 6 * 60,
@@ -3570,6 +3571,7 @@ objects:
         name: 'expireTime'
         description: |
           Expire time of the certificate.
+        output: true
   - !ruby/object:Api::Resource
     name: 'SslPolicy'
     kind: 'compute#sslPolicy'

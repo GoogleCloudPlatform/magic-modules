@@ -729,6 +729,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        This resource should be used with extreme caution!  Provisioning an SSL
+        certificate is complex.  Ensure that you understand the lifecycle of a
+        certificate before attempting complex tasks like cert rotation automatically.
+        This resource will "return" as soon as the certificate object is created,
+        but post-creation the certificate object will go through a "provisioning"
+        process.  The provisioning process can complete only when the domain name
+        for which the certificate is created points to a target pool which, itself,
+        points at the certificate.  Depending on your DNS provider, this may take
+        some time, and migrating from self-managed certificates to Google-managed
+        certificates may entail some downtime while the certificate provisions.
+
+        In conclusion: Be extremely cautious.
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_basic"
@@ -745,8 +759,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'certificate_id'
-        default_from_api: true
-      expireTime: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
   SslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
