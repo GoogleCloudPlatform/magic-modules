@@ -6,8 +6,9 @@ import (
     "fmt"
     "testing"
 
-    "github.com/hashicorp/terraform/helper/acctest"
     "github.com/hashicorp/terraform/helper/resource"
+    "github.com/hashicorp/terraform/terraform"
+    "github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
     "github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 <%
@@ -16,43 +17,63 @@ import (
     azure_client_name = "#{object.api_name}Client".camelcase(:lower)
     properties = object.all_user_properties
 %>
-<%  object.example.reject(&:skip_test).each do |example| -%>
+<%  if object.instance_variable_defined?(:@acctests) -%>
+<%    object.acctests.each do |testName, test| -%>
+func TestAcc<%= resource_name -%>_<%= testName -%>(t *testing.T) {
+    resourceName := "<%= terraform_name -%>.test"
+<%    test.steps.map{|step| object.acctests[step.hcl_reference].hcl_parameters}.flatten.uniq(&:variable_name).each do |param| -%>
+    <%= param.variable_name -%> := <%= param.create_expression -%>
+
+<%    end -%>
+<%    test.steps.uniq(&:config_name).each do |step| -%>
 <%
-	# {Compute}{Address}_{addressBasic}
-	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
-	  ignore_read = data[:object].all_user_properties
-                 .select(&:ignore_read)
-                 .map { |p| p.name.underscore }
-                 .concat(example.ignore_read_extra)
+        hcl_params = object.acctests[step.hcl_reference].hcl_parameters
+        uniq_params = hcl_params.uniq(&:variable_name).map(&:variable_name)
 -%>
+    <%= step.config_name -%> := testAcc<%= resource_name -%>_<%= step.hcl_reference -%>(<%= uniq_params.join(", ") -%>)
+<%    end -%>
+<% -%>
 
-func TestAcc<%= test_slug -%>(t *testing.T) {
-  t.Parallel()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAcc<%= test_slug -%>(acctest.RandString(10)),
-			},
-			{
-				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
-				ImportState:       true,
-				ImportStateVerify: true,
-        <%- unless ignore_read.empty? -%>
-        ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
-        <%- end -%>
-			},
-		},
-	})
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:     func() { testAccPreCheck(t) },
+        Providers:    testAccProviders,
+        CheckDestroy: testCheck<%= resource_name -%>Destroy,
+        Steps: []resource.TestStep{
+<%      test.steps.each do |step| -%>
+<%
+          hcl = object.acctests[step.hcl_reference]
+          props_to_check = Hash.new
+          until hcl.nil? do
+            hcl.properties.each do |propName, prop|
+              props_to_check[propName] = prop unless props_to_check.has_key?(propName)
+            end
+            hcl = hcl.based_on.nil? ? nil : object.acctests[hcl.based_on]
+          end
+          props_to_check.reject!{|pn, pv| object.azure_sdk_definition.read.request.has_key?(object.properties.find{|p| p.name == pn}.azure_api_path) }
+-%>
+            {
+                Config: <%= step.config_name -%>,
+                Check: resource.ComposeTestCheckFunc(
+                    testCheck<%= resource_name -%>Exists(resourceName),
+<%        props_to_check.each do |propName, propValue| -%>
+                    resource.TestCheckResourceAttr(resourceName, "<%= propName.underscore -%>", "<%= propValue -%>"),
+<%        end -%>
+                ),
+            },
+<%      end -%>
+<%      if test.check_import -%>
+            {
+                ResourceName:      resourceName,
+                ImportState:       true,
+                ImportStateVerify: true,
+            },
+<%      end -%>
+        },
+    })
 }
 
-func testAcc<%= test_slug -%>(val string) string {
-<%= example.config_test -%>
-}
-<%- end %>
+<%    end -%>
+<%  end -%>
 
 func testCheck<%= resource_name -%>Exists(resourceName string) resource.TestCheckFunc {
     return func(s *terraform.State) error {
@@ -61,7 +82,7 @@ func testCheck<%= resource_name -%>Exists(resourceName string) resource.TestChec
             return fmt.Errorf("<%= object.name.titlecase -%> not found: %s", resourceName)
         }
 
-<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties, object, true, 8)) -%>
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties, object, true)) -%>
 
         client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
 
@@ -93,7 +114,7 @@ func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 
         if resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>; err != nil {
             if !utils.ResponseWasNotFound(resp.Response) {
-                return err
+                return fmt.Errorf("Bad: Get on <%= azure_client_name -%>: %+v", err)
             }
         }
 
@@ -102,3 +123,19 @@ func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 
     return nil
 }
+
+<%  if object.instance_variable_defined?(:@acctests) -%>
+<%    object.acctests.each do |testName, test| -%>
+<%      uniq_params = test.hcl_parameters.uniq(&:variable_name).map{|p| "#{p.variable_name} #{p.go_type}"} -%>
+func testAcc<%= resource_name -%>_<%= testName -%>(<%= uniq_params.join(", ") -%>) string {
+    return fmt.Sprintf(`
+<%= build_acctest_dependencies_hcl(test, object) -%>
+
+
+<%= build_acctest_resource_test_hcl(test, object) -%>
+
+`, <%= test.hcl_parameters.map(&:variable_name).join(", ") -%>)
+}
+
+<%    end -%>
+<%  end -%>

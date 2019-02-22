@@ -135,4 +135,5 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'encrypted'
         description: 'The encrypted flag of the Automation Variable.'
+        default_value: false
         azure_api_path: '/properties/isEncrypted'

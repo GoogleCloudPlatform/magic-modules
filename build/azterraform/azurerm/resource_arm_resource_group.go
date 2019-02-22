@@ -53,16 +53,16 @@ func resourceArmResourceGroupCreateUpdate(d *schema.ResourceData, meta interface
 
 
     if _, err := client.CreateOrUpdate(ctx, name, parameters); err != nil {
-        return fmt.Errorf("Error creating Resource Group: %+v", err)
+        return fmt.Errorf("Error creating Resource Group %q: %+v", name, err)
     }
 
 
     resp, err := client.Get(ctx, name)
     if err != nil {
-        return err
+        return fmt.Errorf("Error retrieving Resource Group %q: %+v", name, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read Resource Group %q", name)
+        return fmt.Errorf("Cannot read Resource Group %q ID", name)
     }
     d.SetId(*resp.ID)
 
@@ -86,7 +86,7 @@ func resourceArmResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading Resource Group: %+v", err)
+        return fmt.Errorf("Error reading Resource Group %q: %+v", name, err)
     }
 
 

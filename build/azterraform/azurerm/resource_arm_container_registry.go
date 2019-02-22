@@ -105,10 +105,10 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
 
     resp, err := client.Get(ctx, resourceGroup, name)
     if err != nil {
-        return err
+        return fmt.Errorf("Error retrieving Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read Container Registry %q", name)
+        return fmt.Errorf("Cannot read Container Registry %q (Resource Group %q) ID", name, resourceGroup)
     }
     d.SetId(*resp.ID)
 
@@ -133,7 +133,7 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading Container Registry: %+v", err)
+        return fmt.Errorf("Error reading Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
 
 
@@ -215,12 +215,12 @@ func resourceArmContainerRegistryDelete(d *schema.ResourceData, meta interface{}
         if response.WasNotFound(future.Response()) {
             return nil
         }
-        return fmt.Errorf("Error deleting Container Registry %q: %+v", name, err)
+        return fmt.Errorf("Error deleting Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
         if !response.WasNotFound(future.Response()) {
-            return fmt.Errorf("Error waiting for deleting Container Registry %q: %+v", name, err)
+            return fmt.Errorf("Error waiting for deleting Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
         }
     }
 

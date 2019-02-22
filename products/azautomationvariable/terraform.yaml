@@ -1,7 +1,47 @@
 --- !ruby/object:Provider::Terraform::Config
 name: Arm
 overrides: !ruby/object:Provider::ResourceOverrides
-  AutomationVariable: !ruby/object:Provider::Terraform::ResourceOverride
+  AutomationVariable: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    acctests:
+      basic: !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        custom_dependencies_code: |
+          resource "azurerm_resource_group" "test" {
+            name     = "acctestRG-%d"
+            location = "%s"
+          }
+
+          resource "azurerm_automation_account" "test" {
+            name                = "acctestAutoAcct-%d"
+            location            = "${azurerm_resource_group.test.location}"
+            resource_group_name = "${azurerm_resource_group.test.name}"
+
+            sku {
+              name = "Basic"
+            }
+          }
+        properties:
+          name: acctestAutoVar-%d
+          resourceGroupName: ${azurerm_resource_group.test.name}
+          automationAccountName: ${azurerm_automation_account.test.name}
+          value: Hello, Terraform Basic Test.
+        hcl_parameters:
+          - AccDefaultInt
+          - AccLocation
+          - AccDefaultInt
+          - AccDefaultInt
+        steps:
+          - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
+            config_name: config
+            hcl_reference: basic
+      complete: !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        based_on: basic
+        properties:
+          description: This is a variable created by Terraform acceptance test.
+          value: Hello, Terraform Complete Test.
+        steps:
+          - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
+            config_name: config
+            hcl_reference: complete
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "container_registry"

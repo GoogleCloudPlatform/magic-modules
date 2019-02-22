@@ -1,0 +1,20 @@
+<%
+    merged_props = Hash.new
+    cur_acctest_def = acctest_def
+    until cur_acctest_def.nil? do
+      cur_acctest_def.properties.each do |propName, prop|
+        merged_props[propName] = prop unless merged_props.has_key?(propName)
+      end
+      cur_acctest_def = cur_acctest_def.based_on.nil? ? nil : object.acctests[cur_acctest_def.based_on]
+    end
+
+    longest_prop_name = merged_props.keys.max_by{|pn| pn.underscore.length}
+    prop_len = longest_prop_name.nil? ? 0 : longest_prop_name.underscore.length
+-%>
+"<%= "azurerm_" + object.name.underscore -%>" "<%= resource_id -%>" {
+<%   object.properties.each do |prop| -%>
+<%     if merged_props.has_key?(prop.name) -%>
+  <%=    prop.name.underscore.ljust(prop_len) -%> = "<%= merged_props[prop.name] -%>"
+<%     end -%>
+<%   end -%>
+}

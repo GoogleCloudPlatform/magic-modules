@@ -21,6 +21,7 @@ require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
 require 'provider/azure/terraform'
+require 'provider/azure/terraform/resource_override'
 
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform

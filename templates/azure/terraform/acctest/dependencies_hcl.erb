@@ -1,0 +1,5 @@
+<%  unless acctest_def.based_on.nil? -%>
+<%    parent_def = object.acctests[acctest_def.based_on] -%>
+<%=   build_acctest_dependencies_hcl(parent_def, object) -%>
+<%  end -%>
+<%= acctest_def.custom_dependencies_code -%>
