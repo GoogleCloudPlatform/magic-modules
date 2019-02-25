@@ -1,4 +1,0 @@
-<%  properties.select{|p| sdk_op_def.request.has_key?(p.azure_api_path) }.each do |prop| -%>
-<%    var_name = sdk_op_def.request[prop.azure_api_path].go_variable_name -%>
-<%=   lines(build_schema_property_set(var_name == "name" ? "resp.Name" : var_name, "d", prop)) -%>
-<%  end -%>

@@ -1,5 +1,5 @@
-<%  properties.select{|p| sdk_op_def.request.has_key?(p.azure_api_path) }.each do |prop| -%>
-<%    var_name = sdk_op_def.request[prop.azure_api_path].go_variable_name -%>
+<%  properties.select{|p| sdk_op_def.request.has_key?(p.azure_sdk_references[0]) }.each do |prop| -%>
+<%    var_name = sdk_op_def.request[prop.azure_sdk_references[0]].go_variable_name -%>
 <%    if check_existence && var_name != "name" -%>
 <%=   var_name -%>, has<%= var_name.camelcase(:upper) -%> := rs.Primary.Attributes["<%= prop.name.underscore -%>"]
 if !has<%= var_name.camelcase(:upper) -%> {

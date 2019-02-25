@@ -115,6 +115,12 @@ module Google
       end
     end
 
+    def check_property_non_empty_list(name, type = nil)
+      check_property_list(name, type)
+      obj_list = instance_variable_get("@#{name}")
+      raise "Property #{name} is empty" if obj_list.empty?
+    end
+
     def check_optional_property_list(name, type = nil)
       obj_list = instance_variable_get("@#{name}")
       return if obj_list.nil?

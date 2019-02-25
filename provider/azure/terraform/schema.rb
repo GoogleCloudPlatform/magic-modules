@@ -81,8 +81,9 @@ module Provider
           end
         end
 
-        def sdk_object_to_property_template(sdktype)
-          case sdktype
+        def sdk_object_to_property_template(sdk_type_defs, api_path)
+          return 'templates/azure/terraform/sdktypes/sdkobject_to_property.erb' if api_path == ""
+          case sdk_type_defs[api_path]
           when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
             'templates/azure/terraform/sdktypes/sdkprimitive_to_property.erb'
           when Api::Azure::SDKTypeDefinition::EnumObject

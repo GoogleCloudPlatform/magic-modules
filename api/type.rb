@@ -42,7 +42,7 @@ module Api
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
 
-      attr_reader :azure_api_path
+      attr_reader :azure_sdk_references
       attr_reader :custom_schema_get
       attr_reader :custom_schema_set
       attr_reader :custom_expand_func
@@ -74,7 +74,8 @@ module Api
         :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
       check_optional_property :update_url, ::String
 
-      check_optional_property :azure_api_path, ::String
+      check_property :azure_sdk_references, ::Array
+      check_property_non_empty_list :azure_sdk_references, ::String
       check_optional_property :custom_schema_get, ::String
       check_optional_property :custom_schema_set, ::String
       check_optional_property :custom_expand_func, ::String

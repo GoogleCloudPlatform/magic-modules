@@ -1,27 +1,32 @@
 <%
-    temp_var_name = input_statement
-    if sdk_obj_path != "/"
-        temp_var_name = sdk_type_def.go_variable_name || sdk_type_def.go_field_name.camelcase(:lower)
-    end
+    temp_var = input_statement
+    unless api_path == ""
+      sdk_type = sdk_type_defs[api_path]
+      temp_var = sdk_type.go_variable_name || sdk_type.go_field_name.camelcase(:lower)
 -%>
-<%  if sdk_obj_path != "/" -%>
-if <%= temp_var_name -%> := <%= input_statement -%>.<%= sdk_type_def.go_field_name -%>; <%= temp_var_name -%> != nil {
-<%  end -%>
+if <%= temp_var -%> := <%= input_statement -%>.<%= sdk_type.go_field_name -%>; <%= temp_var -%> != nil {
 <%
-    one_level_props = Hash.new
-    properties.select{|p| p.azure_api_path.start_with?(sdk_obj_path)}.each do |prop|
-      prop_key = prop.azure_api_path[sdk_obj_path.length..-1].split("/")[0]
-      prop_list = one_level_props[prop_key] || Array.new
-      one_level_props[prop_key] = prop_list << prop
     end
+
+    direct_children = Hash.new
+    object.properties.each do |prop|
+      prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
+        if api_path == ""
+          sub_paths = child_api_path.split("/")
+          direct_children[child_api_path] = prop if sub_paths.length == 1
+        elsif child_api_path.start_with?(api_path + "/") && 
+          sub_paths = child_api_path[api_path.length..-1].split("/")
+        end
+        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ""
+          sub_api_path = api_path + "/" + sub_paths[1]
+          direct_children[sub_api_path] = (direct_children[sub_api_path] || nil) if sub_paths.length > 2
+          direct_children[child_api_path] = prop if sub_paths.length == 2
+        end
+      end
+    end
+
+    direct_children.each do |child_api_path, prop|
 -%>
-<%
-    one_level_props.each do |prop_name, prop_list|
-      sdk_path = sdk_obj_path + prop_name
-      sdk_type_def = sdk_type_defs[sdk_path]
--%>
-<%=   lines(build_sdk_object_to_property(temp_var_name, sdk_path + "/", sdk_type_def, properties, sdk_type_defs, object, (sdk_obj_path == "/" ? 0 : 4))) -%>
+<%=   lines(build_sdk_object_to_property(temp_var, child_api_path, prop, sdk_type_defs, object)) -%>
 <%  end -%>
-<%  if sdk_obj_path != "/" -%>
-}
-<%  end -%>
+<%= "}" unless api_path == "" -%>

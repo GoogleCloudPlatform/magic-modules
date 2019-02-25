@@ -102,7 +102,7 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.each do |prop| -%>
-<%    var_name = object.azure_sdk_definition.create.request[prop.azure_api_path].go_variable_name -%>
+<%    var_name = object.azure_sdk_definition.create.request[prop.azure_sdk_references[0]].go_variable_name -%>
 <%    output_var = var_name.nil? ? prop.name.camelcase(:lower) : var_name -%>
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
@@ -191,9 +191,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-<%= lines(build_parameters_schema_property_set(object.azure_sdk_definition.read, properties)) -%>
-<%  sdk_type_def = object.azure_sdk_definition.read.response["/"] -%>
-<%= lines(build_sdk_object_to_property("resp", "/", sdk_type_def, properties, object.azure_sdk_definition.read.response, object)) -%>
+<%= lines(build_sdk_object_to_property("resp", "", nil, object.azure_sdk_definition.read.response, object, 0)) -%>
 
     return nil
 }

@@ -1,4 +1,4 @@
-<%  property = properties.find { |p| p.azure_api_path == sdk_obj_path[0..-2] } -%>
+<%  property = properties.find { |p| p.azure_sdk_references[0] == sdk_obj_path[0..-2] } -%>
 <%  if expand_funcs.include?(property.class) -%>
 <%=   output_statement -%><%= expand_func(property) -%>(<%= property.name.camelcase(:lower) -%>),
 <%  else -%>

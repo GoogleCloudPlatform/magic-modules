@@ -2,8 +2,8 @@
     res_name = ""
     depends = []
     param_vars = []
-    properties.select{|p| sdk_op_def.request.has_key?(p.azure_api_path) && !p.azure_api_path.start_with?("/") }.each do |prop|
-      param = sdk_op_def.request[prop.azure_api_path]
+    properties.select{|p| sdk_op_def.request.has_key?(p.azure_sdk_references[0]) && !p.azure_sdk_references[0].start_with?("/") }.each do |prop|
+      param = sdk_op_def.request[prop.azure_sdk_references[0]]
       param_vars += [param.go_variable_name]
       case prop.name
       when "name"

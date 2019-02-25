@@ -49,7 +49,7 @@ func TestAcc<%= resource_name -%>_<%= testName -%>(t *testing.T) {
             end
             hcl = hcl.based_on.nil? ? nil : object.acctests[hcl.based_on]
           end
-          props_to_check.reject!{|pn, pv| object.azure_sdk_definition.read.request.has_key?(object.properties.find{|p| p.name == pn}.azure_api_path) }
+          props_to_check.reject!{|pn, pv| object.azure_sdk_definition.read.request.has_key?(object.properties.find{|p| p.name == pn}.azure_sdk_references[0]) }
 -%>
             {
                 Config: <%= step.config_name -%>,
@@ -125,7 +125,7 @@ func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 }
 
 <%  if object.instance_variable_defined?(:@acctests) -%>
-<%    object.acctests.each do |testName, test| -%>
+<%    object.acctests.reject{|n, t| t.based_on.nil? && t.properties.empty?}.each do |testName, test| -%>
 <%      uniq_params = test.hcl_parameters.uniq(&:variable_name).map{|p| "#{p.variable_name} #{p.go_type}"} -%>
 func testAcc<%= resource_name -%>_<%= testName -%>(<%= uniq_params.join(", ") -%>) string {
     return fmt.Sprintf(`

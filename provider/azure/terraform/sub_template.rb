@@ -35,14 +35,13 @@ module Provider
                            object: object
         end
 
-        def build_sdk_object_to_property(input, sdk_path, sdk_type_def, properties, sdk_type_defs, object, indentation = 4)
-          compile_template sdk_object_to_property_template(sdk_type_def),
+        def build_sdk_object_to_property(input, api_path, property, sdk_type_defs, object, indentation = 4)
+          compile_template sdk_object_to_property_template(sdk_type_defs, api_path),
                            indentation: indentation,
                            input_statement: input,
-                           sdk_obj_path: sdk_path,
-                           sdk_type_def: sdk_type_def,
+                           api_path: api_path,
+                           property: property,
                            sdk_type_defs: sdk_type_defs,
-                           properties: properties,
                            object: object
         end
 
@@ -56,13 +55,6 @@ module Provider
                            indentation: indentation,
                            sdk_op_def: sdk_op_def,
                            object: object
-        end
-
-        def build_parameters_schema_property_set(sdk_op_def, properties, indentation = 4)
-          compile_template 'templates/azure/terraform/sdk/parameters_schema_set.erb',
-                           indentation: indentation,
-                           sdk_op_def: sdk_op_def,
-                           properties: properties
         end
 
         def build_errorf_with_resource_name(format_string, include_error, sdk_op_def, properties, object)
