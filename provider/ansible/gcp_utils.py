@@ -264,6 +264,8 @@ class GcpRequest(object):
     # Takes in two lists and compares them.
     def _compare_lists(self, list1, list2):
         difference = []
+        list1.sort()
+        list2.sort()
         for index in range(len(list1)):
             value1 = list1[index]
             if index < len(list2):
