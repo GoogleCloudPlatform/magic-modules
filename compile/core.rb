@@ -150,11 +150,11 @@ module Compile
       compiled
     end
 
-    def to_yaml(obj, options={})
+    def to_yaml(obj, options = {})
       if obj.is_a?(::Hash)
-        obj.reject { |_, v| v.nil? }.to_yaml(options=options).sub("---\n", '')
+        obj.reject { |_, v| v.nil? }.to_yaml(options).sub("---\n", '')
       else
-        obj.to_yaml(options=options).sub("---\n", '')
+        obj.to_yaml(options).sub("---\n", '')
       end
     end
 
