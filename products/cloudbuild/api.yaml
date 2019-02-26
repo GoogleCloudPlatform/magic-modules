@@ -66,7 +66,7 @@ objects:
         conflicts:
           - build
         description: |
-          Path, from the source root, to a file whose contents is used for the template.
+          Path, from the source root, to a file whose contents is used for the template. Either a filename or build template must be provided.
       - !ruby/object:Api::Type::Array
         name: 'ignoredFiles'
         item_type: Api::Type::String
@@ -137,7 +137,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'build'
         description: |
-          Contents of the build template.
+          Contents of the build template. Either a filename or build template must be provided.
         properties:
           - !ruby/object:Api::Type::Array
             name: 'tags'
