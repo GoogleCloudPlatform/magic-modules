@@ -21,7 +21,6 @@ require 'provider/terraform/sub_template'
 require 'google/golang_utils'
 
 require 'provider/azure/terraform'
-require 'provider/azure/terraform/resource_override'
 
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
@@ -65,14 +64,6 @@ module Provider
         Api::Type::Fingerprint => 'schema.TypeString'
       }
     end
-
-    # BEGIN Azure Specific Methods
-
-    def azure_resource_go_package(product)
-      product.azure_namespace.split('.').last.downcase
-    end
-
-    # END Azure Specific Methods
 
     def updatable?(resource, properties)
       !resource.input || !properties.reject { |p| p.update_url.nil? }.empty?

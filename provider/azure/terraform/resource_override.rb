@@ -18,10 +18,6 @@ module Provider
           post_initialization
         end
 
-        def apply(resource)
-          super
-        end
-
         class AccTestDefinition < Api::Object
           attr_reader :based_on
           attr_reader :steps
@@ -39,7 +35,7 @@ module Provider
 
             check_optional_property :based_on, String
             check_optional_property :check_import, :boolean
-            @check_import = true if @check_import.nil?
+            @check_import = (@steps.length == 1) if @check_import.nil?
             check_optional_property :custom_dependencies_code, String
 
             check_optional_property :properties, Hash

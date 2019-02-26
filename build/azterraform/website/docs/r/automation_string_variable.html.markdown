@@ -13,13 +13,13 @@
 #
 # ----------------------------------------------------------------------------
 layout: "azurerm"
-page_title: "Azure Resource Manager: azurerm_automation_variable"
-sidebar_current: "docs-azurerm-resource-automation-variable"
+page_title: "Azure Resource Manager: azurerm_automation_string_variable"
+sidebar_current: "docs-azurerm-resource-automation-string-variable"
 description: |-
   Manages an automation variable on Azure.
 ---
 
-# azurerm_automation_variable
+# azurerm_automation_string_variable
 
 Manages an automation variable on Azure.
 
@@ -72,12 +72,12 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The automation variable ID.
+* `id` - The automation string variable ID.
 
 
 
 ## Import
 
-AutomationVariable can be imported using the `resource id`, e.g.
+AutomationStringVariable can be imported using the `resource id`, e.g.
 ```shell
-$ terraform import azurerm_automation_variable.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.Automation/TODO.ID_PORTION/example```
+$ terraform import azurerm_automation_string_variable.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.Automation/TODO.ID_PORTION/example```

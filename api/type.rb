@@ -43,9 +43,6 @@ module Api
       attr_reader :new_type
 
       attr_reader :azure_sdk_references
-      attr_reader :custom_schema_get
-      attr_reader :custom_schema_set
-      attr_reader :custom_expand_func
     end
 
     include Fields
@@ -76,9 +73,6 @@ module Api
 
       check_property :azure_sdk_references, ::Array
       check_property_non_empty_list :azure_sdk_references, ::String
-      check_optional_property :custom_schema_get, ::String
-      check_optional_property :custom_schema_set, ::String
-      check_optional_property :custom_expand_func, ::String
 
       check_default_value_property
     end

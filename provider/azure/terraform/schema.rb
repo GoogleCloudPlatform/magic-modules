@@ -56,6 +56,7 @@ module Provider
         end
 
         def schema_property_set_template(property)
+          return property.custom_schema_set if property.instance_variable_defined?(:@custom_schema_set) && !property.custom_schema_set.nil?
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_set.erb'

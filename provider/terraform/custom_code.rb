@@ -229,6 +229,10 @@ module Provider
       # This code is run after the Create call succeeds.  It's placed
       # in the Create function directly without modification.
       attr_reader :post_create
+      # This code is run after the Read call succeeds and before setting
+      # schema attributes. It's placed in the Read function directly
+      # without modification.
+      attr_reader :post_read
       # This code is run before the Update call happens.  It's placed
       # in the Update function, just after the encoder call, before
       # the Update call.  Just like the encoder, it is only used if

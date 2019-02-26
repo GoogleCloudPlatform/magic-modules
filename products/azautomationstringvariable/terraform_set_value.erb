@@ -1,0 +1,9 @@
+<%  if output_var == 'd' -%>
+if properties.IsEncrypted == nil || *properties.IsEncrypted == false {
+    if value := <%= input_var -%>; value != nil {
+        d.Set("<%= prop_name -%>", strconv.Unquote(*value))
+    }
+}
+<%  else -%>
+// Terraform_Set_Value is not supported.
+<%  end -%>

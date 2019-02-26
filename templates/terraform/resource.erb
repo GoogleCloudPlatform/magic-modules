@@ -173,6 +173,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
     }
 
+<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
+
 <%  unless object.self_link_query.nil? -%>
 <%#     This part of the template extracts the one resource we're interested in
         from the list that gets returned.  self_link_query is a field which
@@ -182,13 +184,6 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
                          settable_properties: settable_properties,
                          resource_name: resource_name) -%>
 <% end -%>
-
-<%  if object.custom_code.decoder -%>
-    res, err = resource<%= resource_name -%>Decoder(d, meta, res)
-    if err != nil {
-        return err
-    }
-<%  end -%>
 
 <%= lines(build_sdk_object_to_property("resp", "", nil, object.azure_sdk_definition.read.response, object, 0)) -%>
 
