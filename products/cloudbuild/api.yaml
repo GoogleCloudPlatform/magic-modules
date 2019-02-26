@@ -125,15 +125,15 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'branchName'
             description: |
-              Name of the branch to build.
+              Name of the branch to build. A branch name, tag, or commit SHA must be provided.
           - !ruby/object:Api::Type::String
             name: 'tagName'
             description: |
-              Name of the tag to build.
+              Name of the tag to build. A branch name, tag, or commit SHA must be provided.
           - !ruby/object:Api::Type::String
             name: 'commitSha'
             description: |
-              Explicit commit SHA to build.
+              Explicit commit SHA to build. A branch name, tag, or commit SHA must be provided.
       - !ruby/object:Api::Type::NestedObject
         name: 'build'
         description: |
