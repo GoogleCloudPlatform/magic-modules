@@ -577,3 +577,8 @@ $ terraform import google_container_cluster.mycluster my-gcp-project/us-east1-a/
 
 $ terraform import google_container_cluster.mycluster us-east1-a/my-cluster
 ```
+
+~> **Note:** This resource has several convenience fields that are state-only or used on creation and are not persisted by the API. If you have these fields set in config and import a cluster, you may see diffs that may or may not require actual operations against the resource. Example behavior:
+
+- `min_master_version` will not be set on import and will show a no-op diff if set in config.
+- `remove_default_node_pool`: If the default node pool exists at import, this value will be set to false in state (or true if non-existant). If set to true in config but the node pool exists, a follow-up diff/apply will delete the default node pool.
