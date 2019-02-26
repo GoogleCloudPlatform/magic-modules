@@ -107,8 +107,7 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
-<%  sdk_type_def = object.azure_sdk_definition.create.request["/"] -%>
-<%= lines(build_property_to_sdk_object("#{sdk_type_def.go_variable_name} := ", "/", sdk_type_def, sdk_package, resource_name, settable_properties, object.azure_sdk_definition.create.request, object)) -%>
+<%= lines(build_property_to_sdk_object("/", nil, resource_name, object.azure_sdk_definition.create.request, object)) -%>
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -212,11 +211,7 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 <%    end -%>
 <%  end -%>
 
-<%
-    sdk_type_def = object.azure_sdk_definition.update.request["/"]
-    updatable_properties = settable_properties.reject { |p| p.name == "location" }
--%>
-<%= lines(build_property_to_sdk_object("parameters := ", "/", sdk_type_def, sdk_package, resource_name, updatable_properties, object.azure_sdk_definition.update.request, object)) -%>
+<%= lines(build_property_to_sdk_object("/", nil, resource_name, object.azure_sdk_definition.update.request, object)) -%>
 
     future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.update) -%>
 

@@ -1,18 +1,33 @@
-<%= output_statement -%><%= sdk_obj_path == "/" ? "" : "&" -%><%= sdk_package_name -%>.<%= sdk_type_def.go_type_name -%>{
 <%
-    one_level_props = Hash.new
-    properties.select { |p| p.azure_sdk_references[0].start_with?(sdk_obj_path) }.each do |prop|
-      prop_key = prop.azure_sdk_references[0][sdk_obj_path.length..-1].split("/")[0]
-      prop_list = one_level_props[prop_key] || Array.new
-      one_level_props[prop_key] = prop_list << prop
+    sdk_package = azure_resource_go_package(object.__product)
+    sdk_type = sdk_type_defs[api_path]
+    if api_path == "/"
+-%>
+<%= sdk_type.go_variable_name -%> := <%= sdk_package -%>.<%= sdk_type.go_type_name -%>{
+<%  else -%>
+<%= sdk_type.go_field_name -%>: &<%= sdk_package -%>.<%= sdk_type.go_type_name -%>{
+<%
     end
+
+    direct_children = Hash.new
+    object.all_user_properties.each do |prop|
+      prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
+        if api_path == "/" && child_api_path.start_with?(api_path)
+          sub_paths = child_api_path.split("/")
+          api_path = ""
+        elsif child_api_path.start_with?(api_path + "/")
+          sub_paths = child_api_path[api_path.length..-1].split("/")
+        end
+        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ""
+          sub_api_path = api_path + "/" + sub_paths[1]
+          direct_children[sub_api_path] = (direct_children[sub_api_path] || nil) if sub_paths.length > 2
+          direct_children[child_api_path] = prop if sub_paths.length == 2
+        end
+      end
+    end
+
+    direct_children.each do |child_api_path, prop|
 -%>
-<%
-    one_level_props.each do |prop_name, prop_list|
-      sdk_path = sdk_obj_path + prop_name
-      sdk_type_def = sdk_type_defs[sdk_path]
-      output = sdk_type_def.go_field_name + ": "
--%>
-<%=   lines(build_property_to_sdk_object(output, sdk_path + "/", sdk_type_def, sdk_package_name, resource_name, properties, sdk_type_defs, object)) -%>
+<%=   lines(build_property_to_sdk_object(child_api_path, prop, resource_name, sdk_type_defs, object)) -%>
 <%  end -%>
-}<%= "," unless sdk_obj_path == "/" -%>
+}<%= "," unless api_path == "" -%>

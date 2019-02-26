@@ -2,6 +2,14 @@
 name: Arm
 overrides: !ruby/object:Provider::ResourceOverrides
   AutomationVariable: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    name: AutomationStringVariable
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: validate.NoEmptyStrings
+      automationAccountName: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: validate.NoEmptyStrings
     acctests:
       basic: !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
         custom_dependencies_code: |
@@ -42,6 +50,17 @@ overrides: !ruby/object:Provider::ResourceOverrides
           - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
             config_name: config
             hcl_reference: complete
+      basicCompleteUpdate: !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        steps:
+          - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
+            config_name: basicConfig
+            hcl_reference: basic
+          - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
+            config_name: completeConfig
+            hcl_reference: complete
+          - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
+            config_name: basicConfig
+            hcl_reference: basic
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "container_registry"

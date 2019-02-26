@@ -104,10 +104,6 @@ objects:
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
             go_type_name: RegistryUpdateParameters
-          '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Location
-          '/loginServer': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: LoginServer
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_field_name: RegistryPropertiesUpdateParameters
             go_type_name: RegistryPropertiesUpdateParameters

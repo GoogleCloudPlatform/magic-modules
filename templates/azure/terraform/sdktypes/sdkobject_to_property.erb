@@ -9,12 +9,12 @@ if <%= temp_var -%> := <%= input_statement -%>.<%= sdk_type.go_field_name -%>; <
     end
 
     direct_children = Hash.new
-    object.properties.each do |prop|
+    object.all_user_properties.each do |prop|
       prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
         if api_path == ""
           sub_paths = child_api_path.split("/")
           direct_children[child_api_path] = prop if sub_paths.length == 1
-        elsif child_api_path.start_with?(api_path + "/") && 
+        elsif child_api_path.start_with?(api_path + "/")
           sub_paths = child_api_path[api_path.length..-1].split("/")
         end
         if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ""
