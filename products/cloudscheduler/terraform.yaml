@@ -14,6 +14,26 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_pubsub"
+        primary_resource_id: "job"
+        version: <%= version_name %>
+        vars:
+          job_name: "test-job"
+          topic_name: "job-topic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_http"
+        primary_resource_id: "job"
+        version: <%= version_name %>
+        vars:
+          job_name: "test-job"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "scheduler_job_app_engine"
+        primary_resource_id: "job"
+        version: <%= version_name %>
+        vars:
+          job_name: "test-job"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/cloudscheduler_job_name.erb'
@@ -28,8 +48,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateHttpHeaders()'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-
-        
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
