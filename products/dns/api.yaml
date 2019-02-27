@@ -24,6 +24,10 @@ versions:
     default: true
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Google Cloud DNS API
+    url: https://console.cloud.google.com/apis/library/dns.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'ManagedZone'

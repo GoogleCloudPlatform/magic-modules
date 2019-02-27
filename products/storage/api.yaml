@@ -20,6 +20,10 @@ versions:
     base_url: https://www.googleapis.com/storage/v1/
 scopes:
   - https://www.googleapis.com/auth/devstorage.full_control
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Google CLoud Storage
+    url: https://console.cloud.google.com/apis/library/storage-component.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Object'
