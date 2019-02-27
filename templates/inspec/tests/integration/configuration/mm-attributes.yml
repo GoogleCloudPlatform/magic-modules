@@ -187,3 +187,9 @@ bigquery_table:
 
 repository:
   name: inspec-gcp-repository
+
+organization:
+  id: 953310715741
+
+folder:
+  display_name: inspec-gcp-folder

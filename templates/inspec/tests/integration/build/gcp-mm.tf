@@ -110,6 +110,14 @@ variable "repository" {
   type = "map"
 }
 
+variable "organization" {
+  type = "map"
+}
+
+variable "folder" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -442,4 +450,15 @@ resource "google_bigquery_table" "gcp-inspec-bigquery-table" {
 resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
   project = "${var.gcp_project_id}"
   name = "${var.repository["name"]}"
+}
+
+data "google_organization" "org" {
+  count = "${var.gcp_enable_privileged_resources}"
+  organization = "${var.organization["id"]}"
+}
+
+resource "google_folder" "sales" {
+  count = "${var.gcp_enable_privileged_resources}"
+  display_name = "${var.folder["display_name"]}"
+  parent       = "${data.google_organization.org.name}"
 }
