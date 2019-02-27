@@ -24,6 +24,10 @@ versions:
     base_url: https://container.googleapis.com/v1beta1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Kubernetes Engine API
+    url: https://console.cloud.google.com/apis/library/container.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Cluster'

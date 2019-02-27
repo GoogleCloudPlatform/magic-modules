@@ -19,6 +19,10 @@ versions:
     base_url: https://monitoring.googleapis.com/v3/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Stackdriver Monitoring API
+    url: https://console.cloud.google.com/apis/library/monitoring.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'AlertPolicy'
