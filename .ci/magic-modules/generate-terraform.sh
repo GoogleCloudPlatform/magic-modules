@@ -12,13 +12,13 @@ PATCH_DIR="$(pwd)/patches"
 # it with a correctly-set-up $GOPATH.  It calls out to `goimports`, which means that
 # we need to have all the dependencies correctly downloaded.
 export GOPATH="${PWD}/go"
-mkdir -p "${GOPATH}/src/github.com/terraform-providers"
+mkdir -p "${GOPATH}/src/github.com/$GITHUB_ORG"
 
 pushd magic-modules-branched
-ln -s "${PWD}/build/$SHORT_NAME/" "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
+ln -s "${PWD}/build/$SHORT_NAME/" "${GOPATH}/src/github.com/$GITHUB_ORG/$PROVIDER_NAME"
 popd
 
-pushd "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME"
+pushd "${GOPATH}/src/github.com/$GITHUB_ORG/$PROVIDER_NAME"
 
 # This line removes every file which is not specified here.
 # If you add files to Terraform which are not generated, you have to add them here.
@@ -37,7 +37,11 @@ LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 bundle install
 
 # Build all terraform products
-bundle exec compiler -a -e terraform -o "${GOPATH}/src/github.com/terraform-providers/$PROVIDER_NAME/" -v "$VERSION"
+if [ -n "$OVERRIDE_PROVIDER" ]; then
+  bundle exec compiler -a -e terraform -f "$OVERRIDE_PROVIDER" -o "${GOPATH}/src/github.com/$GITHUB_ORG/$PROVIDER_NAME/" -v "$VERSION"
+else
+  bundle exec compiler -a -e terraform -o "${GOPATH}/src/github.com/$GITHUB_ORG/$PROVIDER_NAME/" -v "$VERSION"
+fi
 
 # This command can crash - if that happens, the script should not fail.
 set +e
@@ -64,7 +68,7 @@ git add -A
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
 
-apply_patches "$PATCH_DIR/terraform-providers/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
+apply_patches "$PATCH_DIR/$GITHUB_ORG/$PROVIDER_NAME" "$TERRAFORM_COMMIT_MSG" "$LAST_COMMIT_AUTHOR" "master"
 
 popd
 popd
