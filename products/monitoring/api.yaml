@@ -881,6 +881,10 @@ objects:
       output: true
       description: A unique resource name for this UptimeCheckConfig. The format is projects/[PROJECT_ID]/uptimeCheckConfigs/[UPTIME_CHECK_ID].
     - !ruby/object:Api::Type::String
+      name: id
+      description: The id of the uptime check
+      output: true
+    - !ruby/object:Api::Type::String
       name: displayName
       required: true
       description: A human-friendly name for the uptime check configuration. The display
