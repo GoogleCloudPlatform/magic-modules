@@ -13,3 +13,7 @@
 [submodule "build/inspec"]
 	path = build/inspec
 	url = https://github.com/modular-magician/inspec-gcp
+[submodule "build/terraform-mapper"]
+	path = build/terraform-mapper
+	url = git@github.com:GoogleCloudPlatform/terraform-google-conversion.git
+    branch = master
