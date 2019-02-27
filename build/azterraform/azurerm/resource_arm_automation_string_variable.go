@@ -124,7 +124,7 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
         return fmt.Errorf("Error reading Automation String Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
     }
 
-    if err := ensureAutomationVariableType("azurerm_automation_string_variable"); err != nil {
+    if err := validateAzureRmAutomationVariableType("azurerm_automation_string_variable"); err != nil {
         return err
     }
 
@@ -135,8 +135,9 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
     if properties := resp.VariableProperties; properties != nil {
         d.Set("description", properties.Description)
         if properties.IsEncrypted == nil || *properties.IsEncrypted == false {
-            if value := properties.Value; value != nil {
-                d.Set("value", strconv.Unquote(*value))
+            if escapedValue := properties.Value; escapedValue != nil {
+                value, _ := strconv.Unquote(*escapedValue)
+                d.Set("value", value)
             }
         }
         d.Set("encrypted", properties.IsEncrypted)
