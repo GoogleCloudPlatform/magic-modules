@@ -79,6 +79,10 @@ module Api
     # For example: `https://www.googleapis.com/compute/v1/`
     attr_reader :base_url
 
+    # The APIs required to be enabled for this product.
+    # Usually just the product's API
+    attr_reader :apis_required
+
     include Compile::Core
 
     def validate
@@ -87,6 +91,7 @@ module Api
       check :display_name, type: String
       check :objects, type: Array, item_type: Api::Resource, required: true
       check :scopes, type: Array, item_type: String, required: true
+      check :apis_required, type: Array, item_type: Api::Product::ApiReference
 
       check_versions
     end
@@ -183,6 +188,17 @@ module Api
 
       raise "Product '#{@name}' must specify a default API version" \
         if defaults.zero? && @versions.length > 1
+    end
+
+    class ApiReference < Api::Object
+      attr_reader :name
+      attr_reader :url
+
+      def validate
+        super
+        check :name, type: String, required: true
+        check :url, type: String, required: true
+      end
     end
   end
 end
