@@ -190,6 +190,7 @@ module Api
         if defaults.zero? && @versions.length > 1
     end
 
+    # Represents any APIs that are required to be enabled to use this product
     class ApiReference < Api::Object
       attr_reader :name
       attr_reader :url
