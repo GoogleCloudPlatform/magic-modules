@@ -1,0 +1,10 @@
+--- !ruby/object:Provider::Terraform::Config
+name: Arm
+overrides: !ruby/object:Provider::ResourceOverrides
+  ServiceBusDisasterRecoveryConfig: !ruby/object:Provider::Terraform::ResourceOverride
+    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_group"
+        primary_resource_id: "example"
+        vars:
+          rg_name: "ExampleRG"
