@@ -48,6 +48,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           function: 'validateHttpHeaders()'
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        ignore_read: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
