@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
-
+	"regexp"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -276,7 +276,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
 			},
 			{
 				Config: testAccContainerCluster_removeNetworkPolicy(clusterName),
@@ -290,7 +289,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
 			},
 			{
 				Config: testAccContainerCluster_withNetworkPolicyDisabled(clusterName),
@@ -304,7 +302,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
 			},
 			{
 				Config: testAccContainerCluster_withNetworkPolicyConfigDisabled(clusterName),
@@ -318,7 +315,6 @@ func TestAccContainerCluster_withNetworkPolicyEnabled(t *testing.T) {
 				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
 			},
 			{
 				Config:             testAccContainerCluster_withNetworkPolicyConfigDisabled(clusterName),
@@ -1214,7 +1210,6 @@ func TestAccContainerCluster_withDefaultNodePoolRemoved(t *testing.T) {
 				ImportStateIdPrefix:     "us-central1-a/",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"remove_default_node_pool"},
 			},
 		},
 	})
