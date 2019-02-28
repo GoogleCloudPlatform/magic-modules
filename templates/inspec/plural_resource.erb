@@ -89,7 +89,7 @@ link_query = object.self_link_query || object.collection_url_response
   private
 
   def product_url
-    <%= base %>
+    <%= object.product_url || base %>
   end
 
   def resource_base_url

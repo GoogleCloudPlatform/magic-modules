@@ -21,6 +21,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Project: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  Folder: !ruby/object:Overrides::Inspec::ResourceOverride
+    product_url: https://cloudresourcemanager.googleapis.com/v2/
 files: !ruby/object:Provider::Config::Files
   copy:
     'Gemfile': 'provider/inspec/Gemfile'

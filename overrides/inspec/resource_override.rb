@@ -22,6 +22,7 @@ module Overrides
         %i[
           manual
           additional_functions
+          product_url
         ]
       end
 
@@ -31,6 +32,7 @@ module Overrides
         check :manual, type: :boolean, default: false
         super
         check :additional_functions, type: String
+        check :product_url, type: String
       end
     end
   end

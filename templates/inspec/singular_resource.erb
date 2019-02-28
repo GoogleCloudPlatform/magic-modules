@@ -90,7 +90,7 @@ class <%= object.name -%> < GcpResourceBase
   private
 
   def product_url
-    '<%= object.self_link_url[0].join %>'
+    '<%= object.product_url || object.self_link_url[0].join %>'
   end
 
   def resource_base_url

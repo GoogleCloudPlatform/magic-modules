@@ -17,7 +17,7 @@ display_name: Resource Manager
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://cloudresourcemanager.googleapis.com/v2/
+    base_url: https://cloudresourcemanager.googleapis.com/v1/
 scopes:
   # All access is needed to create projects.
   - https://www.googleapis.com/auth/cloud-platform
