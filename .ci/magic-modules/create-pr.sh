@@ -131,7 +131,7 @@ fi
       echo "There were no diffs in Inspec."
       MESSAGE="$MESSAGE${NEWLINE}No diff detected in Inspec."
     elif grep "A pull request already exists" ./inspec_pr_err; then
-      MESSAGE="$MESSAGE${NEWLINE}Ansible already has an open PR."
+      MESSAGE="$MESSAGE${NEWLINE}InSpec already has an open PR."
     fi
   fi
   popd
