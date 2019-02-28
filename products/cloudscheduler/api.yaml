@@ -33,6 +33,14 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/scheduler/'
       api: 'https://cloud.google.com/scheduler/docs/reference/rest/'
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          Region where the scheduler job resides
+        required: true
+        input: true
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -61,12 +69,6 @@ objects:
         required: false
         input: true
         default_value: 'Etc/UTC'
-      - !ruby/object:Api::Type::String
-        name: 'region'
-        description: |
-          Region where the schedule job resides.
-        required: false
-        input: true
       - !ruby/object:Api::Type::NestedObject
         name: retryConfig
         description: |

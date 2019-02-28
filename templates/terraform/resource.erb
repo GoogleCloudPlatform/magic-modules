@@ -27,7 +27,8 @@ package google
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
     api_client_name = api_name_lower.downcase
-    has_project = object.base_url.include?("{{project}}")
+    has_project = object.base_url.include?('{{project}}')
+    has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
     timeouts = object.async.nil? ? Api::Timeouts.new : object.async.operation.timeouts
 -%>
 
@@ -229,7 +230,17 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-<%  properties.reject(&:ignore_read).each do |prop| -%>
+<%  if has_region -%>
+    region, err := getRegion(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("region", region); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
+
+<%  properties.reject{|p| p.ignore_read }.each do |prop| -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
