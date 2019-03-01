@@ -14,7 +14,7 @@ import (
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
-<% if version == 'ga' -%>
+<% unless version == 'ga' -%>
 var testAccProvidersOiCS map[string]terraform.ResourceProvider
 <% end -%>
 var testAccProvider *schema.Provider
