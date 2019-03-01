@@ -131,7 +131,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
             should always be sent.
 -%>
 <%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v := d.Get("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%      else -%>
     } else {
 <%      end -%>
@@ -291,7 +291,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
             return err
 <%#         See the equivalent block in Create for context on this block.-%>
 <%          unless prop.send_empty_value -%>
-        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+        } else if v := d.Get("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%          else -%>
         } else {
 <%          end -%>
@@ -371,7 +371,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         return err
 <%#         See the equivalent block in Create for context on this block.-%>
 <%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+    } else if v := d.Get("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%      else -%>
     } else {
 <%      end -%>
