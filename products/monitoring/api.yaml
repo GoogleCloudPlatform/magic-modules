@@ -1018,12 +1018,14 @@ objects:
           with host (specified within the MonitoredResource) to construct the full URL.
     - !ruby/object:Api::Type::NestedObject
       name: resourceGroup
+      input: true
       description: The group resource associated with the configuration.
       conflicts:
         - monitoredResource
       properties:
       - !ruby/object:Api::Type::Enum
         name: resourceType
+        input: true
         description: The resource type of the group members.
         values:
         - :RESOURCE_TYPE_UNSPECIFIED
