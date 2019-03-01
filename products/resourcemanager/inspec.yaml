@@ -23,6 +23,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Folder: !ruby/object:Overrides::Inspec::ResourceOverride
     product_url: https://cloudresourcemanager.googleapis.com/v2/
+    # Creating and viewing folders requires organization level privileges
     privileged: true
 files: !ruby/object:Provider::Config::Files
   copy:
