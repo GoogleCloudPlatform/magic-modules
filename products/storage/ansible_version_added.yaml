@@ -1,0 +1,223 @@
+---
+:facts:
+  :Object:
+    :version_added: '2.8'
+  :Bucket:
+    :version_added: '2.6'
+  :BucketAccessControl:
+    :version_added: '2.6'
+  :ObjectAccessControl:
+    :version_added: '2.6'
+  :DefaultObjectACL:
+    :version_added: '2.6'
+:regular:
+  :Object:
+    :version_added: '2.8'
+    :action:
+      :version_added: '2.8'
+    :overwrite:
+      :version_added: '2.8'
+    :src:
+      :version_added: '2.8'
+    :dest:
+      :version_added: '2.8'
+    :bucket:
+      :version_added: '2.8'
+  :Bucket:
+    :version_added: '2.6'
+    :acl:
+      :version_added: '2.6'
+      :bucket:
+        :version_added: '2.6'
+      :domain:
+        :version_added: '2.6'
+      :email:
+        :version_added: '2.6'
+      :entity:
+        :version_added: '2.6'
+      :entityId:
+        :version_added: '2.6'
+      :id:
+        :version_added: '2.6'
+      :projectTeam:
+        :version_added: '2.6'
+        :projectNumber:
+          :version_added: '2.6'
+        :team:
+          :version_added: '2.6'
+      :role:
+        :version_added: '2.6'
+    :cors:
+      :version_added: '2.6'
+      :maxAgeSeconds:
+        :version_added: '2.6'
+      :method:
+        :version_added: '2.6'
+      :origin:
+        :version_added: '2.6'
+      :responseHeader:
+        :version_added: '2.6'
+    :defaultObjectAcl:
+      :version_added: '2.7'
+      :bucket:
+        :version_added: '2.7'
+      :domain:
+        :version_added: '2.7'
+      :email:
+        :version_added: '2.7'
+      :entity:
+        :version_added: '2.7'
+      :entityId:
+        :version_added: '2.7'
+      :generation:
+        :version_added: '2.7'
+      :id:
+        :version_added: '2.7'
+      :object:
+        :version_added: '2.7'
+      :projectTeam:
+        :version_added: '2.7'
+        :projectNumber:
+          :version_added: '2.7'
+        :team:
+          :version_added: '2.7'
+      :role:
+        :version_added: '2.7'
+    :id:
+      :version_added: '2.6'
+    :lifecycle:
+      :version_added: '2.6'
+      :rule:
+        :version_added: '2.6'
+        :action:
+          :version_added: '2.6'
+          :storageClass:
+            :version_added: '2.6'
+          :type:
+            :version_added: '2.6'
+        :condition:
+          :version_added: '2.6'
+          :ageDays:
+            :version_added: '2.6'
+          :createdBefore:
+            :version_added: '2.6'
+          :isLive:
+            :version_added: '2.6'
+          :matchesStorageClass:
+            :version_added: '2.6'
+          :numNewerVersions:
+            :version_added: '2.6'
+    :location:
+      :version_added: '2.6'
+    :logging:
+      :version_added: '2.6'
+      :logBucket:
+        :version_added: '2.6'
+      :logObjectPrefix:
+        :version_added: '2.6'
+    :metageneration:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :owner:
+      :version_added: '2.6'
+      :entity:
+        :version_added: '2.6'
+      :entityId:
+        :version_added: '2.6'
+    :projectNumber:
+      :version_added: '2.6'
+    :storageClass:
+      :version_added: '2.6'
+    :timeCreated:
+      :version_added: '2.6'
+    :updated:
+      :version_added: '2.6'
+    :versioning:
+      :version_added: '2.6'
+      :enabled:
+        :version_added: '2.6'
+    :website:
+      :version_added: '2.6'
+      :mainPageSuffix:
+        :version_added: '2.6'
+      :notFoundPage:
+        :version_added: '2.6'
+    :project:
+      :version_added: '2.6'
+    :predefinedDefaultObjectAcl:
+      :version_added: '2.6'
+  :BucketAccessControl:
+    :version_added: '2.6'
+    :bucket:
+      :version_added: '2.6'
+    :domain:
+      :version_added: '2.6'
+    :email:
+      :version_added: '2.6'
+    :entity:
+      :version_added: '2.6'
+    :entityId:
+      :version_added: '2.6'
+    :id:
+      :version_added: '2.6'
+    :projectTeam:
+      :version_added: '2.6'
+      :projectNumber:
+        :version_added: '2.6'
+      :team:
+        :version_added: '2.6'
+    :role:
+      :version_added: '2.6'
+  :ObjectAccessControl:
+    :version_added: '2.6'
+    :bucket:
+      :version_added: '2.6'
+    :domain:
+      :version_added: '2.6'
+    :email:
+      :version_added: '2.6'
+    :entity:
+      :version_added: '2.6'
+    :entityId:
+      :version_added: '2.6'
+    :generation:
+      :version_added: '2.6'
+    :id:
+      :version_added: '2.6'
+    :object:
+      :version_added: '2.6'
+    :projectTeam:
+      :version_added: '2.6'
+      :projectNumber:
+        :version_added: '2.6'
+      :team:
+        :version_added: '2.6'
+    :role:
+      :version_added: '2.6'
+  :DefaultObjectACL:
+    :version_added: '2.6'
+    :bucket:
+      :version_added: '2.6'
+    :domain:
+      :version_added: '2.6'
+    :email:
+      :version_added: '2.6'
+    :entity:
+      :version_added: '2.6'
+    :entityId:
+      :version_added: '2.6'
+    :generation:
+      :version_added: '2.6'
+    :id:
+      :version_added: '2.6'
+    :object:
+      :version_added: '2.6'
+    :projectTeam:
+      :version_added: '2.6'
+      :projectNumber:
+        :version_added: '2.6'
+      :team:
+        :version_added: '2.6'
+    :role:
+      :version_added: '2.6'
