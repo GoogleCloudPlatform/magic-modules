@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "app_engine_firewall_rule_basic"
         primary_resource_id: "rule"
-        version: <%= version_name %>
         vars:
           project_id: "test-project"
         test_env_vars:

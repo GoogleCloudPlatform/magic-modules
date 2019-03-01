@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "access_context_manager_access_policy_basic"
         skip_test: true
         primary_resource_id: "access-policy"
-        version: <%= version_name %>
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
@@ -36,7 +35,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: "access_context_manager_access_level_basic"
       skip_test: true
       primary_resource_id: "access-level"
-      version: <%= version_name %>
       vars:
         access_level_name: "ios_no_lock"
     properties:
@@ -55,7 +53,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "access_context_manager_service_perimeter_basic"
         skip_test: true
         primary_resource_id: "service-perimeter"
-        version: <%= version_name %>
         vars:
           access_level_name: "ios_no_lock"
           service_perimeter_name: "restrict_all"

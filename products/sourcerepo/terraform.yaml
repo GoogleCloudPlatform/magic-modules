@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "sourcerepo_repository_basic"
         primary_resource_id: "my-repo"
-        version: <%= version_name %>
         vars:
           repository_name: "my-repository"
     properties:

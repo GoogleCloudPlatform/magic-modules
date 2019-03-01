@@ -18,20 +18,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_pubsub"
         primary_resource_id: "job"
-        version: <%= version_name %>
         vars:
           job_name: "test-job"
           topic_name: "job-topic"
       - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_http"
         primary_resource_id: "job"
-        version: <%= version_name %>
         vars:
           job_name: "test-job"
       - !ruby/object:Provider::Terraform::Examples
         name: "scheduler_job_app_engine"
         primary_resource_id: "job"
-        version: <%= version_name %>
         vars:
           job_name: "test-job"
     properties:

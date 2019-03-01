@@ -142,7 +142,10 @@ module Provider
     end
 
     def generate_resource_tests(data)
-      return if data[:object].examples.reject(&:skip_test).empty?
+      return if data[:object].examples
+                             .reject(&:skip_test)
+                             .reject { |e| @api.version_obj_or_default(data[:version]) < @api.version_obj_or_default(e.min_version) }
+                             .empty?
 
       dir = data[:version] == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data[:output_folder], dir)

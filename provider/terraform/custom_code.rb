@@ -87,8 +87,9 @@ module Provider
       # This list corresponds to the `get*FromEnv` methods in provider_test.go.
       attr_reader :test_env_vars
 
-      # the version (ga, beta, etc.) this example is being generated at
-      attr_reader :version
+      # the version of the example. Note that _all features_ used in an example
+      # must be set to the example min version.
+      attr_reader :min_version
 
       # Extra properties to ignore read on during import.
       # These properties will likely be custom code.
@@ -114,7 +115,6 @@ module Provider
                          vars: vars,
                          test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
                          primary_resource_id: primary_resource_id,
-                         version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
@@ -132,7 +132,6 @@ module Provider
                          vars: vars.map { |k, str| [k, "#{str}-%{random_suffix}"] }.to_h,
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id,
-                         version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
@@ -155,7 +154,6 @@ module Provider
                        {
                          vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
                          primary_resource_id: primary_resource_id,
-                         version: version
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
@@ -195,6 +193,7 @@ module Provider
         super
         check :name, type: String, required: true
         check :primary_resource_id, type: String
+        check :min_version, type: String
         check :vars, type: Hash
         check :test_env_vars, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
