@@ -746,7 +746,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "managed_ssl_certificate_basic"
         primary_resource_id: "default"
-        version: <%= version_name %>
         vars:
           cert_name: "test-cert"
           proxy_name: "test-proxy"
