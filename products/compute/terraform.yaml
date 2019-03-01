@@ -728,6 +728,47 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
+  ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        This resource should be used with extreme caution!  Provisioning an SSL
+        certificate is complex.  Ensure that you understand the lifecycle of a
+        certificate before attempting complex tasks like cert rotation automatically.
+        This resource will "return" as soon as the certificate object is created,
+        but post-creation the certificate object will go through a "provisioning"
+        process.  The provisioning process can complete only when the domain name
+        for which the certificate is created points to a target pool which, itself,
+        points at the certificate.  Depending on your DNS provider, this may take
+        some time, and migrating from self-managed certificates to Google-managed
+        certificates may entail some downtime while the certificate provisions.
+
+        In conclusion: Be extremely cautious.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "managed_ssl_certificate_basic"
+        primary_resource_id: "default"
+        version: <%= version_name %>
+        vars:
+          cert_name: "test-cert"
+          proxy_name: "test-proxy"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
+          dns_zone_name: "dnszone"
+          forwarding_rule_name: "forwarding-rule"
+          http_health_check_name: "http-health-check"
+    description: |
+      {{description}}
+      For a resource where you provide the key, see the
+      SSL Certificate resource.
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'certificate_id'
+        default_from_api: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+
+          These are in the same namespace as the managed SSL certificates.
   SslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
@@ -763,6 +804,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
+        description: |
+          {{description}}
+
+          These are in the same namespace as the managed SSL certificates.
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'certificate_id'
       certificate: !ruby/object:Overrides::Terraform::PropertyOverride
