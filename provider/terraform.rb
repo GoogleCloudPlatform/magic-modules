@@ -144,7 +144,10 @@ module Provider
     def generate_resource_tests(data)
       return if data[:object].examples
                              .reject(&:skip_test)
-                             .reject { |e| @api.version_obj_or_default(data[:version]) < @api.version_obj_or_default(e.min_version) }
+                             .reject do |e|
+                               @api.version_obj_or_default(data[:version]) \
+                                < @api.version_obj_or_default(e.min_version)
+                             end
                              .empty?
 
       dir = data[:version] == 'beta' ? 'google-beta' : 'google'

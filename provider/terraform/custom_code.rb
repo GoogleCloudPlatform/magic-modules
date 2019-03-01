@@ -114,7 +114,7 @@ module Provider
                        {
                          vars: vars,
                          test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
-                         primary_resource_id: primary_resource_id,
+                         primary_resource_id: primary_resource_id
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
@@ -131,7 +131,7 @@ module Provider
                        {
                          vars: vars.map { |k, str| [k, "#{str}-%{random_suffix}"] }.to_h,
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
-                         primary_resource_id: primary_resource_id,
+                         primary_resource_id: primary_resource_id
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
@@ -153,7 +153,7 @@ module Provider
         body = lines(compile_file(
                        {
                          vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
-                         primary_resource_id: primary_resource_id,
+                         primary_resource_id: primary_resource_id
                        },
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))

@@ -184,7 +184,7 @@ module Provider
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
         elsif types.empty? && object.not_in_version?(version)
-          Google::LOGGER.info "Excluding #{object.name} per API version (#{object.min_version} required, #{version} given)"
+          Google::LOGGER.info "Excluding #{object.name} per API version"
         else
           Google::LOGGER.info "Generating #{object.name}"
           # exclude_if_not_in_version must be called in order to filter out
