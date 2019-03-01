@@ -1,6 +1,6 @@
 <% folder = grab_attributes['folder'] -%>
 describe.one do
-  google_resourcemanager_folders(parent: <%= doc_generation ? "'organizations/12345'" : "\"organizations/\#{organization['id']}\"" -%>).names.each do |name|
+  google_resourcemanager_folders(parent: <%= doc_generation ? "'organizations/12345'" : "\"organizations/\#{gcp_organization_id}\"" -%>).names.each do |name|
     # names come back in the format 'folders/1234', we only want the number
     describe google_resourcemanager_folder(name: name.split('/').last) do
       it { should exist }

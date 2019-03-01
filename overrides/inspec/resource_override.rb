@@ -23,6 +23,7 @@ module Overrides
           manual
           additional_functions
           product_url
+          privileged
         ]
       end
 
@@ -33,6 +34,7 @@ module Overrides
         super
         check :additional_functions, type: String
         check :product_url, type: String
+        check :privileged, type: :boolean, default: false
       end
     end
   end

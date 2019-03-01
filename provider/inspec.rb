@@ -125,6 +125,7 @@ module Provider
         attribute_file_name: attribute_file_name,
         doc_generation: false,
         default_template: 'templates/inspec/integration_test_template.erb',
+        privileged: data[:object].privileged,
         out_file: File.join(
           target_folder,
           'integration/verify/controls',

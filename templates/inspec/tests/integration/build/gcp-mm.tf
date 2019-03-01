@@ -110,12 +110,13 @@ variable "repository" {
   type = "map"
 }
 
-variable "organization" {
+variable "folder" {
   type = "map"
 }
 
-variable "folder" {
-  type = "map"
+variable "gcp_organization_id" {
+  type = "string"
+  default = "none"
 }
 
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
@@ -452,13 +453,8 @@ resource "google_sourcerepo_repository" "gcp-inspec-sourcerepo-repository" {
   name = "${var.repository["name"]}"
 }
 
-data "google_organization" "org" {
-  count = "${var.gcp_enable_privileged_resources}"
-  organization = "${var.organization["id"]}"
-}
-
-resource "google_folder" "sales" {
-  count = "${var.gcp_enable_privileged_resources}"
+resource "google_folder" "inspec-gcp-folder" {
+  count = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
-  parent       = "${data.google_organization.org.name}"
+  parent       = "${var.gcp_organization_id}"
 }
