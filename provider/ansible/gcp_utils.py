@@ -144,7 +144,8 @@ class GcpSession(object):
                 msg="Service Account Email only works with Machine Account-based authentication"
             )
 
-        if (self.module.params.get('service_account_file') is not None or self.module.params.get('service_account_contents') is not None) and self.module.params['auth_kind'] != 'serviceaccount':
+        if (self.module.params.get('service_account_file') is not None or
+                self.module.params.get('service_account_contents') is not None) and self.module.params['auth_kind'] != 'serviceaccount':
             self.module.fail_json(
                 msg="Service Account File only works with Service Account-based authentication"
             )
