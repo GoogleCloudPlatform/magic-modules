@@ -104,6 +104,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: uptimeCheckId
+        custom_flatten: "templates/terraform/custom_flatten/id_from_name.erb"
       httpCheck.authInfo.password: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
