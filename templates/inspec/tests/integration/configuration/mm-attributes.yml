@@ -187,3 +187,6 @@ bigquery_table:
 
 repository:
   name: inspec-gcp-repository
+
+folder:
+  display_name: inspec-gcp-folder
