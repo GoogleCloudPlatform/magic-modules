@@ -178,7 +178,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Folder'
     base_url: 'folders?parent={{parent}}'
-    self_link: 'folders/{{name}}'
+    self_link: '{{name}}'
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'folders'
     description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
