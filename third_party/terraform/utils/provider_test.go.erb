@@ -14,7 +14,9 @@ import (
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
+<% if version == 'ga' -%>
 var testAccProvidersOiCS map[string]terraform.ResourceProvider
+<% end -%>
 var testAccProvider *schema.Provider
 var testAccRandomProvider *schema.Provider
 
@@ -75,6 +77,7 @@ func init() {
 
 	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
 		"google-beta": testAccProvider,
+		"random": testAccRandomProvider,
 	}
 	<% end -%>
 }
