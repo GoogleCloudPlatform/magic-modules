@@ -53,12 +53,18 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
+		<% if object.min_version.name == 'beta' -%>
+		Providers:    testAccProvidersOiCS,
+		<% else -%>
 		Providers:    testAccProviders,
+		<% end -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= test_slug -%>(context),
 			},
+		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
+		<% unless object.min_version.name == 'beta' -%>
 			{
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
@@ -67,6 +73,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
         ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
         <%- end -%>
 			},
+		<% end -%>
 		},
 	})
 }
