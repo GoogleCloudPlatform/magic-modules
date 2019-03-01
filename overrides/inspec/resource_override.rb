@@ -22,6 +22,8 @@ module Overrides
         %i[
           manual
           additional_functions
+          product_url
+          privileged
         ]
       end
 
@@ -31,6 +33,10 @@ module Overrides
         check :manual, type: :boolean, default: false
         super
         check :additional_functions, type: String
+        check :product_url, type: String
+        # true if the resources requires organization level privileges
+        # resource manager Folder is an example of a privileged resource
+        check :privileged, type: :boolean, default: false
       end
     end
   end

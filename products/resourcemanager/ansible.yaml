@@ -29,8 +29,12 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
   Lien: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  Folder: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Lien: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  Folder: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     return_if_object: |

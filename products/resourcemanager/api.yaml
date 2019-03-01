@@ -175,3 +175,48 @@ objects:
         name: 'createTime'
         description: 'Time of creation'
         output: true
+  - !ruby/object:Api::Resource
+    name: 'Folder'
+    base_url: 'folders?parent={{parent}}'
+    self_link: '{{name}}'
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'folders'
+    description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        input: true
+        required: true
+        description: |
+          The Folder’s parent's resource name. Updates to the folder's parent
+          must be performed via folders.move.
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          The folder’s display name. A folder’s display name must be unique
+          amongst its siblings, e.g. no two folders with the same parent can
+          share the same display name. The display name must start and end with
+          a letter or digit, may contain letters, digits, spaces, hyphens and
+          underscores and can be no longer than 30 characters. This is captured
+          by the regular expression: `[\p{L}\p{N}]([\p{L}\p{N}_- ]{0,28}[\p{L}\p{N}])?`.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the Folder. Its format is folders/{folder_id},
+          for example: "folders/1234".
+      - !ruby/object:Api::Type::Enum
+        name: 'lifecycleState'
+        description: |
+          The lifecycle state of the folder. Updates to the lifecycleState
+          must be performed via folders.delete and folders.undelete.
+        output: true
+        values:
+          - :LIFECYCLE_STATE_UNSPECIFIED
+          - :ACTIVE
+          - :DELETE_REQUESTED
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: 'Time of creation'
+        output: true
