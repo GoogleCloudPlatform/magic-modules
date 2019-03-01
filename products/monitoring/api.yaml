@@ -1037,6 +1037,7 @@ objects:
         description: The group of resources being monitored. Should be the `name` of a group
     - !ruby/object:Api::Type::NestedObject
       name: monitoredResource
+      input: true
       description: 'The monitored resource (https://cloud.google.com/monitoring/api/resources)
         associated with the configuration. The following monitored resource types are
         supported for uptime checks:  uptime_url  gce_instance  gae_app  aws_ec2_instance  aws_elb_load_balancer'
@@ -1045,6 +1046,7 @@ objects:
       properties:
       - !ruby/object:Api::Type::String
         name: type
+        input: true
         required: true
         description: The monitored resource type. This field must match the type field of a MonitoredResourceDescriptor
           (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors#MonitoredResourceDescriptor)
@@ -1053,6 +1055,7 @@ objects:
           and Logging resource types (https://cloud.google.com/logging/docs/api/v2/resource-list).
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
+        input: true
         required: true
         description: Values for all of the labels listed in the associated
           monitored resource descriptor. For example, Compute Engine VM instances use
