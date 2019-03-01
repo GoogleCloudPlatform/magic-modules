@@ -33,6 +33,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       post_import: templates/terraform/post_import/lien_import.erb
       pre_delete: templates/terraform/pre_delete/modify_delete_url.erb
       decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
+    Folder: !ruby/object:Overrides::Terraform::ResourceOverride
+      exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
