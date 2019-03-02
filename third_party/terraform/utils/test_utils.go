@@ -2,12 +2,13 @@ package google
 
 import (
 	"strconv"
+	"reflect"
 )
 
 type ResourceDataMock struct {
-	FieldsInSchema      map[string]interface{}
+	FieldsInSchema		map[string]interface{}
 	FieldsWithHasChange []string
-	id                  string
+	id					string
 }
 
 func (d *ResourceDataMock) HasChange(key string) bool {
@@ -21,18 +22,18 @@ func (d *ResourceDataMock) HasChange(key string) bool {
 	return exists
 }
 
-func (d *ResourceDataMock) Get(key string) (interface{}, bool) {
-    v, _ := d.GetOk(key)
-    return v
+func (d *ResourceDataMock) Get(key string) interface{} {
+	v, _ := d.GetOk(key)
+	return v
 }
 
 func (d *ResourceDataMock) GetOk(key string) (interface{}, bool) {
-    v, ok := d.GetOkExists(key)
-    if ok && !isEmptyValue(v) {
-        return v, true
-    } else {
-        return v, false
-    }
+	v, ok := d.GetOkExists(key)
+	if ok && !isEmptyValue(reflect.ValueOf(v)) {
+		return v, true
+	} else {
+		return v, false
+	}
 }
 
 
