@@ -63,6 +63,154 @@ func resourceBigQueryTable() *schema.Resource {
 				Computed: true,
 			},
 
+			// ExternalDataConfiguration [Optional] Describes the data format,
+			// location, and other properties of a table stored outside of BigQuery.
+			// By defining these properties, the data source can then be queried as
+			// if it were a standard BigQuery table.
+			"external_data_configuration": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// Autodetect : [Required] Let BigQuery try to autodetect the
+						// schema and format of the table.
+						"autodetect": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						// BigtableOptions: [Optional] Additional options if sourceFormat is set to BIGTABLE.
+                                                "bigtable_options": {
+<% if version.nil? || version == 'ga' -%>
+							Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.ValidateJsonString,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
+						},
+						// Compression: [Optional] The compression type of the data source.
+						"compression": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NONE", "GZIP"}, false),
+						},
+						// CvsOptions: [Optional] Additional properties to set if
+						// sourceFormat is set to CSV.
+						"cvs_options": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// AllowJaggedRows: [Optional] Indicates if BigQuery should
+									// accept rows that are missing trailing optional columns.
+									"allow_jagged_rows": {
+										Type:     schema.TypeBool,
+										Optional: true,
+									},
+									// AllowQuotedNewlines: [Optional] Indicates if BigQuery
+									// should allow quoted data sections that contain newline
+									// characters in a CSV file. The default value is false.
+									"allow_quoted_newlines": {
+										Type:     schema.TypeBool,
+										Optional: true,
+									},
+									// Encoding: [Optional] The character encoding of the data.
+									// The supported values are UTF-8 or ISO-8859-1.
+									"encoding": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"ISO-8859-1", "UTF-8"}, false),
+									},
+									// FieldDelimiter: [Optional] The separator for fields in a CSV file.
+									"field_delimiter": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									// Quote: [Optional] The value that is used to quote data
+									// sections in a CSV file.
+									"quote": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									// SkipLeadingRows: [Optional] The number of rows at the top
+									// of a CSV file that BigQuery will skip when reading the data.
+									"skip_leading_rows": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+								},
+							},
+						},
+						// GoogleSheetsOptions: [Optional] Additional options if sourceFormat is set to GOOGLE_SHEETS.
+						"google_sheets_options": {
+							// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
+							// Typical format: !:
+							"range": {
+<% if version.nil? || version == 'ga' -%>
+								Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							// SkipLeadingRows: [Optional] The number of rows at the top
+							// of the scheet that BigQuery will skip when reading the data.
+							"skip_leading_rows": {
+								Type:     schema.TypeInt,
+								Optional: true,
+							},
+						},
+
+						// IgnoreUnknownValues: [Optional] Indicates if BigQuery should
+						// allow extra values that are not represented in the table schema.
+						// If true, the extra values are ignored. If false, records with
+						// extra columns are treated as bad records, and if there are too
+						// many bad records, an invalid error is returned in the job result.
+						// The default value is false.
+						"ignore_unknown_values": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						// MaxBadRecords: [Optional] The maximum number of bad records that
+						// BigQuery can ignore when reading data.
+						"max_bad_records": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						// Schema: [Optional] The schema for the data.
+						// Schema is required for CSV and JSON formats
+						// schema is disallowed for Google Cloud Bigtable,
+						// Cloud Datastore backups, and Avro formats.
+						"schema": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.ValidateJsonString,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
+						},
+						// SourceFormat [Required] The data format.
+						"source_format": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"CVS", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP",<%= version != 'ga' ? ' "BIGTABLE",' : '' %>
+							}, false),
+						},
+						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
+						"source_uris": {
+							Type:     schema.TypeList,
+							Required: true,
+						},
+					},
+				},
+			},
+
 			// FriendlyName: [Optional] A descriptive name for this table.
 			"friendly_name": {
 				Type:     schema.TypeString,
