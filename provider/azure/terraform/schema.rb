@@ -30,6 +30,7 @@ module Provider
         end
 
         def schema_property_template(property)
+          return property.custom_schema_definition if property.instance_variable_defined?(:@custom_schema_definition) && !property.custom_schema_definition.nil?
           case property
           when Api::Azure::Type::ResourceGroupName
             'templates/azure/terraform/schemas/resource_group_name.erb'
@@ -37,7 +38,7 @@ module Provider
             'templates/azure/terraform/schemas/location.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
             'templates/terraform/schemas/primitive.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
@@ -63,7 +64,7 @@ module Provider
             'templates/azure/terraform/schemas/location_set.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags_set.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
             'templates/terraform/schemas/basic_set.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
@@ -76,6 +77,8 @@ module Provider
             'templates/azure/terraform/sdktypes/property_to_sdkprimitive.erb'
           when Api::Azure::SDKTypeDefinition::EnumObject
             'templates/azure/terraform/sdktypes/property_to_sdkenum.erb'
+          when Api::Azure::SDKTypeDefinition::StringMapObject
+            'templates/azure/terraform/sdktypes/property_to_sdkstringmap.erb'
           when Api::Azure::SDKTypeDefinition::ComplexObject
             'templates/azure/terraform/sdktypes/property_to_sdkobject.erb'
           else
@@ -90,6 +93,8 @@ module Provider
             'templates/azure/terraform/sdktypes/sdkprimitive_to_property.erb'
           when Api::Azure::SDKTypeDefinition::EnumObject
             'templates/azure/terraform/sdktypes/sdkenum_to_property.erb'
+          when Api::Azure::SDKTypeDefinition::StringMapObject
+            'templates/azure/terraform/sdktypes/sdkstringmap_to_property.erb'
           when Api::Azure::SDKTypeDefinition::ComplexObject
             'templates/azure/terraform/sdktypes/sdkobject_to_property.erb'
           else

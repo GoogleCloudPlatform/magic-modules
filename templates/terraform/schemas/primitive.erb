@@ -1,6 +1,3 @@
-<% if property.custom_schema -%>
-"<%= property.name.underscore -%>": <%= compile_template(property.custom_schema, property: property) -%>,
-<% else -%>
 <% if tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
   <% if property.is_set -%>
@@ -31,9 +28,13 @@
 <% if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output -%>
 <%
 	enum_values = property.values
-	enum_values.push "" unless property.required
+	# enum_values.push "" unless property.required
 -%>
-	ValidateFunc: validation.StringInSlice([]string{"<%= enum_values.join '","' -%>"}, false),
+	ValidateFunc: validation.StringInSlice([]string{
+<%  enum_values.each do |val| -%>
+    string(<%= azure_resource_go_package(object.__product) -%>.<%= val -%>),
+<%  end -%>
+  }, false),
 <% end -%>
 <% if !property.diff_suppress_func.nil? -%>
   DiffSuppressFunc: <%= property.diff_suppress_func %>,
@@ -125,4 +126,3 @@
 <% else -%>
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 <% end # tf_types.include?(property.class) -%>
-<% end # property.custom_schema -%>

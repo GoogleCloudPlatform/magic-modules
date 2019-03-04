@@ -29,6 +29,9 @@ module Api
         end
       end
 
+      class StringMapObject < SDKTypeDefinition
+      end
+
       class ComplexObject < SDKTypeDefinition
         attr_reader :go_type_name
 

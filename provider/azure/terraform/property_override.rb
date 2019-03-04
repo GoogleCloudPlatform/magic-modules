@@ -4,6 +4,7 @@ module Provider
   module Azure
     module Terraform
       module OverrideFields
+        attr_reader :custom_schema_definition
         attr_reader :custom_schema_get
         attr_reader :custom_schema_set
         include Provider::Terraform::OverrideFields
@@ -14,6 +15,7 @@ module Provider
 
         def validate
           super
+          check_optional_property :custom_schema_definition, String
           check_optional_property :custom_schema_get, String
           check_optional_property :custom_schema_set, String
         end

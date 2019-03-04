@@ -75,9 +75,6 @@ module Provider
       # so the function header *is* part of the custom code template.
       # As with flatten, `property` and `prefix` are available.
       attr_reader :custom_expand
-
-      # Azure Specific Properties
-      attr_reader :custom_schema
     end
 
     # Support for schema ValidateFunc functionality.
@@ -120,8 +117,6 @@ module Provider
         check_optional_property :update_statement, String
         check_optional_property :custom_flatten, String
         check_optional_property :custom_expand, String
-
-        check_optional_property :custom_schema, String
 
         raise "'default_value' and 'default_from_api' cannot be both set"  \
           if default_from_api && !default_value.nil?

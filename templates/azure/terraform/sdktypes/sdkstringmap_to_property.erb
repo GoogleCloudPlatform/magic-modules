@@ -1,0 +1,2 @@
+<%  input_var = "utils.FlattenStringMap(" + input_statement + "." + sdk_type_defs[api_path].go_field_name + ")" -%>
+<%= lines(build_schema_property_set(input_var, 'd', property)) -%>

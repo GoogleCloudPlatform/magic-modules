@@ -13,6 +13,7 @@ module Provider
 
         def validate
           super
+          @acctests ||= Hash.new
           check_optional_property :acctests, Hash
           check_optional_property_hash :acctests, String, AccTestDefinition
           post_initialization
