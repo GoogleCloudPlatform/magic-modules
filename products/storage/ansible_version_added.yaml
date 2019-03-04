@@ -6,10 +6,6 @@
     :version_added: '2.6'
   :BucketAccessControl:
     :version_added: '2.6'
-  :ObjectAccessControl:
-    :version_added: '2.6'
-  :DefaultObjectACL:
-    :version_added: '2.6'
 :regular:
   :Object:
     :version_added: '2.8'
@@ -160,58 +156,6 @@
     :entityId:
       :version_added: '2.6'
     :id:
-      :version_added: '2.6'
-    :projectTeam:
-      :version_added: '2.6'
-      :projectNumber:
-        :version_added: '2.6'
-      :team:
-        :version_added: '2.6'
-    :role:
-      :version_added: '2.6'
-  :ObjectAccessControl:
-    :version_added: '2.6'
-    :bucket:
-      :version_added: '2.6'
-    :domain:
-      :version_added: '2.6'
-    :email:
-      :version_added: '2.6'
-    :entity:
-      :version_added: '2.6'
-    :entityId:
-      :version_added: '2.6'
-    :generation:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :object:
-      :version_added: '2.6'
-    :projectTeam:
-      :version_added: '2.6'
-      :projectNumber:
-        :version_added: '2.6'
-      :team:
-        :version_added: '2.6'
-    :role:
-      :version_added: '2.6'
-  :DefaultObjectACL:
-    :version_added: '2.6'
-    :bucket:
-      :version_added: '2.6'
-    :domain:
-      :version_added: '2.6'
-    :email:
-      :version_added: '2.6'
-    :entity:
-      :version_added: '2.6'
-    :entityId:
-      :version_added: '2.6'
-    :generation:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :object:
       :version_added: '2.6'
     :projectTeam:
       :version_added: '2.6'

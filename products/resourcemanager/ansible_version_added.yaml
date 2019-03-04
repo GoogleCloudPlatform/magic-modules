@@ -2,10 +2,6 @@
 :facts:
   :Project:
     :version_added: '2.8'
-  :Lien:
-    :version_added: '2.8'
-  :Folder:
-    :version_added: '2.8'
 :regular:
   :Project:
     :version_added: '2.8'
@@ -26,30 +22,4 @@
       :id:
         :version_added: '2.8'
     :id:
-      :version_added: '2.8'
-  :Lien:
-    :version_added: '2.8'
-    :name:
-      :version_added: '2.8'
-    :reason:
-      :version_added: '2.8'
-    :origin:
-      :version_added: '2.8'
-    :createTime:
-      :version_added: '2.8'
-    :parent:
-      :version_added: '2.8'
-    :restrictions:
-      :version_added: '2.8'
-  :Folder:
-    :version_added: '2.8'
-    :name:
-      :version_added: '2.8'
-    :lifecycleState:
-      :version_added: '2.8'
-    :createTime:
-      :version_added: '2.8'
-    :parent:
-      :version_added: '2.8'
-    :displayName:
       :version_added: '2.8'

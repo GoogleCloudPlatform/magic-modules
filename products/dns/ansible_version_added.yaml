@@ -2,8 +2,6 @@
 :facts:
   :ManagedZone:
     :version_added: '2.8'
-  :Project:
-    :version_added: '2.5'
   :ResourceRecordSet:
     :version_added: '2.8'
 :regular:
@@ -39,24 +37,6 @@
         :version_added: '2.5'
         :ipv4Address:
           :version_added: '2.5'
-  :Project:
-    :version_added: '2.5'
-    :number:
-      :version_added: '2.5'
-    :quota:
-      :version_added: '2.5'
-      :managedZones:
-        :version_added: '2.5'
-      :resourceRecordsPerRrset:
-        :version_added: '2.5'
-      :rrsetAdditionsPerChange:
-        :version_added: '2.5'
-      :rrsetDeletionsPerChange:
-        :version_added: '2.5'
-      :rrsetsPerManagedZone:
-        :version_added: '2.5'
-      :totalRrdataSizePerChange:
-        :version_added: '2.5'
   :ResourceRecordSet:
     :version_added: '2.6'
     :name:

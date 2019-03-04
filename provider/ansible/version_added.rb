@@ -36,6 +36,7 @@ module Provider
 
         # Build out paths for regular modules.
         @api.objects.reject(&:exclude).each do |obj|
+          next if obj.not_in_version?(@api.version_obj_or_default('ga'))
           resource = {
             version_added: correct_version([:regular, obj.name], versions)
           }

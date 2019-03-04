@@ -2,14 +2,10 @@
 :facts:
   :Address:
     :version_added: '2.7'
-  :Autoscaler:
-    :version_added: '2.7'
   :BackendBucket:
     :version_added: '2.7'
   :BackendService:
     :version_added: '2.7'
-  :DiskType:
-    :version_added: '2.6'
   :Disk:
     :version_added: '2.7'
   :Firewall:
@@ -28,8 +24,6 @@
     :version_added: '2.7'
   :InstanceTemplate:
     :version_added: '2.7'
-  :License:
-    :version_added: '2.6'
   :Image:
     :version_added: '2.7'
   :Instance:
@@ -40,23 +34,13 @@
     :version_added: '2.7'
   :InterconnectAttachment:
     :version_added: '2.8'
-  :MachineType:
-    :version_added: '2.6'
   :Network:
     :version_added: '2.7'
-  :Region:
-    :version_added: '2.6'
-  :RegionAutoscaler:
-    :version_added: '2.7'
-  :RegionDiskType:
-    :version_added: '2.6'
   :RegionDisk:
     :version_added: '2.8'
   :Route:
     :version_added: '2.7'
   :Router:
-    :version_added: '2.7'
-  :Snapshot:
     :version_added: '2.7'
   :SslCertificate:
     :version_added: '2.7'
@@ -80,8 +64,6 @@
     :version_added: '2.7'
   :VpnTunnel:
     :version_added: '2.7'
-  :Zone:
-    :version_added: '2.6'
 :regular:
   :Address:
     :version_added: '2.6'
@@ -108,46 +90,6 @@
     :labelFingerprint:
       :version_added: '2.6'
     :region:
-      :version_added: '2.6'
-  :Autoscaler:
-    :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :autoscalingPolicy:
-      :version_added: '2.6'
-      :minNumReplicas:
-        :version_added: '2.6'
-      :maxNumReplicas:
-        :version_added: '2.6'
-      :coolDownPeriodSec:
-        :version_added: '2.6'
-      :cpuUtilization:
-        :version_added: '2.6'
-        :utilizationTarget:
-          :version_added: '2.6'
-      :customMetricUtilizations:
-        :version_added: '2.6'
-        :metric:
-          :version_added: '2.6'
-        :utilizationTarget:
-          :version_added: '2.6'
-        :utilizationTargetType:
-          :version_added: '2.6'
-        :filter:
-          :version_added: '2.6'
-      :loadBalancingUtilization:
-        :version_added: '2.6'
-        :utilizationTarget:
-          :version_added: '2.6'
-    :target:
-      :version_added: '2.6'
-    :zone:
       :version_added: '2.6'
   :BackendBucket:
     :version_added: '2.6'
@@ -238,34 +180,6 @@
     :sessionAffinity:
       :version_added: '2.6'
     :timeoutSec:
-      :version_added: '2.6'
-  :DiskType:
-    :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :defaultDiskSizeGb:
-      :version_added: '2.6'
-    :deprecated:
-      :version_added: '2.6'
-      :deleted:
-        :version_added: '2.6'
-      :deprecated:
-        :version_added: '2.6'
-      :obsolete:
-        :version_added: '2.6'
-      :replacement:
-        :version_added: '2.6'
-      :state:
-        :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :validDiskSize:
-      :version_added: '2.6'
-    :zone:
       :version_added: '2.6'
   :Disk:
     :version_added: '2.6'
@@ -709,12 +623,6 @@
           :version_added: '2.6'
         :items:
           :version_added: '2.6'
-  :License:
-    :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :chargesUseFee:
-      :version_added: '2.6'
   :Image:
     :version_added: '2.6'
     :archiveSizeBytes:
@@ -1015,40 +923,6 @@
       :version_added: '2.8'
     :region:
       :version_added: '2.8'
-  :MachineType:
-    :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :deprecated:
-      :version_added: '2.6'
-      :deleted:
-        :version_added: '2.6'
-      :deprecated:
-        :version_added: '2.6'
-      :obsolete:
-        :version_added: '2.6'
-      :replacement:
-        :version_added: '2.6'
-      :state:
-        :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :guestCpus:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :isSharedCpu:
-      :version_added: '2.6'
-    :maximumPersistentDisks:
-      :version_added: '2.6'
-    :maximumPersistentDisksSizeGb:
-      :version_added: '2.6'
-    :memoryMb:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :zone:
-      :version_added: '2.6'
   :Network:
     :version_added: '2.6'
     :description:
@@ -1071,98 +945,6 @@
       :version_added: '2.8'
       :routingMode:
         :version_added: '2.8'
-  :Region:
-    :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :deprecated:
-      :version_added: '2.6'
-      :deleted:
-        :version_added: '2.6'
-      :deprecated:
-        :version_added: '2.6'
-      :obsolete:
-        :version_added: '2.6'
-      :replacement:
-        :version_added: '2.6'
-      :state:
-        :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :zones:
-      :version_added: '2.6'
-  :RegionAutoscaler:
-    :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :autoscalingPolicy:
-      :version_added: '2.6'
-      :minNumReplicas:
-        :version_added: '2.6'
-      :maxNumReplicas:
-        :version_added: '2.6'
-      :coolDownPeriodSec:
-        :version_added: '2.6'
-      :cpuUtilization:
-        :version_added: '2.6'
-        :utilizationTarget:
-          :version_added: '2.6'
-      :customMetricUtilizations:
-        :version_added: '2.6'
-        :metric:
-          :version_added: '2.6'
-        :utilizationTarget:
-          :version_added: '2.6'
-        :utilizationTargetType:
-          :version_added: '2.6'
-        :filter:
-          :version_added: '2.6'
-      :loadBalancingUtilization:
-        :version_added: '2.6'
-        :utilizationTarget:
-          :version_added: '2.6'
-    :target:
-      :version_added: '2.6'
-    :region:
-      :version_added: '2.6'
-  :RegionDiskType:
-    :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :defaultDiskSizeGb:
-      :version_added: '2.6'
-    :deprecated:
-      :version_added: '2.6'
-      :deleted:
-        :version_added: '2.6'
-      :deprecated:
-        :version_added: '2.6'
-      :obsolete:
-        :version_added: '2.6'
-      :replacement:
-        :version_added: '2.6'
-      :state:
-        :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :validDiskSize:
-      :version_added: '2.6'
-    :region:
-      :version_added: '2.6'
   :RegionDisk:
     :version_added: '2.8'
     :labelFingerprint:
@@ -1265,44 +1047,6 @@
           :version_added: '2.7'
     :region:
       :version_added: '2.7'
-  :Snapshot:
-    :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :diskSizeGb:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :storageBytes:
-      :version_added: '2.6'
-    :licenses:
-      :version_added: '2.6'
-    :labels:
-      :version_added: '2.6'
-    :labelFingerprint:
-      :version_added: '2.6'
-    :sourceDisk:
-      :version_added: '2.6'
-    :zone:
-      :version_added: '2.6'
-    :snapshotEncryptionKey:
-      :version_added: '2.6'
-      :rawKey:
-        :version_added: '2.6'
-      :sha256:
-        :version_added: '2.6'
-      :kmsKeyName:
-        :version_added: '2.6'
-    :sourceDiskEncryptionKey:
-      :version_added: '2.6'
-      :rawKey:
-        :version_added: '2.6'
-      :kmsKeyName:
-        :version_added: '2.6'
   :SslCertificate:
     :version_added: '2.6'
     :certificate:
@@ -1551,29 +1295,3 @@
       :version_added: '2.7'
     :region:
       :version_added: '2.7'
-  :Zone:
-    :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :deprecated:
-      :version_added: '2.6'
-      :deleted:
-        :version_added: '2.6'
-      :deprecated:
-        :version_added: '2.6'
-      :obsolete:
-        :version_added: '2.6'
-      :replacement:
-        :version_added: '2.6'
-      :state:
-        :version_added: '2.6'
-    :description:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :region:
-      :version_added: '2.6'
-    :status:
-      :version_added: '2.6'

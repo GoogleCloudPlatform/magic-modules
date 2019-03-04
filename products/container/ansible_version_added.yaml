@@ -4,8 +4,6 @@
     :version_added: '2.8'
   :NodePool:
     :version_added: '2.8'
-  :KubeConfig:
-    :version_added: '2.6'
 :regular:
   :Cluster:
     :version_added: '2.6'
@@ -147,13 +145,3 @@
       :version_added: '2.6'
     :location:
       :version_added: '2.8'
-  :KubeConfig:
-    :version_added: '2.6'
-    :name:
-      :version_added: '2.6'
-    :cluster:
-      :version_added: '2.6'
-    :location:
-      :version_added: '2.6'
-    :context:
-      :version_added: '2.6'

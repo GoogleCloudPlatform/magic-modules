@@ -49,7 +49,9 @@ module Provider
       def initialize(config, api, start_time)
         super(config, api, start_time)
         @max_columns = 160
+      end
 
+      def generate_versions
         # Generate version_added_file
         @version_added = build_version_added
       end

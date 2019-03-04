@@ -1,18 +1,10 @@
 ---
 :facts:
-  :InstanceConfig:
-    :version_added: '2.7'
   :Instance:
     :version_added: '2.8'
   :Database:
     :version_added: '2.8'
 :regular:
-  :InstanceConfig:
-    :version_added: '2.7'
-    :name:
-      :version_added: '2.7'
-    :displayName:
-      :version_added: '2.7'
   :Instance:
     :version_added: '2.7'
     :name:

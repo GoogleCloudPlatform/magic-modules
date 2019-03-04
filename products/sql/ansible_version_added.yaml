@@ -6,12 +6,6 @@
     :version_added: '2.8'
   :User:
     :version_added: '2.8'
-  :SslCert:
-    :version_added: '2.7'
-  :Flag:
-    :version_added: '2.7'
-  :Tier:
-    :version_added: '2.7'
 :regular:
   :Instance:
     :version_added: '2.7'
@@ -126,46 +120,4 @@
     :instance:
       :version_added: '2.7'
     :password:
-      :version_added: '2.7'
-  :SslCert:
-    :version_added: '2.7'
-    :cert:
-      :version_added: '2.7'
-    :certSerialNumber:
-      :version_added: '2.7'
-    :commonName:
-      :version_added: '2.7'
-    :createTime:
-      :version_added: '2.7'
-    :expirationTime:
-      :version_added: '2.7'
-    :instance:
-      :version_added: '2.7'
-    :sha1Fingerprint:
-      :version_added: '2.7'
-  :Flag:
-    :version_added: '2.7'
-    :allowedStringValues:
-      :version_added: '2.7'
-    :appliesTo:
-      :version_added: '2.7'
-    :maxValue:
-      :version_added: '2.7'
-    :minValue:
-      :version_added: '2.7'
-    :name:
-      :version_added: '2.7'
-    :requiresRestart:
-      :version_added: '2.7'
-    :type:
-      :version_added: '2.7'
-  :Tier:
-    :version_added: '2.7'
-    :DiskQuota:
-      :version_added: '2.7'
-    :RAM:
-      :version_added: '2.7'
-    :region:
-      :version_added: '2.7'
-    :tier:
       :version_added: '2.7'
