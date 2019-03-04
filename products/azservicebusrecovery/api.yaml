@@ -111,18 +111,21 @@ objects:
         description: 'The name of the service bus disaster recovery.'
         required: true
         input: true
+        order: 800
         azure_sdk_references: ['alias', '/name']
       - !ruby/object:Api::Azure::Type::ResourceGroupName
         name: 'resourceGroupName'
         description: 'The name of the resource group in which to create the service bus disaster recovery.'
         required: true
         input: true
+        order: 810
         azure_sdk_references: ['resourceGroupName']
       - !ruby/object:Api::Type::String
         name: 'namespaceName'
         description: 'The name of the service bus namespace in which the config is created.'
         required: true
         input: true
+        order: 820
         azure_sdk_references: ['namespaceName']
       - !ruby/object:Api::Type::String
         name: 'partnerNamespace'

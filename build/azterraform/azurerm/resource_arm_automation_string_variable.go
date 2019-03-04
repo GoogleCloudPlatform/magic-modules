@@ -72,15 +72,15 @@ func resourceArmAutomationStringVariableCreateUpdate(d *schema.ResourceData, met
     resourceGroup := d.Get("resource_group_name").(string)
     accountName := d.Get("automation_account_name").(string)
     description := d.Get("description").(string)
-    value := d.Get("value").(string)
     encrypted := d.Get("encrypted").(bool)
+    value := strconv.Quote(d.Get("value").(string))
 
     parameters := automation.VariableCreateOrUpdateParameters{
         Name: utils.String(name),
         VariableCreateOrUpdateProperties: &automation.VariableCreateOrUpdateProperties{
             Description: utils.String(description),
-            Value: utils.String(value),
             IsEncrypted: utils.Bool(encrypted),
+            Value: utils.String(value),
         },
     }
 
@@ -134,13 +134,13 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
     d.Set("automation_account_name", accountName)
     if properties := resp.VariableProperties; properties != nil {
         d.Set("description", properties.Description)
-        if properties.IsEncrypted == nil || *properties.IsEncrypted == false {
-            if escapedValue := properties.Value; escapedValue != nil {
-                value, _ := strconv.Unquote(*escapedValue)
+        d.Set("encrypted", properties.IsEncrypted)
+        if !d.Get("encrypted").(bool) {
+            if quotedValue := properties.Value; quotedValue != nil {
+                value, _ := strconv.Unquote(*quotedValue)
                 d.Set("value", value)
             }
         }
-        d.Set("encrypted", properties.IsEncrypted)
     }
 
     return nil

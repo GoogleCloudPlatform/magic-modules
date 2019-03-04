@@ -101,9 +101,9 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 
     ctx := meta.(*ArmClient).StopContext
 
-<%  settable_properties.each do |prop| -%>
+<%  settable_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%    var_name = object.azure_sdk_definition.create.request[prop.azure_sdk_references[0]].go_variable_name -%>
-<%    output_var = var_name.nil? ? prop.name.camelcase(:lower) : var_name -%>
+<%    output_var = var_name || prop.name.camelcase(:lower) -%>
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 

@@ -12,7 +12,7 @@
     prop_len = longest_prop_name.nil? ? 0 : longest_prop_name.underscore.length
 -%>
 "<%= "azurerm_" + object.name.underscore -%>" "<%= resource_id -%>" {
-<%   object.properties.each do |prop| -%>
+<%   object.all_user_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%     if merged_props.has_key?(prop.name) -%>
   <%=    prop.name.underscore.ljust(prop_len) -%> = "<%= merged_props[prop.name] -%>"
 <%     end -%>

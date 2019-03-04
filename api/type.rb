@@ -42,6 +42,7 @@ module Api
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
 
+      attr_reader :order
       attr_reader :azure_sdk_references
     end
 
@@ -70,6 +71,9 @@ module Api
       check_optional_property_oneof_default \
         :update_verb, %i[POST PUT PATCH NONE], @__resource&.update_verb, Symbol
       check_optional_property :update_url, ::String
+
+      check_optional_property :order, ::Integer
+      @order ||= 1000
 
       check_property :azure_sdk_references, ::Array
       check_property_non_empty_list :azure_sdk_references, ::String

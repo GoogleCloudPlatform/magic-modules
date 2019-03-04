@@ -1,7 +1,7 @@
 <%  if output_var == 'd' -%>
-if properties.IsEncrypted == nil || *properties.IsEncrypted == false {
-    if escapedValue := <%= input_var -%>; escapedValue != nil {
-        value, _ := strconv.Unquote(*escapedValue)
+if !d.Get("encrypted").(bool) {
+    if quotedValue := <%= input_var -%>; quotedValue != nil {
+        value, _ := strconv.Unquote(*quotedValue)
         d.Set("<%= prop_name -%>", value)
     }
 }

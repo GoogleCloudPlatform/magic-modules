@@ -144,18 +144,21 @@ objects:
         required: true
         input: true
         azure_sdk_references: ['registryName', '/name']
+        order: 800
       - !ruby/object:Api::Azure::Type::ResourceGroupName
         name: 'resourceGroupName'
         description: 'The name of the resource group in which to create the Container Registry.'
         required: true
         input: true
         azure_sdk_references: ['resourceGroupName']
+        order: 810
       - !ruby/object:Api::Azure::Type::Location
         name: 'location'
         description: 'Specifies the supported Azure location where the resource exists.'
         required: true
         input: true
         azure_sdk_references: ['/location']
+        order: 820
       - !ruby/object:Api::Type::Enum
         name: 'sku'
         values:
@@ -166,6 +169,7 @@ objects:
         description: 'The SKU name of the the container registry.'
         default_value: :Classic
         azure_sdk_references: ['/sku/name']
+        order: 830
       - !ruby/object:Api::Type::Boolean
         name: 'adminEnabled'
         description: 'Specifies whether the admin user is enabled.'

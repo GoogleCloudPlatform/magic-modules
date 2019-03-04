@@ -63,13 +63,13 @@ func resourceArmServiceBusDisasterRecoveryConfigCreateUpdate(d *schema.ResourceD
     name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
     servicebusName := d.Get("namespace_name").(string)
-    partnerNamespace := d.Get("partner_namespace").(string)
     alternateName := d.Get("alternate_name").(string)
+    partnerNamespace := d.Get("partner_namespace").(string)
 
     parameters := servicebus.ArmDisasterRecovery{
         ArmDisasterRecoveryProperties: &servicebus.ArmDisasterRecoveryProperties{
-            PartnerNamespace: utils.String(partnerNamespace),
             AlternateName: utils.String(alternateName),
+            PartnerNamespace: utils.String(partnerNamespace),
         },
     }
 
@@ -119,8 +119,8 @@ func resourceArmServiceBusDisasterRecoveryConfigRead(d *schema.ResourceData, met
     d.Set("resource_group_name", resourceGroup)
     d.Set("namespace_name", servicebusName)
     if armDisasterRecoveryProperties := resp.ArmDisasterRecoveryProperties; armDisasterRecoveryProperties != nil {
-        d.Set("partner_namespace", armDisasterRecoveryProperties.PartnerNamespace)
         d.Set("alternate_name", armDisasterRecoveryProperties.AlternateName)
+        d.Set("partner_namespace", armDisasterRecoveryProperties.PartnerNamespace)
     }
 
     return nil
