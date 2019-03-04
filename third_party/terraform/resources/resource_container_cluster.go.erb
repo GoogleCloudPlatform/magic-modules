@@ -2156,15 +2156,14 @@ func resourceContainerClusterStateImporter(d *schema.ResourceData, meta interfac
 		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {zone}/{name} or {project}/{zone}/{name}")
 	}
 
-	if len(project) > 0 {
-		d.Set("project", project)
-	} else {
+	if len(project) == 0 {
 		var err error
 		project, err = getProject(d, config)
 		if err != nil {
 			return nil, err
 		}
 	}
+	d.Set("project", project)
 
 	if isZone(location) {
 		d.Set("zone", location)
