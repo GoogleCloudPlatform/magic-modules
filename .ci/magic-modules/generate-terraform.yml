@@ -21,6 +21,8 @@ run:
     path: magic-modules-branched/.ci/magic-modules/generate-terraform.sh
 
 params:
-  VERSION: ""
-  PROVIDER_NAME: ""
-  SHORT_NAME: ""
+    VERSION: ""
+    PROVIDER_NAME: ""
+    SHORT_NAME: ""
+    OVERRIDE_PROVIDER: ""
+    GITHUB_ORG: "terraform-providers"

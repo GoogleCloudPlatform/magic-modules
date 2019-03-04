@@ -30,6 +30,7 @@ require 'provider/ansible'
 require 'provider/inspec'
 require 'provider/terraform'
 require 'provider/terraform_example'
+require 'provider/terraform_object_library'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 product_names = nil
@@ -134,7 +135,8 @@ product_names.each do |product_name|
 
   else
     override_providers = {
-      'examples' => Provider::TerraformExample
+      'examples' => Provider::TerraformExample,
+      'validator' => Provider::TerraformObjectLibrary
     }
 
     provider_class = override_providers[force_provider]

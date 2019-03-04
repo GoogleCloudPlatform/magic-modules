@@ -51,11 +51,12 @@ if ! git diff --name-only HEAD^1 | grep -v "third_party"; then
 fi
 
 # Terraform
-if [ -n "$TERRAFORM_REPO_USER" ]; then
+if [ -n "$TERRAFORM_VERSIONS" ]; then
   for VERSION in "${TERRAFORM_VERSIONS[@]}"; do
     IFS=":" read -ra TERRAFORM_DATA <<< "$VERSION"
     PROVIDER_NAME="${TERRAFORM_DATA[0]}"
     SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
+    TERRAFORM_REPO_USER="${TERRAFORM_DATA[2]}"
 
     pushd "build/$SUBMODULE_DIR"
 

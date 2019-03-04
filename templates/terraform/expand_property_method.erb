@@ -18,7 +18,7 @@
                            property: property)) -%>
 <% else -%>
 <%   if property.is_a?(Api::Type::Map) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]interface{}, error) {
   if v == nil {
     return map[string]interface{}{}, nil
   }
@@ -47,7 +47,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 <%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
 <%   end -%>
 <%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
   }
@@ -58,7 +58,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   return m, nil
 }
 <%   elsif tf_types.include?(property.class) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 <%     if property.is_set -%>
   v = v.(*schema.Set).List()
 <%     end -%>
