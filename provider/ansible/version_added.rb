@@ -96,7 +96,7 @@ module Provider
       def build_path(prop)
         path = []
         while prop
-          path << prop
+          path << prop if !path.last or path.last.name != prop.name
           prop = prop.__parent
         end
         [path.last.__resource.name] + path.map(&:name).reverse
