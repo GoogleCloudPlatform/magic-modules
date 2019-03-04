@@ -151,6 +151,86 @@ objects:
           'https://cloud.google.com/dns/zones/'
       api: 'https://cloud.google.com/dns/api/v1/managedZones'
   - !ruby/object:Api::Resource
+    name: 'Policy'
+    kind: 'dns#policy'
+    base_url: 'projects/{{project}}/policies'
+    input: true
+    description: |
+      A policy is a collection of DNS rules applied to one or more Virtual
+      Private Cloud resources.
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'policies'
+    properties:
+      - !ruby/object:Api::Type::NestedObject
+        name: 'alternativeNameServerConfig'
+        description: |
+          Sets an alternative name server for the associated networks.
+          When specified, all DNS queries are forwarded to a name server that you choose.
+          Names such as .internal are not available when an alternative name server is specified.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/policies/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::Array
+            name: 'targetNameServers'
+            description: |
+              Sets an alternative name server for the associated networks. When specified,
+              all DNS queries are forwarded to a name server that you choose. Names such as .internal
+              are not available when an alternative name server is specified.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'ipv4Address'
+                  description: 'IPv4 address to forward to.'
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          A mutable string of at most 1024 characters associated with this
+          resource for the user's convenience. Has no effect on the policy's
+          function.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/policies/{{name}}'
+        required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableInboundForwarding'
+        description: |
+          Allows networks bound to this policy to receive DNS queries sent
+          by VMs or applications over VPN connections. When enabled, a
+          virtual IP address will be allocated from each of the sub-networks
+          that are bound to this policy.
+        send_empty_value: true
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/policies/{{name}}'
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: Unique identifier for the resource; defined by the server.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          User assigned name for this policy.
+        required: true
+      - !ruby/object:Api::Type::Array
+        name: 'networks'
+        description: 'List of network names specifying networks to which this policy is applied.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+            # are possible.
+          - !ruby/object:Api::Type::String
+              name: 'networkUrl'
+              description: |
+                The fully qualified URL of the VPC network to bind to.
+                This should be formatted like
+                `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/policies/{{name}}'
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Using DNS server policies':
+          'https://cloud.google.com/dns/zones/#using-dns-server-policies'
+      api: 'https://cloud.google.com/dns/docs/reference/v1beta2/policies'
+    min_version: beta
+  - !ruby/object:Api::Resource
     name: 'Project'
     kind: 'dns#project'
     description: |
