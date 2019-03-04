@@ -64,6 +64,11 @@ The following arguments are supported:
     indefinitely. Expired tables will be deleted and their storage
     reclaimed.
 
+* `external_data_configuration` - (Optional) Describes the data format,
+    location, and other properties of a table stored outside of BigQuery.
+    By defining these properties, the data source can then be queried as
+    if it were a standard BigQuery table. Structure is documented below.
+
 * `friendly_name` - (Optional) A descriptive name for the table.
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
@@ -75,6 +80,73 @@ The following arguments are supported:
 
 * `view` - (Optional) If specified, configures this table as a view.
     Structure is documented below.
+
+The `external_data_configuration` block supports:
+
+* `autodetect` - (Required) - Let BigQuery try to autodetect the schema
+    and format of the table.
+
+* `bigtable_options` (Optional, Beta) - A JSON document with additional
+    options if `source_format` is set to "BIGTABLE".
+
+* `compression` (Optional) - The compression type of the data source.
+    Valid values are "NONE" or "GZIP".
+
+* `cvs_options` (Optional) - Additional properties to set if
+    `source_format` is set to "CSV". Structure is documented below.
+
+* `google_sheets_options` (Optional) - Additional options if
+    `source_format` is set to "GOOGLE_SHEETS". Structure is
+    documented below.
+
+* `ignore_unknown_values` (Optional) - Indicates if BigQuery should
+    allow extra values that are not represented in the table schema.
+    If true, the extra values are ignored. If false, records with
+    extra columns are treated as bad records, and if there are too
+    many bad records, an invalid error is returned in the job result.
+    The default value is false.
+
+* `max_bad_records` (Optional) - The maximum number of bad records that
+    BigQuery can ignore when reading data.
+
+* `schema` (Optional) - A JSON schema for the data. Schema is required
+    for CSV and JSON formats schema is disallowed for Google Cloud
+    Bigtable, Cloud Datastore backups, and Avro formats.
+
+* `schema_format` (Required) - The data format. Supported values are:
+    "CVS", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO",
+    "DATSTORE_BACKUP", and "BIGTABLE" (Beta).
+
+* `source_uris` - (Required) A list of the fully-qualified URIs that point to
+    your data in Google Cloud.
+
+The `cvs_options` block supports:
+
+* `allow_jagged_rows` (Optional) - Indicates if BigQuery should accept rows
+    that are missing trailing optional columns.
+
+* `allow_quoted_newlines` (Optional) - Indicates if BigQuery should allow
+    quoted data sections that contain newline characters in a CSV file.
+    The default value is false.
+
+* `encoding` (Optional) - The character encoding of the data. The supported
+    values are UTF-8 or ISO-8859-1.
+
+* `field_delimiter` (Optional) - The separator for fields in a CSV file.
+
+* `quote` (Optional) - The value that is used to quote data sections in a
+    CSV file.
+
+* `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
+    file that BigQuery will skip when reading the data.
+
+The `google_sheets_options` block supports:
+
+* `range` (Optional, Beta) - Range of a sheet to query from. Only used when
+    non-empty. Typical format: !:
+
+* `skip_leading_rows` (Optional) - The number of rows at the top of the scheet
+    that BigQuery will skip when reading the data.
 
 The `time_partitioning` block supports:
 
