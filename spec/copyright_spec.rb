@@ -26,8 +26,9 @@ describe 'ensure files have copyright notice' do
                   artifacts = f.start_with?("#{my_root}/build/")
                   presubmit = f.start_with?("#{my_root}/build/presubmit/")
                   vendor = f.start_with?("#{my_root}/vendor/")
+                  version_added = f.include?('ansible_version_added.yaml')
 
-                  !my_tests && !artifacts && !vendor && !presubmit
+                  !my_tests && !artifacts && !vendor && !presubmit && !version_added
                 end
     checker = Google::CopyrightChecker.new(files)
     missing = checker.check_missing.collect { |f| "  - #{f}" }
