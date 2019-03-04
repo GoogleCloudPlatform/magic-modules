@@ -11,18 +11,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CURRENT_ANSIBLE_VERSION = '2.8'
+CURRENT_ANSIBLE_VERSION = '2.8'.freeze
 
 module Provider
   module Ansible
+    # All logic involved with altering the version_added yaml file and reading
+    # values from it.
     module VersionAdded
       def build_version_added
         product_name = @api.name.downcase
         versions_file = "products/#{product_name}/ansible_version_added.yaml"
-        raise "File not found" unless File.exist?(versions_file)
+        raise 'File not found' unless File.exist?(versions_file)
 
         versions = if File.exist?(versions_file)
-                     YAML.load(File.read(versions_file))
+                     YAML.safe_load(File.read(versions_file))
                    else
                      {}
                    end
@@ -96,7 +98,7 @@ module Provider
       def build_path(prop)
         path = []
         while prop
-          path << prop if !path.last or path.last.name != prop.name
+          path << prop if !path.last || (path.last.name != prop.name)
           prop = prop.__parent
         end
         [path.last.__resource.name] + path.map(&:name).reverse
@@ -105,7 +107,7 @@ module Provider
       # Given a path of resources/properties, return the same path, but with versions substituted for names.
       def version_path(path)
         version_path = []
-        for i in path.length.times
+        path.length.times.each do |i|
           version_path << correct_version(path[0, i], @version_added)
         end
         version_path
