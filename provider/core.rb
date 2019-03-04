@@ -412,7 +412,7 @@ module Provider
 
     def run_formatter(command)
       output = %x(#{command} 2>&1)
-      Google::LOGGER.error output if $CHILD_STATUS && $CHILD_STATUS.exitstatus != 0
+      Google::LOGGER.error output unless $CHILD_STATUS&.exitstatus == 0
     end
 
     def wrap_field(field, spaces)
