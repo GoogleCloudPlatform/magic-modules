@@ -9,7 +9,7 @@ require 'provider/ansible'
 require 'overrides/runner'
 
 
-CURRENT_ANSBILE_VERSION = '2.8'
+CURRENT_ANSIBLE_VERSION = '2.8'
 
 def version(path, struct)
   path = path.map(&:to_sym) + [:version_added]
@@ -31,10 +31,15 @@ end
 products = Dir["products/**/ansible.yaml"].map { |x| x.split('/')[1] }
 for product in products
   # Get api.yaml
-  product_yaml_path = ("products/#{product}/api.yaml")
-  version_yaml_path = ("products/#{product}/ansible_version_added.yaml")
+  product_yaml_path = "products/#{product}/api.yaml"
+  provider_yaml_path = "products/#{product}/ansible.yaml"
+  version_yaml_path = "products/#{product}/ansible_version_added.yaml"
   product_api = Api::Compiler.new(product_yaml_path).run
   product_api.validate
+
+  # Build overrides.
+  product_api, _ = Provider::Config.parse(provider_yaml_path, product_api, 'ga')
+
 
   versions = if File.exists?(version_yaml_path)
                YAML.load(File.read(version_yaml_path))
