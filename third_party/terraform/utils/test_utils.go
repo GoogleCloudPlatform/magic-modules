@@ -1,14 +1,14 @@
 package google
 
 import (
-	"strconv"
 	"reflect"
+	"strconv"
 )
 
 type ResourceDataMock struct {
-	FieldsInSchema		map[string]interface{}
+	FieldsInSchema      map[string]interface{}
 	FieldsWithHasChange []string
-	id					string
+	id                  string
 }
 
 func (d *ResourceDataMock) HasChange(key string) bool {
@@ -35,7 +35,6 @@ func (d *ResourceDataMock) GetOk(key string) (interface{}, bool) {
 		return v, false
 	}
 }
-
 
 func (d *ResourceDataMock) GetOkExists(key string) (interface{}, bool) {
 	for k, v := range d.FieldsInSchema {
