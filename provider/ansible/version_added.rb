@@ -24,7 +24,7 @@ module Provider
         raise 'File not found' unless File.exist?(versions_file)
 
         versions = if File.exist?(versions_file)
-                     YAML.safe_load(File.read(versions_file))
+                     YAML.safe_load(File.read(versions_file), [Symbol])
                    else
                      {}
                    end
