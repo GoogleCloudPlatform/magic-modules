@@ -46,14 +46,8 @@ resource "google_compute_region_instance_group_manager" "foobar" {
   name   = "<%= ctx[:vars]['rigm_name'] %>"
   region = "us-central1"
 
-<% if ctx[:version].nil? || ctx[:version] == 'ga' -%>
   instance_template  = "${google_compute_instance_template.foobar.self_link}"
-<% else -%>
-  version {
-    instance_template  = "${google_compute_instance_template.foobar.self_link}"
-    name               = "primary"
-  }
-<% end -%>
+
   target_pools       = ["${google_compute_target_pool.foobar.self_link}"]
   base_instance_name = "foobar"
 }

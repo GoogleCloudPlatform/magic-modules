@@ -20,7 +20,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_alert_policy_basic"
         primary_resource_id: "alert_policy"
-        version: <%= version_name %>
         vars:
           alert_policy_display_name: "My Alert Policy"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -34,13 +33,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_basic"
         primary_resource_id: "basic"
-        version: <%= version_name %>
         vars:
           display_name: "New Test Group"
       - !ruby/object:Provider::Terraform::Examples
         name: "monitoring_group_subgroup"
         primary_resource_id: "subgroup"
-        version: <%= version_name %>
         vars:
           display_name: "New Test SubGroup"
           display_name2: "New Test SubGroup"
@@ -57,7 +54,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     mutex: stackdriver/notifications/{{project}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        version: <%= version_name %>
         name: "notification_channel_basic"
         primary_resource_id: "basic"
         vars:
@@ -88,13 +84,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        version: <%= version_name %>
         name: "uptime_check_config_http"
         primary_resource_id: "http"
         vars:
           display_name: "http-uptime-check"
       - !ruby/object:Provider::Terraform::Examples
-        version: <%= version_name %>
         name: "uptime_check_tcp"
         primary_resource_id: "tcp_group"
         vars:

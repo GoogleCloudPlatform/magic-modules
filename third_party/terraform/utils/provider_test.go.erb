@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -13,6 +14,9 @@ import (
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
+<% unless version == 'ga' -%>
+var testAccProvidersOiCS map[string]terraform.ResourceProvider
+<% end -%>
 var testAccProvider *schema.Provider
 var testAccRandomProvider *schema.Provider
 
@@ -60,10 +64,25 @@ var billingAccountEnvVars = []string{
 func init() {
 	testAccProvider = Provider().(*schema.Provider)
 	testAccRandomProvider = random.Provider().(*schema.Provider)
+	<% if version == 'ga' -%>
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"google": testAccProvider,
 		"random": testAccRandomProvider,
 	}
+	<% else -%>
+	testAccProviders = map[string]terraform.ResourceProvider{
+		"google": testAccProvider,
+		"random": testAccRandomProvider,
+	}
+
+	// The OiCS provider map is used to ensure that OiCS examples use `google-beta`
+	// if the example is versioned as beta; normal beta tests should continue to
+	// use the standard provider map.
+	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
+		"google-beta": testAccProvider,
+		"random": testAccRandomProvider,
+	}
+	<% end -%>
 }
 
 func TestProvider(t *testing.T) {

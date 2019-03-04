@@ -17,14 +17,30 @@ else
 	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
 end
 %>
-<% object.examples.reject(&:skip_test).each do |example| -%>
 <%
+# @api.version_obj_or_default(version) is slightly wrong; we want the _object_ version or the generation version.
+# Ultimately this won't matter though, since the API default should always be less than the object default.
+object.examples
+         .reject(&:skip_test)
+         .reject { |e| @api.version_obj_or_default(version) < @api.version_obj_or_default(e.min_version) }
+         .each do |example| -
+
+
 	# {Compute}{Address}_{addressBasic}
 	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
 	  ignore_read = data[:object].all_user_properties
                  .select(&:ignore_read)
                  .map { |p| p.name.underscore }
                  .concat(example.ignore_read_extra)
+
+
+	# If we've set an explicit version for the example use that, otherwise use the
+	# object version.
+  if example.min_version.nil?
+  	example_version = object.min_version.name
+  else
+    example_version = example.min_version
+  end
 -%>
 
 func TestAcc<%= test_slug -%>(t *testing.T) {
@@ -53,12 +69,18 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
+		<% if example_version == 'ga' -%>
 		Providers:    testAccProviders,
+		<% else -%>
+		Providers:    testAccProvidersOiCS,
+		<% end -%>
 		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc<%= test_slug -%>(context),
 			},
+		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
+		<% if example_version == 'ga' -%>
 			{
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,
@@ -67,6 +89,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
         ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
         <%- end -%>
 			},
+		<% end -%>
 		},
 	})
 }

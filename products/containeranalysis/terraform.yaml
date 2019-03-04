@@ -21,7 +21,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "container_analysis_note_basic"
         primary_resource_id: "note"
-        version: <%= version_name %>
         vars:
           note_name: "test-attestor-note"
     properties:
