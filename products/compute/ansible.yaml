@@ -21,85 +21,14 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - python >= 2.6
     - requests >= 2.18.4
     - google-auth >= 1.3.0
-  version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
-  Instance: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Address: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-    version_added: '2.7'
-  BackendBucket: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  BackendService: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Disk: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Firewall: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  ForwardingRule: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  GlobalAddress: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  GlobalForwardingRule: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  HealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  HttpHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  HttpsHealthCheck: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Image: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  InstanceGroup: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  InstanceGroupManager: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  InterconnectAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
-  Network: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
-    version_added: '2.7'
-  RegionDisk: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
-  Route: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Router: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
   Snapshot: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
     version_added: '2.7'
-  SslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  SslPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Subnetwork: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  TargetHttpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  TargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  TargetSslProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  TargetTcpProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  UrlMap: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  VpnTunnel: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
   # Readonly resources.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -114,20 +43,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Address: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      addressType: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
-      networkTier: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      subnetwork: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
   BackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
-      loadBalancingScheme: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
-      iap: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
@@ -137,10 +54,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The source snapshot used to create this disk. You can provide this as
           a partial or full URL to the resource.
-      labels: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
-      type: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
   Firewall: !ruby/object:Overrides::Ansible::ResourceOverride
     imports:
       - re
@@ -152,26 +65,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       network: !ruby/object:Overrides::Ansible::PropertyOverride
         default_value:
           selfLink: global/networks/default
-      denied: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      destinationRanges: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      direction: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      disabled: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      priority: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      sourceServiceAccounts: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      targetServiceAccounts: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   ForwardingRule: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
-      networkTier: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      target: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
       IPAddress:  !ruby/object:Overrides::Ansible::PropertyOverride
         description: |
           The IP address that this forwarding rule is serving on behalf of.
@@ -203,12 +98,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * regions/region/addresses/address
           * global/addresses/address
           * address
-  GlobalAddress: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      addressType: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      address: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   GlobalForwardingRule: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       IPAddress:  !ruby/object:Overrides::Ansible::PropertyOverride
@@ -260,14 +149,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - timeout_seconds
-  Image: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      labels: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   InstanceGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       instances: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
         exclude: false
     update: |
       instance = InstanceLogic(module)
@@ -295,21 +179,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases: ["ip_forward"]
       disks.initializeParams.sourceImage: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["image", "image_family"]
-      status: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
   InterconnectAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
     has_tests: false
-  Network: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      routingConfig: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   RegionDisk: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
     properties:
       sourceSnapshot: !ruby/object:Overrides::Ansible::PropertyOverride
         description: |
@@ -317,8 +193,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           a partial or full URL to the resource.
   Route: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
-      description: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
       nextHopGateway: !ruby/object:Overrides::Ansible::PropertyOverride
         description: |
           URL to a gateway that should handle matching packets.
@@ -329,32 +203,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * https://www.googleapis.com/compute/v1/projects/project/global/gateways/default-internet-gateway
           * projects/project/global/gateways/default-internet-gateway
           * global/gateways/default-internet-gateway
-  Router: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  SslPolicy: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
-  Subnetwork: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      enableFlowLogs: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      secondaryIpRanges: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
-  TargetHttpsProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      quicOverride: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
-      sslPolicy: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-  TargetSslProxy: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      sslPolicy: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: false
-    version_added: '2.7'
   # Not yet implemented.
   Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -375,7 +228,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   VpnTunnel: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.7'
     post_create: |
       labels_update(module, module.params, fetch)
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride

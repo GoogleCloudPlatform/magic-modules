@@ -21,7 +21,6 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - python >= 2.6
     - requests >= 2.18.4
     - google-auth >= 1.3.0
-  version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
@@ -36,13 +35,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   DefaultObjectACL: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Bucket: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      defaultObjectAcl: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.7'
   Object: !ruby/object:Overrides::Ansible::ResourceOverride
     template: 'products/storage/helpers/ansible/object_template.erb'
-    version_added: '2.8'
     has_tests: false
   ObjectAccessControl: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

@@ -21,14 +21,12 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - python >= 2.6
     - requests >= 2.18.4
     - google-auth >= 1.3.0
-  version_added: '2.5'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ResourceRecordSet: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
@@ -38,7 +36,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "'www.testzone-4.com.'not in \"{{ results['items'] | map(attribute='name') | list }}\""
     collection: "https://www.googleapis.com/dns/v1/projects/{project}/managedZones/{managed_zone}/rrsets"
   ManagedZone: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       filter: !ruby/object:Provider::Ansible::FilterProp
         name: dnsName
@@ -46,13 +43,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       query_options: false
       filter_api_param: dnsName
 overrides: !ruby/object:Overrides::ResourceOverrides
-  ManagedZone: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      labels: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
   ResourceRecordSet: !ruby/object:Overrides::Ansible::ResourceOverride
     access_api_results: true
-    version_added: '2.6'
     imports:
       - copy
       - datetime

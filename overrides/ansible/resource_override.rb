@@ -38,7 +38,6 @@ module Overrides
           template
           unwrap_resource
           update
-          version_added
 
           facts
         ]
@@ -68,7 +67,6 @@ module Overrides
         check :template, type: ::String
         check :update, type: ::String
         check :unwrap_resource, type: :boolean, default: false
-        check :version_added, type: ::String
 
         check :facts, type: Provider::Ansible::FactsOverride,
                       default: Provider::Ansible::FactsOverride.new

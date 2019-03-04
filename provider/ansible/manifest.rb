@@ -21,7 +21,6 @@ module Provider
       attr_reader :status
       attr_reader :supported_by
       attr_reader :requirements
-      attr_reader :version_added
       attr_reader :author
 
       def validate
@@ -29,7 +28,6 @@ module Provider
         check :status, type: Array, item_type: String
         check :supported_by, type: String
         check :requirements, type: Array, item_type: String
-        check :version_added, type: String
         check :author, type: String
       end
 
