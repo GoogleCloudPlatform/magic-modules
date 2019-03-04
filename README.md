@@ -19,6 +19,12 @@ Magic Modules generates GCP support for:
 * Ansible
 * InSpec
 
+In addition, Magic Modules generates support for several companion
+features/tools:
+
+* Terraform Google Inventory Mapper
+* Terraform in Cloud Shell
+
 Importantly, Magic Modules *isn't* full code generation. Every change is made
 manually; more than a code generator, Magic Modules is a force multiplier for 
 development. While many Magic Modules resources are defined exactly based on the
