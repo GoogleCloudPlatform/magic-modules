@@ -76,7 +76,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_policy_basic"
         primary_resource_id: "example-policy"
-        version: <%= version_name %>
         vars:
           policy_name: "example-policy"
           network_1_name: "network-1"
