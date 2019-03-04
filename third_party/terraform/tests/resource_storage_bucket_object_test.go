@@ -127,6 +127,40 @@ func TestAccStorageObject_content(t *testing.T) {
 	})
 }
 
+func TestAccStorageObject_sensitiveContent(t *testing.T) {
+	t.Parallel()
+
+	bucketName := testBucketName()
+	data := []byte(content)
+	h := md5.New()
+	if _, err := h.Write(data); err != nil {
+		t.Errorf("error calculating md5: %v", err)
+	}
+	data_md5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	testFile := getNewTmpTestFile(t, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectSensitiveContent(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(bucketName, objectName, data_md5),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "content_type", "text/plain; charset=utf-8"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "storage_class", "STANDARD"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccStorageObject_withContentCharacteristics(t *testing.T) {
 	t.Parallel()
 
@@ -309,6 +343,20 @@ resource "google_storage_bucket_object" "object" {
 	name = "%s"
 	bucket = "${google_storage_bucket.bucket.name}"
 	content = "%s"
+}
+`, bucketName, objectName, content)
+}
+
+func testGoogleStorageBucketsObjectSensitiveContent(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+	name = "%s"
+}
+
+resource "google_storage_bucket_object" "object" {
+	name = "%s"
+	bucket = "${google_storage_bucket.bucket.name}"
+	sensitive_content = "%s"
 }
 `, bucketName, objectName, content)
 }

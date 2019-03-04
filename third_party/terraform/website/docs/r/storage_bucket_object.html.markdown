@@ -39,10 +39,12 @@ The following arguments are supported:
 One of the following is required:
 
 * `content` - (Optional) Data as `string` to be uploaded. Must be defined if
-    `source` is not.
+    `sensitive_content` and `source` is not.
+
+* `sensitive_content` - (Optional) Data as `string` to be uploaded. Functionally same as `content`, except value is marked sensitive within Terraform. Must be defined if `content` and `source` is not. Note: using this parameter will mask the content during plan and apply output, but it is still plaintext within the state file.
 
 * `source` - (Optional) A path to the data you want to upload. Must be defined
-    if `content` is not.
+    if `content` and `sensitive_content` is not.
 
 - - -
 

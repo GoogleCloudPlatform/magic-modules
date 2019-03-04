@@ -71,7 +71,15 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"source"},
+				ConflictsWith: []string{"sensitive_content", "source"},
+			},
+
+			"sensitive_content": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"content", "source"},
+				Sensitive:     true,
 			},
 
 			"crc32c": {
@@ -95,7 +103,7 @@ func resourceStorageBucketObject() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
-				ConflictsWith: []string{"content"},
+				ConflictsWith: []string{"content", "sensitive_content"},
 			},
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
@@ -119,6 +127,10 @@ func resourceStorageBucketObject() *schema.Resource {
 					}
 
 					if content, ok := d.GetOkExists("content"); ok {
+						localMd5Hash = getContentMd5Hash([]byte(content.(string)))
+					}
+
+					if content, ok := d.GetOkExists("sensitive_content"); ok {
 						localMd5Hash = getContentMd5Hash([]byte(content.(string)))
 					}
 
@@ -178,8 +190,10 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 		}
 	} else if v, ok := d.GetOk("content"); ok {
 		media = bytes.NewReader([]byte(v.(string)))
+	} else if v, ok := d.GetOk("sensitive_content"); ok {
+		media = bytes.NewReader([]byte(v.(string)))
 	} else {
-		return fmt.Errorf("Error, either \"content\" or \"source\" must be specified")
+		return fmt.Errorf("Error, either \"content\", \"sensitive_content\", or \"source\" must be specified")
 	}
 
 	objectsService := storage.NewObjectsService(config.clientStorage)
