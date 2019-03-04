@@ -51,7 +51,7 @@ module Provider
         @max_columns = 160
 
         # Generate version_added_file
-        build_version_added
+        @version_added = build_version_added
       end
 
       # Returns a string representation of the corresponding Python type

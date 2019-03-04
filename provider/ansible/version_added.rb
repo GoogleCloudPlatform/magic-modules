@@ -52,6 +52,8 @@ module Provider
 
         # Write back to disk.
         File.write("products/#{product_name}/ansible_version_added.yaml", struct.to_yaml)
+
+        struct
       end
 
       private
