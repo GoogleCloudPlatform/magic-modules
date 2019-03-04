@@ -110,6 +110,14 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
     fi
   fi
   popd
+
+  # If there is now a difference in the ansible_version_added files, those
+  # should be pushed back up to the user's MM branch to be reviewed.
+  if git diff --name-only HEAD^1 | grep -v "ansible_version_added.yaml"; then
+    git add products/**/ansible_version_added.yaml
+    git commit -m "Ansible version_added changes"
+    git push origin $BRANCH_NAME
+  fi
 fi
 
   if [ -n "$INSPEC_REPO_USER" ]; then
