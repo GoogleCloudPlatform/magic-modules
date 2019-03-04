@@ -8,38 +8,8 @@ require 'provider/config'
 require 'provider/ansible'
 require 'overrides/runner'
 
-products = [
-  'bigquery',
-  'cloudbuild',
-  'compute',
-  'container',
-  'dns',
-  'iam',
-  'pubsub',
-  'redis',
-  'resourcemanager',
-  'sourcerepo',
-  'spanner',
-  'sql',
-  'storage'
-]
 
 CURRENT_ANSBILE_VERSION = '2.8'
-
-class Version
-  def initialize(product)
-    version_added_path = "products/#{product}/ansible_version_added.yaml"
-    if File.exists?(version_added_path)
-      @version_added_file = YAML.load(File.read(version_added_path))
-    end
-  end
-
-  def version(object, higher_level)
-    return higher_level unless object
-    return object if object.to_f > higher_level.to_f
-    higher_level
-  end
-end
 
 def version(object, higher_level)
   return higher_level unless object
@@ -47,6 +17,7 @@ def version(object, higher_level)
   higher_level
 end
 
+# Builds out property information (with nesting)
 def property(prop, resource_version_added)
   version_for_prop = version(prop.version_added, resource_version_added)
   property_hash = {
@@ -59,6 +30,7 @@ def property(prop, resource_version_added)
   property_hash
 end
 
+products = Dir["products/**/ansible.yaml"].map { |x| x.split('/')[1] }
 for product in products
   # Get api.yaml
   product_yaml_path = ("products/#{product}/api.yaml")
@@ -70,8 +42,7 @@ for product in products
   product_api, provider_config = Provider::Config.parse(provider_yaml_path, product_api, 'ga')
 
   struct = {
-    facts: {
-    },
+    facts: {},
     regular: {}
   }
 
@@ -86,6 +57,8 @@ for product in products
       resource[prop.name.to_sym] = property(prop, resource[:version_added])
     end
     struct[:regular][obj.name.to_sym] = resource
+
+    # Add facts modules from facts datasources.
     struct[:facts][obj.name.to_sym] = {
       version_added: version(provider_config.datasources.instance_variable_get("@#{obj.name}").instance_variable_get('@version_added'), provider_config.manifest.get('version_added', obj))
     }
