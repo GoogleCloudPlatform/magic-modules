@@ -26,7 +26,6 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 datasources: !ruby/object:Overrides::ResourceOverrides
   Snapshot: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-    version_added: '2.7'
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   # Readonly resources.

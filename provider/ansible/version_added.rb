@@ -35,7 +35,7 @@ module Provider
         }
 
         # Build out paths for regular modules.
-        @api.objects.each do |obj|
+        @api.objects.reject(&:exclude).each do |obj|
           resource = {
             version_added: correct_version([:regular, obj.name], versions)
           }
@@ -67,9 +67,10 @@ module Provider
           prop_version = correct_version(path, @version_added)
           # We don't need a version added if it matches the resource.
           return nil if res_version == prop_version
-          # If our property is the same as the properties above it, we don't
-          # need a version added.
-          return nil if version_path(path).sort == version_path(path)
+
+          # If property is the same as the one above it, ignore it.
+          return nil if version_path(path).last == version_path(path)[-2]
+
 
           prop_version
         end
