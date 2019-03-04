@@ -18,11 +18,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_basic"
         primary_resource_id: "example-zone"
-        version: <%= version_name %>
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_managed_zone_private"
         primary_resource_id: "private-zone"
-        version: <%= version_name %>
         skip_test: true
         vars:
           zone_name: "private-zone"
@@ -78,7 +76,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "dns_policy_basic"
         primary_resource_id: "example-policy"
-        version: <%= version_name %>
         vars:
           policy_name: "example-policy"
           network_1_name: "network-1"

@@ -19,15 +19,16 @@ module Provider
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
     def generate(output_folder, types, version_name, _product_path, _dump_yaml)
-      version = @api.version_obj_or_default(version_name)
-      generate_objects(output_folder, types, version)
+      generate_objects(output_folder, types, version_name)
     end
 
     # Create a directory of examples per resource
     def generate_resource(data)
+      version = @api.version_obj_or_default(data[:version])
       examples = data[:object].examples
                               .reject(&:skip_test)
                               .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
+                              .reject { |e| version < @api.version_obj_or_default(e.min_version) }
 
       examples.each do |example|
         target_folder = data[:output_folder]

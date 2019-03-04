@@ -80,6 +80,8 @@ To get more information about <%= object.name -%>, see:
 ~> **Warning:** <%= object.docs.warning -%>
 <%- end -%>
 
+<%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
+     Unless/Until we split our docs, this is a non-issue. -%>
 <% unless object.examples.empty? -%>
   <%- object.examples.each do |example| -%>
     <%- unless example.skip_test -%>

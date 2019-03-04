@@ -1,4 +1,6 @@
 resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
+  provider = "google-beta"
+
   name = "<%= ctx[:vars]["instance_name"] %>"
   zone = "us-central1-b"
   tier = "PREMIUM"
@@ -12,4 +14,9 @@ resource "google_filestore_instance" "<%= ctx[:primary_resource_id] %>" {
     network = "default"
     modes   = ["MODE_IPV4"]
   }
+}
+
+provider "google-beta"{
+  region = "us-central1"
+  zone   = "us-central1-a"
 }

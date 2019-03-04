@@ -19,7 +19,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_topic_basic"
         primary_resource_id: "example"
-        version: <%= version_name %>
         vars:
           topic_name: "example-topic"
     properties:
@@ -33,7 +32,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_push"
         primary_resource_id: "example"
-        version: <%= version_name %>
         skip_test: true
         vars:
           topic_name: "example-topic"
@@ -41,14 +39,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_pull"
         primary_resource_id: "example"
-        version: <%= version_name %>
         vars:
           topic_name: "example-topic"
           subscription_name: "example-subscription"
       - !ruby/object:Provider::Terraform::Examples
         name: "pubsub_subscription_different_project"
         primary_resource_id: "example"
-        version: <%= version_name %>
         skip_test: true
         vars:
           topic_name: "example-topic"

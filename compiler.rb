@@ -111,7 +111,7 @@ product_names.each do |product_name|
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
 
-  Google::LOGGER.info "Compiling '#{product_name}' output to '#{output_path}'"
+  Google::LOGGER.info "Compiling '#{product_name}' (at #{version}) output to '#{output_path}'"
   Google::LOGGER.info \
     "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
 

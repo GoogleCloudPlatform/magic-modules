@@ -23,7 +23,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "cloudbuild_trigger_filename"
         primary_resource_id: "filename-trigger"
-        version: <%= version_name %>
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'trigger_id'
