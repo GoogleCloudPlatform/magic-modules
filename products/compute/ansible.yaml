@@ -24,6 +24,8 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
+  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Snapshot: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -34,6 +36,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
