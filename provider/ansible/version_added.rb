@@ -37,6 +37,7 @@ module Provider
         # Build out paths for regular modules.
         @api.objects.reject(&:exclude).each do |obj|
           next if obj.not_in_version?(@api.version_obj_or_default('ga'))
+
           resource = {
             version_added: correct_version([:regular, obj.name], versions)
           }
@@ -72,7 +73,6 @@ module Provider
           # If property is the same as the one above it, ignore it.
           return nil if version_path(path).last == version_path(path)[-2]
 
-
           prop_version
         end
       end
@@ -86,7 +86,8 @@ module Provider
         }
 
         prop.nested_properties.each do |nested_p|
-          property_hash[nested_p.name.to_sym] = property_version(nested_p, path + [prop.name], struct)
+          property_hash[nested_p.name.to_sym] = property_version(nested_p,
+                                                                 path + [prop.name], struct)
         end
         property_hash
       end
@@ -106,7 +107,8 @@ module Provider
         [path.last.__resource.name] + path.map(&:name).reverse
       end
 
-      # Given a path of resources/properties, return the same path, but with versions substituted for names.
+      # Given a path of resources/properties, return the same path, but with
+      # versions substituted for names.
       def version_path(path)
         version_path = []
         path.length.times.each do |i|
