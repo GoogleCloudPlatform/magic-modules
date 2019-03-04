@@ -111,8 +111,8 @@ module Provider
       # versions substituted for names.
       def version_path(path)
         version_path = []
-        path.length.times.each do |i|
-          version_path << correct_version(path[0, i], @version_added)
+        (path.length - 1).times.each do |i|
+          version_path << correct_version(path[0, i + 2], @version_added)
         end
         version_path
       end
