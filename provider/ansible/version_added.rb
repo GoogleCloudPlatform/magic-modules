@@ -56,6 +56,23 @@ module Provider
         struct
       end
 
+      def version_added(object, type = :regular)
+        if object.is_a?(Api::Resource)
+          correct_version([type, object.name], @version_added)
+        else
+          path = [type] + build_path(object)
+          res_version = correct_version(path[0, 2], @version_added)
+          prop_version = correct_version(path, @version_added)
+          # We don't need a version added if it matches the resource.
+          return nil if res_version == prop_version
+          # If our property is the same as the properties above it, we don't
+          # need a version added.
+          return nil if version_path(path).sort == version_path(path)
+
+          prop_version
+        end
+      end
+
       private
 
       # Builds out property information (with nesting)
@@ -73,6 +90,25 @@ module Provider
       def correct_version(path, struct)
         path = path.map(&:to_sym) + [:version_added]
         struct.dig(*path) || CURRENT_ANSIBLE_VERSION
+      end
+
+      # Build out the path of resources/properties that this property exists within.
+      def build_path(prop)
+        path = []
+        while prop
+          path << prop
+          prop = prop.__parent
+        end
+        [path.last.__resource.name] + path.map(&:name).reverse
+      end
+
+      # Given a path of resources/properties, return the same path, but with versions substituted for names.
+      def version_path(path)
+        version_path = []
+        for i in path.length.times
+          version_path << correct_version(path[0, i], @version_added)
+        end
+        version_path
       end
     end
   end

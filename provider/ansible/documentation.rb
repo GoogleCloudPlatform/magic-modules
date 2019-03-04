@@ -42,7 +42,7 @@ module Provider
               end),
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => prop.aliases,
-            'version_added' => (prop.version_added&.to_f),
+            'version_added' => (version_added(prop)&.to_f),
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
                 if prop.nested_properties?
