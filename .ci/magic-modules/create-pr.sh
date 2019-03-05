@@ -111,6 +111,8 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
   fi
   popd
 
+  pwd
+  git remote -v
   # If there is now a difference in the ansible_version_added files, those
   # should be pushed back up to the user's MM branch to be reviewed.
   if git diff --name-only HEAD^1 | grep "ansible_version_added.yaml"; then
