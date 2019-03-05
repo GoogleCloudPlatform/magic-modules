@@ -21,13 +21,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "tpu_node_basic"
         primary_resource_id: "tpu"
-        version: <%= version_name %>
         vars:
           node_name: "test-tpu"
       - !ruby/object:Provider::Terraform::Examples
         name: "tpu_node_full"
         primary_resource_id: "tpu"
-        version: <%= version_name %>
         vars:
           node_name: "test-tpu"
           network_name: "test-tpu-network"
