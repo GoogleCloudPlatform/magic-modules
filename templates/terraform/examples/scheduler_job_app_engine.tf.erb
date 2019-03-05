@@ -1,6 +1,4 @@
 resource "google_cloud_scheduler_job" "job" {
-  provider = "google-beta"
-
   name     = "<%= ctx[:vars]['job_name'] %>"
   schedule = "*/4 * * * *"
   description = "test app engine job"
@@ -17,9 +15,4 @@ resource "google_cloud_scheduler_job" "job" {
 
     relative_uri = "/ping"
   }
-}
-
-provider "google-beta"{
-  region = "us-central1"
-  zone   = "us-central1-a"
 }
