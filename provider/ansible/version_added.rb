@@ -60,6 +60,10 @@ module Provider
         struct
       end
 
+      # This fetches a version_added from the config file for a Resource or Property.
+      # While the machine-generated config has every property,
+      # this function only returns a version_added if it cannot be inferred from
+      # elsewhere in the module.
       def version_added(object, type = :regular)
         if object.is_a?(Api::Resource)
           correct_version([type, object.name], @version_added)
