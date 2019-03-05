@@ -72,7 +72,7 @@ func resourceBigQueryTable() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						// Autodetect : [Required] Let BigQuery try to autodetect the
+						// Autodetect : [Required] If true, let BigQuery try to autodetect the
 						// schema and format of the table.
 						"autodetect": {
 							Type:     schema.TypeBool,
