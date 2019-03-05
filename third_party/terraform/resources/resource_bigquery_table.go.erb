@@ -68,7 +68,7 @@ func resourceBigQueryTable() *schema.Resource {
 			// By defining these properties, the data source can then be queried as
 			// if it were a standard BigQuery table.
 			"external_data_configuration": {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
