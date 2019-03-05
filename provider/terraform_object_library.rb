@@ -43,6 +43,8 @@ module Provider
       copy_file_list(output_folder, [
                        ['google/constants.go',
                         'third_party/validator/constants.go'],
+                       ['google/cai.go',
+                        'third_party/validator/cai.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
