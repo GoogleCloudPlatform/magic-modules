@@ -16,8 +16,8 @@ name: CloudScheduler
 display_name: Cloud Scheduler
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://cloudscheduler.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://cloudscheduler.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
