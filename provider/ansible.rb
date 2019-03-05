@@ -51,7 +51,10 @@ module Provider
         @max_columns = 160
       end
 
-      def generate_versions
+      def api_version_setup(version_name)
+        version = @api.version_obj_or_default(version_name)
+        @api.set_properties_based_on_version(version)
+
         # Generate version_added_file
         @version_added = build_version_added
       end
