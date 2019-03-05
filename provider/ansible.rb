@@ -57,6 +57,7 @@ module Provider
 
         # Generate version_added_file
         @version_added = build_version_added
+        version
       end
 
       # Returns a string representation of the corresponding Python type

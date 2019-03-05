@@ -178,10 +178,11 @@ module Provider
     def api_version_setup(version_name)
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
+      version
     end
 
     def generate_objects(output_folder, types, version_name)
-      api_version_setup(version_name)
+      version = api_version_setup(version_name)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
