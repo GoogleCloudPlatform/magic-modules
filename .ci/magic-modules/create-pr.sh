@@ -112,15 +112,21 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
   popd
 
   pwd
-  git remote -v
+
   # If there is now a difference in the ansible_version_added files, those
   # should be pushed back up to the user's MM branch to be reviewed.
   if git diff --name-only HEAD^1 | grep "ansible_version_added.yaml"; then
     git config --global user.email "magic-modules@google.com"
     git config --global user.name "Modular Magician"
+
+    BRANCH=$(git config --get pullrequest.branch)
+    REPO=$(git config --get pullrequest.repo)
+
     git add products/**/ansible_version_added.yaml
     git commit -m "Ansible version_added changes"
-    git push origin $BRANCH_NAME
+    
+    git remote add non-gcp-push-target "git@github.com:$REPO"
+    ssh-agent bash -c "ssh-add ~/github_private_key; git push -f non-gcp-push-target \"HEAD:$BRANCH\""
   fi
 fi
 
