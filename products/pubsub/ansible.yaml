@@ -56,6 +56,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       labels: !ruby/object:Overrides::Ansible::PropertyOverride
         version_added: '2.8'
+      messageRetentionDuration: !ruby/object:Overrides::Ansible::PropertyOverride
+        version_added: '2.8'
+      retainAckedMessages: !ruby/object:Overrides::Ansible::PropertyOverride
+        version_added: '2.8'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
