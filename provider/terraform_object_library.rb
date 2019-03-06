@@ -19,7 +19,6 @@ module Provider
     def generate(output_folder, types, version_name, _product_path, _dump_yaml)
       version = @api.version_obj_or_default(version_name)
       generate_objects(output_folder, types, version)
-      copy_utils(output_folder)
     end
 
     def generate_resource(data)
@@ -34,11 +33,14 @@ module Provider
       )
     end
 
-    def copy_utils(output_folder)
+    def compile_common_files(output_folder, version_name = 'ga')
       Google::LOGGER.info 'Compiling common files.'
       compile_file_list(output_folder, [
                           ['google/config.go', 'third_party/terraform/utils/config.go.erb']
-                        ], version: 'ga')
+                        ], version: version_name)
+    end
+
+    def copy_common_files(output_folder, _version_name)
       Google::LOGGER.info 'Copying common files.'
       copy_file_list(output_folder, [
                        ['google/constants.go',
