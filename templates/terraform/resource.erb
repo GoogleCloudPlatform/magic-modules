@@ -107,6 +107,18 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
+<%    if prop.flatten_object -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
+    if err != nil {
+        return err
+<%      unless prop.send_empty_value -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%    else -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return err
@@ -117,6 +129,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
+<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
@@ -241,9 +254,23 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  properties.reject{|p| p.ignore_read }.each do |prop| -%>
+<%    if prop.flatten_object -%>
+    if v, ok := res["<%= prop.api_name -%>"].(map[string]interface{}); res["<%= prop.api_name -%>"] != nil && ok {
+<%      prop.properties.each do |p| -%>
+      if err := d.Set("<%= p.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%><%= titlelize_property(p) -%>(v["<%= p.api_name -%>"], d)); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%      end -%>
+    } else {
+<%      prop.properties.each do |p| -%>
+      d.Set("<%= p.name.underscore -%>", nil)
+<%      end -%>
+    }
+<%    else -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
+<%    end -%>
 <%  end -%>
 <%  if object.has_self_link -%>
     if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
@@ -264,8 +291,20 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  properties_by_custom_update(properties).each do |key, props| -%>
     if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
-<%      props.each do |prop| -%>
-<%      if update_body_properties.include? prop -%>
+<%    props.each do |prop| -%>
+<%      if prop.flatten_object -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
+    if err != nil {
+        return err
+<%        unless prop.send_empty_value -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%        else -%>
+    } else {
+<%        end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%      else -%>
+<%        if update_body_properties.include? prop -%>
         <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
         if err != nil {
             return err
@@ -293,11 +332,12 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }
-<%      else # if update_body_properties.include? prop -%>
+<%        else # if update_body_properties.include? prop -%>
         <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%      end # if update_body_properties.include? prop -%>
-<%      end # props.each -%>
+<%        end # if update_body_properties.include? prop -%>
+<%      end # prop.flatten_object -%>
+<%    end # props.each -%>
 
 <%      if object.mutex -%>
         lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -362,6 +402,18 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  else # if object.input -%>
     obj := make(map[string]interface{})
 <%  update_body_properties.each do |prop| -%>
+<%    if prop.flatten_object -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
+    if err != nil {
+        return err
+<%      unless prop.send_empty_value -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%    else -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return err
@@ -372,6 +424,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
+<%    end -%>
 <%  end -%>
 
 <%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>

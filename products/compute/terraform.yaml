@@ -512,8 +512,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      # We want this to be the smallest change possible, so exclude this for now.
+      # TODO: remove exclusion
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      # We could include this, but it won't be correct mid-apply when subnetworks
+      # are modified, so it's probably better to exclude.
+      subnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       autoCreateSubnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: True
+      routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        # while required inside routingConfig, routingMode is an optional convenience
+        # field.
+        required: false
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/network.erb
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride

@@ -12,7 +12,11 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
-<% if tf_types.include?(property.class) -%>
+<% if property.flatten_object -%>
+	<% order_properties(property.properties).each do |prop| -%>
+		<%= lines(build_schema_property(prop, object)) -%>
+	<% end -%>
+<% elsif tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
   <% if property.is_set -%>
   Type: schema.TypeSet,

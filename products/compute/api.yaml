@@ -2635,7 +2635,7 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#networkList'
       items: 'items'
-    update_verb: :PATCH
+    input: true
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -2723,6 +2723,8 @@ objects:
         output: true
       - !ruby/object:Api::Type::NestedObject
         name: 'routingConfig'
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/networks/{{name}}
         description: |
           The network-level routing configuration for this network. Used by Cloud
           Router to determine what type of network-wide routing behavior to
