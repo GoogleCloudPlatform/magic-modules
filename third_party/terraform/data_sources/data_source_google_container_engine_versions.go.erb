@@ -96,7 +96,7 @@ func dataSourceGoogleContainerEngineVersionsRead(d *schema.ResourceData, meta in
 		d.Set("latest_master_version", validMasterVersions[0])
 	}
 
-		d.Set("valid_node_versions", validNodeVersions)
+	d.Set("valid_node_versions", validNodeVersions)
 	if len(validNodeVersions) > 0 {
 		d.Set("latest_node_version", validNodeVersions[0])
 	}
