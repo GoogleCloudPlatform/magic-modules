@@ -116,17 +116,26 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
   # If there is now a difference in the ansible_version_added files, those
   # should be pushed back up to the user's MM branch to be reviewed.
   if git diff --name-only HEAD^1 | grep "ansible_version_added.yaml"; then
+    # Setup git config.
     git config --global user.email "magic-modules@google.com"
     git config --global user.name "Modular Magician"
 
     BRANCH=$(git config --get pullrequest.branch)
     REPO=$(git config --get pullrequest.repo)
+    CURRENT_BRANCH=$(git rev-parse HEAD)
+    # Add user's branch + checkout that branch.
+    git remote add non-gcp-push-target "git@github.com:$REPO"
+    git checkout non-gcp-push-target/$BRANCH
 
+    # Create commit + push (no force flag to avoid overwrites).
+    # If the push doesn't work, it's not problematic because a commit
+    # down the line will pick up the changes.
     git add products/**/ansible_version_added.yaml
     git commit -m "Ansible version_added changes"
-    
-    git remote add non-gcp-push-target "git@github.com:$REPO"
-    ssh-agent bash -c "ssh-add ~/github_private_key; git push -f non-gcp-push-target \"HEAD:$BRANCH\""
+    ssh-agent bash -c "ssh-add ~/github_private_key; git push non-gcp-push-target \"HEAD:$BRANCH\""
+
+    # Check out the branch we were on to ensure that the downstream commits don't change.
+    git checkout $CURRENT_BRANCH
   fi
 fi
 
