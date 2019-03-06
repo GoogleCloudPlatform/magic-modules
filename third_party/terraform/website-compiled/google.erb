@@ -167,6 +167,21 @@
     </ul>
     </li>
 
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-access-context-manager") %>>
+    <a href="#">Google Access Context Manager Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-access-context-manager-access-level") %>>
+      <a href="/docs/providers/google/r/access_context_manager_access_level.html">google_access_context_manager_access_level</a>
+      <li<%%= sidebar_current("docs-google-access-context-manager-access-policy") %>>
+      <a href="/docs/providers/google/r/access_context_manager_access_policy.html">google_access_context_manager_access_policy</a>
+      <li<%%= sidebar_current("docs-google-access-context-manager-service-perimeter") %>>
+      <a href="/docs/providers/google/r/access_context_manager_service_perimeter.html">google_access_context_manager_service_perimeter</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
+
     <li<%%= sidebar_current("docs-google-app-engine") %>>
     <a href="#">Google App Engine Resources</a>
     <ul class="nav nav-visible">
