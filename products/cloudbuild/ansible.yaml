@@ -21,7 +21,6 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - python >= 2.6
     - requests >= 2.18.4
     - google-auth >= 1.3.0
-  version_added: '2.8'
   author: Google Inc. (@googlecloudplatform)
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides

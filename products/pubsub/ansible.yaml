@@ -21,11 +21,9 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - python >= 2.6
     - requests >= 2.18.4
     - google-auth >= 1.3.0
-  version_added: '2.6'
   author: Google Inc. (@googlecloudplatform)
 datasources: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
@@ -34,7 +32,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
         does_not_exist: |
           "'test-topic1' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   Subscription: !ruby/object:Overrides::Ansible::ResourceOverride
-    version_added: '2.8'
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
@@ -44,22 +41,12 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
   Topic: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      labels: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request
     provider_helpers:
       - 'products/pubsub/helpers/python/provider_topic.py'
   Subscription: !ruby/object:Overrides::Ansible::ResourceOverride
-    properties:
-      labels: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      messageRetentionDuration: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
-      retainAckedMessages: !ruby/object:Overrides::Ansible::PropertyOverride
-        version_added: '2.8'
     transport: !ruby/object:Api::Resource::Transport
       encoder: encode_request
       decoder: decode_request

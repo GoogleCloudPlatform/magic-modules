@@ -23,7 +23,6 @@ module Overrides
       def self.attributes
         %i[
           aliases
-          version_added
         ]
       end
 
@@ -33,7 +32,6 @@ module Overrides
         super
 
         check :aliases, type: ::Array, item_type: ::String
-        check :version_added, type: ::String
       end
     end
   end

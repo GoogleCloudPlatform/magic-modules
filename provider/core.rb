@@ -175,9 +175,14 @@ module Provider
       end.map(&:join)
     end
 
-    def generate_objects(output_folder, types, version_name)
+    def api_version_setup(version_name)
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
+      version
+    end
+
+    def generate_objects(output_folder, types, version_name)
+      version = api_version_setup(version_name)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
@@ -412,7 +417,7 @@ module Provider
 
     def run_formatter(command)
       output = %x(#{command} 2>&1)
-      Google::LOGGER.error output if $CHILD_STATUS && $CHILD_STATUS.exitstatus != 0
+      Google::LOGGER.error output unless $CHILD_STATUS&.exitstatus&.zero?
     end
 
     def wrap_field(field, spaces)
