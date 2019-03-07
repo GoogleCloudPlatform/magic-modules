@@ -47,6 +47,8 @@ module Provider
                         'third_party/validator/constants.go'],
                        ['google/cai.go',
                         'third_party/validator/cai.go'],
+                       ['google/compute_instance.go',
+                        'third_party/validator/compute_instance.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',

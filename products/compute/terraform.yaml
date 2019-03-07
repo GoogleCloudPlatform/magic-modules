@@ -473,7 +473,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sourceType: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    exclude: false
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
