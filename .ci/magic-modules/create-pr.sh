@@ -122,20 +122,26 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
 
     BRANCH=$(git config --get pullrequest.branch)
     REPO=$(git config --get pullrequest.repo)
-    CURRENT_BRANCH=$(git rev-parse HEAD)
-    # Add user's branch + checkout that branch.
+    # Add user's branch + get latest copy.
     git remote add non-gcp-push-target "git@github.com:$REPO"
+    git fetch non-gcp-push-target $BRANCH
+
+    # Make a commit to the current branch and track that commit's SHA1.
+    git add products/**/ansible_version_added.yaml
+    git commit -m "Ansible version_added changes"
+    CHERRY_PICKED_COMMIT=$(git rev-parse HEAD)
+
+    # Checkout the user's branch + add the new cherry-picked commit.
     git checkout non-gcp-push-target/$BRANCH
+    git cherry-pick $CHERRY_PICKED_COMMIT
 
     # Create commit + push (no force flag to avoid overwrites).
     # If the push doesn't work, it's not problematic because a commit
     # down the line will pick up the changes.
-    git add products/**/ansible_version_added.yaml
-    git commit -m "Ansible version_added changes"
     ssh-agent bash -c "ssh-add ~/github_private_key; git push non-gcp-push-target \"HEAD:$BRANCH\""
 
     # Check out the branch we were on to ensure that the downstream commits don't change.
-    git checkout $CURRENT_BRANCH
+    git checkout $CHERRY_PICKED_COMMIT
   fi
 fi
 
