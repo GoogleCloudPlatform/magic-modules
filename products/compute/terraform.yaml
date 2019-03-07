@@ -509,6 +509,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_basic"
+        primary_resource_id: "vpc_network"
+        vars:
+          network_name: "vpc-network"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true

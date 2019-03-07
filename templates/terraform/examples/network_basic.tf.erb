@@ -1,0 +1,3 @@
+resource "google_compute_network" "<%= ctx[:primary_resource_id] %>" {
+  name = "<%= ctx[:vars]['network_name'] %>"
+}
