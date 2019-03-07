@@ -2642,51 +2642,43 @@ objects:
         'Official Documentation': 'https://cloud.google.com/vpc/docs/vpc'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
-      Represents a Network resource.
-
-      Your Cloud Platform Console project can contain multiple networks, and
-      each network can have multiple instances attached to it. A network allows
-      you to define a gateway IP and the network range for the instances
-      attached to that network. Every project is provided with a default network
-      with preset configurations and firewall rules. You can choose to customize
-      the default network by adding or removing rules, or you can create new
-      networks in that project. Generally, most users only need one network,
-      although you can have up to five networks per project by default.
-
-      A network belongs to only one project, and each instance can only belong
-      to one network. All Compute Engine networks use the IPv4 protocol. Compute
-      Engine currently does not support IPv6. However, Google is a major
-      advocate of IPv6 and it is an important future direction.
+      Manages a VPC network or legacy network resource on GCP.
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
-          An optional description of this resource. Provide this property when
-          you create the resource.
+          An optional description of this resource. Changing this will force the
+          recreation of a new resource.
         input: true
       - !ruby/object:Api::Type::String
         name: 'gateway_ipv4'
-        description: |
-          A gateway address for default routing to other networks. This value is
-          read only and is selected by the Google Compute Engine, typically as
-          the first usable address in the IPv4Range.
+        # We override this in api.yaml so that the name is more aesthetic
         api_name: 'gatewayIPv4'
         output: true
+        description: |
+          The gateway address for default routing out of the network. This value
+          is selected by GCP.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
         output: true
       - !ruby/object:Api::Type::String
         name: 'ipv4_range'
-        description: |
-          The range of internal addresses that are legal on this network. This
-          range is a CIDR specification, for example: 192.168.0.0/16. Provided
-          by the client when the network is created.
+        # We override this in api.yaml so that the name is more aesthetic
         api_name: 'IPv4Range'
         input: true
         conflicts:
           - autoCreateSubnetworks
+        description: |
+          If this field is specified, a deprecated legacy network is created.
+          You will no longer be able to create a legacy network on Feb 1, 2020.
+          See the [legacy network docs](https://cloud.google.com/vpc/docs/legacy)
+          for more details.
+
+          The range of internal addresses that are legal on this legacy network.
+          This range is a CIDR specification, for example: `192.168.0.0/16`.
+          Changing this will force the recreation of a new resource.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -2710,12 +2702,12 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'autoCreateSubnetworks'
         description: |
-          When set to true, the network is created in "auto subnet mode". When
-          set to false, the network is in "custom subnet mode".
+          When set to `true`, the network is created in "auto subnet mode" and
+          it will create a subnet for each region automatically across the
+          `10.128.0.0/9` address range.
 
-          In "auto subnet mode", a newly created network is assigned the default
-          CIDR of 10.128.0.0/9 and it automatically creates one subnetwork per
-          region.
+          When set to `false`, the network is created in "custom subnet mode" so
+          the user can explicitly connect subnetwork resources.
         input: true
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2734,9 +2726,9 @@ objects:
           name: 'routingMode'
           required: true
           description: |
-            The network-wide routing mode to use. If set to REGIONAL, this
+            The network-wide routing mode to use. If set to `REGIONAL`, this
             network's cloud routers will only advertise routes with subnetworks
-            of this network in the same region as the router. If set to GLOBAL,
+            of this network in the same region as the router. If set to `GLOBAL`,
             this network's cloud routers will advertise routes with all
             subnetworks of this network, across regions.
           values:
