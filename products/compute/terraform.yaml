@@ -522,6 +522,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       autoCreateSubnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: True
+        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
+        conflicts: []
+      ipv4_range: !ruby/object:Overrides::Terraform::PropertyOverride
+        # TODO: Add a deprecation message to the field here or in api.yaml
+        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
+        conflicts: []
       routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
