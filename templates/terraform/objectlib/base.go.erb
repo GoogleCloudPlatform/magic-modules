@@ -31,6 +31,18 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
 func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
+<%    if prop.flatten_object -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
+    if err != nil {
+        return nil, err
+<%      unless prop.send_empty_value -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%    else -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return nil, err
@@ -41,6 +53,7 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
+<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
