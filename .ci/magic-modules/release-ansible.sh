@@ -16,7 +16,7 @@ get_all_modules() {
   ssh-agent bash -c "ssh-add ~/github_private_key; git fetch $remote_name"
   git checkout $remote_name/devel
   git ls-files -- lib/ansible/modules/cloud/google/gcp_* | cut -d/ -f 6 | cut -d. -f 1 > $file_name
-  
+
   for i in "${ignored_modules[@]}"; do
     sed -i "/$i/d" $file_name
   done
@@ -78,6 +78,7 @@ for filename in mm-bug*; do
   done < $filename
 
   git checkout magician/devel -- "lib/ansible/module_utils/gcp_utils.py"
+  git checkout magician/devel -- "lib/ansible/plugins/doc_fragments/gcp.py"
 
   # This commit may be empty
   set +e
@@ -108,6 +109,7 @@ while read module; do
   fi
 
   git checkout magician/devel -- "lib/ansible/module_utils/gcp_utils.py"
+  git checkout magician/devel -- "lib/ansible/plugins/doc_fragments/gcp.py"
 
   # Create a PR message + save to file
   set +e
