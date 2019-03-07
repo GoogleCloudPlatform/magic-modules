@@ -289,7 +289,8 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     d.Partial(true)
 
 <%  properties_by_custom_update(properties).each do |key, props| -%>
-    if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
+<%  top_level_props = props.reject(&:flatten_object) + props.select(&:flatten_object).flat_map(&:properties) -%>
+    if <%= top_level_props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
 <%    props.each do |prop| -%>
 <%      if prop.flatten_object -%>

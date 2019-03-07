@@ -2724,7 +2724,7 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'routingConfig'
         update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/networks/{{name}}
+        update_url:  projects/{{project}}/global/networks/{{name}}
         description: |
           The network-level routing configuration for this network. Used by Cloud
           Router to determine what type of network-wide routing behavior to

@@ -96,6 +96,7 @@ func TestAccComputeNetwork_routing_mode(t *testing.T) {
 	t.Parallel()
 
 	var network compute.Network
+	networkName := acctest.RandString(10)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -103,7 +104,7 @@ func TestAccComputeNetwork_routing_mode(t *testing.T) {
 		CheckDestroy: testAccCheckComputeNetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetwork_routing_mode("GLOBAL"),
+				Config: testAccComputeNetwork_routing_mode(networkName, "GLOBAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						"google_compute_network.acc_network_routing_mode", &network),
@@ -113,7 +114,7 @@ func TestAccComputeNetwork_routing_mode(t *testing.T) {
 			},
 			// Test updating the routing field (only updateable field).
 			{
-				Config: testAccComputeNetwork_routing_mode("REGIONAL"),
+				Config: testAccComputeNetwork_routing_mode(networkName, "REGIONAL"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkExists(
 						"google_compute_network.acc_network_routing_mode", &network),
@@ -293,10 +294,10 @@ resource "google_compute_network" "baz" {
 }`, acctest.RandString(10))
 }
 
-func testAccComputeNetwork_routing_mode(routingMode string) string {
+func testAccComputeNetwork_routing_mode(network, routingMode string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "acc_network_routing_mode" {
 	name         = "network-test-%s"
 	routing_mode = "%s"
-}`, acctest.RandString(10), routingMode)
+}`, network, routingMode)
 }
