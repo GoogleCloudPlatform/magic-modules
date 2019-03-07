@@ -138,7 +138,7 @@ if [ -n "$ANSIBLE_REPO_USER" ]; then
     # Create commit + push (no force flag to avoid overwrites).
     # If the push doesn't work, it's not problematic because a commit
     # down the line will pick up the changes.
-    ssh-agent bash -c "ssh-add ~/github_private_key; git push non-gcp-push-target \"HEAD:$BRANCH\""
+    ssh-agent bash -c "ssh-add ~/github_private_key; git push non-gcp-push-target \"HEAD:$BRANCH\"" || true
 
     # Check out the branch we were on to ensure that the downstream commits don't change.
     git checkout $CHERRY_PICKED_COMMIT
