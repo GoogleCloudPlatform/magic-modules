@@ -1,0 +1,51 @@
+---
+:facts:
+  :ManagedZone:
+    :version_added: '2.8'
+  :ResourceRecordSet:
+    :version_added: '2.8'
+:regular:
+  :ManagedZone:
+    :version_added: '2.5'
+    :description:
+      :version_added: '2.5'
+    :dnsName:
+      :version_added: '2.5'
+    :id:
+      :version_added: '2.5'
+    :name:
+      :version_added: '2.5'
+    :nameServers:
+      :version_added: '2.5'
+    :nameServerSet:
+      :version_added: '2.5'
+    :creationTime:
+      :version_added: '2.5'
+    :labels:
+      :version_added: '2.8'
+    :visibility:
+      :version_added: '2.5'
+    :privateVisibilityConfig:
+      :version_added: '2.5'
+      :networks:
+        :version_added: '2.5'
+        :networkUrl:
+          :version_added: '2.5'
+    :forwardingConfig:
+      :version_added: '2.5'
+      :targetNameServers:
+        :version_added: '2.5'
+        :ipv4Address:
+          :version_added: '2.5'
+  :ResourceRecordSet:
+    :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :type:
+      :version_added: '2.6'
+    :ttl:
+      :version_added: '2.6'
+    :target:
+      :version_added: '2.6'
+    :managed_zone:
+      :version_added: '2.6'

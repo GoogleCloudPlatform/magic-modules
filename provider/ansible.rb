@@ -20,6 +20,7 @@ require 'provider/ansible/manifest'
 require 'provider/ansible/module'
 require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
+require 'provider/ansible/version_added'
 require 'provider/ansible/facts_override'
 require 'overrides/ansible/resource_override'
 require 'overrides/ansible/property_override'
@@ -43,10 +44,20 @@ module Provider
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
       include Provider::Ansible::Request
+      include Provider::Ansible::VersionAdded
 
       def initialize(config, api, start_time)
         super(config, api, start_time)
         @max_columns = 160
+      end
+
+      def api_version_setup(version_name)
+        version = @api.version_obj_or_default(version_name)
+        @api.set_properties_based_on_version(version)
+
+        # Generate version_added_file
+        @version_added = build_version_added
+        version
       end
 
       # Returns a string representation of the corresponding Python type

@@ -19,8 +19,8 @@ module Google
     def initialize(files)
       @input_files = files
       @copyrightable_files = {
-        /.*\.yaml$/ => /^# Copyright 201[78]/,
-        /.*\.rb$/ => /^# Copyright 201[78]/
+        /.*\.yaml$/ => /^# Copyright 201[789]/,
+        /.*\.rb$/ => /^# Copyright 201[789]/
       }
     end
 
