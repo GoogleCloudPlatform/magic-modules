@@ -358,7 +358,7 @@ resource "google_compute_target_tcp_proxy" "gcp-inspec-target-tcp-proxy" {
 resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   project = "${var.gcp_project_id}"
   name = "${var.regional_cluster["name"]}"
-  region = "${var.regional_cluster["region"]}"
+  region = "${var.gcp_location}"
   initial_node_count = "${var.regional_cluster["initial_node_count"]}"
 }
 
