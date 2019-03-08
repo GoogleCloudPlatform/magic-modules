@@ -221,7 +221,7 @@ module Api
     end
 
     def deprecated?
-      !(@deprecation_message.nil? || @deprecation_message == "")
+      !(@deprecation_message.nil? || @deprecation_message == '')
     end
 
     private
