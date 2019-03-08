@@ -2648,8 +2648,8 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
-          An optional description of this resource. Changing this will force the
-          recreation of a new resource.
+          An optional description of this resource. The resource must be
+          recreated to modify this field.
         input: true
       - !ruby/object:Api::Type::String
         name: 'gateway_ipv4'
@@ -2678,7 +2678,7 @@ objects:
 
           The range of internal addresses that are legal on this legacy network.
           This range is a CIDR specification, for example: `192.168.0.0/16`.
-          Changing this will force the recreation of a new resource.
+          The resource must be recreated to modify this field.
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
