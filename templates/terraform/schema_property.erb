@@ -33,6 +33,9 @@
 <% else -%>
   Optional: true,
 <% end -%>
+<% if property.deprecated? -%>
+  Deprecated: "<%= property.deprecation_message %>",
+<% end -%>
 <% if force_new?(property, object) -%>
   ForceNew: true,
 <% end -%>

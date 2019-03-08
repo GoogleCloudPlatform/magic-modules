@@ -2667,6 +2667,9 @@ objects:
         name: 'ipv4_range'
         # We override this in api.yaml so that the name is more aesthetic
         api_name: 'IPv4Range'
+        deprecation_message: >-
+          Legacy Networks are deprecated and you will no longer be able to
+          create them using this field from Feb 1, 2020 onwards.
         input: true
         conflicts:
           - autoCreateSubnetworks
