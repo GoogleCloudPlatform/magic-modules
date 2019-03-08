@@ -126,7 +126,7 @@ module Provider
       FileUtils.mkpath target_folder
       name = data[:object].name.underscore
       product_name = data[:product_name].underscore
-      filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
+      filepath = File.join(target_folder, "resource_arm_#{name}.go")
       generate_resource_file data.clone.merge(
         default_template: 'templates/terraform/resource.erb',
         out_file: filepath
@@ -163,7 +163,7 @@ module Provider
       filepath =
         File.join(
           target_folder,
-          "resource_#{product_name}_#{name}_test.go"
+          "resource_arm_#{name}_test.go"
         )
       generate_resource_file data.clone.merge(
         product: data[:product_name].camelize(:upper),

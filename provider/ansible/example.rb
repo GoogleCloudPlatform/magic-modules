@@ -92,6 +92,7 @@ module Provider
     class Task < Api::Object
       include Compile::Core
       attr_reader :name
+      attr_reader :description
       attr_reader :code
       attr_reader :scopes
       attr_reader :register
@@ -100,6 +101,7 @@ module Provider
         super
         check_property :name, String
         check_property :code, Hash
+        check_optional_property :description, String
         check_optional_property_list :scopes, ::String
       end
 
@@ -122,7 +124,7 @@ module Provider
       # rubocop:enable Lint/UnusedMethodArgument
 
       def object_name_from_module_name(mod_name)
-        product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
+        product_name = mod_name
         product_name.tr('_', ' ')
       end
 

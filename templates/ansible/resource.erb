@@ -1,16 +1,13 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2017 Google
+# Copyright (C) 2019 <%= @config.manifest.get('author', object) -%>
+#
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 <%= lines(autogen_notice :python) -%>
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
-
-################################################################################
-# Documentation
-################################################################################
 
 <%
   metadata_version = quote_string(@config.manifest.get('metadata_version',
@@ -22,26 +19,32 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.get('status', object) -%>,
                     'supported_by': <%= supported_by -%>}
 
+
 DOCUMENTATION = '''
 ---
+module: <%= module_name(object) -%>
+
+version_added: "<%= @config.manifest.get('version_added', object).to_f -%>"
+
+short_description: <%= object.description -%>
+
+description:
+    - Create, update and delete instance of Azure <%= object.name.titlecase -%>.
+
 <%= to_yaml({
-  'module' => module_name(object),
-  'description' => format_description(object.description),
-  'short_description' => "Creates a GCP #{object.name}",
-  'version_added' => @config.manifest.get('version_added', object).to_f,
-  'author' => @config.manifest.get('author', object),
-  'requirements' => @config.manifest.get('requirements', object),
   'options' => [
+    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) },
     {
       'state' => {
-        'description' => ['Whether the given object should exist in GCP'],
+        'description' => [
+          "Assert the state of the #{object.name.titlecase}.",
+          "Use 'present' to create or update a #{object.name.titlecase} and 'absent' to delete it."
+        ],
+        'default' => 'present',
         'choices' => ['present', 'absent'],
-        'default' => 'present'
       },
-    },
-    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
+    }
   ].flatten.compact.reduce({}, :merge),
-  'extends_documentation_fragment' => 'gcp',
   'notes' => (
     [
       ("API Reference: U(#{object.references.api})" if object.references.api),
@@ -49,6 +52,12 @@ DOCUMENTATION = '''
     ].flatten.compact if object.references
   )
 })-%>
+
+extends_documentation_fragment:
+    - azure
+
+author:
+    - "<%= @config.manifest.get('author', object) -%>"
 '''
 
 <% if example -%>
@@ -64,41 +73,61 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
+<%= to_yaml(object.all_user_properties.select(&:output).map { |p| returns_for_property(p) }.reduce({
+  'id'=> {
+    'description' => ['The identifier of the DTL Virtual Machine resource.'],
+    'returned' => 'always',
+    'type' => 'str',
+  }
+}, :merge)) -%>
 '''
 
-################################################################################
-# Imports
-################################################################################
-<%
-  readonly_selflink_rrefs = object.all_resourcerefs
-                                  .select { |prop| prop.resource_ref.readonly }
-                                  .select { |prop| prop.imports == 'selfLink' }
-                                  .map(&:resource_ref)
-                                  .uniq
--%>
+import time
+from ansible.module_utils.azure_rm_common import AzureRMModuleBase
+from ansible.module_utils.common.dict_transformations import _snake_to_camel
 
-<%
-  import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
-  import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
-  import += ', replace_resource_dict' if nonreadonly_rrefs(object)
--%>
-<%= lines(import) -%>
-import json
-<%
-  imports = object.imports || []
-  imports << 'time' if object.async
-  imports << 're' unless readonly_selflink_rrefs.empty?
--%>
-<%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
+try:
+    from msrestazure.azure_exceptions import CloudError
+    from msrest.polling import LROPoller
+    from msrestazure.azure_operation import AzureOperationPoller
+    from msrest.serialization import Model
+    from <%= object.azure_sdk_definition.python_client_namespace -%> import <%= object.azure_sdk_definition.python_client -%>
 
-################################################################################
-# Main
-################################################################################
+except ImportError:
+    # This is handled in azure_rm_common
+    pass
 
 
-def main():
-    """Main function"""
+class Actions:
+    NoAction, Create, Update, Delete = range(4)
+
+class AzureRM<%= object.name -%>(AzureRMModuleBase):
+    """Configuration class for an Azure RM <%= object.name.titleize -%> resource"""
+
+    def __init__(self):
+        self.module_arg_spec = dict(
+          # TODO: Finish type declaration
+        )
+        # TODO: Required If
+        # TODO: Argument Properties
+        # TODO: Module State
+        # TODO: Base Class Initialization
+
+    # TODO: Main Module Execution
+        # TODO: Parameters -> Class Properties
+        # TODO: Parameters -> SDK
+        # TODO: Create Client Instance
+        # TODO: Response & Idempotency Check
+        # TODO: Perform Desired Action
+        # TODO: Format Response
+
+    # TODO: Create/Update Function
+
+    # TODO: Delete Function
+
+    # TODO: Read Function
+
+'''
 
 <%
   mod_props = object.all_user_properties.reject(&:output).map do |prop|
@@ -463,21 +492,15 @@ def response_to_hash(module, response):
     return {
 <%= lines(response_properties(object.properties, 8)) -%>
     }
-<% readonly_selflink_rrefs.each do |resource| -%>
-
-
-def <%= resource.name.underscore -%>_selflink(name, params):
-    if name is None:
-        return
-    url = r<%= lines(build_url(resource.regex_url)) -%>
-    if not re.match(url, name):
-        name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
-    return name
-<% end -%>
 <%= lines_before(compile('templates/ansible/async.erb'), 1) -%>
 <%= lines_before(compile('templates/ansible/provider_helpers.erb'), 1) -%>
 <%= lines_before(compile('templates/ansible/properties.erb'), 1) -%>
 
+'''
+
+def main():
+    """Main execution"""
+    AzureRM<%= object.name -%>()
 
 if __name__ == '__main__':
     main()

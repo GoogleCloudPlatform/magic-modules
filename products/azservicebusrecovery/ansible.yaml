@@ -1,0 +1,19 @@
+--- !ruby/object:Provider::Ansible::Config
+manifest: !ruby/object:Provider::Ansible::Manifest
+  metadata_version: '1.1'
+  status:
+    - preview
+  supported_by: 'community'
+  requirements:
+    - python >= 2.6
+    - requests >= 2.18.4
+    - google-auth >= 1.3.0
+  version_added: '2.6'
+  author: Zim Kalinowski (@zikalino)
+overrides: !ruby/object:Provider::ResourceOverrides
+  ServiceBusDisasterRecoveryConfig: !ruby/object:Provider::Ansible::ResourceOverride
+    transport: !ruby/object:Api::Resource::Transport
+      encoder: encode_request
+      decoder: decode_request
+    provider_helpers:
+      - 'products/pubsub/helpers/python/provider_topic.py'

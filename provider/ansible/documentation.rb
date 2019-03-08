@@ -24,9 +24,9 @@ module Provider
     module Documentation
       def to_yaml(obj)
         if obj.is_a?(::Hash)
-          obj.reject { |_, v| v.nil? }.to_yaml.sub("---\n", '')
+          obj.reject { |_, v| v.nil? }.to_yaml(:indentation => 4).sub("---\n", '')
         else
-          obj.to_yaml.sub("---\n", '')
+          obj.to_yaml(:indentation => 4).sub("---\n", '')
         end
       end
 
@@ -73,7 +73,7 @@ module Provider
         {
           prop.name => {
             'description' => format_description(prop.description),
-            'returned' => 'success',
+            'returned' => 'always',
             'type' => type,
             'contains' => (
               if prop.is_a?(Api::Type::NestedObject)

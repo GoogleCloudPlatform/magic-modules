@@ -80,8 +80,7 @@ module Provider
       # Returns the name of the module according to Ansible naming standards.
       # Example: gcp_dns_managed_zone
       def module_name(object)
-        ["gcp_#{object.__product.prefix[1..-1]}",
-         object.name.underscore].join('_')
+        "azure_rm_#{object.name.downcase}"
       end
 
       def build_object_data(object, output_folder, version)

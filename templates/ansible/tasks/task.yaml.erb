@@ -1,13 +1,6 @@
-<%
-  again = ''
-  if noop
-    again = ' that already exists' if state == 'present'
-    again = ' that does not exist' if state == 'absent'
-  end
-  verb = verbs[state.to_sym]
--%>
-- name: <%= verb -%> a <%= object_name_from_module_name(@name) -%><%= again %>
-  <%= @name -%>:
+  - name: <%= description -%>
+
+    <%= @name -%>:
 <%=
   lines(indent(compile_string(hash, @code.to_yaml.sub('---', '').strip), 6))
 -%>

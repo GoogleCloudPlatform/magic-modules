@@ -1,0 +1,10 @@
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::Task
+  name: azure_rm_servicebusdisasterrecoveryconfig
+  description: Create (or update) Service Bus Disaster Recovery Config
+  code:
+      resource_group: myResourceGroup
+      name: <%= ctx[:name] %>
+      namespace_name: test.somewild2.example.com.
+      partner_namespace: xxx
+      alternate_name: yyy

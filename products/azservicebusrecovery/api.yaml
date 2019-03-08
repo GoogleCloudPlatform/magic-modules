@@ -1,6 +1,6 @@
 --- !ruby/object:Api::Product
 name: Azure Service Bus Disaster Recovery Config
-prefix: arm
+prefix: azservicebusrecovery
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -17,6 +17,8 @@ objects:
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
       provider_name: servicebus
+      python_client_namespace: azure.mgmt.servicebus
+      python_client: ServiceBusManagementClient
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
         request:
@@ -129,9 +131,9 @@ objects:
         azure_sdk_references: ['namespaceName']
       - !ruby/object:Api::Type::String
         name: 'partnerNamespace'
-        description: 'The description of the service bus disaster recovery.'
+        description: 'The parter namespace of the service bus disaster recovery.'
         azure_sdk_references: ['/properties/partnerNamespace']
       - !ruby/object:Api::Type::String
         name: 'AlternateName'
-        description: 'The value of the service bus disaster recovery.'
+        description: 'The alternative name of the service bus disaster recovery.'
         azure_sdk_references: ['/properties/alternateName']
