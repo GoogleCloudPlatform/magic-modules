@@ -509,7 +509,39 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_basic"
+        primary_resource_id: "vpc_network"
+        vars:
+          network_name: "vpc-network"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      # We want this to be the smallest change possible, so exclude this for now.
+      # TODO: remove exclusion
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      # We could include this, but it won't be correct mid-apply when subnetworks
+      # are modified, so it's probably better to exclude.
+      subnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      autoCreateSubnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: True
+        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
+        conflicts: []
+      ipv4_range: !ruby/object:Overrides::Terraform::PropertyOverride
+        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
+        conflicts: []
+      routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        # while required inside routingConfig, routingMode is an optional convenience
+        # field.
+        required: false
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/network.erb
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride

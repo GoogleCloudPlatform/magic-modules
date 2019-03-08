@@ -8,9 +8,9 @@
 <%   end -%>
 <% else -%>
 <%   if property.required -%>
-  (Required)
+  (Required<% if property.deprecated? -%>, Deprecated<% end -%>)
 <%   elsif !property.output -%>
-  (Optional)
+  (Optional<% if property.deprecated? -%>, Deprecated<% end -%>)
 <%   end -%>
 <% end -%>
 <%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>

@@ -102,7 +102,15 @@ To get more information about <%= object.name -%>, see:
 The following arguments are supported:
 
 <% properties.select(&:required).each do |prop| -%>
+<%   if prop.flatten_object -%>
+<%     if prop.nested_properties? -%>
+<%       prop.nested_properties.each do |p| -%>
+<%=        lines(build_property_documentation(p)) -%>
+<%       end -%>
+<%     end -%>
+<%   else -%>
 <%= lines(build_property_documentation(prop)) -%>
+<%   end -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
@@ -115,7 +123,15 @@ The following arguments are supported:
 - - -
 
 <% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
+<%   if prop.flatten_object -%>
+<%     if prop.nested_properties? -%>
+<%       prop.nested_properties.each do |p| -%>
+<%=        lines(build_property_documentation(p)) -%>
+<%       end -%>
+<%     end -%>
+<%   else -%>
+<%=    lines(build_property_documentation(prop)) -%>
+<%   end -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}") -%>
 * `project` - (Optional) The ID of the project in which the resource belongs.
