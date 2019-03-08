@@ -974,6 +974,7 @@ objects:
           properties for the firewall to apply. sourceServiceAccounts cannot be
           used at the same time as sourceTags or targetTags.
         item_type: Api::Type::String
+        max_size: 10
         conflicts:
           - sourceTags
           - targetTags
@@ -1000,6 +1001,7 @@ objects:
           specified, the firewall rule applies to all instances on the specified
           network.
         item_type: Api::Type::String
+        max_size: 10
         conflicts:
           - sourceTags
           - targetTags
