@@ -35,17 +35,17 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
     }
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 
-<%   end -%>
+<%     end -%>
 
     m[original["<%= property.key_name -%>"].(string)] = transformed
   }
   return m, nil
 }
 
-<%   property.nested_properties.each do |prop| -%>
-<%     next if prop.name == property.key_name -%>
-<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
-<%   end -%>
+<%     property.nested_properties.each do |prop| -%>
+<%       next if prop.name == property.key_name -%>
+<%=        lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%     end -%>
 <%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
   if v == nil {
@@ -57,6 +57,30 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   }
   return m, nil
 }
+<%   elsif property.flatten_object -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(d TerraformResourceData, config *Config) (interface{}, error) {
+  transformed := make(map[string]interface{})
+<%     property.nested_properties.each do |prop| -%>
+  // Note that nesting flattened objects won't work because we don't handle them properly here.
+  transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+  if err != nil {
+    return nil, err
+<%       unless prop.send_empty_value -%>
+  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%       else -%>
+  } else {
+    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%       end -%>
+  }
+
+  return transformed, nil
+<%     end -%>
+}
+
+<%     property.nested_properties.each do |prop| -%>
+<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%     end -%>
 <%   elsif tf_types.include?(property.class) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 <%     if property.is_set -%>

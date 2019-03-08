@@ -64,6 +64,25 @@ module Overrides
           # Names of attributes that can't be set alongside this one
           :conflicts_with,
 
+          # ====================
+          # Schema Modifications
+          # ====================
+          # Schema modifications change the schema of a resource in some
+          # fundamental way. They're not very portable, and will be hard to
+          # generate so we should limit their use. Generally, if you're not
+          # converting existing Terraform resources, these shouldn't be used.
+          #
+          # With great power comes great responsibility.
+
+          # Flatten the child field of a NestedObject into "convenience fields"
+          # that are addressed as if they were top level fields.
+          #
+          # We need this for cases where a field inside a nested object has a
+          # default, if we can't spend a breaking change to fix a misshapen
+          # field, or if the UX is _much_ better otherwise. Nesting flattened
+          # NestedObjects is inadvisable.
+          :flatten_object,
+
           # ===========
           # Custom code
           # ===========
@@ -119,6 +138,11 @@ module Overrides
         unless description.nil?
           @description = format_string(:description, @description,
                                        api_property.description)
+        end
+
+        if @flatten_object && !api_property.is_a?(Api::Type::NestedObject)
+          raise 'Only NestedObjects can be flattened with flatten_object. Type'\
+            " is #{api_property.class} for property #{api_property.name}"
         end
 
         unless api_property.is_a?(Api::Type::Array) ||

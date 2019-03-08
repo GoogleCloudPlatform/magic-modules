@@ -16,6 +16,12 @@
 <%= lines(compile_template(property.custom_flatten,
                            prefix: prefix,
                            property: property)) -%>
+<% elsif property.flatten_object -%>
+<%   if property.nested_properties? -%>
+  <%   property.nested_properties.each do |prop| -%>
+    <%=   lines(build_flatten_method(prefix + titlelize_property(property), prop), 1) -%>
+  <%   end -%>
+<%   end -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
 func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {

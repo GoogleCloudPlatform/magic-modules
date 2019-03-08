@@ -26,6 +26,11 @@ module Api
       attr_reader :description
       attr_reader :exclude
 
+      # Add a deprecation message for a field that's been deprecated in the API
+      # use the YAML chomping folding indicator (>-) if this is a multiline
+      # string, as providers expect a single-line one w/o a newline.
+      attr_reader :deprecation_message
+
       attr_reader :output # If set value will not be sent to server on sync
       attr_reader :input # If set to true value is used only on creation
       attr_reader :url_param_only # If, true will not be send in request body
@@ -57,6 +62,7 @@ module Api
       super
       check :description, type: ::String, required: true
       check :exclude, type: :boolean, default: false, required: true
+      check :deprecation_message, type: ::String
       check :min_version, type: ::String
       check :output, type: :boolean
       check :required, type: :boolean
@@ -212,6 +218,10 @@ module Api
 
     def nested_properties?
       !nested_properties.empty?
+    end
+
+    def deprecated?
+      !(@deprecation_message.nil? || @deprecation_message == '')
     end
 
     private
