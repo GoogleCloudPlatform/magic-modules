@@ -50,10 +50,10 @@ objects:
         path: 'name'
         base_url: '{{op_id}}'
         wait_ms: 1000
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 6 * 60
-        update_sec: 6 * 60
-        delete_sec: 6 * 60
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 6 * 60
+          update_sec: 6 * 60
+          delete_sec: 6 * 60
       result: !ruby/object:Api::Async::Result
         path: 'response'
         resource_inside_response: true
