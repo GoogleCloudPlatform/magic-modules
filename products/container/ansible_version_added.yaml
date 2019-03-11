@@ -41,12 +41,6 @@
         :version_added: '2.6'
       :password:
         :version_added: '2.6'
-      :clusterCaCertificate:
-        :version_added: '2.6'
-      :clientCertificate:
-        :version_added: '2.6'
-      :clientKey:
-        :version_added: '2.6'
     :loggingService:
       :version_added: '2.6'
     :monitoringService:
@@ -56,8 +50,6 @@
     :clusterIpv4Cidr:
       :version_added: '2.6'
     :enableTpu:
-      :version_added: '2.6'
-    :tpuIpv4CidrBlock:
       :version_added: '2.6'
     :addonsConfig:
       :version_added: '2.6'
@@ -70,24 +62,6 @@
         :disabled:
           :version_added: '2.6'
     :subnetwork:
-      :version_added: '2.6'
-    :endpoint:
-      :version_added: '2.6'
-    :initialClusterVersion:
-      :version_added: '2.6'
-    :currentMasterVersion:
-      :version_added: '2.6'
-    :currentNodeVersion:
-      :version_added: '2.6'
-    :createTime:
-      :version_added: '2.6'
-    :nodeIpv4CidrSize:
-      :version_added: '2.6'
-    :servicesIpv4Cidr:
-      :version_added: '2.6'
-    :currentNodeCount:
-      :version_added: '2.6'
-    :expireTime:
       :version_added: '2.6'
     :location:
       :version_added: '2.8'
@@ -119,8 +93,6 @@
         :version_added: '2.6'
     :initialNodeCount:
       :version_added: '2.6'
-    :version:
-      :version_added: '2.6'
     :autoscaling:
       :version_added: '2.6'
       :enabled:
@@ -137,10 +109,6 @@
         :version_added: '2.6'
       :upgradeOptions:
         :version_added: '2.6'
-        :autoUpgradeStartTime:
-          :version_added: '2.6'
-        :description:
-          :version_added: '2.6'
     :cluster:
       :version_added: '2.6'
     :location:
