@@ -1,5 +1,5 @@
 --- !ruby/object:Provider::Terraform::Config
-name: Arm
+name: azautomationstringvariable
 overrides: !ruby/object:Provider::ResourceOverrides
   AutomationVariable: !ruby/object:Provider::Azure::Terraform::ResourceOverride
     name: AutomationStringVariable
@@ -66,9 +66,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestStepDefinition
             config_name: basicConfig
             hcl_reference: basic
-    example:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "container_registry"
-        primary_resource_id: "example"
-        vars:
-          rg_name: "example-rg"
+    document_examples:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
+        title: Example Usage
+        example_name: "basic"

@@ -1,0 +1,5 @@
+--- !ruby/object:Provider::Azure::Terraform::Example
+resource: azurerm_resource_group
+properties:
+  name: "<%= ctx[:is_acctest] ? 'acctest-%d' : 'example-rg' -%>"
+  location: "<%= ctx[:is_acctest] ? '%s' : 'West US' -%>"

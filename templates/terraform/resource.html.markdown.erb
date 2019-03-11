@@ -85,6 +85,18 @@ To get more information about <%= object.name -%>, see:
 <%= example.config_documentation -%>
   <%- end %>
 <%- end -%>
+
+<%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? -%>
+<%    object.document_examples.each do |example_ref| -%>
+## <%= example_ref.title -%>
+
+
+```hcl
+<%= lines(build_documentation_hcl_from_example(product_ns, example_ref.example_name)) -%>
+```
+
+<%    end -%>
+<%  end -%>
 ## Argument Reference
 
 The following arguments are supported:

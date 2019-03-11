@@ -5,6 +5,7 @@ module Provider
     module Terraform
       module OverrideProperties
         attr_reader :acctests
+        attr_reader :document_examples
         include Provider::Terraform::OverrideProperties
       end
 
@@ -16,7 +17,20 @@ module Provider
           @acctests ||= Hash.new
           check_optional_property :acctests, Hash
           check_optional_property_hash :acctests, String, AccTestDefinition
+          check_optional_property :document_examples, Array
+          check_optional_property_list :document_examples, DocumentExampleReference
           post_initialization
+        end
+
+        class DocumentExampleReference < Api::Object
+          attr_reader :title
+          attr_reader :example_name
+
+          def validate
+            super
+            check_property :title, String
+            check_property :example_name, String
+          end
         end
 
         class AccTestDefinition < Api::Object

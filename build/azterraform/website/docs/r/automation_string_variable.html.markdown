@@ -25,8 +25,8 @@ Manages an automation variable on Azure.
 
 
 
-## Example Usage - Container Registry
 
+## Example Usage
 
 ```hcl
 resource "azurerm_resource_group" "example" {
@@ -34,21 +34,20 @@ resource "azurerm_resource_group" "example" {
   location = "West US"
 }
 
-resource "azurerm_storage_account" "example" {
-  name                     = "tfexamplesa"
-  resource_group_name      = "${azurerm_resource_group.example.name}"
-  location                 = "${azurerm_resource_group.example.location}"
-  account_tier             = "Standard"
-  account_replication_type = "GRS"
+resource "azurerm_automation_account" "example" {
+  name                = "example-account"
+  location            = "${azurerm_resource_group.example.location}"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  sku = {
+    name = "Basic"
+  }
 }
 
-resource "azurerm_container_registry" "example" {
-  name                = "tf-example-acr"
-  resource_group_name = "${azurerm_resource_group.example.name}"
-  location            = "${azurerm_resource_group.example.location}"
-  admin_enabled       = true
-  sku                 = "Classic"
-  storage_account_id  = "${azurerm_storage_account.example.id}"
+resource "azurerm_automation_string_variable" "example" {
+  name                    = "example-var"
+  resource_group_name     = "${azurerm_resource_group.example.name}"
+  automation_account_name = "${azurerm_automation_account.example.name}"
+  value                   = "Hello, Terraform Basic Test."
 }
 ```
 
