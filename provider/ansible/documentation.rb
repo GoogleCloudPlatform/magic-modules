@@ -73,8 +73,7 @@ module Provider
             'type' => type,
             'contains' => (
               if prop.nested_properties?
-                prop.nested_properties.reject(&:output)
-                                      .map { |p| returns_for_property(p) }
+                prop.nested_properties.map { |p| returns_for_property(p) }
                                       .reduce({}, :merge)
               end
             )
