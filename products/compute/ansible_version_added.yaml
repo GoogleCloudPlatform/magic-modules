@@ -71,11 +71,7 @@
       :version_added: '2.6'
     :addressType:
       :version_added: '2.7'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -83,11 +79,7 @@
       :version_added: '2.8'
     :subnetwork:
       :version_added: '2.7'
-    :users:
-      :version_added: '2.6'
     :labels:
-      :version_added: '2.6'
-    :labelFingerprint:
       :version_added: '2.6'
     :region:
       :version_added: '2.6'
@@ -95,13 +87,9 @@
     :version_added: '2.6'
     :bucketName:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :enableCdn:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -147,15 +135,11 @@
       :version_added: '2.6'
       :drainingTimeoutSec:
         :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :enableCDN:
       :version_added: '2.6'
     :healthChecks:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :iap:
       :version_added: '2.7'
@@ -164,8 +148,6 @@
       :oauth2ClientId:
         :version_added: '2.7'
       :oauth2ClientSecret:
-        :version_added: '2.7'
-      :oauth2ClientSecretSha256:
         :version_added: '2.7'
     :loadBalancingScheme:
       :version_added: '2.7'
@@ -183,17 +165,7 @@
       :version_added: '2.6'
   :Disk:
     :version_added: '2.6'
-    :labelFingerprint:
-      :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :lastAttachTimestamp:
-      :version_added: '2.6'
-    :lastDetachTimestamp:
       :version_added: '2.6'
     :labels:
       :version_added: '2.7'
@@ -202,8 +174,6 @@
     :name:
       :version_added: '2.6'
     :sizeGb:
-      :version_added: '2.6'
-    :users:
       :version_added: '2.6'
     :type:
       :version_added: '2.7'
@@ -215,17 +185,11 @@
       :version_added: '2.6'
       :rawKey:
         :version_added: '2.6'
-      :sha256:
-        :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
-    :sourceImageId:
-      :version_added: '2.6'
     :diskEncryptionKey:
       :version_added: '2.6'
       :rawKey:
-        :version_added: '2.6'
-      :sha256:
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
@@ -237,10 +201,6 @@
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
-      :sha256:
-        :version_added: '2.6'
-    :sourceSnapshotId:
-      :version_added: '2.6'
   :Firewall:
     :version_added: '2.6'
     :allowed:
@@ -249,8 +209,6 @@
         :version_added: '2.6'
       :ports:
         :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :denied:
       :version_added: '2.8'
       :ip_protocol:
@@ -266,8 +224,6 @@
     :disabled:
       :version_added: '2.8'
     :enableLogging:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -287,11 +243,7 @@
       :version_added: '2.6'
   :ForwardingRule:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :IPAddress:
       :version_added: '2.6'
@@ -317,15 +269,11 @@
       :version_added: '2.7'
     :labels:
       :version_added: '2.6'
-    :labelFingerprint:
-      :version_added: '2.6'
     :allPorts:
       :version_added: '2.6'
     :networkTier:
       :version_added: '2.8'
     :serviceLabel:
-      :version_added: '2.6'
-    :serviceName:
       :version_added: '2.6'
     :region:
       :version_added: '2.6'
@@ -333,21 +281,13 @@
     :version_added: '2.6'
     :address:
       :version_added: '2.8'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
     :labels:
       :version_added: '2.6'
-    :labelFingerprint:
-      :version_added: '2.6'
     :ipVersion:
-      :version_added: '2.6'
-    :region:
       :version_added: '2.6'
     :prefixLength:
       :version_added: '2.6'
@@ -359,11 +299,7 @@
       :version_added: '2.6'
   :GlobalForwardingRule:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :IPAddress:
       :version_added: '2.6'
@@ -385,23 +321,17 @@
       :version_added: '2.6'
     :subnetwork:
       :version_added: '2.6'
-    :region:
-      :version_added: '2.6'
     :target:
       :version_added: '2.6'
   :HttpHealthCheck:
     :version_added: '2.6'
     :checkIntervalSec:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :healthyThreshold:
       :version_added: '2.6'
     :host:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -417,15 +347,11 @@
     :version_added: '2.6'
     :checkIntervalSec:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :healthyThreshold:
       :version_added: '2.6'
     :host:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -441,13 +367,9 @@
     :version_added: '2.6'
     :checkIntervalSec:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :healthyThreshold:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -511,11 +433,7 @@
         :version_added: '2.6'
   :InstanceTemplate:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -539,8 +457,6 @@
             :version_added: '2.6'
           :rsaEncryptedKey:
             :version_added: '2.6'
-          :sha256:
-            :version_added: '2.6'
         :index:
           :version_added: '2.6'
         :initializeParams:
@@ -556,8 +472,6 @@
           :sourceImageEncryptionKey:
             :version_added: '2.6'
             :rawKey:
-              :version_added: '2.6'
-            :sha256:
               :version_added: '2.6'
         :interface:
           :version_added: '2.6'
@@ -595,8 +509,6 @@
             :version_added: '2.6'
           :subnetworkRangeName:
             :version_added: '2.6'
-        :name:
-          :version_added: '2.6'
         :network:
           :version_added: '2.6'
         :networkIP:
@@ -625,22 +537,6 @@
           :version_added: '2.6'
   :Image:
     :version_added: '2.6'
-    :archiveSizeBytes:
-      :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :deprecated:
-      :version_added: '2.6'
-      :deleted:
-        :version_added: '2.6'
-      :deprecated:
-        :version_added: '2.6'
-      :obsolete:
-        :version_added: '2.6'
-      :replacement:
-        :version_added: '2.6'
-      :state:
-        :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :diskSizeGb:
@@ -651,20 +547,14 @@
       :version_added: '2.6'
       :type:
         :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
     :imageEncryptionKey:
       :version_added: '2.6'
       :rawKey:
-        :version_added: '2.6'
-      :sha256:
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
     :labels:
       :version_added: '2.8'
-    :labelFingerprint:
-      :version_added: '2.6'
     :licenses:
       :version_added: '2.6'
     :name:
@@ -683,8 +573,6 @@
       :version_added: '2.6'
       :rawKey:
         :version_added: '2.6'
-      :sha256:
-        :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
     :sourceDiskId:
@@ -694,10 +582,6 @@
   :Instance:
     :version_added: '2.6'
     :canIpForward:
-      :version_added: '2.6'
-    :cpuPlatform:
-      :version_added: '2.6'
-    :creationTimestamp:
       :version_added: '2.6'
     :disks:
       :version_added: '2.6'
@@ -712,8 +596,6 @@
         :rawKey:
           :version_added: '2.6'
         :rsaEncryptedKey:
-          :version_added: '2.6'
-        :sha256:
           :version_added: '2.6'
       :index:
         :version_added: '2.6'
@@ -731,8 +613,6 @@
           :version_added: '2.6'
           :rawKey:
             :version_added: '2.6'
-          :sha256:
-            :version_added: '2.6'
       :interface:
         :version_added: '2.6'
       :mode:
@@ -747,8 +627,6 @@
         :version_added: '2.6'
       :acceleratorType:
         :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
     :labelFingerprint:
       :version_added: '2.6'
     :metadata:
@@ -775,8 +653,6 @@
           :version_added: '2.6'
         :subnetworkRangeName:
           :version_added: '2.6'
-      :name:
-        :version_added: '2.6'
       :network:
         :version_added: '2.6'
       :networkIP:
@@ -799,8 +675,6 @@
         :version_added: '2.6'
     :status:
       :version_added: '2.8'
-    :statusMessage:
-      :version_added: '2.6'
     :tags:
       :version_added: '2.6'
       :fingerprint:
@@ -811,11 +685,7 @@
       :version_added: '2.6'
   :InstanceGroup:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -839,31 +709,7 @@
     :version_added: '2.6'
     :baseInstanceName:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
-    :currentActions:
-      :version_added: '2.6'
-      :abandoning:
-        :version_added: '2.6'
-      :creating:
-        :version_added: '2.6'
-      :creatingWithoutRetries:
-        :version_added: '2.6'
-      :deleting:
-        :version_added: '2.6'
-      :none:
-        :version_added: '2.6'
-      :recreating:
-        :version_added: '2.6'
-      :refreshing:
-        :version_added: '2.6'
-      :restarting:
-        :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :instanceGroup:
       :version_added: '2.6'
     :instanceTemplate:
       :version_added: '2.6'
@@ -875,8 +721,6 @@
         :version_added: '2.6'
       :port:
         :version_added: '2.6'
-    :region:
-      :version_added: '2.6'
     :targetPools:
       :version_added: '2.6'
     :targetSize:
@@ -885,35 +729,15 @@
       :version_added: '2.6'
   :InterconnectAttachment:
     :version_added: '2.8'
-    :cloudRouterIpAddress:
-      :version_added: '2.8'
-    :customerRouterIpAddress:
-      :version_added: '2.8'
     :interconnect:
       :version_added: '2.8'
     :description:
       :version_added: '2.8'
     :edgeAvailabilityDomain:
       :version_added: '2.8'
-    :pairingKey:
-      :version_added: '2.8'
-    :partnerAsn:
-      :version_added: '2.8'
-    :privateInterconnectInfo:
-      :version_added: '2.8'
-      :tag8021q:
-        :version_added: '2.8'
     :type:
       :version_added: '2.8'
-    :state:
-      :version_added: '2.8'
-    :googleReferenceId:
-      :version_added: '2.8'
     :router:
-      :version_added: '2.8'
-    :creationTimestamp:
-      :version_added: '2.8'
-    :id:
       :version_added: '2.8'
     :name:
       :version_added: '2.8'
@@ -927,19 +751,11 @@
     :version_added: '2.6'
     :description:
       :version_added: '2.6'
-    :gateway_ipv4:
-      :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
     :ipv4_range:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
-    :subnetworks:
-      :version_added: '2.6'
     :autoCreateSubnetworks:
-      :version_added: '2.6'
-    :creationTimestamp:
       :version_added: '2.6'
     :routingConfig:
       :version_added: '2.8'
@@ -947,17 +763,7 @@
         :version_added: '2.8'
   :RegionDisk:
     :version_added: '2.8'
-    :labelFingerprint:
-      :version_added: '2.8'
-    :creationTimestamp:
-      :version_added: '2.8'
     :description:
-      :version_added: '2.8'
-    :id:
-      :version_added: '2.8'
-    :lastAttachTimestamp:
-      :version_added: '2.8'
-    :lastDetachTimestamp:
       :version_added: '2.8'
     :labels:
       :version_added: '2.8'
@@ -966,8 +772,6 @@
     :name:
       :version_added: '2.8'
     :sizeGb:
-      :version_added: '2.8'
-    :users:
       :version_added: '2.8'
     :replicaZones:
       :version_added: '2.8'
@@ -979,8 +783,6 @@
       :version_added: '2.8'
       :rawKey:
         :version_added: '2.8'
-      :sha256:
-        :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
     :sourceSnapshot:
@@ -991,10 +793,6 @@
         :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
-      :sha256:
-        :version_added: '2.8'
-    :sourceSnapshotId:
-      :version_added: '2.8'
   :Route:
     :version_added: '2.6'
     :destRange:
@@ -1017,14 +815,8 @@
       :version_added: '2.6'
     :nextHopVpnTunnel:
       :version_added: '2.6'
-    :nextHopNetwork:
-      :version_added: '2.6'
   :Router:
     :version_added: '2.7'
-    :id:
-      :version_added: '2.7'
-    :creationTimestamp:
-      :version_added: '2.7'
     :name:
       :version_added: '2.7'
     :description:
@@ -1051,11 +843,7 @@
     :version_added: '2.6'
     :certificate:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -1063,11 +851,7 @@
       :version_added: '2.6'
   :SslPolicy:
     :version_added: '2.7'
-    :creationTimestamp:
-      :version_added: '2.7'
     :description:
-      :version_added: '2.7'
-    :id:
       :version_added: '2.7'
     :name:
       :version_added: '2.7'
@@ -1075,27 +859,11 @@
       :version_added: '2.7'
     :minTlsVersion:
       :version_added: '2.7'
-    :enabledFeatures:
-      :version_added: '2.7'
     :customFeatures:
       :version_added: '2.7'
-    :fingerprint:
-      :version_added: '2.7'
-    :warnings:
-      :version_added: '2.7'
-      :code:
-        :version_added: '2.7'
-      :message:
-        :version_added: '2.7'
   :Subnetwork:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :gatewayAddress:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :ipCidrRange:
       :version_added: '2.6'
@@ -1105,8 +873,6 @@
       :version_added: '2.6'
     :enableFlowLogs:
       :version_added: '2.8'
-    :fingerprint:
-      :version_added: '2.6'
     :secondaryIpRanges:
       :version_added: '2.8'
       :rangeName:
@@ -1119,11 +885,7 @@
       :version_added: '2.6'
   :TargetHttpProxy:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -1131,11 +893,7 @@
       :version_added: '2.6'
   :TargetHttpsProxy:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -1151,15 +909,11 @@
     :version_added: '2.6'
     :backupPool:
       :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
       :version_added: '2.6'
     :failoverRatio:
       :version_added: '2.6'
     :healthCheck:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :instances:
       :version_added: '2.6'
@@ -1171,11 +925,7 @@
       :version_added: '2.6'
   :TargetSslProxy:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -1189,11 +939,7 @@
       :version_added: '2.8'
   :TargetTcpProxy:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :description:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
@@ -1203,26 +949,16 @@
       :version_added: '2.6'
   :TargetVpnGateway:
     :version_added: '2.7'
-    :creationTimestamp:
-      :version_added: '2.7'
     :description:
       :version_added: '2.7'
     :name:
       :version_added: '2.7'
-    :id:
-      :version_added: '2.7'
     :network:
-      :version_added: '2.7'
-    :tunnels:
-      :version_added: '2.7'
-    :forwardingRules:
       :version_added: '2.7'
     :region:
       :version_added: '2.7'
   :UrlMap:
     :version_added: '2.6'
-    :creationTimestamp:
-      :version_added: '2.6'
     :defaultService:
       :version_added: '2.6'
     :description:
@@ -1235,10 +971,6 @@
         :version_added: '2.6'
       :pathMatcher:
         :version_added: '2.6'
-    :id:
-      :version_added: '2.6'
-    :fingerprint:
-      :version_added: '2.6'
     :name:
       :version_added: '2.6'
     :pathMatchers:
@@ -1267,8 +999,6 @@
         :version_added: '2.6'
   :VpnTunnel:
     :version_added: '2.7'
-    :creationTimestamp:
-      :version_added: '2.7'
     :name:
       :version_added: '2.7'
     :description:
@@ -1281,8 +1011,6 @@
       :version_added: '2.7'
     :sharedSecret:
       :version_added: '2.7'
-    :sharedSecretHash:
-      :version_added: '2.7'
     :ikeVersion:
       :version_added: '2.7'
     :localTrafficSelector:
@@ -1290,8 +1018,6 @@
     :remoteTrafficSelector:
       :version_added: '2.7'
     :labels:
-      :version_added: '2.7'
-    :labelFingerprint:
       :version_added: '2.7'
     :region:
       :version_added: '2.7'

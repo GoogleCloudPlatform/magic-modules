@@ -19,37 +19,17 @@
       :version_added: '2.8'
     :stage:
       :version_added: '2.8'
-    :deleted:
-      :version_added: '2.8'
   :ServiceAccount:
     :version_added: '2.8'
     :name:
       :version_added: '2.8'
-    :projectId:
-      :version_added: '2.8'
-    :uniqueId:
-      :version_added: '2.8'
-    :email:
-      :version_added: '2.8'
     :displayName:
-      :version_added: '2.8'
-    :oauth2ClientId:
       :version_added: '2.8'
   :ServiceAccountKey:
     :version_added: '2.8'
-    :name:
-      :version_added: '2.8'
     :privateKeyType:
       :version_added: '2.8'
     :keyAlgorithm:
-      :version_added: '2.8'
-    :privateKeyData:
-      :version_added: '2.8'
-    :publicKeyData:
-      :version_added: '2.8'
-    :validAfterTime:
-      :version_added: '2.8'
-    :validBeforeTime:
       :version_added: '2.8'
     :serviceAccount:
       :version_added: '2.8'

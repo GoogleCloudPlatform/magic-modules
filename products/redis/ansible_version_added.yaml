@@ -9,13 +9,7 @@
       :version_added: '2.8'
     :authorizedNetwork:
       :version_added: '2.8'
-    :createTime:
-      :version_added: '2.8'
-    :currentLocationId:
-      :version_added: '2.8'
     :displayName:
-      :version_added: '2.8'
-    :host:
       :version_added: '2.8'
     :labels:
       :version_added: '2.8'
@@ -26,8 +20,6 @@
     :name:
       :version_added: '2.8'
     :memorySizeGb:
-      :version_added: '2.8'
-    :port:
       :version_added: '2.8'
     :redisVersion:
       :version_added: '2.8'

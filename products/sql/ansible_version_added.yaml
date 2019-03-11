@@ -17,20 +17,10 @@
       :version_added: '2.7'
     :failoverReplica:
       :version_added: '2.7'
-      :available:
-        :version_added: '2.7'
       :name:
         :version_added: '2.7'
     :instanceType:
       :version_added: '2.7'
-    :ipAddresses:
-      :version_added: '2.7'
-      :ipAddress:
-        :version_added: '2.7'
-      :timeToRetire:
-        :version_added: '2.7'
-      :type:
-        :version_added: '2.7'
     :ipv6Address:
       :version_added: '2.7'
     :masterInstanceName:
@@ -99,8 +89,6 @@
           :version_added: '2.7'
         :startTime:
           :version_added: '2.7'
-      :settingsVersion:
-        :version_added: '2.7'
   :Database:
     :version_added: '2.7'
     :charset:
