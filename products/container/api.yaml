@@ -353,10 +353,13 @@ objects:
         input: true
       # | 'instanceGroupUrls' not supported as it is dynamically created by the
       # |  server and admin has no way to predict it
+      # NodePool updates use a different name for version for updating.
+      # TODO(alexstephen): Support NodePool updates.
+      # Setting as `input: true` until fixed.
       - !ruby/object:Api::Type::String
         name: 'version'
         description: 'The version of the Kubernetes of this node.'
-        output: true
+        input: true
       # | 'status' is not applicable for state enforcement
       # | 'statusMessage' is not applicable for state enforcement
       - !ruby/object:Api::Type::NestedObject
