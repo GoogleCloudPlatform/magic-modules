@@ -44,6 +44,7 @@ module Provider
 
           # Add properties.
           # Only properties that aren't output-only + excluded should get versions.
+          # These are the only properties that become module fields.
           obj.all_user_properties.reject(&:exclude).reject(&:output).each do |prop|
             resource[prop.name.to_sym] = property_version(prop, [:regular, obj.name], versions)
           end
@@ -91,6 +92,7 @@ module Provider
         }
 
         # Only properties that aren't output-only + excluded should get versions.
+          # These are the only properties that become module fields.
         prop.nested_properties.reject(&:exclude).reject(&:output).each do |nested_p|
           property_hash[nested_p.name.to_sym] = property_version(nested_p,
                                                                  path + [prop.name], struct)
