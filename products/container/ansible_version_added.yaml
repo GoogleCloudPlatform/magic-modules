@@ -93,6 +93,8 @@
         :version_added: '2.6'
     :initialNodeCount:
       :version_added: '2.6'
+    :version:
+      :version_added: '2.8'
     :autoscaling:
       :version_added: '2.6'
       :enabled:
