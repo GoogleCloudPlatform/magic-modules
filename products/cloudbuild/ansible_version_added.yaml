@@ -11,8 +11,6 @@
       :version_added: '2.8'
     :disabled:
       :version_added: '2.8'
-    :createTime:
-      :version_added: '2.8'
     :substitutions:
       :version_added: '2.8'
     :filename:

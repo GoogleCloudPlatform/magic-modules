@@ -25,15 +25,9 @@
       :version_added: '2.6'
       :bucket:
         :version_added: '2.6'
-      :domain:
-        :version_added: '2.6'
-      :email:
-        :version_added: '2.6'
       :entity:
         :version_added: '2.6'
       :entityId:
-        :version_added: '2.6'
-      :id:
         :version_added: '2.6'
       :projectTeam:
         :version_added: '2.6'
@@ -57,30 +51,12 @@
       :version_added: '2.7'
       :bucket:
         :version_added: '2.7'
-      :domain:
-        :version_added: '2.7'
-      :email:
-        :version_added: '2.7'
       :entity:
-        :version_added: '2.7'
-      :entityId:
-        :version_added: '2.7'
-      :generation:
-        :version_added: '2.7'
-      :id:
         :version_added: '2.7'
       :object:
         :version_added: '2.7'
-      :projectTeam:
-        :version_added: '2.7'
-        :projectNumber:
-          :version_added: '2.7'
-        :team:
-          :version_added: '2.7'
       :role:
         :version_added: '2.7'
-    :id:
-      :version_added: '2.6'
     :lifecycle:
       :version_added: '2.6'
       :rule:
@@ -119,15 +95,7 @@
       :version_added: '2.6'
       :entity:
         :version_added: '2.6'
-      :entityId:
-        :version_added: '2.6'
-    :projectNumber:
-      :version_added: '2.6'
     :storageClass:
-      :version_added: '2.6'
-    :timeCreated:
-      :version_added: '2.6'
-    :updated:
       :version_added: '2.6'
     :versioning:
       :version_added: '2.6'
@@ -147,15 +115,9 @@
     :version_added: '2.6'
     :bucket:
       :version_added: '2.6'
-    :domain:
-      :version_added: '2.6'
-    :email:
-      :version_added: '2.6'
     :entity:
       :version_added: '2.6'
     :entityId:
-      :version_added: '2.6'
-    :id:
       :version_added: '2.6'
     :projectTeam:
       :version_added: '2.6'

@@ -29,8 +29,6 @@
           :version_added: '2.8'
         :tableId:
           :version_added: '2.8'
-    :creationTime:
-      :version_added: '2.8'
     :datasetReference:
       :version_added: '2.8'
       :datasetId:
@@ -43,11 +41,7 @@
       :version_added: '2.8'
     :friendlyName:
       :version_added: '2.8'
-    :id:
-      :version_added: '2.8'
     :labels:
-      :version_added: '2.8'
-    :lastModifiedTime:
       :version_added: '2.8'
     :location:
       :version_added: '2.8'
@@ -61,29 +55,13 @@
         :version_added: '2.8'
       :tableId:
         :version_added: '2.8'
-    :creationTime:
-      :version_added: '2.8'
     :description:
       :version_added: '2.8'
     :friendlyName:
       :version_added: '2.8'
-    :id:
-      :version_added: '2.8'
     :labels:
       :version_added: '2.8'
-    :lastModifiedTime:
-      :version_added: '2.8'
-    :location:
-      :version_added: '2.8'
     :name:
-      :version_added: '2.8'
-    :numBytes:
-      :version_added: '2.8'
-    :numLongTermBytes:
-      :version_added: '2.8'
-    :numRows:
-      :version_added: '2.8'
-    :type:
       :version_added: '2.8'
     :view:
       :version_added: '2.8'
@@ -100,14 +78,6 @@
       :expirationMs:
         :version_added: '2.8'
       :type:
-        :version_added: '2.8'
-    :streamingBuffer:
-      :version_added: '2.8'
-      :estimatedBytes:
-        :version_added: '2.8'
-      :estimatedRows:
-        :version_added: '2.8'
-      :oldestEntryTime:
         :version_added: '2.8'
     :schema:
       :version_added: '2.8'

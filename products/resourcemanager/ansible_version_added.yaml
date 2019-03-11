@@ -5,13 +5,7 @@
 :regular:
   :Project:
     :version_added: '2.8'
-    :number:
-      :version_added: '2.8'
-    :lifecycleState:
-      :version_added: '2.8'
     :name:
-      :version_added: '2.8'
-    :createTime:
       :version_added: '2.8'
     :labels:
       :version_added: '2.8'

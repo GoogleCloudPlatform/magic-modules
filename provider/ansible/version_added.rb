@@ -43,7 +43,8 @@ module Provider
           }
 
           # Add properties.
-          obj.all_user_properties.each do |prop|
+          # Only properties that aren't output-only + excluded should get versions.
+          obj.all_user_properties.reject(&:exclude).reject(&:output).each do |prop|
             resource[prop.name.to_sym] = property_version(prop, [:regular, obj.name], versions)
           end
           struct[:regular][obj.name.to_sym] = resource
@@ -89,7 +90,8 @@ module Provider
           version_added: correct_version(path + [prop.name], struct)
         }
 
-        prop.nested_properties.each do |nested_p|
+        # Only properties that aren't output-only + excluded should get versions.
+        prop.nested_properties.reject(&:exclude).reject(&:output).each do |nested_p|
           property_hash[nested_p.name.to_sym] = property_version(nested_p,
                                                                  path + [prop.name], struct)
         end

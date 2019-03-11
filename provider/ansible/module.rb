@@ -37,7 +37,8 @@ module Provider
               if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'aliases' => prop.aliases,
             'options' => (if prop.nested_properties?
-                            prop.nested_properties.map { |x| python_dict_for_property(x) }
+                            prop.nested_properties.reject(&:output)
+                                                  .map { |x| python_dict_for_property(x) }
                                                   .reduce({}, :merge)
                           end
                          )

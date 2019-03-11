@@ -46,7 +46,7 @@ module Provider
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
                 if prop.nested_properties?
-                  prop.nested_properties.map { |p| documentation_for_property(p) }
+                  prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
                                         .reduce({}, :merge)
                 end
               )
@@ -72,8 +72,10 @@ module Provider
             'returned' => 'success',
             'type' => type,
             'contains' => (
-              prop.nested_properties.map { |p| returns_for_property(p) }.reduce({}, :merge) \
               if prop.nested_properties?
+                prop.nested_properties.map { |p| returns_for_property(p) }
+                                      .reduce({}, :merge)
+              end
             )
           }.reject { |_, v| v.nil? }
         }

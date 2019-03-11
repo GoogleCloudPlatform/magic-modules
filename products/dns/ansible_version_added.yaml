@@ -11,15 +11,9 @@
       :version_added: '2.5'
     :dnsName:
       :version_added: '2.5'
-    :id:
-      :version_added: '2.5'
     :name:
       :version_added: '2.5'
-    :nameServers:
-      :version_added: '2.5'
     :nameServerSet:
-      :version_added: '2.5'
-    :creationTime:
       :version_added: '2.5'
     :labels:
       :version_added: '2.8'

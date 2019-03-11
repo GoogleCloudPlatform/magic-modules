@@ -27,3 +27,7 @@
         :version_added: '2.6'
     :ackDeadlineSeconds:
       :version_added: '2.6'
+    :messageRetentionDuration:
+      :version_added: '2.8'
+    :retainAckedMessages:
+      :version_added: '2.8'
