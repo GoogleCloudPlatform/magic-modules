@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -14,6 +15,10 @@ func resourceGoogleProjectOrganizationPolicy() *schema.Resource {
 		Update: resourceGoogleProjectOrganizationPolicyUpdate,
 		Delete: resourceGoogleProjectOrganizationPolicyDelete,
 
+		Importer: &schema.ResourceImporter{
+			State: resourceProjectOrgPolicyImporter,
+		},
+
 		Schema: mergeSchemas(
 			schemaOrganizationPolicy,
 			map[string]*schema.Schema{
@@ -25,6 +30,17 @@ func resourceGoogleProjectOrganizationPolicy() *schema.Resource {
 			},
 		),
 	}
+}
+
+func resourceProjectOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("ID must be in the format <projectId>:constraints/<constraint>")
+	}
+	d.Set("project", parts[0])
+	d.Set("constraint", parts[1])
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceGoogleProjectOrganizationPolicyCreate(d *schema.ResourceData, meta interface{}) error {

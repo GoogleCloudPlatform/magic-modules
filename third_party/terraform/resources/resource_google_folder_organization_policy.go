@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -14,6 +15,10 @@ func resourceGoogleFolderOrganizationPolicy() *schema.Resource {
 		Update: resourceGoogleFolderOrganizationPolicyUpdate,
 		Delete: resourceGoogleFolderOrganizationPolicyDelete,
 
+		Importer: &schema.ResourceImporter{
+			State: resourceFolderOrgPolicyImporter,
+		},
+
 		Schema: mergeSchemas(
 			schemaOrganizationPolicy,
 			map[string]*schema.Schema{
@@ -25,6 +30,17 @@ func resourceGoogleFolderOrganizationPolicy() *schema.Resource {
 			},
 		),
 	}
+}
+
+func resourceFolderOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), ":")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("ID must be in the format folders/<folderId>:constraints/<constraint>")
+	}
+	d.Set("folder", parts[0])
+	d.Set("constraint", parts[1])
+
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceGoogleFolderOrganizationPolicyCreate(d *schema.ResourceData, meta interface{}) error {
