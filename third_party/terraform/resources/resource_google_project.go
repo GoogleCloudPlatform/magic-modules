@@ -227,8 +227,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	d.SetId(pid)
 
 	// Wait for the operation to complete
-	opV1 := make(map[string]interface{})
-	waitErr := Convert(op, opV1)
+	opV1, waitErr := ConvertToMap(op)
 	if waitErr != nil {
 		return waitErr
 	}
