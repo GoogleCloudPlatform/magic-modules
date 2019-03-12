@@ -1,13 +1,18 @@
+// ----------------------------------------------------------------------------
+//
+//     This file is copied here by Magic Modules. The code for building up a
+//     compute instance object is copied from the manually implemented
+//     provider file:
+//     third_party/terraform/resources/resource_compute_instance.go
+//
+// ----------------------------------------------------------------------------
 package google
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/googleapi"
@@ -54,36 +59,6 @@ func GetComputeInstanceApiObject(d TerraformResourceData, config *Config) (map[s
 	}
 
 	return jsonMap(instance)
-}
-
-func getInstance(config *Config, d *schema.ResourceData) (*computeBeta.Instance, error) {
-	project, err := getProject(d, config)
-	if err != nil {
-		return nil, err
-	}
-	zone, err := getZone(d, config)
-	if err != nil {
-		return nil, err
-	}
-	instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Id()).Do()
-	if err != nil {
-		return nil, handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
-	}
-	return instance, nil
-}
-
-func getDisk(diskUri string, d *schema.ResourceData, config *Config) (*compute.Disk, error) {
-	source, err := ParseDiskFieldValue(diskUri, d, config)
-	if err != nil {
-		return nil, err
-	}
-
-	disk, err := config.clientCompute.Disks.Get(source.Project, source.Zone, source.Name).Do()
-	if err != nil {
-		return nil, err
-	}
-
-	return disk, err
 }
 
 func expandComputeInstance(project string, zone *compute.Zone, d TerraformResourceData, config *Config) (*computeBeta.Instance, error) {
@@ -252,95 +227,6 @@ func expandInstanceGuestAccelerators(d TerraformResourceData, config *Config) ([
 	return guestAccelerators, nil
 }
 
-// suppressEmptyGuestAcceleratorDiff is used to work around perpetual diff
-// issues when a count of `0` guest accelerators is desired. This may occur when
-// guest_accelerator support is controlled via a module variable. E.g.:
-//
-// 		guest_accelerators {
-//      	count = "${var.enable_gpu ? var.gpu_count : 0}"
-//          ...
-// 		}
-// After reconciling the desired and actual state, we would otherwise see a
-// perpetual resembling:
-// 		[] != [{"count":0, "type": "nvidia-tesla-k80"}]
-func suppressEmptyGuestAcceleratorDiff(d *schema.ResourceDiff, meta interface{}) error {
-	oldi, newi := d.GetChange("guest_accelerator")
-
-	old, ok := oldi.([]interface{})
-	if !ok {
-		return fmt.Errorf("Expected old guest accelerator diff to be a slice")
-	}
-
-	new, ok := newi.([]interface{})
-	if !ok {
-		return fmt.Errorf("Expected new guest accelerator diff to be a slice")
-	}
-
-	if len(old) != 0 && len(new) != 1 {
-		return nil
-	}
-
-	firstAccel, ok := new[0].(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("Unable to type assert guest accelerator")
-	}
-
-	if firstAccel["count"].(int) == 0 {
-		if err := d.Clear("guest_accelerator"); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func resourceComputeInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-
-	project, err := getProject(d, config)
-	if err != nil {
-		return err
-	}
-
-	zone, err := getZone(d, config)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Requesting instance deletion: %s", d.Id())
-
-	if d.Get("deletion_protection").(bool) {
-		return fmt.Errorf("Cannot delete instance %s: instance Deletion Protection is enabled. Set deletion_protection to false for this resource and run \"terraform apply\" before attempting to delete it.", d.Id())
-	} else {
-		op, err := config.clientCompute.Instances.Delete(project, zone, d.Id()).Do()
-		if err != nil {
-			return fmt.Errorf("Error deleting instance: %s", err)
-		}
-
-		// Wait for the operation to complete
-		opErr := computeOperationWaitTime(config.clientCompute, op, project, "instance to delete", int(d.Timeout(schema.TimeoutDelete).Minutes()))
-		if opErr != nil {
-			return opErr
-		}
-
-		d.SetId("")
-		return nil
-	}
-}
-
-func resourceComputeInstanceImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("Invalid import id %q. Expecting {project}/{zone}/{instance_name}", d.Id())
-	}
-
-	d.Set("project", parts[0])
-	d.Set("zone", parts[1])
-	d.SetId(parts[2])
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func expandBootDisk(d TerraformResourceData, config *Config, zone *compute.Zone, project string) (*computeBeta.AttachedDisk, error) {
 	disk := &computeBeta.AttachedDisk{
 		AutoDelete: d.Get("boot_disk.0.auto_delete").(bool),
@@ -415,13 +301,4 @@ func expandScratchDisks(d TerraformResourceData, config *Config, zone *compute.Z
 	}
 
 	return scratchDisks, nil
-}
-
-func hash256(raw string) (string, error) {
-	decoded, err := base64.StdEncoding.DecodeString(raw)
-	if err != nil {
-		return "", err
-	}
-	h := sha256.Sum256(decoded)
-	return base64.StdEncoding.EncodeToString(h[:]), nil
 }
