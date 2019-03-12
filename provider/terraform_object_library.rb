@@ -47,6 +47,10 @@ module Provider
                         'third_party/validator/constants.go'],
                        ['google/cai.go',
                         'third_party/validator/cai.go'],
+                       ['google/json_map.go',
+                        'third_party/validator/json_map.go'],
+                       ['google/compute_instance.go',
+                        'third_party/validator/compute_instance.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
@@ -64,7 +68,21 @@ module Provider
                        ['google/transport.go',
                         'third_party/terraform/utils/transport.go'],
                        ['google/bigtable_client_factory.go',
-                        'third_party/terraform/utils/bigtable_client_factory.go']
+                        'third_party/terraform/utils/bigtable_client_factory.go'],
+                       ['google/common_operation.go',
+                        'third_party/terraform/utils/common_operation.go'],
+                       ['google/compute_operation.go',
+                        'third_party/terraform/utils/compute_operation.go'],
+                       ['google/compute_shared_operation.go',
+                        'third_party/terraform/utils/compute_shared_operation.go'],
+                       ['google/compute_instance_helpers.go',
+                        'third_party/terraform/utils/compute_instance_helpers.go'],
+                       ['google/convert.go',
+                        'third_party/terraform/utils/convert.go'],
+                       ['google/metadata.go',
+                        'third_party/terraform/utils/metadata.go'],
+                       ['google/service_scope.go',
+                        'third_party/terraform/utils/service_scope.go']
                      ])
     end
 
