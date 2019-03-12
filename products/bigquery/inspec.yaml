@@ -31,6 +31,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude_plural: true
       lastModifiedTime: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true
+    additional_functions: |
+      def name
+        return dataset_reference&.dataset_id
+      end
 
   Table: !ruby/object:Overrides::Inspec::ResourceOverride
     properties:
