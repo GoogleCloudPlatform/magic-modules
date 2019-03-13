@@ -37,7 +37,10 @@ module Overrides
           :examples,
 
           # TODO(alexstephen): Deprecate once all resources using autogen async.
-          :autogen_async
+          :autogen_async,
+
+          # Flag - if false, resource is not importable
+          :importable
         ]
       end
 
@@ -57,6 +60,7 @@ module Overrides
         check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
         check :import_format, type: Array, item_type: String, default: []
         check :autogen_async, type: :boolean, default: false
+        check :importable, type: :boolean, default: true
       end
 
       def apply(resource)

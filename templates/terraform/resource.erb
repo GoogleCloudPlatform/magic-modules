@@ -50,10 +50,11 @@ func resource<%= resource_name -%>() *schema.Resource {
         ),
 <%      end -%>
 
+<%      if object.importable -%>
         Importer: &schema.ResourceImporter{
             State: resource<%= resource_name -%>Import,
         },
-
+<%      end -%>
 
         Timeouts: &schema.ResourceTimeout {
             Create: schema.DefaultTimeout(<%= timeouts.insert_sec  -%> * time.Second),
@@ -562,6 +563,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     return nil
 }
 
+<% if object.importable -%>
 func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <% if object.custom_code.custom_import -%>
 <%= lines(compile(object.custom_code.custom_import)) -%>
@@ -582,6 +584,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
     return []*schema.ResourceData{d}, nil
 <% end -%>
 }
+<% end -%>
 
 <% properties.reject(&:ignore_read).each do |prop| -%>
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>
