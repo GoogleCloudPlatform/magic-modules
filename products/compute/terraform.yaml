@@ -201,6 +201,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           in the cloud console. In order to use this additional
           IAM permissions need to be set on the Compute Engine Service Agent. See
           https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      physicalBlockSizeBytes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       constants: templates/terraform/constants/disk.erb
@@ -629,6 +631,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      physicalBlockSizeBytes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
