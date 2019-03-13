@@ -32,7 +32,7 @@ class <%= object.name -%> < GcpResourceBase
   desc '<%= object.name -%>'
   supports platform: 'gcp'
 
-<% object.all_user_properties.reject(&:exclude_reader).each do |prop| -%>
+<% object.all_user_properties.each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>
 
 <% end -%>
@@ -67,7 +67,7 @@ class <%= object.name -%> < GcpResourceBase
 
   def parse
 <%
-  parse_code = object.all_user_properties.reject(&:exclude_reader).map do |prop|
+  parse_code = object.all_user_properties.map do |prop|
     assignment = "@#{prop.out_name} = #{parse_code(prop, '@fetched')}"
   end
 -%>
