@@ -204,7 +204,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/backendBuckets'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/backendBuckets'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::String
@@ -601,7 +601,7 @@ objects:
       guides:
         'Adding a persistent disk':
           'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/disks'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
 <%=
   # Larger disks were timing out at creation. Bumping up to 5 minutes.
   # https://github.com/terraform-providers/terraform-provider-google/issues/703
@@ -777,7 +777,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/vpc/docs/firewalls'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/firewalls'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/firewalls'
     description: |
       Each network has its own firewall controlling access to and from the
       instances.
@@ -1029,7 +1029,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/forwarding-rules'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/forwardingRule'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/forwardingRule'
     input: true
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
@@ -1130,7 +1130,7 @@ objects:
       guides:
         'Reserving a Static External IP Address':
           'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/globalAddresses'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
     input: true
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
@@ -1288,7 +1288,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/httpHealthChecks'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/httpHealthChecks'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
@@ -1370,7 +1370,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/httpsHealthChecks'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/httpsHealthChecks'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Integer
@@ -1448,7 +1448,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/health-checks'
-      api: 'https://cloud.google.com/compute/docs/reference/rest/latest/healthChecks'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/healthChecks'
     description: |
       Health Checks determine whether instances are responsive and able to do work.
       They are an important part of a comprehensive load balancing configuration,
@@ -1699,7 +1699,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/images'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/images'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/images'
     description: |
       Represents an Image resource.
 
@@ -3844,7 +3844,7 @@ objects:
       guides:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/targetHttpProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
@@ -3894,7 +3894,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/targetHttpsProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
@@ -4114,7 +4114,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Setting Up SSL proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/targetSslProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/targetSslProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
@@ -4203,7 +4203,7 @@ objects:
       guides:
         'Setting Up TCP proxy for Google Cloud Load Balancing':
           'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
-      api: 'https://cloud.google.com/compute/docs/reference/latest/targetTcpProxies'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies'
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
     properties:
       - !ruby/object:Api::Type::Time
