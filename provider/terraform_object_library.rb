@@ -51,6 +51,8 @@ module Provider
                         'third_party/validator/json_map.go'],
                        ['google/compute_instance.go',
                         'third_party/validator/compute_instance.go'],
+                       ['google/sql_database_instance.go',
+                        'third_party/validator/sql_database_instance.go'],
                        ['google/image.go',
                         'third_party/terraform/utils/image.go'],
                        ['google/disk_type.go',
