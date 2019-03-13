@@ -6,4 +6,5 @@ resource "google_compute_disk" "default" {
   labels = {
     environment = "dev"
   }
+  physical_block_size_bytes = 4096
 }
