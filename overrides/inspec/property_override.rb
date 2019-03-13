@@ -23,7 +23,7 @@ module Overrides
       def self.attributes
         [
           :name_from_self_link, # Set to convert self link to name
-          :exclude_plural,
+          :exclude_plural
         ]
       end
 
