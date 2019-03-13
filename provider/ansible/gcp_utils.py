@@ -314,7 +314,7 @@ class GcpRequest(object):
     def _compare_boolean(self, value1, value2):
         try:
             # Both True
-            if value1 and value2:
+            if value1 and value2 is True:
                 return None
             # Value1 True, value2 'true'
             elif value1 and to_text(value2) == 'true':
