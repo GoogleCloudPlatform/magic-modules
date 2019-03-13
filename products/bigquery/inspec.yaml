@@ -21,7 +21,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       description: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true
-        exclude_reader: true
       access: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true
       defaultTableExpirationMs: !ruby/object:Overrides::Inspec::PropertyOverride
@@ -35,7 +34,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude_plural: true
     additional_functions: |
       def name
-        return dataset_reference&.dataset_id
+        dataset_reference&.dataset_id
       end
 
   Table: !ruby/object:Overrides::Inspec::ResourceOverride
