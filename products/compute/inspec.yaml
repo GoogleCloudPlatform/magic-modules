@@ -25,10 +25,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
-    additional_functions: |
-      def custom
-        # TODO: actually add code here
-      end
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Image: !ruby/object:Overrides::Inspec::ResourceOverride

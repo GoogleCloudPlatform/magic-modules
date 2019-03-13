@@ -27,7 +27,7 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   attr_reader :table
 
   filter_table_config = FilterTable.create
-<% object.all_user_properties.reject {|prop| prop.exclude_plural }.each do |prop| -%>
+<% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
 
   <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>

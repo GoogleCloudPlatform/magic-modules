@@ -6,6 +6,7 @@ describe google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id
   its('friendly_name') { should eq <%= doc_generation ? "'#{dataset['friendly_name']}'" : "dataset['friendly_name']" -%> }
   its('location') { should eq <%= doc_generation ? "'#{dataset['location']}'" : "dataset['location']" -%> }
   its('description') { should eq <%= doc_generation ? "'#{dataset['description']}'" : "dataset['description']" -%> }
+  its('name') { should eq <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%> }
   its('default_table_expiration_ms') { should cmp <%= doc_generation ? "'#{dataset['default_table_expiration_ms']}'" : "dataset['default_table_expiration_ms']" -%> }
 end
 
