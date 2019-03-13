@@ -50,7 +50,7 @@ func resource<%= resource_name -%>() *schema.Resource {
         ),
 <%      end -%>
 
-<%      if object.importable -%>
+<%      unless object.exclude_import -%>
         Importer: &schema.ResourceImporter{
             State: resource<%= resource_name -%>Import,
         },
@@ -563,7 +563,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     return nil
 }
 
-<% if object.importable -%>
+<% unless object.exclude_import -%>
 func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 <% if object.custom_code.custom_import -%>
 <%= lines(compile(object.custom_code.custom_import)) -%>

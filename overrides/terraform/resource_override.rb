@@ -40,7 +40,7 @@ module Overrides
           :autogen_async,
 
           # Flag - if false, resource is not importable
-          :importable
+          :exclude_import
         ]
       end
 
@@ -60,7 +60,7 @@ module Overrides
         check :docs, type: Provider::Terraform::Docs, default: Provider::Terraform::Docs.new
         check :import_format, type: Array, item_type: String, default: []
         check :autogen_async, type: :boolean, default: false
-        check :importable, type: :boolean, default: true
+        check :exclude_import, type: :boolean, default: false
       end
 
       def apply(resource)
