@@ -142,6 +142,27 @@ objects:
                   name: 'ipv4Address'
                   description: 'IPv4 address of a target name server.'
         min_version: beta
+      - !ruby/object:Api::Type::NestedObject
+        min_version: beta
+        name: 'peeringConfig'
+        description: |
+          The presence of this field indicates that DNS Peering is enabled for this
+          zone. The value of this field contains the network to peer with.
+        update_verb: :PATCH
+        update_url: 'projects/{{project}}/managedZones/{{name}}'
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'targetNetwork'
+            description: 'The network with which to peer.'
+            properties:
+              # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+              # are possible.
+              - !ruby/object:Api::Type::String
+                name: 'networkUrl'
+                description: |
+                  The fully qualified URL of the VPC network to forward queries to.
+                  This should be formatted like
+                  `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Zones':

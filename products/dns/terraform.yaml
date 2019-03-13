@@ -33,6 +33,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           zone_name: "private-zone"
           network_1_name: "network-1"
           network_2_name: "network-2"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_private_peering"
+        min_version: 'beta'
+        primary_resource_id: "peering-zone"
+        vars:
+          zone_name: "peering-zone"
+          network_source_name: "network-source"
+          network_target_name: "network-target"
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -78,6 +86,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
             return hashcode.String(buf.String())
           }
+      visibility: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'caseDiffSuppress'
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
