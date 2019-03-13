@@ -102,11 +102,11 @@ resource "google_container_cluster" "primary" {
 * `location` - (Optional) The location (region or zone) in which the cluster
 resides.
 
-* `zone` - (Optional) The zone in which the cluster resides. `zone` has been
-deprecated in favor of `location`.
+* `zone` - (Optional, Deprecated) The zone in which the cluster resides. `zone`
+has been deprecated in favor of `location`.
 
-* `region` - (Optional) The region in which the cluster resides (for regional clusters).
-`zone` has been deprecated in favor of `location`.
+* `region` - (Optional, Deprecated) The region in which the cluster resides (for
+regional clusters). `zone` has been deprecated in favor of `location`.
 
 -> Note: You must specify a `location` for either cluster type or the
 type-specific `region` for regional clusters / `zone` for zonal clusters.

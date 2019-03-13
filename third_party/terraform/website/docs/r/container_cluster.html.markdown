@@ -149,12 +149,12 @@ single cluster master. If you specify a region (such as `us-west1`), the
 cluster will be a regional cluster with multiple masters spread across zones in
 the region, and with default node locations in those zones as well.
 
-* `zone` - (Optional) The zone that the cluster master and nodes should be
-created in. If specified, this cluster will be a zonal cluster. `zone` has been
-deprecated in favour of `location`.
+* `zone` - (Optional, Deprecated) The zone that the cluster master and nodes
+should be created in. If specified, this cluster will be a zonal cluster. `zone`
+has been deprecated in favour of `location`.
 
-* `region` (Optional) The region that the cluster master and nodes should be
-created in. If specified, this cluster will be a [regional clusters](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-zone-and-regional-clusters#regional)
+* `region` (Optional, Deprecated) The region that the cluster master and nodes
+should be created in. If specified, this cluster will be a [regional clusters](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-zone-and-regional-clusters#regional)
 where the cluster master and nodes (by default) will be created in several zones
 throughout the region. `region` has been deprecated in favour of `location`.
 
