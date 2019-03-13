@@ -458,7 +458,6 @@ jobs:
             params:
                 repository: mm-output
                 branch_file: mm-approved-prs/.git/branch
-                only_if_diff: true
                 force: true
           - put: mark-success
             resource: mm-approved-prs
