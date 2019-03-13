@@ -41,3 +41,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       description: !ruby/object:Overrides::Inspec::PropertyOverride
         exclude_plural: true
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        exclude_plural: true
