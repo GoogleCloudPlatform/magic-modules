@@ -1,25 +1,9 @@
 <%  if with_dependencies && !example.prerequisites.nil? -%>
 <%    example.prerequisites.each do |pre_ex| -%>
-<%=     lines(build_documentation_hcl_from_example(pre_ex.product, pre_ex.example, false)) -%>
+<%=     lines(build_documentation_hcl_from_example(pre_ex.product, pre_ex.example, name_hints)) -%>
 
 <%    end -%>
 <%  end -%>
 resource "<%= example.resource -%>" "<%= resource_id_hint -%>" {
-<%
-    longest_prop_name = example.properties.keys.max_by(&:length)
-    prop_alignment = longest_prop_name.length
--%>
-<%  example.properties.each do |prop_name, prop_value| -%>
-<%    if prop_value.is_a?(String) -%>
-  <%= prop_name.ljust(prop_alignment) -%> = "<%= prop_value -%>"
-<%    elsif prop_value.is_a?(Hash) -%>
-  <%= prop_name -%> = {
-<%      prop_value.each do |sub_prop_name, sub_prop_value| -%>
-    <%=   sub_prop_name -%> = "<%= sub_prop_value -%>"
-<%      end -%>
-  }
-<%    else -%>
-  // TODO: Unsupported property value <%= prop_value -%>
-<%    end -%>
-<%  end -%>
+<%= lines(build_hcl_properties(example.properties)) -%>
 }

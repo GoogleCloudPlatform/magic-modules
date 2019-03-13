@@ -1,0 +1,13 @@
+<%
+    sdk = object.azure_sdk_definition
+    rg_name = ""
+    sub_ids = [sdk.provider_name]
+    sdk.read.request.reject {|k, v| v.id_portion.nil?}.each do |name, value|
+      if value.id_portion == "resourceGroups"
+        rg_name = name_hints[name]
+      else
+        sub_ids <<= "#{value.id_portion}/#{name_hints[name]}"
+      end
+    end
+-%>
+/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/<%= rg_name -%><%= sub_ids.length > 1 ? "/" : "" -%><%= sub_ids.join("/") -%>

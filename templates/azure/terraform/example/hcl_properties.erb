@@ -1,0 +1,29 @@
+<%
+    # props_left: [[name_1, val_1], [name_2, val_2], ...]
+    props_left = properties.to_a
+    begin
+      simple_props = props_left.take_while{|p| !p[1].is_a?(Hash)}
+      props_left = props_left.drop_while{|p| !p[1].is_a?(Hash)}
+
+      prop_alignment = simple_props.map{|p| p[0].length}.max
+      simple_props.each do |prop|
+        if prop[1].is_a?(String)
+-%>
+<%=       prop[0].ljust(prop_alignment) -%> = "<%= prop[1] -%>"
+<%      else -%>
+// TODO: Unsupported property "<%= prop[0] -%>" value <%= prop[1] -%>
+<%
+        end
+      end
+      complex_props = props_left.take_while{|p| p[1].is_a?(Hash)}
+      props_left = props_left.drop_while{|p| p[1].is_a?(Hash)}
+      complex_props.each do |prop|
+-%>
+
+<%=     prop[0] -%> = {
+<%= lines(build_hcl_properties(prop[1])) -%>
+}
+<%
+      end
+    end until props_left.empty?
+-%>

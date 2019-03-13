@@ -24,7 +24,6 @@ description: |-
 Manages a resource group on Azure.
 
 
-
 ## Example Usage - Resource Group
 
 
@@ -54,11 +53,3 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The resource group ID.
-
-
-
-## Import
-
-ResourceGroup can be imported using the `resource id`, e.g.
-```shell
-$ terraform import azurerm_resource_group.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg```

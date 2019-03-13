@@ -36,16 +36,29 @@ module Provider
           def build_test_hcl_from_example()
           end
 
-          def build_documentation_hcl_from_example(product_name, example_name, with_dependencies = true, id_hint = "example")
+          def build_documentation_hcl_from_example(product_name, example_name, name_hints, with_dependencies = false)
             documentation_raw = compile_template 'templates/azure/terraform/example/documentation_hcl.erb',
                                                  example: get_example_from_file(product_name, example_name),
                                                  with_dependencies: with_dependencies,
-                                                 resource_id_hint: id_hint
+                                                 name_hints: name_hints,
+                                                 resource_id_hint: "example"
             context = {
-              resource_id_hint: id_hint,
+              resource_id_hint: "example",
               is_acctest: false
-            }
+            }.merge(name_hints.transform_keys{|k| "#{k.underscore}_hint"})
             compile_string context, documentation_raw
+          end
+
+          def build_documentation_import_resource_id(object, example_reference)
+            compile_template 'templates/azure/terraform/example/import_resource_id.erb',
+                             name_hints: example_reference.resource_name_hints,
+                             object: object
+          end
+
+          def build_hcl_properties(properties_hash, indentation = 2)
+            compile_template 'templates/azure/terraform/example/hcl_properties.erb',
+                             properties: properties_hash,
+                             indentation: indentation
           end
 
           private

@@ -53,7 +53,6 @@ description: |-
 
 <%= lines(object.description) -%>
 
-
 <% if !object.references.nil? -%>
 To get more information about <%= object.name -%>, see:
 
@@ -85,14 +84,13 @@ To get more information about <%= object.name -%>, see:
 <%= example.config_documentation -%>
   <%- end %>
 <%- end -%>
-
 <%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? -%>
 <%    object.document_examples.each do |example_ref| -%>
 ## <%= example_ref.title -%>
 
 
 ```hcl
-<%= lines(build_documentation_hcl_from_example(product_ns, example_ref.example_name)) -%>
+<%= lines(build_documentation_hcl_from_example(product_ns, example_ref.example_name, example_ref.resource_name_hints, true)) -%>
 ```
 
 <%    end -%>
@@ -132,26 +130,12 @@ The following attributes are exported:
 <%= "\n" + object.docs.attributes -%>
 <% end -%>
 
-<% unless object.async.nil? -%>
-## Timeouts
-
-This resource provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
-
-- `create` - Default is <%= object.async.operation.timeouts.insert_sec / 60 -%> minutes.
-<% if updatable?(object, properties) -%>
-- `update` - Default is <%= object.async.operation.timeouts.update_sec / 60 -%> minutes.
-<% end -%>
-- `delete` - Default is <%= object.async.operation.timeouts.delete_sec / 60 -%> minutes.
-<% end -%>
-
+<%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? && !object.document_examples.empty? -%>
 ## Import
 
 <%= object.name -%> can be imported using the `resource id`, e.g.
-<%
-    resource_id_postfix = ""
-    resource_id_postfix = "/#{object.__product.azure_namespace}/TODO.ID_PORTION/example" unless object.name == "ResourceGroup"
--%>
 ```shell
-$ terraform import azurerm_<%= resource_name -%>.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg<%= resource_id_postfix -%>
+$ terraform import azurerm_<%= resource_name -%>.example <%= build_documentation_import_resource_id(object, object.document_examples[0]) -%>
+
 ```
+<%  end -%>

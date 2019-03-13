@@ -24,7 +24,6 @@ description: |-
 Manages a service bus disaster recovery config on Azure.
 
 
-
 ## Example Usage - Resource Group
 
 
@@ -58,11 +57,3 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The service bus disaster recovery config ID.
-
-
-
-## Import
-
-ServiceBusDisasterRecoveryConfig can be imported using the `resource id`, e.g.
-```shell
-$ terraform import azurerm_service_bus_disaster_recovery_config.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/servicebus/TODO.ID_PORTION/example```

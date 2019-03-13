@@ -24,7 +24,6 @@ description: |-
 Manages a container registry on Azure.
 
 
-
 ## Example Usage - Container Registry
 
 
@@ -77,11 +76,3 @@ The following attributes are exported:
 * `id` - The container registry ID.
 
 * `login_server` - The URL that can be used to log into the container registry.
-
-
-
-## Import
-
-ContainerRegistry can be imported using the `resource id`, e.g.
-```shell
-$ terraform import azurerm_container_registry.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.ContainerRegistry/TODO.ID_PORTION/example```

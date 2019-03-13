@@ -25,11 +25,14 @@ module Provider
         class DocumentExampleReference < Api::Object
           attr_reader :title
           attr_reader :example_name
+          attr_reader :resource_name_hints
 
           def validate
             super
             check_property :title, String
             check_property :example_name, String
+            check_optional_property :resource_name_hints, Hash
+            check_optional_property_hash :resource_name_hints, String, String
           end
         end
 

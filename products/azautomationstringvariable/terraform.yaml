@@ -70,3 +70,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
         title: Example Usage
         example_name: "basic"
+        resource_name_hints:
+          resourceGroupName: example-rg
+          automationAccountName: example-account
+          variableName: example-var

@@ -24,8 +24,6 @@ description: |-
 Manages an automation variable on Azure.
 
 
-
-
 ## Example Usage
 
 ```hcl
@@ -38,6 +36,7 @@ resource "azurerm_automation_account" "example" {
   name                = "example-account"
   location            = "${azurerm_resource_group.example.location}"
   resource_group_name = "${azurerm_resource_group.example.name}"
+
   sku = {
     name = "Basic"
   }
@@ -74,9 +73,9 @@ The following attributes are exported:
 * `id` - The automation string variable ID.
 
 
-
 ## Import
 
 AutomationStringVariable can be imported using the `resource id`, e.g.
 ```shell
-$ terraform import azurerm_automation_string_variable.example /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/example-rg/Microsoft.Automation/TODO.ID_PORTION/example```
+$ terraform import azurerm_automation_string_variable.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/Microsoft.Automation/automationAccounts/example-account/variables/example-var
+```

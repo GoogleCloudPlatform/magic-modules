@@ -48,7 +48,12 @@ func resourceArmContainerRegistry() *schema.Resource {
             "sku": {
                 Type: schema.TypeString,
                 Optional: true,
-            	ValidateFunc: validation.StringInSlice([]string{"Classic","Basic","Standard","Premium",""}, false),
+            	ValidateFunc: validation.StringInSlice([]string{
+                string(containerregistry.Classic),
+                string(containerregistry.Basic),
+                string(containerregistry.Standard),
+                string(containerregistry.Premium),
+              }, false),
                 Default: "Classic",
             },
 
