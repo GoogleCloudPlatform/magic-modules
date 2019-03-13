@@ -23,7 +23,8 @@ module Overrides
       def self.attributes
         [
           :name_from_self_link, # Set to convert self link to name
-          :exclude_plural
+          :exclude_plural,
+          :exclude_reader # Set to exclude the attribute reader within generated resources
         ]
       end
 
@@ -32,6 +33,7 @@ module Overrides
       def self.validate
         check :name_from_self_link, type: :boolean, default: false
         check :exclude_plural, type: :boolean, default: false
+        check :exclude_reader, type: :boolean, default: false
       end
     end
   end
