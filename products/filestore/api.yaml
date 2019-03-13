@@ -45,14 +45,27 @@ objects:
         'Copying Data In/Out':
           'https://cloud.google.com/filestore/docs/copying-data'
       api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-<%=
-  # Tests were timing out on delete at 4 minutes.
-  indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        delete_sec: 6 * 60 }},
-                      'templates/zonal_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360
+          update_sec: 360
+          delete_sec: 360
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'zone'
