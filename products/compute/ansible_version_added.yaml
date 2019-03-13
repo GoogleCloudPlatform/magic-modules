@@ -201,6 +201,8 @@
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
+    :physicalBlockSizeBytes:
+      :version_added: '2.8'
   :Firewall:
     :version_added: '2.6'
     :allowed:
@@ -793,6 +795,8 @@
         :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
+    :physicalBlockSizeBytes:
+      :version_added: '2.8'
   :Route:
     :version_added: '2.6'
     :destRange:
