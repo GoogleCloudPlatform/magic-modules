@@ -314,13 +314,13 @@ class GcpRequest(object):
     def _compare_boolean(self, value1, value2):
         try:
             # Both True
-            if value1 and value2 is True:
+            if value1 and isinstance(value2, bool) and value2:
                 return None
             # Value1 True, value2 'true'
             elif value1 and to_text(value2) == 'true':
                 return None
             # Both False
-            elif not value1 and not value2:
+            elif not value1 and isinstance(value2, bool) and not value2:
                 return None
             # Value1 False, value2 'false'
             elif not value1 and to_text(value2) == 'false':
