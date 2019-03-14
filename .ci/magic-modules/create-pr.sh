@@ -185,8 +185,6 @@ fi
 echo "$MESSAGE" > ./pr_comment
 
 # Create Labels list with the comma-separated list of labels for this PR
-if [ -z "$LABELS" ]; then
-  printf "%s" "no-op" > ./label_file
-else
+if [ ! -z "$LABELS" ]; then
   printf "%s" "$LABELS" > ./label_file
 fi
