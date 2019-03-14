@@ -66,14 +66,13 @@ objects:
           Must be unique within the project.
         required: true
       - !ruby/object:Api::Type::Array
-        item_type: Api::Type::String
         name: 'nameServers'
         description: |
           Delegate your managed_zone to these virtual name servers;
           defined by the server
-        output: true
-      - !ruby/object:Api::Type::Array
         item_type: Api::Type::String
+        output: true
+      - !ruby/object:Api::Type::String
         name: 'nameServerSet'
         description: |
           Optionally specifies the NameServerSet for this ManagedZone. A
