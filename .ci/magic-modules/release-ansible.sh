@@ -87,7 +87,7 @@ for filename in mm-bug*; do
   ruby ../../tools/ansible-pr/generate_template.rb > bug_fixes$filename
 
   # Create PR
-  ssh-agent bash -c "ssh-add ~/github_private_key; git push origin bugfixes$filename --force"
+  ssh-agent bash -c "ssh-add ~/github_private_key; git push origin bug_fixes$filename --force"
   hub pull-request -b ansible/ansible:devel -F bug_fixes$filename
   set -e
 
