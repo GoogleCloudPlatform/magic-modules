@@ -185,6 +185,8 @@ fi
 echo "$MESSAGE" > ./pr_comment
 
 # Create Labels list with the comma-separated list of labels for this PR
-if [ ! -z "$LABELS" ]; then
+if [ -z "$LABELS" ]; then
+  touch ./label_file
+else
   printf "%s" "$LABELS" > ./label_file
 fi
