@@ -6,15 +6,21 @@ package google
     resource_name = product_ns + object.name
     properties = object.all_user_properties
     api_version = version.base_url.split("/")[-1]
+    base_url_name = object.base_url + '/{{name}}'
+    asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (object.has_self_link ? base_url_name : object.self_link || base_url_name)
 %>
 
 <%# constants usually contain functions called from inside the setup file. -%>
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+    name, err := replaceVars(d, config, "<%= asset_name_template -%>")
+    if err != nil {
+        return Asset{}, err
+    }
     if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
         return Asset{
-            Name: fmt.Sprintf("//<%= product_ns.downcase -%>.googleapis.com/%s", obj["selfLink"]),
+            Name: name,
             Type: "google.<%= product_ns.downcase -%>.<%= object.name -%>",
             Resource: &AssetResource{
                 Version: "<%= api_version -%>",
