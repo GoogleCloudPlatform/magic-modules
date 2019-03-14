@@ -30,7 +30,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         path: 'name'
@@ -123,7 +123,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies.accessLevels'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
     description: |
       An AccessLevel is a label that can be applied to requests to GCP services,
       along with a list of requirements necessary for the label to be applied.
@@ -314,8 +314,8 @@ objects:
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies.servicePerimeters'
+        'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
     description: |
       ServicePerimeter describes a set of GCP resources which can freely import
       and export data amongst themselves, but not export outside of the
