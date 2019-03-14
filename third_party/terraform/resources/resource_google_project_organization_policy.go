@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -33,12 +32,19 @@ func resourceGoogleProjectOrganizationPolicy() *schema.Resource {
 }
 
 func resourceProjectOrgPolicyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), ":")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("ID must be in the format <projectId>:constraints/<constraint>")
+	config := meta.(*Config)
+
+	if err := parseImportId([]string{
+		"projects/(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
+		"(?P<project>[^/]+):constraints/(?P<constraint>[^/]+)",
+		"(?P<project>[^/]+):(?P<constraint>[^/]+)"},
+		d, config); err != nil {
+		return nil, err
 	}
-	d.Set("project", parts[0])
-	d.Set("constraint", parts[1])
+
+	if d.Get("project") == "" || d.Get("constraint") == "" {
+		return nil, fmt.Errorf("unable to parse project or constraint. Check import formats")
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

@@ -129,8 +129,10 @@ exported:
 
 ## Import
 
-Project organization policies can be imported by `id` in the format `<projectId>:constraints/<constraint>`. eg
+Project organization policies can be imported using any of the follow formats:
 
 ```
+$ terraform import google_project_organization_policy.policy projects/test-project:constraints/serviceuser.services
 $ terraform import google_project_organization_policy.policy test-project:constraints/serviceuser.services
+$ terraform import google_project_organization_policy.policy test-project:serviceuser.services
 ```
