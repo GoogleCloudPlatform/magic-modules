@@ -38,7 +38,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       skip_test: true
       primary_resource_id: "access-level"
       vars:
-        access_level_name: "ios_no_lock"
+        access_level_name: "chromeos_no_lock"
     properties:
       parent: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
@@ -57,7 +57,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
         primary_resource_id: "service-perimeter"
         vars:
-          access_level_name: "ios_no_lock"
+          access_level_name: "chromeos_no_lock"
           service_perimeter_name: "restrict_all"
     properties:
       parent: !ruby/object:Overrides::Terraform::PropertyOverride
