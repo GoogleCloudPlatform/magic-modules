@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -171,8 +170,3 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 }
 `, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
 }
-
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
-
