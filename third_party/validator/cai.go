@@ -7,7 +7,7 @@ type Asset struct {
 	// The type name in `google.<api>.<resourcename>` format.
 	Type      string
 	Resource  *AssetResource
-	IAMPolicy IAMPolicy
+	IAMPolicy *IAMPolicy
 }
 
 // AssetResource is the Asset's Resource field.
