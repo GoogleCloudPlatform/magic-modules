@@ -20,7 +20,7 @@ resource "google_tpu_node" "<%= ctx[:primary_resource_id] %>" {
 	description = "Terraform Google Provider test TPU"
 	network = "${google_compute_network.tpu_network.name}"
 
-	labels {
+	labels = {
 		foo = "bar"
 	}
 
