@@ -6,9 +6,7 @@ inputs:
 image_resource:
   type: docker-image
   source:
-    repository: gcr.io/cg-concourse-hub/magician-ansible
-    username: _json_key
-    password: ((image-key))
+    repository: gcr.io/magic-modules/ansible
 
 run:
     path: magic-modules-gcp/.ci/acceptance-tests/ansible-integration.sh
