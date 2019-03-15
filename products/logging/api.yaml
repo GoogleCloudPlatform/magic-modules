@@ -1,0 +1,137 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+!ruby/object:Api::Product
+name: Logging
+display_name: Stackdriver Logging
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://logging.googleapis.com/v2/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Stackdriver Logging API
+    url: https://console.cloud.google.com/apis/library/logging.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: "Metric"
+    base_url: projects/{{project}}/metrics
+    self_link: "projects/{{project}}/metrics/{{name}}"
+    update_verb: :PUT
+    description: |
+      A custom metric
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "Official Documentation": "https://cloud.google.com/logging/docs/reference/v2/rest/v2"
+      api: "https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.metrics/create"
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: |
+          The name
+        required: true
+      - !ruby/object:Api::Type::String
+        name: description
+        description: |
+          The description
+        required: false
+      - !ruby/object:Api::Type::String
+        name: filter
+        description: |
+          The filter
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: metricDescriptor
+        description: |
+          The metric descriptor
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: valueType
+            description: |
+              Value
+            values:
+              - :BOOL
+              - :INT64
+              - :DOUBLE
+              - :STRING
+              - :DISTRIBUTION
+              - :MONEY
+            required: true
+          - !ruby/object:Api::Type::Enum
+            name: metricKind
+            description: |
+              Blah
+            values:
+              - :DELTA
+            required: true
+          - !ruby/object:Api::Type::Array
+            name: labels
+            description: |
+              Blah
+            required: false
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: key
+                  description: |
+                    The key
+                  required: true
+                - !ruby/object:Api::Type::String
+                  name: description
+                  description: |
+                    The description
+                  required: false
+                - !ruby/object:Api::Type::Enum
+                  name: valueType
+                  description: |
+                    How to combine the results of multiple conditions to
+                    determine if an incident should be opened.
+                  values:
+                    - :BOOL
+                    - :INT64
+                    - :STRING
+                  required: false
+                  default_value: :STRING
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: labelExtractors
+        description: |
+          Desc
+      - !ruby/object:Api::Type::String
+        name: valueExtractor
+        description: |
+          Desc
+      - !ruby/object:Api::Type::NestedObject
+        name: bucketOptions
+        description: |
+          Desc
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: exponentialBuckets
+            description: |
+              Desc
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: numFiniteBuckets
+                description: |
+                  Desc
+              - !ruby/object:Api::Type::Integer
+                name: growthFactor
+                description: |
+                  Desc
+              - !ruby/object:Api::Type::Double
+                name: scale
+                description: |
+                  Desc
