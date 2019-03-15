@@ -82,19 +82,20 @@ func resourceBigQueryTable() *schema.Resource {
 						},
 						// BigtableOptions: [Optional] Additional options if sourceFormat is set to BIGTABLE.
 						/*
-							"bigtable_options": {
-								// <% if version.nil? || version == 'ga' -%>
-								Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-								// <% end -%>
-								Type:         schema.TypeString,
-								Optional:     true,
-								Computed:     true,
-								ValidateFunc: validation.ValidateJsonString,
-								StateFunc: func(v interface{}) string {
-									json, _ := structure.NormalizeJsonString(v)
-									return json
-								},
-							},
+							                                                TODO
+														"bigtable_options": {
+															// <% if version.nil? || version == 'ga' -%>
+															Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+															// <% end -%>
+															Type:         schema.TypeString,
+															Optional:     true,
+															Computed:     true,
+															ValidateFunc: validation.ValidateJsonString,
+															StateFunc: func(v interface{}) string {
+																json, _ := structure.NormalizeJsonString(v)
+																return json
+															},
+														},
 						*/
 						// Compression: [Optional] The compression type of the data source.
 						"compression": {
@@ -102,88 +103,90 @@ func resourceBigQueryTable() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "GZIP"}, false),
 						},
-						// CvsOptions: [Optional] Additional properties to set if
+						// CsvOptions: [Optional] Additional properties to set if
 						// sourceFormat is set to CSV.
-						"cvs_options": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									// AllowJaggedRows: [Optional] Indicates if BigQuery should
-									// accept rows that are missing trailing optional columns.
-									"allow_jagged_rows": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
-									},
-									// AllowQuotedNewlines: [Optional] Indicates if BigQuery
-									// should allow quoted data sections that contain newline
-									// characters in a CSV file. The default value is false.
-									"allow_quoted_newlines": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
-									},
-									// Encoding: [Optional] The character encoding of the data.
-									// The supported values are UTF-8 or ISO-8859-1.
-									"encoding": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										ValidateFunc: validation.StringInSlice([]string{"ISO-8859-1", "UTF-8"}, false),
-									},
-									// FieldDelimiter: [Optional] The separator for fields in a CSV file.
-									"field_delimiter": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									// Quote: [Optional] The value that is used to quote data
-									// sections in a CSV file.
-									"quote": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									// SkipLeadingRows: [Optional] The number of rows at the top
-									// of a CSV file that BigQuery will skip when reading the data.
-									"skip_leading_rows": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Computed: true,
-									},
-								},
-							},
-						},
+						/*
+													"csv_options": {
+														Type:     schema.TypeList,
+														Optional: true,
+														MaxItems: 1,
+														Elem: &schema.Resource{
+															Schema: map[string]*schema.Schema{
+																// AllowJaggedRows: [Optional] Indicates if BigQuery should
+																// accept rows that are missing trailing optional columns.
+																"allow_jagged_rows": {
+																	Type:     schema.TypeBool,
+																	Optional: true,
+																	Computed: true,
+																},
+																// AllowQuotedNewlines: [Optional] Indicates if BigQuery
+																// should allow quoted data sections that contain newline
+																// characters in a CSV file. The default value is false.
+																"allow_quoted_newlines": {
+																	Type:     schema.TypeBool,
+																	Optional: true,
+																	Computed: true,
+																},
+																// Encoding: [Optional] The character encoding of the data.
+																// The supported values are UTF-8 or ISO-8859-1.
+																"encoding": {
+																	Type:         schema.TypeString,
+																	Optional:     true,
+																	Computed:     true,
+																	ValidateFunc: validation.StringInSlice([]string{"ISO-8859-1", "UTF-8"}, false),
+																},
+																// FieldDelimiter: [Optional] The separator for fields in a CSV file.
+																"field_delimiter": {
+																	Type:     schema.TypeString,
+																	Optional: true,
+																	Computed: true,
+																},
+																// Quote: [Optional] The value that is used to quote data
+																// sections in a CSV file.
+																"quote": {
+																	Type:     schema.TypeString,
+																	Optional: true,
+																	Computed: true,
+																},
+																// SkipLeadingRows: [Optional] The number of rows at the top
+																// of a CSV file that BigQuery will skip when reading the data.
+																"skip_leading_rows": {
+																	Type:     schema.TypeInt,
+																	Optional: true,
+																	Computed: true,
+																},
+															},
+														},
+							                                                      },
+						*/
 						// GoogleSheetsOptions: [Optional] Additional options if sourceFormat is set to GOOGLE_SHEETS.
-						"google_sheets_options": {
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
-									// Typical format: !:
-									/*
-										"range": {
-											// <% if version.nil? || version == 'ga' -%>
-											Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-											// <% end -%>
-											Type:     schema.TypeString,
+						/*
+							"google_sheets_options": {
+								Type:     schema.TypeList,
+								Optional: true,
+								MaxItems: 1,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
+										// Typical format: !:
+											"range": {
+												// <% if version.nil? || version == 'ga' -%>
+												Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+												// <% end -%>
+												Type:     schema.TypeString,
+												Optional: true,
+												Computed: true,
+											},
+										// SkipLeadingRows: [Optional] The number of rows at the top
+										// of the scheet that BigQuery will skip when reading the data.
+										"skip_leading_rows": {
+											Type:     schema.TypeInt,
 											Optional: true,
-											Computed: true,
 										},
-									*/
-									// SkipLeadingRows: [Optional] The number of rows at the top
-									// of the scheet that BigQuery will skip when reading the data.
-									"skip_leading_rows": {
-										Type:     schema.TypeInt,
-										Optional: true,
 									},
 								},
 							},
-						},
+						*/
 
 						// IgnoreUnknownValues: [Optional] Indicates if BigQuery should
 						// allow extra values that are not represented in the table schema.
@@ -191,30 +194,34 @@ func resourceBigQueryTable() *schema.Resource {
 						// extra columns are treated as bad records, and if there are too
 						// many bad records, an invalid error is returned in the job result.
 						// The default value is false.
-						"ignore_unknown_values": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						// MaxBadRecords: [Optional] The maximum number of bad records that
-						// BigQuery can ignore when reading data.
-						"max_bad_records": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
+						/*
+							"ignore_unknown_values": {
+								Type:     schema.TypeBool,
+								Optional: true,
+							},
+							// MaxBadRecords: [Optional] The maximum number of bad records that
+							// BigQuery can ignore when reading data.
+							"max_bad_records": {
+								Type:     schema.TypeInt,
+								Optional: true,
+							},
+						*/
 						// Schema: [Optional] The schema for the data.
 						// Schema is required for CSV and JSON formats
 						// schema is disallowed for Google Cloud Bigtable,
 						// Cloud Datastore backups, and Avro formats.
-						"schema": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ValidateFunc: validation.ValidateJsonString,
-							StateFunc: func(v interface{}) string {
-								json, _ := structure.NormalizeJsonString(v)
-								return json
-							},
-						},
+						/*
+													"schema": {
+														Type:         schema.TypeString,
+														Optional:     true,
+														Computed:     true,
+														ValidateFunc: validation.ValidateJsonString,
+														StateFunc: func(v interface{}) string {
+															json, _ := structure.NormalizeJsonString(v)
+															return json
+														},
+							                                                      },
+						*/
 						// SourceFormat [Required] The data format.
 						"source_format": {
 							Type:     schema.TypeString,
@@ -621,23 +628,27 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 	if v, ok := raw["compression"]; ok {
 		edc.Compression = v.(string)
 	}
-	if v, ok := raw["ignore_unknown_values"]; ok {
-		edc.IgnoreUnknownValues = v.(bool)
-	}
-	if v, ok := raw["max_bad_records"]; ok {
-		edc.MaxBadRecords = int64(v.(int))
-	}
+	/*
+			if v, ok := raw["ignore_unknown_values"]; ok {
+				edc.IgnoreUnknownValues = v.(bool)
+			}
+			if v, ok := raw["max_bad_records"]; ok {
+				edc.MaxBadRecords = int64(v.(int))
+		              }
+	*/
 	if v, ok := raw["source_format"]; ok {
 		edc.SourceFormat = v.(string)
 	}
 
-	/* TODO
-	if v, ok := raw["schema"]; ok {
+	/*
+		if v, ok := raw["schema"]; ok {
+			schema, err := expandSchema(v)
+			if err != nil {
+				return nil, err
+			}
 
-		if err := json.Unmarshal([]byte(v.(string)), &extConfig); err != nil {
-			return &edc, err
+			edc.Schema = schema
 		}
-	}
 	*/
 
 	return edc, nil
@@ -653,19 +664,23 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	if edc.Compression != "" {
 		result["compression"] = edc.Compression
 	}
-	if edc.IgnoreUnknownValues == true {
-		result["ignore_unknown_values"] = edc.IgnoreUnknownValues
-	}
-	if edc.MaxBadRecords != 0 {
-		result["max_bad_records"] = edc.MaxBadRecords
-	}
-	if edc.Schema != nil {
-		schema, err := json.Marshal(edc.Schema)
-		if err != nil {
-			return result, err
+	/*
+		if edc.IgnoreUnknownValues == true {
+			result["ignore_unknown_values"] = edc.IgnoreUnknownValues
 		}
-		result["schema"] = string(schema)
-	}
+		if edc.MaxBadRecords != 0 {
+			result["max_bad_records"] = edc.MaxBadRecords
+		}
+
+			if edc.Schema != nil {
+				schema, err := flattenSchema(edc.Schema)
+				if err != nil {
+					return result, err
+				}
+				result["schema"] = schema
+		              }
+	*/
+
 	if edc.SourceFormat != "" {
 		result["source_format"] = edc.SourceFormat
 	}

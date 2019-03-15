@@ -115,7 +115,9 @@ The `external_data_configuration` block supports:
 
 * `schema_format` (Required) - The data format. Supported values are:
     "CVS", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO",
-    "DATSTORE_BACKUP", and "BIGTABLE" (Beta).
+    "DATSTORE_BACKUP", and "BIGTABLE" (Beta). To use "GOOGLE_SHEETS"
+    the `scopes` must include
+    "https://www.googleapis.com/auth/drive.readonly".
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
