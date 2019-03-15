@@ -1,6 +1,7 @@
 require 'provider/azure/terraform/schema'
 require 'provider/azure/terraform/sub_template'
-require 'provider/azure/terraform/example'
+require 'provider/azure/terraform/example/example'
+require 'provider/azure/terraform/example/sub_template'
 require 'provider/azure/terraform/acctest/sub_template'
 
 require 'provider/azure/terraform/resource_override'
