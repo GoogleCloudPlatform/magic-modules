@@ -463,13 +463,13 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Read bucket %v at location %v\n\n", res.Name, res.SelfLink)
 
 	// We are trying to support several different use cases for bucket. Buckets are globally
-	// unique but they are associated with projects internally and some user's want to use
+	// unique but they are associated with projects internally, but some users want to use
 	// buckets in a project agnostic way. Thus we will check to see if the project ID has been
 	// explicitly set and use that first. However if no project is explicitly set, such as during
 	// import, we will look up the ID from the compute API using the project Number from the
 	// bucket API response.
-	// 1. If you are working in a project-agnostic way and have not set the project ID in the provider
-	// block, or the resource or an environment variable we use the compute API to lookup the projectID
+	// If you are working in a project-agnostic way and have not set the project ID in the provider
+	// block, or the resource or an environment variable, we use the compute API to lookup the projectID
 	// from the projectNumber which is included in the bucket API response
 	if d.Get("project") == "" {
 		project, _ := getProject(d, config)
