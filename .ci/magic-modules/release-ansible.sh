@@ -116,7 +116,7 @@ while read module; do
 
   # Create PR
   ssh-agent bash -c "ssh-add ~/github_private_key; git push origin $module --force"
-  hub pull-request -b ansible/ansible:devel -F $module
+  hub pull-request -b ansible/ansible:devel -F $module -f
   set -e
 
   echo "New Module PR built for $module"
