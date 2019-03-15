@@ -53,6 +53,11 @@ module Api
       # list.  Otherwise, it's safe to leave empty.
       # If empty, we assume that `name` is the identifier.
       attr_reader :identity
+      # This is useful in case you need to change the query made for
+      # GET requests only. In particular, this is often used
+      # to extract an object from a parent object or a collection.
+      attr_reader :nested_decoder
+
       attr_reader :exclude
       attr_reader :async
       attr_reader :readonly
@@ -84,6 +89,18 @@ module Api
       def validate
         super
         check :create, type: ::String, required: true
+      end
+    end
+
+    class NestedDecoder < Api::Object
+      attr_reader :keys
+      attr_reader :has_id_only_list
+
+      def validate
+        super
+
+        check :keys, type: Array, item_type: String, required: true
+        check :has_id_only_list, type: :boolean, default: false
       end
     end
 
@@ -175,6 +192,11 @@ module Api
       check :self_link_query, type: Api::Resource::ResponseList
       check :readonly, type: :boolean
       check :references, type: ReferenceLinks
+
+      check :nested_decoder, type: Api::Resource::NestedDecoder
+      if @nested_decoder&.has_id_only_list && @identity&.length != 1
+        raise 'Resource with :has_id_only_list in :nested_decoder must have exactly one :identity property"'
+      end
 
       check :collection_url_response, default: Api::Resource::ResponseList.new,
                                       type: Api::Resource::ResponseList

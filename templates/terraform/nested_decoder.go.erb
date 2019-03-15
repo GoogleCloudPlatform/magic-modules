@@ -1,0 +1,55 @@
+	config := meta.(*Config)
+
+	var v interface{}
+	var ok bool
+<% object.nested_decoder.keys[0...-1].each do |k| -%>
+	v, ok = res["<%=k-%>"]
+	if !ok || v == nil {
+		return nil, nil
+	}
+	res = v.(map[string]interface{})
+<% end -%>
+	v, ok = res["<%=object.nested_decoder.keys[-1]-%>"]
+	if !ok || v == nil {
+		return nil, nil
+	}
+	// Final nested resource is either a list of resources we need to filter
+	// or just the resource itself, which we return.
+	switch v.(type) {
+	case []interface{}:
+		break
+	case map[string]interface{}:
+		return v.(map[string]interface{}), nil
+	default:
+		return nil, fmt.Errorf("invalid value for <%= object.nested_decoder.keys.join(".") -%>: %v", v)
+	}
+
+	items := v.([]interface{})
+	for _, vRaw := range items {
+	<% if object.nested_decoder.has_id_only_list -%>
+		// If only an id is given in parent resource,
+		// construct a resource map for that id KV pair.
+		item := map[string]interface{}{"<%=object.identity.first.api_name%>": vRaw}
+	<% else %>
+		item := vRaw.(map[string]interface{})
+	<% end %>
+
+	<% object.identity.each do |prop| -%>
+	<% if settable_properties.include?(prop) -%>
+		id, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+		if err != nil {
+			return nil, err
+		}
+	<% else -%>
+		id := d.Get("<%= prop.name.underscore -%>")
+	<% end # settable_properties.include?(prop)-%>
+
+		itemId := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
+		log.Printf("[DEBUG] Checking equality of %#v, %#v", itemId, id)
+		if !reflect.DeepEqual(itemId, id) {
+			continue
+		}
+	<% end # object.identity.each -%>
+		return item, nil
+	}
+	return nil, nil
