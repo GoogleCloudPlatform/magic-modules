@@ -76,7 +76,16 @@ func mergeAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 
 	for _, binding := range incoming {
 		if ei, ok := existingIdxs[binding.Role]; ok {
-			existing[ei].Members = append(existing[ei].Members, binding.Members...)
+			memberExists := make(map[string]struct{})
+			for _, m := range existing[ei].Members {
+				memberExists[m] = struct{}{}
+			}
+			for _, m := range binding.Members {
+				// Only add members that don't exist.
+				if _, ok := memberExists[m]; !ok {
+					existing[ei].Members = append(existing[ei].Members, m)
+				}
+			}
 		} else {
 			existing = append(existing, binding)
 		}

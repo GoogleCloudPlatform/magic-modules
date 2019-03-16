@@ -93,6 +93,33 @@ func TestMergeBindings(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Overlapping",
+			existing: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a"},
+				},
+			},
+			incoming: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a", "member-b"},
+				},
+			},
+			expectedAdditive: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a", "member-b"},
+				},
+			},
+			expectedAuthoritative: []IAMBinding{
+				{
+					Role:    "role-a",
+					Members: []string{"member-a", "member-b"},
+				},
+			},
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
