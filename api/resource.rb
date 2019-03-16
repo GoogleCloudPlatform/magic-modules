@@ -93,7 +93,14 @@ module Api
     end
 
     class NestedDecoder < Api::Object
+      # A list of the nested keys, in traversal order.
+      # i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
+      # should be ["cdnPolicy", "signedUrlKeyNames"]
       attr_reader :keys
+
+      # If true, we expect the the nested list to be
+      # a list of IDs for the nested resource, rather
+      # than a list of nested resource objects
       attr_reader :has_id_only_list
 
       def validate
