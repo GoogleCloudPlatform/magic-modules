@@ -160,33 +160,30 @@ func resourceBigQueryTable() *schema.Resource {
 							                                                      },
 						*/
 						// GoogleSheetsOptions: [Optional] Additional options if sourceFormat is set to GOOGLE_SHEETS.
-						/*
-							"google_sheets_options": {
-								Type:     schema.TypeList,
-								Optional: true,
-								MaxItems: 1,
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
-										// Typical format: !:
-											"range": {
-												// <% if version.nil? || version == 'ga' -%>
-												Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-												// <% end -%>
-												Type:     schema.TypeString,
-												Optional: true,
-												Computed: true,
-											},
-										// SkipLeadingRows: [Optional] The number of rows at the top
-										// of the scheet that BigQuery will skip when reading the data.
-										"skip_leading_rows": {
-											Type:     schema.TypeInt,
-											Optional: true,
-										},
+						"google_sheets_options": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									// Range: [Optional] Range of a sheet to query from. Only used when non-empty.
+									// Typical format: !:
+									"range": {
+<% if version.nil? || version == 'ga' -%>
+										Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
+<% end -%>
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									// SkipLeadingRows: [Optional] The number of rows at the top
+									// of the scheet that BigQuery will skip when reading the data.
+									"skip_leading_rows": {
+										Type:     schema.TypeInt,
+										Optional: true,
 									},
 								},
 							},
-						*/
+						},
 
 						// IgnoreUnknownValues: [Optional] Indicates if BigQuery should
 						// allow extra values that are not represented in the table schema.
@@ -194,18 +191,16 @@ func resourceBigQueryTable() *schema.Resource {
 						// extra columns are treated as bad records, and if there are too
 						// many bad records, an invalid error is returned in the job result.
 						// The default value is false.
-						/*
-							"ignore_unknown_values": {
-								Type:     schema.TypeBool,
-								Optional: true,
-							},
-							// MaxBadRecords: [Optional] The maximum number of bad records that
-							// BigQuery can ignore when reading data.
-							"max_bad_records": {
-								Type:     schema.TypeInt,
-								Optional: true,
-							},
-						*/
+						"ignore_unknown_values": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						// MaxBadRecords: [Optional] The maximum number of bad records that
+						// BigQuery can ignore when reading data.
+						"max_bad_records": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
 						// Schema: [Optional] The schema for the data.
 						// Schema is required for CSV and JSON formats
 						// schema is disallowed for Google Cloud Bigtable,
@@ -624,18 +619,18 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 	if len(sourceUris) > 0 {
 		edc.SourceUris = sourceUris
 	}
-
 	if v, ok := raw["compression"]; ok {
 		edc.Compression = v.(string)
 	}
-	/*
-			if v, ok := raw["ignore_unknown_values"]; ok {
-				edc.IgnoreUnknownValues = v.(bool)
-			}
-			if v, ok := raw["max_bad_records"]; ok {
-				edc.MaxBadRecords = int64(v.(int))
-		              }
-	*/
+	if v, ok := raw["google_sheets_options"]; ok {
+		edc.GoogleSheetsOptions = expandGoogleSheetsOptions(v)
+	}
+	if v, ok := raw["ignore_unknown_values"]; ok {
+		edc.IgnoreUnknownValues = v.(bool)
+	}
+	if v, ok := raw["max_bad_records"]; ok {
+		edc.MaxBadRecords = int64(v.(int))
+	}
 	if v, ok := raw["source_format"]; ok {
 		edc.SourceFormat = v.(string)
 	}
@@ -664,13 +659,18 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	if edc.Compression != "" {
 		result["compression"] = edc.Compression
 	}
+
+	if edc.GoogleSheetsOptions != nil {
+		result["google_sheets_options"] = flattenGoogleSheetsOptions(edc.GoogleSheetsOptions)
+	}
+
+	if edc.IgnoreUnknownValues == true {
+		result["ignore_unknown_values"] = edc.IgnoreUnknownValues
+	}
+	if edc.MaxBadRecords != 0 {
+		result["max_bad_records"] = edc.MaxBadRecords
+	}
 	/*
-		if edc.IgnoreUnknownValues == true {
-			result["ignore_unknown_values"] = edc.IgnoreUnknownValues
-		}
-		if edc.MaxBadRecords != 0 {
-			result["max_bad_records"] = edc.MaxBadRecords
-		}
 
 			if edc.Schema != nil {
 				schema, err := flattenSchema(edc.Schema)
@@ -688,8 +688,38 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	// TODO
 	// BigtableOptions
 	// CsvOptions
-	// GoogleSheetsOptions
 	return result, nil
+}
+
+func expandGoogleSheetsOptions(configured interface{}) *bigquery.GoogleSheetsOptions {
+	if len(configured.([]interface{})) > 0 {
+		raw := configured.([]interface{})[0].(map[string]interface{})
+		opts := &bigquery.GoogleSheetsOptions{}
+
+		if v, ok := raw["range"]; ok {
+			opts.Range = v.(string)
+		}
+
+		if v, ok := raw["skip_leading_rows"]; ok {
+			opts.SkipLeadingRows = int64(v.(int))
+		}
+		return opts
+	}
+	return nil
+}
+
+func flattenGoogleSheetsOptions(opts *bigquery.GoogleSheetsOptions) []map[string]interface{} {
+	result := map[string]interface{}{}
+
+	if opts.Range != "" {
+		result["range"] = opts.Range
+	}
+
+	if opts.SkipLeadingRows != 0 {
+		result["skip_leading_rows"] = opts.SkipLeadingRows
+	}
+
+	return []map[string]interface{}{result}
 }
 
 func expandSchema(raw interface{}) (*bigquery.TableSchema, error) {
