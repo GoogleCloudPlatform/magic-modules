@@ -218,18 +218,16 @@ func resourceBigQueryTable() *schema.Resource {
 						// Schema is required for CSV and JSON formats
 						// schema is disallowed for Google Cloud Bigtable,
 						// Cloud Datastore backups, and Avro formats.
-						/*
-													"schema": {
-														Type:         schema.TypeString,
-														Optional:     true,
-														Computed:     true,
-														ValidateFunc: validation.ValidateJsonString,
-														StateFunc: func(v interface{}) string {
-															json, _ := structure.NormalizeJsonString(v)
-															return json
-														},
-							                                                      },
-						*/
+						"schema": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.ValidateJsonString,
+							StateFunc: func(v interface{}) string {
+								json, _ := structure.NormalizeJsonString(v)
+								return json
+							},
+						},
 						// SourceFormat [Required] The data format.
 						"source_format": {
 							Type:     schema.TypeString,
@@ -654,21 +652,18 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 	if v, ok := raw["max_bad_records"]; ok {
 		edc.MaxBadRecords = int64(v.(int))
 	}
+	if v, ok := raw["schema"]; ok {
+		schema, err := expandSchema(v)
+		if err != nil {
+			return nil, err
+		}
+
+		edc.Schema = schema
+	}
 	if v, ok := raw["source_format"]; ok {
 		edc.SourceFormat = v.(string)
 	}
 
-	// TODO
-	/*
-		if v, ok := raw["schema"]; ok {
-			schema, err := expandSchema(v)
-			if err != nil {
-				return nil, err
-			}
-
-			edc.Schema = schema
-		}
-	*/
 
 	return edc, nil
 
@@ -706,16 +701,14 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	if edc.MaxBadRecords != 0 {
 		result["max_bad_records"] = edc.MaxBadRecords
 	}
-	/*
 
-			if edc.Schema != nil {
-				schema, err := flattenSchema(edc.Schema)
-				if err != nil {
-					return result, err
-				}
-				result["schema"] = schema
-		              }
-	*/
+	if edc.Schema != nil {
+		schema, err := flattenSchema(edc.Schema)
+		if err != nil {
+			return result, err
+		}
+		result["schema"] = schema
+	}
 
 	if edc.SourceFormat != "" {
 		result["source_format"] = edc.SourceFormat
