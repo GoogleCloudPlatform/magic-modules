@@ -106,7 +106,8 @@ The following arguments are supported:
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table.
+* `schema` - (Optional) A JSON schema for the table. For more information
+    see the [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is documented below.
@@ -145,7 +146,9 @@ The `external_data_configuration` block supports:
 
 * `schema` (Optional) - A JSON schema for the data. Schema is required
     for CSV and JSON formats schema is disallowed for Google Cloud
-    Bigtable, Cloud Datastore backups, and Avro formats.
+    Bigtable, Cloud Datastore backups, and Avro formats. For more
+    information see the
+    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
 
 * `schema_format` (Required) - The data format. Supported values are:
     "CVS", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO",
@@ -159,6 +162,8 @@ The `external_data_configuration` block supports:
 The `bigtable_options` block supports:
 
 * `column_families` (Optional) - A JSON document describing the column families.
+    For more information see the
+    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
 
 * `ignore_unspecified_column_families` (Optional) - If field is true, then
     the column families that are not specified in "column_families" list are
