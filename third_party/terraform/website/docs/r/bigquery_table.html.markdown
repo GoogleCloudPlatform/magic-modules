@@ -40,7 +40,40 @@ resource "google_bigquery_table" "default" {
     env = "default"
   }
 
-  schema = "${file("schema.json")}"
+  schema = <<EOF
+[
+  {
+    "name": "permalink",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The Permalink"
+  },
+  {
+    "name": "state",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "State where the head office is located"
+  }
+]
+EOF
+}
+
+resource "google_bigquery_table" "sheet" {
+  dataset_id = "${google_bigquery_dataset.default.dataset_id}"
+  table_id   = "scheet"
+
+  external_data_configuration {
+    autodetect    = true
+    source_format = "GOOGLE_SHEETS"
+
+    google_sheets_options {
+      skip_leading_rows = 1
+    }
+
+    source_uris = [
+      "https://docs.google.com/spreadsheets/d/123456789012345",
+    ]
+  }
 }
 ```
 
@@ -86,8 +119,9 @@ The `external_data_configuration` block supports:
 * `autodetect` - (Required) - Let BigQuery try to autodetect the schema
     and format of the table.
 
-* `bigtable_options` (Optional, Beta) - A JSON document with additional
-    options if `source_format` is set to "BIGTABLE".
+* `bigtable_options` (Optional, Beta) - Additional options if
+    `source_format` is set to "BIGTABLE". Structure is
+    documented below.
 
 * `compression` (Optional) - The compression type of the data source.
     Valid values are "NONE" or "GZIP".
@@ -121,6 +155,19 @@ The `external_data_configuration` block supports:
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
+
+The `bigtable_options` block supports:
+
+* `column_families` (Optional) - A JSON document describing the column families.
+
+* `ignore_unspecified_column_families` (Optional) - If field is true, then
+    the column families that are not specified in "column_families" list are
+    not exposed in the table schema. Otherwise, they are read with BYTES
+    type values. The default value is false.
+
+* `read_rowkey_as_string` (Optional) - If field is true, then the rowkey
+    column families will be read and converted to string. The default
+    value is false.
 
 The `cvs_options` block supports:
 
