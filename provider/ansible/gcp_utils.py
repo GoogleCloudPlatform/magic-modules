@@ -278,19 +278,12 @@ class GcpRequest(object):
         return sanitized_difference
 
     # Takes in two lists and compares them.
+    # All things in the list should be identical (even if a dictionary)
     def _compare_lists(self, list1, list2):
-        if isinstance(list1[0], dict):
-            difference = []
-            # List of dictionaries are assumed to be in sorted order.
-            # If placed into sets, we would lose the ability to ignore
-            # unnecessary values
-            for index in range(len(list1)):
-                req_value = list1[index]
-                if index < len(list2):
-                    resp_value = list2[index]
-                    difference.append(self._compare_value(req_value, resp_value))
-        else:
-            difference = list(set(list1) - set(list2))
+        difference = []
+        for item in list1:
+            if item not in list2:
+                difference.append(item)
 
         difference2 = []
         for value in difference:
