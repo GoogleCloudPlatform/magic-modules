@@ -279,11 +279,26 @@ class GcpRequest(object):
 
     # Takes in two lists and compares them.
     # All things in the list should be identical (even if a dictionary)
-    def _compare_lists(self, list1, list2):
+    def _compare_lists(self, req_list, resp_list):
+        # Have to convert each thing over to unicode.
+        # Python doesn't handle equality checks between unicode + non-unicode well.
         difference = []
-        for item in list1:
-            if item not in list2:
-                difference.append(item)
+        new_req_list = self._convert_value(req_list)
+        new_resp_list = self._convert_value(resp_list)
+
+        # We have to compare each thing in the request to every other thing
+        # in the response.
+        # This is because the request value will be a subset of the response value.
+        # The assumption is that these lists will be small enough that it won't
+        # be a performance burden.
+        for req_item in new_req_list:
+            found_item = False
+            for resp_item in new_resp_list:
+                # Looking for a None value here.
+                if not self._compare_value(req_item, resp_item):
+                    found_item = True
+            if not found_item:
+                difference.append(req_item)
 
         difference2 = []
         for value in difference:
@@ -340,3 +355,21 @@ class GcpRequest(object):
         # These errors shouldn't crash Ansible and should be hidden.
         except UnicodeError:
             return None
+
+    # Python (2 esp.) doesn't do comparisons between unicode + non-unicode well.
+    # This leads to a lot of false positives when diffing values.
+    # The Ansible to_text() function is meant to get all strings
+    # into a standard format.
+    def _convert_value(self, value):
+        if isinstance(value, list):
+            new_list = []
+            for item in value:
+                new_list.append(self._convert_value(item))
+            return new_list
+        elif isinstance(value, dict):
+            new_dict = {}
+            for key in value:
+                new_dict[key] = self._convert_value(value[key])
+            return new_dict
+        else:
+            return to_text(value)
