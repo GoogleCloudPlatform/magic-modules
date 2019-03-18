@@ -262,9 +262,9 @@ module Provider
 
         return item_from_hash.to_s
       elsif typed_array?(property)
-        return "#{modularized_property_class(property.item_type)}Array.parse(#{item_from_hash})"
+        return "#{modularized_property_class(property.item_type)}Array.parse(#{item_from_hash}, to_s)"
       end
-      "#{modularized_property_class(property)}.new(#{item_from_hash})"
+      "#{modularized_property_class(property)}.new(#{item_from_hash}, to_s)"
     end
   end
 end
