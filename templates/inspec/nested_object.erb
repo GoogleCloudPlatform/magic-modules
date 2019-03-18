@@ -40,8 +40,9 @@ module GoogleInSpec
 <% end # property.nested_properties.each -%>
 
 <% end # if property.nested_properties? -%>
-        def initialize(args = nil)
+        def initialize(args = nil, parent_identifier = nil)
           return if args.nil?
+          @parent_identifier = parent_identifier
 <% property.nested_properties.each do |prop| -%>
 <%
   parse_code = "@#{prop.out_name} = #{parse_code(prop, 'args')}"
@@ -49,14 +50,18 @@ module GoogleInSpec
 <%= lines(indent(parse_code, 10)) -%>
 <% end # property.nested_properties.each -%>
         end
+
+        def to_s
+          "#{@parent_identifier} <%= class_name -%>"
+        end
       end
 <% if property.is_a?(Api::Type::Array) -%>
 
       class <%= class_name %>Array
-        def self.parse(value)
+        def self.parse(value, parent_identifier)
           return if value.nil?
-          return <%= class_name %>.new(value) unless value.is_a?(::Array)
-          value.map { |v| <%= class_name %>.new(v) }
+          return <%= class_name %>.new(value, parent_identifier) unless value.is_a?(::Array)
+          value.map { |v| <%= class_name %>.new(v, parent_identifier) }
         end
       end
 <% end #if property is Array -%>
