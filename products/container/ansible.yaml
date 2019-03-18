@@ -24,6 +24,8 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 datasources: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Api::Resource::Transport
+      encoder: encode_request
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["region", "zone"]
@@ -35,6 +37,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
         does_not_exist: |
           "'my-cluster' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Api::Resource::Transport
+      encoder: encode_request
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["region", "zone"]
