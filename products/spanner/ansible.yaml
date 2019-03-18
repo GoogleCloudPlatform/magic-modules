@@ -24,7 +24,7 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   author: Google Inc. (@googlecloudplatform)
 datasources: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Api::Resource::Transport
+    transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
@@ -43,7 +43,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "'webstore' not in \"{{ results['items'] | map(attribute='name') | list }}\""
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Api::Resource::Transport
+    transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
     exclude: true
@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Api::Resource::Transport
+    transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
     provider_helpers:
