@@ -118,9 +118,26 @@ objects:
           The bucketOptions are required when the logs-based metric is using a DISTRIBUTION value type and it describes the bucket boundaries used to create a histogram of the extracted values.
         properties:
           - !ruby/object:Api::Type::NestedObject
+            name: linearBuckets
+            description: |
+              Specifies a linear sequence of buckets that all have the same width (except overflow and underflow). Each bucket represents a constant absolute uncertainty on the specific value in the bucket.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: numFiniteBuckets
+                description: |
+                  Must be greater than 0.
+              - !ruby/object:Api::Type::Integer
+                name: width
+                description: |
+                  Must be greater than 0.
+              - !ruby/object:Api::Type::Double
+                name: offset
+                description: |
+                  Lower bound of the first bucket.
+          - !ruby/object:Api::Type::NestedObject
             name: exponentialBuckets
             description: |
-              Desc
+              Specifies an exponential sequence of buckets that have a width that is proportional to the value of the lower bound. Each bucket represents a constant relative uncertainty on a specific value in the bucket.
             properties:
               - !ruby/object:Api::Type::Integer
                 name: numFiniteBuckets
@@ -134,3 +151,13 @@ objects:
                 name: scale
                 description: |
                   Must be greater than 0.
+          - !ruby/object:Api::Type::NestedObject
+            name: explicit
+            description: |
+              Specifies a set of buckets with arbitrary widths.
+            properties:
+              - !ruby/object:Api::Type::Array
+                name: bounds
+                item_type: !ruby/object:Api::Type::Integer
+                description: |
+                  The values must be monotonically increasing.
