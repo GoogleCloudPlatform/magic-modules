@@ -46,7 +46,7 @@ LABELS=""
 
 # Check the files between this commit and HEAD
 # If they're only contained in third_party, add the third_party label.
-if ! git diff --name-only HEAD^1 | grep -v "third_party"; then
+if [ ! git diff --name-only HEAD^1 | grep -v "third_party" | grep -v ".gitmodules" | grep -r "build/" ]; then
   LABELS="${LABELS}only_third_party,"
 fi
 
