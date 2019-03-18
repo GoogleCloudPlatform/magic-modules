@@ -262,7 +262,7 @@ module Provider
 
         return item_from_hash.to_s
       elsif typed_array?(property)
-        class_name = "#{modularized_property_class(property.item_type)}"
+        class_name = modularized_property_class(property.item_type)
         return "#{class_name}Array.parse(#{item_from_hash}, to_s)"
       end
       "#{modularized_property_class(property)}.new(#{item_from_hash}, to_s)"
