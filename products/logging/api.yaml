@@ -158,6 +158,6 @@ objects:
             properties:
               - !ruby/object:Api::Type::Array
                 name: bounds
-                item_type: !ruby/object:Api::Type::Integer
+                item_type: Api::Type::String
                 description: |
                   The values must be monotonically increasing.
