@@ -18,16 +18,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     mutex: customMetric/{{project}}
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "monitoring_alert_policy_basic"
-        primary_resource_id: "alert_policy"
+        name: "logging_metric_basic"
+        primary_resource_id: "logging_metric"
         vars:
-          alert_policy_display_name: "My Alert Policy"
+          metric_display_name: "My Custom Metric"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
     properties:
       metricDescriptor.labels.valueType: !ruby/object:Overrides::Terraform::PropertyOverride
-        # custom_expand: 'templates/terraform/custom_expand/cloudscheduler_job_name.erb'
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
 
 files: !ruby/object:Provider::Config::Files
