@@ -42,7 +42,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    additional_functions: |
+<%= lines(indent(compile('templates/inspec/custom_functions/google_compute_region.rb'), 6)) -%>
+    properties:
+      id: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "region_id"
+      name: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "region_name"
+      status: !ruby/object:Overrides::Inspec::PropertyOverride
+        override_name: "region_status"
   RegionAutoscaler: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionDisk: !ruby/object:Overrides::Inspec::ResourceOverride

@@ -23,6 +23,7 @@ module Overrides
       def self.attributes
         [
           :name_from_self_link, # Set to convert self link to name
+          :override_name, # Optionally override the name of the property
           :exclude_plural
         ]
       end
@@ -31,6 +32,7 @@ module Overrides
 
       def self.validate
         check :name_from_self_link, type: :boolean, default: false
+        check :override_name, type: :string, default: ''
         check :exclude_plural, type: :boolean, default: false
       end
     end
