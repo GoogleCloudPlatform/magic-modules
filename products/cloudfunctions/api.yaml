@@ -22,7 +22,7 @@ scopes:
   - https://www.googleapis.com/auth/cloudfunctions
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Cloud Pub/Sub API
+    name: Cloud Functions API
     url: https://console.cloud.google.com/apis/library/cloudfunctions.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
