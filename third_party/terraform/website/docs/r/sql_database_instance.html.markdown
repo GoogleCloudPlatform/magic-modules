@@ -131,9 +131,13 @@ resource "google_service_networking_connection" "private_vpc_connection" {
 }
 
 resource "google_sql_database_instance" "instance" {
-	depends_on = ["google_service_networking_connection.private_vpc_connection"]
-	name = "private-instance"
+  name = "private-instance"
 	region = "us-central1"
+
+  depends_on = [
+    "google_service_networking_connection.private_vpc_connection"
+  ]
+
 	settings {
 		tier = "db-f1-micro"
 		ip_configuration {
