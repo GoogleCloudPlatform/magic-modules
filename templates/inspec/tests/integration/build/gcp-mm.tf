@@ -119,6 +119,10 @@ variable "gcp_organization_id" {
   default = "none"
 }
 
+variable "cloudfunction" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -457,4 +461,27 @@ resource "google_folder" "inspec-gcp-folder" {
   count = "${var.gcp_organization_id == "none" ? 0 : var.gcp_enable_privileged_resources}"
   display_name = "${var.folder["display_name"]}"
   parent       = "${var.gcp_organization_id}"
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.js.zip"
+  bucket = "${google_storage_bucket.generic-storage-bucket.name}"
+  source = "../configuration/index.js.zip"
+}
+
+resource "google_cloudfunctions_function" "function" {
+  project               = "${var.gcp_project_id}"
+  region                = "${var.cloudfunction["location"]}"
+  name                  = "${var.cloudfunction["name"]}"
+  description           = "${var.cloudfunction["description"]}"
+  available_memory_mb   = "${var.cloudfunction["available_memory_mb"]}"
+  source_archive_bucket = "${google_storage_bucket.generic-storage-bucket.name}"
+  source_archive_object = "${google_storage_bucket_object.archive.name}"
+  trigger_http          = "${var.cloudfunction["trigger_http"]}"
+  timeout               = "${var.cloudfunction["timeout"]}"
+  entry_point           = "${var.cloudfunction["entry_point"]}"
+
+  environment_variables = {
+    MY_ENV_VAR = "${var.cloudfunction["env_var_value"]}"
+  }
 }

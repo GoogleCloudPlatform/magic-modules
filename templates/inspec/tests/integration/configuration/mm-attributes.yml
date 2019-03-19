@@ -189,3 +189,13 @@ repository:
 
 folder:
   display_name: inspec-gcp-folder
+
+cloudfunction:
+  name: inspec-gcp-function
+  location: europe-west1
+  description: A description of the function
+  available_memory_mb: 128
+  trigger_http: true
+  timeout: 60
+  entry_point: hello
+  env_var_value: val1
