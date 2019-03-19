@@ -22,8 +22,3 @@ def up?
   return false if !exists?
   @status == 'UP'
 end
-
-def to_s
-  name = @opts[:name] || @name
-  "Region #{name}"
-end
