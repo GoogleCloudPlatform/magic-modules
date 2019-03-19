@@ -29,7 +29,7 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   filter_table_config = FilterTable.create
 <% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
 
-  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.out_name})" -%>
+  <%= "filter_table_config.add(:#{(prop.override_name || prop.out_name).pluralize}, field: :#{prop.override_name || prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>
 
 
@@ -75,7 +75,7 @@ link_query = object.self_link_query || object.collection_url_response
   def transformers
     {
 <% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
-      '<%= prop.api_name -%>' => ->(obj) { <%= "return :#{prop.out_name}, #{parse_code(prop, 'obj')}" -%> },
+      '<%= prop.api_name -%>' => ->(obj) { <%= "return :#{ prop.override_name || prop.out_name }, #{parse_code(prop, 'obj')}" -%> },
 <% end # object.all_user_properties.each -%>
     }
   end
