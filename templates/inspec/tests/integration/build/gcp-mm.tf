@@ -123,6 +123,10 @@ variable "cloudfunction" {
   type = "map"
 }
 
+variable "backend_bucket" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -484,4 +488,12 @@ resource "google_cloudfunctions_function" "function" {
   environment_variables = {
     MY_ENV_VAR = "${var.cloudfunction["env_var_value"]}"
   }
+}
+
+resource "google_compute_backend_bucket" "image_backend" {
+  project     = "${var.gcp_project_id}"
+  name        = "${var.backend_bucket["name"]}"
+  description = "${var.backend_bucket["description"]}"
+  bucket_name = "${google_storage_bucket.generic-storage-bucket.name}"
+  enable_cdn  = "${var.backend_bucket["enable_cdn"]}"
 }

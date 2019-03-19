@@ -199,3 +199,8 @@ cloudfunction:
   timeout: 60
   entry_point: hello
   env_var_value: val1
+
+backend_bucket:
+  name: inspec-gcp-backend-bucket
+  description: Backend bucket example
+  enable_cdn: true
