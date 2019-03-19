@@ -1084,6 +1084,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           udp500_forwarding_rule_name: "fr-udp500"
           udp4500_forwarding_rule_name: "fr-udp4500"
           route_name: "route1"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vpn_tunnel_beta"
+        primary_resource_id: "tunnel1"
+        min_version: beta
+        vars:
+          vpn_tunnel_name: "tunnel1"
+          target_vpn_gateway_name: "vpn1"
+          network_name: "network1"
+          address_name: "vpn-static-ip"
+          esp_forwarding_rule_name: "fr-esp"
+          udp500_forwarding_rule_name: "fr-udp500"
+          udp4500_forwarding_rule_name: "fr-udp4500"
+          route_name: "route1"
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         All arguments including the shared secret will be stored in the raw
