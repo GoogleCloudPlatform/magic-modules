@@ -6,8 +6,8 @@ package google
     resource_name = product_ns + object.name
     properties = object.all_user_properties
     api_version = version.base_url.split("/")[-1]
-    base_url_name = object.base_url + '/{{name}}'
-    asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (object.has_self_link ? base_url_name : object.self_link || base_url_name)
+    # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
+    asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (!object.self_link.nil? && !object.self_link.empty? ? object.self_link : object.base_url + '/{{name}}')
 %>
 
 <%# constants usually contain functions called from inside the setup file. -%>
