@@ -18,11 +18,13 @@ import (
 )
 
 func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+	name, err := replaceVars(d, config, "//storage.googleapis.com/{{name}}")
+	if err != nil {
+		return Asset{}, err
+	}
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
 		return Asset{
-			// NOTE: selfLink is currently broken:
-			// https://github.com/GoogleCloudPlatform/terraform-google-conversion/issues/10
-			Name: fmt.Sprintf("//storage.googleapis.com/%s", obj["selfLink"]),
+			Name: name,
 			Type: "google.cloud.storage.Bucket",
 			Resource: &AssetResource{
 				Version:              "v1",
