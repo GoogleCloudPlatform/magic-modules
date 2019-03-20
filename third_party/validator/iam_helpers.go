@@ -3,6 +3,7 @@ package google
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -76,19 +77,24 @@ func mergeAdditiveBindings(existing, incoming []IAMBinding) []IAMBinding {
 
 	for _, binding := range incoming {
 		if ei, ok := existingIdxs[binding.Role]; ok {
-			memberExists := make(map[string]struct{})
+			memberExists := make(map[string]bool)
 			for _, m := range existing[ei].Members {
-				memberExists[m] = struct{}{}
+				memberExists[m] = true
 			}
 			for _, m := range binding.Members {
 				// Only add members that don't exist.
-				if _, ok := memberExists[m]; !ok {
+				if !memberExists[m] {
 					existing[ei].Members = append(existing[ei].Members, m)
 				}
 			}
 		} else {
 			existing = append(existing, binding)
 		}
+	}
+
+	// Sort members
+	for i := range existing {
+		sort.Strings(existing[i].Members)
 	}
 
 	return existing
@@ -108,6 +114,11 @@ func mergeAuthoritativeBindings(existing, incoming []IAMBinding) []IAMBinding {
 		} else {
 			existing = append(existing, binding)
 		}
+	}
+
+	// Sort members
+	for i := range existing {
+		sort.Strings(existing[i].Members)
 	}
 
 	return existing

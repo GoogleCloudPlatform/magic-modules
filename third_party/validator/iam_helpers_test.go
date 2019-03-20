@@ -94,29 +94,57 @@ func TestMergeBindings(t *testing.T) {
 			},
 		},
 		{
-			name: "Overlapping",
+			name: "GrandFinale",
 			existing: []IAMBinding{
 				{
 					Role:    "role-a",
-					Members: []string{"member-a"},
+					Members: []string{"member-a", "member-b"},
+				},
+				{
+					Role:    "role-b",
+					Members: []string{"member-c", "member-d"},
+				},
+				{
+					Role:    "role-c",
+					Members: []string{"member-c"},
 				},
 			},
 			incoming: []IAMBinding{
 				{
 					Role:    "role-a",
-					Members: []string{"member-a", "member-b"},
+					Members: []string{"member-a", "member-b", "member-c"},
+				},
+				{
+					Role:    "role-b",
+					Members: []string{"member-b", "member-c"},
 				},
 			},
 			expectedAdditive: []IAMBinding{
 				{
 					Role:    "role-a",
-					Members: []string{"member-a", "member-b"},
+					Members: []string{"member-a", "member-b", "member-c"},
+				},
+				{
+					Role:    "role-b",
+					Members: []string{"member-b", "member-c", "member-d"},
+				},
+				{
+					Role:    "role-c",
+					Members: []string{"member-c"},
 				},
 			},
 			expectedAuthoritative: []IAMBinding{
 				{
 					Role:    "role-a",
-					Members: []string{"member-a", "member-b"},
+					Members: []string{"member-a", "member-b", "member-c"},
+				},
+				{
+					Role:    "role-b",
+					Members: []string{"member-b", "member-c"},
+				},
+				{
+					Role:    "role-c",
+					Members: []string{"member-c"},
 				},
 			},
 		},
