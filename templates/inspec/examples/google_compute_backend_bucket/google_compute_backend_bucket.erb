@@ -1,0 +1,15 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_storage_bucket_name = "#{external_attribute('gcp_storage_bucket_name', doc_generation)}" -%>
+<% backend_bucket = grab_attributes['backend_bucket'] -%>
+describe google_compute_backend_bucket(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{backend_bucket['name']}'" : "backend_bucket['name']" -%>) do
+  it { should exist }
+  its('description') { should eq <%= doc_generation ? "'#{backend_bucket['description']}'" : "backend_bucket['description']" -%> }
+  its('enable_cdn') { should be <%= doc_generation ? "'#{backend_bucket['enable_cdn']}'" : "backend_bucket['enable_cdn']" -%> }
+<% if doc_generation # bucket name is partially random, this ruins VCR in integration tests -%>
+  its('bucket_name') { should eq <%= gcp_storage_bucket_name -%> }
+<% end -%>
+end
+
+describe google_compute_backend_bucket(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
