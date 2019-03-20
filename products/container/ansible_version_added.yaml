@@ -47,6 +47,14 @@
       :version_added: '2.6'
     :network:
       :version_added: '2.6'
+    :privateClusterConfig:
+      :version_added: '2.8'
+      :enablePrivateNodes:
+        :version_added: '2.8'
+      :enablePrivateEndpoint:
+        :version_added: '2.8'
+      :masterIpv4CidrBlock:
+        :version_added: '2.8'
     :clusterIpv4Cidr:
       :version_added: '2.6'
     :enableTpu:

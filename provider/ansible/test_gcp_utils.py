@@ -172,4 +172,45 @@ class GCPRequestDifferenceTestCase(unittest.TestCase):
         self.assertEquals(request1 == request2, False)
         self.assertEquals(request1.difference(request2), difference)
 
+    def test_unsorted_string_arrays(self):
+        value1 = {
+            'foo': [
+                'aaa',
+                'bbb'
+            ]
+        }
+        value2 = {
+            'foo': [
+                'bbb',
+                'aaa'
+            ]
+        }
+        request1 = GcpRequest(value1)
+        request2 = GcpRequest(value2)
+        self.assertEquals(request1 == request2, True)
 
+    def test_unsorted_dictionaries(self):
+        value1 = {
+            'foo': [
+                {
+                    'bar': 'foo'
+                },
+                {
+                    'test': 'bar'
+                }
+            ]
+        }
+        value2 = {
+            'foo': [
+                {
+                    'test': 'bar'
+                },
+                {
+                    'bar': 'foo',
+                    'baz': 'bar'
+                }
+            ]
+        }
+        request1 = GcpRequest(value1)
+        request2 = GcpRequest(value2)
+        self.assertEquals(request1 == request2, True)
