@@ -406,6 +406,9 @@ resource "google_compute_snapshot" "gcp-inspec-snapshot" {
   name = "${var.snapshot["name"]}"
   source_disk = "${google_compute_disk.generic_compute_disk.name}"
   zone = "${var.gcp_zone}"
+  # Depends on the instance of the disk we are using. Allow instance to spin up
+  # Before snapshotting the disk to avoid resourceInUse errors
+  depends_on  = ["google_compute_instance.generic_external_vm_instance_data_disk"]
 }
 
 resource "google_compute_ssl_certificate" "gcp-inspec-ssl-certificate" {
