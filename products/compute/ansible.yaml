@@ -230,9 +230,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  VpnTunnel: !ruby/object:Overrides::Ansible::ResourceOverride
-    post_create: |
-      labels_update(module, module.params, fetch)
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files

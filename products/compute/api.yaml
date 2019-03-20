@@ -4610,6 +4610,7 @@ objects:
         description: Labels to apply to this VpnTunnel.
         update_verb: :POST
         update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
+        min_version: beta
       - !ruby/object:Api::Type::Fingerprint
         name: 'labelFingerprint'
         description: |
@@ -4617,6 +4618,7 @@ objects:
           internally during updates.
         update_url: 'projects/{{project}}/regions/{{region}}/vpnTunnels/{{name}}/setLabels'
         update_verb: :POST
+        min_version: beta
       - !ruby/object:Api::Type::String
         exclude: true
         name: 'detailedStatus'
