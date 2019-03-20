@@ -9,7 +9,6 @@
 package google
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -20,9 +19,13 @@ import (
 )
 
 func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+	name, err := replaceVars(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
+	if err != nil {
+		return Asset{}, err
+	}
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
 		return Asset{
-			Name: fmt.Sprintf("//cloudsql.googleapis.com/%s", obj["selfLink"]),
+			Name: name,
 			Type: "google.cloud.sql.Instance",
 			Resource: &AssetResource{
 				Version:              "v1beta4",
