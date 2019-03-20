@@ -8,3 +8,4 @@ gcp_ext_vm_name: 'gcp_ext_vm_name'
 gcp_location: europe-west2
 gcp_network_name: gcp-inspec-network
 gcp_organization_id: 190694428152
+gcp_storage_bucket_name: gcp-inspec-storage-bucket
