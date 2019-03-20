@@ -175,6 +175,8 @@
       :version_added: '2.6'
     :sizeGb:
       :version_added: '2.6'
+    :physicalBlockSizeBytes:
+      :version_added: '2.8'
     :type:
       :version_added: '2.7'
     :sourceImage:
@@ -201,8 +203,6 @@
         :version_added: '2.6'
       :kmsKeyName:
         :version_added: '2.6'
-    :physicalBlockSizeBytes:
-      :version_added: '2.8'
   :Firewall:
     :version_added: '2.6'
     :allowed:
@@ -775,6 +775,8 @@
       :version_added: '2.8'
     :sizeGb:
       :version_added: '2.8'
+    :physicalBlockSizeBytes:
+      :version_added: '2.8'
     :replicaZones:
       :version_added: '2.8'
     :type:
@@ -795,8 +797,6 @@
         :version_added: '2.8'
       :kmsKeyName:
         :version_added: '2.8'
-    :physicalBlockSizeBytes:
-      :version_added: '2.8'
   :Route:
     :version_added: '2.6'
     :destRange:
