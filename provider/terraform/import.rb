@@ -53,8 +53,8 @@ module Provider
         short_id_default_format = field_markers.join('/')
 
         # Regexes should be unique and ordered from most specific to least specific
-        (id_formats + [short_id_format, short_id_default_format]).
-          uniq.reject(&:empty?).sort_by{|i| i.count('/')}.reverse
+        (id_formats + [short_id_format, short_id_default_format])
+          .uniq.reject(&:empty?).sort_by { |i| i.count('/') }.reverse
       end
     end
   end
