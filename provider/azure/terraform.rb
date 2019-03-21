@@ -2,6 +2,7 @@ require 'provider/azure/terraform/schema'
 require 'provider/azure/terraform/sub_template'
 require 'provider/azure/terraform/example/example'
 require 'provider/azure/terraform/example/sub_template'
+require 'provider/azure/terraform/example/helpers'
 require 'provider/azure/terraform/acctest/sub_template'
 
 require 'provider/azure/terraform/resource_override'
@@ -13,6 +14,7 @@ module Provider
       include Provider::Azure::Terraform::Schema
       include Provider::Azure::Terraform::SubTemplate
       include Provider::Azure::Terraform::Example::SubTemplate
+      include Provider::Azure::Terraform::Example::Helpers
       include Provider::Azure::Terraform::AccTest::SubTemplate
 
       def azure_resource_go_package(product)

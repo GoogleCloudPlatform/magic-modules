@@ -1,5 +1,5 @@
 --- !ruby/object:Provider::Azure::Terraform::Example
 resource: azurerm_resource_group
 properties:
-  name: "<%= get_resource_name('resource_group_name') -%>"
-  location: "<%= is_acctest ? '%s' : 'West US' -%>"
+  name: "<%= get_resource_name('resource_group_name', 'RG') -%>"
+  location: "<%= get_location() -%>"

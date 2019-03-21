@@ -16,23 +16,24 @@ import (
     terraform_name = "azurerm_" + object.name.underscore
     azure_client_name = "#{object.api_name}Client".camelcase(:lower)
     properties = object.all_user_properties
+    contains_acctests = object.instance_variable_defined?(:@acctests)
 %>
-<%  if object.instance_variable_defined?(:@acctests) -%>
-<%    object.acctests.each do |testName, test| -%>
-func TestAcc<%= resource_name -%>_<%= testName -%>(t *testing.T) {
-    resourceName := "<%= terraform_name -%>.test"
-<%    test.steps.map{|step| object.acctests[step.hcl_reference].hcl_parameters}.flatten.uniq(&:variable_name).each do |param| -%>
-    <%= param.variable_name -%> := <%= param.create_expression -%>
-
-<%    end -%>
-<%    test.steps.uniq(&:config_name).each do |step| -%>
 <%
-        hcl_params = object.acctests[step.hcl_reference].hcl_parameters
-        uniq_params = hcl_params.uniq(&:variable_name).map(&:variable_name)
+    test_hcls = Hash.new
+    if contains_acctests
+      object.acctests.each do |test|
+        test.steps.uniq.each do |name|
+          random_vars = []
+          test_hcl = build_test_hcl_from_example(product_ns, name, random_vars, true)
+          test_hcls[name] = { :hcl => test_hcl, :random_vars => random_vars }
+        end
 -%>
-    <%= step.config_name -%> := testAcc<%= resource_name -%>_<%= step.hcl_reference -%>(<%= uniq_params.join(", ") -%>)
-<%    end -%>
-<% -%>
+func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
+    resourceName := "<%= terraform_name -%>.test"
+<%      test.steps.map{|step| test_hcls[step][:random_vars]}.flatten.uniq(&:variable_name).each do |param| -%>
+    <%=   param.variable_name -%> := <%= param.create_expression -%>
+
+<%      end -%>
 
     resource.ParallelTest(t, resource.TestCase{
         PreCheck:     func() { testAccPreCheck(t) },
@@ -40,28 +41,19 @@ func TestAcc<%= resource_name -%>_<%= testName -%>(t *testing.T) {
         CheckDestroy: testCheck<%= resource_name -%>Destroy,
         Steps: []resource.TestStep{
 <%      test.steps.each do |step| -%>
-<%
-          hcl = object.acctests[step.hcl_reference]
-          props_to_check = Hash.new
-          until hcl.nil? do
-            hcl.properties.each do |propName, prop|
-              props_to_check[propName] = prop unless props_to_check.has_key?(propName)
-            end
-            hcl = hcl.based_on.nil? ? nil : object.acctests[hcl.based_on]
-          end
-          props_to_check.reject!{|pn, pv| object.azure_sdk_definition.read.request.has_key?(object.all_user_properties.find{|p| p.name == pn}.azure_sdk_references[0]) }
--%>
+<%        hcl_params = test_hcls[step][:random_vars].map(&:variable_name).uniq -%>
+<%        props_to_check = get_example_properties_to_check(product_ns, step, object) -%>
             {
-                Config: <%= step.config_name -%>,
+                Config: testAcc<%= resource_name -%>_<%= step -%>(<%= hcl_params.join(", ") -%>),
                 Check: resource.ComposeTestCheckFunc(
                     testCheck<%= resource_name -%>Exists(resourceName),
 <%        props_to_check.each do |propName, propValue| -%>
-                    resource.TestCheckResourceAttr(resourceName, "<%= propName.underscore -%>", "<%= propValue -%>"),
+                    resource.TestCheckResourceAttr(resourceName, "<%= propName -%>", "<%= propValue -%>"),
 <%        end -%>
                 ),
             },
 <%      end -%>
-<%      if test.check_import -%>
+<%      if test.steps.count == 1 -%>
             {
                 ResourceName:      resourceName,
                 ImportState:       true,
@@ -82,7 +74,7 @@ func testCheck<%= resource_name -%>Exists(resourceName string) resource.TestChec
             return fmt.Errorf("<%= object.name.titlecase -%> not found: %s", resourceName)
         }
 
-<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties, object, true)) -%>
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties)) -%>
 
         client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
 
@@ -110,7 +102,7 @@ func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
             continue
         }
 
-<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties, object)) -%>
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties)) -%>
 
         if resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>; err != nil {
             if !utils.ResponseWasNotFound(resp.Response) {
@@ -124,18 +116,18 @@ func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
     return nil
 }
 
-<%  if object.instance_variable_defined?(:@acctests) -%>
-<%    object.acctests.reject{|n, t| t.based_on.nil? && t.properties.empty?}.each do |testName, test| -%>
-<%      uniq_params = test.hcl_parameters.uniq(&:variable_name).map{|p| "#{p.variable_name} #{p.go_type}"} -%>
-func testAcc<%= resource_name -%>_<%= testName -%>(<%= uniq_params.join(", ") -%>) string {
+<%
+    if contains_acctests
+      test_hcls.each do |name, test_hcl|
+        uniq_params = test_hcl[:random_vars].uniq(&:parameter_name).map{|p| "#{p.parameter_name} #{p.go_type}"}
+-%>
+func testAcc<%= resource_name -%>_<%= name -%>(<%= uniq_params.join(", ") -%>) string {
     return fmt.Sprintf(`
-<%= build_acctest_dependencies_hcl(test, object) -%>
-
-
-<%= build_acctest_resource_test_hcl(test, object) -%>
-
-`, <%= test.hcl_parameters.map(&:variable_name).join(", ") -%>)
+<%=     lines(test_hcl[:hcl]) -%>
+`, <%=  test_hcl[:random_vars].map(&:parameter_name).join(", ") -%>)
 }
 
-<%    end -%>
-<%  end -%>
+<%
+      end
+    end
+-%>

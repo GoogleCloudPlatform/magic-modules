@@ -26,9 +26,8 @@ import (
 
 func TestAccAzureRMAutomationStringVariable_basic(t *testing.T) {
     resourceName := "azurerm_automation_string_variable.test"
-    rInt := tf.AccRandTimeInt()
+    ri := tf.AccRandTimeInt()
     location := testLocation()
-    config := testAccAzureRMAutomationStringVariable_basic(rInt, location)
 
     resource.ParallelTest(t, resource.TestCase{
         PreCheck:     func() { testAccPreCheck(t) },
@@ -36,7 +35,7 @@ func TestAccAzureRMAutomationStringVariable_basic(t *testing.T) {
         CheckDestroy: testCheckAzureRMAutomationStringVariableDestroy,
         Steps: []resource.TestStep{
             {
-                Config: config,
+                Config: testAccAzureRMAutomationStringVariable_basic(ri, location),
                 Check: resource.ComposeTestCheckFunc(
                     testCheckAzureRMAutomationStringVariableExists(resourceName),
                     resource.TestCheckResourceAttr(resourceName, "value", "Hello, Terraform Basic Test."),
@@ -53,9 +52,8 @@ func TestAccAzureRMAutomationStringVariable_basic(t *testing.T) {
 
 func TestAccAzureRMAutomationStringVariable_complete(t *testing.T) {
     resourceName := "azurerm_automation_string_variable.test"
-    rInt := tf.AccRandTimeInt()
+    ri := tf.AccRandTimeInt()
     location := testLocation()
-    config := testAccAzureRMAutomationStringVariable_complete(rInt, location)
 
     resource.ParallelTest(t, resource.TestCase{
         PreCheck:     func() { testAccPreCheck(t) },
@@ -63,10 +61,10 @@ func TestAccAzureRMAutomationStringVariable_complete(t *testing.T) {
         CheckDestroy: testCheckAzureRMAutomationStringVariableDestroy,
         Steps: []resource.TestStep{
             {
-                Config: config,
+                Config: testAccAzureRMAutomationStringVariable_complete(ri, location),
                 Check: resource.ComposeTestCheckFunc(
                     testCheckAzureRMAutomationStringVariableExists(resourceName),
-                    resource.TestCheckResourceAttr(resourceName, "description", "This is a variable created by Terraform acceptance test."),
+                    resource.TestCheckResourceAttr(resourceName, "description", "This variable is created by Terraform acceptance test."),
                     resource.TestCheckResourceAttr(resourceName, "value", "Hello, Terraform Complete Test."),
                 ),
             },
@@ -81,10 +79,8 @@ func TestAccAzureRMAutomationStringVariable_complete(t *testing.T) {
 
 func TestAccAzureRMAutomationStringVariable_basicCompleteUpdate(t *testing.T) {
     resourceName := "azurerm_automation_string_variable.test"
-    rInt := tf.AccRandTimeInt()
+    ri := tf.AccRandTimeInt()
     location := testLocation()
-    basicConfig := testAccAzureRMAutomationStringVariable_basic(rInt, location)
-    completeConfig := testAccAzureRMAutomationStringVariable_complete(rInt, location)
 
     resource.ParallelTest(t, resource.TestCase{
         PreCheck:     func() { testAccPreCheck(t) },
@@ -92,22 +88,22 @@ func TestAccAzureRMAutomationStringVariable_basicCompleteUpdate(t *testing.T) {
         CheckDestroy: testCheckAzureRMAutomationStringVariableDestroy,
         Steps: []resource.TestStep{
             {
-                Config: basicConfig,
+                Config: testAccAzureRMAutomationStringVariable_basic(ri, location),
                 Check: resource.ComposeTestCheckFunc(
                     testCheckAzureRMAutomationStringVariableExists(resourceName),
                     resource.TestCheckResourceAttr(resourceName, "value", "Hello, Terraform Basic Test."),
                 ),
             },
             {
-                Config: completeConfig,
+                Config: testAccAzureRMAutomationStringVariable_complete(ri, location),
                 Check: resource.ComposeTestCheckFunc(
                     testCheckAzureRMAutomationStringVariableExists(resourceName),
-                    resource.TestCheckResourceAttr(resourceName, "description", "This is a variable created by Terraform acceptance test."),
+                    resource.TestCheckResourceAttr(resourceName, "description", "This variable is created by Terraform acceptance test."),
                     resource.TestCheckResourceAttr(resourceName, "value", "Hello, Terraform Complete Test."),
                 ),
             },
             {
-                Config: basicConfig,
+                Config: testAccAzureRMAutomationStringVariable_basic(ri, location),
                 Check: resource.ComposeTestCheckFunc(
                     testCheckAzureRMAutomationStringVariableExists(resourceName),
                     resource.TestCheckResourceAttr(resourceName, "value", "Hello, Terraform Basic Test."),
@@ -126,14 +122,8 @@ func testCheckAzureRMAutomationStringVariableExists(resourceName string) resourc
         }
 
         name := rs.Primary.Attributes["name"]
-        resourceGroup, hasResourceGroup := rs.Primary.Attributes["resource_group_name"]
-        if !hasResourceGroup {
-            return fmt.Errorf("Bad: no resource group name found in state for Automation String Variable: %q", name)
-        }
-        accountName, hasAccountName := rs.Primary.Attributes["automation_account_name"]
-        if !hasAccountName {
-            return fmt.Errorf("Bad: no automation account name found in state for Automation String Variable: %q", name)
-        }
+        resourceGroup := rs.Primary.Attributes["resource_group_name"]
+        accountName := rs.Primary.Attributes["automation_account_name"]
 
         client := testAccProvider.Meta().(*ArmClient).automationVariableClient
         ctx := testAccProvider.Meta().(*ArmClient).StopContext
@@ -186,12 +176,12 @@ resource "azurerm_automation_account" "test" {
   location            = "${azurerm_resource_group.test.location}"
   resource_group_name = "${azurerm_resource_group.test.name}"
 
-  sku {
+  sku = {
     name = "Basic"
   }
 }
 
-"azurerm_automation_string_variable" "test" {
+resource "azurerm_automation_string_variable" "test" {
   name                    = "acctestAutoVar-%d"
   resource_group_name     = "${azurerm_resource_group.test.name}"
   automation_account_name = "${azurerm_automation_account.test.name}"
@@ -212,16 +202,16 @@ resource "azurerm_automation_account" "test" {
   location            = "${azurerm_resource_group.test.location}"
   resource_group_name = "${azurerm_resource_group.test.name}"
 
-  sku {
+  sku = {
     name = "Basic"
   }
 }
 
-"azurerm_automation_string_variable" "test" {
+resource "azurerm_automation_string_variable" "test" {
   name                    = "acctestAutoVar-%d"
   resource_group_name     = "${azurerm_resource_group.test.name}"
   automation_account_name = "${azurerm_automation_account.test.name}"
-  description             = "This is a variable created by Terraform acceptance test."
+  description             = "This variable is created by Terraform acceptance test."
   value                   = "Hello, Terraform Complete Test."
 }
 `, rInt, location, rInt, rInt)
