@@ -57,8 +57,6 @@
         :version_added: '2.8'
     :clusterIpv4Cidr:
       :version_added: '2.6'
-    :enableTpu:
-      :version_added: '2.6'
     :addonsConfig:
       :version_added: '2.6'
       :httpLoadBalancing:
