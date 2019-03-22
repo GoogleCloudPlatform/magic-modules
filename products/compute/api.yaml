@@ -4273,11 +4273,8 @@ objects:
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#TODO'
       items: 'items'
+    description: 'Subnetwork policy'
     properties:
-      - !ruby/object:Api::Type::Integer
-        name: 'version'
-        description: 'Deprecated.'
-        output: true
       - !ruby/object:Api::Type::Array
         name: 'bindings'
         description: 'Associates a list of members to a role.'
