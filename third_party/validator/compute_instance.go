@@ -26,7 +26,7 @@ func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) (Asset
 	if obj, err := GetComputeInstanceApiObject(d, config); err == nil {
 		return Asset{
 			Name: name,
-			Type: "google.compute.Instance",
+			Type: "compute.googleapis.com/Instance",
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",

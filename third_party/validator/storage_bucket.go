@@ -25,7 +25,7 @@ func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, 
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
 		return Asset{
 			Name: name,
-			Type: "google.cloud.storage.Bucket",
+			Type: "storage.googleapis.com/Bucket",
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",

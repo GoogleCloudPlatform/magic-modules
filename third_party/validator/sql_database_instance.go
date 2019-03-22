@@ -26,7 +26,7 @@ func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) (A
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
 		return Asset{
 			Name: name,
-			Type: "google.cloud.sql.Instance",
+			Type: "sqladmin.googleapis.com/Instance",
 			Resource: &AssetResource{
 				Version:              "v1beta4",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
