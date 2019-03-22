@@ -8,6 +8,8 @@ description: |-
 
 # Google Provider Configuration Reference
 
+-> Want more information about upgrading from `1.X` of the provider to `2.0.0`? Check out the [2.0.0 Upgrade Guide](https://terraform.io/docs/providers/google/version_2_upgrade.html).
+
 The `google` and `google-beta` provider blocks are used to configure the
 credentials you use to authenticate with GCP, as well as a default project and
 location (`zone` and/or `region`) for your resources.
@@ -70,7 +72,7 @@ same configuration.
 
 ### Quick Reference
 
-* `credentials` - (Optional) The path to or the contents of a
+* `credentials` - (Optional) Either the path to or the contents of a
 [service account key file] in JSON format. You can
 [manage key files using the Cloud Console].
 
@@ -92,11 +94,12 @@ an access token using the service account key specified in `credentials`.
 * `access_token` - (Optional) A temporary [OAuth 2.0 access token] obtained from
 the Google Authorization server, i.e. the `Authorization: Bearer` token used to
 authenticate HTTP requests to GCP APIs. This is an alternative to `credentials`,
-and ignores the `scopes` field.
+and ignores the `scopes` field. If both are specified, `access_token` will be
+used over the `credentials` field.
 
 ### Full Reference
 
-* `credentials` - (Optional) The path to or the contents of a
+* `credentials` - (Optional) Either the path to or the contents of a
 [service account key file] in JSON format. You can
 [manage key files using the Cloud Console]. Your service account key file is
 used to complete a two-legged OAuth 2.0 flow to obtain access tokens to
@@ -166,14 +169,15 @@ following ordered by precedence.
 
 * `access_token` - (Optional) A temporary [OAuth 2.0 access token] obtained from
 the Google Authorization server, i.e. the `Authorization: Bearer` token used to
-authenticate HTTP requests to GCP APIs. This is an alternative to `credentials`,
+authenticate HTTP requests to GCP APIs. If both are specified, `access_token` will be
+used over the `credentials` field. This is an alternative to `credentials`,
 and ignores the `scopes` field. Alternatively, this can be specified using the
 `GOOGLE_OAUTH_ACCESS_TOKEN` environment variable.
 
     -> These access tokens cannot be renewed by Terraform and thus will only
-    work for at most 1 hour. If you anticipate Terraform needing access for more
-    than one hour per run, please use a service account key with `credentials`
-    instead.
+    work until they expire. If you anticipate Terraform needing access for
+    longer than a token's lifetime (default `1 hour`), please use a service
+    account key with `credentials` instead.
 
 ---
 
