@@ -1594,9 +1594,6 @@ objects:
       so that leftover disks are not left behind on machine deletion.
 <% type = 'InstanceTemplate' -%>
 <%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -1977,9 +1974,6 @@ objects:
                       'templates/zonal_async.yaml.erb'), 4)
 
 %>
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -4017,9 +4011,6 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_request
 <%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
