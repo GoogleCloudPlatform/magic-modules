@@ -4268,6 +4268,56 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/subnetworks'
 
   - !ruby/object:Api::Resource
+    name: 'SubnetworkPolicy'
+    base_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/getIamPolicy
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#TODO'
+      items: 'items'
+    properties:
+      - !ruby/object:Api::Type::Integer
+        name: 'version'
+        description: 'Deprecated.'
+        output: true
+      - !ruby/object:Api::Type::Array
+        name: 'bindings'
+        description: 'Associates a list of members to a role.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'role'
+              description: |
+                Role that is assigned to members. For example, roles/viewer,
+                roles/editor, or roles/owner.
+            - !ruby/object:Api::Type::Array
+              name: 'members'
+              description: 'Specifies the identities requesting access for a Cloud Platform resource.'
+              item_type: Api::Type::String
+      - !ruby/object:Api::Type::Array
+        name: 'auditConfigs'
+        description: 'Specifies cloud audit logging configuration for this policy.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'service'
+              description: |
+                Specifies a service that will be enabled for audit logging.
+                For example, `storage.googleapis.com`, `cloudsql.googleapis.com`. `allServices` 
+                is a special value that covers all services.
+            - !ruby/object:Api::Type::Array
+              name: 'auditLogConfigs'
+              description: 'The configuration for logging of each type of permission.'
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'logType'
+                    description: 'The log type that this config enables'
+                  - !ruby/object:Api::Type::Array
+                    name: 'exemptedMembers'
+                    description: |
+                      Specifies the identities that do not causelogging for this type of permission.
+                    item_type: Api::Type::String
+
+  - !ruby/object:Api::Resource
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/global/targetHttpProxies
