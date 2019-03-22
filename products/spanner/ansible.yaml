@@ -44,18 +44,23 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Overrides::Ansible::Transport
+      decoder: decode_response
     custom_create_resource: true
     custom_update_resource: true
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Api::Resource::Transport
+    transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
+      decoder: decode_response
     exclude: true
 files: !ruby/object:Provider::Config::Files
   compile:

@@ -16,6 +16,18 @@ require 'provider/ansible/facts_override'
 
 module Overrides
   module Ansible
+    # Allows overriding snowflake transport requests
+    class Transport < Api::Object
+      attr_reader :encoder
+      attr_reader :decoder
+
+      def validate
+        super
+        check :encoder, type: ::String
+        check :decoder, type: ::String
+      end
+    end
+
     # A class to control overridden properties on ansible.yaml in lieu of
     # values from api.yaml.
     class ResourceOverride < Overrides::ResourceOverride
@@ -36,6 +48,7 @@ module Overrides
           provider_helpers
           return_if_object
           template
+          transport
           unwrap_resource
           update
 
@@ -64,6 +77,7 @@ module Overrides
         check :post_action, type: ::String
         check :provider_helpers, type: ::Array, default: [], item_type: String
         check :return_if_object, type: ::String
+        check :transport, type: Transport
         check :template, type: ::String
         check :update, type: ::String
         check :unwrap_resource, type: :boolean, default: false

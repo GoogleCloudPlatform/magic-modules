@@ -56,7 +56,6 @@ module Api
       attr_reader :exclude
       attr_reader :async
       attr_reader :readonly
-      attr_reader :transport
       # Documentation references
       attr_reader :references
       attr_reader :create_verb
@@ -77,18 +76,6 @@ module Api
     # A custom getter is used for :properties instead of `attr_reader`
 
     attr_reader :__product
-
-    # Allows overriding snowflake transport requests
-    class Transport < Api::Object
-      attr_reader :encoder
-      attr_reader :decoder
-
-      def validate
-        super
-        check :encoder, type: ::String
-        check :decoder, type: ::String
-      end
-    end
 
     # Allows mapping of requests to specific API layout quirks.
     class Wrappers < Api::Object
@@ -187,7 +174,6 @@ module Api
       check :self_link, type: String
       check :self_link_query, type: Api::Resource::ResponseList
       check :readonly, type: :boolean
-      check :transport, type: Transport
       check :references, type: ReferenceLinks
 
       check :collection_url_response, default: Api::Resource::ResponseList.new,

@@ -32,9 +32,6 @@ objects:
       A possible configuration for a Cloud Spanner instance. Configurations
       define the geographic placement of nodes and their replication.
     readonly: true
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -57,8 +54,6 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'instances'
     async: !ruby/object:Api::Async
@@ -131,8 +126,6 @@ objects:
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
     input: true
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_response
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'databases'
     references: !ruby/object:Api::Resource::ReferenceLinks

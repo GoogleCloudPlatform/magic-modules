@@ -69,9 +69,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccount'
     base_url: projects/{{project}}/serviceAccounts
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
     description: |
       A service account in the Identity and Access Management API.
     properties:
@@ -101,8 +98,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccountKey'
     base_url: projects/{{project}}/serviceAccounts/{{service_account}}/keys
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_response
     description: |
       A service account in the Identity and Access Management API.
     parameters:
