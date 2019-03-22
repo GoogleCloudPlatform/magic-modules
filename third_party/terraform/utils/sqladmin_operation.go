@@ -62,17 +62,11 @@ func (w *SqlAdminOperationWaiter) QueryOp() (interface{}, error) {
 	}
 
 	var op interface{}
-	err := retryTimeDuration(
+	var err error
+	err = retryTimeDuration(
 		func() error {
-			sqlOp, err := w.Service.Operations.Get(w.Project, w.Op.Name).Do()
-			if err != nil {
-				return err
-			} else {
-				// To avoid aliasing weirdness, let's use a local variable and
-				// set the block level one only once
-				op = sqlOp
-				return nil
-			}
+			op, err = w.Service.Operations.Get(w.Project, w.Op.Name).Do()
+			return err
 		},
 
 		DefaultRequestTimeout,
