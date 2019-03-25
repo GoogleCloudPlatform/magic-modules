@@ -47,9 +47,9 @@ objects:
         base_url: '{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360
-          update_sec: 360
-          delete_sec: 360
+          insert_sec: 600
+          update_sec: 600
+          delete_sec: 600
       result: !ruby/object:Api::Async::Result
         path: 'response'
         resource_inside_response: true
