@@ -79,8 +79,6 @@
       :version_added: '2.8'
     :subnetwork:
       :version_added: '2.7'
-    :labels:
-      :version_added: '2.6'
     :region:
       :version_added: '2.6'
   :BackendBucket:
@@ -225,8 +223,6 @@
       :version_added: '2.8'
     :disabled:
       :version_added: '2.8'
-    :enableLogging:
-      :version_added: '2.6'
     :name:
       :version_added: '2.6'
     :network:
@@ -269,14 +265,8 @@
       :version_added: '2.6'
     :target:
       :version_added: '2.7'
-    :labels:
-      :version_added: '2.6'
-    :allPorts:
-      :version_added: '2.6'
     :networkTier:
       :version_added: '2.8'
-    :serviceLabel:
-      :version_added: '2.6'
     :region:
       :version_added: '2.6'
   :GlobalAddress:
@@ -287,18 +277,10 @@
       :version_added: '2.6'
     :name:
       :version_added: '2.6'
-    :labels:
-      :version_added: '2.6'
     :ipVersion:
-      :version_added: '2.6'
-    :prefixLength:
       :version_added: '2.6'
     :addressType:
       :version_added: '2.8'
-    :purpose:
-      :version_added: '2.6'
-    :network:
-      :version_added: '2.6'
   :GlobalForwardingRule:
     :version_added: '2.6'
     :description:
@@ -1020,8 +1002,6 @@
     :localTrafficSelector:
       :version_added: '2.7'
     :remoteTrafficSelector:
-      :version_added: '2.7'
-    :labels:
       :version_added: '2.7'
     :region:
       :version_added: '2.7'
