@@ -32,7 +32,8 @@ class CsvFormatterForMM
 
   # Places in the CSV header
   def start(_start_notification)
-    @output << ['Date', 'Product', 'Resource', 'Property', 'api.yaml', 'terraform', 'ansible'].to_csv
+    @output << ['Date',
+                'Product', 'Resource', 'Property', 'api.yaml', 'terraform', 'ansible'].to_csv
   end
 
   # This property exists in api.yaml
