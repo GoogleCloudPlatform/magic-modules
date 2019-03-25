@@ -46,6 +46,8 @@ module Provider
           # Only properties that aren't output-only + excluded should get versions.
           # These are the only properties that become module fields.
           obj.all_user_properties.reject(&:exclude).reject(&:output).each do |prop|
+            next if prop.min_version > @api.version_obj_or_default('ga')
+
             resource[prop.name.to_sym] = property_version(prop, [:regular, obj.name], versions)
           end
           struct[:regular][obj.name.to_sym] = resource
