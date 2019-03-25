@@ -1081,7 +1081,6 @@ objects:
           When the load balancing scheme is INTERNAL and protocol is TCP/UDP, omit
           `port`/`port_range` and specify this field as `true` to allow packets addressed
           to any ports to be forwarded to the backends configured with this forwarding rule.
-        min_version: beta
       - !ruby/object:Api::Type::Enum
         name: 'networkTier'
         description: |
