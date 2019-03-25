@@ -45,16 +45,6 @@ resources:
       source:
           uri: git@github.com:terraform-providers/terraform-provider-google.git
           private_key: ((repo-key.private_key))
-
-    - name: magic-modules-new-prs
-      type: github-pull-request
-      source:
-          repo: GoogleCloudPlatform/magic-modules
-          private_key: ((repo-key.private_key))
-          access_token: ((github-account.password))
-          authorship_restriction: true
-          no_label: automerged
-
 jobs:
     - name: ansible-nightly-release
       plan:
@@ -69,10 +59,12 @@ jobs:
                 CREDS: ((repo-key.private_key))
     - name: coverage-spreadsheet-release
       plan:
-          - get: magic-modules-new-prs
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
             trigger: false
           - task: build
-            file: magic-modules-new-prs/.ci/magic-modules/coverage-spreadsheet-upload.yml
+            file: magic-modules-gcp/.ci/magic-modules/coverage-spreadsheet-upload.yml
             params:
                 SERVICE_ACCOUNT: ((magic-modules-service-account))
     - name: nightly-build

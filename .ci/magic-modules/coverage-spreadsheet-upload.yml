@@ -9,7 +9,7 @@ image_resource:
         tag: '0.11.10-3.0.25'
 
 inputs:
-    - name: magic-modules-new-prs
+    - name: magic-modules-gcp
 
 run:
-    path: magic-modules-new-prs/.ci/magic-modules/coverage-spreadsheet-upload.sh
+    path: magic-modules-gcp/.ci/magic-modules/coverage-spreadsheet-upload.sh

@@ -15,7 +15,7 @@ set -x
 
 gcloud auth activate-service-account  magic-modules-spreadsheet@magic-modules.iam.gserviceaccount.com --key-file=$GOOGLE_CLOUD_KEYFILE_JSON
 
-pushd magic-modules-new-prs
+pushd magic-modules-gcp
 bundle install
 gem install rspec
 
