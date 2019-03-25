@@ -121,7 +121,7 @@ func TestAccStorageBucket_customAttributes(t *testing.T) {
 	})
 }
 
-func TestAccStorageBucket_lifecycleRules(t *testing.T) {
+func TestAccStorageBucket_lifecycleRulesMultiple(t *testing.T) {
 	t.Parallel()
 
 	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
@@ -131,7 +131,230 @@ func TestAccStorageBucket_lifecycleRules(t *testing.T) {
 		CheckDestroy: testAccStorageBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBucket_lifecycleRules(bucketName),
+				Config: testAccStorageBucket_lifecycleRulesMultiple(bucketName),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_lifecycleRuleStateLive(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
+	hashK := resourceGCSBucketLifecycleRuleConditionHash(map[string]interface{}{
+		"age":                10,
+		"with_state":         "LIVE",
+		"num_newer_versions": 0,
+		"created_before":     "",
+	})
+	attrPrefix := fmt.Sprintf("lifecycle_rule.0.condition.%d.", hashK)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRule_IsLiveTrue(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(true), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"is_live", "true"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"with_state", "LIVE"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withStateLive(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(true), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"is_live", "true"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"with_state", "LIVE"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_lifecycleRuleStateArchived(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
+	hashK := resourceGCSBucketLifecycleRuleConditionHash(map[string]interface{}{
+		"age":                10,
+		"with_state":         "ARCHIVED",
+		"num_newer_versions": 0,
+		"created_before":     "",
+	})
+	attrPrefix := fmt.Sprintf("lifecycle_rule.0.condition.%d.", hashK)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRule_emptyArchived(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"is_live", "false"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"with_state", "ARCHIVED"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_isLiveFalse(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"is_live", "false"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"with_state", "ARCHIVED"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"is_live", "false"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", attrPrefix+"with_state", "ARCHIVED"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_lifecycleRuleStateAny(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
+
+	hashKLive := resourceGCSBucketLifecycleRuleConditionHash(map[string]interface{}{
+		"age":                10,
+		"with_state":         "LIVE",
+		"num_newer_versions": 0,
+		"created_before":     "",
+	})
+	hashKArchived := resourceGCSBucketLifecycleRuleConditionHash(map[string]interface{}{
+		"age":                10,
+		"with_state":         "ARCHIVED",
+		"num_newer_versions": 0,
+		"created_before":     "",
+	})
+	hashKAny := resourceGCSBucketLifecycleRuleConditionHash(map[string]interface{}{
+		"age":                10,
+		"with_state":         "ANY",
+		"num_newer_versions": 0,
+		"created_before":     "",
+	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", fmt.Sprintf("lifecycle_rule.0.condition.%d.with_state", hashKArchived), "ARCHIVED"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withStateLive(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(true), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", fmt.Sprintf("lifecycle_rule.0.condition.%d.with_state", hashKLive), "LIVE"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withStateAny(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(nil, &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", fmt.Sprintf("lifecycle_rule.0.condition.%d.with_state", hashKAny), "ANY"),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRule_withStateArchived(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketLifecycleConditionState(googleapi.Bool(false), &bucket),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket.bucket", fmt.Sprintf("lifecycle_rule.0.condition.%d.with_state", hashKArchived), "ARCHIVED"),
+				),
 			},
 			{
 				ResourceName:      "google_storage_bucket.bucket",
@@ -665,6 +888,25 @@ func testAccCheckStorageBucketMissing(bucketName string) resource.TestCheckFunc 
 	}
 }
 
+func testAccCheckStorageBucketLifecycleConditionState(expected *bool, b *storage.Bucket) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		actual := b.Lifecycle.Rule[0].Condition.IsLive
+		if expected == nil && b.Lifecycle.Rule[0].Condition.IsLive == nil {
+			return nil
+		}
+		if expected == nil {
+			return fmt.Errorf("expected condition isLive to be unset, instead got %t", *actual)
+		}
+		if actual == nil {
+			return fmt.Errorf("expected condition isLive to be %t, instead got nil (unset)", *expected)
+		}
+		if *expected != *actual {
+			return fmt.Errorf("expected condition isLive to be %t, instead got %t", *expected, *actual)
+		}
+		return nil
+	}
+}
+
 func testAccStorageBucketDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -845,7 +1087,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName, logBucketName, prefix)
 }
 
-func testAccStorageBucket_lifecycleRules(bucketName string) string {
+func testAccStorageBucket_lifecycleRulesMultiple(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
 	name = "%s"
@@ -855,6 +1097,7 @@ resource "google_storage_bucket" "bucket" {
 			storage_class = "NEARLINE"
 		}
 		condition {
+			matches_storage_class = ["COLDLINE"]
 			age = 2
 		}
   	}
@@ -866,6 +1109,131 @@ resource "google_storage_bucket" "bucket" {
 			age = 10
 		}
 	}
+	lifecycle_rule {
+		action {
+			type = "SetStorageClass"
+			storage_class = "NEARLINE"
+		}
+		condition {
+			created_before = "2019-01-01"
+		}
+	}
+	lifecycle_rule {
+		action {
+			type = "SetStorageClass"
+			storage_class = "NEARLINE"
+		}
+		condition {
+			num_newer_versions = 10
+		}
+	}
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_emptyArchived(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 10
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_isLiveFalse(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 10
+      is_live = false
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_withStateArchived(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 10
+      with_state = "ARCHIVED"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_IsLiveTrue(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 10
+      is_live = true
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_withStateLive(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 10
+      with_state = "LIVE"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRule_withStateAny(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age = 10
+      with_state = "ANY"
+    }
+  }
 }
 `, bucketName)
 }
