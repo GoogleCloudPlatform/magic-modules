@@ -32,7 +32,8 @@ class CsvFormatterForMM
 
   # Places in the CSV header
   def start(_start_notification)
-    @output << ['Product', 'Resource', 'Property', 'api.yaml', 'terraform', 'ansible'].to_csv
+    @output << ['Date',
+                'Product', 'Resource', 'Property', 'api.yaml', 'terraform', 'ansible'].to_csv
   end
 
   # This property exists in api.yaml
@@ -59,6 +60,7 @@ class CsvFormatterForMM
   def test_information(notification)
     example_group = notification.example.metadata[:example_group]
     {
+      date: Time.now.strftime('%Y-%m-%d'),
       product: example_group[:parent_example_group][:parent_example_group][:description],
       resource: example_group[:parent_example_group][:description],
       property: example_group[:description],
@@ -68,6 +70,7 @@ class CsvFormatterForMM
 
   def info_to_csv(test_info)
     [
+      test_info[:date],
       test_info[:product], test_info[:resource], test_info[:property], test_info[:api],
       test_info[:terraform], test_info[:ansible]
     ].to_csv
