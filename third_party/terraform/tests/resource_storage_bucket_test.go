@@ -1259,7 +1259,7 @@ resource "google_project" "acceptance" {
 }
 
 resource "google_project_services" "acceptance" {
-	project = "%{google_project.acceptance.project_id}"
+	project = "${google_project.acceptance.project_id}"
 
 	services = [
 	  "cloudkms.googleapis.com",
