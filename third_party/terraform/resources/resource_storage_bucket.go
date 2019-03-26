@@ -771,8 +771,7 @@ func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleC
 	if condition.IsLive == nil {
 		ruleCondition["with_state"] = "ANY"
 	} else {
-		isLive := *condition.IsLive
-		if isLive {
+		if *condition.IsLive {
 			ruleCondition["with_state"] = "LIVE"
 			ruleCondition["is_live"] = true
 		} else {
@@ -884,8 +883,9 @@ func expandStorageBucketLifecycleRuleCondition(v interface{}) (*storage.BucketLi
 		transformed.CreatedBefore = v.(string)
 	}
 
-	// Because TF schema, withStateOk will always be true.
 	withStateV, withStateOk := condition["with_state"]
+	// Because TF schema, withStateOk currently will always be true,
+	// do the check just in case.
 	if withStateOk {
 		switch withStateV.(string) {
 		case "LIVE":
@@ -899,7 +899,7 @@ func expandStorageBucketLifecycleRuleCondition(v interface{}) (*storage.BucketLi
 			// Support deprecated `is_live` behavior
 			// is_live was always read (ok always true)
 			// so it can only support LIVE/ARCHIVED.
-			// When removing is_live, combine this case with case "ANY"
+			// TODO: When removing is_live, combine this case with case "ANY"
 			if v, ok := condition["is_live"]; ok {
 				log.Printf("[WARN] using deprecated field `is_live` because with_state is empty")
 				transformed.IsLive = googleapi.Bool(v.(bool))
@@ -980,7 +980,7 @@ func resourceGCSBucketLifecycleRuleConditionHash(v interface{}) int {
 	//      with_state = "ANY"
 
 	withStateV, withStateOk := m["with_state"]
-	if !withStateOk || withStateV == "" {
+	if !withStateOk || withStateV.(string) == "" {
 		if isLiveV, ok := m["is_live"]; ok {
 			buf.WriteString(fmt.Sprintf("%t-", isLiveV.(bool)))
 		}
