@@ -14,8 +14,8 @@
 		return nil, nil
 	}
 
-<%# Final nested resource is either a list of resources we need to filter
-	# or just the resource itself, which we return. -%>
+  // Final nested resource is either a list of resources we need to filter
+	// or just the resource itself, which we return.
 	switch v.(type) {
 	case []interface{}:
 		break
