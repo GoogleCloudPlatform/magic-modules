@@ -1294,14 +1294,12 @@ objects:
           character, which cannot be a dash.
 
           This field is only used for internal load balancing.
-        min_version: beta
       - !ruby/object:Api::Type::String
         name: 'serviceName'
         description: |
           The internal fully qualified service name for this Forwarding Rule.
           This field is only used for internal load balancing.
         output: true
-        min_version: beta
   - !ruby/object:Api::Resource
     name: 'GlobalAddress'
     kind: 'compute#address'
