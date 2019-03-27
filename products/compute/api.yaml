@@ -4270,6 +4270,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'SubnetworkPolicy'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/getIamPolicy
+    self_link: projects/{{project}}/regions/{{region}}/subnetworks/{{subnetwork}}/getIamPolicy
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#TODO'
       items: 'items'
