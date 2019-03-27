@@ -26,7 +26,7 @@
 
 	items := v.([]interface{})
 	for _, vRaw := range items {
-	<% if object.nested_query.is_id_list_only -%>
+	<% if object.nested_query.is_list_of_ids -%>
 		// If only an id is given in parent resource,
 		// construct a resource map for that id KV pair.
 		item := map[string]interface{}{"<%=object.identity.first.api_name%>": vRaw}
