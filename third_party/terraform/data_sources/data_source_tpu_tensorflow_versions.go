@@ -21,6 +21,7 @@ func dataSourceTpuTensorflowVersions() *schema.Resource {
 			"zone": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"versions": {
 				Type:     schema.TypeList,
