@@ -126,6 +126,9 @@ objects:
       # This isn't a real 'kind' - this API has some inconsistencies and doesn't return one.
       kind: 'resourceManager#liensList'
       items: 'liens'
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - liens
     identity:
       - name
     description: A Lien represents an encumbrance on the actions that can be performed on a resource.
