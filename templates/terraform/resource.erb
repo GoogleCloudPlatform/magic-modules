@@ -217,7 +217,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
     }
 
-<%  if object.nested_decoder -%>
+<%  if object.nested_query -%>
     res, err = resource<%= resource_name -%>Extractor(d, meta, res)
     if err != nil {
         return err
@@ -610,9 +610,9 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 }
 <% end -%>
 
-<%  if object.nested_decoder -%>
+<%  if object.nested_query -%>
 func resource<%= resource_name -%>Extractor(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    <%=     compile_template('templates/terraform/nested_decoder.go.erb',
+    <%=     compile_template('templates/terraform/nested_query.go.erb',
                          object: object,
                          settable_properties: object.settable_properties,
                          resource_name: resource_name) -%>

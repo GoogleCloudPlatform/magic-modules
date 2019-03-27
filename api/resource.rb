@@ -56,7 +56,7 @@ module Api
       # This is useful in case you need to change the query made for
       # GET requests only. In particular, this is often used
       # to extract an object from a parent object or a collection.
-      attr_reader :nested_decoder
+      attr_reader :nested_query
 
       attr_reader :exclude
       attr_reader :async
@@ -92,9 +92,10 @@ module Api
       end
     end
 
-    # Represents info to find a resource nested within an returned API object
-    class NestedDecoder < Api::Object
-      # A list of the nested keys, in traversal order.
+    # Query information for finding resource nested in an returned API object
+    # i.e. fine-grained resources
+    class NestedQuery < Api::Object
+      # A list of keys to traverse in order.
       # i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
       # should be ["cdnPolicy", "signedUrlKeyNames"]
       attr_reader :keys
@@ -102,6 +103,8 @@ module Api
       # If true, we expect the the nested list to be
       # a list of IDs for the nested resource, rather
       # than a list of nested resource objects
+      # i.e. backendBucket.cdnPolicy.signedUrlKeyNames is a list of key names
+      # rather than a list of the actual key objects
       attr_reader :is_list_of_ids
 
       def validate
@@ -201,8 +204,8 @@ module Api
       check :readonly, type: :boolean
       check :references, type: ReferenceLinks
 
-      check :nested_decoder, type: Api::Resource::NestedDecoder
-      if @nested_decoder&.is_list_of_ids && @identity&.length != 1
+      check :nested_query, type: Api::Resource::NestedQuery
+      if @nested_query&.is_list_of_ids && @identity&.length != 1
         raise ':is_list_of_ids = true implies resource`\
               `has exactly one :identity property"'
       end
