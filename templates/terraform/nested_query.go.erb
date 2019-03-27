@@ -1,20 +1,21 @@
-	config := meta.(*Config)
-
 	var v interface{}
 	var ok bool
+
 <% object.nested_query.keys[0...-1].each do |k| -%>
 	v, ok = res["<%=k-%>"]
 	if !ok || v == nil {
 		return nil, nil
 	}
 	res = v.(map[string]interface{})
+
 <% end -%>
 	v, ok = res["<%=object.nested_query.keys[-1]-%>"]
 	if !ok || v == nil {
 		return nil, nil
 	}
-	// Final nested resource is either a list of resources we need to filter
-	// or just the resource itself, which we return.
+
+<%# Final nested resource is either a list of resources we need to filter
+	# or just the resource itself, which we return. -%>
 	switch v.(type) {
 	case []interface{}:
 		break
@@ -30,23 +31,21 @@
 		// If only an id is given in parent resource,
 		// construct a resource map for that id KV pair.
 		item := map[string]interface{}{"<%=object.identity.first.api_name%>": vRaw}
-	<% else %>
+	<% else -%>
 		item := vRaw.(map[string]interface{})
-	<% end %>
-
+	<% end -%>
 	<% object.identity.each do |prop| -%>
 	<% if settable_properties.include?(prop) -%>
-		id, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+		idProp, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
 		if err != nil {
 			return nil, err
 		}
 	<% else -%>
-		id := d.Get("<%= prop.name.underscore -%>")
+		itemIdV := d.Get("<%= prop.name.underscore -%>")
 	<% end # settable_properties.include?(prop)-%>
-
-		itemId := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
-		log.Printf("[DEBUG] Checking equality of %#v, %#v", itemId, id)
-		if !reflect.DeepEqual(itemId, id) {
+		actualIdV := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
+		log.Printf("[DEBUG] Checking if item's <%= prop.api_name %> (%#v) is equal to resource's (%#v)", itemIdV, actualIdV)
+		if !reflect.DeepEqual(itemIdV, actualIdV) {
 			continue
 		}
 	<% end # object.identity.each -%>
