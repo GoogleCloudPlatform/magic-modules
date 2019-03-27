@@ -102,13 +102,13 @@ module Api
       # If true, we expect the the nested list to be
       # a list of IDs for the nested resource, rather
       # than a list of nested resource objects
-      attr_reader :has_id_only_list
+      attr_reader :is_list_of_ids
 
       def validate
         super
 
         check :keys, type: Array, item_type: String, required: true
-        check :has_id_only_list, type: :boolean, default: false
+        check :is_list_of_ids, type: :boolean, default: false
       end
     end
 
@@ -202,8 +202,8 @@ module Api
       check :references, type: ReferenceLinks
 
       check :nested_decoder, type: Api::Resource::NestedDecoder
-      if @nested_decoder&.has_id_only_list && @identity&.length != 1
-        raise ':has_id_only_list in :nested_decoder implies resource`\
+      if @nested_decoder&.is_list_of_ids && @identity&.length != 1
+        raise ':is_list_of_ids = true implies resource`\
               `has exactly one :identity property"'
       end
 
