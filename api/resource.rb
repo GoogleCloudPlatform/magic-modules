@@ -92,6 +92,7 @@ module Api
       end
     end
 
+    # Represents info to find a resource nested within an returned API object
     class NestedDecoder < Api::Object
       # A list of the nested keys, in traversal order.
       # i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
@@ -202,7 +203,8 @@ module Api
 
       check :nested_decoder, type: Api::Resource::NestedDecoder
       if @nested_decoder&.has_id_only_list && @identity&.length != 1
-        raise 'Resource with :has_id_only_list in :nested_decoder must have exactly one :identity property"'
+        raise ':has_id_only_list in :nested_decoder implies resource`\
+              `has exactly one :identity property"'
       end
 
       check :collection_url_response, default: Api::Resource::ResponseList.new,
