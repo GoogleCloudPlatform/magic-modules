@@ -60,6 +60,8 @@ module Provider
                         'third_party/validator/cai_test.go'],
                        ['google/json_map.go',
                         'third_party/validator/json_map.go'],
+                       ['google/project.go',
+                        'third_party/validator/project.go'],
                        ['google/compute_instance.go',
                         'third_party/validator/compute_instance.go'],
                        ['google/sql_database_instance.go',
