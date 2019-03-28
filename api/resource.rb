@@ -39,10 +39,6 @@ module Api
       # TODO(#302): Add support for the other providers.
       attr_reader :update_url
       attr_reader :self_link
-      # This is useful in case you need to change the query made for
-      # GET/DELETE requests only.  In particular, this is often used
-      # to add query parameters.
-      attr_reader :self_link_query
       # This is the type of response from the collection URL. It contains
       # the name of the list of items within the json, as well as the
       # type that this list should be. This is of type Api::Resource::ResponseList
@@ -200,7 +196,6 @@ module Api
       check :kind, type: String
 
       check :self_link, type: String
-      check :self_link_query, type: Api::Resource::ResponseList
       check :readonly, type: :boolean
       check :references, type: ReferenceLinks
 
