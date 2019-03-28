@@ -19,7 +19,7 @@ import (
 )
 
 func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := replaceVars(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
+	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return Asset{}, err
 	}
