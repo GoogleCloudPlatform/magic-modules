@@ -37,18 +37,15 @@ func newProjectIamAsset(
 		return Asset{}, fmt.Errorf("getting project: %v", err)
 	}
 
-	project, err := config.clientResourceManager.Projects.Get(projectID).Do()
-	if err != nil {
-		return Asset{}, fmt.Errorf("client resource manager: getting project: %v", err)
-	}
-
 	bindings, err := expandBindings(d)
 	if err != nil {
 		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
 	return Asset{
-		Name: fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%v", project.ProjectNumber),
+		// Ideally we should use project_number, but since that is generated server-side,
+		// we substitute project_id.
+		Name: fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%v", projectID),
 		Type: "cloudresourcemanager.googleapis.com/Project",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,

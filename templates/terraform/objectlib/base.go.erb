@@ -14,7 +14,7 @@ package google
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-    name, err := replaceVars(d, config, "<%= asset_name_template -%>")
+    name, err := assetName(d, config, "<%= asset_name_template -%>")
     if err != nil {
         return Asset{}, err
     }

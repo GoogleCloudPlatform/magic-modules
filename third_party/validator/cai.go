@@ -1,5 +1,11 @@
 package google
 
+import (
+	"fmt"
+	"math/rand"
+	"regexp"
+)
+
 // Asset is the CAI representation of a resource.
 type Asset struct {
 	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
@@ -33,4 +39,36 @@ type IAMPolicy struct {
 type IAMBinding struct {
 	Role    string   `json:"role"`
 	Members []string `json:"members"`
+}
+
+// assetName templates an asset.name by looking up and replacing all instances
+// of {{field}}. In the case where a field would resolve to an empty string, a
+// generated unique string will be used: "placeholder-" + randomString().
+// This is done to preserve uniqueness of asset.name for a given asset.asset_type.
+func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
+	re := regexp.MustCompile("{{([[:word:]]+)}}")
+
+	f, err := buildReplacementFunc(re, d, config, linkTmpl)
+	if err != nil {
+		return "", err
+	}
+
+	fWithPlaceholder := func(key string) string {
+		val := f(key)
+		if val == "" {
+			val = fmt.Sprintf("placeholder-%s", randString(8))
+		}
+		return val
+	}
+
+	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
+}
+
+func randString(n int) string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }
