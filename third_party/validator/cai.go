@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"regexp"
-	"strings"
 )
 
 // Asset is the CAI representation of a resource.
@@ -48,56 +47,21 @@ type IAMBinding struct {
 // This is done to preserve uniqueness of asset.name for a given asset.asset_type.
 func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
-	var project, region, zone string
-	var err error
 
-	if strings.Contains(linkTmpl, "{{project}}") {
-		project, err = getProject(d, config)
-		if err != nil {
-			return "", err
-		}
+	f, err := buildReplacementFunc(re, d, config, linkTmpl)
+	if err != nil {
+		return "", err
 	}
 
-	if strings.Contains(linkTmpl, "{{region}}") {
-		region, err = getRegion(d, config)
-		if err != nil {
-			return "", err
+	fWithPlaceholder := func(key string) string {
+		val := f(key)
+		if val == "" {
+			val = fmt.Sprintf("<placeholder-%s>", randString(8))
 		}
+		return val
 	}
 
-	if strings.Contains(linkTmpl, "{{zone}}") {
-		zone, err = getZone(d, config)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	replaceFunc := func(s string) string {
-		m := re.FindStringSubmatch(s)[1]
-
-		var res string
-		switch m {
-		case "project":
-			res = project
-		case "region":
-			res = region
-		case "zone":
-			res = zone
-		default:
-			v, ok := d.GetOk(m)
-			if ok {
-				res = fmt.Sprintf("%v", v)
-			}
-		}
-
-		if res == "" {
-			res = fmt.Sprintf("<placeholder-%s>", randString(8))
-		}
-
-		return res
-	}
-
-	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
+	return re.ReplaceAllStringFunc(linkTmpl, fWithPlaceholder), nil
 }
 
 func randString(n int) string {
