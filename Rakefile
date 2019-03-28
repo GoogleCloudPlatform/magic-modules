@@ -81,10 +81,10 @@ desc 'Lints all of the ERB templates'
 task :erblint do
   current_directory = File.dirname(__FILE__)
   ERBLint::CLI.new.run([
-    '--config',
-    current_directory + "/.erb-lint.yml",
-    current_directory + "/templates/**/*.erb"
-  ])
+                         '--config',
+                         current_directory + '/.erb-lint.yml',
+                         current_directory + '/templates/**/*.erb'
+                       ])
 end
 
 # Compiling Tasks
