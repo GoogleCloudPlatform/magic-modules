@@ -103,11 +103,16 @@ module Api
       # rather than a list of the actual key objects
       attr_reader :is_list_of_ids
 
+      # This is used by Ansible, but may not be necessary.
+      attr_reader :kind
+
       def validate
         super
 
         check :keys, type: Array, item_type: String, required: true
         check :is_list_of_ids, type: :boolean, default: false
+
+        check :kind, type: String
       end
     end
 
