@@ -19,6 +19,8 @@ manifest: !ruby/object:Provider::Inspec::Manifest
 overrides: !ruby/object:Overrides::ResourceOverrides
   Address: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  BackendBucketSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
