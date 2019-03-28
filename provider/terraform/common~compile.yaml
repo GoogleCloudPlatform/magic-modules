@@ -43,3 +43,4 @@
 -%>
 '<%= fname.delete_suffix(".erb") -%>': '<%= file_path -%>'
 <% end -%>
+'main.go': 'third_party/terraform/main.go.erb'

@@ -51,4 +51,3 @@
 '<%= dir -%>/test-fixtures/': 'third_party/terraform/utils/test-fixtures'
 'website': 'third_party/terraform/website'
 'version': 'third_party/terraform/version'
-'main.go': 'third_party/terraform/main.go'
