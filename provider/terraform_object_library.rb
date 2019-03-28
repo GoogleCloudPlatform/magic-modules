@@ -47,6 +47,8 @@ module Provider
                         'third_party/validator/constants.go'],
                        ['google/cai.go',
                         'third_party/validator/cai.go'],
+                       ['google/cai_test.go',
+                        'third_party/validator/cai_test.go'],
                        ['google/json_map.go',
                         'third_party/validator/json_map.go'],
                        ['google/compute_instance.go',

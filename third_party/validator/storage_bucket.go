@@ -18,7 +18,7 @@ import (
 )
 
 func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := replaceVars(d, config, "//storage.googleapis.com/{{name}}")
+	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
 		return Asset{}, err
 	}
