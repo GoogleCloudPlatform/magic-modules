@@ -40,28 +40,9 @@ func resourceComputeBackendService() *schema.Resource {
 				MaxItems: 1,
 			},
 
-			"iap": &schema.Schema{
-				Type:     schema.TypeList,
+			"affinity_cookie_ttl_sec": &schema.Schema{
+				Type:     schema.TypeInt,
 				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"oauth2_client_id": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"oauth2_client_secret": &schema.Schema{
-							Type:      schema.TypeString,
-							Required:  true,
-							Sensitive: true,
-						},
-						"oauth2_client_secret_sha256": &schema.Schema{
-							Type:      schema.TypeString,
-							Computed:  true,
-							Sensitive: true,
-						},
-					},
-				},
 			},
 
 			"backend": &schema.Schema{
@@ -158,6 +139,12 @@ func resourceComputeBackendService() *schema.Resource {
 				},
 			},
 
+			"connection_draining_timeout_sec": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  300,
+			},
+
 			"custom_request_headers": &schema.Schema{
 <% if version.nil? || version == 'ga' -%>
 				Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
@@ -177,6 +164,30 @@ func resourceComputeBackendService() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+			},
+
+			"iap": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"oauth2_client_id": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"oauth2_client_secret": &schema.Schema{
+							Type:      schema.TypeString,
+							Required:  true,
+							Sensitive: true,
+						},
+						"oauth2_client_secret_sha256": &schema.Schema{
+							Type:      schema.TypeString,
+							Computed:  true,
+							Sensitive: true,
+						},
+					},
+				},
 			},
 
 			"fingerprint": &schema.Schema{
@@ -227,21 +238,10 @@ func resourceComputeBackendService() *schema.Resource {
 				Computed: true,
 			},
 
-			"affinity_cookie_ttl_sec": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-
 			"timeout_sec": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
-			},
-
-			"connection_draining_timeout_sec": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  300,
 			},
 		},
 	}
