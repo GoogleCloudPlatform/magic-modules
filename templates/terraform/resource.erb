@@ -217,15 +217,19 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
     }
 
-<%  unless object.self_link_query.nil? -%>
-<%#     This part of the template extracts the one resource we're interested in
-        from the list that gets returned.  self_link_query is a field which
-        describes a list result from a read. -%>
-<%=     compile_template('templates/terraform/self_link_query.erb',
-                         object: object,
-                         settable_properties: object.settable_properties,
-                         resource_name: resource_name) -%>
-<% end -%>
+<%  if object.nested_query -%>
+    res, err = flattenNested<%= resource_name -%>(d, meta, res)
+    if err != nil {
+        return err
+    }
+
+    if res == nil {
+        // Object isn't there any more - remove it from the state.
+        log.Printf("[DEBUG] Removing <%= resource_name -%> because it couldn't be matched.")
+        d.SetId("")
+        return nil
+    }
+<%  end -%>
 
 <%  if object.custom_code.decoder -%>
     res, err = resource<%= resource_name -%>Decoder(d, meta, res)
@@ -603,6 +607,15 @@ func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface
 <% if object.custom_code.update_encoder-%>
 func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 <%= lines(compile(object.custom_code.update_encoder)) -%>
+}
+<% end -%>
+
+<%  if object.nested_query -%>
+func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    <%=     compile_template('templates/terraform/nested_query.go.erb',
+                         object: object,
+                         settable_properties: object.settable_properties,
+                         resource_name: resource_name) -%>
 }
 <% end -%>
 
