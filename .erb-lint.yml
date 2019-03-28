@@ -9,6 +9,16 @@ linters:
   # TODO: enable this + fix issues.
   SpaceAroundErbTag:
     enabled: false
+  # TODO: enable this + fix issues.
+  ClosingErbTagIndent:
+    enabled: false
+  # TODO: enable this + fix issues.
+  TrailingWhitespace:
+    enabled: false
+  # While this tag is HTML, it did pick up
+  # a proper error in the TF markdown files.
+  SelfClosingTag:
+    enabled: false
   # TF uses tabs.
   SpaceIndentation:
     enabled: false
@@ -27,4 +37,10 @@ linters:
   # We add multiple blank lines depending on
   # templated code should appear.
   ExtraNewline:
+    enabled: false
+  # Most parser errors are erb-lint trying
+  # to parse code as HTML
+  # If left on, it will lead to many false negatives.
+  # If turned off, it may lead to some false positives.
+  ParserErrors:
     enabled: false
