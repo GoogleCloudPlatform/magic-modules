@@ -26,7 +26,7 @@ func TestAssetName(t *testing.T) {
 		{
 			name:            "MissingValue",
 			template:        "//{{a}}/{{b}}",
-			expectedPattern: `//value-a/<placeholder-\S{8}>`,
+			expectedPattern: `//value-a/placeholder-\S{8}`,
 			data: &mockTerraformResourceData{
 				m: map[string]interface{}{
 					"a": "value-a",

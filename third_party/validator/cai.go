@@ -43,7 +43,7 @@ type IAMBinding struct {
 
 // assetName templates an asset.name by looking up and replacing all instances
 // of {{field}}. In the case where a field would resolve to an empty string, a
-// generated unique string will be used: "<placeholder-" + randomString() + ">".
+// generated unique string will be used: "placeholder-" + randomString().
 // This is done to preserve uniqueness of asset.name for a given asset.asset_type.
 func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	re := regexp.MustCompile("{{([[:word:]]+)}}")
@@ -56,7 +56,7 @@ func assetName(d TerraformResourceData, config *Config, linkTmpl string) (string
 	fWithPlaceholder := func(key string) string {
 		val := f(key)
 		if val == "" {
-			val = fmt.Sprintf("<placeholder-%s>", randString(8))
+			val = fmt.Sprintf("placeholder-%s", randString(8))
 		}
 		return val
 	}
