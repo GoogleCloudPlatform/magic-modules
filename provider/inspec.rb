@@ -206,7 +206,7 @@ module Provider
     end
 
     def markdown_format(property)
-      "    * `#{property.name}`: #{property.description.split("\n").join(' ')}"
+      "    * `#{property.out_name}`: #{property.description.split("\n").join(' ')}"
     end
 
     def grab_attributes
