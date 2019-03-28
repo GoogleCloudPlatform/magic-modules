@@ -297,9 +297,9 @@ objects:
     self_link: |
       projects/{{project}}/managedZones/{{managed_zone}}/rrsets
       ?name={{name}}&type={{type}}
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'dns#resourceRecordSetsListResponse'
-      items: 'rrsets'
+      keys: ['rrsets']
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'rrsets'
     identity:
