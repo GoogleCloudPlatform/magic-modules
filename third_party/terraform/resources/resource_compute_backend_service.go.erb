@@ -49,50 +49,7 @@ func resourceComputeBackendService() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Set:      resourceGoogleComputeBackendServiceBackendHash,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"group": &schema.Schema{
-							Type:             schema.TypeString,
-							Optional:         true,
-							DiffSuppressFunc: compareSelfLinkRelativePaths,
-						},
-						"balancing_mode": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "UTILIZATION",
-						},
-						"capacity_scaler": &schema.Schema{
-							Type:     schema.TypeFloat,
-							Optional: true,
-							Default:  1,
-						},
-						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"max_rate": &schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"max_rate_per_instance": &schema.Schema{
-							Type:     schema.TypeFloat,
-							Optional: true,
-						},
-						"max_connections": &schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"max_connections_per_instance": &schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"max_utilization": &schema.Schema{
-							Type:     schema.TypeFloat,
-							Optional: true,
-							Default:  0.8,
-						},
-					},
-				},
+				Elem: computeBackendServiceBackendSchema(),
 			},
 
 			"cdn_policy": &schema.Schema{
@@ -166,6 +123,11 @@ func resourceComputeBackendService() *schema.Resource {
 				Default:  false,
 			},
 
+			"fingerprint": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"iap": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
@@ -190,22 +152,10 @@ func resourceComputeBackendService() *schema.Resource {
 				},
 			},
 
-			"fingerprint": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"port_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-			},
-
-			"project": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
 			},
 
 			"protocol": &schema.Schema{
@@ -227,11 +177,6 @@ func resourceComputeBackendService() *schema.Resource {
 				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 
-			"self_link": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"session_affinity": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -242,6 +187,65 @@ func resourceComputeBackendService() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+			},
+
+			"project": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+
+			"self_link": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func computeBackendServiceBackendSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"group": &schema.Schema{
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: compareSelfLinkRelativePaths,
+			},
+			"balancing_mode": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "UTILIZATION",
+			},
+			"capacity_scaler": &schema.Schema{
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Default:  1,
+			},
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"max_rate": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"max_rate_per_instance": &schema.Schema{
+				Type:     schema.TypeFloat,
+				Optional: true,
+			},
+			"max_connections": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"max_connections_per_instance": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"max_utilization": &schema.Schema{
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Default:  0.8,
 			},
 		},
 	}
