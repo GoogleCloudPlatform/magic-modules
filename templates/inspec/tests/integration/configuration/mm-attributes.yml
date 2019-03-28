@@ -192,7 +192,6 @@ folder:
 
 cloudfunction:
   name: inspec-gcp-function
-  location: europe-west1
   description: A description of the function
   available_memory_mb: 128
   trigger_http: true
