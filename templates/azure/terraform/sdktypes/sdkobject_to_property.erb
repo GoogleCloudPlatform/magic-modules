@@ -8,25 +8,25 @@ if <%= temp_var -%> := <%= input_statement -%>.<%= sdk_type.go_field_name -%>; <
 <%
     end
 
-    direct_children = Hash.new
+    direct_children = Set.new
     object.all_user_properties.sort_by{|p| [p.order, p.name]}.each do |prop|
       prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
         if api_path == ""
           sub_paths = child_api_path.split("/")
-          direct_children[child_api_path] = prop if sub_paths.length == 1
+          direct_children << child_api_path if sub_paths.length == 1
         elsif child_api_path.start_with?(api_path + "/")
           sub_paths = child_api_path[api_path.length..-1].split("/")
         end
         if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ""
           sub_api_path = api_path + "/" + sub_paths[1]
-          direct_children[sub_api_path] = (direct_children[sub_api_path] || nil) if sub_paths.length > 2
-          direct_children[child_api_path] = prop if sub_paths.length == 2
+          direct_children << sub_api_path if sub_paths.length > 2
+          direct_children << child_api_path if sub_paths.length == 2
         end
       end
     end
 
-    direct_children.each do |child_api_path, prop|
+    direct_children.each do |child_api_path|
 -%>
-<%=   lines(build_sdk_object_to_property(temp_var, child_api_path, prop, sdk_type_defs, object)) -%>
+<%=   lines(build_sdk_object_to_property(temp_var, child_api_path, sdk_type_defs, object)) -%>
 <%  end -%>
 <%= "}" unless api_path == "" -%>

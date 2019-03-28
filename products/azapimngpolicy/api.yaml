@@ -1,0 +1,128 @@
+--- !ruby/object:Api::Product
+name: Azure API Management Policy
+prefix: azapimngpolicy
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: NotUsedInAzure
+scopes:
+  - NotUsedInAzure
+azure_namespace: 'apimanagement'
+azure_version: '2018-01-01'
+objects:
+  - !ruby/object:Api::Resource
+    name: ApiManagementPolicy
+    api_name: APIManagementPolicy
+    base_url: NotUsedInAzure
+
+    azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
+      provider_name: Microsoft.ApiManagement
+      python_client_namespace: azure.mgmt.apimanagement
+      python_client: APIManagementClient
+      create: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: CreateOrUpdate
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'serviceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: service
+            go_variable_name: serviceName
+          'policyId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: policies
+            go_variable_name: name
+          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_variable_name: parameters
+            go_type_name: PolicyContract
+          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_field_name: PolicyContractProperties
+            go_type_name: PolicyContractProperties
+          '/properties/contentFormat': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
+            go_field_name: ContentFormat
+            go_enum_type_name: PolicyContentFormat
+          '/properties/policyContent': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: PolicyContent
+      read: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: Get
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'serviceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: service
+            go_variable_name: serviceName
+          'policyId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: policies
+            go_variable_name: name
+        response:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_variable_name: resourceGroup
+          'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_variable_name: servicebusName
+          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_type_name: PolicyContract
+          '/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: Name
+          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            go_field_name: PolicyContractProperties
+            go_type_name: PolicyContractProperties
+            go_variable_name: properties
+          '/properties/contentFormat': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
+            go_field_name: ContentFormat
+            go_enum_type_name: PolicyContentFormat
+          '/properties/policyContent': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: PolicyContent
+      delete: !ruby/object:Api::Azure::SDKOperationDefinition
+        go_func_name: Delete
+        request:
+          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: resourceGroups
+            go_variable_name: resourceGroup
+          'serviceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: service
+            go_variable_name: serviceName
+          'policyId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            id_portion: policies
+            go_variable_name: name
+
+    description: |
+      Manages a policy within an API Management Service.
+    parameters:
+      - !ruby/object:Api::Azure::Type::ResourceGroupName
+        name: resourceGroupName
+        description: The name of the Resource Group in which the API Management Service exists.
+        required: true
+        input: true
+        order: 991
+        azure_sdk_references: ['resourceGroupName']
+      - !ruby/object:Api::Type::String
+        name: apiManagementName
+        description: The name of the API Management Service where this Policy should be created.
+        required: true
+        input: true
+        order: 992
+        azure_sdk_references: ['serviceName']
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        description: The Name of the Policy within the API Management Service.
+        required: true
+        input: true
+        order: 800
+        azure_sdk_references: ['policyId', '/name']
+      - !ruby/object:Api::Type::String
+        name: xmlContent
+        description: 'The alternative name of the service bus disaster recovery.'
+        azure_sdk_references: ['/properties/policyContent']
+      - !ruby/object:Api::Type::String
+        name: xmlLink
+        description: 'The alternative name of the service bus disaster recovery.'
+        azure_sdk_references: ['/properties/policyContent']
+      - !ruby/object:Api::Type::Enum
+        name: format
+        values:
+          - :Xml
+          - :XmlLink
+        description: 'The content format of the Policy.'
+        order: 1100
+        azure_sdk_references: ['/properties/contentFormat']

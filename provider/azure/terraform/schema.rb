@@ -30,7 +30,7 @@ module Provider
         end
 
         def schema_property_template(property)
-          return property.custom_schema_definition if property.instance_variable_defined?(:@custom_schema_definition) && !property.custom_schema_definition.nil?
+          return property.custom_schema_definition unless get_property_value(property, "custom_schema_definition", nil).nil?
           case property
           when Api::Azure::Type::ResourceGroupName
             'templates/azure/terraform/schemas/resource_group_name.erb'
@@ -46,7 +46,8 @@ module Provider
         end
 
         def schema_property_get_template(property)
-          return property.custom_schema_get if property.instance_variable_defined?(:@custom_schema_get) && !property.custom_schema_get.nil?
+          return property.custom_schema_get unless get_property_value(property, "custom_schema_get", nil).nil?
+          return 'templates/terraform/schemas/hide_from_schema.erb' if get_property_value(property, "hide_from_schema", false)
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_get.erb'
@@ -58,7 +59,8 @@ module Provider
         end
 
         def schema_property_set_template(property)
-          return property.custom_schema_set if property.instance_variable_defined?(:@custom_schema_set) && !property.custom_schema_set.nil?
+          return property.custom_schema_set unless get_property_value(property, "custom_schema_set", nil).nil?
+          return 'templates/terraform/schemas/hide_from_schema.erb' if get_property_value(property, "hide_from_schema", false)
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_set.erb'
@@ -68,37 +70,6 @@ module Provider
             'templates/terraform/schemas/basic_set.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
-          end
-        end
-
-        def property_to_sdk_object_template(sdk_type_defs, api_path)
-          case sdk_type_defs[api_path]
-          when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
-            'templates/azure/terraform/sdktypes/property_to_sdkprimitive.erb'
-          when Api::Azure::SDKTypeDefinition::EnumObject
-            'templates/azure/terraform/sdktypes/property_to_sdkenum.erb'
-          when Api::Azure::SDKTypeDefinition::StringMapObject
-            'templates/azure/terraform/sdktypes/property_to_sdkstringmap.erb'
-          when Api::Azure::SDKTypeDefinition::ComplexObject
-            'templates/azure/terraform/sdktypes/property_to_sdkobject.erb'
-          else
-            'templates/azure/terraform/sdktypes/unsupport.erb'
-          end
-        end
-
-        def sdk_object_to_property_template(sdk_type_defs, api_path)
-          return 'templates/azure/terraform/sdktypes/sdkobject_to_property.erb' if api_path == ""
-          case sdk_type_defs[api_path]
-          when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
-            'templates/azure/terraform/sdktypes/sdkprimitive_to_property.erb'
-          when Api::Azure::SDKTypeDefinition::EnumObject
-            'templates/azure/terraform/sdktypes/sdkenum_to_property.erb'
-          when Api::Azure::SDKTypeDefinition::StringMapObject
-            'templates/azure/terraform/sdktypes/sdkstringmap_to_property.erb'
-          when Api::Azure::SDKTypeDefinition::ComplexObject
-            'templates/azure/terraform/sdktypes/sdkobject_to_property.erb'
-          else
-            'templates/azure/terraform/sdktypes/unsupport.erb'
           end
         end
 

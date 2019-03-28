@@ -1,19 +1,22 @@
 <%
     res_name = ""
+    res_var = ""
     depends = []
-    param_vars = []
+    depends_vars = []
     properties.select{|p| sdk_op_def.request.has_key?(p.azure_sdk_references[0]) && !p.azure_sdk_references[0].start_with?("/") }.each do |prop|
       param = sdk_op_def.request[prop.azure_sdk_references[0]]
-      param_vars += [param.go_variable_name]
       case prop.name
       when "name"
         res_name = "#{object.name.titlecase} %q"
+        res_var = param.go_variable_name
       when "resourceGroupName"
         depends += ["Resource Group %q"]
+        depends_vars += [param.go_variable_name]
       else
         depends += ["#{prop.name.titlecase} %q"]
+        depends_vars += [param.go_variable_name]
       end
     end
-    res_name += " (#{depends.join(', ')})" unless depends.empty?
+    res_name += " (#{depends.reverse.join(' / ')})" unless depends.empty?
 -%>
-fmt.Errorf("<%= format_string % [res_name] -%><%= include_error ? ": %+v" : "" -%>", <%= param_vars.join(", ") -%><%= include_error ? ", err" : "" -%>)
+fmt.Errorf("<%= format_string % [res_name] -%><%= include_error ? ": %+v" : "" -%>", <%= res_var -%>, <%= depends_vars.reverse.join(", ") -%><%= include_error ? ", err" : "" -%>)

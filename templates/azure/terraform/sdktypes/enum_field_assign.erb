@@ -1,5 +1,2 @@
-<%
-    sdk_package = azure_resource_go_package(object.__product)
-    sdk_type = sdk_type_defs[api_path]
--%>
+<%  sdk_package = azure_resource_go_package(object.__product) -%>
 <%= sdk_type.go_field_name -%>: <%= sdk_package -%>.<%= sdk_type.go_enum_type_name -%>(<%= property.name.camelcase(:lower) -%>),

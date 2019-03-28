@@ -19,7 +19,7 @@ module Api
         check_optional_property :python_client, String
         check_property :create, Api::Azure::SDKOperationDefinition
         check_property :read, Api::Azure::SDKOperationDefinition
-        check_property :update, Api::Azure::SDKOperationDefinition
+        check_optional_property :update, Api::Azure::SDKOperationDefinition
         check_property :delete, Api::Azure::SDKOperationDefinition
       end
     end

@@ -1,0 +1,12 @@
+module Provider
+  module Azure
+    module Terraform
+      module Helpers
+        def get_property_value(obj, prop_name, default_value)
+          return default_value unless obj.instance_variable_defined?("@#{prop_name}")
+          obj.instance_variable_get("@#{prop_name}")
+        end
+      end
+    end
+  end
+end
