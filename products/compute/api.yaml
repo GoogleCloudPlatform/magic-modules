@@ -384,6 +384,11 @@ objects:
           properties:
             - !ruby/object:Api::Type::Enum
               name: 'balancingMode'
+              default_value: :UTILIZATION
+              values:
+                - :UTILIZATION
+                - :RATE
+                - :CONNECTION
               description: |
                 Specifies the balancing mode for this backend.
 
@@ -392,12 +397,9 @@ objects:
                 and CONNECTION (for TCP/SSL).
 
                 This cannot be used for internal load balancing.
-              values:
-                - :UTILIZATION
-                - :RATE
-                - :CONNECTION
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
+              default_value: 1.0
               description: |
                 A multiplier applied to the group's maximum servicing capacity
                 (based on UTILIZATION, RATE or CONNECTION).
@@ -471,6 +473,7 @@ objects:
                 This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
+              default_value: 0.8
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
                 CPU utilization target for the group. The default is 0.8. Valid
@@ -539,35 +542,42 @@ objects:
               responses will not be altered.
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionDraining'
-        description: 'Settings for connection draining'
+        description: |
+          Settings for connection draining
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'drainingTimeoutSec'
+            default_value: 300
             description: |
               Time for which instance will be drained (not accept new
               connections, but still work to finish started).
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
-        description: 'Creation timestamp in RFC3339 text format.'
+        description: |
+          Creation timestamp in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        output: true
+        description: |
+          Fingerprint of this resource. A hash of the contents stored in this
+          object. This field is used in optimistic locking.
       - !ruby/object:Api::Type::String
         name: 'description'
-        description: 'An optional description of this resource.'
+        description: |
+          An optional description of this resource.
       - !ruby/object:Api::Type::Boolean
         name: 'enableCDN'
         description: |
           If true, enable Cloud CDN for this BackendService.
 
           When the load balancing scheme is INTERNAL, this field is not used.
-      # 'fingerprint' is not suitable for resource convergence.
-      # TODO(nelsonjr): Limitation: healthChecks can point to various distinct
-      # object types and there's no way to differentiate them right now.
-      # Investigate if there is a way to enforce this on the client side as it
-      # depends on the value of load balancing being internal or external.
-      # TODO(nelsonjr): Make 'healthChecks' into a single object as the API
-      # cannot take 2+ anyway.
       - !ruby/object:Api::Type::Array
         name: 'healthChecks'
+        item_type: Api::Type::String
+        required: true
+        min_size: 1
+        max_size: 1
         description: |
            The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
            for health checking this BackendService. Currently at most one health
@@ -575,7 +585,6 @@ objects:
 
            For internal load balancing, a URL to a HealthCheck resource must be
            specified instead.
-        item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -589,14 +598,19 @@ objects:
             description: Enables IAP.
           - !ruby/object:Api::Type::String
             name: 'oauth2ClientId'
-            description: OAuth2 Client ID for IAP
+            required: true
+            description: |
+              OAuth2 Client ID for IAP
           - !ruby/object:Api::Type::String
             name: 'oauth2ClientSecret'
-            description: OAuth2 Client Secret for IAP
+            required: true
+            description: |
+              OAuth2 Client Secret for IAP
           - !ruby/object:Api::Type::String
             name: 'oauth2ClientSecretSha256'
-            description: OAuth2 Client Secret SHA-256 for IAP
             output: true
+            description: |
+              OAuth2 Client Secret SHA-256 for IAP
       - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
         description: |
@@ -608,6 +622,8 @@ objects:
           - :EXTERNAL
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           Name of the resource. Provided by the client when the resource is
           created. The name must be 1-63 characters long, and comply with
@@ -638,10 +654,19 @@ objects:
           - :HTTPS
           - :TCP
           - :SSL
+      # TODO: make a ResourceRef to Security Policy
+      - !ruby/object:Api::Type::String
+        name: 'securityPolicy'
+        update_verb: :POST
+        update_url:
+          'projects/{{project}}/global/backendServices/{{name}}/setSecurityPolicy'
+        description: |
+          The security policy associated with this backend service.
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
         imports: 'selfLink'
+        exclude: true
         description: |
           The region where the regional backend service resides.
           This field is not applicable to global backend services.

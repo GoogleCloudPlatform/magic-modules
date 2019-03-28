@@ -115,6 +115,8 @@ module Api
         clazz = ::String
       when Api::Type::Integer
         clazz = ::Integer
+      when Api::Type::Double
+        clazz = ::Float
       when Api::Type::Enum
         clazz = ::Symbol
       when Api::Type::Boolean

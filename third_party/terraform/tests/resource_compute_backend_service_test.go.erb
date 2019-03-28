@@ -399,7 +399,7 @@ func testAccCheckComputeBackendServiceExistsWithIAP(n string, svc *compute.Backe
 		}
 
 		if found.Iap == nil || found.Iap.Enabled == false {
-			return fmt.Errorf("IAP not found or not enabled.")
+			return fmt.Errorf("IAP not found or not enabled. Saw %v", found.Iap)
 		}
 
 		*svc = *found
