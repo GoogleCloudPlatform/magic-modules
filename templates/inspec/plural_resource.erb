@@ -36,12 +36,12 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   filter_table_config.connect(self, :table)
 
 <% 
-link_query = object.self_link_query || object.collection_url_response
+link_query_items = object&.nested_query&.keys&.first || object.collection_url_response.items
 -%>
   def initialize(params = {})
     super(params.merge({ use_http_transport: true }))
     @params = params
-<%= indent("@table = fetch_wrapped_resource('#{link_query.items}')", 4) %>
+<%= indent("@table = fetch_wrapped_resource('#{link_query_items}')", 4) %>
   end
 
   def fetch_wrapped_resource(wrap_path)

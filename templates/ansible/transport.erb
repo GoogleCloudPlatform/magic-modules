@@ -21,7 +21,7 @@
                                                 ('kind' if object.kind?),
                                                 'allow_not_found']) %>
 
-<% unless object.self_link_query.nil? -%>
+<% unless object.nested_query.nil? -%>
 
 def fetch_wrapped_resource(module, kind, wrap_kind, wrap_path):
     result = fetch_resource(module, self_link(module), wrap_kind)

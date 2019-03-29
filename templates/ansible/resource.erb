@@ -54,7 +54,7 @@ def main():
     kind = <%= lines(quote_string(object.kind)) -%>
 <% end -%>
 
-<% if object.self_link_query.nil? -%>
+<% if object.nested_query.nil? -%>
 <%
   method = method_call('fetch_resource', ['module', 'self_link(module)',
                                           ('kind' if object.kind?),
@@ -68,11 +68,11 @@ def main():
 <% else #object.identity.empty? -%>
     fetch = <%= method %>
 <% end # object.identity.empty? -%>
-<% else # object.self_link_query.nil? -%>
+<% else # object.nested_query.nil? -%>
     fetch = fetch_wrapped_resource(module, '<%= object.kind -%>',
-                                   '<%= object.self_link_query.kind -%>',
-                                   '<%= object.self_link_query.items -%>')
-<% end # object.self_link_query.nil? -%>
+                                   '<%= object.nested_query.kind -%>',
+                                   '<%= object.nested_query.keys.first -%>')
+<% end # object.nested_query.nil? -%>
     changed = False
 
     if fetch:

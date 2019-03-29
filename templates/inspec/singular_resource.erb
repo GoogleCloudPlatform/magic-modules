@@ -38,19 +38,19 @@ class <%= object.name -%> < GcpResourceBase
 
 <% end -%>
 
-<% if object.self_link_query.nil? -%>
+<% if object.nested_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-<%= indent('@fetched = @connection.fetch(product_url, resource_base_url, params)', 4) %>
+    @fetched = @connection.fetch(product_url, resource_base_url, params)
     parse unless @fetched.nil?
   end
-<% else # object.self_link_query.nil? -%>
+<% else # object.nested_query.nil? -%>
   def initialize(params)
     super(params.merge({ use_http_transport: true }))
     @params = params
-<%= indent('fetched = @connection.fetch(product_url, resource_base_url, params)', 4) %>
-<%= indent('@fetched = unwrap(fetched, params)', 4) %>
+    fetched = @connection.fetch(product_url, resource_base_url, params)
+    @fetched = unwrap(fetched, params)
     parse unless @fetched.nil?
   end
 
@@ -66,7 +66,7 @@ class <%= object.name -%> < GcpResourceBase
   def unwrap(fetched, params)
     fetched[collection_item].find { |result| identity.all? { |id| result[id.to_sym] == params[id] } }
   end
-<% end # object.self_link_query.nil? -%>
+<% end # object.nested_query.nil? -%>
 
   def parse
 <%
