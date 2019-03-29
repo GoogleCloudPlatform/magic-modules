@@ -1,17 +1,9 @@
 // The operation for this resource contains the generated name that we need
 // in order to perform a READ. We need to access the object inside of it as
 // a map[string]interface, so let's do that.
-bytes, err := op.Response.MarshalJSON()
-if err != nil {
-	return err
-}
 
-var data map[string]interface{}
-if err := json.Unmarshal(bytes, &data); err != nil {
-	return err
-}
-
-name := GetResourceNameFromSelfLink(data["name"].(string))
+resp := res["response"].(map[string]interface{})
+name := GetResourceNameFromSelfLink(resp["name"].(string))
 log.Printf("[DEBUG] Setting AccessPolicy name, id to %s", name)
 d.Set("name", name)
 d.SetId(name)
