@@ -1,22 +1,31 @@
 --- !ruby/object:Provider::Terraform::Config
-name: Arm
+name: azapimngpolicy
 overrides: !ruby/object:Provider::ResourceOverrides
-  ApiManagementPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+  ApiManagementPolicy: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    name_in_logs: Global Policy
     properties:
-      name: !ruby/object:Provider::Azure::Terraform::PropertyOverride
-        custom_schema_definition: products/azapimngpolicy/api_management_policy_name_schema.erb
       apiManagementName: !ruby/object:Provider::Azure::Terraform::PropertyOverride
-        custom_schema_definition: products/azapimngpolicy/api_management_name_schema.erb
+        name_in_logs: API Management Service
+        custom_schema_definition: products/azapimngpolicy/terraform_apimng_name_schema.erb
       format: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         hide_from_schema: true
+        custom_schema_get: products/azapimngpolicy/terraform_format_get.erb
         custom_schema_set: templates/terraform/schemas/empty.erb
+        custom_sdkfield_assign: products/azapimngpolicy/terraform_format_field_assign.erb
       xmlContent: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         conflicts_with: [xml_link]
+        diff_suppress_func: 'suppress.SuppressXmlDiff'
+        custom_schema_set: products/azapimngpolicy/terraform_format_content_set.erb
+        custom_sdkfield_assign: products/azapimngpolicy/terraform_content_field_assign.erb
       xmlLink: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         conflicts_with: [xml_content]
-    example:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "resource_group"
-        primary_resource_id: "example"
-        vars:
-          rg_name: "ExampleRG"
+        custom_schema_set: templates/terraform/schemas/empty.erb
+        custom_sdkfield_assign: templates/terraform/schemas/empty.erb
+    document_examples:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
+        title: Example Usage
+        example_name: basic
+        resource_name_hints:
+          resourceGroupName: example-rg
+          apiManagementName: example-apim
+          location: West US

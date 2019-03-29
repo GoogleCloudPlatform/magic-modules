@@ -29,8 +29,6 @@ func resourceArmApiManagementPolicy() *schema.Resource {
 
 
         Schema: map[string]*schema.Schema{
-            "name": azure.SchemaApiManagementChildName(),
-
             "resource_group_name": resourceGroupNameSchema(),
 
             "api_management_name": azure.SchemaApiManagementName(),
@@ -38,6 +36,7 @@ func resourceArmApiManagementPolicy() *schema.Resource {
             "xml_content": {
                 Type: schema.TypeString,
                 Optional: true,
+              DiffSuppressFunc: suppress.SuppressXmlDiff,
                 ConflictsWith: []string{"xml_link"},
             },
 
@@ -51,18 +50,17 @@ func resourceArmApiManagementPolicy() *schema.Resource {
 }
 
 func resourceArmApiManagementPolicyCreateUpdate(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).aPIManagementPolicyClient
+    client := meta.(*ArmClient).apiManagementPolicyClient
     ctx := meta.(*ArmClient).StopContext
 
-    name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
     serviceName := d.Get("api_management_name").(string)
 
     if requireResourcesToBeImported {
-        resp, err := client.Get(ctx, resourceGroup, serviceName, name)
+        resp, err := client.Get(ctx, resourceGroup, serviceName)
         if err != nil {
             if !utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Error checking for present of existing Api Management Policy %q (Api Management Name %q / Resource Group %q): %+v", name, serviceName, resourceGroup, err)
+                return fmt.Errorf("Error checking for present of existing Global Policy (API Management Service %q / Resource Group %q): %+v", serviceName, resourceGroup, err)
             }
         }
         if !utils.ResponseWasNotFound(resp.Response) {
@@ -72,28 +70,36 @@ func resourceArmApiManagementPolicyCreateUpdate(d *schema.ResourceData, meta int
 
     xmlContent := d.Get("xml_content").(string)
     xmlLink := d.Get("xml_link").(string)
-    // TODO: Implement customized logic for property 'format' since it is not included in schema
+    if xmlContent == "" && xmlLink == "" {
+        return fmt.Errorf("Either `xml_content` or `xml_link` is required")
+    }
+
+    content := xmlContent
+    format := apimanagement.XML
+    if xmlLink != "" {
+        content = xmlLink
+        format = apimanagement.XMLLink
+    }
 
     parameters := apimanagement.PolicyContract{
         PolicyContractProperties: &apimanagement.PolicyContractProperties{
-            // TODO: Implement customized logic for property 'format' since it is not included in schema
-            PolicyContent: utils.String(xmlContent),
-            PolicyContent: utils.String(xmlLink),
+            ContentFormat: format,
+            PolicyContent: utils.String(content),
         },
     }
 
 
-    if _, err := client.CreateOrUpdate(ctx, resourceGroup, serviceName, name, parameters); err != nil {
-        return fmt.Errorf("Error creating Api Management Policy %q (Api Management Name %q / Resource Group %q): %+v", name, serviceName, resourceGroup, err)
+    if _, err := client.CreateOrUpdate(ctx, resourceGroup, serviceName, parameters); err != nil {
+        return fmt.Errorf("Error creating Global Policy (API Management Service %q / Resource Group %q): %+v", serviceName, resourceGroup, err)
     }
 
 
-    resp, err := client.Get(ctx, resourceGroup, serviceName, name)
+    resp, err := client.Get(ctx, resourceGroup, serviceName)
     if err != nil {
-        return fmt.Errorf("Error retrieving Api Management Policy %q (Api Management Name %q / Resource Group %q): %+v", name, serviceName, resourceGroup, err)
+        return fmt.Errorf("Error retrieving Global Policy (API Management Service %q / Resource Group %q): %+v", serviceName, resourceGroup, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read Api Management Policy %q (Api Management Name %q / Resource Group %q) ID", name, serviceName, resourceGroup)
+        return fmt.Errorf("Cannot read Global Policy (API Management Service %q / Resource Group %q) ID", serviceName, resourceGroup)
     }
     d.SetId(*resp.ID)
 
@@ -101,34 +107,37 @@ func resourceArmApiManagementPolicyCreateUpdate(d *schema.ResourceData, meta int
 }
 
 func resourceArmApiManagementPolicyRead(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).aPIManagementPolicyClient
+    client := meta.(*ArmClient).apiManagementPolicyClient
     ctx := meta.(*ArmClient).StopContext
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Api Management Policy ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     serviceName := id.Path["service"]
-    name := id.Path["policies"]
 
-    resp, err := client.Get(ctx, resourceGroup, serviceName, name)
+    resp, err := client.Get(ctx, resourceGroup, serviceName)
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] Api Management Policy %q does not exist - removing from state", d.Id())
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading Api Management Policy %q (Api Management Name %q / Resource Group %q): %+v", name, serviceName, resourceGroup, err)
+        return fmt.Errorf("Error reading Global Policy (API Management Service %q / Resource Group %q): %+v", serviceName, resourceGroup, err)
     }
 
 
 
-    d.Set("name", resp.Name)
     d.Set("resource_group_name", resourceGroup)
     if properties := resp.PolicyContractProperties; properties != nil {
-        d.Set("xml_content", properties.PolicyContent)
-        d.Set("xml_link", properties.PolicyContent)
+        d.Set("xml_content", "")
+        d.Set("xml_link", "")
+        if properties.ContentFormat == apimanagement.XML {
+            d.Set("xml_content", properties.PolicyContent)
+        } else if properties.ContentFormat == apimanagement.XMLLink {
+            d.Set("xml_link", properties.PolicyContent)
+        }
     }
 
     return nil
@@ -136,20 +145,19 @@ func resourceArmApiManagementPolicyRead(d *schema.ResourceData, meta interface{}
 
 
 func resourceArmApiManagementPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).aPIManagementPolicyClient
+    client := meta.(*ArmClient).apiManagementPolicyClient
     ctx := meta.(*ArmClient).StopContext
 
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Api Management Policy ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     serviceName := id.Path["service"]
-    name := id.Path["policies"]
 
-    if _, err := client.Delete(ctx, resourceGroup, serviceName, name); err != nil {
-        return fmt.Errorf("Error deleting Api Management Policy %q (Api Management Name %q / Resource Group %q): %+v", name, serviceName, resourceGroup, err)
+    if _, err := client.Delete(ctx, resourceGroup, serviceName, ""); err != nil {
+        return fmt.Errorf("Error deleting Global Policy (API Management Service %q / Resource Group %q): %+v", serviceName, resourceGroup, err)
     }
 
     return nil

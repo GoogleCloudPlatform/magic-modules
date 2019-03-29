@@ -10,6 +10,7 @@ module Provider
           end
 
           def property_to_sdk_field_assignment_template(property, sdk_type)
+            return property.custom_sdkfield_assign unless get_property_value(property, "custom_sdkfield_assign", nil).nil?
             return 'templates/terraform/schemas/hide_from_schema.erb' if get_property_value(property, "hide_from_schema", false)
             case sdk_type
             when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject

@@ -1,0 +1,7 @@
+d.Set("xml_content", "")
+d.Set("xml_link", "")
+if properties.ContentFormat == apimanagement.XML {
+    d.Set("xml_content", properties.PolicyContent)
+} else if properties.ContentFormat == apimanagement.XMLLink {
+    d.Set("xml_link", properties.PolicyContent)
+}

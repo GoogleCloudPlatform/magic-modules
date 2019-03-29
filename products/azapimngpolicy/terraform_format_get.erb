@@ -1,0 +1,10 @@
+if xmlContent == "" && xmlLink == "" {
+    return fmt.Errorf("Either `xml_content` or `xml_link` is required")
+}
+
+content := xmlContent
+format := apimanagement.XML
+if xmlLink != "" {
+    content = xmlLink
+    format = apimanagement.XMLLink
+}

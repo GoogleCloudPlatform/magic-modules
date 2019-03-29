@@ -12,7 +12,7 @@ azure_version: '2018-01-01'
 objects:
   - !ruby/object:Api::Resource
     name: ApiManagementPolicy
-    api_name: APIManagementPolicy
+    api_name: ApiManagementPolicy
     base_url: NotUsedInAzure
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
@@ -28,9 +28,6 @@ objects:
           'serviceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: service
             go_variable_name: serviceName
-          'policyId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: policies
-            go_variable_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
             go_type_name: PolicyContract
@@ -51,9 +48,6 @@ objects:
           'serviceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: service
             go_variable_name: serviceName
-          'policyId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: policies
-            go_variable_name: name
         response:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_variable_name: resourceGroup
@@ -81,12 +75,11 @@ objects:
           'serviceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: service
             go_variable_name: serviceName
-          'policyId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: policies
-            go_variable_name: name
+          'ifMatch': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_variable_name: '""'
 
     description: |
-      Manages a policy within an API Management Service.
+      Manages a global Policy within an API Management Service.
     parameters:
       - !ruby/object:Api::Azure::Type::ResourceGroupName
         name: resourceGroupName
@@ -104,19 +97,12 @@ objects:
         azure_sdk_references: ['serviceName']
     properties:
       - !ruby/object:Api::Type::String
-        name: name
-        description: The Name of the Policy within the API Management Service.
-        required: true
-        input: true
-        order: 800
-        azure_sdk_references: ['policyId', '/name']
-      - !ruby/object:Api::Type::String
         name: xmlContent
-        description: 'The alternative name of the service bus disaster recovery.'
+        description: The XML configuration of this Policy.
         azure_sdk_references: ['/properties/policyContent']
       - !ruby/object:Api::Type::String
         name: xmlLink
-        description: 'The alternative name of the service bus disaster recovery.'
+        description: The HTTP endpoint of the XML configuration accessible from the API Management Service.
         azure_sdk_references: ['/properties/policyContent']
       - !ruby/object:Api::Type::Enum
         name: format

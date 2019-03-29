@@ -32,18 +32,17 @@ func testCheckAzureRMApiManagementPolicyExists(resourceName string) resource.Tes
             return fmt.Errorf("Api Management Policy not found: %s", resourceName)
         }
 
-        name := rs.Primary.Attributes["name"]
         resourceGroup := rs.Primary.Attributes["resource_group_name"]
         serviceName := rs.Primary.Attributes["api_management_name"]
 
-        client := testAccProvider.Meta().(*ArmClient).aPIManagementPolicyClient
+        client := testAccProvider.Meta().(*ArmClient).apiManagementPolicyClient
         ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
-        if resp, err := client.Get(ctx, resourceGroup, serviceName, name); err != nil {
+        if resp, err := client.Get(ctx, resourceGroup, serviceName); err != nil {
             if utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Bad: Api Management Policy %q (Api Management Name %q / Resource Group %q) does not exist", name, serviceName, resourceGroup)
+                return fmt.Errorf("Bad: Global Policy (API Management Service %q / Resource Group %q) does not exist", serviceName, resourceGroup)
             }
-            return fmt.Errorf("Bad: Get on aPIManagementPolicyClient: %+v", err)
+            return fmt.Errorf("Bad: Get on apiManagementPolicyClient: %+v", err)
         }
 
         return nil
@@ -51,7 +50,7 @@ func testCheckAzureRMApiManagementPolicyExists(resourceName string) resource.Tes
 }
 
 func testCheckAzureRMApiManagementPolicyDestroy(s *terraform.State) error {
-    client := testAccProvider.Meta().(*ArmClient).aPIManagementPolicyClient
+    client := testAccProvider.Meta().(*ArmClient).apiManagementPolicyClient
     ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
     for _, rs := range s.RootModule().Resources {
@@ -59,13 +58,12 @@ func testCheckAzureRMApiManagementPolicyDestroy(s *terraform.State) error {
             continue
         }
 
-        name := rs.Primary.Attributes["name"]
         resourceGroup := rs.Primary.Attributes["resource_group_name"]
         serviceName := rs.Primary.Attributes["api_management_name"]
 
-        if resp, err := client.Get(ctx, resourceGroup, serviceName, name); err != nil {
+        if resp, err := client.Get(ctx, resourceGroup, serviceName); err != nil {
             if !utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Bad: Get on aPIManagementPolicyClient: %+v", err)
+                return fmt.Errorf("Bad: Get on apiManagementPolicyClient: %+v", err)
             }
         }
 

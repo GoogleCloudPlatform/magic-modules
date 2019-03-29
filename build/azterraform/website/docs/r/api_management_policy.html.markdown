@@ -16,25 +16,39 @@ layout: "azurerm"
 page_title: "Azure Resource Manager: azurerm_api_management_policy"
 sidebar_current: "docs-azurerm-resource-api-management-policy"
 description: |-
-  Manages a policy within an API Management Service.
+  Manages a global Policy within an API Management Service.
 ---
 
 # azurerm_api_management_policy
 
-Manages a policy within an API Management Service.
+Manages a global Policy within an API Management Service.
 
 
-## Example Usage - Resource Group
-
+## Example Usage
 
 ```hcl
 resource "azurerm_resource_group" "example" {
-  name     = "ExampleRG"
+  name     = "example-rg"
   location = "West US"
+}
 
-  tags {
-    environment = "Production"
+resource "azurerm_api_management" "example" {
+  name                = "example-apim"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  location            = "${azurerm_resource_group.example.location}"
+  publisher_name      = "pub1"
+  publisher_email     = "pub1@email.com"
+
+  sku = {
+    name     = "Developer"
+    capacity = 1
   }
+}
+
+resource "azurerm_api_management_policy" "example" {
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  api_management_name = "${azurerm_api_management.example.name}"
+  xml_content         = "<policies><inbound></inbound></policies>"
 }
 ```
 
@@ -42,20 +56,24 @@ resource "azurerm_resource_group" "example" {
 
 The following arguments are supported:
 
-* `name` - (Required) The Name of the Policy within the API Management Service. Changing this forces a new resource to be created.
-
 * `resource_group_name` - (Required) The name of the Resource Group in which the API Management Service exists. Changing this forces a new resource to be created.
 
 * `api_management_name` - (Required) The name of the API Management Service where this Policy should be created. Changing this forces a new resource to be created.
 
-* `xml_content` - (Optional) The alternative name of the service bus disaster recovery.
+* `xml_content` - (Optional) The XML configuration of this Policy.
 
-* `xml_link` - (Optional) The alternative name of the service bus disaster recovery.
-
-* `format` - (Optional) The content format of the Policy.
+* `xml_link` - (Optional) The HTTP endpoint of the XML configuration accessible from the API Management Service.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The api management policy ID.
+* `id` - The ID of the Api Management Policy.
+
+
+## Import
+
+ApiManagementPolicy can be imported using the `resource id`, e.g.
+```shell
+$ terraform import azurerm_api_management_policy.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/Microsoft.ApiManagement/service/
+```
