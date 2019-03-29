@@ -1,0 +1,12 @@
+<% autogen_exception -%>
+package main
+
+import (
+	"github.com/hashicorp/terraform/plugin"
+	"github.com/terraform-providers/terraform-provider-google<%= "-" + version unless version == 'ga'  -%>/google<%= "-" + version unless version == 'ga'  -%>"
+)
+
+func main() {
+	plugin.Serve(&plugin.ServeOpts{
+		ProviderFunc: google.Provider})
+}
