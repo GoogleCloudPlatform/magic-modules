@@ -53,6 +53,7 @@ resource "google_cloudbuild_trigger" "build_trigger" {
     step {
       name = "gcr.io/cloud-builders/go"
       args = ["build", "my_package"]
+      env = ["env1=two"]
     }
     step {
       name = "gcr.io/cloud-builders/docker"

@@ -186,3 +186,13 @@ objects:
                     are used as arguments to that entrypoint. If the image does not define an
                     entrypoint, the first element in args is used as the entrypoint, and the
                     remainder will be used as arguments.
+                - !ruby/object:Api::Type::Array
+                  name: 'env'
+                  item_type: Api::Type::String
+                  description: |
+                    A list of environment variable definitions to be used when
+                    running a step.
+
+                    The elements are of the form "KEY=VALUE" for the environment variable
+                    "KEY"
+                    being given the value "VALUE".
