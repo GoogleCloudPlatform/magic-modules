@@ -32,20 +32,20 @@ func newProjectIamAsset(
 	config *Config,
 	expandBindings func(d TerraformResourceData) ([]IAMBinding, error),
 ) (Asset, error) {
-	projectID, err := getProject(d, config)
-	if err != nil {
-		return Asset{}, fmt.Errorf("getting project: %v", err)
-	}
-
 	bindings, err := expandBindings(d)
 	if err != nil {
 		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
+	// Ideally we should use project_number, but since that is generated server-side,
+	// we substitute project_id.
+	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
 	return Asset{
-		// Ideally we should use project_number, but since that is generated server-side,
-		// we substitute project_id.
-		Name: fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%v", projectID),
+		Name: name,
 		Type: "cloudresourcemanager.googleapis.com/Project",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
