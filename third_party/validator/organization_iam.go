@@ -37,8 +37,13 @@ func newOrganizationIamAsset(
 		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
+	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
 	return Asset{
-		Name: fmt.Sprintf("//cloudresourcemanager.googleapis.com/organizations/%v", d.Get("org_id").(string)),
+		Name: name,
 		Type: "cloudresourcemanager.googleapis.com/Organization",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,

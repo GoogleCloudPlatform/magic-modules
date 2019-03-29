@@ -37,9 +37,14 @@ func newFolderIamAsset(
 		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
+	// The "folder" argument is of the form "folders/12345"
+	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/{{folder}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
 	return Asset{
-		// The "folder" argument is of the form "folders/12345"
-		Name: fmt.Sprintf("//cloudresourcemanager.googleapis.com/%v", d.Get("folder").(string)),
+		Name: name,
 		Type: "cloudresourcemanager.googleapis.com/Folder",
 		IAMPolicy: &IAMPolicy{
 			Bindings: bindings,
