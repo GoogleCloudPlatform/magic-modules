@@ -10,4 +10,4 @@ prerequisites:
 properties:
   resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
   api_management_name: ${azurerm_api_management.<%= resource_id_hint -%>.name}
-  xml_content: <policies></policies>
+  xml_content: <policies><inbound><find-and-replace from='xyz' to='abc' /></inbound></policies>

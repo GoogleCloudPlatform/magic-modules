@@ -21,10 +21,20 @@ overrides: !ruby/object:Provider::ResourceOverrides
         conflicts_with: [xml_content]
         custom_schema_set: templates/terraform/schemas/empty.erb
         custom_sdkfield_assign: templates/terraform/schemas/empty.erb
+    acctests:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        name: basic
+        steps: [basic]
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        name: findReplace
+        steps: [findReplace]
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        name: update
+        steps: [basic, findReplace, basic]
     document_examples:
       - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
         title: Example Usage
-        example_name: basic
+        example_name: findReplace
         resource_name_hints:
           resourceGroupName: example-rg
           apiManagementName: example-apim
