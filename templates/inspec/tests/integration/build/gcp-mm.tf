@@ -127,6 +127,8 @@ variable "backend_bucket" {
   type = "map"
 }
 
+variable "gcp_cloud_function_region" {}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -478,7 +480,7 @@ resource "google_storage_bucket_object" "archive" {
 
 resource "google_cloudfunctions_function" "function" {
   project               = "${var.gcp_project_id}"
-  region                = "${var.cloudfunction["location"]}"
+  region                = "${var.gcp_cloud_function_region}"
   name                  = "${var.cloudfunction["name"]}"
   description           = "${var.cloudfunction["description"]}"
   available_memory_mb   = "${var.cloudfunction["available_memory_mb"]}"
