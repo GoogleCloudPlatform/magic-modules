@@ -396,9 +396,9 @@ objects:
     self_link: |
       projects/{{project}}/instances/{{instance}}/users
       ?name={{name}}&host={{host}}
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#usersList'
-      items: 'items'
+      keys: ['items']
     identity:
       - name
       - host
@@ -486,9 +486,9 @@ objects:
       'Represents a flag that can be configured for a Cloud SQL instance.'
     base_url: flags
     self_link: flags
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#flagsList'
-      items: 'items'
+      keys: ['items']
     readonly: true
     properties:
       - !ruby/object:Api::Type::Array
@@ -539,9 +539,9 @@ objects:
       Generation, or MySQL First Generation instances.
     base_url: projects/{{project}}/tiers
     self_link: projects/{{project}}/tiers
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#tiersList'
-      items: 'items'
+      keys: ['items']
     identity:
       - tier
     readonly: true

@@ -122,11 +122,8 @@ objects:
     # we might build a more general solution, but this is the only resource I know
     # of where that happens.
     self_link: liens?parent={{parent}}
-    self_link_query: !ruby/object:Api::Resource::ResponseList
-      # This isn't a real 'kind' - this API has some inconsistencies and doesn't return one.
-      kind: 'resourceManager#liensList'
-      items: 'liens'
     nested_query: !ruby/object:Api::Resource::NestedQuery
+      kind: 'resourceManager#liensList'
       keys:
         - liens
     identity:
