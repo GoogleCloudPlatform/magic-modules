@@ -100,7 +100,6 @@ objects:
         - :private
         - :public
         default_value: :public
-        min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'privateVisibilityConfig'
         description: |
@@ -122,7 +121,6 @@ objects:
                     The fully qualified URL of the VPC network to bind to.
                     This should be formatted like
                     `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`
-        min_version: beta
       - !ruby/object:Api::Type::NestedObject
         name: 'forwardingConfig'
         description: |
