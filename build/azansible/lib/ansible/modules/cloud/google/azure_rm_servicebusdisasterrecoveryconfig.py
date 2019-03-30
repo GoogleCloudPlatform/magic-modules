@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #
-# Copyright (C) 2019 Zim Kalinowski (@zikalino)#
+# Copyright (C) 2019 Zim Kalinowski (@zikalino)
+#
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 # ----------------------------------------------------------------------------
@@ -118,179 +119,121 @@ class AzureRMServiceBusDisasterRecoveryConfig(AzureRMModuleBase):
         self.module_arg_spec = dict(
           # TODO: Finish type declaration
         )
-        # TODO: Required If
         # TODO: Argument Properties
-        # TODO: Module State
-        # TODO: Base Class Initialization
 
-    # TODO: Main Module Execution
+        self.results = dict(changed=False)
+        self.mgmt_client = None
+        self.state = None
+        self.to_do = Actions.NoAction
+
+        required_if = [
+            # TODO: Required If
+            ('state', 'present', [])
+        ]
+
+        super(AzureRMServiceBusDisasterRecoveryConfig, self).__init__(derived_arg_spec=self.module_arg_spec,
+                                                                      supports_check_mode=True,
+                                                                      supports_tags=True,
+                                                                      required_if=required_if)
+
+    def exec_module(self, **kwargs):
+        """Main module execution method"""
         # TODO: Parameters -> Class Properties
         # TODO: Parameters -> SDK
-        # TODO: Create Client Instance
-        # TODO: Response & Idempotency Check
-        # TODO: Perform Desired Action
+
+        response = None
+
+        self.mgmt_client = self.get_mgmt_svc_client(ServiceBusManagementClient,
+                                                    base_url=self._cloud_environment.endpoints.resource_manager)
+
+        old_response = self.get_servicebusdisasterrecoveryconfig()
+
+        # TODO: Idempotency Check
+
+        if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
+            self.log("Need to Create / Update the Service Bus Disaster Recovery Config instance")
+
+            self.results['changed'] = True
+            if self.check_mode:
+                return self.results
+
+            response = self.create_update_servicebusdisasterrecoveryconfig()
+
+            self.log("Creation / Update done")
+        elif self.to_do == Actions.Delete:
+            self.log("Service Bus Disaster Recovery Config instance deleted")
+            self.results['changed'] = True
+
+            if self.check_mode:
+                return self.results
+
+            self.delete_servicebusdisasterrecoveryconfig()
+        else:
+            self.log("Service Bus Disaster Recovery Config instance unchanged")
+            self.results['changed'] = False
+            response = old_response
+
         # TODO: Format Response
 
-    # TODO: Create/Update Function
+    def create_update_servicebusdisasterrecoveryconfig(self):
+        '''
+        Creates or updates Service Bus Disaster Recovery Config with the specified configuration.
 
-    # TODO: Delete Function
-
-    # TODO: Read Function
-
-'''
-
-    module = GcpModule(
-        argument_spec=dict(
-            state=dict(default='present', choices=['present', 'absent'], type='str'),
-            name=dict(required=True, type='str'),
-            resource_group_name=dict(required=True, type='str'),
-            namespace_name=dict(required=True, type='str'),
-            partner_namespace=dict(type='str'),
-            alternate_name=dict(type='str')
-        )
-    )
-
-    if not module.params['scopes']:
-        module.params['scopes'] = ['NotUsedInAzure']
-
-    state = module.params['state']
-
-    fetch = fetch_resource(module, self_link(module))
-    changed = False
-
-    if fetch:
-        if state == 'present':
-            if is_different(module, fetch):
-                update(module, self_link(module))
-                fetch = fetch_resource(module, self_link(module))
-                changed = True
-        else:
-            delete(module, self_link(module))
-            fetch = {}
-            changed = True
-    else:
-        if state == 'present':
-            fetch = create(module, collection(module))
-            changed = True
-        else:
-            fetch = {}
-
-    fetch.update({'changed': changed})
-
-    module.exit_json(**fetch)
+        :return: deserialized Service Bus Disaster Recovery Config instance state dictionary
+        '''
+        self.log("Creating / Updating the Service Bus Disaster Recovery Config instance {0}".format(self.name))
+        try:
+            response = self.mgmt_client.disaster_recovery_configs.create_or_update(resource_group_name=self.resource_group,
+                                                                                   namespace_name=self.namespace,
+                                                                                   alias=self.name,
+                                                                                   parameters=self.parameters)
+            if isinstance(response, LROPoller) or isinstance(response.AzureOperationPoller):
+                response = self.get_poller_result(response)
+        except CloudError as exc:
+            self.log('Error attempting to create the Service Bus Disaster Recovery Config instance.')
+            self.fail("Error creating the Service Bus Disaster Recovery Config instance: {0}".format(str(exc)))
+        return response.as_dict()
 
 
-def create(module, link):
-    auth = GcpSession(module, 'zservicebusrecovery')
-    return return_if_object(module, auth.post(link, resource_to_request(module)))
+    def delete_servicebusdisasterrecoveryconfig(self):
+        '''
+        Deletes specified Service Bus Disaster Recovery Config instance in the specified subscription and resource group.
 
+        :return: True
+        '''
+        self.log("Deleting the Service Bus Disaster Recovery Config instance {0}".format(self.name))
+        try:
+            response = self.mgmt_client.disaster_recovery_configs.delete(resource_group_name=self.resource_group,
+                                                                         namespace_name=self.namespace,
+                                                                         alias=self.name)
+        except CloudError as e:
+            self.log('Error attempting to delete the Service Bus Disaster Recovery Config instance.')
+            self.fail("Error deleting the Service Bus Disaster Recovery Config instance: {0}".format(str(e)))
 
-def update(module, link):
-    auth = GcpSession(module, 'zservicebusrecovery')
-    return return_if_object(module, auth.put(link, resource_to_request(module)))
+        if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
+            response = self.get_poller_result(response)
+        return True
 
+    def get_servicebusdisasterrecoveryconfig(self):
+        '''
+        Gets the properties of the specified Service Bus Disaster Recovery Config
+        :return: deserialized Service Bus Disaster Recovery Config instance state dictionary
+        '''
+        self.log("Checking if the Service Bus Disaster Recovery Config instance {0} is present".format(self.name))
+        found = false
+        try:
+            response = self.mgmt_client.disaster_recovery_configs.get(resource_group_name=self.resource_group,
+                                                                      namespace_name=self.namespace,
+                                                                      alias=self.name)
+            found = True
+            self.log("Response : {0}".format(response))
+            self.log("Service Bus Disaster Recovery Config instance : {0} found".format(response.name))
+        except CloudError as e:
+            self.log('Did not find the Service Bus Disaster Recovery Config instance.')
+        if found is True:
+            return response.as_dict()
+        return False
 
-def delete(module, link):
-    auth = GcpSession(module, 'zservicebusrecovery')
-    return return_if_object(module, auth.delete(link))
-
-
-def resource_to_request(module):
-    request = {
-        u'name': module.params.get('name'),
-        u'resourceGroupName': module.params.get('resource_group_name'),
-        u'namespaceName': module.params.get('namespace_name'),
-        u'partnerNamespace': module.params.get('partner_namespace'),
-        u'AlternateName': module.params.get('alternate_name')
-    }
-    request = encode_request(request, module)
-    return_vals = {}
-    for k, v in request.items():
-        if v:
-            return_vals[k] = v
-
-    return return_vals
-
-
-def fetch_resource(module, link, allow_not_found=True):
-    auth = GcpSession(module, 'zservicebusrecovery')
-    return return_if_object(module, auth.get(link), allow_not_found)
-
-
-def self_link(module):
-    return "NotUsedInAzureNotUsedInAzure/{name}".format(**module.params)
-
-
-def collection(module):
-    return "NotUsedInAzureNotUsedInAzure".format(**module.params)
-
-
-def return_if_object(module, response, allow_not_found=False):
-    # If not found, return nothing.
-    if allow_not_found and response.status_code == 404:
-        return None
-
-    # If no content, return nothing.
-    if response.status_code == 204:
-        return None
-
-    try:
-        module.raise_for_status(response)
-        result = response.json()
-    except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
-        module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-
-    result = decode_request(result, module)
-
-    if navigate_hash(result, ['error', 'errors']):
-        module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-
-    return result
-
-
-def is_different(module, response):
-    request = resource_to_request(module)
-    response = response_to_hash(module, response)
-    request = decode_request(request, module)
-
-    # Remove all output-only from response.
-    response_vals = {}
-    for k, v in response.items():
-        if k in request:
-            response_vals[k] = v
-
-    request_vals = {}
-    for k, v in request.items():
-        if k in response:
-            request_vals[k] = v
-
-    return GcpRequest(request_vals) != GcpRequest(response_vals)
-
-
-# Remove unnecessary properties from the response.
-# This is for doing comparisons with Ansible's current parameters.
-def response_to_hash(module, response):
-    return {
-        u'name': module.params.get('name'),
-        u'resourceGroupName': module.params.get('resource_group_name'),
-        u'namespaceName': module.params.get('namespace_name'),
-        u'partnerNamespace': response.get(u'partnerNamespace'),
-        u'AlternateName': response.get(u'AlternateName')
-    }
-
-
-def decode_request(response, module):
-    if 'name' in response:
-        response['name'] = response['name'].split('/')[-1]
-    return response
-
-
-def encode_request(request, module):
-    request['name'] = '/'.join(['projects', module.params['project'],
-                                'topics', module.params['name']])
-    return request
-
-'''
 
 def main():
     """Main execution"""

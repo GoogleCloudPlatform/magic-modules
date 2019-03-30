@@ -25,6 +25,8 @@ require 'provider/ansible/resource_override'
 require 'provider/ansible/property_override'
 require 'provider/ansible/facts_override'
 
+require 'provider/azure/ansible'
+
 module Provider
   module Ansible
     # Code generator for Ansible Cookbooks that manage Google Cloud Platform
@@ -43,6 +45,8 @@ module Provider
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
       include Provider::Ansible::Request
+
+      include Provider::Azure::Ansible
 
       def initialize(config, api)
         super(config, api)

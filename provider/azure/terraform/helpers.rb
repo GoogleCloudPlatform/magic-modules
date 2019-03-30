@@ -6,6 +6,16 @@ module Provider
           return default_value unless obj.instance_variable_defined?("@#{prop_name}")
           obj.instance_variable_get("@#{prop_name}")
         end
+
+        def azure_resource_go_package(product)
+          product.azure_namespace.split('.').last.downcase
+        end
+  
+        def order_azure_properties(properties)
+          special_props = properties.select{|p| p.name == 'name' || p.name == 'location' || p.name == 'resourceGroupName'}
+          other_props = properties.reject{|p| p.name == 'name' || p.name == 'location' || p.name == 'resourceGroupName'}
+          special_props + order_properties(other_props)
+        end
       end
     end
   end

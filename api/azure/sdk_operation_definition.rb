@@ -5,6 +5,7 @@ module Api
   module Azure
     class SDKOperationDefinition < Api::Object
       attr_reader :go_func_name
+      attr_reader :python_func_name
       attr_reader :async
       attr_reader :request
       attr_reader :response
@@ -12,6 +13,7 @@ module Api
       def validate
         super
         check_property :go_func_name, String
+        check_property :python_func_name, String
         check_optional_property :async, :boolean
         check_property :request, Hash
         check_property_hash :request, String, Api::Azure::SDKTypeDefinition

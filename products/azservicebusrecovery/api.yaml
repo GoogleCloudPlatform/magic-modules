@@ -18,22 +18,27 @@ objects:
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
       provider_name: servicebus
       python_client_namespace: azure.mgmt.servicebus
-      python_client: ServiceBusManagementClient
+      python_client: ServiceBusManagementClient.disaster_recovery_configs
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
+        python_func_name: create_or_update
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
+            python_variable_name: resource_group
           'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: namespaces
             go_variable_name: servicebusName
+            python_variable_name: namespace
           'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: disasterRecoveryConfigs
             go_variable_name: name
+            python_variable_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
             go_type_name: ArmDisasterRecovery
+            python_variable_name: parameters
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_field_name: ArmDisasterRecoveryProperties 
             go_type_name: ArmDisasterRecoveryProperties 
@@ -43,16 +48,20 @@ objects:
             go_field_name: PartnerNamespace
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
+        python_func_name: get
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
+            python_variable_name: resource_group
           'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: namespaces
             go_variable_name: servicebusName
+            python_variable_name: namespace
           'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: disasterRecoveryConfigs
             go_variable_name: name
+            python_variable_name: name
         response:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_variable_name: resourceGroup
@@ -70,40 +79,22 @@ objects:
             go_field_name: AlternateName
           '/properties/partnerNamespace': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
             go_field_name: PartnerNamespace
-      update: !ruby/object:Api::Azure::SDKOperationDefinition
-        go_func_name: CreateOrUpdate
-        request:
-          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: resourceGroups
-            go_variable_name: resourceGroup
-          'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: namespaces
-            go_variable_name: servicebusName
-          'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: disasterRecoveryConfigs
-            go_variable_name: name
-          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_variable_name: parameters
-            go_type_name: ArmDisasterRecovery
-          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_field_name: ArmDisasterRecoveryProperties 
-            go_type_name: ArmDisasterRecoveryProperties 
-          '/properties/alternateName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: AlternateName
-          '/properties/partnerNamespace': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
-            go_field_name: PartnerNamespace
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Delete
+        python_func_name: delete
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
+            python_variable_name: resource_group
           'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: namespaces
             go_variable_name: servicebusName
+            python_variable_name: namespace
           'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: disasterRecoveryConfigs
             go_variable_name: name
+            python_variable_name: name
 
     description: |
       Manages a service bus disaster recovery config on Azure.
