@@ -36,7 +36,7 @@
 	<% end -%>
 	<% object.identity.each do |prop| -%>
 	<% if settable_properties.include?(prop) -%>
-		idProp, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
+		itemIdV, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
 		if err != nil {
 			return nil, err
 		}

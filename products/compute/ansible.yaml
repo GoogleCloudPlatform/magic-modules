@@ -26,6 +26,8 @@ manifest: !ruby/object:Provider::Ansible::Manifest
 datasources: !ruby/object:Overrides::ResourceOverrides
   Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Snapshot: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -222,6 +224,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: false
   # Not yet implemented.
   Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

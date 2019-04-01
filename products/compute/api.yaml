@@ -205,12 +205,45 @@ objects:
       guides:
         'Using a Cloud Storage bucket as a load balancer backend': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-bucket'
       api: 'https://cloud.google.com/compute/docs/reference/v1/backendBuckets'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'bucketName'
         description: 'Cloud Storage bucket name.'
         required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'cdnPolicy'
+        description: 'Cloud CDN configuration for this Backend Bucket.'
+        properties:
+        - !ruby/object:Api::Type::Integer
+          name: 'signedUrlCacheMaxAgeSec'
+          default_value: 3600
+          description: |
+            Maximum number of seconds the response to a signed URL request will
+            be considered fresh. Defaults to 1hr (3600s). After this time period,
+            the response will be revalidated before being served.
+            When serving responses to signed URL requests,
+            Cloud CDN will internally behave as though
+            all responses from this backend had a "Cache-Control: public,
+            max-age=[TTL]" header, regardless of any existing Cache-Control
+            header. The actual headers served in responses will not be altered.
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
         description: 'Creation timestamp in RFC3339 text format.'
@@ -240,6 +273,71 @@ objects:
         input: true
         required: true
   - !ruby/object:Api::Resource
+    name: 'BackendBucketSignedUrlKey'
+    kind: 'compute#BackendBucketSignedUrlKey'
+    input: true
+    base_url: projects/{{project}}/global/backendBuckets/{{backend_bucket}}
+    create_url: projects/{{project}}/global/backendBuckets/{{backend_bucket}}/addSignedUrlKey
+    create_verb: :POST
+    delete_url: projects/{{project}}/global/backendBuckets/{{backend_bucket}}/deleteSignedUrlKey?keyName={{name}}
+    delete_verb: :POST
+    self_link: projects/{{project}}/global/backendBuckets/{{backend_bucket}}
+    identity:
+      - name
+    nested_query: !ruby/object:Api::Resource::NestedQuery
+      keys:
+        - cdnPolicy
+        - signedUrlKeyNames
+      is_list_of_ids: true
+    description: |
+      A key for signing Cloud CDN signed URLs for BackendBuckets.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Using Signed URLs': 'https://cloud.google.com/cdn/docs/using-signed-urls/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/backendBuckets'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'backendBucket'
+        resource: 'BackendBucket'
+        imports: 'name'
+        description: |
+          The backend bucket this signed URL key belongs.
+        required: true
+        input: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        api_name: 'keyName'
+        description: |
+          Name of the signed URL key.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'keyValue'
+        description: |
+          128-bit key value used for signing the URL. The key value must be a
+          valid RFC 4648 Section 5 base64url encoded string.
+        required: true
+        input: true
+  - !ruby/object:Api::Resource
     name: 'BackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/global/backendServices
@@ -250,7 +348,24 @@ objects:
     description: |
       Creates a BackendService resource in the specified project using the data
       included in the request.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'affinityCookieTtlSec'
@@ -408,6 +523,20 @@ objects:
                   '&' and '=' will be percent encoded and not treated as
                   delimiters.
                 item_type: Api::Type::String
+          - !ruby/object:Api::Type::Integer
+            name: 'signedUrlCacheMaxAgeSec'
+            default_value: 3600
+            description: |
+              Maximum number of seconds the response to a signed URL request
+              will be considered fresh, defaults to 1hr (3600s). After this
+              time period, the response will be revalidated before
+              being served.
+
+              When serving responses to signed URL requests, Cloud CDN will
+              internally behave as though all responses from this backend had a
+              "Cache-Control: public, max-age=[TTL]" header, regardless of any
+              existing Cache-Control header. The actual headers served in
+              responses will not be altered.
       - !ruby/object:Api::Type::NestedObject
         name: 'connectionDraining'
         description: 'Settings for connection draining'
