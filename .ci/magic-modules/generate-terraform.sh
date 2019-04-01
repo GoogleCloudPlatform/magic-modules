@@ -58,7 +58,11 @@ fi
 
 pushd "build/$SHORT_NAME"
 
-GO111MODULE=on go mod vendor
+# go mod vendor is a very expensive operation.
+# If no changes, avoid running.
+if git diff-index --quiet master --; then
+  GO111MODULE=on go mod vendor
+fi
 
 # These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
