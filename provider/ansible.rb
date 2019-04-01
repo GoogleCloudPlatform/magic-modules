@@ -100,11 +100,12 @@ module Provider
         # Method is overriden to add Ansible example objects to the data object.
         data = super
 
-        prod_name = data[:object].name.underscore
-        path = ["products/#{data[:product].api_name}",
+        prod_name = data.object.name.underscore
+        path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        data.merge(example: (get_example(path) if File.file?(path)))
+        data.example = get_example(path) if File.file?(path)
+        data
       end
 
       # Given a URL and function name, emit a URL.
@@ -237,19 +238,19 @@ module Provider
       end
 
       def generate_resource(data)
-        target_folder = data[:output_folder]
+        target_folder = data.output_folder
         FileUtils.mkpath target_folder
-        name = module_name(data[:object])
+        name = module_name(data.object)
         path = File.join(target_folder,
                          "lib/ansible/modules/cloud/google/#{name}.py")
-        generate_resource_file data.clone.merge(
-          default_template: data[:object].template || 'templates/ansible/resource.erb',
-          out_file: path
-        )
+        data.default_template = data.object.template || 'templates/ansible/resource.erb'
+        data.out_file = path
+
+        generate_resource_file data
       end
 
       def example_defaults(data)
-        obj_name = data[:object].name.underscore
+        obj_name = data.object.name.underscore
         path = ["products/#{data[:product].api_name}",
                 "examples/ansible/#{obj_name}.yaml"].join('/')
 
@@ -257,38 +258,36 @@ module Provider
       end
 
       def generate_resource_tests(data)
-        prod_name = data[:object].name.underscore
-        path = ["products/#{data[:product].api_name}",
+        prod_name = data.object.name.underscore
+        path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        return unless data[:object].has_tests
+        return unless data.object.has_tests
         # Unlike other providers, all resources will not be built at once or
         # in close timing to each other (due to external PRs).
         # This means that examples might not be built out for every resource
         # in a GCP product.
         return unless File.file?(path)
 
-        target_folder = data[:output_folder]
+        target_folder = data.output_folder
         FileUtils.mkpath target_folder
 
-        name = module_name(data[:object])
+        name = module_name(data.object)
         path = File.join(target_folder,
                          "test/integration/targets/#{name}/tasks/main.yml")
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/ansible/integration_test.erb',
-          out_file: path
-        )
+        data.default_template = 'templates/ansible/integration_test.erb'
+        data.out_file = path
+        generate_resource_file data
       end
 
       def compile_datasource(data)
-        target_folder = data[:output_folder]
+        target_folder = data.output_folder
         FileUtils.mkpath target_folder
-        name = "#{module_name(data[:object])}_facts"
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/ansible/facts.erb',
-          out_file: File.join(target_folder,
-                              "lib/ansible/modules/cloud/google/#{name}.py")
-        )
+        name = "#{module_name(data.object)}_facts"
+        data.default_template = 'templates/ansible/facts.erb'
+        data.out_file = File.join(target_folder,
+                                  "lib/ansible/modules/cloud/google/#{name}.py")
+        generate_resource_file data
       end
 
       def generate_objects(output_folder, types, version_name)

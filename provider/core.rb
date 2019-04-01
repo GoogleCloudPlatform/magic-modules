@@ -28,6 +28,53 @@ module Provider
     quiet: false
   }.freeze
 
+  class FileTemplate
+    include Compile::Core
+    attr_accessor :name
+    attr_accessor :object
+    attr_accessor :product
+    attr_accessor :output_folder
+    attr_accessor :version
+    attr_accessor :product_ns
+    attr_accessor :config
+    attr_accessor :scopes
+    attr_accessor :manifest
+    attr_accessor :tests
+    attr_accessor :template
+    attr_accessor :compiler
+    attr_accessor :type
+
+    # Ansible example
+    attr_accessor :example
+
+    # File creation stuff.
+    attr_accessor :default_template
+    attr_accessor :out_file
+    attr_accessor :output_folder
+
+    def initialize(options)
+      @name = options[:name]
+      @object = options[:object]
+      @product = options[:product]
+      @output_folder = options[:output_folder]
+      @version = options[:version]
+      @product_ns = options[:product_ns]
+      @config = options[:config]
+      @scopes = options[:scopes]
+      @manifest = options[:manifest]
+      @tests = options[:tests]
+      @template = options[:template]
+      @compiler = options[:compiler]
+      @example = options[:example]
+      @type = options[:type]
+      @out_file = options[:out_file]
+    end
+
+    def get_binding
+      binding
+    end
+  end
+
   # Basic functionality for code generator providers. Provides basic services,
   # such as compiling and including files, formatting data, etc.
   class Core
@@ -135,7 +182,7 @@ module Provider
     end
 
     def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version: version_name)
+      compile_file_list(output_folder, @config.files.compile, version_name)
     end
 
     def compile_common_files(output_folder, version_name = nil)
@@ -144,17 +191,17 @@ module Provider
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version: version_name)
+      compile_file_list(output_folder, files, version_name)
     end
 
-    def compile_file_list(output_folder, files, data = {})
+    def compile_file_list(output_folder, files, version = nil)
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
           manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
           generate_file(
-            data.clone.merge(
+            FileTemplate.new(
               name: target,
               product: @api,
               object: {},
@@ -166,7 +213,8 @@ module Provider
               compiler: compiler,
               output_folder: output_folder,
               out_file: target_file,
-              product_ns: @api.name
+              product_ns: @api.name,
+              version: version
             )
           )
 
@@ -251,21 +299,21 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      {
+      FileTemplate.new(
         name: object.out_name,
         object: object,
         product: object.__product,
         output_folder: output_folder,
-        version: version
-      }
+        version: version,
+        config: @config
+      )
     end
 
     def generate_resource_file(data)
-      generate_file(data.clone.merge(
-        # Override with provider specific template for this object, if needed
-        template: data[:default_template],
-        product_ns: data[:object].__product.name
-      ))
+      # Override with provider specific template for this object, if needed
+      data.template = data.default_template
+      data.product_ns = data.object.__product.name
+      generate_file data
     end
 
     def build_url(url_parts, extra = false)
@@ -372,12 +420,12 @@ module Provider
     # Once the file's contents are written, set the proper [chmod] mode and
     # format the file with a language-appropriate formatter.
     def generate_file(data)
-      path = data[:out_file]
+      path = data.out_file
       folder = File.dirname(path)
       FileUtils.mkpath folder unless Dir.exist?(folder)
 
       # This variable looks unused, but is used in ansible/resource.erb
-      file_relative = relative_path(path, data[:output_folder]).to_s
+      file_relative = relative_path(path, data.output_folder).to_s
 
       # If we've modified a file since starting an MM run, it's a reasonable
       # assumption that it was this run that modified it.
@@ -390,17 +438,18 @@ module Provider
       # through each key:value pair in the common `data` object, and we set them
       # in the scope of the .erb files.
       ctx = binding
-      data.each { |name, value| ctx.local_variable_set(name, value) }
+      data.instance_variables.each { |name| ctx.local_variable_set(name[1..-1], data.instance_variable_get(name)) }
 
-      Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
-      File.open(path, 'w') { |f| f.puts compile_file(ctx, data[:template]) }
+
+      Google::LOGGER.debug "Generating #{data.name}"
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, data.template) }
 
       # Files are often generated in parallel.
       # We can use thread-local variables to ensure that autogen checking
       # stays specific to the file each thred represents.
       raise "#{path} missing autogen" unless Thread.current[:autogen]
 
-      old_file_chmod_mode = File.stat(data[:template]).mode
+      old_file_chmod_mode = File.stat(data.template).mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
       format_output_file(path)
