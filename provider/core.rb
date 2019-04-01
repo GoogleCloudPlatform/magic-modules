@@ -95,13 +95,13 @@ module Provider
       #
       # The templates get access to everything in the provider +
       # all of the variables in this object.
-      ctx = provider.get_binding
+      ctx = provider.provider_binding
       instance_variables.each do |name|
         ctx.local_variable_set(name[1..-1], instance_variable_get(name))
       end
 
       # This variable looks unused, but is used in ansible/resource.erb
-      ctx.local_variable_set("file_relative", relative_path(path, @output_folder).to_s)
+      ctx.local_variable_set('file_relative', relative_path(path, @output_folder).to_s)
 
       Google::LOGGER.debug "Generating #{@name}"
       File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }
@@ -156,7 +156,7 @@ module Provider
       @go_format_enabled = check_goformat
     end
 
-    def get_binding
+    def provider_binding
       binding
     end
 
@@ -267,20 +267,20 @@ module Provider
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
           manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
-            FileTemplate.new({
-              name: target,
-              product: @api,
-              scopes: @api.scopes,
-              manifest: manifest,
-              compiler: compiler,
-              output_folder: output_folder,
-              product_ns: @api.name,
-              env: {
-                pyformat_enabled: @py_format_enabled,
-                goformat_enabled: @go_format_enabled,
-                start_time: @start_time
-              }
-            }.merge(data)).generate(source, target_file, self)
+          FileTemplate.new({
+            name: target,
+            product: @api,
+            scopes: @api.scopes,
+            manifest: manifest,
+            compiler: compiler,
+            output_folder: output_folder,
+            product_ns: @api.name,
+            env: {
+              pyformat_enabled: @py_format_enabled,
+              goformat_enabled: @go_format_enabled,
+              start_time: @start_time
+            }
+          }.merge(data)).generate(source, target_file, self)
         end
       end.map(&:join)
     end

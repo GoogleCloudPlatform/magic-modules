@@ -36,7 +36,7 @@ module Provider
 
       data.generate('templates/terraform/objectlib/base.go.erb',
                     File.join(target_folder,
-                                "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
+                              "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
                     self)
     end
 

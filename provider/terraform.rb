@@ -177,7 +177,7 @@ module Provider
       new_data.object = @api.objects.first
       new_data.generate('templates/terraform/operation.go.erb',
                         File.join(target_folder,
-                                    "#{product_name}_operation.go"),
+                                  "#{product_name}_operation.go"),
                         self)
     end
   end

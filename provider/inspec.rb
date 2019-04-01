@@ -51,7 +51,8 @@ module Provider
                     self)
 
       data.generate('templates/inspec/plural_resource.erb',
-                    File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+                    File.join(target_folder,
+                              "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
                     self)
 
       generate_documentation(data, name, false)
@@ -77,7 +78,7 @@ module Provider
         compile_file_list(
           data.output_folder,
           { prop[:target] => prop[:source] },
-          { property: prop[:property] }
+          property: prop[:property]
         )
       end
     end
@@ -126,12 +127,12 @@ module Provider
       data_new.privileged = data.object.privileged
 
       data_new.generate('templates/inspec/integration_test_template.erb',
-                    File.join(
-        target_folder,
-        'integration/verify/controls',
-        "#{name}.rb"
-      ),
-      self)
+                        File.join(
+                          target_folder,
+                          'integration/verify/controls',
+                          "#{name}.rb"
+                        ),
+                        self)
     end
 
     def emit_nested_object(property)
