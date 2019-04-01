@@ -39,11 +39,7 @@ module Provider
     attr_accessor :output_folder
     attr_accessor :product_ns
     attr_accessor :config
-    attr_accessor :scopes
     attr_accessor :manifest
-    attr_accessor :tests
-    attr_accessor :compiler
-    attr_accessor :type
     attr_accessor :env
 
     # Ansible stuff.
@@ -270,9 +266,7 @@ module Provider
           FileTemplate.new({
             name: target,
             product: @api,
-            scopes: @api.scopes,
             manifest: manifest,
-            compiler: compiler,
             output_folder: output_folder,
             product_ns: @api.name,
             env: {
