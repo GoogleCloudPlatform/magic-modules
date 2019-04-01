@@ -34,10 +34,10 @@ module Provider
       target_folder = data.output_folder
       product_ns = data.object.__product.name
 
-      data.default_template = 'templates/terraform/objectlib/base.go.erb'
-      data.out_file = File.join(target_folder,
-                                "google/#{product_ns.downcase}_#{data.object.name.underscore}.go")
-      generate_resource_file data
+      data.generate('templates/terraform/objectlib/base.go.erb',
+                    File.join(target_folder,
+                                "google/#{product_ns.downcase}_#{data.object.name.underscore}.go"),
+                    self)
     end
 
     def compile_common_files(output_folder, version_name = 'ga')

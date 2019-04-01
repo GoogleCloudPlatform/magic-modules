@@ -115,13 +115,12 @@ module Provider
     def generate_resource(data)
       dir = data.version == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data.output_folder, dir)
-      FileUtils.mkpath target_folder
+
       name = data.object.name.underscore
       product_name = data.product.name.underscore
       filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
-      data.default_template = 'templates/terraform/resource.erb'
-      data.out_file = filepath
-      generate_resource_file data
+
+      data.generate('templates/terraform/resource.erb', filepath, self)
       generate_documentation(data)
     end
 
@@ -134,9 +133,7 @@ module Provider
 
       filepath =
         File.join(target_folder, "#{product_name}_#{name}.html.markdown")
-      data.default_template = 'templates/terraform/resource.html.markdown.erb'
-      data.out_file = filepath
-      generate_resource_file data
+      data.generate('templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
     def generate_resource_tests(data)
@@ -150,7 +147,7 @@ module Provider
 
       dir = data.version == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data.output_folder, dir)
-      FileUtils.mkpath target_folder
+
       name = data.object.name.underscore
       product_name = data.product.name.underscore
       filepath =
@@ -161,9 +158,8 @@ module Provider
 
       data.product = data.product.name
       data.resource_name = data.object.name.camelize(:upper)
-      data.default_template = 'templates/terraform/examples/base_configs/test_file.go.erb'
-      data.out_file = filepath
-      generate_resource_file data
+      data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
+                    filepath, self)
     end
 
     def generate_operation(output_folder, _types, version_name)
@@ -179,10 +175,10 @@ module Provider
       new_data = data.clone
       new_data.async = async
       new_data.object = @api.objects.first
-      new_data.default_template = 'templates/terraform/operation.go.erb'
-      new_data.out_file = File.join(target_folder,
-                                    "#{product_name}_operation.go")
-      generate_resource_file new_data
+      new_data.generate('templates/terraform/operation.go.erb',
+                        File.join(target_folder,
+                                    "#{product_name}_operation.go"),
+                        self)
     end
   end
 end
