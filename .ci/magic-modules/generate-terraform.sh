@@ -58,17 +58,27 @@ fi
 
 pushd "build/$SHORT_NAME"
 
-# go mod vendor is a very expensive operation.
-# If no changes, avoid running.
-if git diff-index --quiet HEAD --; then
-  GO111MODULE=on go mod vendor
-fi
+# Begin building our commit; we need to set the committer details, and add our modified files.
+#
+# Note that we need to perform `go mod vendor` _after_ adding the files because we're skipping
+# the vendor step if Terraform has no changes. Ideally it would happen before, but because we
+# deleted all of the existing files earlier in this script we'll see changes until we've staged
+# our generated changes.
 
-# These config entries will set the "committer".
 git config --global user.email "magic-modules@google.com"
 git config --global user.name "Modular Magician"
 
 git add -A
+
+# This is useful for human debugging, but not necessary for the Magician.
+git status
+
+# Only run `go mod vendor` if we see changes in this downstream repo, since it takes a while to run
+if [[ ! -z $(git status -s) ]]; then
+  GO111MODULE=on go mod vendor
+  git add -A
+fi
+
 # Set the "author" to the commit's real author.
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
