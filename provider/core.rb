@@ -28,12 +28,13 @@ module Provider
     quiet: false
   }.freeze
 
+  # Responsible for generating a file
+  # with a given set of parameters.
   class FileTemplate
     include Compile::Core
     attr_accessor :name
     attr_accessor :object
     attr_accessor :product
-    attr_accessor :output_folder
     attr_accessor :version
     attr_accessor :product_ns
     attr_accessor :config
@@ -221,7 +222,7 @@ module Provider
               compiler: compiler,
               output_folder: output_folder,
               out_file: target_file,
-              product_ns: @api.name,
+              product_ns: @api.name
             }.merge(data))
           )
 
@@ -445,8 +446,9 @@ module Provider
       # through each key:value pair in the common `data` object, and we set them
       # in the scope of the .erb files.
       ctx = binding
-      data.instance_variables.each { |name| ctx.local_variable_set(name[1..-1], data.instance_variable_get(name)) }
-
+      data.instance_variables.each do |name|
+        ctx.local_variable_set(name[1..-1], data.instance_variable_get(name))
+      end
 
       Google::LOGGER.debug "Generating #{data.name}"
       File.open(path, 'w') { |f| f.puts compile_file(ctx, data.template) }

@@ -127,9 +127,9 @@ module Provider
       data_new.default_template = 'templates/inspec/integration_test_template.erb'
       data_new.privileged = data.object.privileged
       data_new.out_file = File.join(
-          target_folder,
-          'integration/verify/controls',
-          "#{name}.rb"
+        target_folder,
+        'integration/verify/controls',
+        "#{name}.rb"
       )
       generate_resource_file data_new
     end
