@@ -30,7 +30,7 @@ object.examples
 
 	# {Compute}{Address}_{addressBasic}
 	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
-	  ignore_read = data[:object].all_user_properties
+	  ignore_read = data.object.all_user_properties
                  .select(&:ignore_read)
                  .map { |p| p.name.underscore }
                  .concat(example.ignore_read_extra)

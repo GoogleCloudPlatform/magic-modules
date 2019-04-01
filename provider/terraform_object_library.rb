@@ -31,15 +31,13 @@ module Provider
     end
 
     def generate_resource(data)
-      target_folder = data[:output_folder]
-      product_ns = data[:object].__product.name
+      target_folder = data.output_folder
+      product_ns = data.object.__product.name
 
-      generate_resource_file data.clone.merge(
-        object: data[:object],
-        default_template: 'templates/terraform/objectlib/base.go.erb',
-        out_file: File.join(target_folder,
-                            "google/#{product_ns.downcase}_#{data[:object].name.underscore}.go")
-      )
+      data.default_template = 'templates/terraform/objectlib/base.go.erb'
+      data.out_file = File.join(target_folder,
+                                "google/#{product_ns.downcase}_#{data.object.name.underscore}.go")
+      generate_resource_file data
     end
 
     def compile_common_files(output_folder, version_name = 'ga')

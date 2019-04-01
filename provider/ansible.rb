@@ -249,14 +249,6 @@ module Provider
         generate_resource_file data
       end
 
-      def example_defaults(data)
-        obj_name = data.object.name.underscore
-        path = ["products/#{data[:product].api_name}",
-                "examples/ansible/#{obj_name}.yaml"].join('/')
-
-        compile_file(EXAMPLE_DEFAULTS, path) if File.file?(path)
-      end
-
       def generate_resource_tests(data)
         prod_name = data.object.name.underscore
         path = ["products/#{data.product.api_name}",

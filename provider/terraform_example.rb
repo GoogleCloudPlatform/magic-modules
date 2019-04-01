@@ -24,38 +24,34 @@ module Provider
 
     # Create a directory of examples per resource
     def generate_resource(data)
-      version = @api.version_obj_or_default(data[:version])
-      examples = data[:object].examples
-                              .reject(&:skip_test)
-                              .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
-                              .reject { |e| version < @api.version_obj_or_default(e.min_version) }
+      version = @api.version_obj_or_default(data.version)
+      examples = data.object.examples
+                            .reject(&:skip_test)
+                            .reject { |e| !e.test_env_vars.nil? && e.test_env_vars.any? }
+                            .reject { |e| version < @api.version_obj_or_default(e.min_version) }
 
       examples.each do |example|
-        target_folder = data[:output_folder]
+        target_folder = data.output_folder
         target_folder = File.join(target_folder, example.name)
         FileUtils.mkpath target_folder
 
-        generate_resource_file data.clone.merge(
-          example: example,
-          default_template: 'templates/terraform/examples/base_configs/example_file.tf.erb',
-          out_file: File.join(target_folder, 'main.tf')
-        )
+        data.example = example
 
-        generate_resource_file data.clone.merge(
-          example: example,
-          default_template: 'templates/terraform/examples/base_configs/tutorial.md.erb',
-          out_file: File.join(target_folder, 'tutorial.md')
-        )
+        data.default_template = 'templates/terraform/examples/base_configs/example_file.tf.erb'
+        data.out_file = File.join(target_folder, 'main.tf')
+        generate_resource_file data
 
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
-          out_file: File.join(target_folder, 'backing_file.tf')
-        )
+        data.default_template = 'templates/terraform/examples/base_configs/tutorial.md.erb'
+        data.out_file = File.join(target_folder, 'tutorial.md')
+        generate_resource_file data
 
-        generate_resource_file data.clone.merge(
-          default_template: 'templates/terraform/examples/static/motd',
-          out_file: File.join(target_folder, 'motd')
-        )
+        data.default_template = 'templates/terraform/examples/base_configs/example_backing_file.tf.erb'
+        data.out_file = File.join(target_folder, 'backing_file.tf')
+        generate_resource_file data
+
+        data.default_template = 'templates/terraform/examples/static/motd'
+        data.out_file = File.join(target_folder, 'motd')
+        generate_resource_file data
       end
     end
 

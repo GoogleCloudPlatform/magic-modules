@@ -59,6 +59,10 @@ module Provider
     attr_accessor :privileged
     attr_accessor :property
 
+    # Terraform stuff.
+    attr_accessor :async
+    attr_accessor :resource_name
+
     def initialize(options)
       @name = options[:name]
       @object = options[:object]
@@ -186,7 +190,7 @@ module Provider
     end
 
     def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version_name)
+      compile_file_list(output_folder, @config.files.compile, version: version_name)
     end
 
     def compile_common_files(output_folder, version_name = nil)
@@ -195,7 +199,7 @@ module Provider
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version_name)
+      compile_file_list(output_folder, files, version: version_name)
     end
 
     def compile_file_list(output_folder, files, data = {})
