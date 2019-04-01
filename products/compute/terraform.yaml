@@ -191,6 +191,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         flatten_object: true
       connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         name: connection_draining_timeout_sec
+      customRequestHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
       healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: 'selfLinkRelativePathHash'
