@@ -37,22 +37,29 @@ module Provider
 
         data.example = example
 
-        data.default_template = 'templates/terraform/examples/base_configs/example_file.tf.erb'
-        data.out_file = File.join(target_folder, 'main.tf')
-        generate_resource_file data
+        data.generate(
+          'templates/terraform/examples/base_configs/example_file.tf.erb',
+          File.join(target_folder, 'main.tf'),
+          self
+        )
 
-        data.default_template = 'templates/terraform/examples/base_configs/tutorial.md.erb'
-        data.out_file = File.join(target_folder, 'tutorial.md')
-        generate_resource_file data
+        data.generate(
+          'templates/terraform/examples/base_configs/tutorial.md.erb',
+          File.join(target_folder, 'tutorial.md'),
+          self
+        )
 
-        data.default_template =
-          'templates/terraform/examples/base_configs/example_backing_file.tf.erb'
-        data.out_file = File.join(target_folder, 'backing_file.tf')
-        generate_resource_file data
+        data.generate(
+          'templates/terraform/examples/base_configs/example_backing_file.tf.erb',
+          File.join(target_folder, 'backing_file.tf'),
+          self
+        )
 
-        data.default_template = 'templates/terraform/examples/static/motd'
-        data.out_file = File.join(target_folder, 'motd')
-        generate_resource_file data
+        data.generate(
+          'templates/terraform/examples/static/motd',
+          File.join(target_folder, 'motd'),
+          self
+        )
       end
     end
 

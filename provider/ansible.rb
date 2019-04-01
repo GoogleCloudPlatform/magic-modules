@@ -239,14 +239,14 @@ module Provider
 
       def generate_resource(data)
         target_folder = data.output_folder
-        FileUtils.mkpath target_folder
         name = module_name(data.object)
         path = File.join(target_folder,
                          "lib/ansible/modules/cloud/google/#{name}.py")
-        data.default_template = data.object.template || 'templates/ansible/resource.erb'
-        data.out_file = path
-
-        generate_resource_file data
+        data.generate(
+          data.object.template || 'templates/ansible/resource.erb',
+          path,
+          self
+        )
       end
 
       def generate_resource_tests(data)
@@ -262,24 +262,25 @@ module Provider
         return unless File.file?(path)
 
         target_folder = data.output_folder
-        FileUtils.mkpath target_folder
 
         name = module_name(data.object)
         path = File.join(target_folder,
                          "test/integration/targets/#{name}/tasks/main.yml")
-        data.default_template = 'templates/ansible/integration_test.erb'
-        data.out_file = path
-        generate_resource_file data
+
+        data.generate(
+          'templates/ansible/integration_test.erb',
+          path,
+          self
+        )
       end
 
       def compile_datasource(data)
         target_folder = data.output_folder
-        FileUtils.mkpath target_folder
         name = "#{module_name(data.object)}_facts"
-        data.default_template = 'templates/ansible/facts.erb'
-        data.out_file = File.join(target_folder,
-                                  "lib/ansible/modules/cloud/google/#{name}.py")
-        generate_resource_file data
+        data.generate('templates/ansible/facts.erb',
+                      File.join(target_folder,
+                                "lib/ansible/modules/cloud/google/#{name}.py"),
+                      self)
       end
 
       def generate_objects(output_folder, types, version_name)
