@@ -44,7 +44,7 @@ func TestAccCloudBuildTrigger_fullStep(t *testing.T) {
 		CheckDestroy: testAccCheckCloudBuildTriggerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleCloudBuildTrigger_fullStep(),
+				Config: testAccCloudBuildTrigger_fullStep(),
 			},
 			{
 				ResourceName:      "google_cloudbuild_trigger.build_trigger",
@@ -84,7 +84,7 @@ resource "google_cloudbuild_trigger" "build_trigger" {
   `)
 }
 
-func testGoogleCloudBuildTrigger_fullStep() string {
+func testAccCloudBuildTrigger_fullStep() string {
 	return fmt.Sprintf(`
 resource "google_cloudbuild_trigger" "build_trigger" {
   description = "acceptance test build trigger"

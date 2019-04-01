@@ -269,8 +269,8 @@ objects:
                             Paths must be absolute and cannot conflict with other volume paths on
                             the same build step or with certain reserved volume paths.
                 - !ruby/object:Api::Type::Array
-                  item_type: Api::Type::String
                   name: 'waitFor'
+                  item_type: Api::Type::String
                   description: |
                     The ID(s) of the step(s) that this build step depends on.
 
