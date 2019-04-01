@@ -152,6 +152,7 @@ module Provider
       @go_format_enabled = check_goformat
     end
 
+    # This provides the FileTemplate class with access to a provider.
     def provider_binding
       binding
     end
