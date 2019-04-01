@@ -33,7 +33,6 @@
 -%>
 <% object_names.each do |obj_name| -%>
 'test/integration/targets/<%= obj_name -%>/aliases': 'templates/ansible/aliases'
-'test/integration/targets/<%= obj_name -%>/defaults/main.yml': 'templates/ansible/defaults_main.yaml'
 'test/integration/targets/<%= obj_name -%>/meta/main.yml': 'provider/ansible/blank_file.yaml'
 <% end -%>
 

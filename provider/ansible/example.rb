@@ -71,6 +71,7 @@ module Provider
       attr_reader :verifier
       attr_reader :dependencies
       attr_reader :facts
+      attr_reader :vars
 
       def validate
         super
@@ -79,6 +80,7 @@ module Provider
         check :verifier, type: Verifier, default: FactsVerifier.new
         check :dependencies, item_type: Task, type: Array
         check :facts, type: Task, default: FactsTask.new
+        check :vars, type: Hash, default: {}
 
         @facts&.set_variable(self, :__example)
         @verifier.set_variable(self, :__example) if @verifier.respond_to?(:__example)

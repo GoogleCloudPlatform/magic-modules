@@ -14,5 +14,8 @@
 -%>
 <% autogen_exception -%>
 ---
-# defaults file
-resource_name: '{{resource_prefix}}'
+<%=
+  to_yaml({
+    'resource_name' => '{{ resource_prefix }}'
+  }.merge(example.vars))
+-%>
