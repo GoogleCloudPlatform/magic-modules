@@ -138,6 +138,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true
+    mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_signed_url_key"
+        primary_resource_id: "backend_key"
+        vars:
+          key_name: "test-key"
+          backend_name: "test-signed-backend-bucket"
+          bucket_name: "test-storage-bucket"
+        skip_test: true
+    properties:
+      backendBucket: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      keyValue: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the key's value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        Because the API does not return the sensitive key value,
+        we cannot confirm or reverse changes to a key outside of Terraform.
   BackendService: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
