@@ -52,6 +52,13 @@ module Provider
     attr_accessor :out_file
     attr_accessor :output_folder
 
+    # InSpec stuff.
+    attr_accessor :plural
+    attr_accessor :doc_generation
+    attr_accessor :attribute_file_name
+    attr_accessor :privileged
+    attr_accessor :property
+
     def initialize(options)
       @name = options[:name]
       @object = options[:object]
@@ -68,10 +75,7 @@ module Provider
       @example = options[:example]
       @type = options[:type]
       @out_file = options[:out_file]
-    end
-
-    def get_binding
-      binding
+      @property = options[:property]
     end
   end
 
@@ -194,14 +198,14 @@ module Provider
       compile_file_list(output_folder, files, version_name)
     end
 
-    def compile_file_list(output_folder, files, version = nil)
+    def compile_file_list(output_folder, files, data = {})
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
           manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
           generate_file(
-            FileTemplate.new(
+            FileTemplate.new({
               name: target,
               product: @api,
               object: {},
@@ -214,8 +218,7 @@ module Provider
               output_folder: output_folder,
               out_file: target_file,
               product_ns: @api.name,
-              version: version
-            )
+            }.merge(data))
           )
 
           format_output_file(target_file)
