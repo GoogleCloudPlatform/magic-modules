@@ -44,16 +44,15 @@ module Provider
     # resources that can be used by InSpec
     def generate_resource(data)
       target_folder = File.join(data.output_folder, 'libraries')
-      FileUtils.mkpath target_folder
       name = data.object.name.underscore
-      data.default_template = 'templates/inspec/singular_resource.erb'
-      data.out_file = File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb")
-      generate_resource_file data
 
-      data.default_template = 'templates/inspec/plural_resource.erb'
-      data.out_file =
-        File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb')
-      generate_resource_file data
+      data.generate('templates/inspec/singular_resource.erb',
+                    File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+                    self)
+
+      data.generate('templates/inspec/plural_resource.erb',
+                    File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+                    self)
 
       generate_documentation(data, name, false)
       generate_documentation(data, name, true)
@@ -78,7 +77,7 @@ module Provider
         compile_file_list(
           data.output_folder,
           { prop[:target] => prop[:source] },
-          prop
+          { property: prop[:property] }
         )
       end
     end
@@ -92,9 +91,9 @@ module Provider
       data_new.name = name
       data_new.plural = plural
       data_new.doc_generation = true
-      data_new.default_template = 'templates/inspec/doc_template.md.erb'
-      data_new.out_file = File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md")
-      generate_resource_file data_new
+      data_new.generate('templates/inspec/doc_template.md.erb',
+                        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+                        self)
     end
 
     # Format a url that may be include newlines into a single line
@@ -124,14 +123,15 @@ module Provider
       data_new.name = name
       data_new.attribute_file_name = attribute_file_name
       data_new.doc_generation = false
-      data_new.default_template = 'templates/inspec/integration_test_template.erb'
       data_new.privileged = data.object.privileged
-      data_new.out_file = File.join(
+
+      data_new.generate('templates/inspec/integration_test_template.erb',
+                    File.join(
         target_folder,
         'integration/verify/controls',
         "#{name}.rb"
-      )
-      generate_resource_file data_new
+      ),
+      self)
     end
 
     def emit_nested_object(property)

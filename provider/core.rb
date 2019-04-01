@@ -365,6 +365,7 @@ module Provider
         name: object.out_name,
         object: object,
         product: object.__product,
+        product_ns: object.__product.name,
         output_folder: output_folder,
         version: version,
         config: @config,
