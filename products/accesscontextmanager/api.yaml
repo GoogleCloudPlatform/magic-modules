@@ -16,8 +16,8 @@ name: AccessContextManager
 display_name: Access Context Manager
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://accesscontextmanager.googleapis.com/v1beta/
+    name: ga
+    base_url: https://accesscontextmanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
@@ -30,7 +30,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         path: 'name'
@@ -123,7 +123,7 @@ objects:
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies.accessLevels'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.accessLevels'
     description: |
       An AccessLevel is a label that can be applied to requests to GCP services,
       along with a list of requirements necessary for the label to be applied.
@@ -300,8 +300,6 @@ objects:
                         - :DESKTOP_WINDOWS
                         - :DESKTOP_LINUX
                         - :DESKTOP_CHROME_OS
-                        - :ANDROID
-                        - :IOS
   - !ruby/object:Api::Resource
     name: 'ServicePerimeter'
     # This is an unusual API, so we need to use a few fields to map the methods
@@ -316,8 +314,8 @@ objects:
     update_mask: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
-      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1beta/accessPolicies.servicePerimeters'
+        'Service Perimeter Quickstart': 'https://cloud.google.com/vpc-service-controls/docs/quickstart'
+      api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters'
     description: |
       ServicePerimeter describes a set of GCP resources which can freely import
       and export data amongst themselves, but not export outside of the
@@ -393,7 +391,7 @@ objects:
         description: |
           Specifies the type of the Perimeter. There are two types: regular and
           bridge. Regular Service Perimeter contains resources, access levels,
-          and restricted/unrestricted services. Every resource can be in at most
+          and restricted services. Every resource can be in at most
           ONE regular Service Perimeter.
 
           In addition to being in a regular service perimeter, a resource can also
@@ -415,7 +413,7 @@ objects:
         name: 'status'
         description: |
           ServicePerimeter configuration. Specifies sets of resources,
-          restricted/unrestricted services and access levels that determine
+          restricted services and access levels that determine
           perimeter content and boundaries.
         properties:
           - !ruby/object:Api::Type::Array
@@ -440,37 +438,11 @@ objects:
               Format: accessPolicies/{policy_id}/accessLevels/{access_level_name}
             item_type: Api::Type::String
           - !ruby/object:Api::Type::Array
-            name: 'unrestrictedServices'
-            description: |
-              GCP services that are not subject to the Service Perimeter
-              restrictions. May contain a list of services or a single wildcard
-              "*". For example, if logging.googleapis.com is unrestricted, users
-              can access logs inside the perimeter as if the perimeter doesn't
-              exist, and it also means VMs inside the perimeter can access logs
-              outside the perimeter.
-
-              The wildcard means that unless explicitly specified by
-              "restrictedServices" list, any service is treated as unrestricted.
-              One of the fields "restrictedServices", "unrestrictedServices"
-              must contain a wildcard "*", otherwise the Service Perimeter
-              specification is invalid. It also means that both field being
-              empty is invalid as well. "unrestrictedServices" can be empty if
-              and only if "restrictedServices" list contains a "*" wildcard.
-            item_type: Api::Type::String
-          - !ruby/object:Api::Type::Array
             name: 'restrictedServices'
             description: |
               GCP services that are subject to the Service Perimeter
-              restrictions. May contain a list of services or a single wildcard
-              "*". For example, if storage.googleapis.com is specified, access
-              to the storage buckets inside the perimeter must meet the
-              perimeter's access restrictions.
-
-              Wildcard means that unless explicitly specified by
-              "unrestrictedServices" list, any service is treated as restricted.
-              One of the fields "restrictedServices", "unrestrictedServices"
-              must contain a wildcard "*", otherwise the Service Perimeter
-              specification is invalid. It also means that both field being
-              empty is invalid as well. "restrictedServices" can be empty if and
-              only if "unrestrictedServices" list contains a "*" wildcard.
+              restrictions. Must contain a list of services. For example, if
+              `storage.googleapis.com` is specified, access to the storage
+              buckets inside the perimeter must meet the perimeter's access
+              restrictions.
             item_type: Api::Type::String

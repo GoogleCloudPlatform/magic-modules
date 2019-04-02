@@ -67,9 +67,6 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
-	<% unless version == 'ga' -%>
-	clientAccessContextManager   *accesscontextmanager.Service
-	<% end -%>
 	clientBilling                *cloudbilling.APIService
 	clientBuild                  *cloudbuild.Service
 	clientComposer               *composer.Service
@@ -305,15 +302,6 @@ func (c *Config) LoadAndValidate() error {
 		return err
 	}
 	c.clientCloudFunctions.UserAgent = userAgent
-
-	<% unless version == 'ga' -%>
-	log.Printf("[INFO] Instantiating Google Cloud AccessContextManager Client...")
-	c.clientAccessContextManager, err = accesscontextmanager.New(client)
-	if err != nil {
-		return err
-	}
-	c.clientAccessContextManager.UserAgent = userAgent
-	<% end -%>
 
 	c.bigtableClientFactory = &BigtableClientFactory{
 		UserAgent:   userAgent,
