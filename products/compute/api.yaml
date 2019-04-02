@@ -581,13 +581,7 @@ objects:
           When the load balancing scheme is INTERNAL, this field is not used.
       - !ruby/object:Api::Type::Array
         name: 'healthChecks'
-        item_type: !ruby/object:Api::Type::ResourceRef
-          name: 'healthCheck'
-          description: 'A HealthCheck'
-          # Not technically true, but we don't support multi-resource refs yet
-          # and none of Terraform / Ansible / InSpec care about the type
-          resource: 'HealthCheck'
-          imports: 'selfLink'
+        item_type: Api::Type::String
         required: true
         min_size: 1
         max_size: 1

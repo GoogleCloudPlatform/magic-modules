@@ -206,6 +206,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: 'selfLinkRelativePathHash'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
       iap: !ruby/object:Overrides::Terraform::PropertyOverride
         send_empty_value: true
       iap.enabled: !ruby/object:Overrides::Terraform::PropertyOverride
