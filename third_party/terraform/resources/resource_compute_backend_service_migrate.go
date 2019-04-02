@@ -155,7 +155,16 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 			// because MM doesn't give fields strong types. Since another value
 			// in this block was a real float, it assumed this was a float too.
 			// It's not.
-			vInt := math.Round(v)
+			// Note that math.Round in Go is from float64 -> float64, so it will
+			// be a noop. int(floatVal) truncates extra parts, so if the float64
+			// representation of an int falls below the real value we'll have
+			// the wrong value. eg if 3 was represented as 2.999999, that would
+			// convert to 2. So we add 0.5, ensuring that we'll truncate to the
+			// correct value. This wouldn't remain true if we were far enough
+			// from 0 that we were off by > 0.5, but no float conversion *could*
+			// work correctly in that case. 53-bit floating types as the only
+			// numeric type was not a good idea, thanks Javascript.
+			vInt := int(v + 0.5)
 			log.Printf("[DEBUG] writing float value %f as integer value %v", v, vInt)
 			buf.WriteString(fmt.Sprintf("%d-", vInt))
 		default:
@@ -173,7 +182,16 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 			// because MM doesn't give fields strong types. Since another value
 			// in this block was a real float, it assumed this was a float too.
 			// It's not.
-			vInt := math.Round(v)
+			// Note that math.Round in Go is from float64 -> float64, so it will
+			// be a noop. int(floatVal) truncates extra parts, so if the float64
+			// representation of an int falls below the real value we'll have
+			// the wrong value. eg if 3 was represented as 2.999999, that would
+			// convert to 2. So we add 0.5, ensuring that we'll truncate to the
+			// correct value. This wouldn't remain true if we were far enough
+			// from 0 that we were off by > 0.5, but no float conversion *could*
+			// work correctly in that case. 53-bit floating types as the only
+			// numeric type was not a good idea, thanks Javascript.
+			vInt := int(v + 0.5)
 			log.Printf("[DEBUG] writing float value %f as integer value %v", v, vInt)
 			buf.WriteString(fmt.Sprintf("%d-", vInt))
 		default:
