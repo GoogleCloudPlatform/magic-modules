@@ -168,6 +168,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
   BackendService: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_basic"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
       decoder: 'templates/terraform/decoders/backend_service.go.erb'

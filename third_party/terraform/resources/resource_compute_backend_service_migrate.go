@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 
@@ -151,11 +152,10 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 		switch v := v.(type) {
 		case float64:
 			// The Golang JSON library can't tell int values apart from floats,
-			// because MM doesn't give it a strong type. Since another value was
-			//  a real float, it assumed this was a float too. It's not.
-			// Adding 0.5 means that we'll round to the nearest number if/when
-			// the real float value lands on the wrong side of the int.
-			vInt := int(v + 0.5)
+			// because MM doesn't give fields strong types. Since another value
+			// in this block was a real float, it assumed this was a float too.
+			// It's not.
+			vInt := math.Round(v)
 			log.Printf("[DEBUG] writing float value %f as integer value %v", v, vInt)
 			buf.WriteString(fmt.Sprintf("%d-", vInt))
 		default:
@@ -170,11 +170,10 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 		switch v := v.(type) {
 		case float64:
 			// The Golang JSON library can't tell int values apart from floats,
-			// because MM doesn't give it a strong type. Since another value was
-			//  a real float, it assumed this was a float too. It's not.
-			// Adding 0.5 means that we'll round to the nearest number if/when
-			// the real float value lands on the wrong side of the int.
-			vInt := int(v + 0.5)
+			// because MM doesn't give fields strong types. Since another value
+			// in this block was a real float, it assumed this was a float too.
+			// It's not.
+			vInt := math.Round(v)
 			log.Printf("[DEBUG] writing float value %f as integer value %v", v, vInt)
 			buf.WriteString(fmt.Sprintf("%d-", vInt))
 		default:

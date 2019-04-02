@@ -19,8 +19,8 @@
 // create), and force sending each subfield as empty when the block isn't
 // present in config.
 
-iapVal, ok := obj["iap"]
-if !ok || iapVal == nil {
+iapVal := obj["iap"]
+if iapVal == nil {
 	data := map[string]interface{}{}
 	data["enabled"] = false
 	data["oauth2ClientId"] = ""
