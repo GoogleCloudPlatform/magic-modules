@@ -67,8 +67,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     id_format: "{{zone}}/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "autoscaler_beta"
-        primary_resource_id: "foobar"
+        name: "autoscaler_single_instance"
+        primary_resource_id: "default"
         min_version: 'beta'
         vars:
           autoscaler_name: "my-autoscaler"
