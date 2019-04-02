@@ -168,7 +168,72 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
   BackendService: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_basic"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: 'templates/terraform/encoders/backend_service.go.erb'
+      decoder: 'templates/terraform/decoders/backend_service.go.erb'
+      post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
+      post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
+    properties:
+      backends: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: backend
+        is_set: true
+        set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
+      backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+      cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      # TODO(rileykarson): Add this- exclude for now to make the PR easier to review.
+      cdnPolicy.signedUrlCacheMaxAgeSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: connection_draining_timeout_sec
+      customRequestHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: 'selfLinkRelativePathHash'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
+      iap: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      iap.enabled: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      iap.oauth2ClientSecret: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+        # We don't support ignore_read on nested fields
+        ignore_read: true
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
+      iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      # TODO(rileykarson): Add this- exclude for now to make the PR easier to review.
+      loadBalancingScheme: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      protocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
