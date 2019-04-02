@@ -234,6 +234,32 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+  BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true
+    mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_signed_url_key"
+        primary_resource_id: "backend_key"
+        vars:
+          key_name: "test-key"
+          backend_name: "my-backend-service"
+        skip_test: true
+    properties:
+      backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      keyValue: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the key's value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        Because the API does not return the sensitive key value,
+        we cannot confirm or reverse changes to a key outside of Terraform.
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
