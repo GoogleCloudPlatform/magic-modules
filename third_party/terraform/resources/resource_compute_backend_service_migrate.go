@@ -164,7 +164,13 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 			// from 0 that we were off by > 0.5, but no float conversion *could*
 			// work correctly in that case. 53-bit floating types as the only
 			// numeric type was not a good idea, thanks Javascript.
-			vInt := int(v + 0.5)
+			var vInt int
+			if v < 0 {
+				vInt = int(v - 0.5)
+			} else {
+				vInt = int(v + 0.5)
+			}
+
 			log.Printf("[DEBUG] writing float value %f as integer value %v", v, vInt)
 			buf.WriteString(fmt.Sprintf("%d-", vInt))
 		default:
@@ -191,7 +197,13 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 			// from 0 that we were off by > 0.5, but no float conversion *could*
 			// work correctly in that case. 53-bit floating types as the only
 			// numeric type was not a good idea, thanks Javascript.
-			vInt := int(v + 0.5)
+			var vInt int
+			if v < 0 {
+				vInt = int(v - 0.5)
+			} else {
+				vInt = int(v + 0.5)
+			}
+
 			log.Printf("[DEBUG] writing float value %f as integer value %v", v, vInt)
 			buf.WriteString(fmt.Sprintf("%d-", vInt))
 		default:
