@@ -65,6 +65,7 @@ def replace_resource_dict(item, value):
         else:
             return item.get(value)
 
+
 # Handles all authentication and HTTP sessions for GCP API calls.
 class GcpSession(object):
     def __init__(self, module, product):
