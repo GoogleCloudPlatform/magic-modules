@@ -97,8 +97,8 @@ module Provider
       copied_data.plural = plural
       copied_data.doc_generation = true
       copied_data.generate('templates/inspec/doc_template.md.erb',
-                        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
-                        self)
+                           File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+                           self)
     end
 
     # Format a url that may be include newlines into a single line
@@ -133,12 +133,12 @@ module Provider
       copied_data.privileged = data.object.privileged
 
       copied_data.generate('templates/inspec/integration_test_template.erb',
-                        File.join(
-                          target_folder,
-                          'integration/verify/controls',
-                          "#{name}.rb"
-                        ),
-                        self)
+                           File.join(
+                             target_folder,
+                             'integration/verify/controls',
+                             "#{name}.rb"
+                           ),
+                           self)
     end
 
     def emit_nested_object(property)

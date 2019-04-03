@@ -178,9 +178,9 @@ module Provider
       copied_data.async = async
       copied_data.object = @api.objects.first
       copied_data.generate('templates/terraform/operation.go.erb',
-                        File.join(target_folder,
-                                  "#{product_name}_operation.go"),
-                        self)
+                           File.join(target_folder,
+                                     "#{product_name}_operation.go"),
+                           self)
     end
   end
 end
