@@ -67,20 +67,12 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 
 	if folderId != "" {
 		p.Parent = &cloudresourcemanager.ResourceId{
-			Id:   parseFolderId(folderId),
+			Id:   strings.TrimPrefix(folderId, "folders/"),
 			Type: "folder",
 		}
 	}
 
 	return nil
-}
-
-func parseFolderId(v interface{}) string {
-	folderId := v.(string)
-	if strings.HasPrefix(folderId, "folders/") {
-		return folderId[8:]
-	}
-	return folderId
 }
 
 func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
