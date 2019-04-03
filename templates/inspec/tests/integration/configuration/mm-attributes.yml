@@ -79,7 +79,7 @@ instance_template:
   name: inspec-gcp-instance-template
   description: A description of the instance template
   instance_description: A description of the instance itself
-  machine_type: n1-standard-1
+  machine_type: f1-micro
   tag: foo
   can_ip_forward: false
   scheduling_automatic_restart: true
@@ -203,3 +203,9 @@ backend_bucket:
   name: inspec-gcp-backend-bucket
   description: Backend bucket example
   enable_cdn: true
+
+regional_node_pool:
+  name: inspec-gcp-regional-node-pool
+  cluster_name: inspec-gcp-regional-node-pool-cluster
+  node_count: 1
+  initial_node_count: 1
