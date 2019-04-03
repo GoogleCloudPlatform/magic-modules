@@ -699,13 +699,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	var instance *sqladmin.DatabaseInstance
-	err = retryTimeDuration(
+	err = retry(
 		func() error {
 				instance, err = config.clientSqlAdmin.Instances.Get(project, d.Id()).Do()
 			return err
 		},
-
-		DefaultRequestTimeout,
 	)
 
 	if err != nil {
