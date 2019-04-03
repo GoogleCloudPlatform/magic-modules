@@ -39,8 +39,12 @@ module Overrides
           # TODO(alexstephen): Deprecate once all resources using autogen async.
           :autogen_async,
 
-          # Flag - if false, resource is not importable
-          :exclude_import
+          # If true, resource is not importable
+          :exclude_import,
+
+          # If true, exclude resource from Terraform Validator
+          # (i.e. terraform-provider-conversion)
+          :exclude_validator
         ]
       end
 

@@ -21,6 +21,15 @@ module Provider
       generate_objects(output_folder, types, version)
     end
 
+    def generate_object(object, output_folder, version_name)
+      if object.exclude_validator
+        Google::LOGGER.info "Skipping fine-grained resource #{object.name}"
+        return
+      end
+
+      super(object, output_folder, version_name)
+    end
+
     def generate_resource(data)
       target_folder = data[:output_folder]
       product_ns = data[:object].__product.name
