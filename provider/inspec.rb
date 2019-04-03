@@ -18,6 +18,7 @@ require 'provider/inspec/manifest'
 require 'overrides/inspec/resource_override'
 require 'overrides/inspec/property_override'
 require 'active_support/inflector'
+require 'google/yaml_validator'
 
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
@@ -58,6 +59,21 @@ module Provider
       generate_documentation(data.clone, name, false)
       generate_documentation(data.clone, name, true)
       generate_properties(data.clone, data.object.all_user_properties)
+    end
+
+    def generate_iam_policy(data)
+      target_folder = File.join(data[:output_folder], 'libraries/google/iam/property')
+      FileUtils.mkpath target_folder
+
+      FileUtils.cp_r 'templates/inspec/iam_policy/properties/.', target_folder
+
+      target_folder = File.join(data[:output_folder], 'libraries')
+      name = data[:object].name.underscore
+
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/inspec/iam_policy/iam_policy.erb',
+        out_file: File.join(target_folder, "google_#{data[:product].api_name}_#{name}_iam_policy.rb")
+      )
     end
 
     def generate_properties(data, props)

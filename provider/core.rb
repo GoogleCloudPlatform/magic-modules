@@ -335,6 +335,7 @@ module Provider
 
       generate_resource data.clone
       generate_resource_tests data.clone
+      generate_iam_policy(data.clone) if data.object.iam_policy&.exists
     end
 
     def generate_datasources(output_folder, types, version_name)

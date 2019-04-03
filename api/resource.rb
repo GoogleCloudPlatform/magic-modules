@@ -66,6 +66,8 @@ module Api
       attr_reader :min_version # Minimum API version this resource is in
       attr_reader :update_mask
       attr_reader :has_self_link
+
+      attr_reader :iam_policy
     end
 
     include Properties
@@ -151,6 +153,24 @@ module Api
       end
     end
 
+    # Represents a list of documentation links.
+    class IamPolicy < Api::Object
+      # boolean of if this binding should be generated
+      attr_reader :exists
+
+      # the url of iam binding
+      attr_reader :url
+
+      def validate
+        super
+
+        check :exists, type: :boolean, default: false
+        if :exists
+          check :url, type: String, required: true
+        end
+      end
+    end
+
     def to_s
       JSON.pretty_generate(self)
     end
@@ -227,6 +247,8 @@ module Api
 
       check :properties, type: Array, item_type: Api::Type, required: true unless @exclude
       check :parameters, type: Array, item_type: Api::Type unless @exclude
+
+      check :iam_policy, type: Api::Resource::IamPolicy
 
       check_identity unless @identity.nil?
     end
