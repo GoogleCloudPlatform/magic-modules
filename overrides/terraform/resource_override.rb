@@ -39,8 +39,13 @@ module Overrides
           # TODO(alexstephen): Deprecate once all resources using autogen async.
           :autogen_async,
 
-          # Flag - if false, resource is not importable
-          :exclude_import
+          # If true, resource is not importable
+          :exclude_import,
+
+          # If true, resource is fine-grained, i.e. not an API resource that
+          # exists by itself. Instead, the resource is created, read, and edited
+          # through another resource.
+          :is_fine_grained_resource
         ]
       end
 

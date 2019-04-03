@@ -142,6 +142,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
+    is_fine_grained_resource: true
     mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -236,6 +237,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
+    is_fine_grained_resource: true
     mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
     examples:
       - !ruby/object:Provider::Terraform::Examples
