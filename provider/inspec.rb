@@ -88,11 +88,15 @@ module Provider
       docs_folder = File.join(data.output_folder, 'docs', 'resources')
 
       name = plural ? base_name.pluralize : base_name
-      data_new = data.clone
-      data_new.name = name
-      data_new.plural = plural
-      data_new.doc_generation = true
-      data_new.generate('templates/inspec/doc_template.md.erb',
+
+      # We need to clone the data object, since we're making temporary alterations
+      # to it for documentation. These alterations shouldn't exist after documentation
+      # creation.
+      copied_data = data.clone
+      copied_data.name = name
+      copied_data.plural = plural
+      copied_data.doc_generation = true
+      copied_data.generate('templates/inspec/doc_template.md.erb',
                         File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
                         self)
     end
@@ -120,13 +124,15 @@ module Provider
     end
 
     def generate_inspec_test(data, name, target_folder, attribute_file_name)
-      data_new = data.clone
-      data_new.name = name
-      data_new.attribute_file_name = attribute_file_name
-      data_new.doc_generation = false
-      data_new.privileged = data.object.privileged
+      # We need to clone the data object, since we're making temporary alterations
+      # to it for test. These alterations shouldn't exist after test creation.
+      copied_data = data.clone
+      copied_data.name = name
+      copied_data.attribute_file_name = attribute_file_name
+      copied_data.doc_generation = false
+      copied_data.privileged = data.object.privileged
 
-      data_new.generate('templates/inspec/integration_test_template.erb',
+      copied_data.generate('templates/inspec/integration_test_template.erb',
                         File.join(
                           target_folder,
                           'integration/verify/controls',

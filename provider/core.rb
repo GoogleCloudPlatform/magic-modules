@@ -96,7 +96,7 @@ module Provider
         ctx.local_variable_set(name[1..-1], instance_variable_get(name))
       end
 
-      # This variable looks unused, but is used in ansible/resource.erb
+      # This variable is used in ansible/resource.erb
       ctx.local_variable_set('file_relative', relative_path(path, @output_folder).to_s)
 
       Google::LOGGER.debug "Generating #{@name}"
