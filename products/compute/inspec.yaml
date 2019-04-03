@@ -21,6 +21,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  BackendServiceSignedUrlKey: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride

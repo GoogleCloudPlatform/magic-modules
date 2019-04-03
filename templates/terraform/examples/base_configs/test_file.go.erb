@@ -10,6 +10,8 @@ import (
   "github.com/hashicorp/terraform/helper/resource"
 )
 <%
+raise 'skip_test should be true if resource is not importable' \
+  if object.exclude_import
 resource_name = product_ns + object.name
 if @config.legacy_name.nil?
 	terraform_name = "google_" + (product_ns + object.name).underscore

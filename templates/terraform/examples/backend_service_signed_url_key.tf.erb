@@ -1,0 +1,50 @@
+resource "google_compute_backend_service_signed_url_key" "backend_key" {
+  name           = "<%= ctx[:vars]['key_name'] %>"
+  key_value      = "pPsVemX8GM46QVeezid6Rw=="
+  backend_service = "${google_compute_backend_service.example_backend.name}"
+}
+
+resource "google_compute_backend_service" "example_backend" {
+  name        = "<%= ctx[:vars]['backend_name'] %>"
+  description = "Our company website"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+  enable_cdn  = true
+
+  backend {
+    group = "${google_compute_instance_group_manager.webservers.instance_group}"
+  }
+
+  health_checks = ["${google_compute_http_health_check.default.self_link}"]
+}
+
+resource "google_compute_instance_group_manager" "webservers" {
+  name               = "my-webservers"
+  instance_template  = "${google_compute_instance_template.webserver.self_link}"
+  base_instance_name = "webserver"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "webserver" {
+  name         = "standard-webserver"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = "debian-cloud/debian-9"
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_http_health_check" "default" {
+  name               = "test"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
