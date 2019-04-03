@@ -32,27 +32,43 @@ module Provider
   # with a given set of parameters.
   class FileTemplate
     include Compile::Core
+    # The name of the resource
     attr_accessor :name
+    # The resource itself.
     attr_accessor :object
+    # The entire API object.
     attr_accessor :product
+    # The API version
     attr_accessor :version
+    # The root folder we're outputting to.
     attr_accessor :output_folder
+    # The namespace of the product.
     attr_accessor :product_ns
+    # The provider-specific configuration.
     attr_accessor :config
+    # The provider specific high-level configuration fields.
     attr_accessor :manifest
+    # Information about the local environment
+    # (which formatters are enabled, start-time)
     attr_accessor :env
 
     # Ansible stuff.
+    # The Ansible example object.
     attr_accessor :example
 
     # InSpec stuff.
+    # Is this a plural resource?
     attr_accessor :plural
+    # Should we generate documentation?
     attr_accessor :doc_generation
+    # The file name of the attribute
     attr_accessor :attribute_file_name
     attr_accessor :privileged
     attr_accessor :property
 
     # Terraform stuff.
+    # The async object used for making operations.
+    # We assume that all resources share the same async properties.
     attr_accessor :async
     attr_accessor :resource_name
 
