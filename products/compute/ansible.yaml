@@ -105,6 +105,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * regions/region/addresses/address
           * global/addresses/address
           * address
+  GlobalAddress: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      address:  !ruby/object:Overrides::Ansible::PropertyOverride
+        description: |
+          The static external IP address represented by this resource.
   GlobalForwardingRule: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       IPAddress:  !ruby/object:Overrides::Ansible::PropertyOverride
