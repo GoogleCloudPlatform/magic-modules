@@ -80,10 +80,12 @@ module Discovery
   class Builder
     attr_reader :results
 
-    def initialize(url, objects)
-      @url = url
+    def initialize(doc, objects)
+      @product = doc['product']
+      @filename = doc['filename']
+      @url = doc['url']
       @resources_in_api_yaml = objects
-      @results = fetch_discovery_doc(url)
+      @results = fetch_discovery_doc(@url)
     end
 
     def resources
@@ -109,7 +111,7 @@ module Discovery
         resource = resource.sub('Global', '')
         Resource.new(@results['schemas'][resource], resource, self)
       else
-        puts "#{original_resource} from api.yaml not found in discovery docs - #{@url}"
+        puts "#{original_resource} from #{@filename} not found in discovery docs - #{@url}"
       end
     end
 

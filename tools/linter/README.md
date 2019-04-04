@@ -1,9 +1,11 @@
 # api.yaml linter
 
-This linter lints api.yaml against the Discovery Docs.
+This linter lints api.yaml against the Discovery Docs. It iterates through all
+apis and Resources in api.yaml files and attempts to find the correspond
+Discovery Doc to determine if Resource fields are different or missing.
 
-Because api.yaml is handwritten, it will inevitably veer away from the Discovery docs
-(the source of truth) or just be inputted incorrectly.
+Because api.yaml is handwritten, it will inevitably drift from the Discovery
+Docs (the source of truth).
 
 ## Running the linter
 The linter is powered by RSpec.
@@ -12,12 +14,16 @@ The linter is powered by RSpec.
   rspec tools/linter/run.rb
 ```
 
-Tests are divided into two parts: property tests and resource tests. Each is
-tagged with :property or :resource To run only property tests, do the
-following:
+Tests are divided into two parts: property tests and resource tests. The linter uses [rspec tags](https://relishapp.com/rspec/rspec-core/v/3-8/docs/command-line/tag-option) to filter which tests are run. The tests are broken down into `property` and `resource` tests and can be run with `--tag property` or `--tag resource`. It is also possible to filter by product using `--tag product:name`.
 
+To run only property tests, do the following:
 ```
   rspec tools/linter/run.rb --tag property
+```
+
+To run only cloudbuild tests, do the following:
+```
+  rspec tools/linter/run.rb --tag product:cloudbuild
 ```
 
 ## Getting Results as a CSV
