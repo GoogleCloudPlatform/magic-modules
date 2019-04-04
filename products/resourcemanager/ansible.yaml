@@ -35,6 +35,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Folder: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  Organization: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Project: !ruby/object:Overrides::Ansible::ResourceOverride
     return_if_object: |
 <%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 6)) -%>
