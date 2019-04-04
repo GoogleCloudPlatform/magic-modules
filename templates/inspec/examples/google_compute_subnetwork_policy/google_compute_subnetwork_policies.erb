@@ -1,6 +1,0 @@
-<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
-<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
-describe google_compute_subnetwork_policies(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'test-subnetwork') do
-	its('count') { should eq 1 }
-	its('bindings.count') { should eq 1 }
-end

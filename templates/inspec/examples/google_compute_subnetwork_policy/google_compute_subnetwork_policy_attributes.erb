@@ -1,3 +1,0 @@
-gcp_project_id = attribute(:gcp_project_id, default: '<%= external_attribute('gcp_project_id') -%>', description: 'The GCP project identifier.')
-gcp_location = attribute(:gcp_location, default: '<%= external_attribute('gcp_location') -%>', description: 'The GCP project region.')
-subnetwork_policy_binding = attribute('subnetwork_policy_binding', default: <%= JSON.pretty_generate(grab_attributes['subnetwork_policy_binding']) -%>, description: 'Subnetwork policy binding definition')

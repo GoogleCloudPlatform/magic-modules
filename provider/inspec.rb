@@ -79,7 +79,7 @@ module Provider
       generate_resource_file data.clone.merge(
         default_template: 'templates/inspec/iam_policy/iam_policy.md.erb',
         out_file: File.join(markdown_target_folder, "google_#{data[:product].api_name}_#{name}_iam_policy.md")
-      )      
+      )
     end
 
     def generate_properties(data, props)
