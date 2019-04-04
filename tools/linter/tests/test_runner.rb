@@ -19,7 +19,7 @@ def run_tests(discovery_doc, api, filters, tags = {}, **kwargs)
     discovery_doc.resources.each do |disc_resource|
       api_obj = api&.objects&.select { |p| p.name == disc_resource.name }&.first
       # Second context: resource name
-      describe disc_resource.name do
+      describe disc_resource.name, resource: disc_resource.name do
         # Run all resource tests on this resource
         include_examples 'resource_tests', disc_resource, api_obj, tags if filters[:resource]
 
