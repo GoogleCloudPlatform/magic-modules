@@ -1,0 +1,42 @@
+<% iam_resource_name = "#{resource_name(object, product_ns)}_iam_policy" -%>
+---
+title: About the <%= iam_resource_name -%> resource
+platform: gcp
+---
+
+## Syntax
+A `<%= iam_resource_name -%>` is used to test a Google <%= object.name -%> Iam Policy resource
+
+## Examples
+```
+describe google_compute_subnetwork_policy(project: 'chef-gcp-inspec', region: 'europe-west2', subnetwork: 'test-subnetwork') do
+  it { should exist }
+  its('bindings.first.role') { should eq 'roles/compute.networkUser'}
+  its('bindings.first.members') { should include 'user:slevenick@google.com'}
+end
+```
+
+## Properties
+Properties that can be accessed from the `<%= iam_resource_name -%>` resource:
+
+  * `bindings`: Associates a list of members to a role.
+
+    * `role`: Role that is assigned to members. For example, roles/viewer, roles/editor, or roles/owner.
+
+    * `members`: Specifies the identities requesting access for a Cloud Platform resource.
+
+  * `audit_configs`: Specifies cloud audit logging configuration for this policy.
+
+    * `service`: Specifies a service that will be enabled for audit logging. For example, `storage.googleapis.com`, `cloudsql.googleapis.com`. `allServices`  is a special value that covers all services.
+
+    * `audit_log_configs`: The configuration for logging of each type of permission.
+
+
+<% unless @api.apis_required.empty? -%>
+
+## GCP Permissions
+
+<% @api.apis_required.each do |api| -%>
+Ensure the [<%= api.name -%>](<%= api.url -%>) is enabled for the current project.
+<% end # @api.apis_required.each -%>
+<% end # unless @api.apis_required.empty? -%>
