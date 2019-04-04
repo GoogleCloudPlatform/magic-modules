@@ -11,18 +11,32 @@ import (
 func GetProjectCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
 	// NOTE: asset.name should use the project number, but we use project_id b/c
 	// the number is computed server-side.
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	name, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {
 		return Asset{}, err
 	}
+
+	parent, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
+	// Project ancestry should also contain the project itself.
+	ancestry, err := getProjectAncestry(d, config)
+	if err != nil {
+		return Asset{}, err
+	}
+
 	if obj, err := GetProjectApiObject(d, config); err == nil {
 		return Asset{
-			Name: name,
-			Type: "cloudresourcemanager.googleapis.com/Project",
+			Name:         name,
+			Type:         "cloudresourcemanager.googleapis.com/Project",
+			AncestryPath: ancestry,
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
 				DiscoveryName:        "Project",
+				Parent:               parent,
 				Data:                 obj,
 			},
 		}, nil
@@ -76,7 +90,7 @@ func getParentResourceId(d TerraformResourceData, p *cloudresourcemanager.Projec
 }
 
 func GetProjectBillingInfoCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//cloudbilling.googleapis.com/projects/{{project}}/billingInfo")
+	name, err := replaceWithPlaceholder(d, config, "//cloudbilling.googleapis.com/projects/{{project}}/billingInfo")
 	if err != nil {
 		return Asset{}, err
 	}

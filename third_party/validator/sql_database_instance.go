@@ -19,18 +19,31 @@ import (
 )
 
 func GetSQLDatabaseInstanceCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
+	name, err := replaceWithPlaceholder(d, config, "//cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}")
 	if err != nil {
 		return Asset{}, err
 	}
+
+	parent, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
+	ancestry, err := getProjectAncestry(d, config)
+	if err != nil {
+		return Asset{}, err
+	}
+
 	if obj, err := GetSQLDatabaseInstanceApiObject(d, config); err == nil {
 		return Asset{
-			Name: name,
-			Type: "sqladmin.googleapis.com/Instance",
+			Name:         name,
+			Type:         "sqladmin.googleapis.com/Instance",
+			AncestryPath: ancestry,
 			Resource: &AssetResource{
 				Version:              "v1beta4",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/sqladmin/v1beta4/rest",
 				DiscoveryName:        "DatabaseInstance",
+				Parent:               parent,
 				Data:                 obj,
 			},
 		}, nil

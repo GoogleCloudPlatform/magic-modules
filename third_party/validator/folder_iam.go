@@ -38,7 +38,7 @@ func newFolderIamAsset(
 	}
 
 	// The "folder" argument is of the form "folders/12345"
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/{{folder}}")
+	name, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/{{folder}}")
 	if err != nil {
 		return Asset{}, err
 	}

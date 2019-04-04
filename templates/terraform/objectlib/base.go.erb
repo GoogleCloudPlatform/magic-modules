@@ -14,10 +14,16 @@ package google
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-    name, err := assetName(d, config, "<%= asset_name_template -%>")
+    name, err := replaceWithPlaceholder(d, config, "<%= asset_name_template -%>")
     if err != nil {
         return Asset{}, err
     }
+
+    parent, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+    if err != nil {
+        return Asset{}, err
+    }
+
     if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
         return Asset{
             Name: name,
@@ -26,6 +32,7 @@ func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) 
                 Version: "<%= api_version -%>",
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_ns.downcase -%>/<%= api_version -%>/rest",
                 DiscoveryName: "<%= object.name -%>",
+		Parent: parent,
                 Data: obj,
             },
         }, nil

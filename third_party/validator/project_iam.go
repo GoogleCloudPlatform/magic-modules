@@ -39,7 +39,7 @@ func newProjectIamAsset(
 
 	// Ideally we should use project_number, but since that is generated server-side,
 	// we substitute project_id.
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	name, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
 	if err != nil {
 		return Asset{}, err
 	}

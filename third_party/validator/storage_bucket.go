@@ -18,18 +18,31 @@ import (
 )
 
 func GetStorageBucketCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//storage.googleapis.com/{{name}}")
+	name, err := replaceWithPlaceholder(d, config, "//storage.googleapis.com/{{name}}")
 	if err != nil {
 		return Asset{}, err
 	}
+
+	parent, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
+	ancestry, err := getProjectAncestry(d, config)
+	if err != nil {
+		return Asset{}, err
+	}
+
 	if obj, err := GetStorageBucketApiObject(d, config); err == nil {
 		return Asset{
-			Name: name,
-			Type: "storage.googleapis.com/Bucket",
+			Name:         name,
+			Type:         "storage.googleapis.com/Bucket",
+			AncestryPath: ancestry,
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
 				DiscoveryName:        "Bucket",
+				Parent:               parent,
 				Data:                 obj,
 			},
 		}, nil

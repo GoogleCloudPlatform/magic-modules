@@ -3,9 +3,11 @@ package google
 import (
 	"regexp"
 	"testing"
+
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 )
 
-func TestAssetName(t *testing.T) {
+func TestReplaceWithPlaceholder(t *testing.T) {
 	cases := []struct {
 		name            string
 		template        string
@@ -39,7 +41,7 @@ func TestAssetName(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			r := regexp.MustCompile(c.expectedPattern)
 
-			output, err := assetName(c.data, nil, c.template)
+			output, err := replaceWithPlaceholder(c.data, nil, c.template)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -49,6 +51,16 @@ func TestAssetName(t *testing.T) {
 			}
 		})
 	}
+}
+
+type mockTerraformResourceData struct {
+	m map[string]interface{}
+	TerraformResourceData
+}
+
+func (d *mockTerraformResourceData) GetOk(k string) (interface{}, bool) {
+	v, ok := d.m[k]
+	return v, ok
 }
 
 func TestRandString(t *testing.T) {
@@ -65,12 +77,43 @@ func TestRandString(t *testing.T) {
 	}
 }
 
-type mockTerraformResourceData struct {
-	m map[string]interface{}
-	TerraformResourceData
-}
+func TestAncestryPath(t *testing.T) {
+	cases := []struct {
+		name           string
+		input          []*cloudresourcemanager.Ancestor
+		expectedOutput string
+	}{
+		{
+			name:           "Empty",
+			input:          []*cloudresourcemanager.Ancestor{},
+			expectedOutput: "",
+		},
+		{
+			name: "ProjectOrganization",
+			input: []*cloudresourcemanager.Ancestor{
+				{
+					ResourceId: &cloudresourcemanager.ResourceId{
+						Id:   "my-prj",
+						Type: "project",
+					},
+				},
+				{
+					ResourceId: &cloudresourcemanager.ResourceId{
+						Id:   "my-org",
+						Type: "organization",
+					},
+				},
+			},
+			expectedOutput: "organization/my-org/project/my-prj",
+		},
+	}
 
-func (d *mockTerraformResourceData) GetOk(k string) (interface{}, bool) {
-	v, ok := d.m[k]
-	return v, ok
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			output := ancestryPath(c.input)
+			if output != c.expectedOutput {
+				t.Errorf("expected output %q, got %q", c.expectedOutput, output)
+			}
+		})
+	}
 }

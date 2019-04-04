@@ -37,7 +37,7 @@ func newOrganizationIamAsset(
 		return Asset{}, fmt.Errorf("expanding bindings: %v", err)
 	}
 
-	name, err := assetName(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
+	name, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/organizations/{{org_id}}")
 	if err != nil {
 		return Asset{}, err
 	}

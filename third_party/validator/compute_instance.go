@@ -19,18 +19,31 @@ import (
 )
 
 func GetComputeInstanceCaiObject(d TerraformResourceData, config *Config) (Asset, error) {
-	name, err := assetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
+	name, err := replaceWithPlaceholder(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/instances/{{name}}")
 	if err != nil {
 		return Asset{}, err
 	}
+
+	parent, err := replaceWithPlaceholder(d, config, "//cloudresourcemanager.googleapis.com/projects/{{project}}")
+	if err != nil {
+		return Asset{}, err
+	}
+
+	ancestry, err := getProjectAncestry(d, config)
+	if err != nil {
+		return Asset{}, err
+	}
+
 	if obj, err := GetComputeInstanceApiObject(d, config); err == nil {
 		return Asset{
-			Name: name,
-			Type: "compute.googleapis.com/Instance",
+			Name:         name,
+			Type:         "compute.googleapis.com/Instance",
+			AncestryPath: ancestry,
 			Resource: &AssetResource{
 				Version:              "v1",
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
 				DiscoveryName:        "Instance",
+				Parent:               parent,
 				Data:                 obj,
 			},
 		}, nil
