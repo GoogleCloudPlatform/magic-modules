@@ -158,16 +158,10 @@ module Api
       # boolean of if this binding should be generated
       attr_reader :exists
 
-      # the url of iam binding
-      attr_reader :url
-
       def validate
         super
 
         check :exists, type: :boolean, default: false
-        if :exists
-          check :url, type: String, required: true
-        end
       end
     end
 
