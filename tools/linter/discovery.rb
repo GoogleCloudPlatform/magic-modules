@@ -84,6 +84,7 @@ module Discovery
       @product = doc['product']
       @filename = doc['filename']
       @url = doc['url']
+      @aliases = doc['aliases'] || {}
       @resources_in_api_yaml = objects
       @results = fetch_discovery_doc(@url)
     end
@@ -100,13 +101,12 @@ module Discovery
     end
 
     def get_resource(resource)
-      # TODO: (chrisst) add aliases since 'Trigger' is 'BuildTrigger'
-      # in the schema
-
-      # Region, Global should resolve to normal.
       original_resource = resource
+
+      resource = @aliases[resource] if @aliases[resource]
+      # Region, Global should resolve to normal.
       if @results['schemas'][resource]
-        Resource.new(@results['schemas'][resource], resource, self)
+        Resource.new(@results['schemas'][resource], original_resource, self)
       elsif @results['schemas'][resource.sub('Region', '')]
         resource = resource.sub('Region', '')
         Resource.new(@results['schemas'][resource], resource, self)
