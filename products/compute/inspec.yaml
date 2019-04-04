@@ -29,6 +29,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  GlobalAddress: !ruby/object:Overrides::Inspec::ResourceOverride
+    properties:
+      address:  !ruby/object:Overrides::Inspec::PropertyOverride
+        description: |
+          The static external IP address represented by this resource.
   Image: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Instance: !ruby/object:Overrides::Inspec::ResourceOverride
