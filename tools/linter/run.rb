@@ -32,14 +32,19 @@ require 'yaml'
 require 'rspec'
 
 Google::LOGGER.level = Logger::ERROR
-VALID_KEYS = %w[filename url product version].sort.freeze
+REQUIRED_KEYS = %w[filename url product version].freeze
+VALID_KEYS = (REQUIRED_KEYS + %w[aliases]).freeze
 
 doc_file = 'tools/linter/docs.yaml'
 docs = YAML.safe_load(File.read(doc_file))
 
 docs.each do |doc|
-  raise "#{doc.keys} contains invalid keys. Valid keys are #{VALID_KEYS}" \
-    unless doc.keys.sort == VALID_KEYS
+  raise "Missing required keys #{REQUIRED_KEYS} for #{doc['product']}" \
+    unless REQUIRED_KEYS & doc.keys == REQUIRED_KEYS
+
+  doc.keys.each do |key|
+    raise "#{key} is an invalid key." unless VALID_KEYS.include? key
+  end
 
   api = ApiFetcher.api_from_file(doc['filename'])
   builder = Discovery::Builder.new(doc, api.objects.map(&:name))

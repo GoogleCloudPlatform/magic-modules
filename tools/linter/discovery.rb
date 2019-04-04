@@ -100,6 +100,9 @@ module Discovery
     end
 
     def get_resource(resource)
+      # TODO: (chrisst) add aliases since 'Trigger' is 'BuildTrigger'
+      # in the schema
+
       # Region, Global should resolve to normal.
       original_resource = resource
       if @results['schemas'][resource]
@@ -133,11 +136,11 @@ module Discovery
     end
 
     def list_of_resource_keys
-      if @results['resources'].keys == ['projects']
-        @resources_in_api_yaml
-      else
-        @results['resources'].keys.reject { |o| o.downcase.include?('operation') }
-      end
+      # There are 2 main ways to format discovery docs, check for the
+      # newer format first, then fall back to the old.
+      resources = @results.dig('resources', 'projects', 'resources') || @results['resources']
+
+      resources.keys.reject { |o| o.downcase.include?('operation') }
     end
   end
 end
