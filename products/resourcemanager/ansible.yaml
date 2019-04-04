@@ -30,6 +30,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Folder: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  Organization: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Lien: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
