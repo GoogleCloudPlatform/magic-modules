@@ -80,10 +80,12 @@ module Discovery
   class Builder
     attr_reader :results
 
-    def initialize(url, objects)
-      @url = url
+    def initialize(doc, objects)
+      @product = doc['product']
+      @filename = doc['filename']
+      @url = doc['url']
       @resources_in_api_yaml = objects
-      @results = fetch_discovery_doc(url)
+      @results = fetch_discovery_doc(@url)
     end
 
     def resources
@@ -98,6 +100,9 @@ module Discovery
     end
 
     def get_resource(resource)
+      # TODO: (chrisst) add aliases since 'Trigger' is 'BuildTrigger'
+      # in the schema
+
       # Region, Global should resolve to normal.
       original_resource = resource
       if @results['schemas'][resource]
@@ -109,7 +114,7 @@ module Discovery
         resource = resource.sub('Global', '')
         Resource.new(@results['schemas'][resource], resource, self)
       else
-        puts "#{original_resource} from api.yaml not found in discovery docs - #{@url}"
+        puts "#{original_resource} from #{@filename} not found in discovery docs - #{@url}"
       end
     end
 
@@ -131,11 +136,11 @@ module Discovery
     end
 
     def list_of_resource_keys
-      if @results['resources'].keys == ['projects']
-        @resources_in_api_yaml
-      else
-        @results['resources'].keys.reject { |o| o.downcase.include?('operation') }
-      end
+      # There are 2 main ways to format discovery docs, check for the
+      # newer format first, then fall back to the old.
+      resources = @results.dig('resources', 'projects', 'resources') || @results['resources']
+
+      resources.keys.reject { |o| o.downcase.include?('operation') }
     end
   end
 end
