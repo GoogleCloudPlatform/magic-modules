@@ -33,7 +33,7 @@
   version: v1
   filename: products/cloudbuild/api.yaml
   aliases:
-    - Trigger: BuildTrigger
+    Trigger: BuildTrigger
 - url: https://clouddebugger.googleapis.com/$discovery/rest?version=v2
   product: clouddebugger
   version: v2

@@ -14,7 +14,7 @@ The linter is powered by RSpec.
   rspec tools/linter/run.rb
 ```
 
-Tests are divided into two parts: property tests and resource tests. The linter uses [rspec tags](https://relishapp.com/rspec/rspec-core/v/3-8/docs/command-line/tag-option) to filter which tests are run. The tests are broken down into `property` and `resource` tests and can be run with `--tag property` or `--tag resource`. It is also possible to filter by product using `--tag product:name`.
+Tests are divided into two parts: property tests and resource tests. The linter uses [rspec tags](https://relishapp.com/rspec/rspec-core/v/3-8/docs/command-line/tag-option) to filter which tests are run. The tests are broken down into `property` and `resource` tests and can be run with `--tag property` or `--tag resource`. It is also possible to filter by product or resource `--tag product:<name>` or `--tag resource:<name>`.
 
 To run only property tests, do the following:
 ```
@@ -24,6 +24,11 @@ To run only property tests, do the following:
 To run only cloudbuild tests, do the following:
 ```
   rspec tools/linter/run.rb --tag product:cloudbuild
+```
+
+To run only cloudbuild Trigger tests, do the following:
+```
+  rspec tools/linter/run.rb --tag resource:Trigger
 ```
 
 ## Getting Results as a CSV
