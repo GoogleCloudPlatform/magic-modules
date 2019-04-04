@@ -36,6 +36,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/avoid_meaningless_project_update.erb
   Folder: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  Organization: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
