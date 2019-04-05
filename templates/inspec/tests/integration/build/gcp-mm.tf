@@ -129,6 +129,10 @@ variable "backend_bucket" {
 
 variable "gcp_cloud_function_region" {}
 
+variable "regional_node_pool" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -369,7 +373,8 @@ resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   project = "${var.gcp_project_id}"
   name = "${var.regional_cluster["name"]}"
   region = "${var.gcp_location}"
-  initial_node_count = "${var.regional_cluster["initial_node_count"]}"
+  initial_node_count = 1
+  remove_default_node_pool = true
 }
 
 resource "google_compute_route" "gcp-inspec-route" {
@@ -501,4 +506,12 @@ resource "google_compute_backend_bucket" "image_backend" {
   description = "${var.backend_bucket["description"]}"
   bucket_name = "${google_storage_bucket.generic-storage-bucket.name}"
   enable_cdn  = "${var.backend_bucket["enable_cdn"]}"
+}
+
+resource "google_container_node_pool" "inspec-gcp-regional-node-pool" {
+  project    = "${var.gcp_project_id}"
+  name       = "${var.regional_node_pool["name"]}"
+  region     = "${var.gcp_location}"
+  cluster    = "${google_container_cluster.gcp-inspec-regional-cluster.name}"
+  node_count = "${var.regional_node_pool["node_count"]}"
 }
