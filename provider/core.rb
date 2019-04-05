@@ -333,8 +333,8 @@ module Provider
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
 
-      generate_resource data
-      generate_resource_tests data
+      generate_resource data.clone
+      generate_resource_tests data.clone
     end
 
     def generate_datasources(output_folder, types, version_name)
@@ -368,7 +368,7 @@ module Provider
     def generate_datasource(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
 
-      compile_datasource data
+      compile_datasource data.clone
     end
 
     def build_object_data(object, output_folder, version)

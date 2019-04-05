@@ -55,9 +55,9 @@ module Provider
                               "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
                     self)
 
-      generate_documentation(data, name, false)
-      generate_documentation(data, name, true)
-      generate_properties(data, data.object.all_user_properties)
+      generate_documentation(data.clone, name, false)
+      generate_documentation(data.clone, name, true)
+      generate_properties(data.clone, data.object.all_user_properties)
     end
 
     def generate_properties(data, props)
@@ -89,14 +89,10 @@ module Provider
 
       name = plural ? base_name.pluralize : base_name
 
-      # We need to clone the data object, since we're making temporary alterations
-      # to it for documentation. These alterations shouldn't exist after documentation
-      # creation.
-      copied_data = data.clone
-      copied_data.name = name
-      copied_data.plural = plural
-      copied_data.doc_generation = true
-      copied_data.generate('templates/inspec/doc_template.md.erb',
+      data.name = name
+      data.plural = plural
+      data.doc_generation = true
+      data.generate('templates/inspec/doc_template.md.erb',
                            File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
                            self)
     end
@@ -117,22 +113,19 @@ module Provider
 
       name = "google_#{data.product.api_name}_#{data.object.name.underscore}"
 
-      generate_inspec_test(data, name, target_folder, name)
+      generate_inspec_test(data.clone, name, target_folder, name)
 
       # Build test for plural resource
-      generate_inspec_test(data, name.pluralize, target_folder, name)
+      generate_inspec_test(data.clone, name.pluralize, target_folder, name)
     end
 
     def generate_inspec_test(data, name, target_folder, attribute_file_name)
-      # We need to clone the data object, since we're making temporary alterations
-      # to it for test. These alterations shouldn't exist after test creation.
-      copied_data = data.clone
-      copied_data.name = name
-      copied_data.attribute_file_name = attribute_file_name
-      copied_data.doc_generation = false
-      copied_data.privileged = data.object.privileged
+      data.name = name
+      data.attribute_file_name = attribute_file_name
+      data.doc_generation = false
+      data.privileged = data.object.privileged
 
-      copied_data.generate('templates/inspec/integration_test_template.erb',
+      data.generate('templates/inspec/integration_test_template.erb',
                            File.join(
                              target_folder,
                              'integration/verify/controls',

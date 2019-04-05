@@ -172,12 +172,9 @@ module Provider
       dir = data.version == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data.output_folder, dir)
 
-      # We need to make alterations to the data just for generating operations.
-      # These changes should not exist after operation generation happens.
-      copied_data = data.clone
-      copied_data.async = async
-      copied_data.object = @api.objects.first
-      copied_data.generate('templates/terraform/operation.go.erb',
+      data.async = async
+      data.object = @api.objects.first
+      data.generate('templates/terraform/operation.go.erb',
                            File.join(target_folder,
                                      "#{product_name}_operation.go"),
                            self)
