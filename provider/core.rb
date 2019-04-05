@@ -309,6 +309,10 @@ module Provider
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
+          unless object.iam_policy&.exclude
+            Google::LOGGER.info "Generating #{object.name} IAM policy without #{object.name}"
+            generate_iam_policy data
+          end
         elsif types.empty? && object.not_in_version?(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
@@ -335,7 +339,7 @@ module Provider
 
       generate_resource data.clone
       generate_resource_tests data.clone
-      generate_iam_policy(data.clone) if data.object.iam_policy&.exists
+      generate_iam_policy(data.clone) unless object.iam_policy&.exclude
     end
 
     def generate_datasources(output_folder, types, version_name)

@@ -156,12 +156,12 @@ module Api
     # Represents a list of documentation links.
     class IamPolicy < Api::Object
       # boolean of if this binding should be generated
-      attr_reader :exists
+      attr_reader :exclude
 
       def validate
         super
 
-        check :exists, type: :boolean, default: false
+        check :exclude, type: :boolean, default: false
       end
     end
 
