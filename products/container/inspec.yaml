@@ -23,7 +23,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # that can handle zonal resources only
     name: 'RegionalCluster'
   NodePool: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    # See note on RegionalCluster, similar for NodePool
+    name: 'RegionalNodePool'
+    base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
+    properties:
+      cluster: !ruby/object:Overrides::Inspec::PropertyOverride
+        resource: 'RegionalCluster'
   KubeConfig: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
 files: !ruby/object:Provider::Config::Files
