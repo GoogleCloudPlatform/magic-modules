@@ -40,14 +40,6 @@ resources:
         stop: 11:59 PM
         location: America/Los_Angeles
 
-    - name: week-trigger
-      type: time
-      source:
-        start: 11:00 PM
-        stop: 11:59 PM
-        days: [Sunday]
-        location: America/Los_Angeles
-
     - name: terraform-head
       type: git-branch
       source:
@@ -67,7 +59,7 @@ jobs:
                 CREDS: ((repo-key.private_key))
     - name: coverage-spreadsheet-release
       plan:
-          - get: week-trigger
+          - get: night-trigger
             trigger: true
           - get: magic-modules-gcp
             trigger: false
