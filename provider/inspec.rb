@@ -61,6 +61,8 @@ module Provider
       generate_properties(data.clone, data.object.all_user_properties)
     end
 
+    # Generate the IAM policy for this object. This is used to query and test
+    # IAM policies separately from the resource itself
     def generate_iam_policy(data)
       property_target = File.join(data[:output_folder], 'libraries/google/iam/property')
       FileUtils.mkpath property_target
@@ -289,6 +291,11 @@ module Provider
         return "#{class_name}Array.parse(#{item_from_hash}, to_s)"
       end
       "#{modularized_property_class(property)}.new(#{item_from_hash}, to_s)"
+    end
+
+    # Extracts identifiers of a resource in the form {{identifier}} from a url
+    def extract_identifiers(url)
+      url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
 end

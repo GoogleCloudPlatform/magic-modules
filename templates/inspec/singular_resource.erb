@@ -88,7 +88,7 @@ class <%= object.name -%> < GcpResourceBase
 
 <% 
 individual_url = format_url(object.self_link_url[1])
-best_guess_identifier = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }.last 
+best_guess_identifier = extract_identifiers(individual_url).last 
 -%>
   def to_s
     "<%= object.name -%> #{@params[:<%= best_guess_identifier -%>]}"

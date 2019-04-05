@@ -8,11 +8,17 @@ platform: gcp
 A `<%= iam_resource_name -%>` is used to test a Google <%= object.name -%> Iam Policy resource
 
 ## Examples
+<%
+identifiers = extract_identifiers(format_url(object.self_link_url[1]))
+identifiers_out = identifiers.map { |id| "#{id}: #{id.inspect}" }.join(', ')
+-%>
 ```
-describe google_compute_subnetwork_policy(project: 'chef-gcp-inspec', region: 'europe-west2', subnetwork: 'test-subnetwork') do
+describe <%= iam_resource_name -%>(<%= identifiers_out -%>) do
   it { should exist }
-  its('bindings.first.role') { should eq 'roles/compute.networkUser'}
-  its('bindings.first.members') { should include 'user:slevenick@google.com'}
+end
+
+describe <%= iam_resource_name -%>(<%= identifiers_out -%>).bindings do |binding|
+  its('role') { should_not eq 'roles/owner' }
 end
 ```
 
