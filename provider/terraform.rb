@@ -175,9 +175,9 @@ module Provider
       data.async = async
       data.object = @api.objects.first
       data.generate('templates/terraform/operation.go.erb',
-                           File.join(target_folder,
-                                     "#{product_name}_operation.go"),
-                           self)
+                    File.join(target_folder,
+                              "#{product_name}_operation.go"),
+                    self)
     end
   end
 end
