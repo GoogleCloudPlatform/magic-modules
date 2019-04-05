@@ -940,7 +940,7 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				// sometimes but not always share metadata fingerprints.
 				instance, err := config.clientComputeBeta.Instances.Get(project, zone, d.Id()).Do()
 				if err != nil {
-					return handleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
+					return fmt.Errorf("Error retrieving metadata: %s", err)
 				}
 
 				metadataV1.Fingerprint = instance.Metadata.Fingerprint
