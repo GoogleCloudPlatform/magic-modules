@@ -26,19 +26,19 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_variable_name: resource_group
+            python_parameter_name: resource_group
           'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: namespaces
             go_variable_name: servicebusName
-            python_variable_name: namespace
+            python_parameter_name: namespace
           'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: disasterRecoveryConfigs
             go_variable_name: name
-            python_variable_name: name
+            python_parameter_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
             go_type_name: ArmDisasterRecovery
-            python_variable_name: parameters
+            python_parameter_name: parameters
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_field_name: ArmDisasterRecoveryProperties 
             go_type_name: ArmDisasterRecoveryProperties 
@@ -53,15 +53,15 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_variable_name: resource_group
+            python_parameter_name: resource_group
           'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: namespaces
             go_variable_name: servicebusName
-            python_variable_name: namespace
+            python_parameter_name: namespace
           'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: disasterRecoveryConfigs
             go_variable_name: name
-            python_variable_name: name
+            python_parameter_name: name
         response:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_variable_name: resourceGroup
@@ -86,15 +86,15 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_variable_name: resource_group
+            python_parameter_name: resource_group
           'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: namespaces
             go_variable_name: servicebusName
-            python_variable_name: namespace
+            python_parameter_name: namespace
           'alias': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: disasterRecoveryConfigs
             go_variable_name: name
-            python_variable_name: name
+            python_parameter_name: name
 
     description: |
       Manages a service bus disaster recovery config on Azure.

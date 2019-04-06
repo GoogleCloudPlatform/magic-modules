@@ -94,6 +94,12 @@ module Google
       instance_variable_set("@#{property}", def_value) if value.nil?
     end
 
+    def check_property_value_oneof(property, prop_value, valid_values, type)
+      check_property_value property, prop_value, type
+      raise "Invalid #{property} #{prop_value}" \
+        unless valid_values.include?(prop_value)
+    end
+
     def check_extraneous_properties
       instance_variables.each do |variable|
         var_name = variable.id2name[1..-1]
@@ -127,6 +133,12 @@ module Google
       check_property_list(name, type)
     end
 
+    def check_optional_property_list_oneof(name, valid_values, type = nil)
+      obj_list = instance_variable_get("@#{name}")
+      return if obj_list.nil?
+      obj_list.each { |o| check_property_value_oneof "#{name}:item", o, valid_values, type }
+    end
+
     def check_property_hash(name, keyType = nil, valType = nil)
       obj_hash = instance_variable_get("@#{name}")
       if obj_hash.nil?
@@ -150,10 +162,7 @@ module Google
     # Verifies if a property is of a given type and its value are one of the
     # valid possibilities.
     def check_property_oneof(property, valid_values, type = nil)
-      check_property(property, type)
-      prop_value = instance_variable_get("@#{property}")
-      raise "Invalid #{property} #{prop_value}" \
-        unless valid_values.include?(prop_value)
+      check_property_value_oneof property, instance_variable_get("@#{property}"), valid_values, type
     end
 
     # Similar to 'check_property_oneof' but assigns a default value if missing.

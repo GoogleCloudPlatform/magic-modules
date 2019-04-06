@@ -5,6 +5,8 @@ module Api
   module Azure
     class SDKDefinition < Api::Object
       attr_reader :provider_name
+      attr_reader :go_client_namespace
+      attr_reader :go_client
       attr_reader :python_client_namespace
       attr_reader :python_client
       attr_reader :create
@@ -15,6 +17,8 @@ module Api
       def validate
         super
         check_optional_property :provider_name, String
+        check_optional_property :go_client_namespace, String
+        check_optional_property :go_client, String
         check_optional_property :python_client_namespace, String
         check_optional_property :python_client, String
         check_property :create, Api::Azure::SDKOperationDefinition

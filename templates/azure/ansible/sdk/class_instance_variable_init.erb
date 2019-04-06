@@ -1,0 +1,11 @@
+<%  params = object.azure_sdk_definition.create.request.reject {|k, v| k.start_with?("/") && k != "/"} -%>
+<%  params.each do |name, value| -%>
+<%    case value -%>
+<%    when Api::Azure::SDKTypeDefinition::StringObject -%>
+self.<%= value.python_parameter_name -%> = None
+<%    when Api::Azure::SDKTypeDefinition::ComplexObject -%>
+self.<%= value.python_parameter_name -%> = dict()
+<%    else -%>
+# TODO: <%= value -%> is not supported for initialization
+<%    end -%>
+<%  end -%>

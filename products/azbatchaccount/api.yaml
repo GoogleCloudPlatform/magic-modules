@@ -114,30 +114,30 @@ objects:
             go_variable_name: name
             python_parameter_name: name
           'tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            applicable_to: [:python]
+            applicable_to: [python]
             python_parameter_name: tags
           'autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            applicable_to: [:python]
-            python_vairiable_name: auto_storage
+            applicable_to: [python]
+            python_parameter_name: auto_storage
           'autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            applicable_to: [:python]
+            applicable_to: [python]
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            applicable_to: [:go]
+            applicable_to: [go]
             go_variable_name: parameters
             go_type_name: AccountUpdateParameters
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            applicable_to: [:go]
+            applicable_to: [go]
             go_field_name: AccountUpdateProperties
             go_type_name: AccountUpdateProperties
           '/properties/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            applicable_to: [:go]
+            applicable_to: [go]
             go_field_name: AutoStorage
             go_type_name: AutoStorageBaseProperties
           '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            applicable_to: [:go]
+            applicable_to: [go]
             go_field_name: StorageAccountID
           '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            applicable_to: [:go]
+            applicable_to: [go]
             go_field_name: Tags
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
         async: true

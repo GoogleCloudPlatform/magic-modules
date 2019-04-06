@@ -20,6 +20,8 @@ __metaclass__ = type
     combine_create_update = object.azure_sdk_definition.update.nil? || (object.azure_sdk_definition.create.python_func_name == object.azure_sdk_definition.update.python_func_name)
     python_sdk_client = object.azure_sdk_definition.python_client.split(".")[0]
     python_sdk_sub_client = object.azure_sdk_definition.python_client.split(".")[1]
+
+    input_properties = object.all_user_properties.reject(&:output)
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.get('status', object) -%>,
@@ -39,7 +41,7 @@ description:
 
 <%= to_yaml({
   'options' => [
-    object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) },
+    input_properties.map{|p| documentation_for_property(p)},
     {
       'state' => {
         'description' => [
@@ -112,9 +114,15 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
 
     def __init__(self):
         self.module_arg_spec = dict(
-          # TODO: Finish type declaration
+<%= lines(indent_list(input_properties.map{|p| python_dict_for_property(p, object)}, 12, true)) -%>
+            state=dict(
+                type='str',
+                default='present',
+                choices=['present', 'absent']
+            )
         )
-        # TODO: Argument Properties
+
+<%= lines(build_class_instance_variable_init(object)) -%>
 
         self.results = dict(changed=False)
         self.mgmt_client = None
@@ -122,7 +130,6 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
         self.to_do = Actions.NoAction
 
         required_if = [
-            # TODO: Required If
             ('state', 'present', [])
         ]
 
