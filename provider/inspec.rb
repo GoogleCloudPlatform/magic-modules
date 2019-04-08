@@ -43,21 +43,21 @@ module Provider
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
-      target_folder = File.join(data[:output_folder], 'libraries')
-      FileUtils.mkpath target_folder
-      name = data[:object].name.underscore
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/singular_resource.erb',
-        out_file: File.join(target_folder, "google_#{data[:product].api_name}_#{name}.rb")
-      )
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/plural_resource.erb',
-        out_file: \
-          File.join(target_folder, "google_#{data[:product].api_name}_#{name}".pluralize + '.rb')
-      )
-      generate_documentation(data, name, false)
-      generate_documentation(data, name, true)
-      generate_properties(data, data[:object].all_user_properties)
+      target_folder = File.join(data.output_folder, 'libraries')
+      name = data.object.name.underscore
+
+      data.generate('templates/inspec/singular_resource.erb',
+                    File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+                    self)
+
+      data.generate('templates/inspec/plural_resource.erb',
+                    File.join(target_folder,
+                              "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+                    self)
+
+      generate_documentation(data.clone, name, false)
+      generate_documentation(data.clone, name, true)
+      generate_properties(data.clone, data.object.all_user_properties)
     end
 
     def generate_properties(data, props)
@@ -76,25 +76,25 @@ module Provider
     def generate_property_files(prop_map, data)
       prop_map.flatten.compact.each do |prop|
         compile_file_list(
-          data[:output_folder],
+          data.output_folder,
           { prop[:target] => prop[:source] },
-          prop
+          property: prop[:property]
         )
       end
     end
 
     # Generates InSpec markdown documents for the resource
     def generate_documentation(data, base_name, plural)
-      docs_folder = File.join(data[:output_folder], 'docs', 'resources')
+      docs_folder = File.join(data.output_folder, 'docs', 'resources')
 
       name = plural ? base_name.pluralize : base_name
-      generate_resource_file data.clone.merge(
-        name: name,
-        plural: plural,
-        doc_generation: true,
-        default_template: 'templates/inspec/doc_template.md.erb',
-        out_file: File.join(docs_folder, "google_#{data[:product].api_name}_#{name}.md")
-      )
+
+      data.name = name
+      data.plural = plural
+      data.doc_generation = true
+      data.generate('templates/inspec/doc_template.md.erb',
+                    File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+                    self)
     end
 
     # Format a url that may be include newlines into a single line
@@ -106,32 +106,32 @@ module Provider
 
     # Copies InSpec tests to build folder
     def generate_resource_tests(data)
-      target_folder = File.join(data[:output_folder], 'test')
+      target_folder = File.join(data.output_folder, 'test')
       FileUtils.mkpath target_folder
 
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
 
-      name = "google_#{data[:product].api_name}_#{data[:object].name.underscore}"
+      name = "google_#{data.product.api_name}_#{data.object.name.underscore}"
 
-      generate_inspec_test(data, name, target_folder, name)
+      generate_inspec_test(data.clone, name, target_folder, name)
 
       # Build test for plural resource
-      generate_inspec_test(data, name.pluralize, target_folder, name)
+      generate_inspec_test(data.clone, name.pluralize, target_folder, name)
     end
 
     def generate_inspec_test(data, name, target_folder, attribute_file_name)
-      generate_resource_file data.clone.merge(
-        name: name,
-        attribute_file_name: attribute_file_name,
-        doc_generation: false,
-        default_template: 'templates/inspec/integration_test_template.erb',
-        privileged: data[:object].privileged,
-        out_file: File.join(
-          target_folder,
-          'integration/verify/controls',
-          "#{name}.rb"
-        )
-      )
+      data.name = name
+      data.attribute_file_name = attribute_file_name
+      data.doc_generation = false
+      data.privileged = data.object.privileged
+
+      data.generate('templates/inspec/integration_test_template.erb',
+                    File.join(
+                      target_folder,
+                      'integration/verify/controls',
+                      "#{name}.rb"
+                    ),
+                    self)
     end
 
     def emit_nested_object(property)

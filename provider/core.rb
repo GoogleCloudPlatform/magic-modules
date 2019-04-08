@@ -28,6 +28,128 @@ module Provider
     quiet: false
   }.freeze
 
+  # Responsible for generating a file
+  # with a given set of parameters.
+  class FileTemplate
+    include Compile::Core
+    # The name of the resource
+    attr_accessor :name
+    # The resource itself.
+    attr_accessor :object
+    # The entire API object.
+    attr_accessor :product
+    # The API version
+    attr_accessor :version
+    # The root folder we're outputting to.
+    attr_accessor :output_folder
+    # The namespace of the product.
+    attr_accessor :product_ns
+    # The provider-specific configuration.
+    attr_accessor :config
+    # The provider specific high-level configuration fields.
+    attr_accessor :manifest
+    # Information about the local environment
+    # (which formatters are enabled, start-time)
+    attr_accessor :env
+
+    # Ansible stuff.
+    # The Ansible example object.
+    attr_accessor :example
+
+    # InSpec stuff.
+    # Is this a plural resource?
+    attr_accessor :plural
+    # Should we generate documentation?
+    attr_accessor :doc_generation
+    # The file name of the attribute
+    attr_accessor :attribute_file_name
+    attr_accessor :privileged
+    attr_accessor :property
+
+    # Terraform stuff.
+    # The async object used for making operations.
+    # We assume that all resources share the same async properties.
+    attr_accessor :async
+    attr_accessor :resource_name
+
+    def initialize(options)
+      options.each { |k, v| method("#{k}=").call(v) }
+
+      @env = {
+        pyformat_enabled: options.dig(:env, :pyformat_enabled),
+        goformat_enabled: options.dig(:env, :goformat_enabled),
+        start_time: options.dig(:env, :start_time)
+      }
+    end
+
+    # Given the data object for a file, write that file and verify that it
+    # passes these conditions:
+    #
+    # - The file has not been generated already this run
+    # - The file has an autogen exception or an autogen notice defined
+    #
+    # Once the file's contents are written, set the proper [chmod] mode and
+    # format the file with a language-appropriate formatter.
+    def generate(template, path, provider)
+      folder = File.dirname(path)
+      FileUtils.mkpath folder unless Dir.exist?(folder)
+
+      # If we've modified a file since starting an MM run, it's a reasonable
+      # assumption that it was this run that modified it.
+      if File.exist?(path) && File.mtime(path) > @env[:start_time]
+        raise "#{path} was already modified during this run"
+      end
+
+      # You're looking at some magic here!
+      # This is how variables are made available in templates; we iterate
+      # through each key:value pair in this object, and we set them
+      # in the scope of the provider.
+      #
+      # The templates get access to everything in the provider +
+      # all of the variables in this object.
+      ctx = provider.provider_binding
+      instance_variables.each do |name|
+        ctx.local_variable_set(name[1..-1], instance_variable_get(name))
+      end
+
+      # This variable is used in ansible/resource.erb
+      ctx.local_variable_set('file_relative', relative_path(path, @output_folder).to_s)
+
+      Google::LOGGER.debug "Generating #{@name}"
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }
+
+      # Files are often generated in parallel.
+      # We can use thread-local variables to ensure that autogen checking
+      # stays specific to the file each thred represents.
+      raise "#{path} missing autogen" unless Thread.current[:autogen]
+
+      old_file_chmod_mode = File.stat(template).mode
+      FileUtils.chmod(old_file_chmod_mode, path)
+
+      format_output_file(path)
+    end
+
+    private
+
+    def format_output_file(path)
+      if path.end_with?('.py') && @env[:pyformat_enabled]
+        run_formatter("python3 -m black --line-length 160 -S #{path}")
+      elsif path.end_with?('.go') && @env[:goformat_enabled]
+        run_formatter("gofmt -w -s #{path}")
+        run_formatter("goimports -w #{path}")
+      end
+    end
+
+    def run_formatter(command)
+      output = %x(#{command} 2>&1)
+      Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
+    end
+
+    def relative_path(target, base)
+      Pathname.new(target).relative_path_from(Pathname.new(base))
+    end
+  end
+
   # Basic functionality for code generator providers. Provides basic services,
   # such as compiling and including files, formatting data, etc.
   class Core
@@ -44,6 +166,11 @@ module Provider
       @start_time = start_time
       @py_format_enabled = check_pyformat
       @go_format_enabled = check_goformat
+    end
+
+    # This provides the FileTemplate class with access to a provider.
+    def provider_binding
+      binding
     end
 
     def check_pyformat
@@ -153,24 +280,18 @@ module Provider
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
           manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
-          generate_file(
-            data.clone.merge(
-              name: target,
-              product: @api,
-              object: {},
-              config: {},
-              scopes: @api.scopes,
-              manifest: manifest,
-              tests: '',
-              template: source,
-              compiler: compiler,
-              output_folder: output_folder,
-              out_file: target_file,
-              product_ns: @api.name
-            )
-          )
-
-          format_output_file(target_file)
+          FileTemplate.new({
+            name: target,
+            product: @api,
+            manifest: manifest,
+            output_folder: output_folder,
+            product_ns: @api.name,
+            env: {
+              pyformat_enabled: @py_format_enabled,
+              goformat_enabled: @go_format_enabled,
+              start_time: @start_time
+            }
+          }.merge(data)).generate(source, target_file, self)
         end
       end.map(&:join)
     end
@@ -212,8 +333,8 @@ module Provider
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
 
-      generate_resource data
-      generate_resource_tests data
+      generate_resource data.clone
+      generate_resource_tests data.clone
     end
 
     def generate_datasources(output_folder, types, version_name)
@@ -247,25 +368,24 @@ module Provider
     def generate_datasource(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
 
-      compile_datasource data
+      compile_datasource data.clone
     end
 
     def build_object_data(object, output_folder, version)
-      {
+      FileTemplate.new(
         name: object.out_name,
         object: object,
         product: object.__product,
+        product_ns: object.__product.name,
         output_folder: output_folder,
-        version: version
-      }
-    end
-
-    def generate_resource_file(data)
-      generate_file(data.clone.merge(
-        # Override with provider specific template for this object, if needed
-        template: data[:default_template],
-        product_ns: data[:object].__product.name
-      ))
+        version: version,
+        config: @config,
+        env: {
+          pyformat_enabled: @py_format_enabled,
+          goformat_enabled: @go_format_enabled,
+          start_time: @start_time
+        }
+      )
     end
 
     def build_url(url_parts, extra = false)
@@ -314,10 +434,6 @@ module Provider
       (code + (self_code || [])).join("\n")
     end
 
-    def relative_path(target, base)
-      Pathname.new(target).relative_path_from(Pathname.new(base))
-    end
-
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
@@ -361,63 +477,6 @@ module Provider
     def emit_link_var_args_list(_url, extra_data, args_list)
       [args_list[0],
        (args_list[2] if extra_data)]
-    end
-
-    # Given the data object for a file, write that file and verify that it
-    # passes these conditions:
-    #
-    # - The file has not been generated already this run
-    # - The file has an autogen exception or an autogen notice defined
-    #
-    # Once the file's contents are written, set the proper [chmod] mode and
-    # format the file with a language-appropriate formatter.
-    def generate_file(data)
-      path = data[:out_file]
-      folder = File.dirname(path)
-      FileUtils.mkpath folder unless Dir.exist?(folder)
-
-      # This variable looks unused, but is used in ansible/resource.erb
-      file_relative = relative_path(path, data[:output_folder]).to_s
-
-      # If we've modified a file since starting an MM run, it's a reasonable
-      # assumption that it was this run that modified it.
-      if File.exist?(path) && File.mtime(path) > @start_time
-        raise "#{path} was already modified during this run"
-      end
-
-      # You're looking at some magic here!
-      # This is how variables are made available in templates; we iterate
-      # through each key:value pair in the common `data` object, and we set them
-      # in the scope of the .erb files.
-      ctx = binding
-      data.each { |name, value| ctx.local_variable_set(name, value) }
-
-      Google::LOGGER.debug "Generating #{data[:name]} #{data[:type]}"
-      File.open(path, 'w') { |f| f.puts compile_file(ctx, data[:template]) }
-
-      # Files are often generated in parallel.
-      # We can use thread-local variables to ensure that autogen checking
-      # stays specific to the file each thred represents.
-      raise "#{path} missing autogen" unless Thread.current[:autogen]
-
-      old_file_chmod_mode = File.stat(data[:template]).mode
-      FileUtils.chmod(old_file_chmod_mode, path)
-
-      format_output_file(path)
-    end
-
-    def format_output_file(path)
-      if path.end_with?('.py') && @py_format_enabled
-        run_formatter("python3 -m black --line-length 160 -S #{path}")
-      elsif path.end_with?('.go') && @go_format_enabled
-        run_formatter("gofmt -w -s #{path}")
-        run_formatter("goimports -w #{path}")
-      end
-    end
-
-    def run_formatter(command)
-      output = %x(#{command} 2>&1)
-      Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
     end
 
     def wrap_field(field, spaces)
