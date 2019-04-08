@@ -14,13 +14,11 @@ import (
 )
 
 var dataflowTerminalStatesMap = map[string]struct{}{
-	"JOB_STATE_DONE":       {},
-	"JOB_STATE_FAILED":     {},
-	"JOB_STATE_CANCELLED":  {},
-	"JOB_STATE_UPDATED":    {},
-	"JOB_STATE_DRAINING":   {},
-	"JOB_STATE_DRAINED":    {},
-	"JOB_STATE_CANCELLING": {},
+	"JOB_STATE_DONE":      {},
+	"JOB_STATE_FAILED":    {},
+	"JOB_STATE_CANCELLED": {},
+	"JOB_STATE_UPDATED":   {},
+	"JOB_STATE_DRAINED":   {},
 }
 
 func resourceDataflowJob() *schema.Resource {
@@ -83,6 +81,7 @@ func resourceDataflowJob() *schema.Resource {
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 
