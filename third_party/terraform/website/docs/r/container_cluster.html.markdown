@@ -445,7 +445,7 @@ This block also contains several computed attributes, documented below. If this 
 
 The `master_authorized_networks_config` block supports:
 
-* `cidr_blocks` - (Optional) Defines up to 20 external networks that can access
+* `cidr_blocks` - (Optional) Defines external networks that can access
     Kubernetes master through HTTPS.
 
 The `master_authorized_networks_config.cidr_blocks` block supports:
