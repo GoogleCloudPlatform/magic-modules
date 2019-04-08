@@ -48,7 +48,7 @@ objects:
         name: 'description'
         description: |
           Human-readable description of the trigger.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Boolean
         name: 'disabled'
         description: |
           Whether the trigger is disabled or not. If true, the trigger will never result in a build.
