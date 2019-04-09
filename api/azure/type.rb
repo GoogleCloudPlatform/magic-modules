@@ -5,12 +5,24 @@ module Api
     module Type
 
       class ResourceGroupName < Api::Type::String
+        def validate
+          @order ||= 550
+          super
+        end
       end
 
       class Location < Api::Type::String
+        def validate
+          @order ||= 600
+          super
+        end
       end
 
       class Tags < Api::Type::KeyValuePairs
+        def validate
+          @order ||= 2000
+          super
+        end
       end
 
     end

@@ -51,5 +51,13 @@ module Google
     def method_call(name, args)
       "#{name}(#{args.compact.join(', ')})"
     end
+
+    def python_field_name(property, sdk_op_def)
+      sdk_ref = property.azure_sdk_references[0]
+      return property.out_name.underscore unless sdk_op_def.request.has_key?(sdk_ref)
+      python_var = sdk_op_def.request[sdk_ref].python_variable_name
+      return property.out_name.underscore if python_var.nil?
+      python_var
+    end
   end
 end

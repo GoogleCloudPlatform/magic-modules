@@ -48,6 +48,9 @@ module Provider
       def validate
         super
 
+        @name_default_order = 500
+        @azure_sdk_language = 'go'
+
         @id_format ||= '{{name}}'
         @import_format ||= []
         @custom_code ||= Provider::Terraform::CustomCode.new

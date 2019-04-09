@@ -45,6 +45,9 @@ module Provider
       def validate
         super
 
+        @name_default_order = 555
+        @azure_sdk_language = 'python'
+
         default_value_property :access_api_results, false
         default_value_property :custom_create_resource, false
         default_value_property :custom_update_resource, false

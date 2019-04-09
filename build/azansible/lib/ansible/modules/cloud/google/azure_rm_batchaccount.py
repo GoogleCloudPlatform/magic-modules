@@ -37,6 +37,10 @@ description:
     - Create, update and delete instance of Azure Batch Account.
 
 options:
+    resource_group:
+        description:
+        - The name of the resource group in which to create the Batch Account.
+        required: true
     name:
         description:
         - The name of the Batch Account.
@@ -45,22 +49,10 @@ options:
         description:
         - Specifies the supported Azure location where the resource exists.
         required: true
-    tags:
-        description:
-        - A mapping of tags to assign to the batch account.
-        required: false
     auto_storage_account_id:
         description:
         - The ID of the Batch Account auto storage account.
         required: false
-    pool_allocation_mode:
-        description:
-        - The pool acclocation mode of the Batch Account.
-        required: false
-        default: BatchService
-        choices:
-        - BatchService
-        - UserSubscription
     key_vault_reference:
         description:
         - A reference to the Azure key vault associated with the Batch account.
@@ -75,10 +67,18 @@ options:
                 description:
                 - The URL of the Azure key vault associated with the Batch account.
                 required: true
-    resource_group_name:
+    pool_allocation_mode:
         description:
-        - The name of the resource group in which to create the Batch Account.
-        required: true
+        - The pool acclocation mode of the Batch Account.
+        required: false
+        default: BatchService
+        choices:
+        - BatchService
+        - UserSubscription
+    tags:
+        description:
+        - A mapping of tags to assign to the batch account.
+        required: false
     state:
         description:
         - Assert the state of the Batch Account.
@@ -128,16 +128,42 @@ class AzureRMBatchAccount(AzureRMModuleBase):
 
     def __init__(self):
         self.module_arg_spec = dict(
-            name=dict(required=True, type='str'),
-            location=dict(required=True, type='str'),
-            tags=dict(type='str'),
-            auto_storage_account_id=dict(type='str'),
-            pool_allocation_mode=dict(default='BatchService', type='str', choices=['BatchService', 'UserSubscription']),
-            key_vault_reference=dict(type='dict', options=dict(
-                id=dict(required=True, type='str'),
-                url=dict(required=True, type='str')
-            )),
-            resource_group_name=dict(required=True, type='str'),
+            resource_group=dict(
+                required=True,
+                type='str'
+            ),
+            name=dict(
+                required=True,
+                type='str'
+            ),
+            location=dict(
+                required=True,
+                type='str'
+            ),
+            auto_storage_account_id=dict(
+                type='str'
+            ),
+            key_vault_reference=dict(
+                type='dict',
+                options=dict(
+                    id=dict(
+                        required=True,
+                        type='str'
+                    ),
+                    url=dict(
+                        required=True,
+                        type='str'
+                    )
+                )
+            ),
+            pool_allocation_mode=dict(
+                default='BatchService',
+                type='str',
+                choices=['BatchService', 'UserSubscription']
+            ),
+            tags=dict(
+                type='str'
+            ),
             state=dict(
                 type='str',
                 default='present',
@@ -147,7 +173,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
 
         self.resource_group = None
         self.name = None
-        self.parameters = dict()
+        self.batch_account = dict()
 
         self.results = dict(changed=False)
         self.mgmt_client = None
@@ -165,8 +191,12 @@ class AzureRMBatchAccount(AzureRMModuleBase):
 
     def exec_module(self, **kwargs):
         """Main module execution method"""
-        # TODO: Parameters -> Class Properties
-        # TODO: Parameters -> SDK
+
+        for key in list(self.module_arg_spec.keys()) + ['tags']:
+            if hasattr(self, key):
+                setattr(self, key, kwargs[key])
+            elif kwargs[key] is not None:
+                self.parameters[key] = kwargs[key]
 
         response = None
 
@@ -175,18 +205,30 @@ class AzureRMBatchAccount(AzureRMModuleBase):
 
         old_response = self.get_batchaccount()
 
-        # TODO: Idempotency Check
+        if not old_response:
+            self.log("Batch Account instance doesn't exist")
+            if self.state == 'absent':
+                self.log("Old instance didn't exist")
+            else:
+                self.to_do = Actions.Create
+        else:
+            self.log("Batch Account instance already exists")
+            if self.state == 'absent':
+                self.to_do = Actions.Delete
+            elif self.state == 'present':
+                if (not default_compare(self.parameters, old_response, '', self.results)):
+                  self.to_do = Actions.Update
 
         if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
-            self.log("Need to Create the Batch Account instance")
+            self.log("Need to Create / Update the Batch Account instance")
 
             self.results['changed'] = True
             if self.check_mode:
                 return self.results
 
-            response = self.create_batchaccount()
+            response = self.create_update_batchaccount()
 
-            self.log("Creation done")
+            self.log("Creation / Update done")
         elif self.to_do == Actions.Delete:
             self.log("Batch Account instance deleted")
             self.results['changed'] = True
@@ -200,27 +242,36 @@ class AzureRMBatchAccount(AzureRMModuleBase):
             self.results['changed'] = False
             response = old_response
 
-        # TODO: Format Response
+        if self.state == 'present':
+            self.results.update({
+                'id': response.get('id', None)
+            })
+        return self.results
 
-    def create_batchaccount(self):
+    def create_update_batchaccount(self):
         '''
-        Creates Batch Account with the specified configuration.
+        Creates or updates Batch Account with the specified configuration.
 
         :return: deserialized Batch Account instance state dictionary
         '''
-        self.log("Creating the Batch Account instance {0}".format(self.name))
+        self.log("Creating / Updating the Batch Account instance {0}".format(self.name))
+
         try:
-            response = self.mgmt_client.batch_account.create(resource_group_name=self.resource_group,
-                                                             account_name=self.name,
-                                                             parameters=self.parameters)
+            if self.to_do == Actions.Create:
+                response = self.mgmt_client.batch_account.create(resource_group_name=self.resource_group,
+                                                                 name=self.name,
+                                                                 parameters=self.batch_account)
+            else:
+                response = self.mgmt_client.batch_account.update(resource_group_name=self.resource_group,
+                                                                 name=self.name,
+                                                                 tags=self.tags,
+                                                                 auto_storage=self.auto_storage)
             if isinstance(response, LROPoller) or isinstance(response.AzureOperationPoller):
                 response = self.get_poller_result(response)
         except CloudError as exc:
             self.log('Error attempting to create the Batch Account instance.')
             self.fail("Error creating the Batch Account instance: {0}".format(str(exc)))
         return response.as_dict()
-
-    # TODO: Update Function Not Implemented
 
     def delete_batchaccount(self):
         '''
@@ -231,7 +282,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
         self.log("Deleting the Batch Account instance {0}".format(self.name))
         try:
             response = self.mgmt_client.batch_account.delete(resource_group_name=self.resource_group,
-                                                             account_name=self.name)
+                                                             name=self.name)
         except CloudError as e:
             self.log('Error attempting to delete the Batch Account instance.')
             self.fail("Error deleting the Batch Account instance: {0}".format(str(e)))
@@ -249,7 +300,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
         found = false
         try:
             response = self.mgmt_client.batch_account.get(resource_group_name=self.resource_group,
-                                                          account_name=self.name)
+                                                          name=self.name)
             found = True
             self.log("Response : {0}".format(response))
             self.log("Batch Account instance : {0} found".format(response.name))

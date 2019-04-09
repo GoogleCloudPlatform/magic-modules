@@ -28,8 +28,9 @@ module Provider
         elsif prop.is_a? Api::Type::NestedObject
           nested_obj_dict(prop, object, prop.properties, spaces)
         else
-          name = prop.out_name.underscore
-          "#{name}=dict(#{prop_options(prop, object, spaces).join(', ')})"
+          name = python_field_name(prop, object.azure_sdk_definition.create)
+          options = prop_options(prop, object, spaces).join("\n")
+          "#{name}=dict(\n#{indent_list(options, 4)}\n)"
         end
       end
 
@@ -38,14 +39,14 @@ module Provider
       # Creates a Python dictionary representing a nested object property
       # for validation.
       def nested_obj_dict(prop, object, properties, spaces)
-        name = prop.out_name.underscore
-        options = prop_options(prop, object, spaces).join(', ')
+        name = python_field_name(prop, object.azure_sdk_definition.create)
+        options = prop_options(prop, object, spaces).join("\n")
         [
-          "#{name}=dict(#{options}, options=dict(",
+          "#{name}=dict(\n#{indent_list(options, 4, true)}\n    options=dict(",
           indent_list(properties.map do |p|
             python_dict_for_property(p, object, spaces + 4)
-          end, 4),
-          '))'
+          end, 8),
+          "    )\n)"
         ]
       end
 

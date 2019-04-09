@@ -29,15 +29,18 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_parameter_name: resource_group
+            python_parameter_name: resource_group_name
+            python_variable_name: resource_group
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
             python_parameter_name: name
+            python_variable_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
             go_type_name: AccountCreateParameters
             python_parameter_name: parameters
+            python_variable_name: batch_account
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
@@ -67,11 +70,13 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_parameter_name: resource_group
+            python_parameter_name: resource_group_name
+            python_variable_name: resource_group
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
             python_parameter_name: name
+            python_variable_name: name
         response:
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_type_name: Account
@@ -108,17 +113,21 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_parameter_name: resource_group
+            python_parameter_name: resource_group_name
+            python_variable_name: resource_group
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
             python_parameter_name: name
+            python_variable_name: name
           'tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [python]
             python_parameter_name: tags
+            python_variable_name: tags
           'autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             applicable_to: [python]
             python_parameter_name: auto_storage
+            python_variable_name: auto_storage
           'autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [python]
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
@@ -147,11 +156,13 @@ objects:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
             go_variable_name: resourceGroup
-            python_parameter_name: resource_group
+            python_parameter_name: resource_group_name
+            python_variable_name: resource_group
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
             python_parameter_name: name
+            python_variable_name: name
 
     description: |
       Manages a Batch Account on Azure.

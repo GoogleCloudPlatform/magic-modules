@@ -32,10 +32,10 @@ module Provider
 
       # Builds out the DOCUMENTATION for a property.
       # This will eventually be converted to YAML
-      def documentation_for_property(prop)
+      def documentation_for_property(prop, object)
         required = prop.required && !prop.default_value ? true : false
         {
-          prop.name.underscore => {
+          python_field_name(prop, object.azure_sdk_definition.create) => {
             'description' => [
               format_description(prop.description),
               (resourceref_description(prop) \
@@ -49,10 +49,10 @@ module Provider
             'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
               if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| documentation_for_property(p) }.reduce({}, :merge)
+                prop.properties.map { |p| documentation_for_property(p, object) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
                 prop.item_type.properties
-                              .map { |p| documentation_for_property(p) }
+                              .map { |p| documentation_for_property(p, object) }
                               .reduce({}, :merge)
               end
             )

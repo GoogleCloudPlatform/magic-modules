@@ -2,9 +2,9 @@
 <%  params.each do |name, value| -%>
 <%    case value -%>
 <%    when Api::Azure::SDKTypeDefinition::StringObject -%>
-self.<%= value.python_parameter_name -%> = None
+self.<%= value.python_variable_name -%> = None
 <%    when Api::Azure::SDKTypeDefinition::ComplexObject -%>
-self.<%= value.python_parameter_name -%> = dict()
+self.<%= value.python_variable_name -%> = dict()
 <%    else -%>
 # TODO: <%= value -%> is not supported for initialization
 <%    end -%>

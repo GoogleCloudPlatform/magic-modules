@@ -73,7 +73,7 @@ module Api
       check_optional_property :update_url, ::String
 
       check_optional_property :order, ::Integer
-      @order ||= 1000
+      @order ||= 750
 
       check_property :azure_sdk_references, ::Array
       check_property_non_empty_list :azure_sdk_references, ::String

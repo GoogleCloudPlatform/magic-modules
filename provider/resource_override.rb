@@ -30,6 +30,8 @@ module Provider
     def apply(api_resource)
       ensure_resource_properties
       update_overriden_properties(api_resource)
+      update_overriden_azure_sdk_definition(api_resource)
+      update_name_property_sort_order(api_resource)
 
       # TODO(nelsonjr): Enable revalidate the object to make sure we did not
       # break the object during the override process
@@ -38,6 +40,9 @@ module Provider
 
     def validate
       super
+
+      @name_default_order = 750
+      @azure_sdk_language = 'csharp'
 
       @properties ||= {}
 
@@ -87,6 +92,19 @@ module Provider
         unless Api::Resource.included_modules.include?(clazz)
       raise "#{self.class} did not include required #{clazz} module" \
         unless self.class.included_modules.include?(clazz)
+    end
+
+    def update_overriden_azure_sdk_definition(api_resource)
+      override = instance_variable_get('@azure_sdk_definition')
+      api_resource.azure_sdk_definition.merge_overrides override, @azure_sdk_language
+    end
+
+    def update_name_property_sort_order(api_resource)
+      name_index = api_resource.properties.find_index{|p| p.name == 'name'}
+      unless name_index.nil?
+        name_prop = api_resource.properties[name_index]
+        name_prop.instance_variable_set('@order', @name_default_order)
+      end
     end
 
     # Returns the module that provides overriden properties for this provider.

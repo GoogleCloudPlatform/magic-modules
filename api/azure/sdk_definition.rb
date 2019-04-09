@@ -26,6 +26,13 @@ module Api
         check_optional_property :update, Api::Azure::SDKOperationDefinition
         check_property :delete, Api::Azure::SDKOperationDefinition
       end
+
+      def merge_overrides(overrides, language)
+        @create.merge_overrides(nil, language) unless @create.nil?
+        @read.merge_overrides(nil, language) unless @read.nil?
+        @update.merge_overrides(nil, language) unless @update.nil?
+        @delete.merge_overrides(nil, language) unless @delete.nil?
+      end
     end
   end
 end
