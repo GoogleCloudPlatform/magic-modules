@@ -1,0 +1,10 @@
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::Task
+  name: azure_rm_batchaccount
+  description: Create (or update) Batch Account
+  code:
+      resource_group: myResourceGroup
+      name: <%= ctx[:name] %>
+      resource_group: MyResGroup
+      location: West US
+      storage_account_id: MyStorageAccountId

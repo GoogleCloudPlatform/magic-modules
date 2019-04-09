@@ -96,6 +96,15 @@ author:
     - "Zim Kalinowski (@zikalino)"
 '''
 
+EXAMPLES = '''
+  - name: Create (or update) Batch Account
+    azure_rm_batchaccount:
+      resource_group: MyResGroup
+      name: "test_object"
+      location: West US
+      storage_account_id: MyStorageAccountId
+      state: present
+'''
 
 RETURN = '''
 id:
