@@ -233,3 +233,19 @@ func resourceArmBatchAccountDelete(d *schema.ResourceData, meta interface{}) err
 
     return nil
 }
+
+func expandArmBatchAccountKeyVaultReference(input []interface{}) *batch.KeyVaultReference {
+    if len(input) == 0 {
+        return nil
+    }
+    v := input[0].(map[string]interface{})
+
+    id := v["id"].(string)
+    url := v["url"].(string)
+
+    result := batch.KeyVaultReference{
+        ID: utils.String(id),
+        URL: utils.String(url),
+    }
+    return &result
+}

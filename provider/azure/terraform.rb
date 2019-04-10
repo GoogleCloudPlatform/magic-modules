@@ -1,6 +1,7 @@
 require 'provider/azure/terraform/helpers'
 require 'provider/azure/terraform/schema'
 require 'provider/azure/terraform/sub_template'
+require 'provider/azure/terraform/sdk/expand_flatten_descriptor'
 require 'provider/azure/terraform/sdk/sub_template'
 require 'provider/azure/terraform/sdk/helpers'
 require 'provider/azure/terraform/example/example'

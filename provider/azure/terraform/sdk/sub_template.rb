@@ -22,30 +22,35 @@ module Provider
                              property: property
           end
   
-          def build_sdk_field_assignment(property, api_path, sdk_type_defs, resource_name, object)
+          def build_sdk_field_assignment(property, api_path, sdk_type_defs, resource_name, expand_queue, properties, object)
             compile_template property_to_sdk_field_assignment_template(property, sdk_type_defs[api_path]),
                              property: property,
                              api_path: api_path,
                              sdk_type_defs: sdk_type_defs,
                              resource_name: resource_name,
+                             expand_queue: expand_queue,
+                             properties: properties,
                              object: object
           end
 
-          def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, object, indentation = 4)
+          def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4)
             compile_template 'templates/azure/terraform/sdktypes/property_to_sdkobject.erb',
                              indentation: indentation,
                              resource_name: resource_name,
                              api_path: api_path,
                              sdk_type_defs: sdk_type_defs,
+                             expand_queue: expand_queue,
+                             properties: properties,
                              object: object
           end
   
-          def build_sdk_object_to_property(input, api_path, sdk_type_defs, object, indentation = 4)
+          def build_sdk_object_to_property(input, api_path, sdk_type_defs, properties, object, indentation = 4)
             compile_template sdk_object_to_property_template(sdk_type_defs, api_path),
                              indentation: indentation,
                              input_statement: input,
                              api_path: api_path,
                              sdk_type_defs: sdk_type_defs,
+                             properties: properties,
                              object: object
           end
   

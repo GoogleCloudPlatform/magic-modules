@@ -35,10 +35,14 @@ module Provider
 
       # Transforms a Terraform schema representation of a property into a
       # representation used by the Cloud API.
-      def build_expand_method(prefix, property)
+      def build_expand_method(prefix, property, api_path, sdk_type_defs, expand_queue, object)
         compile_template 'templates/terraform/expand_property_method.erb',
                          prefix: prefix,
-                         property: property
+                         property: property,
+                         sdk_type_defs: sdk_type_defs,
+                         api_path: api_path,
+                         expand_queue: expand_queue,
+                         object: object
       end
 
       def build_expand_resource_ref(var_name, property)

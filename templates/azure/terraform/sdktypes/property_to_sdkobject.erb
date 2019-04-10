@@ -3,7 +3,7 @@
     sdk_type = sdk_type_defs[api_path]
 
     direct_children = Set.new
-    object.all_user_properties.each do |prop|
+    properties.each do |prop|
       prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
         if api_path == '/' && child_api_path.start_with?(api_path)
           sub_paths = child_api_path.split('/')
@@ -20,13 +20,13 @@
     end
 
     direct_children.to_a.sort.each do |child_api_path|
-      matched_properties = get_properties_matching_sdk_reference(child_api_path, object)
+      matched_properties = get_properties_matching_sdk_reference(properties, child_api_path, object)
 -%>
-<%=   lines(build_sdk_field_assignment(nil, child_api_path, sdk_type_defs, resource_name, object)) if matched_properties.empty? -%>
+<%=   lines(build_sdk_field_assignment(nil, child_api_path, sdk_type_defs, resource_name, expand_queue, properties, object)) if matched_properties.empty? -%>
 <%
       matched_properties.each do |property|
 -%>
-<%=     lines(build_sdk_field_assignment(property, child_api_path, sdk_type_defs, resource_name, object)) -%>
+<%=     lines(build_sdk_field_assignment(property, child_api_path, sdk_type_defs, resource_name, expand_queue, properties, object)) -%>
 <%
       end
     end

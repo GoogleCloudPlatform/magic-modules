@@ -1,5 +1,5 @@
 <%  sdk_type = sdk_type_defs[api_path] -%>
 <%  input_var = sdk_type.go_variable_name || input_statement + "." + sdk_type.go_field_name -%>
-<%  get_properties_matching_sdk_reference(api_path, object).each do |property| -%>
+<%  get_properties_matching_sdk_reference(properties, api_path, object).each do |property| -%>
 <%=   lines(build_schema_property_set(input_var, 'd', property)) -%>
 <%  end -%>

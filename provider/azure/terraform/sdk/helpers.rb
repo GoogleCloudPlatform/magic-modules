@@ -1,12 +1,12 @@
+require 'provider/azure/terraform/sdk/expand_flatten_descriptor'
+
 module Provider
   module Azure
     module Terraform
       module SDK
         module Helpers
-          def get_properties_matching_sdk_reference(sdk_reference, object)
-            object.all_user_properties
-              .select{|p| p.azure_sdk_references.include?(sdk_reference)}
-              .sort_by{|p| [p.order, p.name]}
+          def get_properties_matching_sdk_reference(properties, sdk_reference, object)
+            properties.select{|p| p.azure_sdk_references.include?(sdk_reference)}.sort_by{|p| [p.order, p.name]}
           end
 
           def get_applicable_reference(references, typedefs)
@@ -20,6 +20,12 @@ module Provider
             ref = get_applicable_reference(references, typedefs)
             return nil if ref.nil?
             typedefs[ref]
+          end
+
+          def expand_enqueue(expand_queue, property, api_path, sdk_type_defs)
+            sdk_type = sdk_type_defs[api_path]
+            existed = expand_queue.any?{|exp| exp.property == property && exp.sdk_type.go_type_name == sdk_type.go_type_name}
+            expand_queue << ExpandFlattenDescriptor.new(property, api_path, sdk_type_defs) unless existed
           end
 
           def property_to_sdk_field_assignment_template(property, sdk_type)
