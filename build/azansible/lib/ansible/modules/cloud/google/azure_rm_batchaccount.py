@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (C) 2019 Zim Kalinowski (@zikalino)
+# Copyright (C) 2019 Junyi Yi (@JunyiYi)
 #
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -29,7 +29,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: azure_rm_batchaccount
-version_added: "2.6"
+version_added: "2.9"
 
 short_description: Manages a Batch Account on Azure.
 
@@ -93,7 +93,7 @@ extends_documentation_fragment:
     - azure
 
 author:
-    - "Zim Kalinowski (@zikalino)"
+    - "Junyi Yi (@JunyiYi)"
 '''
 
 EXAMPLES = '''
@@ -205,7 +205,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
             if hasattr(self, key):
                 setattr(self, key, kwargs[key])
             elif kwargs[key] is not None:
-                self.parameters[key] = kwargs[key]
+                self.batch_account[key] = kwargs[key]
 
         response = None
 
@@ -225,7 +225,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
             if self.state == 'absent':
                 self.to_do = Actions.Delete
             elif self.state == 'present':
-                if (not default_compare(self.parameters, old_response, '', self.results)):
+                if (not default_compare(self.batch_account, old_response, '', self.results)):
                   self.to_do = Actions.Update
 
         if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):

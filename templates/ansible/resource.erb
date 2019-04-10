@@ -23,7 +23,7 @@ __metaclass__ = type
 
     input_properties = object.all_user_properties.reject(&:output).sort_by{|p| [p.order, p.name]}
     output_properties = object.all_user_properties.select(&:output)
-    root_object_field = object.azure_sdk_definition.create.request["/"].python_parameter_name
+    root_object_field = object.azure_sdk_definition.create.request["/"].python_variable_name
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': <%= @config.manifest.get('status', object) -%>,
