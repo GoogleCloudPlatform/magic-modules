@@ -11,6 +11,8 @@ module Provider
             'string'
           when Api::Type::KeyValuePairs
             'map[string]interface{}'
+          when Api::Type::NestedObject
+            '[]interface{}'
           else
             'interface{}'
           end
@@ -51,7 +53,7 @@ module Provider
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_get.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs, Api::Type::NestedObject
             'templates/terraform/schemas/basic_get.erb'
           else
             'templates/terraform/schemas/unsupport.erb'

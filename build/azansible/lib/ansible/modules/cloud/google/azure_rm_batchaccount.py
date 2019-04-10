@@ -22,7 +22,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ["preview"],
+                    'status': ['preview'],
                     'supported_by': 'community'}
 
 
@@ -109,7 +109,7 @@ EXAMPLES = '''
 RETURN = '''
 id:
     description:
-    - The identifier of the DTL Virtual Machine resource.
+    - The identifier of the Batch Account resource.
     returned: always
     type: str
 '''

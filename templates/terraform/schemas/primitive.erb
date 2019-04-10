@@ -1,3 +1,6 @@
+<%
+    sdk_package = object.azure_sdk_definition.go_client_namespace
+-%>
 <% if tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
   <% if property.is_set -%>
@@ -32,7 +35,7 @@
 -%>
     ValidateFunc: validation.StringInSlice([]string{
 <%  enum_values.each do |val| -%>
-        string(<%= azure_resource_go_package(object.__product) -%>.<%= val -%>),
+        <%= go_literal(val, sdk_package) -%>,
 <%  end -%>
     }, false),
 <% end -%>
@@ -117,7 +120,7 @@
     Sensitive: true,
 <% end -%>
 <% unless property.default_value.nil? -%>
-    Default: <%= go_literal(property.default_value) -%>,
+    Default: <%= go_literal(property.default_value, sdk_package) -%>,
 <% end -%>
 <% unless property.conflicts_with.empty? -%>
     ConflictsWith: []string{<%= property.conflicts_with.map{ |p| go_literal(p) }.join(', ') -%>},

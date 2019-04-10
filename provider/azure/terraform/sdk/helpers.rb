@@ -30,17 +30,11 @@ module Provider
               'templates/azure/terraform/sdktypes/expand_func_field_assign.erb'
             when Api::Azure::SDKTypeDefinition::EnumObject
               'templates/azure/terraform/sdktypes/enum_field_assign.erb'
+            when Api::Azure::SDKTypeDefinition::ComplexObject
+              return 'templates/azure/terraform/sdktypes/nested_object_field_assign.erb' if property.nil?
+              'templates/azure/terraform/sdktypes/expand_func_field_assign.erb'
             else
               'templates/azure/terraform/sdktypes/unsupport.erb'
-            end
-          end
-
-          def property_to_sdk_object_template(sdk_type_defs, api_path)
-            case sdk_type_defs[api_path]
-            when Api::Azure::SDKTypeDefinition::ComplexObject
-              'templates/azure/terraform/sdktypes/property_to_sdkobject.erb'
-            else
-              'templates/azure/terraform/sdktypes/property_to_sdkfield_assign.erb'
             end
           end
   

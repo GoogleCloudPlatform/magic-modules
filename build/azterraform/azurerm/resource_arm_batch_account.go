@@ -73,7 +73,7 @@ func resourceArmBatchAccount() *schema.Resource {
                     string(batch.BatchService),
                     string(batch.UserSubscription),
                 }, false),
-                Default: "BatchService",
+                Default: string(batch.BatchService),
             },
 
             "tags": tagsSchema(),
@@ -102,7 +102,7 @@ func resourceArmBatchAccountCreate(d *schema.ResourceData, meta interface{}) err
 
     location := azureRMNormalizeLocation(d.Get("location").(string))
     autoStorageAccountId := d.Get("auto_storage_account_id").(string)
-    // TODO: Property 'key_vault_reference' of type Api::Type::NestedObject is not supported
+    keyVaultReference := d.Get("key_vault_reference").([]interface{})
     poolAllocationMode := d.Get("pool_allocation_mode").(string)
     tags := d.Get("tags").(map[string]interface{})
 
@@ -112,8 +112,7 @@ func resourceArmBatchAccountCreate(d *schema.ResourceData, meta interface{}) err
             AutoStorage: &batch.AutoStorageBaseProperties{
                 StorageAccountID: utils.String(autoStorageAccountId),
             },
-            KeyVaultReference: &batch.KeyVaultReference{
-            },
+            KeyVaultReference: expandArmBatchAccountKeyVaultReference(keyVaultReference),
             PoolAllocationMode: batch.PoolAllocationMode(poolAllocationMode),
         },
         Tags: expandTags(tags),

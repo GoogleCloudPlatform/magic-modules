@@ -36,7 +36,7 @@ package azurerm
 -%>
 <%
     azure_client_name = object.azure_sdk_definition.go_client
-    sdk_package = azure_resource_go_package(object.__product)
+    sdk_package = object.azure_sdk_definition.go_client_namespace
 -%>
 <%
     combine_create_update = object.azure_sdk_definition.update.nil? || (object.azure_sdk_definition.create.go_func_name == object.azure_sdk_definition.update.go_func_name)
@@ -128,7 +128,9 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
-<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, object)) -%>
+    <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
+<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, object, 8)) -%>
+    }
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -226,7 +228,9 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 <%    end -%>
 <%  end -%>
 
-<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, object)) -%>
+    <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
+<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, object, 8)) -%>
+    }
 
 <%  unless sdk_operation.async -%>
     if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {

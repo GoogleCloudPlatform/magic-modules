@@ -22,16 +22,17 @@ module Provider
                              property: property
           end
   
-          def build_sdk_field_assignment(property, sdk_type, resource_name, object)
-            compile_template property_to_sdk_field_assignment_template(property, sdk_type),
+          def build_sdk_field_assignment(property, api_path, sdk_type_defs, resource_name, object)
+            compile_template property_to_sdk_field_assignment_template(property, sdk_type_defs[api_path]),
                              property: property,
-                             sdk_type: sdk_type,
-                             resouce_name: resource_name,
+                             api_path: api_path,
+                             sdk_type_defs: sdk_type_defs,
+                             resource_name: resource_name,
                              object: object
           end
 
           def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, object, indentation = 4)
-            compile_template property_to_sdk_object_template(sdk_type_defs, api_path),
+            compile_template 'templates/azure/terraform/sdktypes/property_to_sdkobject.erb',
                              indentation: indentation,
                              resource_name: resource_name,
                              api_path: api_path,

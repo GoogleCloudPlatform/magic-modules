@@ -26,7 +26,7 @@ __metaclass__ = type
     root_object_field = object.azure_sdk_definition.create.request["/"].python_variable_name
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', object) -%>,
+                    'status': [<%= @config.manifest.get('status', object).map{|item| "'#{item}'"}.join(', ') -%>],
                     'supported_by': <%= supported_by -%>}
 
 
@@ -85,7 +85,7 @@ EXAMPLES = '''
 RETURN = '''
 <%= to_yaml(output_properties.map{|p| returns_for_property(p)}.reduce({
   'id'=> {
-    'description' => ['The identifier of the DTL Virtual Machine resource.'],
+    'description' => ["The identifier of the #{object.name.titlecase} resource."],
     'returned' => 'always',
     'type' => 'str',
   }

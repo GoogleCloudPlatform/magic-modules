@@ -1,25 +1,18 @@
 <%
-    sdk_package = azure_resource_go_package(object.__product)
+    sdk_package = object.azure_sdk_definition.go_client_namespace
     sdk_type = sdk_type_defs[api_path]
-    if api_path == "/"
--%>
-<%= sdk_type.go_variable_name -%> := <%= sdk_package -%>.<%= sdk_type.go_type_name -%>{
-<%  else -%>
-<%= sdk_type.go_field_name -%>: &<%= sdk_package -%>.<%= sdk_type.go_type_name -%>{
-<%
-    end
 
     direct_children = Set.new
     object.all_user_properties.each do |prop|
       prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
-        if api_path == "/" && child_api_path.start_with?(api_path)
-          sub_paths = child_api_path.split("/")
-          api_path = ""
-        elsif child_api_path.start_with?(api_path + "/")
-          sub_paths = child_api_path[api_path.length..-1].split("/")
+        if api_path == '/' && child_api_path.start_with?(api_path)
+          sub_paths = child_api_path.split('/')
+          api_path = ''
+        elsif child_api_path.start_with?(api_path + '/')
+          sub_paths = child_api_path[api_path.length..-1].split('/')
         end
-        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ""
-          sub_api_path = api_path + "/" + sub_paths[1]
+        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ''
+          sub_api_path = api_path + '/' + sub_paths[1]
           direct_children << sub_api_path if sub_paths.length > 2
           direct_children << child_api_path if sub_paths.length == 2
         end
@@ -27,7 +20,14 @@
     end
 
     direct_children.to_a.sort.each do |child_api_path|
+      matched_properties = get_properties_matching_sdk_reference(child_api_path, object)
 -%>
-<%=   lines(build_property_to_sdk_object(child_api_path, resource_name, sdk_type_defs, object)) -%>
-<%  end -%>
-}<%= "," unless api_path == "" -%>
+<%=   lines(build_sdk_field_assignment(nil, child_api_path, sdk_type_defs, resource_name, object)) if matched_properties.empty? -%>
+<%
+      matched_properties.each do |property|
+-%>
+<%=     lines(build_sdk_field_assignment(property, child_api_path, sdk_type_defs, resource_name, object)) -%>
+<%
+      end
+    end
+-%>

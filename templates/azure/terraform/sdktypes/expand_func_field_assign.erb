@@ -1,3 +1,4 @@
+<%  sdk_type = sdk_type_defs[api_path] -%>
 <%  if expand_funcs.include?(property.class) -%>
 <%=   sdk_type.go_field_name -%>: <%= expand_func(property) -%>(<%= property.name.camelcase(:lower) -%>),
 <%  else -%>
