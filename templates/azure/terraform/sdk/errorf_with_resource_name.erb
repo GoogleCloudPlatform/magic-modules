@@ -3,8 +3,8 @@
     res_var = ""
     depends = []
     depends_vars = []
-    properties.select{|p| sdk_op_def.request.has_key?(p.azure_sdk_references[0]) && !p.azure_sdk_references[0].start_with?("/") }.each do |prop|
-      param = sdk_op_def.request[prop.azure_sdk_references[0]]
+    properties.select{|p| !get_applicable_reference(p.azure_sdk_references, sdk_op_def.request).nil? && !get_applicable_reference(p.azure_sdk_references, sdk_op_def.request).start_with?("/") }.each do |prop|
+      param = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_op_def.request)
       case prop.name
       when "name"
         res_name = "#{get_property_value(prop, "name_in_logs", nil) || object.name.titlecase} %q"

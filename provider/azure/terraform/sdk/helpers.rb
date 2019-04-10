@@ -9,6 +9,19 @@ module Provider
               .sort_by{|p| [p.order, p.name]}
           end
 
+          def get_applicable_reference(references, typedefs)
+            references.each do |ref|
+              return ref if typedefs.has_key?(ref)
+            end
+            nil
+          end
+
+          def get_sdk_typedef_by_references(references, typedefs)
+            ref = get_applicable_reference(references, typedefs)
+            return nil if ref.nil?
+            typedefs[ref]
+          end
+
           def property_to_sdk_field_assignment_template(property, sdk_type)
             return property.custom_sdkfield_assign unless get_property_value(property, "custom_sdkfield_assign", nil).nil?
             return 'templates/terraform/schemas/hide_from_schema.erb' if get_property_value(property, "hide_from_schema", false)
@@ -16,7 +29,7 @@ module Provider
             when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
               'templates/azure/terraform/sdktypes/expand_func_field_assign.erb'
             when Api::Azure::SDKTypeDefinition::EnumObject
-              'templates/azure/terraform/sdktypes/enum_fiield_assign.erb'
+              'templates/azure/terraform/sdktypes/enum_field_assign.erb'
             else
               'templates/azure/terraform/sdktypes/unsupport.erb'
             end

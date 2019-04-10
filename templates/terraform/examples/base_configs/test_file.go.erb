@@ -14,7 +14,7 @@ import (
 <%
     resource_name = "AzureRM" + object.name
     terraform_name = "azurerm_" + object.name.underscore
-    azure_client_name = "#{object.api_name}Client".camelcase(:lower)
+    azure_client_name = object.azure_sdk_definition.go_client
     properties = object.all_user_properties
     contains_acctests = object.instance_variable_defined?(:@acctests)
 %>

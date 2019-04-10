@@ -38,7 +38,7 @@ module Provider
             'templates/azure/terraform/schemas/location.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs, Api::Type::NestedObject
             'templates/terraform/schemas/primitive.erb'
           else
             'templates/terraform/schemas/unsupport.erb'

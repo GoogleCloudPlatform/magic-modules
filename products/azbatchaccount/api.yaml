@@ -193,7 +193,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: autoStorageAccountId
         description: The ID of the Batch Account auto storage account.
-        azure_sdk_references: ['/properties/autoStorage/storageAccountId', 'autoStorage/storageAccountId']
+        azure_sdk_references: ['autoStorage/storageAccountId', '/properties/autoStorage/storageAccountId']
       - !ruby/object:Api::Type::Enum
         name: poolAllocationMode
         description: The pool acclocation mode of the Batch Account.

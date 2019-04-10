@@ -16,13 +16,13 @@
   Optional: true,
 <% end -%>
 <% if force_new?(property, object) -%>
-  ForceNew: true,
+    ForceNew: true,
 <% end -%>
 <% unless property.validation.nil? || property.output -%>
 	<% if !property.validation.regex.nil? -%>
-  ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
+    ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
 	<% elsif !property.validation.function.nil? -%>
-	ValidateFunc: <%= property.validation.function -%>,
+    ValidateFunc: <%= property.validation.function -%>,
 	<% end # property.validation.nil?  -%>
 <% end # property.validation.nil?  -%>
 <% if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output -%>
@@ -30,11 +30,11 @@
 	enum_values = property.values
 	# enum_values.push "" unless property.required
 -%>
-	ValidateFunc: validation.StringInSlice([]string{
+    ValidateFunc: validation.StringInSlice([]string{
 <%  enum_values.each do |val| -%>
-    string(<%= azure_resource_go_package(object.__product) -%>.<%= val -%>),
+        string(<%= azure_resource_go_package(object.__product) -%>.<%= val -%>),
 <%  end -%>
-  }, false),
+    }, false),
 <% end -%>
 <% if !property.diff_suppress_func.nil? -%>
   DiffSuppressFunc: <%= property.diff_suppress_func %>,
@@ -45,14 +45,14 @@
 	StateFunc: <%= property.state_func %>,
 <% end -%>
 <% if property.is_a?(Api::Type::NestedObject) -%>
-  MaxItems: 1,
-  Elem: &schema.Resource{
-    Schema: map[string]*schema.Schema{
-      <% order_properties(property.properties).each do |prop| -%>
-        <%= lines(build_schema_property(prop, object)) -%>
-      <% end -%>
+    MaxItems: 1,
+    Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+<%   order_properties(property.properties).each do |prop| -%>
+<%=    lines(build_schema_property(prop, object, 12)) -%>
+<%   end -%>
+        },
     },
-  },
 <% elsif property.is_a?(Api::Type::Array) -%>
   <% unless property.min_size.nil? -%>
       MinItems: <%= property.min_size %>,

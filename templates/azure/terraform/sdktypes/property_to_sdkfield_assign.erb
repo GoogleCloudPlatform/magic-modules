@@ -1,3 +1,3 @@
 <%  get_properties_matching_sdk_reference(api_path, object).each do |property| -%>
-<%=   lines(build_sdk_field_assignment(property, sdk_type_defs[api_path], resource_name)) -%>
+<%=   lines(build_sdk_field_assignment(property, sdk_type_defs[api_path], resource_name, object)) -%>
 <%  end -%>

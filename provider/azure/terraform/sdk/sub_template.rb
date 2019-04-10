@@ -22,11 +22,12 @@ module Provider
                              property: property
           end
   
-          def build_sdk_field_assignment(property, sdk_type, resource_name)
+          def build_sdk_field_assignment(property, sdk_type, resource_name, object)
             compile_template property_to_sdk_field_assignment_template(property, sdk_type),
                              property: property,
                              sdk_type: sdk_type,
-                             resouce_name: resource_name
+                             resouce_name: resource_name,
+                             object: object
           end
 
           def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, object, indentation = 4)

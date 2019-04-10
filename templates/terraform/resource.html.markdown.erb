@@ -37,7 +37,7 @@
 -%>
 <%
   resource_name = object.name.underscore
-  properties = object.all_user_properties.reject(&:hide_from_schema)
+  properties = object.all_user_properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>

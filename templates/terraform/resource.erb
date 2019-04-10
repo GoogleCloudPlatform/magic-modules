@@ -26,8 +26,7 @@ package azurerm
     # can just be read in anyways, and after a Read they will need to be set in every Update.
     settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
     # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
-    update_body_properties = settable_properties
-    update_body_properties = settable_properties.reject(&:input) if object.update_verb == :PATCH
+    updatable_properties = settable_properties.reject{|p| get_applicable_reference(p.azure_sdk_references, object.azure_sdk_definition.update.request).nil?}
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
@@ -36,7 +35,7 @@ package azurerm
     has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
 <%
-    azure_client_name = "#{object.api_name}Client".camelcase(:lower)
+    azure_client_name = object.azure_sdk_definition.go_client
     sdk_package = azure_resource_go_package(object.__product)
 -%>
 <%
@@ -79,7 +78,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
-<%          order_azure_properties(properties.reject(&:hide_from_schema)).each do |prop| -%>
+<%          order_azure_properties(properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}).each do |prop| -%>
 <%=             lines_before(build_schema_property(prop, object, 12)) -%>
 
 <%          end -%>
@@ -97,13 +96,14 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 }
 <% end -%>
 
+<%  sdk_operation = object.azure_sdk_definition.create -%>
 func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= azure_client_name -%>
 
     ctx := meta.(*ArmClient).StopContext
 
-<%  settable_properties.reject{|p| p.azure_sdk_references[0].start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%    var_name = object.azure_sdk_definition.create.request[prop.azure_sdk_references[0]].go_variable_name -%>
+<%  settable_properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
 <%    output_var = var_name || prop.name.camelcase(:lower) -%>
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
@@ -122,13 +122,13 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
         }
     }
 
-<%  settable_properties.select{|p| p.azure_sdk_references[0].start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%    var_name = object.azure_sdk_definition.create.request[prop.azure_sdk_references[0]].go_variable_name -%>
+<%  settable_properties.select{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
 <%    output_var = var_name || prop.name.camelcase(:lower) -%>
 <%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%  end -%>
 
-<%= lines(build_property_to_sdk_object("/", resource_name, object.azure_sdk_definition.create.request, object)) -%>
+<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, object)) -%>
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -139,20 +139,20 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-<%  unless object.azure_sdk_definition.create.async -%>
-    if _, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.create) -%>; err != nil {
-        return <%= build_errorf_with_resource_name("Error creating %s", true, object.azure_sdk_definition.create, properties, object) -%>
+<%  unless sdk_operation.async -%>
+    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
+        return <%= build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object) -%>
 
     }
 <%  else -%>
-    future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.create) -%>
+    future, err := <%= build_sdk_func_invocation(sdk_operation) -%>
 
     if err != nil {
-        return <%= build_errorf_with_resource_name("Error creating %s", true, object.azure_sdk_definition.create, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object) -%>
 
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return <%= build_errorf_with_resource_name("Error waiting for creation of %s", true, object.azure_sdk_definition.create, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Error waiting for creation of %s", true, sdk_operation, properties, object) -%>
 
     }
 <%  end -%>
@@ -162,11 +162,11 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
 
     if err != nil {
-        return <%= build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.create, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.read, properties, object) -%>
 
     }
     if resp.ID == nil {
-        return <%= build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.create, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.read, properties, object) -%>
 
     }
     d.SetId(*resp.ID)
@@ -212,38 +212,45 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 }
 
 <%  if !combine_create_update -%>
+<%    sdk_operation = object.azure_sdk_definition.update -%>
 func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= azure_client_name -%>
 
     ctx := meta.(*ArmClient).StopContext
 
-<%= build_azure_id_parser(object.azure_sdk_definition.update, object) -%>
-
-
-<%  settable_properties.each do |prop| -%>
-<%    if prop.name != "name" && prop.name != "resourceGroupName" && prop.name != "location" -%>
-<%      output_var = prop.name.camelcase(:lower) -%>
+<%  updatable_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%    if prop.name != "location" -%>
+<%      var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
+<%      output_var = var_name || prop.name.camelcase(:lower) -%>
 <%=     lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
 <%    end -%>
 <%  end -%>
 
-<%= lines(build_property_to_sdk_object("/", resource_name, object.azure_sdk_definition.update.request, object)) -%>
+<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, object)) -%>
 
-    future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.update) -%>
+<%  unless sdk_operation.async -%>
+    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
+        return <%= build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object) -%>
+
+    }
+<%  else -%>
+    future, err := <%= build_sdk_func_invocation(sdk_operation) -%>
 
     if err != nil {
-        return <%= build_errorf_with_resource_name("Error updating %s", true, object.azure_sdk_definition.update, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object) -%>
 
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return <%= build_errorf_with_resource_name("Error waiting for update of %s", true, object.azure_sdk_definition.update, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Error waiting for update of %s", true, sdk_operation, properties, object) -%>
 
     }
+<%  end -%>
 
     return resource<%= resource_name -%>Read(d, meta)
 }
 <%  end -%>
 
+<%  sdk_operation = object.azure_sdk_definition.delete -%>
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= azure_client_name -%>
 
@@ -258,28 +265,28 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-<%= build_azure_id_parser(object.azure_sdk_definition.delete, object) -%>
+<%= build_azure_id_parser(sdk_operation, object) -%>
 
 
-<%  unless object.azure_sdk_definition.delete.async -%>
-    if _, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>; err != nil {
-        return <%= build_errorf_with_resource_name("Error deleting %s", true, object.azure_sdk_definition.delete, properties, object) -%>
+<%  unless sdk_operation.async -%>
+    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
+        return <%= build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object) -%>
 
     }
 <%  else -%>
-    future, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.delete) -%>
+    future, err := <%= build_sdk_func_invocation(sdk_operation) -%>
 
     if err != nil {
         if response.WasNotFound(future.Response()) {
             return nil
         }
-        return <%= build_errorf_with_resource_name("Error deleting %s", true, object.azure_sdk_definition.delete, properties, object) -%>
+        return <%= build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object) -%>
 
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
         if !response.WasNotFound(future.Response()) {
-            return <%= build_errorf_with_resource_name("Error waiting for deleting %s", true, object.azure_sdk_definition.delete, properties, object) -%>
+            return <%= build_errorf_with_resource_name("Error waiting for deleting %s", true, sdk_operation, properties, object) -%>
 
         }
     }
