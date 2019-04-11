@@ -12,3 +12,4 @@
 # limitations under the License.
 
 'test/integration/configuration/mm-attributes.yml': 'templates/inspec/mm-attributes.yml'
+'test/integration/build/gcp-mm.tf': 'templates/inspec/gcp-mm.tf'

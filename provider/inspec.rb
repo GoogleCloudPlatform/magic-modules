@@ -289,5 +289,15 @@ module Provider
         object_name => example_data  
       }).sub('---', '')
     end
+
+    def new_examples_tf_integration(full_name, short_name, name)
+      {
+        'resource' => {
+          full_name => {
+            name => new_examples[short_name]
+          }
+        }
+      }
+    end
   end
 end
