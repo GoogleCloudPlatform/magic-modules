@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'google/hcl_utils'
 require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
@@ -24,6 +25,7 @@ module Provider
   # resources.
   class Inspec < Provider::Core
     include Google::RubyUtils
+    include Google::HclUtils
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -291,13 +293,26 @@ module Provider
     end
 
     def new_examples_tf_integration(full_name, short_name, name)
-      {
-        'resource' => {
-          full_name => {
-            name => new_examples[short_name]
-          }
+      values = new_examples[short_name]
+      new_tf_values = values.map do |k, v|
+        {
+          k => if v.is_a?(String)
+              "${var.#{short_name}[\"#{k}\"]}"
+            elsif v.is_a?(Array)
+              v.enum_for(:each_with_index).map { |_, index| "${var.#{short_name}[\"#{k}#{index + 1}\"]}" }
+            else
+              raise "#{v.class} is not supported for TF creation on Inspec"
+            end
         }
-      }
+      end.reduce({}, :merge)
+      new_tf_values["project"] = '${var.gcp_project_id}'
+      hcl({
+        'resource' => [{
+          full_name => [{
+            name => [new_tf_values]
+          }]
+        }]
+      })
     end
   end
 end

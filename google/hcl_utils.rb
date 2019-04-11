@@ -18,22 +18,32 @@ module Google
   module HclUtils
     include Compile::Core
 
+    # Takes a structure of the following format and converts to HCL.
+    # "resource" => [{
+    #   "google_compute_autoscalar" => [{
+    #      "my-autoscalar" => {
+    #        "field" => true
+    #      }
+    #   }]
+    # }]
     def hcl(dictionary)
       raise "Only accepts dictionary" unless dictionary.is_a?(Hash)
       raise "Only accepts dictinonaries with one key" \
         unless dictionary.keys.length == 1
 
-      type = dictionary.keys.first
-      name = dictionary[type].keys.first
+      hcl_type = dictionary.keys.first
+      gcp_type = dictionary[hcl_type].first.keys.first
+      name = dictionary[hcl_type].first[gcp_type].first.keys.first
+
+      values = dictionary[hcl_type].first[gcp_type].first[name].first
 
       # Find longest name to understand how spacing should work.
-      longest = dictionary[type][name].keys.max_by(&:length).length
-
-      values = dictionary[type][name].map { |k, v| "#{k}#{' ' * (longest - k.length)} = #{hcl_literal(v)}" }
+      longest = values.keys.max_by(&:length).length
+      values = values.map { |k, v| "#{k}#{' ' * (longest - k.length)} = #{hcl_literal(v)}" }
 
       [
-        "#{type} \"#{name}\" {",
-        values.map { |k| "\t#{k}" },
+        "#{hcl_type} \"#{gcp_type}\" \"#{name}\" {",
+        values.map { |k| "  #{k}" },
         '}'
       ].flatten.join("\n")
     end
