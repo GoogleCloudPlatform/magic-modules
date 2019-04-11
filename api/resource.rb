@@ -68,6 +68,7 @@ module Api
       attr_reader :has_self_link
 
       attr_reader :iam_policy
+      attr_reader :exclude_resource
     end
 
     include Properties
@@ -161,7 +162,7 @@ module Api
       def validate
         super
 
-        check :exclude, type: :boolean, default: false
+        check :exclude, type: :boolean, default: true
       end
     end
 
@@ -243,6 +244,7 @@ module Api
       check :parameters, type: Array, item_type: Api::Type unless @exclude
 
       check :iam_policy, type: Api::Resource::IamPolicy
+      check :exclude_resource, type: :boolean, default: false
 
       check_identity unless @identity.nil?
     end
