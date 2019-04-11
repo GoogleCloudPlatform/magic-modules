@@ -25,18 +25,20 @@ describe Google::GolangUtils do
     describe 'sample case' do
       let(:original) {
         {
-          "variable" => {
-            "image" => {
-              "description": "the Image to use"
-            }
-          }
+          "variable" => [{
+            "image" => [{
+              "my-image" => [{
+                "description": "the Image to use"
+              }]
+            }]
+          }]
         }
       }
 
       let(:final) {
         [
-          "variable \"image\" {",
-          "\tdescription = \"the Image to use\"",
+          "variable \"image\" \"my-image\" {",
+          "  description = \"the Image to use\"",
           '}'
         ].join("\n")
       }
@@ -48,22 +50,24 @@ describe Google::GolangUtils do
     describe 'correct spacing' do
       let(:original) {
         {
-          "variable" => {
-            "image" => {
-              "description": "the Image to use",
-              "a really long name": "long name",
-              "short": "a short name"
-            }
-          }
+          "variable" => [{
+            "image" => [{
+              "my-image" => [{
+                "description": "the Image to use",
+                "a really long name": "long name",
+                "short": "a short name"
+              }]
+            }]
+          }]
         }
       }
 
       let(:final) {
         [
-          "variable \"image\" {",
-          "\tdescription        = \"the Image to use\"",
-          "\ta really long name = \"long name\"",
-          "\tshort              = \"a short name\"",
+          "variable \"image\" \"my-image\" {",
+          "  description        = \"the Image to use\"",
+          "  a really long name = \"long name\"",
+          "  short              = \"a short name\"",
           '}'
         ].join("\n")
       }
