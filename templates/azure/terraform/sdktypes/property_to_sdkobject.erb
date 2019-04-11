@@ -23,9 +23,7 @@
       matched_properties = get_properties_matching_sdk_reference(properties, child_api_path, object)
 -%>
 <%=   lines(build_sdk_field_assignment(nil, child_api_path, sdk_type_defs, resource_name, expand_queue, properties, object)) if matched_properties.empty? -%>
-<%
-      matched_properties.each do |property|
--%>
+<%    matched_properties.each do |property| -%>
 <%=     lines(build_sdk_field_assignment(property, child_api_path, sdk_type_defs, resource_name, expand_queue, properties, object)) -%>
 <%
       end

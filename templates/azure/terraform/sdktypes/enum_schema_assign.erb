@@ -1,4 +1,4 @@
 <%  input_var = "string(" + input_statement + "." + sdk_type_defs[api_path].go_field_name + ")" -%>
 <%  get_properties_matching_sdk_reference(properties, api_path, object).each do |property| -%>
-<%=   lines(build_schema_property_set(input_var, 'd', property)) -%>
+<%=   lines(build_schema_property_set(input_var, 'd', api_path, sdk_type_defs, resource_name, flatten_queue, property)) -%>
 <%  end -%>

@@ -22,7 +22,7 @@ module Provider
             typedefs[ref]
           end
 
-          def expand_enqueue(expand_queue, property, api_path, sdk_type_defs)
+          def expand_or_flatten_enqueue(expand_queue, property, api_path, sdk_type_defs)
             sdk_type = sdk_type_defs[api_path]
             existed = expand_queue.any?{|exp| exp.property == property && exp.sdk_type.go_type_name == sdk_type.go_type_name}
             expand_queue << ExpandFlattenDescriptor.new(property, api_path, sdk_type_defs) unless existed
@@ -43,16 +43,16 @@ module Provider
               'templates/azure/terraform/sdktypes/unsupport.erb'
             end
           end
-  
-          def sdk_object_to_property_template(sdk_type_defs, api_path)
-            return 'templates/azure/terraform/sdktypes/sdkobject_to_property.erb' if api_path == ""
-            case sdk_type_defs[api_path]
+
+          def property_to_schema_assignment_template(property, sdk_type)
+            case sdk_type
             when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
-              'templates/azure/terraform/sdktypes/sdkprimitive_to_property.erb'
+              'templates/azure/terraform/sdktypes/primitive_schema_assign.erb'
             when Api::Azure::SDKTypeDefinition::EnumObject
-              'templates/azure/terraform/sdktypes/sdkenum_to_property.erb'
+              'templates/azure/terraform/sdktypes/enum_schema_assign.erb'
             when Api::Azure::SDKTypeDefinition::ComplexObject
-              'templates/azure/terraform/sdktypes/sdkobject_to_property.erb'
+              return 'templates/azure/terraform/sdktypes/nested_object_schema_assign.erb' if property.nil?
+              'templates/azure/terraform/sdktypes/primitive_schema_assign.erb'
             else
               'templates/azure/terraform/sdktypes/unsupport.erb'
             end

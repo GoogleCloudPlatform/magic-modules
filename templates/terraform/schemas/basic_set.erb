@@ -3,6 +3,6 @@ d.Set("<%= prop_name -%>", <%= input_var -%>)
 <%  else -%>
 <%    temp_var = prop_name.camelize(:lower) -%>
 if <%= temp_var -%> := <%= input_var -%>; <%= temp_var -%> != nil {
-    <%= output_var -%>["<%= prop_name -%>"] = *<%= temp_var -%>
+    <%= output_var -%>["<%= prop_name -%>"] = *<%= lines(temp_var) -%>
 }
 <%  end -%>

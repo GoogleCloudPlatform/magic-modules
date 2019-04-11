@@ -87,11 +87,13 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(input <%= go_type(
     }
     return &result
 <%       elsif property.is_a?(Api::Type::Array) -%>
-    result := make([]<%= sdk_package -%>.<%= sdk_type.go_type_name -%>, 0)
+    results := make([]<%= sdk_package -%>.<%= sdk_type.go_type_name -%>, 0)
     for _, v := range input {
-        result = append(results, ??)
+        // TODO: Implement Array Expand
+        item := <%= sdk_package -%>.<%= sdk_type.go_type_name -%>{}
+        results = append(results, item)
     }
-    return result
+    return results
 <%       end -%>
 }
 

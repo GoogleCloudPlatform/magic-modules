@@ -1,0 +1,8 @@
+<%  expand_or_flatten_enqueue(flatten_queue, property, api_path, sdk_type_defs) -%>
+<%  if output_var == 'd' -%>
+if err := d.Set("<%= prop_name -%>", flatten<%= resource_name -%><%= titlelize_property(property) -%>(<%= input_var -%>)); err != nil {
+    return fmt.Errorf("Error setting `<%= prop_name -%>`: %+v", err)
+}
+<%  else -%>
+<%= output_var -%>["<%= prop_name -%>"] = flatten<%= resource_name -%><%= titlelize_property(property) -%>(<%= input_var -%>)
+<%  end -%>

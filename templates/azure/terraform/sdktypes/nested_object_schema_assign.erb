@@ -1,0 +1,7 @@
+<%
+    sdk_type = sdk_type_defs[api_path]
+    temp_var = sdk_type.go_variable_name || sdk_type.go_field_name.camelcase(:lower) || input_statement
+-%>
+if <%= temp_var -%> := <%= input_statement -%>.<%= sdk_type.go_field_name -%>; <%= temp_var -%> != nil {
+<%= lines(build_sdk_object_to_property(temp_var, output, api_path, sdk_type_defs, resource_name, flatten_queue, properties, object)) -%>
+}

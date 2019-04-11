@@ -162,18 +162,18 @@ func resourceArmBatchAccountRead(d *schema.ResourceData, meta interface{}) error
     }
 
 
-
     d.Set("name", resp.Name)
     if location := resp.Location; location != nil {
         d.Set("location", azureRMNormalizeLocation(*location))
     }
-    if accountProperties := resp.AccountProperties; accountProperties != nil {
-        if autoStorage := accountProperties.AutoStorage; autoStorage != nil {
+    if properties := resp.AccountProperties; properties != nil {
+        if autoStorage := properties.AutoStorage; autoStorage != nil {
             d.Set("auto_storage_account_id", autoStorage.StorageAccountID)
         }
-        if keyVaultReference := accountProperties.KeyVaultReference; keyVaultReference != nil {
+        if err := d.Set("key_vault_reference", flattenArmBatchAccountKeyVaultReference(properties.KeyVaultReference)); err != nil {
+            return fmt.Errorf("Error setting `key_vault_reference`: %+v", err)
         }
-        d.Set("pool_allocation_mode", string(accountProperties.PoolAllocationMode))
+        d.Set("pool_allocation_mode", string(properties.PoolAllocationMode))
     }
     flattenAndSetTags(d, resp.Tags)
 
@@ -248,4 +248,21 @@ func expandArmBatchAccountKeyVaultReference(input []interface{}) *batch.KeyVault
         URL: utils.String(url),
     }
     return &result
+}
+
+func flattenArmBatchAccountKeyVaultReference(input *batch.KeyVaultReference) []interface{} {
+    if input == nil {
+        return make([]interface{}, 0)
+    }
+
+    result := make(map[string]interface{})
+
+    if id := input.ID; id != nil {
+        result["id"] = *id
+    }
+    if url := input.URL; url != nil {
+        result["url"] = *url
+    }
+
+    return []interface{}{result}
 }

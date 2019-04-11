@@ -70,6 +70,8 @@ module Provider
             'templates/azure/terraform/schemas/tags_set.erb'
           when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
             'templates/terraform/schemas/basic_set.erb'
+          when Api::Type::NestedObject
+            'templates/terraform/schemas/flatten_set.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
           end

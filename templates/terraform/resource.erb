@@ -100,8 +100,7 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 
 <%  sdk_operation = object.azure_sdk_definition.create -%>
 func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= azure_client_name -%>
-
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
     ctx := meta.(*ArmClient).StopContext
 
 <%  settable_properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
@@ -111,12 +110,10 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%  end -%>
 
     if requireResourcesToBeImported {
-        resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
-
+        resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
         if err != nil {
             if !utils.ResponseWasNotFound(resp.Response) {
-                return <%= build_errorf_with_resource_name("Error checking for present of existing %s", true, object.azure_sdk_definition.read, properties, object) -%>
-
+                return <%= lines(build_errorf_with_resource_name("Error checking for present of existing %s", true, object.azure_sdk_definition.read, properties, object)) -%>
             }
         }
         if !utils.ResponseWasNotFound(resp.Response) {
@@ -145,33 +142,26 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 
 <%  unless sdk_operation.async -%>
     if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
-        return <%= build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object)) -%>
     }
 <%  else -%>
-    future, err := <%= build_sdk_func_invocation(sdk_operation) -%>
-
+    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
     if err != nil {
-        return <%= build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object)) -%>
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return <%= build_errorf_with_resource_name("Error waiting for creation of %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error waiting for creation of %s", true, sdk_operation, properties, object)) -%>
     }
 <%  end -%>
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
-
+    resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
     if err != nil {
-        return <%= build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.read, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.read, properties, object)) -%>
     }
     if resp.ID == nil {
-        return <%= build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.read, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.read, properties, object)) -%>
     }
     d.SetId(*resp.ID)
 
@@ -179,38 +169,24 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 }
 
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= azure_client_name -%>
-
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
     ctx := meta.(*ArmClient).StopContext
 
-<%= build_azure_id_parser(object.azure_sdk_definition.read, object) -%>
+<%= lines(build_azure_id_parser(object.azure_sdk_definition.read, object)) -%>
 
-
-    resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>
-
+    resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
     if err != nil {
         if utils.ResponseWasNotFound(resp.Response) {
             log.Printf("[INFO] <%= object.name.titlecase -%> %q does not exist - removing from state", d.Id())
             d.SetId("")
             return nil
         }
-        return <%= build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, properties, object)) -%>
     }
 
 <%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
 
-<%  unless object.self_link_query.nil? -%>
-<%#     This part of the template extracts the one resource we're interested in
-        from the list that gets returned.  self_link_query is a field which
-        describes a list result from a read. -%>
-<%=     compile_template('templates/terraform/self_link_query.erb',
-                         object: object,
-                         settable_properties: settable_properties,
-                         resource_name: resource_name) -%>
-<% end -%>
-
-<%= lines(build_sdk_object_to_property("resp", "", object.azure_sdk_definition.read.response, properties, object, 0)) -%>
+<%= lines(build_sdk_object_to_property('resp', 'd', '', object.azure_sdk_definition.read.response, resource_name, flatten_queue, properties, object)) -%>
 
     return nil
 }
@@ -218,8 +194,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  if !combine_create_update -%>
 <%    sdk_operation = object.azure_sdk_definition.update -%>
 func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= azure_client_name -%>
-
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
     ctx := meta.(*ArmClient).StopContext
 
 <%  updatable_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
@@ -236,19 +211,15 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 
 <%  unless sdk_operation.async -%>
     if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
-        return <%= build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object)) -%>
     }
 <%  else -%>
-    future, err := <%= build_sdk_func_invocation(sdk_operation) -%>
-
+    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
     if err != nil {
-        return <%= build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object)) -%>
     }
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return <%= build_errorf_with_resource_name("Error waiting for update of %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error waiting for update of %s", true, sdk_operation, properties, object)) -%>
     }
 <%  end -%>
 
@@ -258,8 +229,7 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 
 <%  sdk_operation = object.azure_sdk_definition.delete -%>
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= azure_client_name -%>
-
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
     ctx := meta.(*ArmClient).StopContext
 
 <%  if object.mutex -%>
@@ -271,29 +241,24 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-<%= build_azure_id_parser(sdk_operation, object) -%>
-
+<%= lines(build_azure_id_parser(sdk_operation, object)) -%>
 
 <%  unless sdk_operation.async -%>
     if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
-        return <%= build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object)) -%>
     }
 <%  else -%>
-    future, err := <%= build_sdk_func_invocation(sdk_operation) -%>
-
+    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
     if err != nil {
         if response.WasNotFound(future.Response()) {
             return nil
         }
-        return <%= build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object) -%>
-
+        return <%= lines(build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object)) -%>
     }
 
     if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
         if !response.WasNotFound(future.Response()) {
-            return <%= build_errorf_with_resource_name("Error waiting for deleting %s", true, sdk_operation, properties, object) -%>
-
+            return <%= lines(build_errorf_with_resource_name("Error waiting for deleting %s", true, sdk_operation, properties, object)) -%>
         }
     }
 <%  end -%>
@@ -304,4 +269,9 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  while !expand_queue.empty? -%>
 <%    descriptor = expand_queue.shift -%>
 <%=   lines(build_expand_method(resource_name, descriptor.property, descriptor.api_path, descriptor.sdk_type_defs, expand_queue, object)) -%>
+<%  end -%>
+
+<%  while !flatten_queue.empty? -%>
+<%    descriptor = flatten_queue.shift -%>
+<%=   lines(build_flatten_method(resource_name, descriptor.property, descriptor.api_path, descriptor.sdk_type_defs, flatten_queue, object)) -%>
 <%  end -%>

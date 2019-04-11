@@ -87,6 +87,7 @@ objects:
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_field_name: AccountProperties
             go_type_name: AccountProperties
+            go_variable_name: properties
           '/properties/accountEndpoint': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: AccountEndpoint
           '/properties/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject

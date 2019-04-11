@@ -1,15 +1,6 @@
 <%
-    temp_var = input_statement
-    unless api_path == ""
-      sdk_type = sdk_type_defs[api_path]
-      temp_var = sdk_type.go_variable_name || sdk_type.go_field_name.camelcase(:lower)
--%>
-if <%= temp_var -%> := <%= input_statement -%>.<%= sdk_type.go_field_name -%>; <%= temp_var -%> != nil {
-<%
-    end
-
     direct_children = Set.new
-    object.all_user_properties.sort_by{|p| [p.order, p.name]}.each do |prop|
+    properties.sort_by{|p| [p.order, p.name]}.each do |prop|
       prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
         if api_path == ""
           sub_paths = child_api_path.split("/")
@@ -26,7 +17,10 @@ if <%= temp_var -%> := <%= input_statement -%>.<%= sdk_type.go_field_name -%>; <
     end
 
     direct_children.each do |child_api_path|
+      matched_properties = get_properties_matching_sdk_reference(properties, child_api_path, object)
 -%>
-<%=   lines(build_sdk_object_to_property(temp_var, child_api_path, sdk_type_defs, properties, object)) -%>
+<%=   lines(build_schema_assignment(input_statement, output, nil, child_api_path, sdk_type_defs, resource_name, flatten_queue, properties, object)) if matched_properties.empty? -%>
+<%    matched_properties.each do |property| -%>
+<%=     lines(build_schema_assignment(input_statement, output, property, child_api_path, sdk_type_defs, resource_name, flatten_queue, properties, object)) -%>
+<%    end -%>
 <%  end -%>
-<%= "}" unless api_path == "" -%>

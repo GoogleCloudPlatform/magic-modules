@@ -2,6 +2,6 @@
 <%  if expand_funcs.include?(property.class) -%>
 <%=   sdk_type.go_field_name -%>: <%= expand_func(property) -%>(<%= property.name.camelcase(:lower) -%>),
 <%  else -%>
-<%    expand_enqueue(expand_queue, property, api_path, sdk_type_defs) -%>
+<%    expand_or_flatten_enqueue(expand_queue, property, api_path, sdk_type_defs) -%>
 <%=   sdk_type.go_field_name -%>: expand<%= resource_name -%><%= titlelize_property(property) -%>(<%= property.name.camelcase(:lower) -%>),
 <%  end -%>
