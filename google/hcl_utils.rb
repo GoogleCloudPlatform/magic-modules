@@ -27,8 +27,8 @@ module Google
     #   }]
     # }]
     def hcl(dictionary)
-      raise "Only accepts dictionary" unless dictionary.is_a?(Hash)
-      raise "Only accepts dictinonaries with one key" \
+      raise 'Only accepts dictionary' unless dictionary.is_a?(Hash)
+      raise 'Only accepts dictinonaries with one key' \
         unless dictionary.keys.length == 1
 
       hcl_type = dictionary.keys.first

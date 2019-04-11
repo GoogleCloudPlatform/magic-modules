@@ -23,54 +23,54 @@ describe Google::GolangUtils do
     let(:hcl) { Test.new }
 
     describe 'sample case' do
-      let(:original) {
+      let(:original) do
         {
-          "variable" => [{
-            "image" => [{
-              "my-image" => [{
-                "description": "the Image to use"
+          'variable' => [{
+            'image' => [{
+              'my-image' => [{
+                "description": 'the Image to use'
               }]
             }]
           }]
         }
-      }
+      end
 
-      let(:final) {
+      let(:final) do
         [
-          "variable \"image\" \"my-image\" {",
-          "  description = \"the Image to use\"",
+          'variable "image" "my-image" {',
+          '  description = "the Image to use"',
           '}'
         ].join("\n")
-      }
+      end
 
       subject { hcl.hcl(original) }
       it { is_expected.to eq final }
     end
 
     describe 'correct spacing' do
-      let(:original) {
+      let(:original) do
         {
-          "variable" => [{
-            "image" => [{
-              "my-image" => [{
-                "description": "the Image to use",
-                "a really long name": "long name",
-                "short": "a short name"
+          'variable' => [{
+            'image' => [{
+              'my-image' => [{
+                "description": 'the Image to use',
+                "a really long name": 'long name',
+                "short": 'a short name'
               }]
             }]
           }]
         }
-      }
+      end
 
-      let(:final) {
+      let(:final) do
         [
-          "variable \"image\" \"my-image\" {",
-          "  description        = \"the Image to use\"",
-          "  a really long name = \"long name\"",
-          "  short              = \"a short name\"",
+          'variable "image" "my-image" {',
+          '  description        = "the Image to use"',
+          '  a really long name = "long name"',
+          '  short              = "a short name"',
           '}'
         ].join("\n")
-      }
+      end
 
       subject { hcl.hcl(original) }
       it { is_expected.to eq final }

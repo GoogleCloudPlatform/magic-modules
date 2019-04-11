@@ -212,7 +212,7 @@ module Provider
     end
 
     def grab_attributes
-      YAML.load(compile('templates/inspec/mm-attributes.yml'))
+      YAML.safe_load(compile('templates/inspec/mm-attributes.yml'))
     end
 
     # Returns a variable name OR default value for that variable based on
@@ -273,7 +273,7 @@ module Provider
     # Gets attributes from the new_examples file.
     # These attributes will be used to generate the tf file + tf attributes file.
     def new_examples
-      YAML.load_file('templates/inspec/new-examples.yaml') 
+      YAML.load_file('templates/inspec/new-examples.yaml')
     end
 
     # For a given resource, output the attribute file YAML placed in mm-attributes.yaml
@@ -287,9 +287,9 @@ module Provider
                     v.each_with_index { |item, index| example_data["#{k}#{index + 1}"] = item }
                     example_data.delete(k)
                   end
-      YAML.dump({
-        object_name => example_data  
-      }).sub('---', '')
+      YAML.dump(
+        object_name => example_data
+      ).sub('---', '')
     end
 
     def new_examples_tf_integration(full_name, short_name, name)
@@ -297,22 +297,23 @@ module Provider
       new_tf_values = values.map do |k, v|
         {
           k => if v.is_a?(String)
-              "${var.#{short_name}[\"#{k}\"]}"
-            elsif v.is_a?(Array)
-              v.enum_for(:each_with_index).map { |_, index| "${var.#{short_name}[\"#{k}#{index + 1}\"]}" }
-            else
-              raise "#{v.class} is not supported for TF creation on Inspec"
-            end
+                 "${var.#{short_name}[\"#{k}\"]}"
+               elsif v.is_a?(Array)
+                 v.enum_for(:each_with_index)
+                  .map { |_, index| "${var.#{short_name}[\"#{k}#{index + 1}\"]}" }
+               else
+                 raise "#{v.class} is not supported for TF creation on Inspec"
+               end
         }
       end.reduce({}, :merge)
-      new_tf_values["project"] = '${var.gcp_project_id}'
-      hcl({
+      new_tf_values['project'] = '${var.gcp_project_id}'
+      hcl(
         'resource' => [{
           full_name => [{
             name => [new_tf_values]
           }]
         }]
-      })
+      )
     end
   end
 end
