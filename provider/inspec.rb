@@ -267,5 +267,25 @@ module Provider
       end
       "#{modularized_property_class(property)}.new(#{item_from_hash}, to_s)"
     end
+
+    # Gets attributes from the new_examples file.
+    # These attributes will be used to generate the tf file + tf attributes file.
+    def new_examples
+      YAML.load_file('templates/inspec/tests/integration/configuration/new-examples.yaml') 
+    end
+
+    # For a given resource, output the attribute file YAML placed in mm-attributes.yaml
+    def new_examples_attributes(object)
+      example_data = new_examples[object.name.underscore]
+      raise "No example found for #{object.name.underscore}" unless example_data
+
+      # Arrays should be multiple fields, not a single field.
+      example_data.select { |_, v| v.is_a?(Array) }
+                  .each do |k, v|
+                    v.each_with_index { |item, index| example_data["#{k}#{index}"] = item }
+                    example_data.delete(k)
+                  end
+      example_data
+    end
   end
 end
