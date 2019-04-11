@@ -43,7 +43,7 @@ description:
 
 <%= to_yaml({
   'options' => [
-    input_properties.map{|p| documentation_for_property(p, object)},
+    input_properties.reject{|p| is_tags?(p)}.map{|p| documentation_for_property(p, object)},
     {
       'state' => {
         'description' => [
@@ -65,6 +65,7 @@ description:
 
 extends_documentation_fragment:
     - azure
+    <%= lines('- azure_tags') if is_tags_defined?(object) -%>
 
 author:
     - "<%= @config.manifest.get('author', object) -%>"
@@ -111,12 +112,13 @@ except ImportError:
 class Actions:
     NoAction, Create, Update, Delete = range(4)
 
+
 class AzureRM<%= object.name -%>(AzureRMModuleBase):
     """Configuration class for an Azure RM <%= object.name.titleize -%> resource"""
 
     def __init__(self):
         self.module_arg_spec = dict(
-<%= lines(indent_list(input_properties.map{|p| python_dict_for_property(p, object)}, 12, true)) -%>
+<%= lines(indent_list(input_properties.reject{|p| is_tags?(p)}.map{|p| python_dict_for_property(p, object)}, 12, true)) -%>
             state=dict(
                 type='str',
                 default='present',
@@ -136,17 +138,25 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
         ]
 
 <%= lines(build_multiline_method_call("super(AzureRM#{object.name}, self).__init__(", [
-      "derived_arg_spec=self.module_arg_spec", "supports_check_mode=True", "supports_tags=True", "required_if=required_if"
+      "derived_arg_spec=self.module_arg_spec",
+      "supports_check_mode=True",
+      "supports_tags=#{python_literal(is_tags_defined?(object))}",
+      "required_if=required_if"
     ], ")", 8)) -%>
 
     def exec_module(self, **kwargs):
         """Main module execution method"""
 
-        for key in list(self.module_arg_spec.keys()) + ['tags']:
+        for key in list(self.module_arg_spec.keys())<%= " + ['tags']" if is_tags_defined?(object) -%>:
             if hasattr(self, key):
                 setattr(self, key, kwargs[key])
             elif kwargs[key] is not None:
                 self.<%= root_object_field -%>[key] = kwargs[key]
+<%  input_properties.each do |prop| -%>
+<%    if prop.is_a? Api::Type::Enum -%>
+        self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'] = _snake_to_camel(self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'], True)
+<%    end -%>
+<%  end -%>
 
         response = None
 
@@ -167,7 +177,7 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
                 self.to_do = Actions.Delete
             elif self.state == 'present':
                 if (not default_compare(self.<%= root_object_field -%>, old_response, '', self.results)):
-                  self.to_do = Actions.Update
+                    self.to_do = Actions.Update
 
         if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
             self.log("Need to Create / Update the <%= object.name.titlecase -%> instance")
@@ -248,7 +258,7 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
         :return: deserialized <%= object.name.titlecase -%> instance state dictionary
         '''
         self.log("Checking if the <%= object.name.titlecase -%> instance {0} is present".format(self.name))
-        found = false
+        found = False
         try:
 <%= lines(build_sdk_method_invocation(python_sdk_sub_client, sdk_operation)) -%>
             found = True
@@ -264,6 +274,7 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
 def main():
     """Main execution"""
     AzureRM<%= object.name -%>()
+
 
 if __name__ == '__main__':
     main()

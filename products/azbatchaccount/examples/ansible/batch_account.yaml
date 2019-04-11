@@ -7,4 +7,4 @@ task: !ruby/object:Provider::Ansible::Task
       name: <%= ctx[:name] %>
       resource_group: MyResGroup
       location: West US
-      storage_account_id: MyStorageAccountId
+      auto_storage_account: MyStorageAccountId

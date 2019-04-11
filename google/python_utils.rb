@@ -25,8 +25,10 @@ module Google
     # quotes in the string like "\"foo\"" which is not a pattern we want to
     # see in our yaml config files.
     def python_literal(value)
-      if value.is_a?(String) || value.is_a?(Symbol)
+      if value.is_a?(String)
         "'#{value}'"
+      elsif value.is_a?(Symbol)
+        "'#{value.to_s.underscore}'"
       elsif value.is_a?(Numeric)
         value.to_s
       elsif value.is_a?(Array)

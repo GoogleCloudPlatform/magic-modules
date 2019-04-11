@@ -7,5 +7,10 @@ manifest: !ruby/object:Provider::Ansible::Manifest
   requirements:
     - python >= 2.6
     - requests >= 2.18.4
-  version_added: '2.9'
+  version_added: '2.8'
   author: Junyi Yi (@JunyiYi)
+overrides: !ruby/object:Provider::ResourceOverrides
+  BatchAccount: !ruby/object:Provider::Ansible::ResourceOverride
+    properties:
+      autoStorageAccountId: !ruby/object:Provider::Ansible::PropertyOverride
+        name: autoStorageAccount

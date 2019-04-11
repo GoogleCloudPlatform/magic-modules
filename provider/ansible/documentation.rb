@@ -41,12 +41,12 @@ module Provider
               (resourceref_description(prop) \
                if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
             ].flatten.compact,
-            'required' => required,
-            'default' => (prop.default_value.to_s if prop.default_value),
+            'required' => (true if required),
+            'default' => (prop.default_value.to_s.underscore if prop.default_value),
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => (prop.aliases if prop.aliases),
             'version_added' => (prop.version_added.to_f if prop.version_added),
-            'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
+            'choices' => (prop.values.map{|v| v.to_s.underscore} if prop.is_a? Api::Type::Enum),
             'suboptions' => (
               if prop.is_a?(Api::Type::NestedObject)
                 prop.properties.map { |p| documentation_for_property(p, object) }.reduce({}, :merge)

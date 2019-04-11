@@ -74,7 +74,7 @@ module Provider
         format([
                  [
                    "choices=[#{prop.values.map do |x|
-                                 quote_string(x.to_s)
+                                 quote_string(x.to_s.underscore)
                                end.join(', ')}]"
                  ],
                  [
