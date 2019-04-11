@@ -64,24 +64,26 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
-      property_target = File.join(data[:output_folder], 'libraries/google/iam/property')
+      property_target = File.join(data.output_folder, 'libraries/google/iam/property')
       FileUtils.mkpath property_target
 
       FileUtils.cp_r 'templates/inspec/iam_policy/properties/.', property_target
 
-      target_folder = File.join(data[:output_folder], 'libraries')
-      name = data[:object].name.underscore
+      target_folder = File.join(data.output_folder, 'libraries')
+      name = data.object.name.underscore
 
-      iam_policy_resource_name = "google_#{data[:product].api_name}_#{name}_iam_policy"
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/iam_policy/iam_policy.erb',
-        out_file: File.join(target_folder, "#{iam_policy_resource_name}.rb")
+      iam_policy_resource_name = "google_#{data.product.api_name}_#{name}_iam_policy"
+      data.generate(
+        'templates/inspec/iam_policy/iam_policy.erb',
+        File.join(target_folder, "#{iam_policy_resource_name}.rb"),
+        self
       )
 
-      markdown_target_folder = File.join(data[:output_folder], 'docs/resources')
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/iam_policy/iam_policy.md.erb',
-        out_file: File.join(markdown_target_folder, "#{iam_policy_resource_name}.md")
+      markdown_target_folder = File.join(data.output_folder, 'docs/resources')
+      data.generate(
+        'templates/inspec/iam_policy/iam_policy.md.erb',
+        File.join(markdown_target_folder, "#{iam_policy_resource_name}.md"),
+        self
       )
     end
 

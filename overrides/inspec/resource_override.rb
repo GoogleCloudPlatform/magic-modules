@@ -24,7 +24,6 @@ module Overrides
           additional_functions
           product_url
           privileged
-          no_resource
         ]
       end
 
@@ -38,9 +37,6 @@ module Overrides
         # true if the resources requires organization level privileges
         # resource manager Folder is an example of a privileged resource
         check :privileged, type: :boolean, default: false
-        # true if we should not generate the singular and plural resource
-        # for this object. (if we want only the IAM policy)
-        check :no_resource, type: :boolean, default: false
       end
     end
   end
