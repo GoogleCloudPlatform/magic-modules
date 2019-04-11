@@ -210,7 +210,7 @@ module Provider
     end
 
     def grab_attributes
-      YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yml')
+      YAML.load(compile('templates/inspec/mm-attributes.yml'))
     end
 
     # Returns a variable name OR default value for that variable based on
@@ -271,21 +271,23 @@ module Provider
     # Gets attributes from the new_examples file.
     # These attributes will be used to generate the tf file + tf attributes file.
     def new_examples
-      YAML.load_file('templates/inspec/tests/integration/configuration/new-examples.yaml') 
+      YAML.load_file('templates/inspec/new-examples.yaml') 
     end
 
     # For a given resource, output the attribute file YAML placed in mm-attributes.yaml
-    def new_examples_attributes(object)
-      example_data = new_examples[object.name.underscore]
-      raise "No example found for #{object.name.underscore}" unless example_data
+    def new_examples_attributes(object_name)
+      example_data = new_examples[object_name]
+      raise "No example found for #{object_name}" unless example_data
 
       # Arrays should be multiple fields, not a single field.
       example_data.select { |_, v| v.is_a?(Array) }
                   .each do |k, v|
-                    v.each_with_index { |item, index| example_data["#{k}#{index}"] = item }
+                    v.each_with_index { |item, index| example_data["#{k}#{index + 1}"] = item }
                     example_data.delete(k)
                   end
-      example_data
+      YAML.dump({
+        object_name => example_data  
+      }).sub('---', '')
     end
   end
 end
