@@ -26,7 +26,10 @@ module Google
       type = dictionary.keys.first
       name = dictionary[type].keys.first
 
-      values = dictionary[type][name].map { |k, v| "#{k} = #{hcl_literal(v)}" }
+      # Find longest name to understand how spacing should work.
+      longest = dictionary[type][name].keys.max_by(&:length).length
+
+      values = dictionary[type][name].map { |k, v| "#{k}#{' ' * (longest - k.length)} = #{hcl_literal(v)}" }
 
       [
         "#{type} \"#{name}\" {",

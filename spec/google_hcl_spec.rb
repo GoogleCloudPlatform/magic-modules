@@ -22,25 +22,52 @@ describe Google::GolangUtils do
   context '#go_literal' do
     let(:hcl) { Test.new }
 
-    let(:original) {
-      {
-        "variable" => {
-          "image" => {
-            "description": "the Image to use"
+    describe 'sample case' do
+      let(:original) {
+        {
+          "variable" => {
+            "image" => {
+              "description": "the Image to use"
+            }
           }
         }
       }
-    }
 
-    let(:final) {
-      [
-        "variable \"image\" {",
-        "\tdescription = \"the Image to use\"",
-        '}'
-      ].join("\n")
-    }
+      let(:final) {
+        [
+          "variable \"image\" {",
+          "\tdescription = \"the Image to use\"",
+          '}'
+        ].join("\n")
+      }
 
-    describe 'sample case' do
+      subject { hcl.hcl(original) }
+      it { is_expected.to eq final }
+    end
+
+    describe 'correct spacing' do
+      let(:original) {
+        {
+          "variable" => {
+            "image" => {
+              "description": "the Image to use",
+              "a really long name": "long name",
+              "short": "a short name"
+            }
+          }
+        }
+      }
+
+      let(:final) {
+        [
+          "variable \"image\" {",
+          "\tdescription        = \"the Image to use\"",
+          "\ta really long name = \"long name\"",
+          "\tshort              = \"a short name\"",
+          '}'
+        ].join("\n")
+      }
+
       subject { hcl.hcl(original) }
       it { is_expected.to eq final }
     end
