@@ -130,7 +130,7 @@ func testCheckAzureRMAutomationStringVariableExists(resourceName string) resourc
 
         if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
             if utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Bad: Automation String Variable %q (Resource Group %q, Automation Account Name %q) does not exist", name, resourceGroup, accountName)
+                return fmt.Errorf("Bad: Automation String Variable %q (Automation Account Name %q / Resource Group %q) does not exist", name, accountName, resourceGroup)
             }
             return fmt.Errorf("Bad: Get on automationVariableClient: %+v", err)
         }

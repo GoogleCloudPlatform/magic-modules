@@ -4,7 +4,7 @@
     sub_ids = ['providers/' + sdk.provider_name]
     sdk.read.request.reject {|k, v| v.id_portion.nil?}.each do |name, value|
       if value.id_portion == "resourceGroups"
-        rg_name = name_hints[name]
+        rg_name = name_hints[value.id_portion]
       else
         sub_ids <<= "#{value.id_portion}/#{name_hints[value.id_portion]}"
       end

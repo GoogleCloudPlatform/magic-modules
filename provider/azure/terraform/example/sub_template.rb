@@ -57,7 +57,7 @@ module Provider
           def initialize(resource_id_hint, name_hints, random_vars)
             @my_binding = binding
             @my_binding.local_variable_set(:resource_id_hint, resource_id_hint)
-            @name_hints = name_hints.transform_keys(&:underscore)
+            @name_hints = name_hints
             @random_variables = random_vars
           end
 

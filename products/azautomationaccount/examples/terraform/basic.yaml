@@ -5,7 +5,7 @@ prerequisites:
     product: azresourcegroup
     example: basic
 properties:
-  name: "<%= get_resource_name('automation_account_name', 'AutoAcct') -%>"
+  name: "<%= get_resource_name('automationAccounts', 'AutoAcct') -%>"
   location: ${azurerm_resource_group.<%= resource_id_hint -%>.location}
   resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
   sku:

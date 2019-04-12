@@ -17,8 +17,13 @@ objects:
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
       provider_name: Microsoft.Automation
+      go_client_namespace: automation
+      go_client: automationVariableClient
+      python_client_namespace: '?'
+      python_client: '?'
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
+        python_func_name: create_or_update
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -45,6 +50,7 @@ objects:
             go_field_name: Value
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
+        python_func_name: get
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -56,10 +62,6 @@ objects:
             id_portion: variables
             go_variable_name: name
         response:
-          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_variable_name: resourceGroup
-          'automationAccountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_variable_name: accountName
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_type_name: Variable
           '/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
@@ -74,32 +76,9 @@ objects:
             go_field_name: IsEncrypted
           '/properties/value': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Value
-      update: !ruby/object:Api::Azure::SDKOperationDefinition
-        go_func_name: CreateOrUpdate
-        request:
-          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: resourceGroups
-            go_variable_name: resourceGroup
-          'automationAccountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: automationAccounts
-            go_variable_name: accountName
-          'variableName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: variables
-            go_variable_name: name
-          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_variable_name: parameters
-            go_type_name: VariableCreateOrUpdateParameters
-          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_field_name: VariableCreateOrUpdateProperties 
-            go_type_name: VariableCreateOrUpdateProperties 
-          '/properties/description': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Description
-          '/properties/isEncrypted': !ruby/object:Api::Azure::SDKTypeDefinition::BooleanObject
-            go_field_name: IsEncrypted
-          '/properties/value': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Value
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Delete
+        python_func_name: delete
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -119,14 +98,12 @@ objects:
         description: 'The name of the resource group in which to create the Automation Variable.'
         required: true
         input: true
-        order: 991
         azure_sdk_references: ['resourceGroupName']
       - !ruby/object:Api::Type::String
         name: 'automationAccountName'
         description: 'The name of the automation account in which the Variable is created.'
         required: true
         input: true
-        order: 992
         azure_sdk_references: ['automationAccountName']
     properties:
       - !ruby/object:Api::Type::String
@@ -134,7 +111,6 @@ objects:
         description: 'The name of the Automation Variable.'
         required: true
         input: true
-        order: 990
         azure_sdk_references: ['variableName', '/name']
       - !ruby/object:Api::Type::String
         name: 'description'

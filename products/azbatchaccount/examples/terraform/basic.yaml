@@ -8,7 +8,7 @@ prerequisites:
     product: azstorageaccount
     example: basic
 properties:
-  name: "<%= get_resource_name('batch_accounts', 'batch') -%>"
+  name: "<%= get_resource_name('batchAccounts', 'batch') -%>"
   resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
   location: ${azurerm_resource_group.<%= resource_id_hint -%>.location}
   poolAllocationMode: BatchService

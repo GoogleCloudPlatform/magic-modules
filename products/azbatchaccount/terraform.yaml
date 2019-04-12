@@ -17,7 +17,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         title: Example Usage
         example_name: basic
         resource_name_hints:
-          resourceGroupName: example-rg
+          resourceGroups: example-rg
           storageAccounts: examplesa
           batchAccounts: example-batch-account
           location: West US

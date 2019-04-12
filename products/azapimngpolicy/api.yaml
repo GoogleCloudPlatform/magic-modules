@@ -17,10 +17,13 @@ objects:
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
       provider_name: Microsoft.ApiManagement
+      go_client_namespace: apimanagement
+      go_client: apiManagementPolicyClient
       python_client_namespace: azure.mgmt.apimanagement
       python_client: APIManagementClient
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
+        python_func_name: create_or_update
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -41,6 +44,7 @@ objects:
             go_field_name: PolicyContent
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
+        python_func_name: get
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -49,10 +53,6 @@ objects:
             id_portion: service
             go_variable_name: serviceName
         response:
-          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_variable_name: resourceGroup
-          'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_variable_name: servicebusName
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_type_name: PolicyContract
           '/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
@@ -68,6 +68,7 @@ objects:
             go_field_name: PolicyContent
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Delete
+        python_func_name: delete
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -86,14 +87,12 @@ objects:
         description: The name of the Resource Group in which the API Management Service exists.
         required: true
         input: true
-        order: 991
         azure_sdk_references: ['resourceGroupName']
       - !ruby/object:Api::Type::String
         name: apiManagementName
         description: The name of the API Management Service where this Policy should be created.
         required: true
         input: true
-        order: 992
         azure_sdk_references: ['serviceName']
     properties:
       - !ruby/object:Api::Type::String

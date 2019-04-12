@@ -32,18 +32,18 @@ func resourceArmAutomationStringVariable() *schema.Resource {
             "name": {
                 Type: schema.TypeString,
                 Required: true,
-              ForceNew: true,
-            		ValidateFunc: validate.NoEmptyStrings,
-            	},
+                ForceNew: true,
+                ValidateFunc: validate.NoEmptyStrings,
+            },
 
             "resource_group_name": resourceGroupNameSchema(),
 
             "automation_account_name": {
                 Type: schema.TypeString,
                 Required: true,
-              ForceNew: true,
-            		ValidateFunc: validate.NoEmptyStrings,
-            	},
+                ForceNew: true,
+                ValidateFunc: validate.NoEmptyStrings,
+            },
 
             "description": {
                 Type: schema.TypeString,
@@ -71,6 +71,19 @@ func resourceArmAutomationStringVariableCreateUpdate(d *schema.ResourceData, met
     name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
     accountName := d.Get("automation_account_name").(string)
+
+    if requireResourcesToBeImported {
+        resp, err := client.Get(ctx, resourceGroup, accountName, name)
+        if err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return fmt.Errorf("Error checking for present of existing Automation String Variable %q (Automation Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+            }
+        }
+        if !utils.ResponseWasNotFound(resp.Response) {
+            return tf.ImportAsExistsError("azurerm_automation_string_variable", *resp.ID)
+        }
+    }
+
     description := d.Get("description").(string)
     encrypted := d.Get("encrypted").(bool)
     value := strconv.Quote(d.Get("value").(string))
@@ -86,16 +99,16 @@ func resourceArmAutomationStringVariableCreateUpdate(d *schema.ResourceData, met
 
 
     if _, err := client.CreateOrUpdate(ctx, resourceGroup, accountName, name, parameters); err != nil {
-        return fmt.Errorf("Error creating Automation String Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
+        return fmt.Errorf("Error creating Automation String Variable %q (Automation Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
     }
 
 
     resp, err := client.Get(ctx, resourceGroup, accountName, name)
     if err != nil {
-        return fmt.Errorf("Error retrieving Automation String Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
+        return fmt.Errorf("Error retrieving Automation String Variable %q (Automation Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read Automation String Variable %q (Resource Group %q, Automation Account Name %q) ID", name, resourceGroup, accountName)
+        return fmt.Errorf("Cannot read Automation String Variable %q (Automation Account Name %q / Resource Group %q) ID", name, accountName, resourceGroup)
     }
     d.SetId(*resp.ID)
 
@@ -108,7 +121,7 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Automation String Variable ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     accountName := id.Path["automationAccounts"]
@@ -121,17 +134,14 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading Automation String Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
+        return fmt.Errorf("Error reading Automation String Variable %q (Automation Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
     }
 
     if err := validateAzureRmAutomationVariableType("azurerm_automation_string_variable"); err != nil {
         return err
     }
 
-
     d.Set("name", resp.Name)
-    d.Set("resource_group_name", resourceGroup)
-    d.Set("automation_account_name", accountName)
     if properties := resp.VariableProperties; properties != nil {
         d.Set("description", properties.Description)
         d.Set("encrypted", properties.IsEncrypted)
@@ -154,14 +164,14 @@ func resourceArmAutomationStringVariableDelete(d *schema.ResourceData, meta inte
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Automation String Variable ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     accountName := id.Path["automationAccounts"]
     name := id.Path["variables"]
 
     if _, err := client.Delete(ctx, resourceGroup, accountName, name); err != nil {
-        return fmt.Errorf("Error deleting Automation String Variable %q (Resource Group %q, Automation Account Name %q): %+v", name, resourceGroup, accountName, err)
+        return fmt.Errorf("Error deleting Automation String Variable %q (Automation Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
     }
 
     return nil

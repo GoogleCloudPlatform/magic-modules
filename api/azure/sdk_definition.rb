@@ -16,11 +16,11 @@ module Api
 
       def validate
         super
-        check_optional_property :provider_name, String
-        check_optional_property :go_client_namespace, String
-        check_optional_property :go_client, String
-        check_optional_property :python_client_namespace, String
-        check_optional_property :python_client, String
+        check_property :provider_name, String
+        check_property :go_client_namespace, String
+        check_property :go_client, String
+        check_property :python_client_namespace, String
+        check_property :python_client, String
         check_property :create, Api::Azure::SDKOperationDefinition
         check_property :read, Api::Azure::SDKOperationDefinition
         check_optional_property :update, Api::Azure::SDKOperationDefinition

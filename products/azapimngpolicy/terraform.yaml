@@ -10,12 +10,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
       format: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         hide_from_schema: true
         custom_schema_get: products/azapimngpolicy/terraform_format_get.erb
-        custom_schema_set: templates/terraform/schemas/empty.erb
+        custom_schema_set: products/azapimngpolicy/terraform_format_content_set.erb
         custom_sdkfield_assign: products/azapimngpolicy/terraform_format_field_assign.erb
       xmlContent: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         conflicts_with: [xml_link]
         diff_suppress_func: 'suppress.SuppressXmlDiff'
-        custom_schema_set: products/azapimngpolicy/terraform_format_content_set.erb
+        custom_schema_set: templates/terraform/schemas/empty.erb
         custom_sdkfield_assign: products/azapimngpolicy/terraform_content_field_assign.erb
       xmlLink: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         conflicts_with: [xml_content]
@@ -36,6 +36,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         title: Example Usage
         example_name: findReplace
         resource_name_hints:
-          resourceGroupName: example-rg
-          apiManagementName: example-apim
+          resourceGroups: example-rg
+          service: example-apim
           location: West US

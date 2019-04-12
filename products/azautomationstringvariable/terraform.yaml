@@ -30,7 +30,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         title: Example Usage
         example_name: basic
         resource_name_hints:
-          resourceGroupName: example-rg
-          automationAccountName: example-account
-          variableName: example-var
+          resourceGroups: example-rg
+          automationAccounts: example-account
+          variables: example-var
           location: West US
