@@ -332,9 +332,18 @@ module Provider
 
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
+      unless object.exclude_resource
+        Google::LOGGER.debug "Generating #{object.name} resource"
+        generate_resource data.clone
+        Google::LOGGER.debug "Generating #{object.name} tests"
+        generate_resource_tests data.clone
+      end
 
-      generate_resource data.clone
-      generate_resource_tests data.clone
+      # if iam_policy is not defined or excluded, don't generate it
+      return if object.iam_policy.nil? || object.iam_policy.exclude
+
+      Google::LOGGER.debug "Generating #{object.name} IAM policy"
+      generate_iam_policy data.clone
     end
 
     def generate_datasources(output_folder, types, version_name)

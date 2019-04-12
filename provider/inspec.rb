@@ -18,6 +18,7 @@ require 'provider/inspec/manifest'
 require 'overrides/inspec/resource_override'
 require 'overrides/inspec/property_override'
 require 'active_support/inflector'
+require 'google/yaml_validator'
 
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
@@ -58,6 +59,27 @@ module Provider
       generate_documentation(data.clone, name, false)
       generate_documentation(data.clone, name, true)
       generate_properties(data.clone, data.object.all_user_properties)
+    end
+
+    # Generate the IAM policy for this object. This is used to query and test
+    # IAM policies separately from the resource itself
+    def generate_iam_policy(data)
+      target_folder = File.join(data.output_folder, 'libraries')
+      name = data.object.name.underscore
+
+      iam_policy_resource_name = "google_#{data.product.api_name}_#{name}_iam_policy"
+      data.generate(
+        'templates/inspec/iam_policy/iam_policy.erb',
+        File.join(target_folder, "#{iam_policy_resource_name}.rb"),
+        self
+      )
+
+      markdown_target_folder = File.join(data.output_folder, 'docs/resources')
+      data.generate(
+        'templates/inspec/iam_policy/iam_policy.md.erb',
+        File.join(markdown_target_folder, "#{iam_policy_resource_name}.md"),
+        self
+      )
     end
 
     def generate_properties(data, props)
@@ -266,6 +288,11 @@ module Provider
         return "#{class_name}Array.parse(#{item_from_hash}, to_s)"
       end
       "#{modularized_property_class(property)}.new(#{item_from_hash}, to_s)"
+    end
+
+    # Extracts identifiers of a resource in the form {{identifier}} from a url
+    def extract_identifiers(url)
+      url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
 end

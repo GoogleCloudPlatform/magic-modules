@@ -220,3 +220,48 @@ objects:
         name: 'createTime'
         description: 'Time of creation'
         output: true
+  - !ruby/object:Api::Resource
+    name: 'Organization'
+    base_url: 'organizations'
+    collection_url: organizations:search
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'organizations'
+    description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the organization. This is the organization's relative path in the API.
+          Its format is "organizations/[organizationId]". For example, "organizations/1234".
+      - !ruby/object:Api::Type::String
+        name: displayName
+        output: true
+        description: |
+          A human-readable string that refers to the Organization in the GCP Console UI.
+          This string is set by the server and cannot be changed. The string will be set
+          to the primary domain (for example, "google.com") of the G Suite customer that
+          owns the organization.
+      - !ruby/object:Api::Type::Enum
+        name: 'lifecycleState'
+        description: |
+          The lifecycle state of the folder. Updates to the lifecycleState
+          must be performed via folders.delete and folders.undelete.
+        output: true
+        values:
+          - :LIFECYCLE_STATE_UNSPECIFIED
+          - :ACTIVE
+          - :DELETE_REQUESTED
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        output: true
+        description: |
+          Timestamp when the Organization was created. Assigned by the server.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'owner'
+        description: The entity that owns the Organization
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'directoryCustomerId'
+            description: The G Suite customer id used in the Directory API
