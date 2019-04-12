@@ -13,13 +13,13 @@ __metaclass__ = type
 ################################################################################
 
 <%
-  metadata_version = quote_string('1.1')
-  supported_by = quote_string('community')
+  metadata_version = quote_string("1.1")
+  supported_by = quote_string("community")
 
   uri_props = object.uri_properties.reject { |para| para.nil? || para.name == 'name' }
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': 'preview',
+                    'status': "preview",
                     'supported_by': <%= supported_by -%>}
 
 DOCUMENTATION = '''
@@ -30,7 +30,7 @@ DOCUMENTATION = '''
   'short_description' => "Gather facts for GCP #{object.name}",
   'version_added' => version_added(object, :facts).to_f,
   'author' => "Google Inc. (@googlecloudplatform)",
-  'requirements' => ['python >= 2.6', 'requests >= 2.18.4', 'google-auth >= 1.3.0']
+  'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"]
   'options' => [
     ({
       object.facts.filter.name.underscore => {
