@@ -3,7 +3,9 @@
   nested_properties = nested_properties(property)
   if !nested_properties.empty?
 -%>
-The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%>:
+---
+
+The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%> the following:
 <%- if property.is_a?(Api::Type::Map) %>
 * `<%= property.key_name.underscore -%>` - (Required) The identifier for this object. Format specified above.
 <% end -%>

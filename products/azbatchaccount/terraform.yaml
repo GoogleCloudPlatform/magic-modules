@@ -1,10 +1,23 @@
 --- !ruby/object:Provider::Terraform::Config
 name: azbatchaccount
 overrides: !ruby/object:Provider::ResourceOverrides
-  BatchAccount: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "resource_group"
-        primary_resource_id: "example"
-        vars:
-          rg_name: "ExampleRG"
+  BatchAccount: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    properties:
+      name: !ruby/object:Provider::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: validateAzureRMBatchAccountName
+      autoStorageAccountId: !ruby/object:Provider::Terraform::PropertyOverride
+        name: storageAccountId
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: azure.ValidateResourceIDOrEmpty
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_functions: products/azbatchaccount/terraform_extra_functions.erb
+    document_examples:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
+        title: Example Usage
+        example_name: basic
+        resource_name_hints:
+          resourceGroupName: example-rg
+          storageAccounts: examplesa
+          batchAccounts: example-batch-account
+          location: West US

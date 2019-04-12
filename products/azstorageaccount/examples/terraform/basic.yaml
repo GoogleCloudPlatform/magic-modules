@@ -1,0 +1,12 @@
+--- !ruby/object:Provider::Azure::Terraform::Example
+resource: azurerm_storage_account
+prerequisites:
+  - !ruby/object:Provider::Azure::Terraform::ExampleReference
+    product: azresourcegroup
+    example: basic
+properties:
+  name: "<%= get_resource_name('storage_accounts', 'sa') -%>"
+  resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
+  location: ${azurerm_resource_group.<%= resource_id_hint -%>.location}
+  accountTier: Standard
+  accountReplicationType: LRS

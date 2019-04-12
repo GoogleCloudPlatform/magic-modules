@@ -1,0 +1,15 @@
+--- !ruby/object:Provider::Azure::Terraform::Example
+resource: azurerm_batch_account
+prerequisites:
+  - !ruby/object:Provider::Azure::Terraform::ExampleReference
+    product: azresourcegroup
+    example: basic
+  - !ruby/object:Provider::Azure::Terraform::ExampleReference
+    product: azstorageaccount
+    example: basic
+properties:
+  name: "<%= get_resource_name('batch_accounts', 'batch') -%>"
+  resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
+  location: ${azurerm_resource_group.<%= resource_id_hint -%>.location}
+  poolAllocationMode: BatchService
+  storageAccountId: ${azurerm_storage_account.<%= resource_id_hint -%>.id}

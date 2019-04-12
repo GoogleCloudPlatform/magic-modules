@@ -256,6 +256,8 @@ module Provider
       # the Read() method to succeed.
       attr_reader :post_import
 
+      attr_reader :extra_functions
+
       def validate
         super
 
@@ -271,6 +273,7 @@ module Provider
         check_optional_property :pre_delete, String
         check_optional_property :custom_import, String
         check_optional_property :post_import, String
+        check_optional_property :extra_functions, String
       end
     end
   end

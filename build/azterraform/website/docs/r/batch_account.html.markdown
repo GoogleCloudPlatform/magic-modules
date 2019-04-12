@@ -24,17 +24,28 @@ description: |-
 Manages a Batch Account on Azure.
 
 
-## Example Usage - Resource Group
-
+## Example Usage
 
 ```hcl
 resource "azurerm_resource_group" "example" {
-  name     = "ExampleRG"
+  name     = "example-rg"
   location = "West US"
+}
 
-  tags {
-    environment = "Production"
-  }
+resource "azurerm_storage_account" "example" {
+  name                   = "examplesa"
+  resource_group_name    = "${azurerm_resource_group.example.name}"
+  location               = "${azurerm_resource_group.example.location}"
+  accountTier            = "Standard"
+  accountReplicationType = "LRS"
+}
+
+resource "azurerm_batch_account" "example" {
+  name                = "example-batch-account"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  location            = "${azurerm_resource_group.example.location}"
+  poolAllocationMode  = "BatchService"
+  storageAccountId    = "${azurerm_storage_account.example.id}"
 }
 ```
 
@@ -44,19 +55,21 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the Batch Account. Changing this forces a new resource to be created.
 
-* `location` - (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created.
-
 * `resource_group_name` - (Required) The name of the resource group in which to create the Batch Account. Changing this forces a new resource to be created.
 
-* `tags` - (Optional) A mapping of tags to assign to the batch account.
+* `location` - (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created.
 
-* `auto_storage_account_id` - (Optional) The ID of the Batch Account auto storage account.
+* `key_vault_reference` - (Optional) One `key_vault_reference` block defined below. Changing this forces a new resource to be created.
 
 * `pool_allocation_mode` - (Optional) The pool acclocation mode of the Batch Account. Defaults to `BatchService`. Changing this forces a new resource to be created.
 
-* `key_vault_reference` - (Optional) A reference to the Azure key vault associated with the Batch account. Changing this forces a new resource to be created.  Structure is documented below.
+* `storage_account_id` - (Optional) The ID of the Batch Account auto storage account.
 
-The `key_vault_reference` block supports:
+* `tags` - (Optional) A mapping of tags to assign to the batch account.
+
+---
+
+The `key_vault_reference` block supports the following:
 
 * `id` - (Required) The resource ID of the Azure key vault associated with the Batch account. Changing this forces a new resource to be created.
 
@@ -67,3 +80,12 @@ The `key_vault_reference` block supports:
 The following attributes are exported:
 
 * `id` - The ID of the Batch Account.
+
+
+## Import
+
+Batch Account can be imported using the `resource id`, e.g.
+
+```shell
+$ terraform import azurerm_batch_account.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Batch/batchAccounts/example-batch-account
+```

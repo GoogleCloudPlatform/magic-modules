@@ -16,7 +16,7 @@ objects:
     base_url: NotUsedInAzure
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
-      provider_name: batch
+      provider_name: Microsoft.Batch
       go_client_namespace: batch
       go_client: batchAccountClient
       python_client_namespace: azure.mgmt.batch

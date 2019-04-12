@@ -275,3 +275,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%    descriptor = flatten_queue.shift -%>
 <%=   lines(build_flatten_method(resource_name, descriptor.property, descriptor.api_path, descriptor.sdk_type_defs, flatten_queue, object)) -%>
 <%  end -%>
+
+<%  if object.custom_code.extra_functions -%>
+<%=   lines(compile(object.custom_code.extra_functions)) -%>
+<%  end -%>

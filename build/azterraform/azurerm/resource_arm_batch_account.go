@@ -33,16 +33,12 @@ func resourceArmBatchAccount() *schema.Resource {
                 Type: schema.TypeString,
                 Required: true,
                 ForceNew: true,
+                ValidateFunc: validateAzureRMBatchAccountName,
             },
 
             "location": locationSchema(),
 
             "resource_group_name": resourceGroupNameSchema(),
-
-            "auto_storage_account_id": {
-                Type: schema.TypeString,
-                Optional: true,
-            },
 
             "key_vault_reference": {
                 Type: schema.TypeList,
@@ -76,6 +72,12 @@ func resourceArmBatchAccount() *schema.Resource {
                 Default: string(batch.BatchService),
             },
 
+            "storage_account_id": {
+                Type: schema.TypeString,
+                Optional: true,
+                ValidateFunc: azure.ValidateResourceIDOrEmpty,
+            },
+
             "tags": tagsSchema(),
         },
     }
@@ -101,16 +103,16 @@ func resourceArmBatchAccountCreate(d *schema.ResourceData, meta interface{}) err
     }
 
     location := azureRMNormalizeLocation(d.Get("location").(string))
-    autoStorageAccountId := d.Get("auto_storage_account_id").(string)
     keyVaultReference := d.Get("key_vault_reference").([]interface{})
     poolAllocationMode := d.Get("pool_allocation_mode").(string)
+    storageAccountId := d.Get("storage_account_id").(string)
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := batch.AccountCreateParameters{
         Location: utils.String(location),
         AccountCreateProperties: &batch.AccountCreateProperties{
             AutoStorage: &batch.AutoStorageBaseProperties{
-                StorageAccountID: utils.String(autoStorageAccountId),
+                StorageAccountID: utils.String(storageAccountId),
             },
             KeyVaultReference: expandArmBatchAccountKeyVaultReference(keyVaultReference),
             PoolAllocationMode: batch.PoolAllocationMode(poolAllocationMode),
@@ -167,13 +169,13 @@ func resourceArmBatchAccountRead(d *schema.ResourceData, meta interface{}) error
         d.Set("location", azureRMNormalizeLocation(*location))
     }
     if properties := resp.AccountProperties; properties != nil {
-        if autoStorage := properties.AutoStorage; autoStorage != nil {
-            d.Set("auto_storage_account_id", autoStorage.StorageAccountID)
-        }
         if err := d.Set("key_vault_reference", flattenArmBatchAccountKeyVaultReference(properties.KeyVaultReference)); err != nil {
             return fmt.Errorf("Error setting `key_vault_reference`: %+v", err)
         }
         d.Set("pool_allocation_mode", string(properties.PoolAllocationMode))
+        if autoStorage := properties.AutoStorage; autoStorage != nil {
+            d.Set("storage_account_id", autoStorage.StorageAccountID)
+        }
     }
     flattenAndSetTags(d, resp.Tags)
 
@@ -186,13 +188,13 @@ func resourceArmBatchAccountUpdate(d *schema.ResourceData, meta interface{}) err
 
     name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
-    autoStorageAccountId := d.Get("auto_storage_account_id").(string)
+    storageAccountId := d.Get("storage_account_id").(string)
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := batch.AccountUpdateParameters{
         AccountUpdateProperties: &batch.AccountUpdateProperties{
             AutoStorage: &batch.AutoStorageBaseProperties{
-                StorageAccountID: utils.String(autoStorageAccountId),
+                StorageAccountID: utils.String(storageAccountId),
             },
         },
         Tags: expandTags(tags),
@@ -265,4 +267,21 @@ func flattenArmBatchAccountKeyVaultReference(input *batch.KeyVaultReference) []i
     }
 
     return []interface{}{result}
+}
+
+func validateAzureRMBatchAccountName(v interface{}, k string) (warnings []string, errors []error) {
+    value := v.(string)
+    if !regexp.MustCompile(`^[a-z0-9]+$`).MatchString(value) {
+        errors = append(errors, fmt.Errorf("lowercase letters and numbers only are allowed in %q: %q", k, value))
+    }
+
+    if 3 > len(value) {
+        errors = append(errors, fmt.Errorf("%q cannot be less than 3 characters: %q", k, value))
+    }
+
+    if len(value) > 24 {
+        errors = append(errors, fmt.Errorf("%q cannot be longer than 24 characters: %q %d", k, value, len(value)))
+    }
+
+    return warnings, errors
 }

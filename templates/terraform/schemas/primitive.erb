@@ -3,35 +3,35 @@
 -%>
 <% if tf_types.include?(property.class) -%>
 "<%= property.name.underscore -%>": {
-  <% if property.is_set -%>
-  Type: schema.TypeSet,
-  <% else -%>
-  Type: <%= tf_type(property) %>,
-  <% end -%>
-<%	if property.default_from_api -%>
-	Computed: true,
-	Optional: true,
-<% elsif property.required -%>
-  Required: true,
-<% elsif property.output -%>
-  Computed: true,
-<% else -%>
-  Optional: true,
-<% end -%>
+<%   if property.is_set -%>
+    Type: schema.TypeSet,
+<%   else -%>
+    Type: <%= tf_type(property) %>,
+<%   end -%>
+<%   if property.default_from_api -%>
+    Computed: true,
+    Optional: true,
+<%   elsif property.required -%>
+    Required: true,
+<%   elsif property.output -%>
+    Computed: true,
+<%   else -%>
+    Optional: true,
+<%   end -%>
 <% if force_new?(property, object) -%>
     ForceNew: true,
 <% end -%>
 <% unless property.validation.nil? || property.output -%>
-	<% if !property.validation.regex.nil? -%>
+<%   if !property.validation.regex.nil? -%>
     ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
-	<% elsif !property.validation.function.nil? -%>
+<%   elsif !property.validation.function.nil? -%>
     ValidateFunc: <%= property.validation.function -%>,
-	<% end # property.validation.nil?  -%>
+<%   end # property.validation.nil?  -%>
 <% end # property.validation.nil?  -%>
 <% if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output -%>
 <%
-	enum_values = property.values
-	# enum_values.push "" unless property.required
+  enum_values = property.values
+  # enum_values.push "" unless property.required
 -%>
     ValidateFunc: validation.StringInSlice([]string{
 <%  enum_values.each do |val| -%>

@@ -98,16 +98,16 @@ To get more information about <%= object.name -%>, see:
 ## Argument Reference
 
 The following arguments are supported:
-<% properties.select(&:required).each do |prop| -%>
+<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-<% properties.select(&:required).each do |prop| -%>
+<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 
@@ -133,9 +133,9 @@ The following attributes are exported:
 <%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? && !object.document_examples.empty? -%>
 ## Import
 
-<%= object.name -%> can be imported using the `resource id`, e.g.
-```shell
-$ terraform import azurerm_<%= resource_name -%>.example <%= build_documentation_import_resource_id(object, object.document_examples[0]) -%>
+<%= object.name.titlecase -%> can be imported using the `resource id`, e.g.
 
+```shell
+$ terraform import azurerm_<%= resource_name -%>.example <%= lines(build_documentation_import_resource_id(object, object.document_examples[0])) -%>
 ```
 <%  end -%>

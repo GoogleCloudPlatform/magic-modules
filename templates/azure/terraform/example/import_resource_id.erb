@@ -1,12 +1,12 @@
 <%
     sdk = object.azure_sdk_definition
     rg_name = ""
-    sub_ids = [sdk.provider_name]
+    sub_ids = ['providers/' + sdk.provider_name]
     sdk.read.request.reject {|k, v| v.id_portion.nil?}.each do |name, value|
       if value.id_portion == "resourceGroups"
         rg_name = name_hints[name]
       else
-        sub_ids <<= "#{value.id_portion}/#{name_hints[name]}"
+        sub_ids <<= "#{value.id_portion}/#{name_hints[value.id_portion]}"
       end
     end
 -%>
