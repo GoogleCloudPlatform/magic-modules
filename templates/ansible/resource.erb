@@ -187,7 +187,17 @@ def main():
                   response_to_hash(module, fetch))
 <% end -%>
 <%   if object.input && update_props.empty? -%>
-    module.fail_json(msg="<%= object.name -%> cannot be edited")
+<%=
+    method_call('delete', [
+                            'module', delete_url,
+                            ('kind' if object.kind?),
+                            ('fetch' if object.access_api_results)
+                          ])
+-%>
+<%=
+  method_call('create', ['module', create_link,
+                         ('kind' if object.kind?)])
+-%>
 <%   elsif  !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
 <% method_args = ['link'] -%>
