@@ -19,7 +19,7 @@ __metaclass__ = type
   uri_props = object.uri_properties.reject { |para| para.nil? || para.name == 'name' }
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': "preview",
+                    'status': ["preview"],
                     'supported_by': <%= supported_by -%>}
 
 DOCUMENTATION = '''
