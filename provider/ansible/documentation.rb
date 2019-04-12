@@ -14,7 +14,6 @@
 require 'compile/core'
 require 'provider/config'
 require 'provider/core'
-require 'provider/ansible/manifest'
 
 # Rubocop doesn't like this file because the hashes are complicated.
 # Humans like this file because the hashes are explicit and easy to read.
