@@ -65,7 +65,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: true
+    exclude_resource: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_target_pool.rb'), 6)) -%>
