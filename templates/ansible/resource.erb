@@ -188,15 +188,15 @@ def main():
 <% end -%>
 <%   if object.input && update_props.empty? -%>
 <%=
-    method_call('delete', [
+    indent(method_call('delete', [
                             'module', delete_url,
                             ('kind' if object.kind?),
                             ('fetch' if object.access_api_results)
-                          ])
+                          ]), 4)
 -%>
 <%=
-  method_call('create', ['module', create_link,
-                         ('kind' if object.kind?)])
+  indent(method_call('create', ['module', create_link,
+                         ('kind' if object.kind?)]), 4)
 -%>
 <%   elsif  !object.input -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
