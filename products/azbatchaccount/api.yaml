@@ -191,7 +191,7 @@ objects:
         name: tags
         description: A mapping of tags to assign to the batch account.
         azure_sdk_references: ['tags', '/tags']
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Azure::Type::ResourceReference
         name: autoStorageAccountId
         description: The ID of the Batch Account auto storage account.
         azure_sdk_references: ['autoStorage/storageAccountId', '/properties/autoStorage/storageAccountId']
@@ -222,3 +222,8 @@ objects:
             required: true
             input: true
             azure_sdk_references: ['/properties/keyVaultReference/url']
+      - !ruby/object:Api::Type::String
+        name: accountEndpoint
+        description: The account endpoint used to interact with the Batch service.
+        output: true
+        azure_sdk_references: ['/properties/accountEndpoint']

@@ -106,6 +106,11 @@ id:
     - The identifier of the Batch Account resource.
     returned: always
     type: str
+account_endpoint:
+    description:
+    - The account endpoint used to interact with the Batch service.
+    returned: always
+    type: str
 '''
 
 import time
@@ -245,7 +250,8 @@ class AzureRMBatchAccount(AzureRMModuleBase):
 
         if self.state == 'present':
             self.results.update({
-                'id': response.get('id', None)
+                'id': response.get('id', None),
+                'account_endpoint': response.get('account_endpoint', None)
             })
         return self.results
 

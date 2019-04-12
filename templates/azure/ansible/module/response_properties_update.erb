@@ -1,4 +1,4 @@
 'id': response.get('id', None)
 <%  properties.each do |prop| -%>
-'<%=  prop.name -%>': response.get('??', None)
+'<%=  prop.name.underscore -%>': response.get('<%= prop.name.underscore -%>', None)
 <%  end -%>

@@ -81,6 +81,8 @@ The following attributes are exported:
 
 * `id` - The ID of the Batch Account.
 
+* `account_endpoint` - The account endpoint used to interact with the Batch service.
+
 
 ## Import
 

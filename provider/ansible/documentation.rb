@@ -71,7 +71,7 @@ module Provider
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
         {
-          prop.name => {
+          prop.name.underscore => {
             'description' => format_description(prop.description),
             'returned' => 'always',
             'type' => type,

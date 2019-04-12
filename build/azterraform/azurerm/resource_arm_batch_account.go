@@ -79,6 +79,11 @@ func resourceArmBatchAccount() *schema.Resource {
             },
 
             "tags": tagsSchema(),
+
+            "account_endpoint": {
+                Type: schema.TypeString,
+                Computed: true,
+            },
         },
     }
 }
@@ -169,6 +174,7 @@ func resourceArmBatchAccountRead(d *schema.ResourceData, meta interface{}) error
         d.Set("location", azureRMNormalizeLocation(*location))
     }
     if properties := resp.AccountProperties; properties != nil {
+        d.Set("account_endpoint", properties.AccountEndpoint)
         if err := d.Set("key_vault_reference", flattenArmBatchAccountKeyVaultReference(properties.KeyVaultReference)); err != nil {
             return fmt.Errorf("Error setting `key_vault_reference`: %+v", err)
         }

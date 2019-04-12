@@ -28,6 +28,7 @@ module Provider
             Api::Type::String => 'utils.String',
             Api::Azure::Type::Location => "utils.String",
             Api::Azure::Type::Tags => 'expandTags',
+            Api::Azure::Type::ResourceReference => "utils.String"
           }
         end
 

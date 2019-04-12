@@ -3,7 +3,6 @@ require 'api/type'
 module Api
   module Azure
     module Type
-
       class ResourceGroupName < Api::Type::String
         def validate
           @order ||= 550
@@ -25,6 +24,11 @@ module Api
         end
       end
 
+      class ResourceReference < Api::Type::String
+        def validate
+          super
+        end
+      end
     end
   end
 end
