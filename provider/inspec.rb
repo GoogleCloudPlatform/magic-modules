@@ -40,6 +40,18 @@ module Provider
       end
     end
 
+    # Subclass of FileTemplate with InSpec specific fields
+    class InspecFileTemplate < Provider::FileTemplate
+      # InSpec stuff.
+      # Is this a plural resource?
+      attr_accessor :plural
+      # Should we generate documentation?
+      attr_accessor :doc_generation
+      # The file name of the attribute
+      attr_accessor :attribute_file_name
+      attr_accessor :privileged
+    end
+
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
@@ -104,6 +116,10 @@ module Provider
       end
     end
 
+    def build_object_data(object, output_folder, version)
+      InspecFileTemplate.new(object, output_folder, version, @config, build_env)
+    end
+
     # Generates InSpec markdown documents for the resource
     def generate_documentation(data, base_name, plural)
       docs_folder = File.join(data.output_folder, 'docs', 'resources')
@@ -113,9 +129,11 @@ module Provider
       data.name = name
       data.plural = plural
       data.doc_generation = true
-      data.generate('templates/inspec/doc_template.md.erb',
-                    File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
-                    self)
+      data.generate(
+        'templates/inspec/doc_template.md.erb',
+        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+        self
+      )
     end
 
     # Format a url that may be include newlines into a single line

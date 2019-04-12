@@ -54,14 +54,6 @@ module Provider
     # The Ansible example object.
     attr_accessor :example
 
-    # InSpec stuff.
-    # Is this a plural resource?
-    attr_accessor :plural
-    # Should we generate documentation?
-    attr_accessor :doc_generation
-    # The file name of the attribute
-    attr_accessor :attribute_file_name
-    attr_accessor :privileged
     attr_accessor :property
 
     # Terraform stuff.
@@ -70,16 +62,22 @@ module Provider
     attr_accessor :async
     attr_accessor :resource_name
 
-    def initialize(options)
-      options.each { |k, v| method("#{k}=").call(v) }
-
-      @env = {
-        pyformat_enabled: options.dig(:env, :pyformat_enabled),
-        goformat_enabled: options.dig(:env, :goformat_enabled),
-        start_time: options.dig(:env, :start_time)
-      }
+    def initialize(object, output_folder, version, config, env)
+      @name = object.out_name
+      @object = object
+      @product = object.__product
+      @product_ns = object.__product.name
+      @output_folder = output_folder
+      @version = version
+      @config = config
+      @env = env
     end
-
+            name: target,
+            product: @api,
+            manifest: manifest,
+            output_folder: output_folder,
+            product_ns: @api.name,
+            env: build_env
     # Given the data object for a file, write that file and verify that it
     # passes these conditions:
     #
@@ -282,11 +280,7 @@ module Provider
             product: @api,
             output_folder: output_folder,
             product_ns: @api.name,
-            env: {
-              pyformat_enabled: @py_format_enabled,
-              goformat_enabled: @go_format_enabled,
-              start_time: @start_time
-            }
+            env: build_env
           }.merge(data)).generate(source, target_file, self)
         end
       end.map(&:join)
@@ -377,20 +371,15 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      FileTemplate.new(
-        name: object.out_name,
-        object: object,
-        product: object.__product,
-        product_ns: object.__product.name,
-        output_folder: output_folder,
-        version: version,
-        config: @config,
-        env: {
-          pyformat_enabled: @py_format_enabled,
-          goformat_enabled: @go_format_enabled,
-          start_time: @start_time
-        }
-      )
+      FileTemplate.new(object, output_folder, version, @config, build_env)
+    end
+
+    def build_env
+      {
+        pyformat_enabled: @py_format_enabled,
+        goformat_enabled: @go_format_enabled,
+        start_time: @start_time
+      }
     end
 
     def build_url(url_parts, extra = false)
