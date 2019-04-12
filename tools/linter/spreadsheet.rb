@@ -39,7 +39,7 @@ RSpec.configure do |c|
   c.inclusion_filter = [:property]
 end
 Google::LOGGER.level = Logger::ERROR
-VALID_KEYS = %w[filename url product version].freeze
+VALID_KEYS = %w[filename url product version aliases].freeze
 
 # Running tests.
 docs = YAML.safe_load(File.read(doc_file))
@@ -52,7 +52,7 @@ docs.each do |doc|
   # Need value in case TF or Ansible file does not exist.
   api_name = api.api_name
 
-  builder = Discovery::Builder.new(doc['url'], api.objects.map(&:name))
+  builder = Discovery::Builder.new(doc, api.objects.map(&:name))
   run_tests(builder, api, { property: true }, { provider: :api }, api_name: api_name)
 
   # Run tests on TF API
