@@ -64,11 +64,6 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
-      property_target = File.join(data.output_folder, 'libraries/google/iam/property')
-      FileUtils.mkpath property_target
-
-      FileUtils.cp_r 'templates/inspec/iam_policy/properties/.', property_target
-
       target_folder = File.join(data.output_folder, 'libraries')
       name = data.object.name.underscore
 

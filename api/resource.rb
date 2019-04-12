@@ -154,7 +154,10 @@ module Api
       end
     end
 
-    # Represents a list of documentation links.
+    # Information about the IAM policy for this resource
+    # Several GCP resources have IAM policies that are scoped to
+    # and accessed via their parent resource
+    # See: https://cloud.google.com/iam/docs/overview
     class IamPolicy < Api::Object
       # boolean of if this binding should be generated
       attr_reader :exclude
@@ -162,7 +165,7 @@ module Api
       def validate
         super
 
-        check :exclude, type: :boolean, default: true
+        check :exclude, type: :boolean, default: false
       end
     end
 

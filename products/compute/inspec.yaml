@@ -65,7 +65,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Subnetwork: !ruby/object:Overrides::Inspec::ResourceOverride
-    exclude: false
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
