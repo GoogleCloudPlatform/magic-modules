@@ -32,7 +32,7 @@ func resourceArmServiceBusDisasterRecoveryConfig() *schema.Resource {
             "name": {
                 Type: schema.TypeString,
                 Required: true,
-              ForceNew: true,
+                ForceNew: true,
             },
 
             "resource_group_name": resourceGroupNameSchema(),
@@ -40,7 +40,7 @@ func resourceArmServiceBusDisasterRecoveryConfig() *schema.Resource {
             "namespace_name": {
                 Type: schema.TypeString,
                 Required: true,
-              ForceNew: true,
+                ForceNew: true,
             },
 
             "alternate_name": {
@@ -63,6 +63,19 @@ func resourceArmServiceBusDisasterRecoveryConfigCreateUpdate(d *schema.ResourceD
     name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
     servicebusName := d.Get("namespace_name").(string)
+
+    if requireResourcesToBeImported {
+        resp, err := client.Get(ctx, resourceGroup, servicebusName, name)
+        if err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return fmt.Errorf("Error checking for present of existing Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
+            }
+        }
+        if !utils.ResponseWasNotFound(resp.Response) {
+            return tf.ImportAsExistsError("azurerm_service_bus_disaster_recovery_config", *resp.ID)
+        }
+    }
+
     alternateName := d.Get("alternate_name").(string)
     partnerNamespace := d.Get("partner_namespace").(string)
 
@@ -75,16 +88,16 @@ func resourceArmServiceBusDisasterRecoveryConfigCreateUpdate(d *schema.ResourceD
 
 
     if _, err := client.CreateOrUpdate(ctx, resourceGroup, servicebusName, name, parameters); err != nil {
-        return fmt.Errorf("Error creating Service Bus Disaster Recovery Config %q (Resource Group %q, Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
+        return fmt.Errorf("Error creating Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
     }
 
 
     resp, err := client.Get(ctx, resourceGroup, servicebusName, name)
     if err != nil {
-        return fmt.Errorf("Error retrieving Service Bus Disaster Recovery Config %q (Resource Group %q, Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
+        return fmt.Errorf("Error retrieving Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read Service Bus Disaster Recovery Config %q (Resource Group %q, Namespace Name %q) ID", name, resourceGroup, servicebusName)
+        return fmt.Errorf("Cannot read Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q) ID", name, servicebusName, resourceGroup)
     }
     d.SetId(*resp.ID)
 
@@ -97,7 +110,7 @@ func resourceArmServiceBusDisasterRecoveryConfigRead(d *schema.ResourceData, met
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Service Bus Disaster Recovery Config ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     servicebusName := id.Path["namespaces"]
@@ -110,14 +123,11 @@ func resourceArmServiceBusDisasterRecoveryConfigRead(d *schema.ResourceData, met
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading Service Bus Disaster Recovery Config %q (Resource Group %q, Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
+        return fmt.Errorf("Error reading Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
     }
 
 
-
     d.Set("name", resp.Name)
-    d.Set("resource_group_name", resourceGroup)
-    d.Set("namespace_name", servicebusName)
     if armDisasterRecoveryProperties := resp.ArmDisasterRecoveryProperties; armDisasterRecoveryProperties != nil {
         d.Set("alternate_name", armDisasterRecoveryProperties.AlternateName)
         d.Set("partner_namespace", armDisasterRecoveryProperties.PartnerNamespace)
@@ -134,14 +144,14 @@ func resourceArmServiceBusDisasterRecoveryConfigDelete(d *schema.ResourceData, m
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Service Bus Disaster Recovery Config ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     servicebusName := id.Path["namespaces"]
     name := id.Path["disasterRecoveryConfigs"]
 
     if _, err := client.Delete(ctx, resourceGroup, servicebusName, name); err != nil {
-        return fmt.Errorf("Error deleting Service Bus Disaster Recovery Config %q (Resource Group %q, Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
+        return fmt.Errorf("Error deleting Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
     }
 
     return nil

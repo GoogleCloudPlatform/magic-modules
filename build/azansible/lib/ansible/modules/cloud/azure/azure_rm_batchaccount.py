@@ -29,7 +29,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: azure_rm_batchaccount
-version_added: "2.8"
+version_added: "2.9"
 
 short_description: Manages a Batch Account on Azure.
 

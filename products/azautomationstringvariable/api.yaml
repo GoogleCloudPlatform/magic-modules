@@ -125,3 +125,8 @@ objects:
         description: 'The encrypted flag of the Automation Variable.'
         default_value: false
         azure_sdk_references: ['/properties/isEncrypted']
+      - !ruby/object:Api::Azure::Type::ResourceReference
+        name: id
+        description: The ID of the Automation Variable.
+        output: true
+        azure_sdk_references: ['/id']

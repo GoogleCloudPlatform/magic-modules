@@ -33,10 +33,7 @@ func testCheckAzureRMContainerRegistryExists(resourceName string) resource.TestC
         }
 
         name := rs.Primary.Attributes["name"]
-        resourceGroup, hasResourceGroup := rs.Primary.Attributes["resource_group_name"]
-        if !hasResourceGroup {
-            return fmt.Errorf("Bad: no resource group name found in state for Container Registry: %q", name)
-        }
+        resourceGroup := rs.Primary.Attributes["resource_group_name"]
 
         client := testAccProvider.Meta().(*ArmClient).containerRegistryClient
         ctx := testAccProvider.Meta().(*ArmClient).StopContext

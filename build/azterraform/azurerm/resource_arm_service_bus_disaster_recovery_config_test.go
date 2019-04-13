@@ -33,21 +33,15 @@ func testCheckAzureRMServiceBusDisasterRecoveryConfigExists(resourceName string)
         }
 
         name := rs.Primary.Attributes["name"]
-        resourceGroup, hasResourceGroup := rs.Primary.Attributes["resource_group_name"]
-        if !hasResourceGroup {
-            return fmt.Errorf("Bad: no resource group name found in state for Service Bus Disaster Recovery Config: %q", name)
-        }
-        servicebusName, hasServicebusName := rs.Primary.Attributes["namespace_name"]
-        if !hasServicebusName {
-            return fmt.Errorf("Bad: no namespace name found in state for Service Bus Disaster Recovery Config: %q", name)
-        }
+        resourceGroup := rs.Primary.Attributes["resource_group_name"]
+        servicebusName := rs.Primary.Attributes["namespace_name"]
 
         client := testAccProvider.Meta().(*ArmClient).serviceBusRecoveryClient
         ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
         if resp, err := client.Get(ctx, resourceGroup, servicebusName, name); err != nil {
             if utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Bad: Service Bus Disaster Recovery Config %q (Resource Group %q, Namespace Name %q) does not exist", name, resourceGroup, servicebusName)
+                return fmt.Errorf("Bad: Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q) does not exist", name, servicebusName, resourceGroup)
             }
             return fmt.Errorf("Bad: Get on serviceBusRecoveryClient: %+v", err)
         }

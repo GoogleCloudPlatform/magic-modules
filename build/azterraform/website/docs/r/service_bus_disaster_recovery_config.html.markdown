@@ -48,12 +48,12 @@ The following arguments are supported:
 
 * `namespace_name` - (Required) The name of the service bus namespace in which the config is created. Changing this forces a new resource to be created.
 
-* `partner_namespace` - (Optional) The parter namespace of the service bus disaster recovery.
-
 * `alternate_name` - (Optional) The alternative name of the service bus disaster recovery.
+
+* `partner_namespace` - (Optional) The parter namespace of the service bus disaster recovery.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The service bus disaster recovery config ID.
+* `id` - The ID of the service bus disaster recovery.

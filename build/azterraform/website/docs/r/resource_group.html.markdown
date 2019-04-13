@@ -52,4 +52,4 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The resource group ID.
+* `id` - The ID of the resource group.

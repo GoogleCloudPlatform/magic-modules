@@ -16,8 +16,14 @@ objects:
     base_url: NotUsedInAzure
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
+      provider_name: Microsoft.Resources
+      go_client_namespace: resources
+      go_client: resourceGroupsClient
+      python_client_namespace: '?'
+      python_client: '?'
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: CreateOrUpdate
+        python_func_name: create_or_update
         request:
           'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -31,6 +37,7 @@ objects:
             go_field_name: Tags
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
+        python_func_name: get
         request:
           'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -44,21 +51,9 @@ objects:
             go_field_name: Location
           '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Tags
-      update: !ruby/object:Api::Azure::SDKOperationDefinition
-        go_func_name: CreateOrUpdate
-        request:
-          'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            id_portion: resourceGroups
-            go_variable_name: name
-          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_variable_name: parameters
-            go_type_name: Group
-          '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Location
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Tags
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Delete
+        python_func_name: delete
         async: true
         request:
           'name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
@@ -86,3 +81,8 @@ objects:
         name: 'tags'
         description: 'A mapping of tags to assign to the resource group.'
         azure_sdk_references: ['/tags']
+      - !ruby/object:Api::Azure::Type::ResourceReference
+        name: id
+        description: The ID of the resource group.
+        output: true
+        azure_sdk_references: ['/id']

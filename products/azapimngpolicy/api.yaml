@@ -111,3 +111,8 @@ objects:
         description: 'The content format of the Policy.'
         order: 1100
         azure_sdk_references: ['/properties/contentFormat']
+      - !ruby/object:Api::Azure::Type::ResourceReference
+        name: id
+        description: The ID of the API Management Policy.
+        output: true
+        azure_sdk_references: ['/id']

@@ -61,11 +61,11 @@ The following arguments are supported:
 
 * `location` - (Required) Specifies the supported Azure location where the resource exists. Changing this forces a new resource to be created.
 
-* `sku` - (Optional) The SKU name of the the container registry. Defaults to `Classic`.
-
 * `admin_enabled` - (Optional) Specifies whether the admin user is enabled. Defaults to `false`.
 
 * `storage_account_id` - (Optional) The ID of a Storage Account which must be located in the same Azure Region as the Container Registry.
+
+* `sku` - (Optional) The SKU name of the the container registry. Defaults to `Classic`.
 
 * `tags` - (Optional) A mapping of tags to assign to the container registry.
 
@@ -73,6 +73,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The container registry ID.
-
 * `login_server` - The URL that can be used to log into the container registry.
+
+* `id` - The ID of the container registry.

@@ -43,6 +43,19 @@ func resourceArmResourceGroupCreateUpdate(d *schema.ResourceData, meta interface
     ctx := meta.(*ArmClient).StopContext
 
     name := d.Get("name").(string)
+
+    if requireResourcesToBeImported {
+        resp, err := client.Get(ctx, name)
+        if err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return fmt.Errorf("Error checking for present of existing Resource Group %q: %+v", name, err)
+            }
+        }
+        if !utils.ResponseWasNotFound(resp.Response) {
+            return tf.ImportAsExistsError("azurerm_resource_group", *resp.ID)
+        }
+    }
+
     location := azureRMNormalizeLocation(d.Get("location").(string))
     tags := d.Get("tags").(map[string]interface{})
 
@@ -75,7 +88,7 @@ func resourceArmResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Resource Group ID %q: %+v", d.Id(), err)
+        return err
     }
     name := id.ResourceGroup
 
@@ -88,7 +101,6 @@ func resourceArmResourceGroupRead(d *schema.ResourceData, meta interface{}) erro
         }
         return fmt.Errorf("Error reading Resource Group %q: %+v", name, err)
     }
-
 
 
     d.Set("name", resp.Name)
@@ -108,7 +120,7 @@ func resourceArmResourceGroupDelete(d *schema.ResourceData, meta interface{}) er
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Resource Group ID %q: %+v", d.Id(), err)
+        return err
     }
     name := id.ResourceGroup
 

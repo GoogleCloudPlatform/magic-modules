@@ -70,7 +70,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The ID of the Automation String Variable.
+* `id` - The ID of the Automation Variable.
 
 
 ## Import

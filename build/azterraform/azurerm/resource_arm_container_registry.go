@@ -32,7 +32,7 @@ func resourceArmContainerRegistry() *schema.Resource {
             "name": {
                 Type: schema.TypeString,
                 Required: true,
-              ForceNew: true,
+                ForceNew: true,
             },
 
             "resource_group_name": resourceGroupNameSchema(),
@@ -48,13 +48,13 @@ func resourceArmContainerRegistry() *schema.Resource {
             "sku": {
                 Type: schema.TypeString,
                 Optional: true,
-            	ValidateFunc: validation.StringInSlice([]string{
-                string(containerregistry.Classic),
-                string(containerregistry.Basic),
-                string(containerregistry.Standard),
-                string(containerregistry.Premium),
-              }, false),
-                Default: "Classic",
+                ValidateFunc: validation.StringInSlice([]string{
+                    string(containerregistry.Classic),
+                    string(containerregistry.Basic),
+                    string(containerregistry.Standard),
+                    string(containerregistry.Premium),
+                }, false),
+                Default: string(containerregistry.Classic),
             },
 
             "storage_account_id": {
@@ -78,22 +78,35 @@ func resourceArmContainerRegistryCreate(d *schema.ResourceData, meta interface{}
 
     name := d.Get("name").(string)
     resourceGroup := d.Get("resource_group_name").(string)
+
+    if requireResourcesToBeImported {
+        resp, err := client.Get(ctx, resourceGroup, name)
+        if err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return fmt.Errorf("Error checking for present of existing Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
+            }
+        }
+        if !utils.ResponseWasNotFound(resp.Response) {
+            return tf.ImportAsExistsError("azurerm_container_registry", *resp.ID)
+        }
+    }
+
     location := azureRMNormalizeLocation(d.Get("location").(string))
-    sku := d.Get("sku").(string)
     adminEnabled := d.Get("admin_enabled").(bool)
     storageAccountId := d.Get("storage_account_id").(string)
+    sku := d.Get("sku").(string)
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := containerregistry.Registry{
         Location: utils.String(location),
-        Sku: &containerregistry.Sku{
-            Name: containerregistry.SkuName(sku),
-        },
         RegistryProperties: &containerregistry.RegistryProperties{
             AdminUserEnabled: utils.Bool(adminEnabled),
             StorageAccount: &containerregistry.StorageAccountProperties{
                 ID: utils.String(storageAccountId),
             },
+        },
+        Sku: &containerregistry.Sku{
+            Name: containerregistry.SkuName(sku),
         },
         Tags: expandTags(tags),
     }
@@ -126,7 +139,7 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Container Registry ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     name := id.Path["registries"]
@@ -142,14 +155,10 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
     }
 
 
-
     d.Set("name", resp.Name)
     d.Set("resource_group_name", resourceGroup)
     if location := resp.Location; location != nil {
         d.Set("location", azureRMNormalizeLocation(*location))
-    }
-    if sku := resp.Sku; sku != nil {
-        d.Set("sku", string(sku.Name))
     }
     if registryProperties := resp.RegistryProperties; registryProperties != nil {
         d.Set("admin_enabled", registryProperties.AdminUserEnabled)
@@ -158,6 +167,9 @@ func resourceArmContainerRegistryRead(d *schema.ResourceData, meta interface{}) 
         }
     }
     d.Set("login_server", resp.LoginServer)
+    if sku := resp.Sku; sku != nil {
+        d.Set("sku", string(sku.Name))
+    }
     flattenAndSetTags(d, resp.Tags)
 
     return nil
@@ -167,37 +179,28 @@ func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}
     client := meta.(*ArmClient).containerRegistryClient
     ctx := meta.(*ArmClient).StopContext
 
-    id, err := parseAzureResourceID(d.Id())
-    if err != nil {
-        return fmt.Errorf("Error parsing Container Registry ID %q: %+v", d.Id(), err)
-    }
-    resourceGroup := id.ResourceGroup
-    name := id.Path["registries"]
-
-    sku := d.Get("sku").(string)
+    name := d.Get("name").(string)
+    resourceGroup := d.Get("resource_group_name").(string)
     adminEnabled := d.Get("admin_enabled").(bool)
     storageAccountId := d.Get("storage_account_id").(string)
+    sku := d.Get("sku").(string)
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := containerregistry.RegistryUpdateParameters{
-        Sku: &containerregistry.Sku{
-            Name: containerregistry.SkuName(sku),
-        },
         RegistryPropertiesUpdateParameters: &containerregistry.RegistryPropertiesUpdateParameters{
             AdminUserEnabled: utils.Bool(adminEnabled),
             StorageAccount: &containerregistry.StorageAccountProperties{
                 ID: utils.String(storageAccountId),
             },
         },
+        Sku: &containerregistry.Sku{
+            Name: containerregistry.SkuName(sku),
+        },
         Tags: expandTags(tags),
     }
 
-    future, err := client.Update(ctx, resourceGroup, name, parameters)
-    if err != nil {
+    if _, err := client.Update(ctx, resourceGroup, name, parameters); err != nil {
         return fmt.Errorf("Error updating Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
-    }
-    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return fmt.Errorf("Error waiting for update of Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }
 
     return resourceArmContainerRegistryRead(d, meta)
@@ -210,7 +213,7 @@ func resourceArmContainerRegistryDelete(d *schema.ResourceData, meta interface{}
 
     id, err := parseAzureResourceID(d.Id())
     if err != nil {
-        return fmt.Errorf("Error parsing Container Registry ID %q: %+v", d.Id(), err)
+        return err
     }
     resourceGroup := id.ResourceGroup
     name := id.Path["registries"]

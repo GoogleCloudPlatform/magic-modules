@@ -20,4 +20,4 @@
     res_name = "#{get_property_value(object, "name_in_logs", nil) || object.name.titlecase}" if res_name == ""
     res_name += " (#{depends.reverse.join(' / ')})" unless depends.empty?
 -%>
-fmt.Errorf("<%= format_string % [res_name] -%><%= include_error ? ": %+v" : "" -%>", <%= res_var != "" ? "#{res_var}, " : "" -%><%= depends_vars.reverse.join(", ") -%><%= include_error ? ", err" : "" -%>)
+fmt.Errorf("<%= format_string % [res_name] -%><%= include_error ? ": %+v" : "" -%>", <%= ([res_var] + (depends_vars.reverse)).join(", ") -%><%= include_error ? ", err" : "" -%>)

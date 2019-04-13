@@ -17,8 +17,13 @@ objects:
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
       provider_name: Microsoft.ContainerRegistry
+      go_client_namespace: containerregistry
+      go_client: containerRegistryClient
+      python_client_namespace: '?'
+      python_client: '?'
       create: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Create
+        python_func_name: create
         async: true
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
@@ -54,6 +59,7 @@ objects:
             go_field_name: Tags
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
+        python_func_name: get
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -94,6 +100,7 @@ objects:
             go_field_name: Tags
       update: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Update
+        python_func_name: update
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: resourceGroups
@@ -126,6 +133,7 @@ objects:
             go_field_name: Tags
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Delete
+        python_func_name: delete
         async: true
         request:
           'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
@@ -144,21 +152,18 @@ objects:
         required: true
         input: true
         azure_sdk_references: ['registryName', '/name']
-        order: 800
       - !ruby/object:Api::Azure::Type::ResourceGroupName
         name: 'resourceGroupName'
         description: 'The name of the resource group in which to create the Container Registry.'
         required: true
         input: true
         azure_sdk_references: ['resourceGroupName']
-        order: 810
       - !ruby/object:Api::Azure::Type::Location
         name: 'location'
         description: 'Specifies the supported Azure location where the resource exists.'
         required: true
         input: true
         azure_sdk_references: ['/location']
-        order: 820
       - !ruby/object:Api::Type::Enum
         name: 'sku'
         values:
@@ -188,3 +193,8 @@ objects:
         name: 'tags'
         description: 'A mapping of tags to assign to the container registry.'
         azure_sdk_references: ['/tags']
+      - !ruby/object:Api::Azure::Type::ResourceReference
+        name: id
+        description: The ID of the container registry.
+        output: true
+        azure_sdk_references: ['/id']

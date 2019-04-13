@@ -17,6 +17,8 @@ objects:
 
     azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinition
       provider_name: servicebus
+      go_client_namespace: servicebus
+      go_client: serviceBusRecoveryClient
       python_client_namespace: azure.mgmt.servicebus
       python_client: ServiceBusManagementClient.disaster_recovery_configs
       create: !ruby/object:Api::Azure::SDKOperationDefinition
@@ -63,10 +65,6 @@ objects:
             go_variable_name: name
             python_parameter_name: name
         response:
-          'resourceGroupName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_variable_name: resourceGroup
-          'namespaceName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_variable_name: servicebusName
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
             go_type_name: ArmDisasterRecovery
@@ -128,3 +126,8 @@ objects:
         name: 'AlternateName'
         description: 'The alternative name of the service bus disaster recovery.'
         azure_sdk_references: ['/properties/alternateName']
+      - !ruby/object:Api::Azure::Type::ResourceReference
+        name: id
+        description: The ID of the service bus disaster recovery.
+        output: true
+        azure_sdk_references: ['/id']
