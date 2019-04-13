@@ -150,7 +150,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
                 type='str'
             ),
             auto_storage_account=dict(
-                type='str'
+                type='raw'
             ),
             key_vault_reference=dict(
                 type='dict',
@@ -203,6 +203,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
         if not self.location:
             self.location = resource_group.location
         self.location = normalize_location_name(self.location)
+        self.batch_account['auto_storage_account'] = self.normalize_resource_id(self.batch_account['auto_storage_account'], '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/sample-acct')
         self.batch_account['pool_allocation_mode'] = _snake_to_camel(self.batch_account['pool_allocation_mode'], True)
 
         response = None
@@ -223,7 +224,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
             if self.state == 'absent':
                 self.to_do = Actions.Delete
             elif self.state == 'present':
-                self.to_do = Actions.Update
+                self.idempotency_check(old_response, self.batch_account)
 
         if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
             self.log("Need to Create / Update the Batch Account instance")

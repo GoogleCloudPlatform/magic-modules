@@ -62,6 +62,7 @@ module Provider
           return 'str' if prop.resource_ref.readonly
           return 'dict'
         end
+        return 'raw' if prop.is_a? Api::Azure::Type::ResourceReference
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
       end
 
