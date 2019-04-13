@@ -53,7 +53,7 @@ module Provider
       # Returns an array of all base options for a given property.
       def prop_options(prop, _object, spaces)
         [
-          ('required=True' if prop.required && !prop.default_value),
+          ('required=True' if prop.required && !prop.default_value && !is_location?(prop)),
           ("default=#{python_literal(prop.default_value)}" \
            if prop.default_value),
           "type=#{quote_string(python_type(prop))}",

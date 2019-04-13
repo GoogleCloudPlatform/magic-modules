@@ -41,7 +41,7 @@ module Provider
               (resourceref_description(prop) \
                if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
             ].flatten.compact,
-            'required' => (true if required),
+            'required' => (true if required && !is_location?(prop)),
             'default' => (prop.default_value.to_s.underscore if prop.default_value),
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => (prop.aliases if prop.aliases),
@@ -75,6 +75,7 @@ module Provider
             'description' => format_description(prop.description),
             'returned' => 'always',
             'type' => type,
+            'sample' => (prop.sample_value unless prop.sample_value.nil?),
             'contains' => (
               if prop.is_a?(Api::Type::NestedObject)
                 prop.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)

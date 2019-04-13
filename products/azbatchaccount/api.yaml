@@ -80,6 +80,8 @@ objects:
         response:
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_type_name: Account
+          '/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            go_field_name: ID
           '/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Name
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
@@ -222,8 +224,15 @@ objects:
             required: true
             input: true
             azure_sdk_references: ['/properties/keyVaultReference/url']
+      - !ruby/object:Api::Azure::Type::ResourceReference
+        name: id
+        description: The ID of the Batch account.
+        output: true
+        azure_sdk_references: ['/id']
+        sample_value: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Batch/batchAccounts/sampleacct'
       - !ruby/object:Api::Type::String
         name: accountEndpoint
         description: The account endpoint used to interact with the Batch service.
         output: true
         azure_sdk_references: ['/properties/accountEndpoint']
+        sample_value: 'sampleacct.westus.batch.azure.com'

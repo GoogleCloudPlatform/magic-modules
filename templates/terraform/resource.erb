@@ -20,11 +20,13 @@ package azurerm
 
 <%
     properties = object.all_user_properties
+    schema_properties = properties.reject{|p| p.name == 'id' || get_property_value(p, 'hide_from_schema', false)}
     # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
     # can just be read in anyways, and after a Read they will need to be set in every Update.
     settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
     # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
     updatable_properties = settable_properties.reject{|p| !object.azure_sdk_definition.update.nil? && get_applicable_reference(p.azure_sdk_references, object.azure_sdk_definition.update.request).nil?}
+    output_properties = properties.reject{|p| p.name == 'id'}
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
@@ -80,7 +82,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
-<%          order_azure_properties(properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}).each do |prop| -%>
+<%          order_azure_properties(schema_properties).each do |prop| -%>
 <%=             lines_before(build_schema_property(prop, object, 12)) -%>
 
 <%          end -%>
@@ -181,12 +183,12 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
             d.SetId("")
             return nil
         }
-        return <%= lines(build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, properties, object)) -%>
+        return <%= lines(build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, output_properties, object)) -%>
     }
 
 <%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
 
-<%= lines(build_sdk_object_to_property('resp', 'd', '', object.azure_sdk_definition.read.response, resource_name, flatten_queue, properties, object)) -%>
+<%= lines(build_sdk_object_to_property('resp', 'd', '', object.azure_sdk_definition.read.response, resource_name, flatten_queue, output_properties, object)) -%>
 
     return nil
 }

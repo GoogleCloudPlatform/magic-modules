@@ -79,7 +79,7 @@ The `key_vault_reference` block supports the following:
 
 The following attributes are exported:
 
-* `id` - The ID of the Batch Account.
+* `id` - The ID of the Batch account.
 
 * `account_endpoint` - The account endpoint used to interact with the Batch service.
 

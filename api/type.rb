@@ -43,6 +43,7 @@ module Api
       attr_reader :new_type
 
       attr_reader :order
+      attr_reader :sample_value
       attr_reader :azure_sdk_references
     end
 
@@ -74,6 +75,8 @@ module Api
 
       check_optional_property :order, ::Integer
       @order ||= 750
+
+      check_optional_property :sample_value, ::String
 
       check_property :azure_sdk_references, ::Array
       check_property_non_empty_list :azure_sdk_references, ::String

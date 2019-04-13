@@ -84,17 +84,11 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml(output_properties.map{|p| returns_for_property(p)}.reduce({
-  'id'=> {
-    'description' => ["The identifier of the #{object.name.titlecase} resource."],
-    'returned' => 'always',
-    'type' => 'str',
-  }
-}, :merge)) -%>
+<%= to_yaml(output_properties.map{|p| returns_for_property(p)}.reduce({}, :merge)) -%>
 '''
 
 import time
-from ansible.module_utils.azure_rm_common import AzureRMModuleBase
+from ansible.module_utils.azure_rm_common import AzureRMModuleBase<%= lines(', normalize_location_name') if is_location_defined?(object) -%>
 from ansible.module_utils.common.dict_transformations import _snake_to_camel
 
 try:
@@ -133,15 +127,10 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
         self.state = None
         self.to_do = Actions.NoAction
 
-        required_if = [
-            ('state', 'present', [])
-        ]
-
 <%= lines(build_multiline_method_call("super(AzureRM#{object.name}, self).__init__(", [
       "derived_arg_spec=self.module_arg_spec",
       "supports_check_mode=True",
-      "supports_tags=#{python_literal(is_tags_defined?(object))}",
-      "required_if=required_if"
+      "supports_tags=#{python_literal(is_tags_defined?(object))}"
     ], ")", 8)) -%>
 
     def exec_module(self, **kwargs):
@@ -152,9 +141,15 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
                 setattr(self, key, kwargs[key])
             elif kwargs[key] is not None:
                 self.<%= root_object_field -%>[key] = kwargs[key]
+
 <%  input_properties.each do |prop| -%>
 <%    if prop.is_a? Api::Type::Enum -%>
         self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'] = _snake_to_camel(self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'], True)
+<%    elsif is_location? prop -%>
+        resource_group = self.get_resource_group(self.resource_group)
+        if not self.location:
+            self.location = resource_group.location
+        self.location = normalize_location_name(self.location)
 <%    end -%>
 <%  end -%>
 

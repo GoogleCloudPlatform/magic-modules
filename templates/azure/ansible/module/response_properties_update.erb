@@ -1,4 +1,3 @@
-'id': response.get('id', None)
 <%  properties.each do |prop| -%>
 '<%=  prop.name.underscore -%>': response.get('<%= prop.name.underscore -%>', None)
 <%  end -%>
