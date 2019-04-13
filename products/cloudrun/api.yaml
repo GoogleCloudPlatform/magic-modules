@@ -1,0 +1,55 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Cloudrun
+display_name: Cloud Run
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://run.googleapis.com/apis/serving.knative.dev/v1alpha1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Service'
+    base_url: namespaces/{{project}}/services
+    self_link: namespaces/{{project}}/services/{{name}}
+    update_verb: :PATCH
+    update_mask: true
+    description: |
+      A Google Cloud Run instance.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/run/docs/'
+      api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/namespaces.services/create'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          The name of the service.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'image'
+        description: |
+          Reference to container image and version.
+        required: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'region'
+        description: |
+          The region of the service.
+        required: true
+        url_param_only: true
