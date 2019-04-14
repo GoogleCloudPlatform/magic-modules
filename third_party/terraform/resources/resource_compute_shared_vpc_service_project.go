@@ -52,7 +52,6 @@ func resourceComputeSharedVpcServiceProjectCreate(d *schema.ResourceData, meta i
 	if err != nil {
 		return err
 	}
-
 	err = computeBetaOperationWaitTime(config.clientCompute, op, hostProject, "Enabling Shared VPC Resource", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		return err
@@ -119,12 +118,10 @@ func disableXpnResource(d *schema.ResourceData, config *Config, hostProject, pro
 	if err != nil {
 		return err
 	}
-
 	err = computeBetaOperationWaitTime(config.clientCompute, op, hostProject, "Disabling Shared VPC Resource", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
