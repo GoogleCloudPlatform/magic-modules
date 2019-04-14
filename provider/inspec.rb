@@ -52,6 +52,12 @@ module Provider
       attr_accessor :privileged
     end
 
+    # Subclass of FileTemplate with InSpec specific fields
+    class NestedObjectFileTemplate < Provider::FileTemplate
+      # Property to generate this file for
+      attr_accessor :property
+    end
+
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
@@ -98,22 +104,27 @@ module Provider
       return if nested_objects.empty?
 
       # Create property files for any nested objects.
-      prop_map = nested_objects.map { |nested_object| emit_nested_object(nested_object) }
-      generate_property_files(prop_map, data)
+      generate_property_files(nested_objects, data)
 
       # Create property files for any deeper nested objects.
       nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
     end
 
     # Generate the files for the properties
-    def generate_property_files(prop_map, data)
-      # prop_map.flatten.compact.each do |prop|
-      #   compile_file_list(
-      #     data.output_folder,
-      #     { prop[:target] => prop[:source] },
-      #     nil
-      #   )
-      # end
+    def generate_property_files(properties, data)
+      properties.flatten.compact.each do |property|
+        nested_object_template = NestedObjectFileTemplate.file_for_copy(
+          data.output_folder,
+          data.name,
+          data.product,
+          data.version,
+          data.env
+        )
+        nested_object_template.property = property
+        source = File.join('templates', 'inspec', 'nested_object.erb')
+        target = "libraries/#{nested_object_requires(property)}.rb"
+        nested_object_template.generate(source, target, self)
+      end
     end
 
     def build_object_data(object, output_folder, version)
@@ -171,14 +182,6 @@ module Provider
                       "#{name}.rb"
                     ),
                     self)
-    end
-
-    def emit_nested_object(property)
-      {
-        source: File.join('templates', 'inspec', 'nested_object.erb'),
-        target: "libraries/#{nested_object_requires(property)}.rb",
-        property: property
-      }
     end
 
     def time?(property)
