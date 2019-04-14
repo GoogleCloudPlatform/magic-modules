@@ -63,14 +63,12 @@ module Provider
     attr_accessor :resource_name
 
     class << self
-      protected :new
-
       # Construct a new FileTemplate based on a resource object
       def file_for_resource(output_folder, object, version, config, env)
-        a = new(output_folder, object.name, object.__product, version, env)
-        a.object = object
-        a.config = config
-        a
+        file_template = new(output_folder, object.name, object.__product, version, env)
+        file_template.object = object
+        file_template.config = config
+        file_template
       end
 
       # Construct a new FileTemplate based on a file to be copied into the output directory
@@ -87,6 +85,7 @@ module Provider
       @version = version
       @env = env
     end
+
     # Given the data object for a file, write that file and verify that it
     # passes these conditions:
     #
@@ -284,7 +283,13 @@ module Provider
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
-          FileTemplate.file_for_copy(output_folder, target, @api, version, build_env).generate(source, target_file, self)
+          FileTemplate.new(
+            output_folder,
+            target,
+            @api,
+            version,
+            build_env
+          ).generate(source, target_file, self)
         end
       end.map(&:join)
     end

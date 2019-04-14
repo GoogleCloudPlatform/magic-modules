@@ -42,13 +42,16 @@ module Provider
 
     # Subclass of FileTemplate with InSpec specific fields
     class InspecFileTemplate < Provider::FileTemplate
-      # InSpec stuff.
-      # Is this a plural resource?
+      # Used within doc template to pluralize names
       attr_accessor :plural
-      # Should we generate documentation?
+      # If this is a file that is being compiled for doc generation
+      # This is accessed within the test templates to output an example name
+      # for documentation rather than a variable name
       attr_accessor :doc_generation
-      # The file name of the attribute
+      # Used to compile InSpec attributes that are used within integration tests
       attr_accessor :attribute_file_name
+      # If this is a privileged resource, which will make integration tests unusable
+      # unless the user is an admin of the GCP organization
       attr_accessor :privileged
     end
 
@@ -64,14 +67,17 @@ module Provider
       target_folder = File.join(data.output_folder, 'libraries')
       name = data.object.name.underscore
 
-      data.generate('templates/inspec/singular_resource.erb',
-                    File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
-                    self)
+      data.generate(
+        'templates/inspec/singular_resource.erb',
+        File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+        self
+      )
 
-      data.generate('templates/inspec/plural_resource.erb',
-                    File.join(target_folder,
-                              "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
-                    self)
+      data.generate(
+        'templates/inspec/plural_resource.erb',
+        File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+        self
+      )
 
       generate_documentation(data.clone, name, false)
       generate_documentation(data.clone, name, true)
@@ -113,7 +119,7 @@ module Provider
     # Generate the files for the properties
     def generate_property_files(properties, data)
       properties.flatten.compact.each do |property|
-        nested_object_template = NestedObjectFileTemplate.file_for_copy(
+        nested_object_template = NestedObjectFileTemplate.new(
           data.output_folder,
           data.name,
           data.product,
@@ -122,7 +128,10 @@ module Provider
         )
         nested_object_template.property = property
         source = File.join('templates', 'inspec', 'nested_object.erb')
-        target = "libraries/#{nested_object_requires(property)}.rb"
+        target = File.join(
+          nested_object_template.output_folder,
+          "libraries/#{nested_object_requires(property)}.rb"
+        )
         nested_object_template.generate(source, target, self)
       end
     end
@@ -175,13 +184,15 @@ module Provider
       data.doc_generation = false
       data.privileged = data.object.privileged
 
-      data.generate('templates/inspec/integration_test_template.erb',
-                    File.join(
-                      target_folder,
-                      'integration/verify/controls',
-                      "#{name}.rb"
-                    ),
-                    self)
+      data.generate(
+        'templates/inspec/integration_test_template.erb',
+        File.join(
+          target_folder,
+          'integration/verify/controls',
+          "#{name}.rb"
+        ),
+        self
+      )
     end
 
     def time?(property)
