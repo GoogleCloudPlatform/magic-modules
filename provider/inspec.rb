@@ -107,17 +107,17 @@ module Provider
 
     # Generate the files for the properties
     def generate_property_files(prop_map, data)
-      prop_map.flatten.compact.each do |prop|
-        compile_file_list(
-          data.output_folder,
-          { prop[:target] => prop[:source] },
-          property: prop[:property]
-        )
-      end
+      # prop_map.flatten.compact.each do |prop|
+      #   compile_file_list(
+      #     data.output_folder,
+      #     { prop[:target] => prop[:source] },
+      #     nil
+      #   )
+      # end
     end
 
     def build_object_data(object, output_folder, version)
-      InspecFileTemplate.new(object, output_folder, version, @config, build_env)
+      InspecFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
     end
 
     # Generates InSpec markdown documents for the resource

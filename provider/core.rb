@@ -62,22 +62,31 @@ module Provider
     attr_accessor :async
     attr_accessor :resource_name
 
-    def initialize(object, output_folder, version, config, env)
-      @name = object.out_name
-      @object = object
-      @product = object.__product
-      @product_ns = object.__product.name
+    class << self
+      protected :new
+
+      # Construct a new FileTemplate based on a resource object
+      def file_for_resource(output_folder, object, version, config, env)
+        a = new(output_folder, object.name, object.__product, version, env)
+        a.object = object
+        a.config = config
+        a
+      end
+
+      # Construct a new FileTemplate based on a file to be copied into the output directory
+      def file_for_copy(output_folder, target, api, version, env)
+        new(output_folder, target, api, version, env)
+      end
+    end
+
+    def initialize(output_folder, name, product, version, env)
+      @name = name
+      @product = product
+      @product_ns = product.name
       @output_folder = output_folder
       @version = version
-      @config = config
       @env = env
     end
-            name: target,
-            product: @api,
-            manifest: manifest,
-            output_folder: output_folder,
-            product_ns: @api.name,
-            env: build_env
     # Given the data object for a file, write that file and verify that it
     # passes these conditions:
     #
@@ -258,7 +267,7 @@ module Provider
     end
 
     def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version: version_name)
+      compile_file_list(output_folder, @config.files.compile, version_name)
     end
 
     def compile_common_files(output_folder, version_name = nil)
@@ -267,21 +276,15 @@ module Provider
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version: version_name)
+      compile_file_list(output_folder, files, version_name)
     end
 
-    def compile_file_list(output_folder, files, data = {})
+    def compile_file_list(output_folder, files, version = nil)
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
-          FileTemplate.new({
-            name: target,
-            product: @api,
-            output_folder: output_folder,
-            product_ns: @api.name,
-            env: build_env
-          }.merge(data)).generate(source, target_file, self)
+          FileTemplate.file_for_copy(output_folder, target, @api, version, build_env).generate(source, target_file, self)
         end
       end.map(&:join)
     end
@@ -371,7 +374,7 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      FileTemplate.new(object, output_folder, version, @config, build_env)
+      FileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
     end
 
     def build_env
