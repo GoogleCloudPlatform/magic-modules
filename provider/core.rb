@@ -379,7 +379,7 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      FileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
+      FileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
 
     def build_env
