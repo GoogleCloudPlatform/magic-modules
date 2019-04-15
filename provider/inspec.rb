@@ -40,20 +40,44 @@ module Provider
       end
     end
 
+    # Subclass of FileTemplate with InSpec specific fields
+    class InspecFileTemplate < Provider::FileTemplate
+      # Used within doc template to pluralize names
+      attr_accessor :plural
+      # If this is a file that is being compiled for doc generation
+      # This is accessed within the test templates to output an example name
+      # for documentation rather than a variable name
+      attr_accessor :doc_generation
+      # Used to compile InSpec attributes that are used within integration tests
+      attr_accessor :attribute_file_name
+      # If this is a privileged resource, which will make integration tests unusable
+      # unless the user is an admin of the GCP organization
+      attr_accessor :privileged
+    end
+
+    # Subclass of FileTemplate with InSpec specific fields
+    class NestedObjectFileTemplate < Provider::FileTemplate
+      # Property to generate this file for
+      attr_accessor :property
+    end
+
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
       target_folder = File.join(data.output_folder, 'libraries')
       name = data.object.name.underscore
 
-      data.generate('templates/inspec/singular_resource.erb',
-                    File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
-                    self)
+      data.generate(
+        'templates/inspec/singular_resource.erb',
+        File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+        self
+      )
 
-      data.generate('templates/inspec/plural_resource.erb',
-                    File.join(target_folder,
-                              "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
-                    self)
+      data.generate(
+        'templates/inspec/plural_resource.erb',
+        File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+        self
+      )
 
       generate_documentation(data.clone, name, false)
       generate_documentation(data.clone, name, true)
@@ -86,22 +110,34 @@ module Provider
       return if nested_objects.empty?
 
       # Create property files for any nested objects.
-      prop_map = nested_objects.map { |nested_object| emit_nested_object(nested_object) }
-      generate_property_files(prop_map, data)
+      generate_property_files(nested_objects, data)
 
       # Create property files for any deeper nested objects.
       nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
     end
 
     # Generate the files for the properties
-    def generate_property_files(prop_map, data)
-      prop_map.flatten.compact.each do |prop|
-        compile_file_list(
+    def generate_property_files(properties, data)
+      properties.flatten.compact.each do |property|
+        nested_object_template = NestedObjectFileTemplate.new(
           data.output_folder,
-          { prop[:target] => prop[:source] },
-          property: prop[:property]
+          data.name,
+          data.product,
+          data.version,
+          data.env
         )
+        nested_object_template.property = property
+        source = File.join('templates', 'inspec', 'nested_object.erb')
+        target = File.join(
+          nested_object_template.output_folder,
+          "libraries/#{nested_object_requires(property)}.rb"
+        )
+        nested_object_template.generate(source, target, self)
       end
+    end
+
+    def build_object_data(object, output_folder, version)
+      InspecFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
     end
 
     # Generates InSpec markdown documents for the resource
@@ -113,9 +149,11 @@ module Provider
       data.name = name
       data.plural = plural
       data.doc_generation = true
-      data.generate('templates/inspec/doc_template.md.erb',
-                    File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
-                    self)
+      data.generate(
+        'templates/inspec/doc_template.md.erb',
+        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+        self
+      )
     end
 
     # Format a url that may be include newlines into a single line
@@ -146,21 +184,15 @@ module Provider
       data.doc_generation = false
       data.privileged = data.object.privileged
 
-      data.generate('templates/inspec/integration_test_template.erb',
-                    File.join(
-                      target_folder,
-                      'integration/verify/controls',
-                      "#{name}.rb"
-                    ),
-                    self)
-    end
-
-    def emit_nested_object(property)
-      {
-        source: File.join('templates', 'inspec', 'nested_object.erb'),
-        target: "libraries/#{nested_object_requires(property)}.rb",
-        property: property
-      }
+      data.generate(
+        'templates/inspec/integration_test_template.erb',
+        File.join(
+          target_folder,
+          'integration/verify/controls',
+          "#{name}.rb"
+        ),
+        self
+      )
     end
 
     def time?(property)

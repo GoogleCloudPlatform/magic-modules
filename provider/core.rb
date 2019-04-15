@@ -54,14 +54,6 @@ module Provider
     # The Ansible example object.
     attr_accessor :example
 
-    # InSpec stuff.
-    # Is this a plural resource?
-    attr_accessor :plural
-    # Should we generate documentation?
-    attr_accessor :doc_generation
-    # The file name of the attribute
-    attr_accessor :attribute_file_name
-    attr_accessor :privileged
     attr_accessor :property
 
     # Terraform stuff.
@@ -70,14 +62,23 @@ module Provider
     attr_accessor :async
     attr_accessor :resource_name
 
-    def initialize(options)
-      options.each { |k, v| method("#{k}=").call(v) }
+    class << self
+      # Construct a new FileTemplate based on a resource object
+      def file_for_resource(output_folder, object, version, config, env)
+        file_template = new(output_folder, object.name, object.__product, version, env)
+        file_template.object = object
+        file_template.config = config
+        file_template
+      end
+    end
 
-      @env = {
-        pyformat_enabled: options.dig(:env, :pyformat_enabled),
-        goformat_enabled: options.dig(:env, :goformat_enabled),
-        start_time: options.dig(:env, :start_time)
-      }
+    def initialize(output_folder, name, product, version, env)
+      @name = name
+      @product = product
+      @product_ns = product.name
+      @output_folder = output_folder
+      @version = version
+      @env = env
     end
 
     # Given the data object for a file, write that file and verify that it
@@ -260,7 +261,7 @@ module Provider
     end
 
     def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version: version_name)
+      compile_file_list(output_folder, @config.files.compile, version_name)
     end
 
     def compile_common_files(output_folder, version_name = nil)
@@ -269,25 +270,21 @@ module Provider
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version: version_name)
+      compile_file_list(output_folder, files, version_name)
     end
 
-    def compile_file_list(output_folder, files, data = {})
+    def compile_file_list(output_folder, files, version = nil)
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
-          FileTemplate.new({
-            name: target,
-            product: @api,
-            output_folder: output_folder,
-            product_ns: @api.name,
-            env: {
-              pyformat_enabled: @py_format_enabled,
-              goformat_enabled: @go_format_enabled,
-              start_time: @start_time
-            }
-          }.merge(data)).generate(source, target_file, self)
+          FileTemplate.new(
+            output_folder,
+            target,
+            @api,
+            version,
+            build_env
+          ).generate(source, target_file, self)
         end
       end.map(&:join)
     end
@@ -377,20 +374,15 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      FileTemplate.new(
-        name: object.out_name,
-        object: object,
-        product: object.__product,
-        product_ns: object.__product.name,
-        output_folder: output_folder,
-        version: version,
-        config: @config,
-        env: {
-          pyformat_enabled: @py_format_enabled,
-          goformat_enabled: @go_format_enabled,
-          start_time: @start_time
-        }
-      )
+      FileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
+    end
+
+    def build_env
+      {
+        pyformat_enabled: @py_format_enabled,
+        goformat_enabled: @go_format_enabled,
+        start_time: @start_time
+      }
     end
 
     def build_url(url_parts, extra = false)
