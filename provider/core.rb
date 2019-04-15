@@ -386,8 +386,8 @@ module Provider
     end
 
     # This is used within Terraform and Ansible but they implement their own
-    def build_url(url_parts, extra = false) 
-      raise "Unimplemented build_url for this provider"
+    def build_url(_url_parts, _extra = false)
+      raise 'Unimplemented build_url for this provider'
     end
 
     def true?(obj)
