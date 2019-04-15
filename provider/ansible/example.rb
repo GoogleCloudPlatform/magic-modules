@@ -15,7 +15,6 @@ require 'api/object'
 require 'compile/core'
 require 'provider/config'
 require 'provider/core'
-require 'provider/ansible/manifest'
 
 module Provider
   module Ansible

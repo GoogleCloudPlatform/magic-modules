@@ -34,7 +34,6 @@ module Provider
 
       def validate
         super
-        check :manifest, type: Provider::Ansible::Manifest
       end
     end
   end

@@ -46,8 +46,6 @@ module Provider
     attr_accessor :product_ns
     # The provider-specific configuration.
     attr_accessor :config
-    # The provider specific high-level configuration fields.
-    attr_accessor :manifest
     # Information about the local environment
     # (which formatters are enabled, start-time)
     attr_accessor :env
@@ -279,11 +277,9 @@ module Provider
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
-          manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
           FileTemplate.new({
             name: target,
             product: @api,
-            manifest: manifest,
             output_folder: output_folder,
             product_ns: @api.name,
             env: {
