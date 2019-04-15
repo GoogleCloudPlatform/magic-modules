@@ -385,27 +385,9 @@ module Provider
       }
     end
 
-    def build_url(url_parts, extra = false)
-      (product_url, obj_url) = url_parts
-      extra_arg = ''
-      extra_arg = ', extra_data' if extra
-      ['URI.join(',
-       indent([quote_string(product_url) + ',',
-               'expand_variables(',
-               indent(format_expand_variables(obj_url), 2),
-               indent('data' + extra_arg, 2),
-               ')'], 2),
-       ')'].join("\n")
-    end
-
-    # TODO(rileykarson): Rehome this function.
-    # For some reason the corresponding quote_string function lives in compile/core.rb
-    # and no beside this function.
-    def unquote_string(value)
-      return value.gsub(/"(.*)"/, '\1') if value.start_with?('"')
-      return value.gsub(/'(.*)'/, '\1') if value.start_with?("'")
-
-      value
+    # This is used within Terraform and Ansible but they implement their own
+    def build_url(_url_parts, _extra = false)
+      raise 'Unimplemented build_url for this provider'
     end
 
     def true?(obj)
@@ -414,21 +396,6 @@ module Provider
 
     def false?(obj)
       obj.to_s.casecmp('false').zero?
-    end
-
-    def emit_link(name, url, emit_self, extra_data = false)
-      (params, fn_args) = emit_link_var_args(url, extra_data)
-      code = ["def #{emit_self ? 'self.' : ''}#{name}(#{fn_args})",
-              indent(url, 2),
-              'end']
-
-      if emit_self
-        self_code = ['', "def #{name}(#{fn_args})",
-                     "  self.class.#{name}(#{params.join(', ')})",
-                     'end']
-      end
-
-      (code + (self_code || [])).join("\n")
     end
 
     # Filter the properties to keep only the ones requiring custom update
@@ -454,63 +421,6 @@ module Provider
 
     def generate_requires(properties, requires = [])
       requires.concat(properties.collect(&:requires))
-    end
-
-    def emit_requires(requires)
-      requires.flatten.sort.uniq.map { |r| "require '#{r}'" }.join("\n")
-    end
-
-    def emit_link_var_args(url, extra_data)
-      params = emit_link_var_args_list(url, extra_data,
-                                       %w[data extra extra_data])
-      defaults = emit_link_var_args_list(url, extra_data,
-                                         [nil, "''", '{}'])
-      [params.compact, params.zip(defaults)
-                             .reject { |p| p[0].nil? }
-                             .map { |p| p[1].nil? ? p[0] : "#{p[0]} = #{p[1]}" }
-                             .join(', ')]
-    end
-
-    def emit_link_var_args_list(_url, extra_data, args_list)
-      [args_list[0],
-       (args_list[2] if extra_data)]
-    end
-
-    def wrap_field(field, spaces)
-      avail_columns = DEFAULT_FORMAT_OPTIONS[:max_columns] - spaces - 5
-      indent(field.scan(/\S.{0,#{avail_columns}}\S(?=\s|$)|\S+/), 2)
-    end
-
-    def format_section_ruler(size)
-      size_pad = (size - size.to_s.length - 4) # < + > + 2 spaces around number.
-      return unless size_pad.positive?
-
-      ['<',
-       '-' * (size_pad / 2), ' ', size.to_s, ' ', '-' * (size_pad / 2),
-       (size_pad.even? ? '' : '-'),
-       '>'].join
-    end
-
-    def format_box(existing, size)
-      result = []
-      result << ['+', '-' * size, '+'].join
-      result << ['|', format_section_ruler(existing),
-                 format_section_ruler(size - existing), '|'].join
-      result << yield
-      result << ['+', '-' * size, '+'].join
-      result.join("\n")
-    end
-
-    def format_sources(sources, existing, size)
-      format_box(existing, size) do
-        sources.map do |source|
-          source.split("\n").map do |l|
-            right_pad_len = size - existing - l.length
-            right_pad = right_pad_len.positive? ? ' ' * right_pad_len : ''
-            '|' + '.' * existing + l + right_pad + '|'
-          end
-        end
-      end
     end
 
     def provider_name
