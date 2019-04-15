@@ -396,8 +396,6 @@ module Provider
       obj.to_s.casecmp('false').zero?
     end
 
-    def emit_link(name, url, emit_self, extra_data = false) end
-
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
