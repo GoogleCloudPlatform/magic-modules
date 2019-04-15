@@ -19,7 +19,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     import_format: ["namespaces/{{project}}/services/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloud_run"
+        name: "cloudrun_service"
         primary_resource_id: "service"
         vars:
           instance_name: "test-service"
