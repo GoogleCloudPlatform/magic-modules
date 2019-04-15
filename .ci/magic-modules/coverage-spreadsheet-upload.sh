@@ -19,7 +19,7 @@ pushd magic-modules-gcp
 bundle install
 gem install rspec
 
-bundle exec rspec tools/linter/spreadsheet.rb
+bundle exec rspec tools/linter/spreadsheet.rb  || true
 
 echo "File created"
 date=$(date +'%m%d%Y')
