@@ -1,4 +1,4 @@
-resource "google_cloud_run" "<%= ctx[:primary_resource_id] %>" {
+resource "google_cloudrun_service" "<%= ctx[:primary_resource_id] %>" {
   provider = "google-beta"
 
   name = "<%= ctx[:vars]["service_name"] %>"
