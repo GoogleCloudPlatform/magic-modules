@@ -70,11 +70,6 @@ module Provider
         file_template.config = config
         file_template
       end
-
-      # Construct a new FileTemplate based on a file to be copied into the output directory
-      def file_for_copy(output_folder, target, api, version, env)
-        new(output_folder, target, api, version, env)
-      end
     end
 
     def initialize(output_folder, name, product, version, env)
