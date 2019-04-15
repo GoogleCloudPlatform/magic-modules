@@ -195,6 +195,10 @@ module Provider
       )
     end
 
+    def emit_requires(requires)
+      requires.flatten.sort.uniq.map { |r| "require '#{r}'" }.join("\n")
+    end
+
     def time?(property)
       property.is_a?(::Api::Type::Time)
     end

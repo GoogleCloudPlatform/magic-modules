@@ -194,15 +194,6 @@ module Provider
               .reject { |prop| prop.resource_ref.readonly }
       end
 
-      # TODO(alexstephen): Standardize on one version and move to provider/core
-      # https://github.com/GoogleCloudPlatform/magic-modules/issues/30
-      def wrap_field(field, spaces)
-        # field.scan goes from 0 -> avail_columns - 1
-        # -1 to account for this
-        avail_columns = DEFAULT_FORMAT_OPTIONS[:max_columns] - spaces - 1
-        field.scan(/\S.{0,#{avail_columns}}\S(?=\s|$)|\S+/)
-      end
-
       def list_kind(object)
         "#{object.kind}List"
       end
