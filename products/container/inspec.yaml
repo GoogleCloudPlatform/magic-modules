@@ -12,10 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Inspec::Config
-manifest: !ruby/object:Provider::Inspec::Manifest
-  summary: 'InSpec resources for verifying GCP infrastructure'
-  description: |
-    InSpec resources for verifying GCP infrastructure
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Inspec::ResourceOverride
     # Change the name of the resulting resource. Do this because
