@@ -19,6 +19,8 @@ pushd magic-modules-gcp
 bundle install
 gem install rspec
 
+# || true will suppress errors, but it's necessary for this to run. If unset,
+# Concourse will fail on *any* rspec step failing (eg: any API mismatch)
 bundle exec rspec tools/linter/spreadsheet.rb  || true
 
 echo "File created"
