@@ -28,6 +28,13 @@ module Provider
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
 
+    # FileTemplate with Terraform specific fields
+    class TerraformFileTemplate < Provider::FileTemplate
+      # The async object used for making operations.
+      # We assume that all resources share the same async properties.
+      attr_accessor :async
+    end
+
     # Sorts properties in the order they should appear in the TF schema:
     # Required, Optional, Computed
     def order_properties(properties)
@@ -178,6 +185,10 @@ module Provider
                     File.join(target_folder,
                               "#{product_name}_operation.go"),
                     self)
+    end
+
+    def build_object_data(object, output_folder, version)
+      TerraformFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
   end
 end
