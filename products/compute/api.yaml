@@ -2796,7 +2796,6 @@ objects:
 
       Tip: Disks should be set to autoDelete=true
       so that leftover disks are not left behind on machine deletion.
-<% type = 'InstanceTemplate' -%>
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -3579,7 +3578,6 @@ objects:
     has_self_link: true
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
-<% type = 'Instance' -%>
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
