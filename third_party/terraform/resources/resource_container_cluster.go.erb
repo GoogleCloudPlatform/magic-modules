@@ -481,10 +481,11 @@ func resourceContainerCluster() *schema.Resource {
 			"node_config": schemaNodeConfig,
 
 			"node_pool": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				ForceNew: true, // TODO(danawillow): Add ability to add/remove nodePools
+				Type:       schema.TypeList,
+				Optional:   true,
+				Computed:   true,
+				ConfigMode: schema.SchemaConfigModeAttr,
+				ForceNew:   true, // TODO(danawillow): Add ability to add/remove nodePools
 				Elem: &schema.Resource{
 					Schema: schemaNodePool,
 				},
@@ -549,11 +550,12 @@ func resourceContainerCluster() *schema.Resource {
 			},
 
 			"ip_allocation_policy": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				MaxItems: 1,
+				Type:       schema.TypeList,
+				MaxItems:   1,
+				ForceNew:   true,
+				Optional:   true,
+				Computed:   true,
+				ConfigMode: schema.SchemaConfigModeAttr,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"use_ip_aliases": {
@@ -631,9 +633,10 @@ func resourceContainerCluster() *schema.Resource {
 
 			"private_cluster_config": {
 				Type:          schema.TypeList,
-				Optional:      true,
 				MaxItems:      1,
+				Optional:      true,
 				Computed:      true,
+				ConfigMode:    schema.SchemaConfigModeAttr,
 				DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

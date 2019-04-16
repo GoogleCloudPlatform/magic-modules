@@ -212,7 +212,8 @@ deprecated in favour of `node_locations`.
 
 * `ip_allocation_policy` - (Optional) Configuration for cluster IP allocation. As of now, only pre-allocated subnetworks (custom type with secondary ranges) are supported.
     This will activate IP aliases. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases)
-    Structure is documented below.
+    Structure is documented below. This field is marked to use [Attribute as Block](/docs/configuration/attr-as-blocks.html)
+    in order to support explicit removal with `ip_allocation_policy = []`.
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`,
@@ -286,7 +287,9 @@ to the datasource. A `region` can have a different set of supported versions tha
     Structure is documented below.
 
 * `private_cluster_config` - (Optional) A set of options for creating
-    a private cluster. Structure is documented below.
+    a private cluster. Structure is documented below. This field is marked to
+    use [Attribute as Block](/docs/configuration/attr-as-blocks.html) in order
+    to support explicit removal with `private_cluster_config = []`.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
