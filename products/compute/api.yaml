@@ -2991,7 +2991,23 @@ objects:
                   Defines whether the instance is preemptible. This can only be set
                   during instance creation, it cannot be set or changed after the
                   instance has been created.
-<%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 10) %>
+          - !ruby/object:Api::Type::Array
+            name: 'serviceAccounts'
+            description: |
+              A list of service accounts, with their specified scopes, authorized
+              for this instance. Only one service account per VM instance is
+              supported.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'email'
+                  description: Email address of the service account.
+                - !ruby/object:Api::Type::Array
+                  name: scopes
+                  description: |
+                    The list of scopes to be made available for this service
+                    account.
+                  item_type: Api::Type::String
 <%= indent(compile('products/compute/instance_tags.yaml'), 10) %>
   - !ruby/object:Api::Resource
     name: 'License'
@@ -3641,7 +3657,23 @@ objects:
               Defines whether the instance is preemptible. This can only be set
               during instance creation, it cannot be set or changed after the
               instance has been created.
-<%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 6) %>
+      - !ruby/object:Api::Type::Array
+        name: 'serviceAccounts'
+        description: |
+          A list of service accounts, with their specified scopes, authorized
+          for this instance. Only one service account per VM instance is
+          supported.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'email'
+              description: Email address of the service account.
+            - !ruby/object:Api::Type::Array
+              name: scopes
+              description: |
+                The list of scopes to be made available for this service
+                account.
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
