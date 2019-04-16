@@ -59,7 +59,24 @@ objects:
         'Reserving a Static External IP Address': 'https://cloud.google.com/compute/docs/instances-and-network'
         'Reserving a Static Internal IP Address': 'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/beta/addresses'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -2791,7 +2808,24 @@ objects:
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -3284,7 +3318,24 @@ objects:
       guides:
         'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionAutoscalers'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -3356,12 +3407,26 @@ objects:
         'Adding or Resizing Regional Persistent Disks':
           'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
-<%=
-  # Larger disks were timing out at creation. Bumping up to 5 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/703
-  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
-                      'templates/regional_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      timeouts: !ruby/object:Api::Timeouts
+        insert_sec: 300 # 5 minutes
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -3617,7 +3682,24 @@ objects:
           guides:
             'Google Cloud Router': 'https://cloud.google.com/router/docs/'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: region
@@ -4155,15 +4237,30 @@ objects:
       instances in all other subnets of the same VPC network, regardless of
       region, using their RFC1918 private IP addresses. You can isolate portions
       of the network, even entire subnets, using firewall rules.
-<%=
-  # Users were experiencing timeout. Bumping up to 6 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/718
-  indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        delete_sec: 6 * 60}},
-                      'templates/regional_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      # Users were experiencing timeout. Bumping up to 6 minutes.
+      # https://github.com/terraform-providers/terraform-provider-google/issues/718
+      timeouts: !ruby/object:Api::Timeouts
+        insert_sec: 360 # 6 minutes
+        update_sec: 360 # 6 minutes
+        delete_sec: 360 # 6 minutes
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4438,7 +4535,24 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -4711,7 +4825,24 @@ objects:
       by Google, but used only by you.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -4939,7 +5070,24 @@ objects:
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
         'Networks and Tunnel Routing': 'https://cloud.google.com/vpn/docs/concepts/choosing-networks-routing'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/vpnTunnels'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
