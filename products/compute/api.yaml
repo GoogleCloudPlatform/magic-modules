@@ -2966,7 +2966,31 @@ objects:
 <%=
   indent(compile('products/compute/instance_networkinterfaces.yaml'), 10)
 %>
-<%= indent(compile('products/compute/instance_scheduling.yaml'), 10) %>
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scheduling'
+            description: Sets the scheduling options for this instance.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'automaticRestart'
+                description: |
+                  Specifies whether the instance should be automatically restarted
+                  if it is terminated by Compute Engine (not terminated by a user).
+                  You can only set the automatic restart option for standard
+                  instances. Preemptible instances cannot be automatically
+                  restarted.
+              - !ruby/object:Api::Type::String
+                name: 'onHostMaintenance'
+                description: |
+                  Defines the maintenance behavior for this instance. For standard
+                  instances, the default behavior is MIGRATE. For preemptible
+                  instances, the default and only possible behavior is TERMINATE.
+                  For more information, see Setting Instance Scheduling Options.
+              - !ruby/object:Api::Type::Boolean
+                name: 'preemptible'
+                description: |
+                  Defines whether the instance is preemptible. This can only be set
+                  during instance creation, it cannot be set or changed after the
+                  instance has been created.
 <%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 10) %>
 <%= indent(compile('products/compute/instance_tags.yaml'), 10) %>
   - !ruby/object:Api::Resource
@@ -3592,7 +3616,31 @@ objects:
 <%=
   indent(compile('products/compute/instance_networkinterfaces.yaml'), 6)
 %>
-<%= indent(compile('products/compute/instance_scheduling.yaml'), 6) %>
+      - !ruby/object:Api::Type::NestedObject
+        name: 'scheduling'
+        description: Sets the scheduling options for this instance.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'automaticRestart'
+            description: |
+              Specifies whether the instance should be automatically restarted
+              if it is terminated by Compute Engine (not terminated by a user).
+              You can only set the automatic restart option for standard
+              instances. Preemptible instances cannot be automatically
+              restarted.
+          - !ruby/object:Api::Type::String
+            name: 'onHostMaintenance'
+            description: |
+              Defines the maintenance behavior for this instance. For standard
+              instances, the default behavior is MIGRATE. For preemptible
+              instances, the default and only possible behavior is TERMINATE.
+              For more information, see Setting Instance Scheduling Options.
+          - !ruby/object:Api::Type::Boolean
+            name: 'preemptible'
+            description: |
+              Defines whether the instance is preemptible. This can only be set
+              during instance creation, it cannot be set or changed after the
+              instance has been created.
 <%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 6) %>
       - !ruby/object:Api::Type::Enum
         name: 'status'
