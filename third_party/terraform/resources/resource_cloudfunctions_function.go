@@ -269,10 +269,10 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"max_instances": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				ValidateFunc:     validation.IntAtLeast(0),
-				DiffSuppressFunc: emptyOrDefaultStringSuppress("0"),
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      0,
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 
 			"project": {
