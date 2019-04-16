@@ -2944,7 +2944,25 @@ objects:
               The metadata key/value pairs to assign to instances that are
               created from this template. These pairs can consist of custom
               metadata or predefined keys.
-<%= indent(compile('products/compute/instance_guestaccelerators.yaml'), 10) %>
+          - !ruby/object:Api::Type::Array
+            name: 'guestAccelerators'
+            description: |
+              List of the type and count of accelerator cards attached to the
+              instance
+            item_type: !ruby/object:Api::Type::NestedObject
+               properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'acceleratorCount'
+                  description: |
+                    The number of the guest accelerator cards exposed to this
+                    instance.
+                # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+                # created.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: |
+                    Full or partial URL of the accelerator type resource to expose
+                    to this instance.
 <%=
   indent(compile('products/compute/instance_networkinterfaces.yaml'), 10)
 %>
@@ -3486,7 +3504,25 @@ objects:
               values:
                 - :SCRATCH
                 - :PERSISTENT
-<%= indent(compile('products/compute/instance_guestaccelerators.yaml'), 6) %>
+      - !ruby/object:Api::Type::Array
+        name: 'guestAccelerators'
+        description: |
+          List of the type and count of accelerator cards attached to the
+          instance
+        item_type: !ruby/object:Api::Type::NestedObject
+           properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'acceleratorCount'
+              description: |
+                The number of the guest accelerator cards exposed to this
+                instance.
+            # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+            # created.
+            - !ruby/object:Api::Type::String
+              name: 'acceleratorType'
+              description: |
+                Full or partial URL of the accelerator type resource to expose
+                to this instance.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
