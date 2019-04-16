@@ -45,6 +45,12 @@ module Provider
       include Provider::Ansible::Request
       include Provider::Ansible::VersionAdded
 
+      # FileTemplate with Ansible specific fields
+      class AnsibleFileTemplate < Provider::FileTemplate
+        # The Ansible example object.
+        attr_accessor :example
+      end
+
       def initialize(config, api, start_time)
         super(config, api, start_time)
         @max_columns = 160
@@ -97,7 +103,13 @@ module Provider
 
       def build_object_data(object, output_folder, version)
         # Method is overriden to add Ansible example objects to the data object.
-        data = super
+        data = AnsibleFileTemplate.file_for_resource(
+          output_folder,
+          object,
+          version,
+          @config,
+          build_env
+        )
 
         prod_name = data.object.name.underscore
         path = ["products/#{data.product.api_name}",
