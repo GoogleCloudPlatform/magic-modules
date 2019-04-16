@@ -183,7 +183,24 @@ objects:
       guides:
         'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers'
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -857,12 +874,28 @@ objects:
         'Adding a persistent disk':
           'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
-<%=
-  # Larger disks were timing out at creation. Bumping up to 5 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/703
-  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
-                      'templates/zonal_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      # Larger disks were timing out at creation. Bumping up to 5 minutes.
+      # https://github.com/terraform-providers/terraform-provider-google/issues/703
+      timeouts: !ruby/object:Api::Timeouts
+        insert_sec: 300 # 5 minutes
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -2542,16 +2575,30 @@ objects:
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
 <% type = 'Instance' -%>
-<%=
-  # Users were experiencing timeouts. Bumping up to 6 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/852
-  indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        delete_sec: 6 * 60}},
-                      'templates/zonal_async.yaml.erb'), 4)
-
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      # Users were experiencing timeouts. Bumping up to 6 minutes.
+      # https://github.com/terraform-providers/terraform-provider-google/issues/852
+      timeouts: !ruby/object:Api::Timeouts
+        insert_sec: 360 # 6 minutes
+        update_sec: 360 # 6 minutes
+        delete_sec: 360 # 6 minutes
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -2662,7 +2709,24 @@ objects:
       and can contain identical or different instances. Instance groups do not
       use an instance template. Unlike managed instance groups, you must create
       and add instances to an instance group manually.
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     input: true
     parameters:
       - !ruby/object:Api::Type::ResourceRef
@@ -2765,7 +2829,24 @@ objects:
       verify the status of the individual instances.
 
       A managed instance group can have up to 1000 VM instances per group.
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
