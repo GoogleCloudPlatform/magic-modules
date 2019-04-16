@@ -1069,12 +1069,12 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
+        # Larger disks were timing out at creation. Bumping up to 5 minutes.
+        # https://github.com/terraform-providers/terraform-provider-google/issues/703
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 300 # 5 minutes
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
-      # Larger disks were timing out at creation. Bumping up to 5 minutes.
-      # https://github.com/terraform-providers/terraform-provider-google/issues/703
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 300 # 5 minutes
       status: !ruby/object:Api::Async::Status
         path: 'status'
         complete: 'DONE'
@@ -2770,14 +2770,14 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
         wait_ms: 1000
+        # Users were experiencing timeouts. Bumping up to 6 minutes.
+        # https://github.com/terraform-providers/terraform-provider-google/issues/852
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360 # 6 minutes
+          update_sec: 360 # 6 minutes
+          delete_sec: 360 # 6 minutes
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
-      # Users were experiencing timeouts. Bumping up to 6 minutes.
-      # https://github.com/terraform-providers/terraform-provider-google/issues/852
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 360 # 6 minutes
-        update_sec: 360 # 6 minutes
-        delete_sec: 360 # 6 minutes
       status: !ruby/object:Api::Async::Status
         path: 'status'
         complete: 'DONE'
@@ -4025,10 +4025,10 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 300 # 5 minutes
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 300 # 5 minutes
       status: !ruby/object:Api::Async::Status
         path: 'status'
         complete: 'DONE'
@@ -4472,12 +4472,12 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 300 # 5 minutes
+          update_sec: 300 # 5 minutes
+          delete_sec: 300 # 5 minutes
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 300 # 5 minutes
-        update_sec: 300 # 5 minutes
-        delete_sec: 300 # 5 minutes
       status: !ruby/object:Api::Async::Status
         path: 'status'
         complete: 'DONE'
@@ -4710,14 +4710,14 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360 # 6 minutes
+          update_sec: 360 # 6 minutes
+          # Deletes can take 20-30 minutes to complete, since they depend
+          # on the provisioning process either succeeding or failing completely.
+          delete_sec: 1800 # 30 minutes
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 360 # 6 minutes
-        update_sec: 360 # 6 minutes
-        # Deletes can take 20-30 minutes to complete, since they depend
-        # on the provisioning process either succeeding or failing completely.
-        delete_sec: 1800 # 30 minutes
       status: !ruby/object:Api::Async::Status
         path: 'status'
         complete: 'DONE'
@@ -4938,14 +4938,14 @@ objects:
         path: 'name'
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
+        # Users were experiencing timeout. Bumping up to 6 minutes.
+        # https://github.com/terraform-providers/terraform-provider-google/issues/718
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360 # 6 minutes
+          update_sec: 360 # 6 minutes
+          delete_sec: 360 # 6 minutes
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
-      # Users were experiencing timeout. Bumping up to 6 minutes.
-      # https://github.com/terraform-providers/terraform-provider-google/issues/718
-      timeouts: !ruby/object:Api::Timeouts
-        insert_sec: 360 # 6 minutes
-        update_sec: 360 # 6 minutes
-        delete_sec: 360 # 6 minutes
       status: !ruby/object:Api::Async::Status
         path: 'status'
         complete: 'DONE'
