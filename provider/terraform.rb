@@ -33,6 +33,8 @@ module Provider
       # The async object used for making operations.
       # We assume that all resources share the same async properties.
       attr_accessor :async
+
+      attr_accessor :resource_name
     end
 
     # Sorts properties in the order they should appear in the TF schema:
