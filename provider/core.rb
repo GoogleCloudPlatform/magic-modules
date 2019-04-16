@@ -50,18 +50,6 @@ module Provider
     # (which formatters are enabled, start-time)
     attr_accessor :env
 
-    # Ansible stuff.
-    # The Ansible example object.
-    attr_accessor :example
-
-    attr_accessor :property
-
-    # Terraform stuff.
-    # The async object used for making operations.
-    # We assume that all resources share the same async properties.
-    attr_accessor :async
-    attr_accessor :resource_name
-
     class << self
       # Construct a new FileTemplate based on a resource object
       def file_for_resource(output_folder, object, version, config, env)
