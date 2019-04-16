@@ -38,7 +38,24 @@ objects:
       Represents a Cloud SQL instance. Cloud SQL instances are SQL databases
       hosted in Google's cloud. The Instances resource provides methods for
       common configuration and management tasks.
-<%= indent(compile('templates/async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'sql#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'backendType'
@@ -367,7 +384,24 @@ objects:
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
-<%= indent(compile('templates/async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'sql#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
@@ -404,7 +438,24 @@ objects:
       - host
     description: |
       The Users resource represents a database user in a Cloud SQL instance.
-<%= indent(compile('templates/async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'sql#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
