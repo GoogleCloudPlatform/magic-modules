@@ -1046,7 +1046,24 @@ objects:
       outgoing traffic and a default "deny" for incoming traffic. For all
       networks except the default network, you must create any firewall rules
       you need.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
       # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
@@ -1572,7 +1589,24 @@ objects:
           'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
     input: true
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'address'
@@ -1694,7 +1728,24 @@ objects:
 
       For more information, see
       https://cloud.google.com/compute/docs/load-balancing/http/
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
@@ -1731,7 +1782,24 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/v1/httpHealthChecks'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1813,7 +1881,24 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/v1/httpsHealthChecks'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1903,7 +1988,24 @@ objects:
       continue to poll unhealthy instances. If an instance later responds
       successfully to some number of consecutive probes, it is marked
       healthy again and can receive new connections.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -2035,7 +2137,24 @@ objects:
       Tip: Disks should be set to autoDelete=true
       so that leftover disks are not left behind on machine deletion.
 <% type = 'InstanceTemplate' -%>
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2156,7 +2275,24 @@ objects:
       images are available only to your project. You can create a custom image
       from root persistent disks and other images. Then, use the custom image
       to create an instance.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'archiveSizeBytes'
@@ -3098,7 +3234,24 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
       Manages a VPC network or legacy network resource on GCP.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -3574,7 +3727,24 @@ objects:
           guides:
             'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'destRange'
@@ -3837,14 +4007,28 @@ objects:
     # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
     # operation. we'll leave the object as global operation and use the disk's
     # zonal operation for the create action.
-<%=
-  indent(compile_file({timeouts: {
-                        insert_sec: 5 * 60,
-                        update_sec: 5 * 60,
-                        delete_sec: 5 * 60}},
-                      'templates/global_async.yaml.erb'), 4)
-
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      timeouts: !ruby/object:Api::Timeouts
+        insert_sec: 300 # 5 minutes
+        update_sec: 300 # 5 minutes
+        delete_sec: 300 # 5 minutes
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceDisk'
@@ -3989,7 +4173,24 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
       the load balancer to serve secure connections from the user.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'certificate'
@@ -4044,12 +4245,30 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing.  This resource
       represents a certificate for which the certificate secrets are created and
       managed by Google.
-<%= indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        # Deletes can take 20-30 minutes to complete, since they depend
-                        # on the provisioning process either succeeding or failing completely.
-                        delete_sec: 30 * 60}}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      timeouts: !ruby/object:Api::Timeouts
+        insert_sec: 360 # 6 minutes
+        update_sec: 360 # 6 minutes
+        # Deletes can take 20-30 minutes to complete, since they depend
+        # on the provisioning process either succeeding or failing completely.
+        delete_sec: 1800 # 30 minutes
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4121,7 +4340,24 @@ objects:
           guides:
             'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4393,7 +4629,24 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4443,7 +4696,24 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4677,7 +4947,24 @@ objects:
       guides:
         'Setting Up SSL proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetSslProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4766,7 +5053,24 @@ objects:
         'Setting Up TCP proxy for Google Cloud Load Balancing':
           'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4919,7 +5223,24 @@ objects:
     description: |
       UrlMaps are used to route requests to a backend service based on rules
       that you define for the host and path of an incoming URL.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
