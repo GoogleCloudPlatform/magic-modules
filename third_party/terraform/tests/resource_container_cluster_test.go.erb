@@ -1347,6 +1347,40 @@ func TestAccContainerCluster_withIPAllocationPolicy_createSubnetwork(t *testing.
 	})
 }
 
+// This test will intentionally perform a recreate. Without attr syntax, there's
+// no way to go from allocation policy set -> unset without one.
+func TestAccContainerCluster_withIPAllocationPolicy_explicitEmpty(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+	resource.Test(t, resource.TestCase{
+		PreCheck:	  func() { testAccPreCheck(t) },
+		Providers:	  testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withIPAllocationPolicy_createSubnetwork(cluster),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+			{
+				Config: testAccContainerCluster_withIPAllocationPolicy_explicitEmpty(cluster),
+			},
+			{
+				ResourceName:		 "google_container_cluster.with_ip_allocation_policy",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:		 true,
+				ImportStateVerify:	 true,
+			},
+		},
+	})
+}
+
+
 <% unless version == 'ga' -%>
 func TestAccContainerCluster_withPodSecurityPolicy(t *testing.T) {
 	t.Parallel()
@@ -2851,6 +2885,17 @@ resource "google_container_cluster" "with_ip_allocation_policy" {
 		use_ip_aliases    = true
 		create_subnetwork = true
 	}
+}`, cluster)
+}
+
+func testAccContainerCluster_withIPAllocationPolicy_explicitEmpty(cluster string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_ip_allocation_policy" {
+	name = "%s"
+	zone = "us-central1-a"
+
+	initial_node_count = 1
+	ip_allocation_policy = []
 }`, cluster)
 }
 

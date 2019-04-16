@@ -287,9 +287,7 @@ to the datasource. A `region` can have a different set of supported versions tha
     Structure is documented below.
 
 * `private_cluster_config` - (Optional) A set of options for creating
-    a private cluster. Structure is documented below. This field is marked to
-    use [Attribute as Block](/docs/configuration/attr-as-blocks.html) in order
-    to support explicit removal with `private_cluster_config = []`.
+    a private cluster. Structure is documented below.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.

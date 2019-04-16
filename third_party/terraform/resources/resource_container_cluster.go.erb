@@ -484,7 +484,6 @@ func resourceContainerCluster() *schema.Resource {
 				Type:       schema.TypeList,
 				Optional:   true,
 				Computed:   true,
-				ConfigMode: schema.SchemaConfigModeAttr,
 				ForceNew:   true, // TODO(danawillow): Add ability to add/remove nodePools
 				Elem: &schema.Resource{
 					Schema: schemaNodePool,
@@ -636,7 +635,6 @@ func resourceContainerCluster() *schema.Resource {
 				MaxItems:      1,
 				Optional:      true,
 				Computed:      true,
-				ConfigMode:    schema.SchemaConfigModeAttr,
 				DiffSuppressFunc: containerClusterPrivateClusterConfigSuppress,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
