@@ -85,6 +85,10 @@
     :version_added: '2.6'
     :bucketName:
       :version_added: '2.6'
+    :cdnPolicy:
+      :version_added: '2.8'
+      :signedUrlCacheMaxAgeSec:
+        :version_added: '2.8'
     :description:
       :version_added: '2.6'
     :enableCdn:
@@ -129,6 +133,8 @@
           :version_added: '2.6'
         :queryStringWhitelist:
           :version_added: '2.6'
+      :signedUrlCacheMaxAgeSec:
+        :version_added: '2.8'
     :connectionDraining:
       :version_added: '2.6'
       :drainingTimeoutSec:
@@ -155,8 +161,8 @@
       :version_added: '2.6'
     :protocol:
       :version_added: '2.6'
-    :region:
-      :version_added: '2.6'
+    :securityPolicy:
+      :version_added: '2.8'
     :sessionAffinity:
       :version_added: '2.6'
     :timeoutSec:
@@ -265,7 +271,11 @@
       :version_added: '2.6'
     :target:
       :version_added: '2.7'
+    :allPorts:
+      :version_added: '2.8'
     :networkTier:
+      :version_added: '2.8'
+    :serviceLabel:
       :version_added: '2.8'
     :region:
       :version_added: '2.6'

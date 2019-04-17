@@ -17,6 +17,14 @@
       :version_added: '2.5'
     :labels:
       :version_added: '2.8'
+    :visibility:
+      :version_added: '2.8'
+    :privateVisibilityConfig:
+      :version_added: '2.8'
+      :networks:
+        :version_added: '2.8'
+        :networkUrl:
+          :version_added: '2.8'
   :ResourceRecordSet:
     :version_added: '2.6'
     :name:
