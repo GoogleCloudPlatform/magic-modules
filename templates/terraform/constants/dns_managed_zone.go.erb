@@ -1,0 +1,5 @@
+func dnsManagedZoneVisibilityDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+  oldV = strings.ToUpper(old)
+  newV = strings.ToUpper(new)
+  return oldV == newV || (oldV == "" && newV == "PUBLIC") || (oldV == "PUBLIC" && newV == "")
+}

@@ -87,7 +87,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
             return hashcode.String(buf.String())
           }
       visibility: !ruby/object:Overrides::Terraform::PropertyOverride
-        diff_suppress_func: 'caseDiffSuppress'
+        diff_suppress_func: 'dnsManagedZoneVisibilityDiffSuppress'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/dns_managed_zone.go.erb'
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
