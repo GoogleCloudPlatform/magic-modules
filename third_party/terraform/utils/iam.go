@@ -10,6 +10,8 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
+const maxBackoffSeconds = 30
+
 // The ResourceIamUpdater interface is implemented for each GCP resource supporting IAM policy.
 //
 // Implementations should keep track of the resource identifier.
@@ -44,6 +46,41 @@ type iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
 
 type resourceIdParserFunc func(d *schema.ResourceData, config *Config) error
 
+// Wrapper around updater.GetResourceIamPolicy() that handles Fibonacci backoff
+// for reading policies from IAM
+func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
+	mutexKey := updater.GetMutexKey()
+	mutexKV.Lock(mutexKey)
+	defer mutexKV.Unlock(mutexKey)
+
+	backoff := time.Second
+	prevBackoff := time.Duration(0)
+
+	for {
+		log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
+		p, err := updater.GetResourceIamPolicy()
+		if err == nil {
+			log.Printf("[DEBUG] Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
+			return p, nil
+		}
+
+		if !isGoogleApiErrorWithCode(err, 429) {
+			return nil, err
+		}
+
+		if backoff > time.Second*maxBackoffSeconds {
+			return nil, fmt.Errorf("Error applying IAM policy to %s: Waited too long for read.\n", updater.DescribeResource())
+		}
+
+		log.Printf("[DEBUG] 429 while attempting to read policy for %s, waiting %v before attempting again", updater.DescribeResource(), backoff)
+		time.Sleep(backoff)
+		// Fibonacci increase backoff
+		newBackoff := backoff + prevBackoff
+		prevBackoff = backoff
+		backoff = newBackoff
+	}
+}
+
 func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc) error {
 	mutexKey := updater.GetMutexKey()
 	mutexKV.Lock(mutexKey)
@@ -54,6 +91,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		log.Printf("[DEBUG]: Retrieving policy for %s\n", updater.DescribeResource())
 		p, err := updater.GetResourceIamPolicy()
 		if isGoogleApiErrorWithCode(err, 429) {
+			log.Printf("[DEBUG] 429 while attempting to read policy for %s, waiting %v before attempting again", updater.DescribeResource(), backoff)
 			time.Sleep(backoff)
 			continue
 		} else if err != nil {
@@ -71,7 +109,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 		if err == nil {
 			fetchBackoff := 1 * time.Second
 			for successfulFetches := 0; successfulFetches < 3; {
-				if fetchBackoff > 30*time.Second {
+				if fetchBackoff > maxBackoffSeconds*time.Second {
 					return fmt.Errorf("Error applying IAM policy to %s: Waited too long for propagation.\n", updater.DescribeResource())
 				}
 				time.Sleep(fetchBackoff)
