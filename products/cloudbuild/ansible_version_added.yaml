@@ -45,3 +45,25 @@
           :version_added: '2.8'
         :args:
           :version_added: '2.8'
+        :env:
+          :version_added: '2.8'
+        :id:
+          :version_added: '2.8'
+        :entrypoint:
+          :version_added: '2.8'
+        :dir:
+          :version_added: '2.8'
+        :secretEnv:
+          :version_added: '2.8'
+        :timeout:
+          :version_added: '2.8'
+        :timing:
+          :version_added: '2.8'
+        :volumes:
+          :version_added: '2.8'
+          :name:
+            :version_added: '2.8'
+          :path:
+            :version_added: '2.8'
+        :waitFor:
+          :version_added: '2.8'
