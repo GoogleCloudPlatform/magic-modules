@@ -53,32 +53,17 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 	mutexKV.Lock(mutexKey)
 	defer mutexKV.Unlock(mutexKey)
 
-	backoff := time.Second
-	prevBackoff := time.Duration(0)
-
-	for {
-		log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
-		p, err := updater.GetResourceIamPolicy()
-		if err == nil {
-			log.Printf("[DEBUG] Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
-			return p, nil
-		}
-
-		if !isGoogleApiErrorWithCode(err, 429) {
-			return nil, err
-		}
-
-		if backoff > time.Second*maxBackoffSeconds {
-			return nil, fmt.Errorf("Error applying IAM policy to %s: Waited too long for read.\n", updater.DescribeResource())
-		}
-
-		log.Printf("[DEBUG] 429 while attempting to read policy for %s, waiting %v before attempting again", updater.DescribeResource(), backoff)
-		time.Sleep(backoff)
-		// Fibonacci increase backoff
-		newBackoff := backoff + prevBackoff
-		prevBackoff = backoff
-		backoff = newBackoff
+	log.Printf("[DEBUG] Retrieving policy for %s\n", updater.DescribeResource())
+	var policy *cloudresourcemanager.Policy
+	err := retryTime(func() (perr error) {
+		policy, perr = updater.GetResourceIamPolicy()
+		return perr
+	}, 10)
+	if err != nil {
+		return nil, err
 	}
+	log.Printf("[DEBUG] Retrieved policy for %s: %+v\n", updater.DescribeResource(), policy)
+	return policy, nil
 }
 
 func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModifyFunc) error {
