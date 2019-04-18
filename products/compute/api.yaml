@@ -6492,6 +6492,8 @@ objects:
           Denotes the logging options for the subnetwork flow logs. If logging is enabled
           logs will be exported to Stackdriver.
         min_version: beta
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enable'
