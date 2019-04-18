@@ -133,6 +133,7 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, expand_queue, settable_properties, object, 8)) -%>
     }
 
+<%= lines(build_sdkfield_block_assignments(resource_name, sdk_operation.request, expand_queue, settable_properties, object)) -%>
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
@@ -210,6 +211,8 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
     <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
 <%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, expand_queue, updatable_properties, object, 8)) -%>
     }
+
+<%= lines(build_sdkfield_block_assignments(resource_name, sdk_operation.request, expand_queue, settable_properties, object)) -%>
 
 <%  unless sdk_operation.async -%>
     if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {

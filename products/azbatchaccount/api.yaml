@@ -34,7 +34,7 @@ objects:
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
-            python_parameter_name: name
+            python_parameter_name: account_name
             python_variable_name: name
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             go_variable_name: parameters
@@ -75,7 +75,7 @@ objects:
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
-            python_parameter_name: name
+            python_parameter_name: account_name
             python_variable_name: name
         response:
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
@@ -121,7 +121,7 @@ objects:
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
-            python_parameter_name: name
+            python_parameter_name: account_name
             python_variable_name: name
           'tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [python]
@@ -164,7 +164,7 @@ objects:
           'accountName': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             id_portion: batchAccounts
             go_variable_name: name
-            python_parameter_name: name
+            python_parameter_name: account_name
             python_variable_name: name
 
     description: |

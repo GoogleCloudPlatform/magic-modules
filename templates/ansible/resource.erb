@@ -131,7 +131,7 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
       "derived_arg_spec=self.module_arg_spec",
       "supports_check_mode=True",
       "supports_tags=#{python_literal(is_tags_defined?(object))}"
-    ], ")", 8)) -%>
+    ], ')', 8)) -%>
 
     def exec_module(self, **kwargs):
         """Main module execution method"""
@@ -147,11 +147,15 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
         self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'] = _snake_to_camel(self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'], True)
 <%    elsif is_location? prop -%>
         resource_group = self.get_resource_group(self.resource_group)
-        if not self.location:
-            self.location = resource_group.location
-        self.location = normalize_location_name(self.location)
+        if self.<%= root_object_field -%>.get('location') is None:
+            self.<%= root_object_field -%>['location'] = resource_group.location
 <%    elsif prop.is_a? Api::Azure::Type::ResourceReference -%>
-        self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'] = self.normalize_resource_id(self.<%= root_object_field -%>['<%= python_field_name(prop, object.azure_sdk_definition.create) -%>'], <%= python_literal(prop.sample_value) -%>)
+<%      prop_field_name = python_field_name(prop, object.azure_sdk_definition.create) -%>
+<%      prop_expr = "self.#{root_object_field}['#{prop_field_name}']" -%>
+        if self.<%= root_object_field -%>.get('<%= prop_field_name -%>') is not None:
+            <%= prop_expr -%> = self.normalize_resource_id(
+                <%= prop_expr -%>,
+                <%= python_literal(prop.sample_value) -%>)
 <%    end -%>
 <%  end -%>
 
@@ -221,7 +225,7 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
             else:
 <%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.update, 16)) -%>
 <%  end -%>
-            if isinstance(response, LROPoller) or isinstance(response.AzureOperationPoller):
+            if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
                 response = self.get_poller_result(response)
         except CloudError as exc:
             self.log('Error attempting to create the <%= object.name.titlecase -%> instance.')

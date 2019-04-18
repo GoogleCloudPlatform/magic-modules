@@ -116,15 +116,17 @@ func resourceArmBatchAccountCreate(d *schema.ResourceData, meta interface{}) err
     parameters := batch.AccountCreateParameters{
         Location: utils.String(location),
         AccountCreateProperties: &batch.AccountCreateProperties{
-            AutoStorage: &batch.AutoStorageBaseProperties{
-                StorageAccountID: utils.String(storageAccountId),
-            },
             KeyVaultReference: expandArmBatchAccountKeyVaultReference(keyVaultReference),
             PoolAllocationMode: batch.PoolAllocationMode(poolAllocationMode),
         },
         Tags: expandTags(tags),
     }
 
+    if storageAccountId != "" {
+        parameters.AccountCreateProperties.AutoStorage = &batch.AutoStorageBaseProperties{
+            StorageAccountID: &storageAccountId,
+        }
+    }
 
     future, err := client.Create(ctx, resourceGroup, name, parameters)
     if err != nil {
@@ -198,12 +200,15 @@ func resourceArmBatchAccountUpdate(d *schema.ResourceData, meta interface{}) err
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := batch.AccountUpdateParameters{
-        AccountUpdateProperties: &batch.AccountUpdateProperties{
+        Tags: expandTags(tags),
+    }
+
+    if storageAccountId != "" {
+        parameters.AccountUpdateProperties = &batch.AccountUpdateProperties{
             AutoStorage: &batch.AutoStorageBaseProperties{
                 StorageAccountID: utils.String(storageAccountId),
             },
-        },
-        Tags: expandTags(tags),
+        }
     }
 
     if _, err := client.Update(ctx, resourceGroup, name, parameters); err != nil {

@@ -6,10 +6,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: validateAzureRMBatchAccountName
-      autoStorageAccountId: !ruby/object:Provider::Terraform::PropertyOverride
+      autoStorageAccountId: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         name: storageAccountId
         validation: !ruby/object:Provider::Terraform::Validation
           function: azure.ValidateResourceIDOrEmpty
+        sdkfield_assign_type: block
+        custom_sdkfield_assign: products/azbatchaccount/terraform_storage_id_assign.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_functions: products/azbatchaccount/terraform_extra_functions.erb
     document_examples:

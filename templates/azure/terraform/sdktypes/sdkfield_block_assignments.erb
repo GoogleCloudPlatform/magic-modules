@@ -1,0 +1,3 @@
+<%  properties.select{|p| get_property_value(p, 'sdkfield_assign_type', 'inline') == 'block'}.each do |prop| -%>
+<%=   lines(build_sdk_field_assignment(prop, get_applicable_reference(prop.azure_sdk_references, sdk_type_defs), sdk_type_defs, resource_name, expand_queue, properties, object)) -%>
+<%  end -%>

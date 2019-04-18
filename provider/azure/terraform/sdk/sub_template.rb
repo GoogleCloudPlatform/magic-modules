@@ -48,6 +48,16 @@ module Provider
                              object: object
           end
 
+          def build_sdkfield_block_assignments(resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4)
+            compile_template 'templates/azure/terraform/sdktypes/sdkfield_block_assignments.erb',
+                             indentation: indentation,
+                             resource_name: resource_name,
+                             sdk_type_defs: sdk_type_defs,
+                             expand_queue: expand_queue,
+                             properties: properties,
+                             object: object
+          end
+
           def build_schema_assignment(input, output, property, api_path, sdk_type_defs, resource_name, flatten_queue, properties, object)
             compile_template property_to_schema_assignment_template(property, sdk_type_defs[api_path]),
                              input_statement: input,
