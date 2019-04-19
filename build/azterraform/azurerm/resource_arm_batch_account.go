@@ -124,7 +124,7 @@ func resourceArmBatchAccountCreate(d *schema.ResourceData, meta interface{}) err
 
     if storageAccountId != "" {
         parameters.AccountCreateProperties.AutoStorage = &batch.AutoStorageBaseProperties{
-            StorageAccountID: &storageAccountId,
+            StorageAccountID: utils.String(storageAccountId),
         }
     }
 
@@ -200,16 +200,14 @@ func resourceArmBatchAccountUpdate(d *schema.ResourceData, meta interface{}) err
     tags := d.Get("tags").(map[string]interface{})
 
     parameters := batch.AccountUpdateParameters{
-        Tags: expandTags(tags),
-    }
-
-    if storageAccountId != "" {
-        parameters.AccountUpdateProperties = &batch.AccountUpdateProperties{
+        AccountUpdateProperties: &batch.AccountUpdateProperties{
             AutoStorage: &batch.AutoStorageBaseProperties{
                 StorageAccountID: utils.String(storageAccountId),
             },
-        }
+        },
+        Tags: expandTags(tags),
     }
+
 
     if _, err := client.Update(ctx, resourceGroup, name, parameters); err != nil {
         return fmt.Errorf("Error updating Batch Account %q (Resource Group %q): %+v", name, resourceGroup, err)

@@ -3,7 +3,7 @@ require 'api/azure/sdk_operation_definition_override'
 
 module Api
   module Azure
-    module SDKDefinitionOverride < Api::Object
+    class SDKDefinitionOverride < Api::Object
       attr_reader :create
       attr_reader :read
       attr_reader :update

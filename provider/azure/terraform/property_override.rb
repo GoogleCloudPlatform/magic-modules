@@ -6,7 +6,6 @@ module Provider
       module OverrideFields
         attr_reader :name_in_logs
         attr_reader :hide_from_schema
-        attr_reader :sdkfield_assign_type
         attr_reader :custom_schema_definition
         attr_reader :custom_schema_get
         attr_reader :custom_schema_set
@@ -26,7 +25,6 @@ module Provider
           check_optional_property :custom_schema_get, String
           check_optional_property :custom_schema_set, String
           check_optional_property :custom_sdkfield_assign, String
-          check_property_oneof_default :sdkfield_assign_type, ['inline', 'block'], 'inline'
         end
 
         private

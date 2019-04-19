@@ -26,7 +26,7 @@ module Provider
                              flatten_queue: flatten_queue
           end
 
-          def build_sdk_field_assignment(property, api_path, sdk_type_defs, resource_name, expand_queue, properties, object)
+          def build_sdk_field_assignment(property, api_path, sdk_type_defs, resource_name, expand_queue, properties, object, in_structure = true)
             compile_template property_to_sdk_field_assignment_template(property, sdk_type_defs[api_path]),
                              property: property,
                              api_path: api_path,
@@ -34,22 +34,24 @@ module Provider
                              resource_name: resource_name,
                              expand_queue: expand_queue,
                              properties: properties,
+                             in_structure: in_structure,
                              object: object
           end
 
-          def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4)
+          def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4, include_empty = false)
             compile_template 'templates/azure/terraform/sdktypes/property_to_sdkobject.erb',
                              indentation: indentation,
                              resource_name: resource_name,
                              api_path: api_path,
                              sdk_type_defs: sdk_type_defs,
                              expand_queue: expand_queue,
+                             include_empty: include_empty,
                              properties: properties,
                              object: object
           end
 
-          def build_sdkfield_block_assignments(resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4)
-            compile_template 'templates/azure/terraform/sdktypes/sdkfield_block_assignments.erb',
+          def build_property_to_sdk_object_empty_sensitive(resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4)
+            compile_template 'templates/azure/terraform/sdktypes/property_to_sdkobject_empty_sensitive.erb',
                              indentation: indentation,
                              resource_name: resource_name,
                              sdk_type_defs: sdk_type_defs,

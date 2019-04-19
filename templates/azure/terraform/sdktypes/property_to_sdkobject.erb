@@ -3,15 +3,17 @@
     sdk_type = sdk_type_defs[api_path]
 
     direct_children = Set.new
-    properties.select{|p| get_property_value(p, 'sdkfield_assign_type', 'inline') == 'inline'}.each do |prop|
+    properties.each do |prop|
       prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
+        child_type_def = sdk_type_defs[child_api_path]
         if api_path == '/' && child_api_path.start_with?(api_path)
           sub_paths = child_api_path.split('/')
           api_path = ''
         elsif child_api_path.start_with?(api_path + '/')
           sub_paths = child_api_path[api_path.length..-1].split('/')
         end
-        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ''
+        skip_empty = child_type_def.empty_value_sensitive && !include_empty
+        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == '' && !skip_empty
           sub_api_path = api_path + '/' + sub_paths[1]
           direct_children << sub_api_path if sub_paths.length > 2
           direct_children << child_api_path if sub_paths.length == 2

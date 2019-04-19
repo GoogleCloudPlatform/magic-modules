@@ -27,11 +27,18 @@ module Api
         check_property :delete, Api::Azure::SDKOperationDefinition
       end
 
-      def merge_overrides(overrides, language)
-        @create.merge_overrides(nil, language) unless @create.nil?
-        @read.merge_overrides(nil, language) unless @read.nil?
-        @update.merge_overrides(nil, language) unless @update.nil?
-        @delete.merge_overrides(nil, language) unless @delete.nil?
+      def filter_language!(language)
+        @create.filter_language!(language) unless @create.nil?
+        @read.filter_language!(language) unless @read.nil?
+        @update.filter_language!(language) unless @update.nil?
+        @delete.filter_language!(language) unless @delete.nil?
+      end
+
+      def merge_overrides!(overrides)
+        @create.merge_overrides!(overrides.create) if !@create.nil? && !overrides.create.nil?
+        @read.merge_overrides!(nil) if !@read.nil? && !overrides.read.nil?
+        @update.merge_overrides!(nil) if !@update.nil? && !overrides.update.nil?
+        @delete.merge_overrides!(nil) if !@delete.nil? && !overrides.delete.nil?
       end
     end
   end

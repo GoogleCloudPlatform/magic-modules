@@ -1,10 +1,12 @@
 require 'provider/terraform/resource_override'
+require 'api/azure/sdk_definition_override'
 
 module Provider
   module Azure
     module Terraform
       module OverrideProperties
         attr_reader :name_in_logs
+        attr_reader :azure_sdk_definition
         attr_reader :acctests
         attr_reader :document_examples
         include Provider::Terraform::OverrideProperties
@@ -17,6 +19,7 @@ module Provider
           super
           @acctests ||= Array.new
           check_optional_property :name_in_logs, String
+          check_optional_property :azure_sdk_definition, Api::Azure::SDKDefinitionOverride
           check_optional_property :acctests, Array
           check_optional_property_list :acctests, AccTestDefinition
           check_optional_property :document_examples, Array

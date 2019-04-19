@@ -21,6 +21,7 @@ require 'google/yaml_validator'
 
 require 'api/azure/type'
 require 'api/azure/sdk_definition'
+require 'api/azure/sdk_definition_override'
 
 module Api
   # Process <product>.yaml and produces output module

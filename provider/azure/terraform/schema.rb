@@ -18,6 +18,15 @@ module Provider
           end
         end
 
+        def go_empty_value(property)
+          case property
+          when Api::Type::Enum, Api::Type::String
+            '""'
+          else
+            'nil'
+          end
+        end
+
         def expand_func(property)
           expand_funcs[property.class]
         end

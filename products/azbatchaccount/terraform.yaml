@@ -2,6 +2,11 @@
 name: azbatchaccount
 overrides: !ruby/object:Provider::ResourceOverrides
   BatchAccount: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    azure_sdk_definition: !ruby/object:Api::Azure::SDKDefinitionOverride
+      create: !ruby/object:Api::Azure::SDKOperationDefinitionOverride
+        request:
+          '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinitionOverride
+            empty_value_sensitive: true
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -10,8 +15,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         name: storageAccountId
         validation: !ruby/object:Provider::Terraform::Validation
           function: azure.ValidateResourceIDOrEmpty
-        sdkfield_assign_type: block
-        custom_sdkfield_assign: products/azbatchaccount/terraform_storage_id_assign.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_functions: products/azbatchaccount/terraform_extra_functions.erb
     document_examples:

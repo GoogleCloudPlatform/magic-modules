@@ -62,12 +62,12 @@ module Api
       attr_reader :update_verb
       attr_reader :input # If true, resource is not updatable as a whole unit
       attr_reader :min_version # Minimum API version this resource is in
-
-      # Azure Specific Attributes
-      attr_reader :azure_sdk_definition
     end
 
     include Properties
+
+    # Azure Specific Attributes (Skip default override process)
+    attr_reader :azure_sdk_definition
 
     # Parameters can be overridden via Provider::PropertyOverride
     # A custom getter is used for :parameters instead of `attr_reader`

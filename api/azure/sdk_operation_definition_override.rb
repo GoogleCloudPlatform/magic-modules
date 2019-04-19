@@ -9,8 +9,8 @@ module Api
 
       def validate
         super
-        check_property :request, Hash
-        check_property_hash :request, String, Api::Azure::SDKTypeDefinitionOverride
+        check_optional_property :request, Hash
+        check_optional_property_hash :request, String, Api::Azure::SDKTypeDefinitionOverride
         check_optional_property :response, Hash
         check_optional_property_hash :response, String, Api::Azure::SDKTypeDefinitionOverride
       end

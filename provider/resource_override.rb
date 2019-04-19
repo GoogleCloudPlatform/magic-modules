@@ -73,7 +73,7 @@ module Provider
           prop_name = "@#{method.id2name}".to_sym
           var_value = instance_variable_get(prop_name)
           api_resource.instance_variable_set(prop_name, var_value) \
-            unless var_value.nil?
+            unless var_value.nil? || prop_name == :@azure_sdk_definition
         end
       end
     end
@@ -95,8 +95,11 @@ module Provider
     end
 
     def update_overriden_azure_sdk_definition(api_resource)
-      override = instance_variable_get('@azure_sdk_definition')
-      api_resource.azure_sdk_definition.merge_overrides override, @azure_sdk_language
+      unless api_resource.azure_sdk_definition.nil?
+        api_resource.azure_sdk_definition.filter_language! @azure_sdk_language
+        override = instance_variable_get('@azure_sdk_definition')
+        api_resource.azure_sdk_definition.merge_overrides!(override) unless override.nil?
+      end
     end
 
     def update_name_property_sort_order(api_resource)
