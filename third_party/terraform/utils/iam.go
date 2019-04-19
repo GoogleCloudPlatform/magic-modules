@@ -46,8 +46,8 @@ type iamPolicyModifyFunc func(p *cloudresourcemanager.Policy) error
 
 type resourceIdParserFunc func(d *schema.ResourceData, config *Config) error
 
-// Wrapper around updater.GetResourceIamPolicy() that handles Fibonacci backoff
-// for reading policies from IAM
+// Wrapper around updater.GetResourceIamPolicy() to handle retry/backoff
+// for just reading policies from IAM
 func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.Policy, error) {
 	mutexKey := updater.GetMutexKey()
 	mutexKV.Lock(mutexKey)
