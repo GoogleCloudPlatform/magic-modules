@@ -48,6 +48,14 @@ objects:
         required: true
         description: |
           The collection being indexed
+      - !ruby/object:Api::Type::Enum
+        name: queryScope
+        description: |
+          The scope at which a query is run
+        default_value: :COLLECTION
+        values:
+          - :QUERY_SCOPE_UNSPECIFIED
+          - :COLLECTION
       - !ruby/object:Api::Type::Array
         name: fields
         description: |
@@ -60,3 +68,11 @@ objects:
               name: 'fieldPath'
               description: |
                 Can be name. For single field indexes, this must match the name of the field or may be omitted.
+            - !ruby/object:Api::Type::Enum
+              name: 'order'
+              description: |
+                Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
+              values:
+                - :ORDER_UNSPECIFIED
+                - :ASCENDING
+                - :DESCENDING
