@@ -1,76 +1,78 @@
 ---
 <%= lines(autogen_notice :yaml) -%>
-# Pre-test setup
+- block:
+  # Pre-test setup
 <% unless example.dependencies.nil? -%>
 <% example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', object, false)) -%>
+<%= lines(indent(depend.build_test('present', object, false), 2)) -%>
 <% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
-<%= lines(example.task.build_test('absent', object, false)) -%>
-#----------------------------------------------------------
+<%= lines(indent(example.task.build_test('absent', object, false), 2)) -%>
+  #----------------------------------------------------------
 <% resource_name = object.name.uncombine.downcase -%>
-<%= lines(example.task.build_test('present', object, false)) -%>
-  register: result
+<%= lines(indent(example.task.build_test('present', object, false), 2)) -%>
+    register: result
 <% if object.readonly -%>
-- name: assert changed is false
+  - name: assert changed is false
 <% else # if object.readonly -%>
-- name: assert changed is true
+  - name: assert changed is true
 <% end # if object.readonly -%>
-  assert:
-    that:
+    assert:
+      that:
 <% if object.readonly -%>
-      # <%= object.name -%> is not altered, just verified.
-      - result.changed == false
+        # <%= object.name -%> is not altered, just verified.
+        - result.changed == false
 <% else # if object.readonly -%>
-      - result.changed == true
+        - result.changed == true
 <% end # if object.readonly -%>
 <% if object.kind? -%>
-      - "result.kind == <%= quote_string(object.kind) -%>"
+        - "result.kind == <%= quote_string(object.kind) -%>"
 <% end # if object.kind -%>
 <% unless example.verifier.nil? -%>
-<%= lines(example.verifier.build_task('present', object)) -%>
+<%= lines(indent(example.verifier.build_task('present', object), 2)) -%>
 <% end -%>
 <% unless object.readonly -%>
-# ----------------------------------------------------------------------------
-<%= lines(example.task.build_test('present', object, true)) -%>
-  register: result
-- name: assert changed is false
-  assert:
-    that:
-      - result.changed == false
+  # ----------------------------------------------------------------------------
+<%= lines(indent(example.task.build_test('present', object, true), 2)) -%>
+    register: result
+  - name: assert changed is false
+    assert:
+      that:
+        - result.changed == false
 <% if object.kind? -%>
-      - "result.kind == <%= quote_string(object.kind) -%>"
+        - "result.kind == <%= quote_string(object.kind) -%>"
 <% end # if object.kind -%>
-#----------------------------------------------------------
-<%= lines(example.task.build_test('absent', object, false)) -%>
-  register: result
-- name: assert changed is true
-  assert:
-    that:
-      - result.changed == true
+  #----------------------------------------------------------
+<%= lines(indent(example.task.build_test('absent', object, false), 2)) -%>
+    register: result
+  - name: assert changed is true
+    assert:
+      that:
+        - result.changed == true
 <% if object.kind? -%>
-      - result.has_key('kind') == False
+        - result.has_key('kind') == False
 <% end # if object.kind? -%>
 <% unless example.verifier.nil? -%>
-<%= lines(example.verifier.build_task('absent', object)) -%>
+<%= lines(indent(example.verifier.build_task('absent', object), 2)) -%>
 <% end -%>
-# ----------------------------------------------------------------------------
-<%= lines(example.task.build_test('absent', object, true)) -%>
-  register: result
-- name: assert changed is false
-  assert:
-    that:
-      - result.changed == false
+  # ----------------------------------------------------------------------------
+<%= lines(indent(example.task.build_test('absent', object, true), 2)) -%>
+    register: result
+  - name: assert changed is false
+    assert:
+      that:
+        - result.changed == false
 <% if object.kind? -%>
-      - result.has_key('kind') == False
+        - result.has_key('kind') == False
 <% end # if object.kind? -%>
 <% end # object.readonly -%>
 <% if example.dependencies and !example.dependencies.empty? -%>
-#---------------------------------------------------------
-# Post-test teardown
-# If errors happen, don't crash the playbook!
+  always:
+  #---------------------------------------------------------
+  # Post-test teardown
+  # If errors happen, don't crash the playbook!
 <% example.dependencies.reverse.each do |depend| -%>
-<%= lines(depend.build_test('absent', object, false)) -%>
-  ignore_errors: true
+<%= lines(indent(depend.build_test('absent', object, false), 2)) -%>
+    ignore_errors: true
 <% end # example.dependencies.each -%>
 <% end # if example.dependencies -%>
