@@ -13,6 +13,14 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Index: !ruby/object:Overrides::Terraform::ResourceOverride
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/index.go.erb
+    properties:
+      database: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      collection: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
