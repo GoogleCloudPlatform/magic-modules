@@ -15,7 +15,7 @@ datasources: !ruby/object:Provider::ResourceOverrides
     properties:
       name: !ruby/object:Provider::Ansible::PropertyOverride
         required: false
-    examples:
+    example:
       - !ruby/object:Provider::Azure::ExampleReference
         example: infoget
       - !ruby/object:Provider::Azure::ExampleReference

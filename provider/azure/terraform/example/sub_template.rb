@@ -15,7 +15,7 @@ module Provider
 
           def build_hcl_from_example(product_name, example_name, id_hint, name_hints, random_vars, with_dependencies = false)
             hcl_raw = compile_template 'templates/azure/terraform/example/example_hcl.erb',
-                                       example: get_example_from_file(product_name, example_name),
+                                       example: get_example_by_names(example_name, product_name),
                                        random_variables: random_vars,
                                        resource_id_hint: id_hint,
                                        name_hints: name_hints,
@@ -34,16 +34,6 @@ module Provider
             compile_template 'templates/azure/terraform/example/hcl_properties.erb',
                              properties: properties_hash,
                              indentation: indentation
-          end
-
-          private
-
-          def get_example_from_file(product_name, example_name)
-            example_yaml = "products/#{product_name}/examples/terraform/#{example_name}.yaml"
-            example = Google::YamlValidator.parse(File.read(example_yaml))
-            raise "#{example_yaml}(#{example.class}) is not Provider::Azure::Terraform::Example" unless example.is_a?(Provider::Azure::Terraform::Example)
-            example.validate
-            example
           end
         end
 

@@ -1,4 +1,4 @@
---- !ruby/object:Provider::Azure::Terraform::Example
+--- !ruby/object:Provider::Azure::Example
 resource: azurerm_resource_group
 properties:
   name: "<%= get_resource_name('resourceGroups', 'RG') -%>"

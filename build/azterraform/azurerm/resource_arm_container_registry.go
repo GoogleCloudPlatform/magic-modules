@@ -199,6 +199,7 @@ func resourceArmContainerRegistryUpdate(d *schema.ResourceData, meta interface{}
         Tags: expandTags(tags),
     }
 
+
     if _, err := client.Update(ctx, resourceGroup, name, parameters); err != nil {
         return fmt.Errorf("Error updating Container Registry %q (Resource Group %q): %+v", name, resourceGroup, err)
     }

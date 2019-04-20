@@ -1,7 +1,7 @@
---- !ruby/object:Provider::Azure::Terraform::Example
+--- !ruby/object:Provider::Azure::Example
 resource: azurerm_automation_account
 prerequisites:
-  - !ruby/object:Provider::Azure::Terraform::ExampleReference
+  - !ruby/object:Provider::Azure::ExampleReference
     product: azresourcegroup
     example: basic
 properties:

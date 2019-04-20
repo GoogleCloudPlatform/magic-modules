@@ -1,10 +1,10 @@
---- !ruby/object:Provider::Azure::Terraform::Example
+--- !ruby/object:Provider::Azure::Example
 resource: azurerm_api_management_policy
 prerequisites:
-  - !ruby/object:Provider::Azure::Terraform::ExampleReference
+  - !ruby/object:Provider::Azure::ExampleReference
     product: azresourcegroup
     example: basic
-  - !ruby/object:Provider::Azure::Terraform::ExampleReference
+  - !ruby/object:Provider::Azure::ExampleReference
     product: azapimanagement
     example: basic
 properties:
