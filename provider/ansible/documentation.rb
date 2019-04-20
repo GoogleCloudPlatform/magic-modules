@@ -62,7 +62,7 @@ module Provider
 
       # Builds out the RETURNS for a property.
       # This will eventually be converted to YAML
-      def returns_for_property(prop)
+      def returns_for_property(prop, object)
         type = python_type(prop)
         type = 'str' if prop.is_a? Api::Azure::Type::ResourceReference
         # Complex types only mentioned in reference to RETURNS YAML block
@@ -72,16 +72,16 @@ module Provider
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
         {
-          prop.name.underscore => {
+          python_field_name(prop, object.azure_sdk_definition.read) => {
             'description' => format_description(prop.description),
             'returned' => 'always',
             'type' => type,
             'sample' => (prop.sample_value unless prop.sample_value.nil?),
             'contains' => (
               if prop.is_a?(Api::Type::NestedObject)
-                prop.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
+                prop.properties.map { |p| returns_for_property(p, object) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
-                prop.item_type.properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
+                prop.item_type.properties.map { |p| returns_for_property(p, object) }.reduce({}, :merge)
               end
             )
           }.reject { |_, v| v.nil? }

@@ -32,6 +32,11 @@ module Provider
 
     include Provider::Azure::Terraform
 
+    def initialize(config, api)
+      super(config, api)
+      @provider = 'terraform'
+    end
+
     # Sorts properties in the order they should appear in the TF schema:
     # Required, Optional, Computed
     def order_properties(properties)

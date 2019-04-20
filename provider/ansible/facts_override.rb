@@ -25,7 +25,7 @@ module Provider
 
       def validate
         super
-        default_value_property :has_filters, true
+        default_value_property :has_filters, false
         default_value_property :filter, FilterProp.new
         default_value_property :query_options, true
         default_value_property :filter_api_param, 'filter'

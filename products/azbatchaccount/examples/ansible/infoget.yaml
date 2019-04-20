@@ -1,0 +1,6 @@
+--- !ruby/object:Provider::Azure::Example
+resource: azure_rm_batchaccount
+description: Get instance of Batch Account
+properties:
+  resourceGroup: MyResGroup
+  name: test_object

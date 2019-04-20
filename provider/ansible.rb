@@ -51,6 +51,7 @@ module Provider
       def initialize(config, api)
         super(config, api)
         @max_columns = 160
+        @provider = 'ansible'
       end
 
       # Returns a string representation of the corresponding Python type
@@ -262,7 +263,7 @@ module Provider
       def compile_datasource(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
-        name = "#{module_name(data[:object])}_facts"
+        name = "#{module_name(data[:object])}_info"
         generate_resource_file data.clone.merge(
           default_template: 'templates/ansible/facts.erb',
           out_file: File.join(target_folder,

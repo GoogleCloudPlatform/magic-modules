@@ -9,8 +9,22 @@ manifest: !ruby/object:Provider::Ansible::Manifest
     - requests >= 2.18.4
   version_added: '2.9'
   author: Junyi Yi (@JunyiYi)
+datasources: !ruby/object:Provider::ResourceOverrides
+  BatchAccount: !ruby/object:Provider::Ansible::ResourceOverride
+    version_added: '2.9'
+    properties:
+      name: !ruby/object:Provider::Ansible::PropertyOverride
+        required: false
+    examples:
+      - !ruby/object:Provider::Azure::ExampleReference
+        example: infoget
+      - !ruby/object:Provider::Azure::ExampleReference
+        example: infolist
 overrides: !ruby/object:Provider::ResourceOverrides
   BatchAccount: !ruby/object:Provider::Ansible::ResourceOverride
     properties:
       autoStorageAccountId: !ruby/object:Provider::Ansible::PropertyOverride
         name: autoStorageAccount
+    examples:
+      - !ruby/object:Provider::Azure::ExampleReference
+        example: basic

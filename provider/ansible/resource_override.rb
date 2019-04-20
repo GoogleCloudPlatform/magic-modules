@@ -14,6 +14,8 @@
 require 'provider/resource_override'
 require 'provider/ansible/facts_override'
 
+require 'provider/azure/example/example'
+
 module Provider
   module Ansible
     # Ansible specific properties to be added to Api::Resource
@@ -35,8 +37,9 @@ module Provider
       attr_reader :unwrap_resource
       attr_reader :update
       attr_reader :version_added
-
       attr_reader :facts
+
+      attr_reader :examples
     end
 
     # Product specific overriden properties for Ansible
@@ -78,6 +81,9 @@ module Provider
 
         @facts ||= FactsOverride.new
         check_property :facts, FactsOverride
+
+        default_value_property :examples, []
+        check_optional_property_list :examples, Provider::Azure::ExampleReference
       end
 
       private

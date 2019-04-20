@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (C) 2019 <%= @config.manifest.get('author', object) -%>
-
+# Copyright (C) 2019 <%= lines(@config.manifest.get('author', object)) -%>
 #
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -32,12 +31,9 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-module: <%= module_name(object) -%>
-
+module: <%= lines(module_name(object)) -%>
 version_added: "<%= @config.manifest.get('version_added', object).to_f -%>"
-
-short_description: <%= object.description -%>
-
+short_description: <%= lines(object.description) -%>
 description:
     - Create, update and delete instance of Azure <%= object.name.titlecase -%>.
 
@@ -71,20 +67,15 @@ author:
     - "<%= @config.manifest.get('author', object) -%>"
 '''
 
-<% if example -%>
+<%  unless object.examples.empty? -%>
+<%    code = object.examples.map{|exref| lines(build_yaml_from_example(get_example_by_reference(exref)))} -%>
 EXAMPLES = '''
-<% res_readable_name = object.name.uncombine -%>
-<% if example.dependencies -%>
-<%   example.dependencies.each do |depend| -%>
-<%= lines(depend.build_test('present', object, false), 1) -%>
-<%   end # example.dependencies.each -%>
-<% end # if example.dependencies -%>
-<%= lines(example.task.build_example('present', object)) -%>
+<%=   lines(indent(code.join("\n"), 2)) -%>
 '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml(output_properties.map{|p| returns_for_property(p)}.reduce({}, :merge)) -%>
+<%= to_yaml(output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)) -%>
 '''
 
 import time

@@ -31,7 +31,7 @@ module Provider
       ensure_resource_properties
       update_overriden_properties(api_resource)
       update_overriden_azure_sdk_definition(api_resource)
-      update_name_property_sort_order(api_resource)
+      update_properties_default_sort_order(api_resource)
 
       # TODO(nelsonjr): Enable revalidate the object to make sure we did not
       # break the object during the override process
@@ -41,6 +41,7 @@ module Provider
     def validate
       super
 
+      @id_default_order = 400
       @name_default_order = 750
       @azure_sdk_language = 'csharp'
 
@@ -102,12 +103,11 @@ module Provider
       end
     end
 
-    def update_name_property_sort_order(api_resource)
-      name_index = api_resource.properties.find_index{|p| p.name == 'name'}
-      unless name_index.nil?
-        name_prop = api_resource.properties[name_index]
-        name_prop.instance_variable_set('@order', @name_default_order)
-      end
+    def update_properties_default_sort_order(api_resource)
+      name = api_resource.all_user_properties.find{|p| p.name == 'name'}
+      name.instance_variable_set('@order', @name_default_order) unless name.nil?
+      id = api_resource.all_user_properties.find{|p| p.name == 'id'}
+      id.instance_variable_set('@order', @id_default_order) unless id.nil?
     end
 
     # Returns the module that provides overriden properties for this provider.

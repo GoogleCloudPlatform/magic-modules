@@ -12,6 +12,10 @@ module Provider
           object.all_user_properties.any?{|p| is_tags?(p)}
         end
 
+        def get_tags_property(object)
+          object.all_user_properties.find{|p| is_tags?(p)}
+        end
+
         def is_location?(property)
           property.is_a? Api::Azure::Type::Location
         end

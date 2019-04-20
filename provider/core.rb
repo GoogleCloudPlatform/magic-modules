@@ -18,6 +18,8 @@ require 'google/logger'
 require 'google/hash_utils'
 require 'pathname'
 
+require 'provider/azure/core'
+
 module Provider
   DEFAULT_FORMAT_OPTIONS = {
     indent: 0,
@@ -30,11 +32,13 @@ module Provider
   # such as compiling and including files, formatting data, etc.
   class Core
     include Compile::Core
+    include Provider::Azure::Core
 
     def initialize(config, api)
       @config = config
       @api = api
       @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
+      @provider = ''
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
