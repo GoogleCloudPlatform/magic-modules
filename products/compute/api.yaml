@@ -4867,7 +4867,7 @@ objects:
           Node type to use for nodes group that are created from this template.
           Only one of nodeTypeFlexibility and nodeType can be specified.
         conflicts:
-          - 'nodeTypeFlexibility'684
+          - 'nodeTypeFlexibility'
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeTypeFlexibility'
         description: |
