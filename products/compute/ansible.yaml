@@ -31,6 +31,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -237,6 +239,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
