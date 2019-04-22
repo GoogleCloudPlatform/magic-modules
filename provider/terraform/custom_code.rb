@@ -87,8 +87,19 @@ module Provider
       # This list corresponds to the `get*FromEnv` methods in provider_test.go.
       attr_reader :test_env_vars
 
-      # the version of the example. Note that _all features_ used in an example
-      # must be set to the example min version.
+      # The version name of of the example's version if it's different than the
+      # resource version, eg. `beta`
+      #
+      # This should be the highest version of all the features used in the
+      # example; if there's a single beta field in an example, the example's
+      # min_version is beta. This is only needed if an example uses features
+      # with a different version than the resource; a beta resource's examples
+      # are all automatically versioned at beta.
+      #
+      # When an example has a version of beta, each resource must use the
+      # `google-beta` provider in the config and a `google-beta` block must be
+      # defined. If the `google` provider is implicitly used, the test will
+      # fail.
       attr_reader :min_version
 
       # Extra properties to ignore read on during import.
