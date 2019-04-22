@@ -202,6 +202,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: connection_draining_timeout_sec
       customRequestHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+      backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
       healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         set_hash_func: 'selfLinkRelativePathHash'
