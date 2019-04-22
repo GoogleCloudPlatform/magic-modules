@@ -5448,7 +5448,7 @@ objects:
           the value of sizeGb must not be less than the size of the sourceImage
           or the size of the snapshot.
         update_verb: :POST
-        update_url: 'projects/{{project}}/region/{{region}}/disks/{{name}}/resize'
+        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/resize'
       - !ruby/object:Api::Type::Array
         name: 'users'
         description: |
