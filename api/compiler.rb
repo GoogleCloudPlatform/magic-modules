@@ -31,16 +31,12 @@ module Api
 
     def run
       # Compile step #1: compile with generic class to instantiate target class
-      source = compile(@catalog)
-      config = Google::YamlValidator.parse(source)
+      config = Google::YamlValidator.parse(File.read(@catalog))
       unless config.class <= Api::Product
         raise StandardError, "#{@catalog} is #{config.class}"\
           ' instead of Api::Product' \
       end
-      # Compile step #2: Now that we have the target class, compile with that
-      # class features
-      source = config.compile(@catalog, 0)
-      Google::YamlValidator.parse(source)
+      config
     end
   end
 end
