@@ -59,7 +59,24 @@ objects:
         'Reserving a Static External IP Address': 'https://cloud.google.com/compute/docs/instances-and-network'
         'Reserving a Static Internal IP Address': 'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/beta/addresses'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -166,7 +183,24 @@ objects:
       guides:
         'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/autoscalers'
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -177,7 +211,196 @@ objects:
         required: true
         input: true
     properties:
-<%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'Unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. The name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoscalingPolicy'
+        description: |
+          The configuration parameters for the autoscaling algorithm. You can
+          define one or more of the policies for an autoscaler: cpuUtilization,
+          customMetricUtilizations, and loadBalancingUtilization.
+
+          If none of these are specified, the default will be to autoscale based
+          on cpuUtilization to 0.6 or 60%.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'minNumReplicas'
+            description: |
+              The minimum number of replicas that the autoscaler can scale down
+              to. This cannot be less than 0. If not provided, autoscaler will
+              choose a default value depending on maximum number of instances
+              allowed.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxNumReplicas'
+            description: |
+              The maximum number of instances that the autoscaler can scale up
+              to. This is required when creating or updating an autoscaler. The
+              maximum number of replicas should not be lower than minimal number
+              of replicas.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'coolDownPeriodSec'
+            description: |
+              The number of seconds that the autoscaler should wait before it
+              starts collecting information from a new instance. This prevents
+              the autoscaler from collecting information when the instance is
+              initializing, during which the collected usage would not be
+              reliable. The default time autoscaler waits is 60 seconds.
+
+              Virtual machine initialization times might vary because of
+              numerous factors. We recommend that you test how long an
+              instance may take to initialize. To do this, create an instance
+              and time the startup process.
+            default_value: 60
+          - !ruby/object:Api::Type::NestedObject
+            name: 'cpuUtilization'
+            description: |
+              Defines the CPU utilization policy that allows the autoscaler to
+              scale based on the average CPU utilization of a managed instance
+              group.
+            properties:
+            - !ruby/object:Api::Type::Double
+              name: 'utilizationTarget'
+              description: |
+                The target CPU utilization that the autoscaler should maintain.
+                Must be a float value in the range (0, 1]. If not specified, the
+                default is 0.6.
+
+                If the CPU level is below the target utilization, the autoscaler
+                scales down the number of instances until it reaches the minimum
+                number of instances you specified or until the average CPU of
+                your instances reaches the target utilization.
+
+                If the average CPU is above the target utilization, the autoscaler
+                scales up until it reaches the maximum number of instances you
+                specified or until the average utilization reaches the target
+                utilization.
+          - !ruby/object:Api::Type::Array
+            name: 'customMetricUtilizations'
+            description: |
+              Defines the CPU utilization policy that allows the autoscaler to
+              scale based on the average CPU utilization of a managed instance
+              group.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'metric'
+                description: |
+                  The identifier (type) of the Stackdriver Monitoring metric.
+                  The metric cannot have negative values.
+
+                  The metric must have a value type of INT64 or DOUBLE.
+                required: true
+              - !ruby/object:Api::Type::Double
+                name: 'singleInstanceAssignment'
+                min_version: beta
+                description: |
+                  If scaling is based on a per-group metric value that represents the
+                  total amount of work to be done or resource usage, set this value to
+                  an amount assigned for a single instance of the scaled group.
+                  The autoscaler will keep the number of instances proportional to the
+                  value of this metric, the metric itself should not change value due
+                  to group resizing.
+
+                  For example, a good metric to use with the target is
+                  `pubsub.googleapis.com/subscription/num_undelivered_messages`
+                  or a custom metric exporting the total number of requests coming to
+                  your instances.
+
+                  A bad example would be a metric exporting an average or median
+                  latency, since this value can't include a chunk assignable to a
+                  single instance, it could be better used with utilization_target
+                  instead.
+              - !ruby/object:Api::Type::Double
+                name: 'utilizationTarget'
+                description: |
+                  The target value of the metric that autoscaler should
+                  maintain. This must be a positive value. A utilization
+                  metric scales number of virtual machines handling requests
+                  to increase or decrease proportionally to the metric.
+
+                  For example, a good metric to use as a utilizationTarget is
+                  www.googleapis.com/compute/instance/network/received_bytes_count.
+                  The autoscaler will work to keep this value constant for each
+                  of the instances.
+              - !ruby/object:Api::Type::Enum
+                name: 'utilizationTargetType'
+                description: |
+                  Defines how target utilization value is expressed for a
+                  Stackdriver Monitoring metric. Either GAUGE, DELTA_PER_SECOND,
+                  or DELTA_PER_MINUTE.
+                values:
+                  - :GAUGE
+                  - :DELTA_PER_SECOND
+                  - :DELTA_PER_MINUTE
+              - !ruby/object:Api::Type::String
+                name: 'filter'
+                description: |
+                  A filter string to be used as the filter string for
+                  a Stackdriver Monitoring TimeSeries.list API call.
+                  This filter is used to select a specific TimeSeries for
+                  the purpose of autoscaling and to determine whether the metric
+                  is exporting per-instance or per-group data.
+
+                  You can only use the AND operator for joining selectors.
+                  You can only use direct equality comparison operator (=) without
+                  any functions for each selector.
+                  You can specify the metric in both the filter string and in the
+                  metric field. However, if specified in both places, the metric must
+                  be identical.
+
+                  The monitored resource type determines what kind of values are
+                  expected for the metric. If it is a gce_instance, the autoscaler
+                  expects the metric to include a separate TimeSeries for each
+                  instance in a group. In such a case, you cannot filter on resource
+                  labels.
+
+                  If the resource type is any other value, the autoscaler expects
+                  this metric to contain values that apply to the entire autoscaled
+                  instance group and resource label filtering can be performed to
+                  point autoscaler at the correct TimeSeries to scale upon.
+                  This is called a per-group metric for the purpose of autoscaling.
+
+                  If not specified, the type defaults to gce_instance.
+
+                  You should provide a filter that is selective enough to pick just
+                  one TimeSeries for the autoscaled group or for each of the instances
+                  (if you are using gce_instance resource type). If multiple
+                  TimeSeries are returned upon the query execution, the autoscaler
+                  will sum their respective values to obtain its scaling value.
+                min_version: beta
+          - !ruby/object:Api::Type::NestedObject
+            name: 'loadBalancingUtilization'
+            description: |
+              Configuration parameters of autoscaling based on a load balancer.
+            properties:
+            - !ruby/object:Api::Type::Double
+              name: 'utilizationTarget'
+              description: |
+                Fraction of backend capacity utilization (set in HTTP(s) load
+                balancing configuration) that autoscaler should maintain. Must
+                be a positive float value. If not defined, the default is 0.8.
       - !ruby/object:Api::Type::ResourceRef
         name: 'target'
         resource: 'InstanceGroupManager'
@@ -840,12 +1063,28 @@ objects:
         'Adding a persistent disk':
           'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
-<%=
-  # Larger disks were timing out at creation. Bumping up to 5 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/703
-  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
-                      'templates/zonal_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+        # Larger disks were timing out at creation. Bumping up to 5 minutes.
+        # https://github.com/terraform-providers/terraform-provider-google/issues/703
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 300 # 5 minutes
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -1029,7 +1268,24 @@ objects:
       outgoing traffic and a default "deny" for incoming traffic. For all
       networks except the default network, you must create any firewall rules
       you need.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
       # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
@@ -1555,7 +1811,24 @@ objects:
           'https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address'
       api: 'https://cloud.google.com/compute/docs/reference/v1/globalAddresses'
     input: true
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'address'
@@ -1677,7 +1950,24 @@ objects:
 
       For more information, see
       https://cloud.google.com/compute/docs/load-balancing/http/
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
 <%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
       - !ruby/object:Api::Type::ResourceRef
@@ -1714,7 +2004,24 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/v1/httpHealthChecks'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1796,7 +2103,24 @@ objects:
       guides:
         'Adding Health Checks': 'https://cloud.google.com/compute/docs/load-balancing/health-checks#legacy_health_checks'
       api: 'https://cloud.google.com/compute/docs/reference/v1/httpsHealthChecks'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -1886,7 +2210,24 @@ objects:
       continue to poll unhealthy instances. If an instance later responds
       successfully to some number of consecutive probes, it is marked
       healthy again and can receive new connections.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'checkIntervalSec'
@@ -2018,7 +2359,24 @@ objects:
       Tip: Disks should be set to autoDelete=true
       so that leftover disks are not left behind on machine deletion.
 <% type = 'InstanceTemplate' -%>
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -2139,7 +2497,24 @@ objects:
       images are available only to your project. You can create a custom image
       from root persistent disks and other images. Then, use the custom image
       to create an instance.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Integer
         name: 'archiveSizeBytes'
@@ -2389,16 +2764,30 @@ objects:
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
 <% type = 'Instance' -%>
-<%=
-  # Users were experiencing timeouts. Bumping up to 6 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/852
-  indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        delete_sec: 6 * 60}},
-                      'templates/zonal_async.yaml.erb'), 4)
-
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+        # Users were experiencing timeouts. Bumping up to 6 minutes.
+        # https://github.com/terraform-providers/terraform-provider-google/issues/852
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360 # 6 minutes
+          update_sec: 360 # 6 minutes
+          delete_sec: 360 # 6 minutes
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -2509,7 +2898,24 @@ objects:
       and can contain identical or different instances. Instance groups do not
       use an instance template. Unlike managed instance groups, you must create
       and add instances to an instance group manually.
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     input: true
     parameters:
       - !ruby/object:Api::Type::ResourceRef
@@ -2612,7 +3018,24 @@ objects:
       verify the status of the individual instances.
 
       A managed instance group can have up to 1000 VM instances per group.
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -2791,7 +3214,24 @@ objects:
     description: |
       Represents an InterconnectAttachment (VLAN attachment) resource. For more
       information, see Creating VLAN Attachments.
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -3064,7 +3504,24 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks'
     description: |
       Manages a VPC network or legacy network resource on GCP.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -3284,7 +3741,24 @@ objects:
       guides:
         'Autoscaling Groups of Instances': 'https://cloud.google.com/compute/docs/autoscaler/'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionAutoscalers'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -3295,7 +3769,196 @@ objects:
         required: true
         input: true
     properties:
-<%= indent(compile('products/compute/autoscaler_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'Unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. The name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'autoscalingPolicy'
+        description: |
+          The configuration parameters for the autoscaling algorithm. You can
+          define one or more of the policies for an autoscaler: cpuUtilization,
+          customMetricUtilizations, and loadBalancingUtilization.
+
+          If none of these are specified, the default will be to autoscale based
+          on cpuUtilization to 0.6 or 60%.
+        required: true
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'minNumReplicas'
+            description: |
+              The minimum number of replicas that the autoscaler can scale down
+              to. This cannot be less than 0. If not provided, autoscaler will
+              choose a default value depending on maximum number of instances
+              allowed.
+          - !ruby/object:Api::Type::Integer
+            name: 'maxNumReplicas'
+            description: |
+              The maximum number of instances that the autoscaler can scale up
+              to. This is required when creating or updating an autoscaler. The
+              maximum number of replicas should not be lower than minimal number
+              of replicas.
+            required: true
+          - !ruby/object:Api::Type::Integer
+            name: 'coolDownPeriodSec'
+            description: |
+              The number of seconds that the autoscaler should wait before it
+              starts collecting information from a new instance. This prevents
+              the autoscaler from collecting information when the instance is
+              initializing, during which the collected usage would not be
+              reliable. The default time autoscaler waits is 60 seconds.
+
+              Virtual machine initialization times might vary because of
+              numerous factors. We recommend that you test how long an
+              instance may take to initialize. To do this, create an instance
+              and time the startup process.
+            default_value: 60
+          - !ruby/object:Api::Type::NestedObject
+            name: 'cpuUtilization'
+            description: |
+              Defines the CPU utilization policy that allows the autoscaler to
+              scale based on the average CPU utilization of a managed instance
+              group.
+            properties:
+            - !ruby/object:Api::Type::Double
+              name: 'utilizationTarget'
+              description: |
+                The target CPU utilization that the autoscaler should maintain.
+                Must be a float value in the range (0, 1]. If not specified, the
+                default is 0.6.
+
+                If the CPU level is below the target utilization, the autoscaler
+                scales down the number of instances until it reaches the minimum
+                number of instances you specified or until the average CPU of
+                your instances reaches the target utilization.
+
+                If the average CPU is above the target utilization, the autoscaler
+                scales up until it reaches the maximum number of instances you
+                specified or until the average utilization reaches the target
+                utilization.
+          - !ruby/object:Api::Type::Array
+            name: 'customMetricUtilizations'
+            description: |
+              Defines the CPU utilization policy that allows the autoscaler to
+              scale based on the average CPU utilization of a managed instance
+              group.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+              - !ruby/object:Api::Type::String
+                name: 'metric'
+                description: |
+                  The identifier (type) of the Stackdriver Monitoring metric.
+                  The metric cannot have negative values.
+
+                  The metric must have a value type of INT64 or DOUBLE.
+                required: true
+              - !ruby/object:Api::Type::Double
+                name: 'singleInstanceAssignment'
+                min_version: beta
+                description: |
+                  If scaling is based on a per-group metric value that represents the
+                  total amount of work to be done or resource usage, set this value to
+                  an amount assigned for a single instance of the scaled group.
+                  The autoscaler will keep the number of instances proportional to the
+                  value of this metric, the metric itself should not change value due
+                  to group resizing.
+
+                  For example, a good metric to use with the target is
+                  `pubsub.googleapis.com/subscription/num_undelivered_messages`
+                  or a custom metric exporting the total number of requests coming to
+                  your instances.
+
+                  A bad example would be a metric exporting an average or median
+                  latency, since this value can't include a chunk assignable to a
+                  single instance, it could be better used with utilization_target
+                  instead.
+              - !ruby/object:Api::Type::Double
+                name: 'utilizationTarget'
+                description: |
+                  The target value of the metric that autoscaler should
+                  maintain. This must be a positive value. A utilization
+                  metric scales number of virtual machines handling requests
+                  to increase or decrease proportionally to the metric.
+
+                  For example, a good metric to use as a utilizationTarget is
+                  www.googleapis.com/compute/instance/network/received_bytes_count.
+                  The autoscaler will work to keep this value constant for each
+                  of the instances.
+              - !ruby/object:Api::Type::Enum
+                name: 'utilizationTargetType'
+                description: |
+                  Defines how target utilization value is expressed for a
+                  Stackdriver Monitoring metric. Either GAUGE, DELTA_PER_SECOND,
+                  or DELTA_PER_MINUTE.
+                values:
+                  - :GAUGE
+                  - :DELTA_PER_SECOND
+                  - :DELTA_PER_MINUTE
+              - !ruby/object:Api::Type::String
+                name: 'filter'
+                description: |
+                  A filter string to be used as the filter string for
+                  a Stackdriver Monitoring TimeSeries.list API call.
+                  This filter is used to select a specific TimeSeries for
+                  the purpose of autoscaling and to determine whether the metric
+                  is exporting per-instance or per-group data.
+
+                  You can only use the AND operator for joining selectors.
+                  You can only use direct equality comparison operator (=) without
+                  any functions for each selector.
+                  You can specify the metric in both the filter string and in the
+                  metric field. However, if specified in both places, the metric must
+                  be identical.
+
+                  The monitored resource type determines what kind of values are
+                  expected for the metric. If it is a gce_instance, the autoscaler
+                  expects the metric to include a separate TimeSeries for each
+                  instance in a group. In such a case, you cannot filter on resource
+                  labels.
+
+                  If the resource type is any other value, the autoscaler expects
+                  this metric to contain values that apply to the entire autoscaled
+                  instance group and resource label filtering can be performed to
+                  point autoscaler at the correct TimeSeries to scale upon.
+                  This is called a per-group metric for the purpose of autoscaling.
+
+                  If not specified, the type defaults to gce_instance.
+
+                  You should provide a filter that is selective enough to pick just
+                  one TimeSeries for the autoscaled group or for each of the instances
+                  (if you are using gce_instance resource type). If multiple
+                  TimeSeries are returned upon the query execution, the autoscaler
+                  will sum their respective values to obtain its scaling value.
+                min_version: beta
+          - !ruby/object:Api::Type::NestedObject
+            name: 'loadBalancingUtilization'
+            description: |
+              Configuration parameters of autoscaling based on a load balancer.
+            properties:
+            - !ruby/object:Api::Type::Double
+              name: 'utilizationTarget'
+              description: |
+                Fraction of backend capacity utilization (set in HTTP(s) load
+                balancing configuration) that autoscaler should maintain. Must
+                be a positive float value. If not defined, the default is 0.8.
       - !ruby/object:Api::Type::String
         name: 'target'
         # TODO(#303): resourceref once RegionIGM exists
@@ -3356,12 +4019,26 @@ objects:
         'Adding or Resizing Regional Persistent Disks':
           'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
-<%=
-  # Larger disks were timing out at creation. Bumping up to 5 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/703
-  indent(compile_file({timeouts: { insert_sec: 5 * 60 }},
-                      'templates/regional_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 300 # 5 minutes
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -3509,7 +4186,24 @@ objects:
           guides:
             'Using Routes': 'https://cloud.google.com/vpc/docs/using-routes'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routes'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'destRange'
@@ -3617,7 +4311,24 @@ objects:
           guides:
             'Google Cloud Router': 'https://cloud.google.com/router/docs/'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/routers'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: region
@@ -3755,14 +4466,28 @@ objects:
     # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
     # operation. we'll leave the object as global operation and use the disk's
     # zonal operation for the create action.
-<%=
-  indent(compile_file({timeouts: {
-                        insert_sec: 5 * 60,
-                        update_sec: 5 * 60,
-                        delete_sec: 5 * 60}},
-                      'templates/global_async.yaml.erb'), 4)
-
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 300 # 5 minutes
+          update_sec: 300 # 5 minutes
+          delete_sec: 300 # 5 minutes
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceDisk'
@@ -3907,7 +4632,24 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing. This resource
       provides a mechanism to upload an SSL key and certificate to
       the load balancer to serve secure connections from the user.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'certificate'
@@ -3962,12 +4704,30 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing.  This resource
       represents a certificate for which the certificate secrets are created and
       managed by Google.
-<%= indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        # Deletes can take 20-30 minutes to complete, since they depend
-                        # on the provisioning process either succeeding or failing completely.
-                        delete_sec: 30 * 60}}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360 # 6 minutes
+          update_sec: 360 # 6 minutes
+          # Deletes can take 20-30 minutes to complete, since they depend
+          # on the provisioning process either succeeding or failing completely.
+          delete_sec: 1800 # 30 minutes
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4039,7 +4799,24 @@ objects:
           guides:
             'Using SSL Policies': 'https://cloud.google.com/compute/docs/load-balancing/ssl-policies'
           api: 'https://cloud.google.com/compute/docs/reference/rest/v1/sslPolicies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4155,15 +4932,30 @@ objects:
       instances in all other subnets of the same VPC network, regardless of
       region, using their RFC1918 private IP addresses. You can isolate portions
       of the network, even entire subnets, using firewall rules.
-<%=
-  # Users were experiencing timeout. Bumping up to 6 minutes.
-  # https://github.com/terraform-providers/terraform-provider-google/issues/718
-  indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        delete_sec: 6 * 60}},
-                      'templates/regional_async.yaml.erb'), 4)
-%>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+        # Users were experiencing timeout. Bumping up to 6 minutes.
+        # https://github.com/terraform-providers/terraform-provider-google/issues/718
+        timeouts: !ruby/object:Api::Timeouts
+          insert_sec: 360 # 6 minutes
+          update_sec: 360 # 6 minutes
+          delete_sec: 360 # 6 minutes
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4296,7 +5088,24 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4346,7 +5155,24 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/target-proxies'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetHttpsProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4438,7 +5264,24 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/compute/docs/load-balancing/network/target-pools'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/targetPools'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -4563,7 +5406,24 @@ objects:
       guides:
         'Setting Up SSL proxy for Google Cloud Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetSslProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4652,7 +5512,24 @@ objects:
         'Setting Up TCP proxy for Google Cloud Load Balancing':
           'https://cloud.google.com/compute/docs/load-balancing/tcp-ssl/tcp-proxy'
       api: 'https://cloud.google.com/compute/docs/reference/v1/targetTcpProxies'
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4711,7 +5588,24 @@ objects:
       by Google, but used only by you.
     references: !ruby/object:Api::Resource::ReferenceLinks
       api: https://cloud.google.com/compute/docs/reference/rest/v1/targetVpnGateways
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -4788,7 +5682,24 @@ objects:
     description: |
       UrlMaps are used to route requests to a backend service based on rules
       that you define for the host and path of an incoming URL.
-<%= indent(compile_file({}, 'templates/global_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4939,7 +5850,24 @@ objects:
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
         'Networks and Tunnel Routing': 'https://cloud.google.com/vpn/docs/concepts/choosing-networks-routing'
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/vpnTunnels'
-<%= indent(compile_file({}, 'templates/regional_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
