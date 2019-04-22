@@ -19,3 +19,7 @@ resource "google_compute_network" "custom-test" {
   auto_create_subnetworks = false
 }
 
+provider "google-beta"{
+  region = "us-central1"
+  zone   = "us-central1-a"
+}
