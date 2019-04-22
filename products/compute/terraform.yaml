@@ -1065,8 +1065,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         input: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      enableFlowLogs: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
       logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
