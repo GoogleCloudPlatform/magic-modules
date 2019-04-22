@@ -672,6 +672,19 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       optional_properties: |
         * `delete_default_routes_on_create`: If set to `true`, default routes (`0.0.0.0/0`) will be deleted
           immediately after network creation. Defaults to `false`.
+  NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_template_basic"
+        primary_resource_id: "template"
+        vars:
+          template_name: "soletenant-tmpl"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+
   Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
   RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
