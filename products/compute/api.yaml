@@ -1028,7 +1028,75 @@ objects:
         description: 'A reference to the zone where the disk type resides.'
         required: true
     properties:
-<%= indent(compile('products/compute/disk_type_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'defaultDiskSizeGb'
+        description: 'Server-defined default disk size in GB.'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'deprecated'
+        description: 'The deprecation status associated with this disk type.'
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: 'deleted'
+            description: |
+              An optional RFC3339 timestamp on or after which the deprecation state
+              of this resource will be changed to DELETED.
+            output: true
+          - !ruby/object:Api::Type::Time
+            name: 'deprecated'
+            description: |
+              An optional RFC3339 timestamp on or after which the deprecation state
+              of this resource will be changed to DEPRECATED.
+            output: true
+          - !ruby/object:Api::Type::Time
+            name: 'obsolete'
+            description: |
+              An optional RFC3339 timestamp on or after which the deprecation state
+              of this resource will be changed to OBSOLETE.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'replacement'
+            description: |
+              The URL of the suggested replacement for a deprecated resource. The
+              suggested replacement resource must be the same kind of resource as
+              the deprecated resource.
+            output: true
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: |
+              The deprecation state of this resource. This can be DEPRECATED,
+              OBSOLETE, or DELETED. Operations which create a new resource using a
+              DEPRECATED resource will return successfully, but with a warning
+              indicating the deprecated resource and recommending its replacement.
+              Operations which use OBSOLETE or DELETED resources will be rejected
+              and result in an error.
+            values:
+              - :DEPRECATED
+              - :OBSOLETE
+              - :DELETED
+            output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'validDiskSize'
+        description: |
+          An optional textual description of the valid disk size, such as
+          "10GB-10TB".
+        output: true
   - !ruby/object:Api::Resource
     name: 'Disk'
     # TODO(nelsonjr): Implement disk special actions as defined in the API:
@@ -1204,9 +1272,88 @@ objects:
           used.
         output: true
     properties:
-<%=
-  indent(compile_file({location: 'zone'}, 'products/compute/disks.yaml'), 6)
-%>
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
+        update_verb: :POST
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'lastAttachTimestamp'
+        description: 'Last attach timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'lastDetachTimestamp'
+        description: 'Last dettach timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels to apply to this disk.  A list of key->value pairs.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Array
+        name: 'licenses'
+        description: 'Any applicable publicly visible licenses.'
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'sizeGb'
+        description: |
+          Size of the persistent disk, specified in GB. You can specify this
+          field when creating a persistent disk using the sourceImage or
+          sourceSnapshot parameter, or specify it alone to create an empty
+          persistent disk.
+
+          If you specify this field along with sourceImage or sourceSnapshot,
+          the value of sizeGb must not be less than the size of the sourceImage
+          or the size of the snapshot.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}/resize'
+      - !ruby/object:Api::Type::Array
+        name: 'users'
+        description: |
+          Links to the users of the disk (attached instances) in form:
+          project/zones/zone/instances/instance
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'user'
+          resource: 'Instance'
+          imports: 'selfLink'
+          description: 'A reference to a user of this disk'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'physicalBlockSizeBytes'
+        description: |
+          Physical block size of the persistent disk, in bytes. If not present
+          in a request, a default value is used. Currently supported sizes
+          are 4096 and 16384, other sizes may be added in the future.
+          If an unsupported value is requested, the error message will list
+          the supported values for the caller's project.
       - !ruby/object:Api::Type::ResourceRef
         name: 'type'
         resource: 'DiskType'
@@ -1969,7 +2116,178 @@ objects:
         path: 'error/errors'
         message: 'message'
     properties:
-<%= indent(compile('products/compute/forwarding_rule_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      # This is a multi-resource resource reference (Address, GlobalAddress)
+      - !ruby/object:Api::Type::String
+        name: 'IPAddress'
+        description: |
+          The IP address that this forwarding rule is serving on behalf of.
+
+          Addresses are restricted based on the forwarding rule's load balancing
+          scheme (EXTERNAL or INTERNAL) and scope (global or regional).
+
+          When the load balancing scheme is EXTERNAL, for global forwarding
+          rules, the address must be a global IP, and for regional forwarding
+          rules, the address must live in the same region as the forwarding
+          rule. If this field is empty, an ephemeral IPv4 address from the same
+          scope (global or regional) will be assigned. A regional forwarding
+          rule supports IPv4 only. A global forwarding rule supports either IPv4
+          or IPv6.
+
+          When the load balancing scheme is INTERNAL, this can only be an RFC
+          1918 IP address belonging to the network/subnet configured for the
+          forwarding rule. By default, if this field is empty, an ephemeral
+          internal IP address will be automatically allocated from the IP range
+          of the subnet or network configured for this forwarding rule.
+
+          An address can be specified either by a literal IP address or a URL
+          reference to an existing Address resource. The following examples are
+          all valid:
+
+          * 100.1.2.3
+          * https://www.googleapis.com/compute/v1/projects/project/regions/
+               region/addresses/address
+          * projects/project/regions/region/addresses/address
+          * regions/region/addresses/address
+          * global/addresses/address
+          * address
+      - !ruby/object:Api::Type::Enum
+        name: 'IPProtocol'
+        description: |
+          The IP protocol to which this rule applies. Valid options are TCP,
+          UDP, ESP, AH, SCTP or ICMP.
+
+          When the load balancing scheme is INTERNAL, only TCP and UDP are
+          valid.
+        values:
+          - :TCP
+          - :UDP
+          - :ESP
+          - :AH
+          - :SCTP
+          - :ICMP
+      - !ruby/object:Api::Type::ResourceRef
+        # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/200)
+        # After adding the RegionBackendService resource, move this field out
+        # of the common fields for forwarding rules. This field should refer
+        # to a RegionBackendService for a ForwardingRule and to a BackendService
+        # for a GlobalForwardingRule.
+        name: 'backendService'
+        resource: 'BackendService'
+        imports: 'selfLink'
+        description: |
+          A reference to a BackendService to receive the matched traffic.
+
+          This is used for internal load balancing.
+          (not used for external load balancing)
+      - !ruby/object:Api::Type::Enum
+        name: 'ipVersion'
+        description: |
+          The IP Version that will be used by this forwarding rule. Valid
+          options are IPV4 or IPV6. This can only be specified for a global
+          forwarding rule.
+        values:
+          - :IPV4
+          - :IPV6
+      - !ruby/object:Api::Type::Enum
+        name: 'loadBalancingScheme'
+        description: |
+          This signifies what the ForwardingRule will be used for and can only
+          take the following values: INTERNAL, EXTERNAL The value of INTERNAL
+          means that this will be used for Internal Network Load Balancing (TCP,
+          UDP). The value of EXTERNAL means that this will be used for External
+          Load Balancing (HTTP(S) LB, External TCP/UDP LB, SSL Proxy)
+        values:
+          - :INTERNAL
+          - :EXTERNAL
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource; provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          For internal load balancing, this field identifies the network that
+          the load balanced IP should belong to for this Forwarding Rule. If
+          this field is not specified, the default network will be used.
+
+          This field is not used for external load balancing.
+      # TODO(nelsonjr): When implementing new types enable convering the
+      # manifest input from a single value to a range of form NN-NN. The API
+      # accepts a single value, e.g. '80', but the API stores and returns
+      # '80-80'. This causes idempotency false positive.
+      - !ruby/object:Api::Type::String
+        name: 'portRange'
+        description: |
+          This field is used along with the target field for TargetHttpProxy,
+          TargetHttpsProxy, TargetSslProxy, TargetTcpProxy, TargetVpnGateway,
+          TargetPool, TargetInstance.
+
+          Applicable only when IPProtocol is TCP, UDP, or SCTP, only packets
+          addressed to ports in the specified range will be forwarded to target.
+          Forwarding rules with the same [IPAddress, IPProtocol] pair must have
+          disjoint port ranges.
+
+          Some types of forwarding target have constraints on the acceptable
+          ports:
+
+          * TargetHttpProxy: 80, 8080
+          * TargetHttpsProxy: 443
+          * TargetTcpProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
+                            1883, 5222
+          * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
+                            1883, 5222
+          * TargetVpnGateway: 500, 4500
+      - !ruby/object:Api::Type::Array
+        name: 'ports'
+        max_size: 5
+        description: |
+          This field is used along with the backend_service field for internal
+          load balancing.
+
+          When the load balancing scheme is INTERNAL, a single port or a comma
+          separated list of ports can be configured. Only packets addressed to
+          these ports will be forwarded to the backends configured with this
+          forwarding rule.
+
+          You may specify a maximum of up to 5 ports.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'subnetwork'
+        resource: 'Subnetwork'
+        imports: 'selfLink'
+        description: |
+          A reference to a subnetwork.
+
+          For internal load balancing, this field identifies the subnetwork that
+          the load balanced IP should belong to for this Forwarding Rule.
+
+          If the network specified is in auto subnet mode, this field is
+          optional. However, if the network is in custom subnet mode, a
+          subnetwork must be specified.
+
+          This field is not used for external load balancing.
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
         resource: 'Region'
@@ -2300,11 +2618,43 @@ objects:
           - tcpHealthCheck
           - sslHealthCheck
         properties:
-<%=
-  protocol = 'HTTP'
-  port = 80
-  indent(compile('products/compute/healthcheck_protocol_props.yaml.erb'), 12)
-%>
+            - !ruby/object:Api::Type::String
+              name: 'host'
+              description: |
+                The value of the host header in the HTTP health check request.
+                If left empty (default value), the public IP on behalf of which this health
+                check is performed will be used.
+            - !ruby/object:Api::Type::String
+              name: 'requestPath'
+              description: |
+                The request path of the HTTP health check request.
+                The default value is /.
+              default_value: "/"
+            - !ruby/object:Api::Type::String
+              name: 'response'
+              description: |
+                The bytes to match against the beginning of the response data. If left empty
+                (the default value), any response will indicate health. The response data
+                can only be ASCII.
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description: |
+                The TCP port number for the HTTP health check request.
+                The default value is 80.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'proxyHeader'
+              description: |
+                Specifies the type of proxy header to append before sending data to the
+                backend, either NONE or PROXY_V1. The default is NONE.
+              values:
+                - :NONE
+                - :PROXY_V1
+              default_value: :NONE
       - !ruby/object:Api::Type::NestedObject
         name: 'httpsHealthCheck'
         conflicts:
@@ -2312,11 +2662,43 @@ objects:
           - tcpHealthCheck
           - sslHealthCheck
         properties:
-<%=
-  protocol = 'HTTPS'
-  port = 443
-  indent(compile('products/compute/healthcheck_protocol_props.yaml.erb'), 12)
-%>
+            - !ruby/object:Api::Type::String
+              name: 'host'
+              description: |
+                The value of the host header in the HTTPS health check request.
+                If left empty (default value), the public IP on behalf of which this health
+                check is performed will be used.
+            - !ruby/object:Api::Type::String
+              name: 'requestPath'
+              description: |
+                The request path of the HTTPS health check request.
+                The default value is /.
+              default_value: "/"
+            - !ruby/object:Api::Type::String
+              name: 'response'
+              description: |
+                The bytes to match against the beginning of the response data. If left empty
+                (the default value), any response will indicate health. The response data
+                can only be ASCII.
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description: |
+                The TCP port number for the HTTPS health check request.
+                The default value is 443.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'proxyHeader'
+              description: |
+                Specifies the type of proxy header to append before sending data to the
+                backend, either NONE or PROXY_V1. The default is NONE.
+              values:
+                - :NONE
+                - :PROXY_V1
+              default_value: :NONE
       - !ruby/object:Api::Type::NestedObject
         name: 'tcpHealthCheck'
         conflicts:
@@ -2324,10 +2706,38 @@ objects:
           - httpsHealthCheck
           - sslHealthCheck
         properties:
-<%=
-  protocol = 'TCP'
-  indent(compile('products/compute/healthcheck_protocol_props.yaml.erb'), 12)
-%>
+            - !ruby/object:Api::Type::String
+              name: 'request'
+              description: |
+                The application data to send once the TCP connection has been
+                established (default value is empty). If both request and response are
+                empty, the connection establishment alone will indicate health. The request
+                data can only be ASCII.
+            - !ruby/object:Api::Type::String
+              name: 'response'
+              description: |
+                The bytes to match against the beginning of the response data. If left empty
+                (the default value), any response will indicate health. The response data
+                can only be ASCII.
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description: |
+                The TCP port number for the TCP health check request.
+                The default value is 443.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'proxyHeader'
+              description: |
+                Specifies the type of proxy header to append before sending data to the
+                backend, either NONE or PROXY_V1. The default is NONE.
+              values:
+                - :NONE
+                - :PROXY_V1
+              default_value: :NONE
       - !ruby/object:Api::Type::NestedObject
         name: 'sslHealthCheck'
         conflicts:
@@ -2335,10 +2745,38 @@ objects:
           - httpsHealthCheck
           - tcpHealthCheck
         properties:
-<%=
-  protocol = 'SSL'
-  indent(compile('products/compute/healthcheck_protocol_props.yaml.erb'), 12)
-%>
+            - !ruby/object:Api::Type::String
+              name: 'request'
+              description: |
+                The application data to send once the SSL connection has been
+                established (default value is empty). If both request and response are
+                empty, the connection establishment alone will indicate health. The request
+                data can only be ASCII.
+            - !ruby/object:Api::Type::String
+              name: 'response'
+              description: |
+                The bytes to match against the beginning of the response data. If left empty
+                (the default value), any response will indicate health. The response data
+                can only be ASCII.
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              description: |
+                The TCP port number for the SSL health check request.
+                The default value is 443.
+            - !ruby/object:Api::Type::String
+              name: 'portName'
+              description: |
+                Port name as defined in InstanceGroup#NamedPort#name. If both port and
+                port_name are defined, port takes precedence.
+            - !ruby/object:Api::Type::Enum
+              name: 'proxyHeader'
+              description: |
+                Specifies the type of proxy header to append before sending data to the
+                backend, either NONE or PROXY_V1. The default is NONE.
+              values:
+                - :NONE
+                - :PROXY_V1
+              default_value: :NONE
   - !ruby/object:Api::Resource
     name: 'InstanceTemplate'
     kind: 'compute#instanceTemplate'
@@ -2358,7 +2796,6 @@ objects:
 
       Tip: Disks should be set to autoDelete=true
       so that leftover disks are not left behind on machine deletion.
-<% type = 'InstanceTemplate' -%>
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -2417,7 +2854,174 @@ objects:
             description: |
               An optional text description for the instances that are created
               from this instance template.
-<%= indent(compile('products/compute/instance_disks.yaml'), 10) %>
+          - !ruby/object:Api::Type::Array
+            name: 'disks'
+            description: |
+              An array of disks that are associated with the instances that are
+              created from this template.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Boolean
+                  name: 'autoDelete'
+                  description: |
+                    Specifies whether the disk will be auto-deleted when the
+                    instance is deleted (but not when the disk is detached from
+                    the instance).
+
+                    Tip: Disks should be set to autoDelete=true
+                    so that leftover disks are not left behind on machine
+                    deletion.
+                - !ruby/object:Api::Type::Boolean
+                  name: 'boot'
+                  description: |
+                    Indicates that this is a boot disk. The virtual machine will
+                    use the first partition of the disk for its root filesystem.
+                - !ruby/object:Api::Type::String
+                  name: 'deviceName'
+                  description: |
+                    Specifies a unique device name of your choice that is
+                    reflected into the /dev/disk/by-id/google-* tree of a Linux
+                    operating system running within the instance. This name can
+                    be used to reference the device for mounting, resizing, and
+                    so on, from within the instance.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'diskEncryptionKey'
+                  description: |
+                    Encrypts or decrypts a disk using a customer-supplied
+                    encryption key.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'rawKey'
+                      description: |
+                        Specifies a 256-bit customer-supplied encryption key,
+                        encoded in RFC 4648 base64 to either encrypt or decrypt
+                        this resource.
+                    - !ruby/object:Api::Type::String
+                      name: 'rsaEncryptedKey'
+                      description: |
+                        Specifies an RFC 4648 base64 encoded, RSA-wrapped
+                        2048-bit customer-supplied encryption key to either
+                        encrypt or decrypt this resource.
+                    - !ruby/object:Api::Type::String
+                      name: 'sha256'
+                      description: |
+                        The RFC 4648 base64 encoded SHA-256 hash of the
+                        customer-supplied encryption key that protects this
+                        resource.
+                      output: true
+                - !ruby/object:Api::Type::Integer
+                  name: 'index'
+                  description: |
+                    Assigns a zero-based index to this disk, where 0 is
+                    reserved for the boot disk. For example, if you have many
+                    disks attached to an instance, each disk would have a
+                    unique index number. If not specified, the server will
+                    choose an appropriate value.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'initializeParams'
+                  description: |
+                    Specifies the parameters for a new disk that will be
+                    created alongside the new instance. Use initialization
+                    parameters to create boot disks or local SSDs attached to
+                    the new instance.
+                  input: true
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'diskName'
+                      description: |
+                        Specifies the disk name. If not specified, the default
+                        is to use the name of the instance.
+                    - !ruby/object:Api::Type::Integer
+                      name: 'diskSizeGb'
+                      description: Specifies the size of the disk in base-2 GB.
+                    # diskStorageType - deprecated
+                    - !ruby/object:Api::Type::ResourceRef
+                      name: 'diskType'
+                      description: |
+                        Reference to a disk type.
+                        Specifies the disk type to use to create the instance.
+                        If not specified, the default is pd-standard.
+                      resource: 'DiskType'
+                      imports: 'selfLink'
+                    - !ruby/object:Api::Type::String
+                      name: 'sourceImage'
+                      description: |
+                        The source image to create this disk. When creating a
+                        new instance, one of initializeParams.sourceImage or
+                        disks.source is required.  To create a disk with one of
+                        the public operating system images, specify the image
+                        by its family name.
+                    - !ruby/object:Api::Type::NestedObject
+                      name: 'sourceImageEncryptionKey'
+                      description: |
+                        The customer-supplied encryption key of the source
+                        image. Required if the source image is protected by a
+                        customer-supplied encryption key.
+
+                        Instance templates do not store customer-supplied
+                        encryption keys, so you cannot create disks for
+                        instances in a managed instance group if the source
+                        images are encrypted with your own keys.
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'rawKey'
+                          description: |
+                            Specifies a 256-bit customer-supplied encryption
+                            key, encoded in RFC 4648 base64 to either encrypt
+                            or decrypt this resource.
+                        - !ruby/object:Api::Type::String
+                          name: 'sha256'
+                          description: |
+                            The RFC 4648 base64 encoded SHA-256 hash of the
+                            customer-supplied encryption key that protects this
+                            resource.
+                          output: true
+                - !ruby/object:Api::Type::Enum
+                  name: 'interface'
+                  description: |
+                    Specifies the disk interface to use for attaching this
+                    disk, which is either SCSI or NVME. The default is SCSI.
+                    Persistent disks must always use SCSI and the request will
+                    fail if you attempt to attach a persistent disk in any
+                    other format than SCSI.
+                  values:
+                    - :SCSI
+                    - :NVME
+              # Ignoring kind - It's a constant and we don't need it.
+              # TODO(alexstephen): Place in licenses - it's a Array of
+              # ResourceRefs
+                - !ruby/object:Api::Type::Enum
+                  name: 'mode'
+                  description: |
+                    The mode in which to attach this disk, either READ_WRITE or
+                    READ_ONLY. If not specified, the default is to attach the
+                    disk in READ_WRITE mode.
+                  values:
+                    - :READ_WRITE
+                    - :READ_ONLY
+                # This is the name, not selfLink of a disk.
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'source'
+                  resource: 'Disk'
+                  imports: 'name'
+                  description: |
+                    Reference to a disk. When creating a new instance,
+                    one of initializeParams.sourceImage or disks.source is required.
+
+                    If desired, you can also attach existing non-root
+                    persistent disks using this property. This field is only
+                    applicable for persistent disks.
+
+                    Note that for InstanceTemplate, specify the disk name, not
+                    the URL for the disk.
+                - !ruby/object:Api::Type::Enum
+                  name: 'type'
+                  description: |
+                    Specifies the type of the disk, either SCRATCH or
+                    PERSISTENT. If not specified, the default is PERSISTENT.
+                  values:
+                    - :SCRATCH
+                    - :PERSISTENT
           # This machineType seems to be the shortname.
           # This is because machineType selfLinks are zone specific.
           - !ruby/object:Api::Type::ResourceRef
@@ -2433,14 +3037,225 @@ objects:
             description: |
               Specifies a minimum CPU platform for the VM instance. Applicable
               values are the friendly names of CPU platforms
-<%= indent(compile('products/compute/instance_metadata.yaml'), 10) %>
-<%= indent(compile('products/compute/instance_guestaccelerators.yaml'), 10) %>
-<%=
-  indent(compile('products/compute/instance_networkinterfaces.yaml'), 10)
-%>
-<%= indent(compile('products/compute/instance_scheduling.yaml'), 10) %>
-<%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 10) %>
-<%= indent(compile('products/compute/instance_tags.yaml'), 10) %>
+          # TODO(nelsonjr): Implement updating metadata *after* resource is created.
+
+          # Expose instance 'metadata' as a simple name/value pair hash. However the API
+          # defines metadata as a NestedObject with the following layout:
+          #
+          # metadata {
+          #   fingerprint: 'hash-of-last-metadata'
+          #   items: [
+          #     {
+          #       key: 'metadata1-key'
+          #       value: 'metadata1-value'
+          #     },
+          #     ...
+          #   ]
+          # }
+          #
+          # Fingerpint is an optimistic locking mechanism for updates, which requires
+          # adding the 'fingerprint' of the last metadata to allow update.
+          #
+          # To comply with the API please add an encoder: and decoder: to the provider.
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'metadata'
+            description: |
+              The metadata key/value pairs to assign to instances that are
+              created from this template. These pairs can consist of custom
+              metadata or predefined keys.
+          - !ruby/object:Api::Type::Array
+            name: 'guestAccelerators'
+            description: |
+              List of the type and count of accelerator cards attached to the
+              instance
+            item_type: !ruby/object:Api::Type::NestedObject
+               properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'acceleratorCount'
+                  description: |
+                    The number of the guest accelerator cards exposed to this
+                    instance.
+                # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+                # created.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: |
+                    Full or partial URL of the accelerator type resource to expose
+                    to this instance.
+          - !ruby/object:Api::Type::Array
+            name: 'networkInterfaces'
+            description: |
+              An array of configurations for this interface. This specifies
+              how this interface is configured to interact with other
+              network services, such as connecting to the internet. Only
+              one network interface is supported per instance.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Array
+                 name: 'accessConfigs'
+                 description: |
+                   An array of configurations for this interface. Currently, only
+                   one access config, ONE_TO_ONE_NAT, is supported. If there are no
+                   accessConfigs specified, then this instance will have no
+                   external internet access.
+                 item_type: !ruby/object:Api::Type::NestedObject
+                   properties:
+                     # 'kind' is not needed for object convergence
+                     - !ruby/object:Api::Type::String
+                       name: 'name'
+                       description: |
+                         The name of this access configuration. The
+                         default and recommended name is External NAT but you can
+                         use any arbitrary string you would like. For example, My
+                         external IP or Network Access.
+                       required: true
+                     - !ruby/object:Api::Type::ResourceRef
+                       name: 'natIP'
+                       resource: 'Address'
+                       imports: 'address'
+                       description: |
+                         Reference to an address.
+                         An external IP address associated with this instance.
+                         Specify an unused static external IP address available to
+                         the project or leave this field undefined to use an IP
+                         from a shared ephemeral IP address pool. If you specify a
+                         static external IP address, it must live in the same
+                         region as the zone of the instance.
+                     - !ruby/object:Api::Type::Enum
+                       name: 'type'
+                       description: |
+                         The type of configuration. The default and only option is
+                         ONE_TO_ONE_NAT.
+                       values:
+                         - :ONE_TO_ONE_NAT
+                       required: true
+                - !ruby/object:Api::Type::Array
+                  name: 'aliasIpRanges'
+                  description: |
+                    An array of alias IP ranges for this network interface. Can
+                    only be specified for network interfaces on subnet-mode
+                    networks.
+                  item_type: !ruby/object:Api::Type::NestedObject
+                    properties:
+                      - !ruby/object:Api::Type::String
+                        name: 'ipCidrRange'
+                        description: |
+                          The IP CIDR range represented by this alias IP range.
+                          This IP CIDR range must belong to the specified
+                          subnetwork and cannot contain IP addresses reserved by
+                          system or used by other network interfaces. This range
+                          may be a single IP address (e.g. 10.2.3.4), a netmask
+                          (e.g. /24) or a CIDR format string (e.g. 10.1.2.0/24).
+                      - !ruby/object:Api::Type::String
+                        name: 'subnetworkRangeName'
+                        description: |
+                          Optional subnetwork secondary range name specifying
+                          the secondary range from which to allocate the IP
+                          CIDR range for this alias IP range. If left
+                          unspecified, the primary range of the subnetwork will
+                          be used.
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: |
+                    The name of the network interface, generated by the
+                    server. For network devices, these are eth0, eth1, etc
+                  output: true
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'network'
+                  resource: 'Network'
+                  imports: 'selfLink'
+                  description: |
+                    Specifies the title of an existing network.  When creating
+                    an instance, if neither the network nor the subnetwork is specified,
+                    the default network global/networks/default is used; if the network
+                    is not specified but the subnetwork is specified, the network is
+                    inferred.
+                - !ruby/object:Api::Type::String
+                  name: 'networkIP'
+                  description: |
+                    An IPv4 internal network address to assign to the
+                    instance for this network interface. If not specified
+                    by the user, an unused internal IP is assigned by the
+                    system.
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'subnetwork'
+                  resource: 'Subnetwork'
+                  imports: 'selfLink'
+                  description: |
+                    Reference to a VPC network.
+                    If the network resource is in legacy mode, do not
+                    provide this property.  If the network is in auto
+                    subnet mode, providing the subnetwork is optional. If
+                    the network is in custom subnet mode, then this field
+                    should be specified.
+                # networkInterfaces.kind is not necessary for convergence.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'scheduling'
+            description: Sets the scheduling options for this instance.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'automaticRestart'
+                description: |
+                  Specifies whether the instance should be automatically restarted
+                  if it is terminated by Compute Engine (not terminated by a user).
+                  You can only set the automatic restart option for standard
+                  instances. Preemptible instances cannot be automatically
+                  restarted.
+              - !ruby/object:Api::Type::String
+                name: 'onHostMaintenance'
+                description: |
+                  Defines the maintenance behavior for this instance. For standard
+                  instances, the default behavior is MIGRATE. For preemptible
+                  instances, the default and only possible behavior is TERMINATE.
+                  For more information, see Setting Instance Scheduling Options.
+              - !ruby/object:Api::Type::Boolean
+                name: 'preemptible'
+                description: |
+                  Defines whether the instance is preemptible. This can only be set
+                  during instance creation, it cannot be set or changed after the
+                  instance has been created.
+          - !ruby/object:Api::Type::Array
+            name: 'serviceAccounts'
+            description: |
+              A list of service accounts, with their specified scopes, authorized
+              for this instance. Only one service account per VM instance is
+              supported.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'email'
+                  description: Email address of the service account.
+                - !ruby/object:Api::Type::Array
+                  name: scopes
+                  description: |
+                    The list of scopes to be made available for this service
+                    account.
+                  item_type: Api::Type::String
+          - !ruby/object:Api::Type::NestedObject
+            name: 'tags'
+            description: |
+              A list of tags to apply to this instance. Tags are used to identify
+              valid sources or targets for network firewalls and are specified by
+              the client during instance creation. The tags can be later modified
+              by the setTags method. Each tag within the list must comply with
+              RFC1035.
+            properties:
+              # TODO(alexstephen) Investigate bytes type
+              - !ruby/object:Api::Type::String
+                name: 'fingerprint'
+                description: |
+                  Specifies a fingerprint for this request, which is essentially a
+                  hash of the metadata's contents and used for optimistic locking.
+                  The fingerprint is initially generated by Compute Engine and
+                  changes after every request to modify or update metadata. You
+                  must always provide an up-to-date fingerprint hash in order to
+                  update or change metadata.
+              - !ruby/object:Api::Type::Array
+                name: 'items'
+                description: |
+                  An array of tags. Each tag must be 1-63 characters long, and
+                  comply with RFC1035.
+                item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'License'
     kind: 'compute#license'
@@ -2763,7 +3578,6 @@ objects:
     has_self_link: true
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
-<% type = 'Instance' -%>
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -2810,8 +3624,191 @@ objects:
         name: 'creationTimestamp'
         description: Creation timestamp in RFC3339 text format.
         output: true
-<%= indent(compile('products/compute/instance_disks.yaml'), 6) %>
-<%= indent(compile('products/compute/instance_guestaccelerators.yaml'), 6) %>
+      - !ruby/object:Api::Type::Array
+        name: 'disks'
+        description: |
+          An array of disks that are associated with the instances that are
+          created from this template.
+        input: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Boolean
+              name: 'autoDelete'
+              description: |
+                Specifies whether the disk will be auto-deleted when the
+                instance is deleted (but not when the disk is detached from
+                the instance).
+
+                Tip: Disks should be set to autoDelete=true
+                so that leftover disks are not left behind on machine
+                deletion.
+            - !ruby/object:Api::Type::Boolean
+              name: 'boot'
+              description: |
+                Indicates that this is a boot disk. The virtual machine will
+                use the first partition of the disk for its root filesystem.
+            - !ruby/object:Api::Type::String
+              name: 'deviceName'
+              description: |
+                Specifies a unique device name of your choice that is
+                reflected into the /dev/disk/by-id/google-* tree of a Linux
+                operating system running within the instance. This name can
+                be used to reference the device for mounting, resizing, and
+                so on, from within the instance.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'diskEncryptionKey'
+              description: |
+                Encrypts or decrypts a disk using a customer-supplied
+                encryption key.
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'rawKey'
+                  description: |
+                    Specifies a 256-bit customer-supplied encryption key,
+                    encoded in RFC 4648 base64 to either encrypt or decrypt
+                    this resource.
+                - !ruby/object:Api::Type::String
+                  name: 'rsaEncryptedKey'
+                  description: |
+                    Specifies an RFC 4648 base64 encoded, RSA-wrapped
+                    2048-bit customer-supplied encryption key to either
+                    encrypt or decrypt this resource.
+                - !ruby/object:Api::Type::String
+                  name: 'sha256'
+                  description: |
+                    The RFC 4648 base64 encoded SHA-256 hash of the
+                    customer-supplied encryption key that protects this
+                    resource.
+                  output: true
+            - !ruby/object:Api::Type::Integer
+              name: 'index'
+              description: |
+                Assigns a zero-based index to this disk, where 0 is
+                reserved for the boot disk. For example, if you have many
+                disks attached to an instance, each disk would have a
+                unique index number. If not specified, the server will
+                choose an appropriate value.
+            - !ruby/object:Api::Type::NestedObject
+              name: 'initializeParams'
+              description: |
+                Specifies the parameters for a new disk that will be
+                created alongside the new instance. Use initialization
+                parameters to create boot disks or local SSDs attached to
+                the new instance.
+              input: true
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'diskName'
+                  description: |
+                    Specifies the disk name. If not specified, the default
+                    is to use the name of the instance.
+                - !ruby/object:Api::Type::Integer
+                  name: 'diskSizeGb'
+                  description: Specifies the size of the disk in base-2 GB.
+                # diskStorageType - deprecated
+                - !ruby/object:Api::Type::ResourceRef
+                  name: 'diskType'
+                  description: |
+                    Reference to a disk type.
+                    Specifies the disk type to use to create the instance.
+                    If not specified, the default is pd-standard.
+                  resource: 'DiskType'
+                  imports: 'selfLink'
+                - !ruby/object:Api::Type::String
+                  name: 'sourceImage'
+                  description: |
+                    The source image to create this disk. When creating a
+                    new instance, one of initializeParams.sourceImage or
+                    disks.source is required.  To create a disk with one of
+                    the public operating system images, specify the image
+                    by its family name.
+                - !ruby/object:Api::Type::NestedObject
+                  name: 'sourceImageEncryptionKey'
+                  description: |
+                    The customer-supplied encryption key of the source
+                    image. Required if the source image is protected by a
+                    customer-supplied encryption key.
+
+                    Instance templates do not store customer-supplied
+                    encryption keys, so you cannot create disks for
+                    instances in a managed instance group if the source
+                    images are encrypted with your own keys.
+                  properties:
+                    - !ruby/object:Api::Type::String
+                      name: 'rawKey'
+                      description: |
+                        Specifies a 256-bit customer-supplied encryption
+                        key, encoded in RFC 4648 base64 to either encrypt
+                        or decrypt this resource.
+                    - !ruby/object:Api::Type::String
+                      name: 'sha256'
+                      description: |
+                        The RFC 4648 base64 encoded SHA-256 hash of the
+                        customer-supplied encryption key that protects this
+                        resource.
+                      output: true
+            - !ruby/object:Api::Type::Enum
+              name: 'interface'
+              description: |
+                Specifies the disk interface to use for attaching this
+                disk, which is either SCSI or NVME. The default is SCSI.
+                Persistent disks must always use SCSI and the request will
+                fail if you attempt to attach a persistent disk in any
+                other format than SCSI.
+              values:
+                - :SCSI
+                - :NVME
+          # Ignoring kind - It's a constant and we don't need it.
+          # TODO(alexstephen): Place in licenses - it's a Array of
+          # ResourceRefs
+            - !ruby/object:Api::Type::Enum
+              name: 'mode'
+              description: |
+                The mode in which to attach this disk, either READ_WRITE or
+                READ_ONLY. If not specified, the default is to attach the
+                disk in READ_WRITE mode.
+              values:
+                - :READ_WRITE
+                - :READ_ONLY
+            # This is the name, not selfLink of a disk.
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'source'
+              resource: 'Disk'
+              imports: 'selfLink'
+              description: |
+                Reference to a disk. When creating a new instance,
+                one of initializeParams.sourceImage or disks.source is required.
+
+                If desired, you can also attach existing non-root
+                persistent disks using this property. This field is only
+                applicable for persistent disks.
+            - !ruby/object:Api::Type::Enum
+              name: 'type'
+              description: |
+                Specifies the type of the disk, either SCRATCH or
+                PERSISTENT. If not specified, the default is PERSISTENT.
+              values:
+                - :SCRATCH
+                - :PERSISTENT
+      - !ruby/object:Api::Type::Array
+        name: 'guestAccelerators'
+        description: |
+          List of the type and count of accelerator cards attached to the
+          instance
+        item_type: !ruby/object:Api::Type::NestedObject
+           properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'acceleratorCount'
+              description: |
+                The number of the guest accelerator cards exposed to this
+                instance.
+            # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+            # created.
+            - !ruby/object:Api::Type::String
+              name: 'acceleratorType'
+              description: |
+                Full or partial URL of the accelerator type resource to expose
+                to this instance.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
@@ -2828,7 +3825,32 @@ objects:
           is initially generated by Compute Engine and changes after every
           request to modify or update metadata. You must always provide an
           up-to-date fingerprint hash in order to update or change metadata.
-<%= indent(compile('products/compute/instance_metadata.yaml'), 6) %>
+      # TODO(nelsonjr): Implement updating metadata *after* resource is created.
+
+      # Expose instance 'metadata' as a simple name/value pair hash. However the API
+      # defines metadata as a NestedObject with the following layout:
+      #
+      # metadata {
+      #   fingerprint: 'hash-of-last-metadata'
+      #   items: [
+      #     {
+      #       key: 'metadata1-key'
+      #       value: 'metadata1-value'
+      #     },
+      #     ...
+      #   ]
+      # }
+      #
+      # Fingerpint is an optimistic locking mechanism for updates, which requires
+      # adding the 'fingerprint' of the last metadata to allow update.
+      #
+      # To comply with the API please add an encoder: and decoder: to the provider.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'metadata'
+        description: |
+          The metadata key/value pairs to assign to instances that are
+          created from this template. These pairs can consist of custom
+          metadata or predefined keys.
       - !ruby/object:Api::Type::ResourceRef
         name: 'machineType'
         resource: 'MachineType'
@@ -2853,11 +3875,155 @@ objects:
           lowercase letter, and all following characters must be a dash,
           lowercase letter, or digit, except the last character, which cannot
           be a dash.
-<%=
-  indent(compile('products/compute/instance_networkinterfaces.yaml'), 6)
-%>
-<%= indent(compile('products/compute/instance_scheduling.yaml'), 6) %>
-<%= indent(compile('products/compute/instance_serviceaccounts.yaml'), 6) %>
+      - !ruby/object:Api::Type::Array
+        name: 'networkInterfaces'
+        description: |
+          An array of configurations for this interface. This specifies
+          how this interface is configured to interact with other
+          network services, such as connecting to the internet. Only
+          one network interface is supported per instance.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Array
+             name: 'accessConfigs'
+             description: |
+               An array of configurations for this interface. Currently, only
+               one access config, ONE_TO_ONE_NAT, is supported. If there are no
+               accessConfigs specified, then this instance will have no
+               external internet access.
+             item_type: !ruby/object:Api::Type::NestedObject
+               properties:
+                 # 'kind' is not needed for object convergence
+                 - !ruby/object:Api::Type::String
+                   name: 'name'
+                   description: |
+                     The name of this access configuration. The
+                     default and recommended name is External NAT but you can
+                     use any arbitrary string you would like. For example, My
+                     external IP or Network Access.
+                   required: true
+                 - !ruby/object:Api::Type::ResourceRef
+                   name: 'natIP'
+                   resource: 'Address'
+                   imports: 'address'
+                   description: |
+                     Reference to an address.
+                     An external IP address associated with this instance.
+                     Specify an unused static external IP address available to
+                     the project or leave this field undefined to use an IP
+                     from a shared ephemeral IP address pool. If you specify a
+                     static external IP address, it must live in the same
+                     region as the zone of the instance.
+                 - !ruby/object:Api::Type::Enum
+                   name: 'type'
+                   description: |
+                     The type of configuration. The default and only option is
+                     ONE_TO_ONE_NAT.
+                   values:
+                     - :ONE_TO_ONE_NAT
+                   required: true
+            - !ruby/object:Api::Type::Array
+              name: 'aliasIpRanges'
+              description: |
+                An array of alias IP ranges for this network interface. Can
+                only be specified for network interfaces on subnet-mode
+                networks.
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::String
+                    name: 'ipCidrRange'
+                    description: |
+                      The IP CIDR range represented by this alias IP range.
+                      This IP CIDR range must belong to the specified
+                      subnetwork and cannot contain IP addresses reserved by
+                      system or used by other network interfaces. This range
+                      may be a single IP address (e.g. 10.2.3.4), a netmask
+                      (e.g. /24) or a CIDR format string (e.g. 10.1.2.0/24).
+                  - !ruby/object:Api::Type::String
+                    name: 'subnetworkRangeName'
+                    description: |
+                      Optional subnetwork secondary range name specifying
+                      the secondary range from which to allocate the IP
+                      CIDR range for this alias IP range. If left
+                      unspecified, the primary range of the subnetwork will
+                      be used.
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              description: |
+                The name of the network interface, generated by the
+                server. For network devices, these are eth0, eth1, etc
+              output: true
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'network'
+              resource: 'Network'
+              imports: 'selfLink'
+              description: |
+                Specifies the title of an existing network.  When creating
+                an instance, if neither the network nor the subnetwork is specified,
+                the default network global/networks/default is used; if the network
+                is not specified but the subnetwork is specified, the network is
+                inferred.
+            - !ruby/object:Api::Type::String
+              name: 'networkIP'
+              description: |
+                An IPv4 internal network address to assign to the
+                instance for this network interface. If not specified
+                by the user, an unused internal IP is assigned by the
+                system.
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'subnetwork'
+              resource: 'Subnetwork'
+              imports: 'selfLink'
+              description: |
+                Reference to a VPC network.
+                If the network resource is in legacy mode, do not
+                provide this property.  If the network is in auto
+                subnet mode, providing the subnetwork is optional. If
+                the network is in custom subnet mode, then this field
+                should be specified.
+            # networkInterfaces.kind is not necessary for convergence.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'scheduling'
+        description: Sets the scheduling options for this instance.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'automaticRestart'
+            description: |
+              Specifies whether the instance should be automatically restarted
+              if it is terminated by Compute Engine (not terminated by a user).
+              You can only set the automatic restart option for standard
+              instances. Preemptible instances cannot be automatically
+              restarted.
+          - !ruby/object:Api::Type::String
+            name: 'onHostMaintenance'
+            description: |
+              Defines the maintenance behavior for this instance. For standard
+              instances, the default behavior is MIGRATE. For preemptible
+              instances, the default and only possible behavior is TERMINATE.
+              For more information, see Setting Instance Scheduling Options.
+          - !ruby/object:Api::Type::Boolean
+            name: 'preemptible'
+            description: |
+              Defines whether the instance is preemptible. This can only be set
+              during instance creation, it cannot be set or changed after the
+              instance has been created.
+      - !ruby/object:Api::Type::Array
+        name: 'serviceAccounts'
+        description: |
+          A list of service accounts, with their specified scopes, authorized
+          for this instance. Only one service account per VM instance is
+          supported.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'email'
+              description: Email address of the service account.
+            - !ruby/object:Api::Type::Array
+              name: scopes
+              description: |
+                The list of scopes to be made available for this service
+                account.
+              item_type: Api::Type::String
       - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
@@ -2884,7 +4050,31 @@ objects:
         name: 'statusMessage'
         description: An optional, human-readable explanation of the status.
         output: true
-<%= indent(compile('products/compute/instance_tags.yaml'), 6) %>
+      - !ruby/object:Api::Type::NestedObject
+        name: 'tags'
+        description: |
+          A list of tags to apply to this instance. Tags are used to identify
+          valid sources or targets for network firewalls and are specified by
+          the client during instance creation. The tags can be later modified
+          by the setTags method. Each tag within the list must comply with
+          RFC1035.
+        properties:
+          # TODO(alexstephen) Investigate bytes type
+          - !ruby/object:Api::Type::String
+            name: 'fingerprint'
+            description: |
+              Specifies a fingerprint for this request, which is essentially a
+              hash of the metadata's contents and used for optimistic locking.
+              The fingerprint is initially generated by Compute Engine and
+              changes after every request to modify or update metadata. You
+              must always provide an up-to-date fingerprint hash in order to
+              update or change metadata.
+          - !ruby/object:Api::Type::Array
+            name: 'items'
+            description: |
+              An array of tags. Each tag must be 1-63 characters long, and
+              comply with RFC1035.
+            item_type: Api::Type::String
   - !ruby/object:Api::Resource
     name: 'InstanceGroup'
     kind: 'compute#instanceGroup'
@@ -3988,7 +5178,75 @@ objects:
         description: 'A reference to the region where the disk type resides.'
         required: true
     properties:
-<%= indent(compile('products/compute/disk_type_properties.yaml'), 6) %>
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'defaultDiskSizeGb'
+        description: 'Server-defined default disk size in GB.'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'deprecated'
+        description: 'The deprecation status associated with this disk type.'
+        output: true
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: 'deleted'
+            description: |
+              An optional RFC3339 timestamp on or after which the deprecation state
+              of this resource will be changed to DELETED.
+            output: true
+          - !ruby/object:Api::Type::Time
+            name: 'deprecated'
+            description: |
+              An optional RFC3339 timestamp on or after which the deprecation state
+              of this resource will be changed to DEPRECATED.
+            output: true
+          - !ruby/object:Api::Type::Time
+            name: 'obsolete'
+            description: |
+              An optional RFC3339 timestamp on or after which the deprecation state
+              of this resource will be changed to OBSOLETE.
+            output: true
+          - !ruby/object:Api::Type::String
+            name: 'replacement'
+            description: |
+              The URL of the suggested replacement for a deprecated resource. The
+              suggested replacement resource must be the same kind of resource as
+              the deprecated resource.
+            output: true
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: |
+              The deprecation state of this resource. This can be DEPRECATED,
+              OBSOLETE, or DELETED. Operations which create a new resource using a
+              DEPRECATED resource will return successfully, but with a warning
+              indicating the deprecated resource and recommending its replacement.
+              Operations which use OBSOLETE or DELETED resources will be rejected
+              and result in an error.
+            values:
+              - :DEPRECATED
+              - :OBSOLETE
+              - :DELETED
+            output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'validDiskSize'
+        description: |
+          An optional textual description of the valid disk size, such as
+          "10GB-10TB".
+        output: true
   - !ruby/object:Api::Resource
     name: 'RegionDisk'
     kind: 'compute#disk'
@@ -4128,9 +5386,88 @@ objects:
           used.
         output: true
     properties:
-<%=
-  indent(compile_file({location: 'region'}, 'products/compute/disks.yaml'), 6)
-%>
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
+        update_verb: :POST
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'lastAttachTimestamp'
+        description: 'Last attach timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::Time
+        name: 'lastDetachTimestamp'
+        description: 'Last dettach timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels to apply to this disk.  A list of key->value pairs.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/setLabels'
+      - !ruby/object:Api::Type::Array
+        name: 'licenses'
+        description: 'Any applicable publicly visible licenses.'
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        input: true
+        required: true
+      - !ruby/object:Api::Type::Integer
+        name: 'sizeGb'
+        description: |
+          Size of the persistent disk, specified in GB. You can specify this
+          field when creating a persistent disk using the sourceImage or
+          sourceSnapshot parameter, or specify it alone to create an empty
+          persistent disk.
+
+          If you specify this field along with sourceImage or sourceSnapshot,
+          the value of sizeGb must not be less than the size of the sourceImage
+          or the size of the snapshot.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}/resize'
+      - !ruby/object:Api::Type::Array
+        name: 'users'
+        description: |
+          Links to the users of the disk (attached instances) in form:
+          project/zones/zone/instances/instance
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'user'
+          resource: 'Instance'
+          imports: 'selfLink'
+          description: 'A reference to a user of this disk'
+        output: true
+      - !ruby/object:Api::Type::Integer
+        name: 'physicalBlockSizeBytes'
+        description: |
+          Physical block size of the persistent disk, in bytes. If not present
+          in a request, a default value is used. Currently supported sizes
+          are 4096 and 16384, other sizes may be added in the future.
+          If an unsupported value is requested, the error message will list
+          the supported values for the caller's project.
       - !ruby/object:Api::Type::Array
         name: 'replicaZones'
         description: 'URLs of the zones where the disk should be replicated to.'
