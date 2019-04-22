@@ -4806,6 +4806,92 @@ objects:
             - :REGIONAL
             - :GLOBAL
   - !ruby/object:Api::Resource
+    name: 'NodeTemplate'
+    kind: 'compute#nodeTemplate'
+    base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
+    has_self_link: true
+    description: |
+      Represents a NodeTemplate resource. Node templates specify properties
+      for creating sole-tenant nodes, such as node type, vCPU and memory
+      requirments, node affinity labels, and region. 
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeTemplates'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        required: true
+        description: |
+          Region where nodes using the node template will be created
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional textual description of the resource.'
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the resource.'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'nodeAffinityLabels'
+        description: |
+          Labels to use for node affinity, which will be used in
+          instance scheduling.
+      - !ruby/object:Api::Type::String
+        name: 'nodeType'
+        description: |
+          Node type to use for nodes group that are created from this template.
+          Only one of nodeTypeFlexibility and nodeType can be specified.
+        conflicts:
+          - nodeTypeFlexibility
+      - !ruby/object:Api::Type::NestedObject
+        name: 'nodeTypeFlexibility'
+        description: |
+          Flexible properties for the desired node type. Node groups that
+          use this node template will create nodes of a type that matches
+          these properties. Only one of nodeTypeFlexibility and nodeType can
+          be specified.
+        conflicts:
+          - nodeType
+        properties:
+          - !ruby/object:Api::Type::String
+            name: cpus
+            description: |
+               Number of virtual CPUs to use.
+          - !ruby/object:Api::Type::String
+            name: memory
+            description: |
+              Physical memory available to the node, defined in MB.
+          - !ruby/object:Api::Type::String
+            name: localSsd
+            description: |
+              Use local SSD
+            output: true
+  - !ruby/object:Api::Resource
     name: 'Region'
     kind: 'compute#region'
     base_url: projects/{{project}}/regions
