@@ -97,9 +97,13 @@ module Provider
       # are all automatically versioned at beta.
       #
       # When an example has a version of beta, each resource must use the
-      # `google-beta` provider in the config and a `google-beta` block must be
-      # defined. If the `google` provider is implicitly used, the test will
-      # fail.
+      # `google-beta` provider in the config. If the `google` provider is
+      # implicitly used, the test will fail.
+      #
+      # NOTE: Until Terraform 0.12 is released and is used in the OiCS tests, an
+      # explicit provider block should be defined. While the tests @ 0.12 will
+      # use `google-beta` automatically, past Terraform versions required an
+      # explicit block.
       attr_reader :min_version
 
       # Extra properties to ignore read on during import.
