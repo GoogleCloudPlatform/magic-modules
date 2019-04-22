@@ -26,10 +26,14 @@ describe Api::Compiler do
     subject { -> { Api::Compiler.new('my-file-to-parse.yaml').run } }
 
     before do
+      # File will only be read once because there's no
+      # compilation occurring.
+      # (Compilation means file will be read twice - once
+      # to determine class + once to compile)
       IO.expects(:read).with('my-file-to-parse.yaml')
         .returns('--- !ruby/object:Api::Product
                       name: "foo"')
-        .twice
+        .once
     end
 
     it { is_expected.not_to raise_error }
