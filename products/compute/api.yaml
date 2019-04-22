@@ -6434,9 +6434,6 @@ objects:
         name: 'enableFlowLogs'
         description: |
           Whether to enable flow logging for this subnetwork.
-        update_verb: :PATCH
-        update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
-        send_empty_value: true
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         description: |
@@ -6495,9 +6492,6 @@ objects:
         update_verb: :PATCH
         update_url:  projects/{{project}}/regions/{{region}}/subnetworks/{{name}}
         properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enable'
-            description: 'Whether to enable flow logging for this subnetwork'
           - !ruby/object:Api::Type::Enum
             name: 'aggregationInterval'
             description: |

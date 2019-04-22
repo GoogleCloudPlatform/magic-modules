@@ -1,5 +1,5 @@
 resource "google_compute_subnetwork" "subnet-with-logging" {
-  provider = "google-beta" 
+  provider      = "google-beta" 
   name          = "<%= ctx[:vars]['subnetwork_name'] %>"
   ip_cidr_range = "10.2.0.0/16"
   region        = "us-central1"
@@ -11,7 +11,6 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
 
   enable_flow_logs = true
   log_config {
-    enable = true
     aggregation_interval = "INTERVAL_10_MIN"
     flow_sampling = 0.5
     metadata = "INCLUDE_ALL_METADATA"
@@ -19,7 +18,7 @@ resource "google_compute_subnetwork" "subnet-with-logging" {
 }
 
 resource "google_compute_network" "custom-test" {
-  provider = "google-beta"
+  provider                = "google-beta"
   name                    = "<%= ctx[:vars]['network_name'] %>"
   auto_create_subnetworks = false
 }
