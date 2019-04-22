@@ -4811,9 +4811,6 @@ objects:
     base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
     input: true
     min_version: beta
-    exports:
-      - !ruby/object:Api::Type::SelfLink
-        name: 'selfLink'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
@@ -4829,7 +4826,24 @@ objects:
       backend with internal load balancers. Because NEG backends allow you to
       specify IP addresses and ports, you can distribute traffic in a granular
       fashion among applications or containers running within VM instances.
-<%= indent(compile_file({}, 'templates/zonal_async.yaml.erb'), 4) %>
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'

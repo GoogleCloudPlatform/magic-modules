@@ -672,23 +672,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       optional_properties: |
         * `delete_default_routes_on_create`: If set to `true`, default routes (`0.0.0.0/0`) will be deleted
           immediately after network creation. Defaults to `false`.
-  NetworkEndpointGroup: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "network_endpoint_group"
         primary_resource_id: "neg"
-        version: <%= _version_name %>
         vars:
           neg_name: "my-lb-neg"
           network_name: "neg-network"
           subnetwork_name: "neg-subnetwork"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      zone: !ruby/object:Provider::Terraform::PropertyOverride
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
