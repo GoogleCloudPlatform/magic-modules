@@ -4844,7 +4844,7 @@ objects:
         imports: 'selfLink'
         required: true
         description: |
-          Region where nodes using this the node template will be created
+          Region where nodes using the node template will be created
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -4866,6 +4866,8 @@ objects:
         description: |
           Node type to use for nodes group that are created from this template.
           Only one of nodeTypeFlexibility and nodeType can be specified.
+        conflicts:
+          - 'nodeTypeFlexibility'684
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeTypeFlexibility'
         description: |
@@ -4873,6 +4875,8 @@ objects:
           use this node template will create nodes of a type that matches
           these properties. Only one of nodeTypeFlexibility and nodeType can
           be specified.
+        conflicts:
+          - 'nodeType'
         properties:
           - !ruby/object:Api::Type::String
             name: cpus
@@ -4885,7 +4889,7 @@ objects:
           - !ruby/object:Api::Type::String
             name: localSsd
             description: |
-              Local SSD
+              Use local SSD
             output: true
   - !ruby/object:Api::Resource
     name: 'Region'

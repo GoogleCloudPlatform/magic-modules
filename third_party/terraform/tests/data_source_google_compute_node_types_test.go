@@ -46,7 +46,7 @@ func testAccCheckGoogleComputeNodeTypes(n string) resource.TestCheckFunc {
 
 		cnt, err := strconv.Atoi(count)
 		if err != nil {
-			return errors.New("failed to read number of version")
+			return errors.New("failed to read number of node types")
 		}
 		if cnt < 1 {
 			return fmt.Errorf("expected at least one node type, got %d", cnt)
