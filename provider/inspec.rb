@@ -280,13 +280,6 @@ module Provider
       "'#{YAML.load_file(external_attribute_file)[attribute_name]}'"
     end
 
-    # Replaces Google module name within InSpec resources with GoogleInSpec
-    # to alleviate module namespace conflicts due to dependencies on
-    # Google SDKs
-    def inspec_property_type(property)
-      property.property_type.sub('Google::', 'GoogleInSpec::')
-    end
-
     def qualified_property_class(property)
       name = property.name.underscore
       other = property.__resource.name
