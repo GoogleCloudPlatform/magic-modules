@@ -64,6 +64,8 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"<%= var_name -%>": getTestServiceAccountFromEnv(t),
 		<% elsif var_type == :PROJECT_NAME -%>
 			"<%= var_name -%>": getTestProjectFromEnv(t),
+		<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
+			"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
 		<% end -%>
 	<% end -%>
 			"random_suffix": acctest.RandString(10),

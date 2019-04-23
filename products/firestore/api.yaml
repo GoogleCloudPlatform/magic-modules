@@ -58,7 +58,8 @@ objects:
         name: name
         output: true
         description: |
-          A server defined name for this index.
+          A server defined name for this index. Format:
+          `projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes/{{server_generated_id}}`
       - !ruby/object:Api::Type::String
         name: database
         default_value: '(default)'
