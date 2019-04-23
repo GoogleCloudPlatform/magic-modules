@@ -378,14 +378,6 @@ module Provider
       raise 'Unimplemented build_url for this provider'
     end
 
-    def true?(obj)
-      obj.to_s.casecmp('true').zero?
-    end
-
-    def false?(obj)
-      obj.to_s.casecmp('false').zero?
-    end
-
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
