@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
 require 'overrides/inspec/resource_override'
@@ -23,7 +22,6 @@ module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
   class Inspec < Provider::Core
-    include Google::RubyUtils
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
