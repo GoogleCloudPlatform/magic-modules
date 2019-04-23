@@ -128,69 +128,105 @@ items:
             description:
             - A mapping of tags to assign to the batch account.
             returned: always
-            type: str
+            type: list
 '''
 
-################################################################################
-# Imports
-################################################################################
-from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest
-import json
+from ansible.module_utils.azure_rm_common import AzureRMModuleBase
 
-################################################################################
-# Main
-################################################################################
+try:
+    from msrestazure.azure_exceptions import CloudError
+    from azure.mgmt.batch import BatchManagementClient    from msrest.serialization import Model
+except ImportError:
+    # This is handled in azure_rm_common
+    pass
+
+
+class AzureRMBatchAccountInfo(AzureRMModuleBase):
+    def __init__(self):
+        # define user inputs into argument
+        self.module_arg_spec = dict(
+            resource_group=dict(
+                required=True,
+                type='str'
+            ),
+            name=dict(
+                type='str'
+            ),
+            tags=dict(
+                type='list'
+            )
+        )
+        # store the results of the module operation
+        self.results = dict(
+            changed=False
+        )
+        self.mgmt_client = None
+        self.resource_group = None
+        self.name = None
+        self.tags = None
+        super(AzureRMBatchAccountInfo, self).__init__(self.module_arg_spec, supports_tags=False)
+
+    def exec_module(self, **kwargs):
+        for key in self.module_arg_spec:
+            setattr(self, key, kwargs[key])
+        self.mgmt_client = self.get_mgmt_svc_client(BatchManagementClient,
+                                                    base_url=self._cloud_environment.endpoints.resource_manager)
+
+        if (self.name):
+            self.results['items'] = self.get()
+        else:
+            self.results['items'] = self.list()
+        return self.results
+
+    def get(self):
+        response = None
+        results = []
+        try:
+            response = self.mgmt_client.batch_account.get(resource_group_name=self.resource_group,
+                                                          account_name=self.name)
+            self.log("Response : {0}".format(response))
+        except CloudError as e:
+            self.log('Could not get info for Batch Account.')
+
+        if response and self.has_tags(response.tags, self.tags):
+            results.append(self.format_response(response))
+
+        return results
+
+    def list(self):
+        response = None
+        results = []
+        try:
+            response = self.mgmt_client.batch_account.list_by_resource_group(resource_group_name=self.resource_group)
+            self.log("Response : {0}".format(response))
+        except CloudError as e:
+            self.log('Could not get info for Batch Account.')
+
+        if response is not None:
+            for item in response:
+                if self.has_tags(item.tags, self.tags):
+                    results.append(self.format_response(item))
+
+        return results
+
+    def format_response(self, item):
+        d = item.as_dict()
+        d = {
+            'id': d['id'],
+            'resource_group': self.resource_group,
+            'name': d['name'],
+            'location': d['location'],
+            'account_endpoint': d['account_endpoint'],
+            'auto_storage_account': d['auto_storage']['storage_account_id'],
+            'key_vault_reference': d['key_vault_reference'],
+            'pool_allocation_mode': d['pool_allocation_mode'],
+            'tags': d['tags'],
+        }
+        return d
 
 
 def main():
-    module = GcpModule(
-        argument_spec=dict(
-        )
-    )
-
-    if not module.params['scopes']:
-        module.params['scopes'] = ['NotUsedInAzure']
-
-    items = fetch_list(module, collection(module))
-    if items.get('items'):
-        items = items.get('items')
-    else:
-        items = []
-    return_value = {
-        'items': items
-    }
-    module.exit_json(**return_value)
-
-
-def collection(module):
-    return "NotUsedInAzureNotUsedInAzure".format(**module.params)
-
-
-def fetch_list(module, link):
-    auth = GcpSession(module, 'zbatchaccount')
-    response = auth.get(link)
-    return return_if_object(module, response)
-
-
-def return_if_object(module, response):
-    # If not found, return nothing.
-    if response.status_code == 404:
-        return None
-
-    # If no content, return nothing.
-    if response.status_code == 204:
-        return None
-
-    try:
-        module.raise_for_status(response)
-        result = response.json()
-    except getattr(json.decoder, 'JSONDecodeError', ValueError) as inst:
-        module.fail_json(msg="Invalid JSON response with error: %s" % inst)
-
-    if navigate_hash(result, ['error', 'errors']):
-        module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
-
-    return result
+    AzureRMBatchAccountInfo()
 
 
 if __name__ == "__main__":

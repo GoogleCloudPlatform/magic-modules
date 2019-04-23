@@ -35,7 +35,7 @@ module Provider
       def documentation_for_property(prop, object)
         required = prop.required && !prop.default_value ? true : false
         {
-          python_field_name(prop, object.azure_sdk_definition.create) => {
+          python_variable_name(prop, object.azure_sdk_definition.create) => {
             'description' => [
               format_description(prop.description),
               (resourceref_description(prop) \
@@ -72,7 +72,7 @@ module Provider
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
         {
-          python_field_name(prop, object.azure_sdk_definition.read) => {
+          python_variable_name(prop, object.azure_sdk_definition.read) => {
             'description' => format_description(prop.description),
             'returned' => 'always',
             'type' => type,

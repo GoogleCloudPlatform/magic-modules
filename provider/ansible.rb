@@ -64,6 +64,7 @@ module Provider
           return 'dict'
         end
         return 'raw' if prop.is_a? Api::Azure::Type::ResourceReference
+        return 'list' if prop.is_a? Api::Azure::Type::Tags
         PYTHON_TYPE_FROM_MM_TYPE.fetch(prop.class.to_s, 'str')
       end
 

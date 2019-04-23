@@ -3,7 +3,7 @@ module Provider
     module Ansible
       module Module
         module SubTemplate
-          def build_class_instance_variable_init(object, indentation = 8)
+          def build_class_instance_variable_init(sdk_operation, object, indentation = 8)
             result = compile 'templates/azure/ansible/module/class_instance_variable_init.erb', 1
             indent result, indentation
           end

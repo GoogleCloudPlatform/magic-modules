@@ -10,6 +10,7 @@ module Api
       attr_reader :go_field_name
       attr_reader :python_parameter_name
       attr_reader :python_variable_name
+      attr_reader :python_field_name
 
       def validate
         super
@@ -22,6 +23,7 @@ module Api
         check_optional_property :go_field_name, String
         check_optional_property :python_parameter_name, String
         check_optional_property :python_variable_name, String
+        check_optional_property :python_field_name, String
       end
     end
   end

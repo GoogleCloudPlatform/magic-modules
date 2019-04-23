@@ -10,6 +10,7 @@ module Api
       attr_reader :go_field_name
       attr_reader :python_parameter_name
       attr_reader :python_variable_name
+      attr_reader :python_field_name
 
       def validate
         super
@@ -23,6 +24,7 @@ module Api
         check_optional_property :go_field_name, String
         check_optional_property :python_parameter_name, String
         check_optional_property :python_variable_name, String
+        check_optional_property :python_field_name, String
       end
 
       def merge_overrides!(overrides)
@@ -32,6 +34,7 @@ module Api
         @go_field_name = overrides.go_field_name unless overrides.go_field_name.nil?
         @python_parameter_name = overrides.python_parameter_name unless overrides.python_parameter_name.nil?
         @python_variable_name = overrides.python_variable_name unless overrides.python_variable_name.nil?
+        @python_field_name = overrides.python_field_name unless overrides.python_field_name.nil?
       end
 
       class BooleanObject < SDKTypeDefinition
@@ -45,7 +48,7 @@ module Api
 
         def validate
           super
-          check_property :go_enum_type_name, String
+          check_optional_property :go_enum_type_name, String
         end
       end
 
@@ -56,6 +59,9 @@ module Api
           super
           check_optional_property :go_type_name, String
         end
+      end
+
+      class ComplexArray < ComplexObject
       end
 
     end

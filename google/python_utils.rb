@@ -54,7 +54,7 @@ module Google
       "#{name}(#{args.compact.join(', ')})"
     end
 
-    def python_field_name(property, sdk_op_def)
+    def python_variable_name(property, sdk_op_def)
       sdk_ref = get_applicable_reference(property.azure_sdk_references, sdk_op_def.request)
       return property.out_name.underscore if sdk_ref.nil?
       python_var = get_sdk_typedef_by_references(property.azure_sdk_references, sdk_op_def.request).python_variable_name
