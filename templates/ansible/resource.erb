@@ -320,7 +320,7 @@ def resource_to_request(module):
             return_vals[k] = v
 
     return return_vals
-<% unless false?(object.unwrap_resource) -%>
+<% if object.unwrap_resource -%>
 <%
   urf_code = [
     'return {',
