@@ -61,18 +61,18 @@ objects:
           A server defined name for this index.
       - !ruby/object:Api::Type::String
         name: database
-        required: true
+        default_value: '(default)'
         description: |
-          The Firestore database id
+          The Firestore database id. Defaults to `"(default)"`.
       - !ruby/object:Api::Type::String
         name: collection
         required: true
         description: |
-          The collection being indexed
+          The collection being indexed.
       - !ruby/object:Api::Type::Enum
         name: queryScope
         description: |
-          The scope at which a query is run
+          The scope at which a query is run. Defaults to `"COLLECTION"`.
         default_value: :COLLECTION
         values:
           - :QUERY_SCOPE_UNSPECIFIED
@@ -80,15 +80,21 @@ objects:
       - !ruby/object:Api::Type::Array
         name: fields
         description: |
-          The fields supported by this index.
+          The fields supported by this index. The last field entry is always for
+          the field path `__name__`. If, on creation, `__name__` was not
+          specified as the last field, it will be added automatically with the
+          same direction as that of the last field defined. If the final field
+          in a composite index is not directional, the `__name__` will be
+          ordered `"ASCENDING"` (unless explicitly specified otherwise).
         required: true
+        # Single field indexes _exist_, but the API only lets us manage composite ones.
         min_size: 2
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
               name: 'fieldPath'
               description: |
-                Can be name. For single field indexes, this must match the name of the field or may be omitted.
+                Name of the field.
             - !ruby/object:Api::Type::Enum
               name: 'order'
               description: |

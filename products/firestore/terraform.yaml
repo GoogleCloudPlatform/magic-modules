@@ -15,6 +15,15 @@
 overrides: !ruby/object:Overrides::ResourceOverrides
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "firestore_index_basic"
+        # This example relies on a well-known collection having been created and
+        # Firestore being enabled on the project. We can't do that automatically
+        # so a generated test won't work yet.
+        skip_test: true
+        primary_resource_id: "my-index"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/index.go.erb
       post_create: templates/terraform/post_create/index.go.erb
