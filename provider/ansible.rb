@@ -51,11 +51,6 @@ module Provider
         attr_accessor :example
       end
 
-      def initialize(config, api, start_time)
-        super(config, api, start_time)
-        @max_columns = 160
-      end
-
       def api_version_setup(version_name)
         version = @api.version_obj_or_default(version_name)
         @api.set_properties_based_on_version(version)

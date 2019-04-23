@@ -21,13 +21,6 @@ require 'json'
 require 'overrides/runner'
 
 module Provider
-  DEFAULT_FORMAT_OPTIONS = {
-    indent: 0,
-    start_indent: 0,
-    max_columns: 100,
-    quiet: false
-  }.freeze
-
   # Responsible for generating a file
   # with a given set of parameters.
   class FileTemplate
@@ -145,7 +138,6 @@ module Provider
     def initialize(config, api, start_time)
       @config = config
       @api = api
-      @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
 
       # The compiler will error out if a file has been written in this compiler
       # run already. Instead of storing all the modified files in state we'll
