@@ -1065,6 +1065,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         input: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb
       resource_definition: templates/terraform/resource_definition/subnetwork.erb
@@ -1075,6 +1077,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_logging_config_beta"
+        primary_resource_id: "subnet-with-logging"
+        min_version: beta
+        vars:
+          subnetwork_name: "log-test-subnetwork"
+          network_name: "log-test-network"
   TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
