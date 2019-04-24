@@ -16,6 +16,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
     autogen_async: true
     import_format: ["{{name}}"]
+    description: |
+      {{description}} This resource manages composite indexes and not single
+      field indexes.
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firestore_index_basic"

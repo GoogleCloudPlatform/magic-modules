@@ -76,7 +76,6 @@ objects:
           The scope at which a query is run. Defaults to `"COLLECTION"`.
         default_value: :COLLECTION
         values:
-          - :QUERY_SCOPE_UNSPECIFIED
           - :COLLECTION
       - !ruby/object:Api::Type::Array
         name: fields
@@ -101,6 +100,11 @@ objects:
               description: |
                 Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
               values:
-                - :ORDER_UNSPECIFIED
                 - :ASCENDING
                 - :DESCENDING
+            - !ruby/object:Api::Type::Enum
+              name: 'arrayConfig'
+              description: |
+                Indicates that this field supports operations on arrayValues.
+              values:
+                - :CONTAINS
