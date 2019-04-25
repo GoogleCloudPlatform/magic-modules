@@ -99,7 +99,7 @@ resource "google_compute_forwarding_rule" "foobar" {
   description = "Resource created for Terraform acceptance testing"
   ip_protocol = "UDP"
   name        = "%s"
-  port_range  = "80"
+  port_range  = "80-81"
   target      = "${google_compute_target_pool.foo-tp.self_link}"
 <% unless version == 'ga' -%>
   labels      = {"foo" = "bar"}
