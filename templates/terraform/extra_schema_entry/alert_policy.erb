@@ -13,7 +13,10 @@
 	# limitations under the License.
 -%>
 "labels": {
-	Type:     schema.TypeList,
-	Optional: true,
-	Deprecated:  "labels is removed as it was never used. See user_labels for the correct field",
+	Type:      schema.TypeList,
+	Optional:  true,
+	Elem:      &schema.Schema{
+		Type: schema.TypeString,
+	},
+	Deprecated: "labels is removed as it was never used. See user_labels for the correct field",
 },
