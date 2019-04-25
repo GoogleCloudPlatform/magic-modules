@@ -1,10 +1,7 @@
-<%  if output_var == 'd' -%>
 if !d.Get("encrypted").(bool) {
-    if quotedValue := <%= input_var -%>; quotedValue != nil {
-        value, _ := strconv.Unquote(*quotedValue)
-        d.Set("<%= prop_name -%>", value)
-    }
+  value, err := azure.ParseAzureRmAutomationVariableValue("azurerm_automation_string_variable", properties.Value)
+  if err != nil {
+    return err
+  }
+  d.Set("value", value)
 }
-<%  else -%>
-// Terraform_Set_Value is not supported.
-<%  end -%>

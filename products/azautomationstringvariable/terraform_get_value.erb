@@ -1,5 +1,1 @@
-<%  if input_var == 'd' -%>
 <%=   output_var -%> := strconv.Quote(d.Get("<%= prop_name -%>").(<%= go_type(property) -%>))
-<%  else -%>
-// Terraform_Get_Value is not supported.
-<%  end -%>

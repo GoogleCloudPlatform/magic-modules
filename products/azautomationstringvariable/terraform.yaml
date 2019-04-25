@@ -13,8 +13,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
       value: !ruby/object:Provider::Azure::Terraform::PropertyOverride
         custom_schema_get: products/azautomationstringvariable/terraform_get_value.erb
         custom_schema_set: products/azautomationstringvariable/terraform_set_value.erb
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_read: products/azautomationstringvariable/check_type_after_read.erb
     acctests:
       - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
         name: basic
@@ -30,7 +28,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
         title: Example Usage
         example_name: basic
         resource_name_hints:
-          resourceGroups: example-rg
-          automationAccounts: example-account
-          variables: example-var
+          resourceGroups: tfex-example-rg
+          automationAccounts: tfex-example-account
+          variables: tfex-example-var
           location: West US
