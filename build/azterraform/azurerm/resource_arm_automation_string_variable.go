@@ -137,9 +137,6 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
         return fmt.Errorf("Error reading Automation String Variable %q (Automation Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
     }
 
-    if err := validateAzureRmAutomationVariableType("azurerm_automation_string_variable"); err != nil {
-        return err
-    }
 
     d.Set("name", resp.Name)
     d.Set("resource_group_name", resourceGroup)
@@ -148,10 +145,11 @@ func resourceArmAutomationStringVariableRead(d *schema.ResourceData, meta interf
         d.Set("description", properties.Description)
         d.Set("encrypted", properties.IsEncrypted)
         if !d.Get("encrypted").(bool) {
-            if quotedValue := properties.Value; quotedValue != nil {
-                value, _ := strconv.Unquote(*quotedValue)
-                d.Set("value", value)
-            }
+          value, err := azure.ParseAzureRmAutomationVariableValue("azurerm_automation_string_variable", properties.Value)
+          if err != nil {
+            return err
+          }
+          d.Set("value", value)
         }
     }
 
