@@ -189,7 +189,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
 
-<%= lines(build_sdk_object_to_property('resp', 'd', '', object.azure_sdk_definition.read.response, resource_name, flatten_queue, output_properties, object)) -%>
+<%= lines(build_sdk_object_to_property('resp', 'd', '', object.azure_sdk_definition.read, resource_name, flatten_queue, output_properties, object)) -%>
 
     return nil
 }

@@ -1,7 +1,11 @@
 <%
     direct_children = Set.new
     properties.sort_by{|p| [p.order, p.name]}.each do |prop|
-      prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
+      child_api_path = nil
+      prop.azure_sdk_references.each do |ref|
+        child_api_path = ref if sdk_operation.response.has_key?(ref) || (sdk_operation.request.has_key?(ref) && child_api_path.nil?)
+      end
+      unless child_api_path.nil?
         if api_path == ""
           sub_paths = child_api_path.split("/")
           direct_children << child_api_path if sub_paths.length == 1
@@ -19,8 +23,8 @@
     direct_children.each do |child_api_path|
       matched_properties = get_properties_matching_sdk_reference(properties, child_api_path, object)
 -%>
-<%=   lines(build_schema_assignment(input_statement, output, nil, child_api_path, sdk_type_defs, resource_name, flatten_queue, properties, object)) if matched_properties.empty? -%>
+<%=   lines(build_schema_assignment(input_statement, output, nil, child_api_path, sdk_operation, resource_name, flatten_queue, properties, object)) if matched_properties.empty? -%>
 <%    matched_properties.each do |property| -%>
-<%=     lines(build_schema_assignment(input_statement, output, property, child_api_path, sdk_type_defs, resource_name, flatten_queue, properties, object)) -%>
+<%=     lines(build_schema_assignment(input_statement, output, property, child_api_path, sdk_operation, resource_name, flatten_queue, properties, object)) -%>
 <%    end -%>
 <%  end -%>

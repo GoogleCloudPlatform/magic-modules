@@ -206,38 +206,6 @@ objects:
             id_portion: resourceGroups
             python_parameter_name: resource_group_name
             python_variable_name: resource_group
-        response:
-          '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexArray
-            go_type_name: Account
-          '/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: ID
-          '/name': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Name
-          '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Location
-          '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_field_name: AccountProperties
-            go_type_name: AccountProperties
-            go_variable_name: properties
-          '/properties/accountEndpoint': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: AccountEndpoint
-          '/properties/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_field_name: AutoStorage
-            go_type_name: AutoStorageProperties
-          '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: StorageAccountID
-          '/properties/keyVaultReference': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
-            go_field_name: KeyVaultReference
-            go_type_name: KeyVaultReference
-          '/properties/keyVaultReference/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: ID
-          '/properties/keyVaultReference/url': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: URL
-          '/properties/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
-            go_field_name: PoolAllocationMode
-            go_enum_type_name: PoolAllocationMode
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
-            go_field_name: Tags
 
 
     description: |

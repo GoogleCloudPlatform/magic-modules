@@ -44,7 +44,8 @@ module Provider
             end
           end
 
-          def property_to_schema_assignment_template(property, sdk_type)
+          def property_to_schema_assignment_template(property, sdk_operation, api_path)
+            sdk_type = sdk_operation.response[api_path] || sdk_operation.request[api_path]
             case sdk_type
             when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject
               'templates/azure/terraform/sdktypes/primitive_schema_assign.erb'
