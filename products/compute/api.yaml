@@ -2257,10 +2257,9 @@ objects:
           * TargetSslProxy: 25, 43, 110, 143, 195, 443, 465, 587, 700, 993, 995,
                             1883, 5222
           * TargetVpnGateway: 500, 4500
-      # TODO(nelsonjr): Create a new type, WeakResourceRef that could accept
-      # various different objects, instead of one, to enable these scenarios
-      # where a field can receive multiple types (ditto in other places, look
-      # for "mysterious" Api::Type::String based objects)
+      # This is a multi-resource resource reference (TargetHttp(s)Proxy,
+      # TargetSslProxy, TargetTcpProxy, TargetVpnGateway, TargetPool,
+      # TargetInstance)
       - !ruby/object:Api::Type::String
         name: 'target'
         required: true
