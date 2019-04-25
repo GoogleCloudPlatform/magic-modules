@@ -1131,6 +1131,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       secondaryIpRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         name: secondaryIpRange
         unordered_list: true
+        default_from_api: true
+        schema_config_mode_attr: true
+        send_empty_value: true
       secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
