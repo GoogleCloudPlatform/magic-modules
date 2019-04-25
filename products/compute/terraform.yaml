@@ -470,7 +470,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
   GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
-    exclude: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_http"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
+    properties:
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'caseDiffSuppress'
+        default_from_api: true
+      loadBalancingScheme: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      portRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portRangeDiffSuppress'
+      target: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
   HttpHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}
