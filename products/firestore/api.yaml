@@ -99,12 +99,14 @@ objects:
               name: 'order'
               description: |
                 Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
+                Only one of `order` and `arrayConfig` can be specified.
               values:
                 - :ASCENDING
                 - :DESCENDING
             - !ruby/object:Api::Type::Enum
               name: 'arrayConfig'
               description: |
-                Indicates that this field supports operations on arrayValues.
+                Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
+                be specified.
               values:
                 - :CONTAINS
