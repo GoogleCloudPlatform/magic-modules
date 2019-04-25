@@ -407,6 +407,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_internallb"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          backend_name: "website-backend"
+          network_name: "website-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
