@@ -702,10 +702,14 @@ objects:
           entries in this field is
           `projects/[PROJECT_ID]/notificationChannels/[CHANNEL_ID]`
         item_type: Api::Type::String
-      - !ruby/object:Api::Type::Array
-        name: 'labels'
-        description: 'User-supplied key/value data to be used for organizing AlertPolicy objects.'
-        item_type: Api::Type::String
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: userLabels
+        description: |
+          This field is intended to be used for organizing and identifying the AlertPolicy
+          objects.The field can contain up to 64 entries. Each key and value is limited
+          to 63 Unicode characters or 128 bytes, whichever is smaller. Labels and values
+          can contain only lowercase letters, numerals, underscores, and dashes. Keys
+          must begin with a letter.
       - !ruby/object:Api::Type::NestedObject
         name: documentation
         description: |

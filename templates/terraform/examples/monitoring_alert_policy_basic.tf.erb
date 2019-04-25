@@ -13,4 +13,8 @@ resource "google_monitoring_alert_policy" "<%= ctx[:primary_resource_id] %>" {
       }
     }
   }
+
+  user_labels = {
+    foo = "bar"
+  }
 }
