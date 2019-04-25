@@ -1163,6 +1163,21 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
+  TargetInstance: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_instance_basic"
+        primary_resource_id: "default"
+        vars:
+          target_name: "target"
+          instance_name: "target-vm"
+    properties:
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false # the provider-default value will be used if not specified
+      instance:  !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
   TargetPool: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
     properties:
