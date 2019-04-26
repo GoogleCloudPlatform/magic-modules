@@ -835,6 +835,7 @@ objects:
               OAuth2 Client Secret SHA-256 for IAP
       - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
+        input: true
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
