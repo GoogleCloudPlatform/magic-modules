@@ -1181,7 +1181,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         description: |
           The Compute instance VM handling traffic for this target instance.
           Accepts the instance self-link, relative path
-          (e.g. `projects/project/zones/zone/instances/instance`) or name.
+          (e.g. `projects/project/zones/zone/instances/instance`) or name. If
+          name is given, the zone will default to the given zone or
+          the provider-default zone and the project will default to the
+          provider-level project.
   TargetPool: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
     properties:
