@@ -10,7 +10,7 @@
         if prop[1].is_a?(String)
 -%>
 <%=       prop[0].ljust(prop_alignment) -%> = "<%= prop[1] -%>"
-<%      elsif prop[1].is_a?(Integer) -%>
+<%      elsif prop[1].is_a?(Integer) || prop[1].is_a?(TrueClass) || prop[1].is_a?(FalseClass) -%>
 <%=       prop[0].ljust(prop_alignment) -%> = <%= prop[1] -%>
 <%      else -%>
 // TODO: Unsupported property "<%= prop[0] -%>" value <%= prop[1] -%>

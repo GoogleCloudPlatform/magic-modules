@@ -98,6 +98,6 @@ func flatten<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(inp
   <% end -%>
 <% end -%>
 <% else -%>
-  // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+  // TODO: Flatten Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 <% end # tf_types.include?(property.class) -%>
 <% end # custom code check -%>
