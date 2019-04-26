@@ -6834,7 +6834,9 @@ objects:
         imports: 'selfLink'
         description: |
           A URL to the virtual machine instance that handles traffic for this
-          target instance.
+          target instance. Accepts self-links or the partial paths with format
+          `projects/project/zones/zone/instances/instance' or
+          `zones/zone/instances/instance`
         required: true
         input: true
   - !ruby/object:Api::Resource
