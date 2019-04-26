@@ -1180,7 +1180,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
         description: |
           The Compute instance VM handling traffic for this target instance.
-          Accepts the instance self-link or name.
+          Accepts the instance self-link, relative path
+          (e.g. `projects/project/zones/zone/instances/instance`) or name.
   TargetPool: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
     properties:

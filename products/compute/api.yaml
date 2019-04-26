@@ -6839,6 +6839,15 @@ objects:
           `zones/zone/instances/instance`
         required: true
         input: true
+      - !ruby/object:Api::Type::Enum
+        name: 'natPolicy'
+        description: |
+          NAT option controlling how IPs are NAT'ed to the instance.
+          Currently only NO_NAT (default value) is supported.
+        input: true
+        default_value: :NO_NAT
+        values:
+          - :NO_NAT
   - !ruby/object:Api::Resource
     name: 'TargetPool'
     kind: 'compute#targetPool'
