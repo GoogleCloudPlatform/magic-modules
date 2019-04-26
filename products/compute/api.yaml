@@ -1772,6 +1772,14 @@ objects:
           A BackendService to receive the matched traffic. This is used only
           for INTERNAL load balancing.
       - !ruby/object:Api::Type::Enum
+        name: 'ipVersion'
+        deprecation_message: >-
+          ipVersion is not used for regional forwarding rules. Please remove
+          this field if you are using it.
+        values:
+          - :IPV4
+          - :IPV6
+      - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can only
