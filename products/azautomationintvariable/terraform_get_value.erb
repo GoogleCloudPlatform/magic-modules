@@ -1,1 +1,1 @@
-<%=   output_var -%> := strconv.Quote(d.Get("<%= prop_name -%>").(<%= go_type(property) -%>))
+<%=   output_var -%> := strconv.Itoa(d.Get("<%= prop_name -%>").(<%= go_type(property) -%>))

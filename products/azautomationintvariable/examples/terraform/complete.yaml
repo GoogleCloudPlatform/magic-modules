@@ -1,5 +1,5 @@
 --- !ruby/object:Provider::Azure::Example
-resource: azurerm_automation_string_variable
+resource: azurerm_automation_int_variable
 prerequisites:
   - !ruby/object:Provider::Azure::ExampleReference
     product: azresourcegroup
@@ -12,4 +12,4 @@ properties:
   resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
   automation_account_name: ${azurerm_automation_account.<%= resource_id_hint -%>.name}
   description: This variable is created by Terraform acceptance test.
-  value: Hello, Terraform Complete Test.
+  value: 12345

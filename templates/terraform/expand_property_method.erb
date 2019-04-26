@@ -126,7 +126,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(input <%= go_type(
 <%       end -%>
 <%     end # nested_properties, array of resourcerefs, else -%>
 <%   else -%>
-  // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+  // TODO: Expand Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 }
 <%   end # tf_types.include?(property.class) -%>
 <% end # custom_code check -%>

@@ -116,7 +116,7 @@ objects:
         name: 'description'
         description: 'The description of the Automation Variable.'
         azure_sdk_references: ['/properties/description']
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Integer
         name: 'value'
         description: 'The value of the Automation Variable.'
         azure_sdk_references: ['/properties/value']

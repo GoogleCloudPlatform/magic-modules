@@ -1,8 +1,8 @@
 --- !ruby/object:Provider::Terraform::Config
-name: azautomationstringvariable
+name: azautomationintvariable
 overrides: !ruby/object:Provider::ResourceOverrides
   AutomationVariable: !ruby/object:Provider::Azure::Terraform::ResourceOverride
-    name: AutomationStringVariable
+    name: AutomationIntVariable
     properties:
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
@@ -11,8 +11,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: validate.NoEmptyStrings
       value: !ruby/object:Provider::Azure::Terraform::PropertyOverride
-        custom_schema_get: products/azautomationstringvariable/terraform_get_value.erb
-        custom_schema_set: products/azautomationstringvariable/terraform_set_value.erb
+        custom_schema_get: products/azautomationintvariable/terraform_get_value.erb
+        custom_schema_set: products/azautomationintvariable/terraform_set_value.erb
+        custom_sdkfield_assign: products/azautomationintvariable/terraform_sdk_value.erb
     acctests:
       - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
         name: basic

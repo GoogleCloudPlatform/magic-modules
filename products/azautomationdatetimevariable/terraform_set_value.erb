@@ -1,7 +1,0 @@
-if !d.Get("encrypted").(bool) {
-  value, err := azure.ParseAzureRmAutomationVariableValue("azurerm_automation_string_variable", properties.Value)
-  if err != nil {
-    return err
-  }
-  d.Set("value", value)
-}

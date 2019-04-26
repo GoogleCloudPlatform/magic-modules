@@ -9,6 +9,8 @@ module Provider
             'bool'
           when Api::Type::Enum, Api::Type::String
             'string'
+          when Api::Type::Integer
+            'int'
           when Api::Type::KeyValuePairs
             'map[string]interface{}'
           when Api::Type::NestedObject
@@ -35,6 +37,7 @@ module Provider
           {
             Api::Type::Boolean => 'utils.Bool',
             Api::Type::String => 'utils.String',
+            Api::Type::Integer => 'utils.Int',
             Api::Azure::Type::Location => "utils.String",
             Api::Azure::Type::Tags => 'expandTags',
             Api::Azure::Type::ResourceReference => "utils.String"
@@ -50,7 +53,7 @@ module Provider
             'templates/azure/terraform/schemas/location.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs, Api::Type::NestedObject
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::Integer, Api::Type::KeyValuePairs, Api::Type::NestedObject
             'templates/terraform/schemas/primitive.erb'
           else
             'templates/terraform/schemas/unsupport.erb'

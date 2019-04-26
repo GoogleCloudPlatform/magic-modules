@@ -1,5 +1,5 @@
 --- !ruby/object:Provider::Azure::Example
-resource: azurerm_automation_string_variable
+resource: azurerm_automation_int_variable
 prerequisites:
   - !ruby/object:Provider::Azure::ExampleReference
     product: azresourcegroup
@@ -11,4 +11,4 @@ properties:
   name: "<%= get_resource_name('variables', 'AutoVar') -%>"
   resource_group_name: ${azurerm_resource_group.<%= resource_id_hint -%>.name}
   automation_account_name: ${azurerm_automation_account.<%= resource_id_hint -%>.name}
-  value: Hello, Terraform Basic Test.
+  value: 1234
