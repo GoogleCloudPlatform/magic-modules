@@ -569,8 +569,14 @@ objects:
       items: 'items'
     has_self_link: true
     description: |
-      Creates a BackendService resource in the specified project using the data
-      included in the request.
+      A Backend Service defines a group of virtual machines that will serve
+      traffic for load balancing. This resource is a global backend service,
+      appropriate for external load balancing. For internal load balancing, use
+      a regional backend service instead.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/backendServices'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -856,11 +862,10 @@ objects:
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
-          load balancing cannot be used with the other. One of `INTERNAL` or
-          `EXTERNAL`. Defaults to `EXTERNAL`.
+          load balancing cannot be used with the other. Must be `EXTERNAL` for
+          a global backend service. Defaults to `EXTERNAL`.
         default_value: :EXTERNAL
         values:
-          - :INTERNAL
           - :EXTERNAL
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -888,9 +893,6 @@ objects:
         description: |
           The protocol this BackendService uses to communicate with backends.
           Possible values are HTTP, HTTPS, TCP, and SSL. The default is HTTP.
-
-          For internal load balancing, the possible values are TCP and UDP, and
-          the default is TCP.
         values:
           - :HTTP
           - :HTTPS
