@@ -3,76 +3,69 @@ package google
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestDataSourceGoogleContainerRegistryRepository(t *testing.T) {
+func TestAccSecurityScannerScanConfig_scanConfigUpdate(t *testing.T) {
 	t.Parallel()
 
-	resourceName := "data.google_container_registry_repository.default"
+	firstAddressSuffix := acctest.RandString(10)
+	secondAddressSuffix := acctest.RandString(10)
+	context := map[string]interface{}{
+		"random_suffix":       firstAddressSuffix,
+		"random_suffix2":      secondAddressSuffix,
+		"static_address_name": "scanner_static_ip",
+		"user_agent":          "CHROME_LINUX",
+		"export":              "ENABLED",
+		"max_qps":             10,
+	}
+	updateContext := map[string]interface{}{
+		"random_suffix":       firstAddressSuffix,
+		"random_suffix2":      secondAddressSuffix,
+		"static_address_name": "scanner_static_ip_update",
+		"user_agent":          "CHROME_ANDROID",
+		"export":              "DISABLED",
+		"max_qps":             20,
+	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSecurityScannerScanConfigDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckGoogleContainerRegistryRepo_basic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "project"),
-					resource.TestCheckResourceAttrSet(resourceName, "region"),
-					resource.TestCheckResourceAttr(resourceName, "repository_url", "bar.gcr.io/foo"),
-				),
+				Config: testAccSecurityScannerScanConfig(context),
+			},
+			{
+				ResourceName:      "google_security_scanner_scan_config.terraform-scan-config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccSecurityScannerScanConfig(updateContext),
 			},
 		},
 	})
 }
 
-const testAccCheckGoogleContainerRegistryRepo_basic = `
-data "google_container_registry_repository" "default" {
-	project = "foo"
-	region = "bar"
-}
-`
-
-func TestDataSourceGoogleContainerRegistryImage(t *testing.T) {
-	t.Parallel()
-
-	resourceName := "data.google_container_registry_image.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckGoogleContainerRegistryImage_basic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "project"),
-					resource.TestCheckResourceAttrSet(resourceName, "region"),
-					resource.TestCheckResourceAttr(resourceName, "image_url", "bar.gcr.io/foo/baz"),
-					resource.TestCheckResourceAttr(resourceName+"2", "image_url", "bar.gcr.io/foo/baz:qux"),
-					resource.TestCheckResourceAttr(resourceName+"3", "image_url", "bar.gcr.io/foo/baz@1234"),
-				),
-			},
-		},
-	})
+func testAccSecurityScannerScanConfig(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_address" "scanner_static_ip" {
+  name     = "scan-static-ip-%{random_suffix}"
 }
 
-const testAccCheckGoogleContainerRegistryImage_basic = `
-data "google_container_registry_image" "test" {
-	project = "foo"
-	region = "bar"
-	name = "baz"
+resource "google_compute_address" "scanner_static_ip_update" {
+  name     = "scan-static-ip-%{random_suffix2}"
 }
-data "google_container_registry_image" "test2" {
-	project = "foo"
-	region = "bar"
-	name = "baz"
-	tag = "qux"
+
+resource "google_security_scanner_scan_config" "terraform-scan-config" {
+  display_name                      = "terraform-scan-config-%{random_suffix}"
+  max_qps                           = %{max_qps}
+  starting_urls                     = ["http://${google_compute_address.%{static_address_name}.address}"]
+  target_platforms                  = ["COMPUTE"]
+  user_agent                        = "%{user_agent}"
+  export_to_security_command_center = "%{export}"
 }
-data "google_container_registry_image" "test3" {
-	project = "foo"
-	region = "bar"
-	name = "baz"
-	digest = "1234"
+`, context)
 }
-`

@@ -29,6 +29,7 @@ objects:
     base_url: projects/{{project}}/scanConfigs
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     description: |
       A description of the conditions under which some aspect of your system is
       considered to be "unhealthy" and the ways to notify people or services
@@ -51,6 +52,7 @@ objects:
           The maximum QPS during scanning. A valid value ranges from 5 to 20 inclusively.
           If the field is unspecified or its value is set 0, server will default to 15.
           Other values outside of [5, 20] range will be rejected with INVALID_ARGUMENT error.
+        default_value: 15
       - !ruby/object:Api::Type::Array
         name: startingUrls
         description: |
@@ -105,6 +107,7 @@ objects:
       - !ruby/object:Api::Type::Enum
         name: userAgent
         description: Type of the user agents used for scanning
+        default_value: :CHROME_LINUX
         values:
           - :USER_AGENT_UNSPECIFIED
           - :CHROME_LINUX
@@ -149,6 +152,7 @@ objects:
         name: exportToSecurityCommandCenter
         description: |
           Controls export of scan configurations and results to Cloud Security Command Center.
+        default_value: :ENABLED
         values:
           - :EXPORT_TO_SECURITY_COMMAND_CENTER_UNSPECIFIED
           - :ENABLED
