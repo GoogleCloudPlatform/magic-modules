@@ -1,0 +1,19 @@
+resource "google_compute_address" "scanner_static_ip" {
+  provider = "google-beta"
+  name     = "<%= ctx[:vars]['address_name'] %>"
+}
+
+resource "google_security_scanner_scan_config" "<%= ctx[:primary_resource_id] %>" {
+	provider                          = "google-beta"
+  display_name                      = "<%= ctx[:vars]['scan_config_name'] %>%{random_suffix}"
+  max_qps = 5
+  starting_urls                     = ["http://${google_compute_address.scanner_static_ip.address}"]
+  target_platforms                  = ["COMPUTE"]
+  user_agent                        = "CHROME_LINUX"
+  export_to_security_command_center = "ENABLED"
+}
+
+provider "google-beta"{
+  region = "us-central1"
+  zone   = "us-central1-a"
+}
