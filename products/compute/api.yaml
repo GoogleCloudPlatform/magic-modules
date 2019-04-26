@@ -1776,6 +1776,8 @@ objects:
         deprecation_message: >-
           ipVersion is not used for regional forwarding rules. Please remove
           this field if you are using it.
+        description: |
+          ipVersion is not a valid field for regional forwarding rules.
         values:
           - :IPV4
           - :IPV6
