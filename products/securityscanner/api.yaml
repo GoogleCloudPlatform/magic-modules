@@ -31,9 +31,7 @@ objects:
     update_verb: :PATCH
     update_mask: true
     description: |
-      A description of the conditions under which some aspect of your system is
-      considered to be "unhealthy" and the ways to notify people or services
-      about this state.
+      A ScanConfig resource contains the configurations to launch a scan.
     properties:
       - !ruby/object:Api::Type::String
         name: name
