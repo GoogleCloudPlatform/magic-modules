@@ -12,18 +12,13 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
-<%
-    resource_name = "Arm" + object.name
-    sdk_package = object.azure_sdk_definition.go_client_namespace
-    sdk_type = sdk_type_defs[api_path]
--%>
 <% if property.custom_expand -%>
 <%= lines(compile_template(property.custom_expand,
-                           prefix: prefix,
+                           prefix: sdk_marshal.resource,
                            property: property)) -%>
 <% else -%>
 <%   if property.is_a?(Api::Type::Map) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
+func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
   if v == nil {
     return map[string]interface{}{}, nil
   }
@@ -34,7 +29,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 
 <%     nested_properties(property.value_type).each do |prop| -%>
 <%       next if prop.name == property.key_name -%>
-    transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+    transformed<%= titlelize_property(prop) -%>, err := expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
     if err != nil {
       return nil, err
     }
@@ -49,10 +44,10 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
 
 <%   nested_properties(property.value_type).each do |prop| -%>
 <%     next if prop.name == property.key_name -%>
-<%#      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%#      lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%   end -%>
 <%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
+func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
   if v == nil {
     return map[string]string{}, nil
   }
@@ -63,7 +58,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   return m, nil
 }
 <%   elsif tf_types.include?(property.class) -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(input <%= go_type(property) -%>) *<%= sdk_package -%>.<%= sdk_type.go_type_name -%> {
+func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(input <%= go_type(property) -%>) *<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%> {
 <%
        if !nested_properties(property).empty?
          nested_properties = nested_properties(property)
@@ -77,20 +72,20 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(input <%= go_type(
     v := input[0].(map[string]interface{})
 
 <%         nested_properties.each do |prop| -%>
-<%           var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_type_defs).go_variable_name -%>
+<%           var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_marshal.sdktype.type_definitions).go_variable_name -%>
 <%           output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=          lines(build_schema_property_get('v', output_var, prop, object, 4)) -%>
+<%=          lines(build_schema_property_get('v', output_var, prop, sdk_marshal, 4)) -%>
 <%         end -%>
 
-    result := <%= sdk_package -%>.<%= sdk_type.go_type_name -%>{
-<%=        lines(build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, expand_queue, nested_properties, object, 8)) -%>
+    result := <%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>{
+<%=        lines(build_property_to_sdk_object(sdk_marshal.clone(nil, nested_properties), 8)) -%>
     }
     return &result
 <%       elsif property.is_a?(Api::Type::Array) -%>
-    results := make([]<%= sdk_package -%>.<%= sdk_type.go_type_name -%>, 0)
+    results := make([]<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>, 0)
     for _, v := range input {
         // TODO: Implement Array Expand
-        item := <%= sdk_package -%>.<%= sdk_type.go_type_name -%>{}
+        item := <%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>{}
         results = append(results, item)
     }
     return results
@@ -98,7 +93,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(input <%= go_type(
 }
 
 <%       nested_properties.each do |prop| -%>
-<%#        lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%#        lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%       end -%>
 <%     elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
   l := v.([]interface{})

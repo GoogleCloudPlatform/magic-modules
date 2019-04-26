@@ -1,5 +1,3 @@
-<%  sdk_package = object.azure_sdk_definition.go_client_namespace -%>
-<%  sdk_type = sdk_type_defs[api_path] -%>
-<%= sdk_type.go_field_name -%><%= in_structure ? ': ' : ' = ' -%>&<%= sdk_package -%>.<%= sdk_type.go_type_name -%>{
-<%= lines(build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, expand_queue, properties, object)) -%>
+<%= sdk_marshal.sdktype.go_field_name -%><%= in_structure ? ': ' : ' = ' -%>&<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>{
+<%= lines(build_property_to_sdk_object(sdk_marshal)) -%>
 }<%= ',' if in_structure -%>

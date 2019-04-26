@@ -1,19 +1,19 @@
 <%
     direct_children = Set.new
-    properties.sort_by{|p| [p.order, p.name]}.each do |prop|
+    sdk_marshal.properties.sort_by{|p| [p.order, p.name]}.each do |prop|
       child_api_path = nil
       prop.azure_sdk_references.each do |ref|
-        child_api_path = ref if sdk_operation.response.has_key?(ref) || (sdk_operation.request.has_key?(ref) && child_api_path.nil?)
+        child_api_path = ref if sdk_marshal.sdktype.operation.response.has_key?(ref) || (sdk_marshal.sdktype.operation.request.has_key?(ref) && child_api_path.nil?)
       end
       unless child_api_path.nil?
-        if api_path == ""
-          sub_paths = child_api_path.split("/")
+        if sdk_marshal.sdktype.typedef_reference == ''
+          sub_paths = child_api_path.split('/')
           direct_children << child_api_path if sub_paths.length == 1
-        elsif child_api_path.start_with?(api_path + "/")
-          sub_paths = child_api_path[api_path.length..-1].split("/")
+        elsif child_api_path.start_with?(sdk_marshal.sdktype.typedef_reference + '/')
+          sub_paths = child_api_path[sdk_marshal.sdktype.typedef_reference.length..-1].split('/')
         end
-        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ""
-          sub_api_path = api_path + "/" + sub_paths[1]
+        if !sub_paths.nil? && sub_paths.length > 1 && sub_paths[0] == ''
+          sub_api_path = sdk_marshal.sdktype.typedef_reference + '/' + sub_paths[1]
           direct_children << sub_api_path if sub_paths.length > 2
           direct_children << child_api_path if sub_paths.length == 2
         end
@@ -21,10 +21,10 @@
     end
 
     direct_children.each do |child_api_path|
-      matched_properties = get_properties_matching_sdk_reference(properties, child_api_path, object)
+      matched_properties = get_properties_matching_sdk_reference(sdk_marshal.properties, child_api_path)
 -%>
-<%=   lines(build_schema_assignment(input_statement, output, nil, child_api_path, sdk_operation, resource_name, flatten_queue, properties, object)) if matched_properties.empty? -%>
+<%=   lines(build_schema_assignment(input, output, nil, sdk_marshal.clone(child_api_path))) if matched_properties.empty? -%>
 <%    matched_properties.each do |property| -%>
-<%=     lines(build_schema_assignment(input_statement, output, property, child_api_path, sdk_operation, resource_name, flatten_queue, properties, object)) -%>
+<%=     lines(build_schema_assignment(input, output, property, sdk_marshal.clone(child_api_path))) -%>
 <%    end -%>
 <%  end -%>

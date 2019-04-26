@@ -68,7 +68,7 @@ func resourceArmServiceBusDisasterRecoveryConfigCreateUpdate(d *schema.ResourceD
         resp, err := client.Get(ctx, resourceGroup, servicebusName, name)
         if err != nil {
             if !utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Error checking for present of existing Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
+                return fmt.Errorf("Error checking for present of existing Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
             }
         }
         if !utils.ResponseWasNotFound(resp.Response) {
@@ -88,16 +88,16 @@ func resourceArmServiceBusDisasterRecoveryConfigCreateUpdate(d *schema.ResourceD
 
 
     if _, err := client.CreateOrUpdate(ctx, resourceGroup, servicebusName, name, parameters); err != nil {
-        return fmt.Errorf("Error creating Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
+        return fmt.Errorf("Error creating Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
     }
 
 
     resp, err := client.Get(ctx, resourceGroup, servicebusName, name)
     if err != nil {
-        return fmt.Errorf("Error retrieving Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
+        return fmt.Errorf("Error retrieving Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
     }
     if resp.ID == nil {
-        return fmt.Errorf("Cannot read Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q) ID", name, servicebusName, resourceGroup)
+        return fmt.Errorf("Cannot read Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q) ID", name, resourceGroup, servicebusName)
     }
     d.SetId(*resp.ID)
 
@@ -123,11 +123,13 @@ func resourceArmServiceBusDisasterRecoveryConfigRead(d *schema.ResourceData, met
             d.SetId("")
             return nil
         }
-        return fmt.Errorf("Error reading Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
+        return fmt.Errorf("Error reading Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
     }
 
 
     d.Set("name", resp.Name)
+    d.Set("resource_group_name", resourceGroup)
+    d.Set("namespace_name", servicebusName)
     if armDisasterRecoveryProperties := resp.ArmDisasterRecoveryProperties; armDisasterRecoveryProperties != nil {
         d.Set("alternate_name", armDisasterRecoveryProperties.AlternateName)
         d.Set("partner_namespace", armDisasterRecoveryProperties.PartnerNamespace)
@@ -151,7 +153,7 @@ func resourceArmServiceBusDisasterRecoveryConfigDelete(d *schema.ResourceData, m
     name := id.Path["disasterRecoveryConfigs"]
 
     if _, err := client.Delete(ctx, resourceGroup, servicebusName, name); err != nil {
-        return fmt.Errorf("Error deleting Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q): %+v", name, servicebusName, resourceGroup, err)
+        return fmt.Errorf("Error deleting Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q): %+v", name, resourceGroup, servicebusName, err)
     }
 
     return nil

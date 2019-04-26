@@ -101,6 +101,8 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 <% end -%>
 
 <%  sdk_operation = object.azure_sdk_definition.create -%>
+<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, true -%>
+<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, expand_queue, sdktype, settable_properties -%>
 func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
     ctx := meta.(*ArmClient).StopContext
@@ -108,7 +110,7 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%  settable_properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
 <%    output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
+<%=   lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
 <%  end -%>
 
     if requireResourcesToBeImported {
@@ -126,14 +128,14 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
 <%  settable_properties.select{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
 <%    output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=   lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
+<%=   lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
 <%  end -%>
 
     <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
-<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, expand_queue, settable_properties, object, 8)) -%>
+<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
     }
 
-<%= lines(build_property_to_sdk_object_empty_sensitive(resource_name, sdk_operation.request, expand_queue, settable_properties, object)) -%>
+<%= lines(build_property_to_sdk_object_empty_sensitive(sdk_marshal)) -%>
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
@@ -171,6 +173,9 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     return resource<%= resource_name -%>Read(d, meta)
 }
 
+<%  sdk_operation = object.azure_sdk_definition.read -%>
+<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, false -%>
+<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, flatten_queue, sdktype, output_properties -%>
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
     ctx := meta.(*ArmClient).StopContext
@@ -189,7 +194,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
 
-<%= lines(build_sdk_object_to_property('resp', 'd', '', object.azure_sdk_definition.read, resource_name, flatten_queue, output_properties, object)) -%>
+<%= lines(build_sdk_object_to_property('resp', 'd', sdk_marshal)) -%>
 
     return nil
 }
@@ -204,15 +209,17 @@ func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.Res
 <%    if prop.name != "location" -%>
 <%      var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
 <%      output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=     lines(build_schema_property_get('d', output_var, prop, object, 4)) -%>
+<%=     lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
 <%    end -%>
 <%  end -%>
 
     <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
-<%= lines(build_property_to_sdk_object("/", resource_name, sdk_operation.request, expand_queue, updatable_properties, object, 8)) -%>
+<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, true -%>
+<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, expand_queue, sdktype, updatable_properties -%>
+<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
     }
 
-<%= lines(build_property_to_sdk_object_empty_sensitive(resource_name, sdk_operation.request, expand_queue, settable_properties, object)) -%>
+<%= lines(build_property_to_sdk_object_empty_sensitive(sdk_marshal)) -%>
 
 <%  unless sdk_operation.async -%>
     if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
@@ -273,12 +280,12 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%  while !expand_queue.empty? -%>
 <%    descriptor = expand_queue.shift -%>
-<%=   lines(build_expand_method(resource_name, descriptor.property, descriptor.api_path, descriptor.sdk_type_defs, expand_queue, object)) -%>
+<%=   lines(build_expand_method(descriptor.property, descriptor.sdkmarshal)) -%>
 <%  end -%>
 
 <%  while !flatten_queue.empty? -%>
 <%    descriptor = flatten_queue.shift -%>
-<%=   lines(build_flatten_method(resource_name, descriptor.property, descriptor.api_path, descriptor.sdk_type_defs, flatten_queue, object)) -%>
+<%=   lines(build_flatten_method(descriptor.property, descriptor.sdkmarshal)) -%>
 <%  end -%>
 
 <%  if object.custom_code.extra_functions -%>

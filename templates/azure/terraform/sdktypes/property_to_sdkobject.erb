@@ -1,11 +1,9 @@
 <%
-    sdk_package = object.azure_sdk_definition.go_client_namespace
-    sdk_type = sdk_type_defs[api_path]
-
     direct_children = Set.new
-    properties.each do |prop|
-      prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |child_api_path|
-        child_type_def = sdk_type_defs[child_api_path]
+    sdk_marshal.properties.sort_by{|p| [p.order, p.name]}.each do |prop|
+      prop.azure_sdk_references.select{|ref| sdk_marshal.sdktype.type_definitions.has_key?(ref)}.each do |child_api_path|
+        child_type_def = sdk_marshal.sdktype.type_definitions[child_api_path]
+        api_path = sdk_marshal.sdktype.typedef_reference
         if api_path == '/' && child_api_path.start_with?(api_path)
           sub_paths = child_api_path.split('/')
           api_path = ''
@@ -22,12 +20,10 @@
     end
 
     direct_children.to_a.sort.each do |child_api_path|
-      matched_properties = get_properties_matching_sdk_reference(properties, child_api_path, object)
+      matched_properties = get_properties_matching_sdk_reference(sdk_marshal.properties, child_api_path)
 -%>
-<%=   lines(build_sdk_field_assignment(nil, child_api_path, sdk_type_defs, resource_name, expand_queue, properties, object)) if matched_properties.empty? -%>
+<%=   lines(build_sdk_field_assignment(nil, sdk_marshal.clone(child_api_path))) if matched_properties.empty? -%>
 <%    matched_properties.each do |property| -%>
-<%=     lines(build_sdk_field_assignment(property, child_api_path, sdk_type_defs, resource_name, expand_queue, properties, object)) -%>
-<%
-      end
-    end
--%>
+<%=     lines(build_sdk_field_assignment(property, sdk_marshal.clone(child_api_path))) -%>
+<%    end -%>
+<%  end -%>

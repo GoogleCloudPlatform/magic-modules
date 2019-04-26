@@ -3,86 +3,59 @@ module Provider
     module Terraform
       module SDK
         module SubTemplate
-          def build_schema_property_get(input, output, property, object, indentation = 0)
+          def build_schema_property_get(input, output, property, sdk_marshal, indentation = 0)
             compile_template schema_property_get_template(property),
                              indentation: indentation,
                              input_var: input,
                              output_var: output,
-                             prop_name: property.name.underscore,
+                             sdk_marshal: sdk_marshal,
                              property: property,
-                             object: object
+                             prop_name: property.name.underscore
           end
 
-          def build_schema_property_set(input, output, api_path, sdk_type_defs, resource_name, flatten_queue, property, indentation = 0)
+          def build_schema_property_set(input, output, property, sdk_marshal, indentation = 0)
             compile_template schema_property_set_template(property),
                              indentation: indentation,
                              input_var: input,
                              output_var: output,
-                             api_path: api_path,
-                             sdk_type_defs: sdk_type_defs,
-                             prop_name: property.name.underscore,
                              property: property,
-                             resource_name: resource_name,
-                             flatten_queue: flatten_queue
+                             sdk_marshal: sdk_marshal,
+                             prop_name: property.name.underscore
           end
 
-          def build_sdk_field_assignment(property, api_path, sdk_type_defs, resource_name, expand_queue, properties, object, in_structure = true)
-            compile_template property_to_sdk_field_assignment_template(property, sdk_type_defs[api_path]),
+          def build_sdk_field_assignment(property, sdk_marshal, in_structure = true)
+            compile_template property_to_sdk_field_assignment_template(property, sdk_marshal.sdktype.type_definition),
                              property: property,
-                             api_path: api_path,
-                             sdk_type_defs: sdk_type_defs,
-                             resource_name: resource_name,
-                             expand_queue: expand_queue,
-                             properties: properties,
-                             in_structure: in_structure,
-                             object: object
+                             sdk_marshal: sdk_marshal,
+                             in_structure: in_structure
           end
 
-          def build_property_to_sdk_object(api_path, resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4, include_empty = false)
+          def build_property_to_sdk_object(sdk_marshal, indentation = 4, include_empty = false)
             compile_template 'templates/azure/terraform/sdktypes/property_to_sdkobject.erb',
                              indentation: indentation,
-                             resource_name: resource_name,
-                             api_path: api_path,
-                             sdk_type_defs: sdk_type_defs,
-                             expand_queue: expand_queue,
-                             include_empty: include_empty,
-                             properties: properties,
-                             object: object
+                             sdk_marshal: sdk_marshal,
+                             include_empty: include_empty
           end
 
-          def build_property_to_sdk_object_empty_sensitive(resource_name, sdk_type_defs, expand_queue, properties, object, indentation = 4)
+          def build_property_to_sdk_object_empty_sensitive(sdk_marshal, indentation = 4)
             compile_template 'templates/azure/terraform/sdktypes/property_to_sdkobject_empty_sensitive.erb',
                              indentation: indentation,
-                             resource_name: resource_name,
-                             sdk_type_defs: sdk_type_defs,
-                             expand_queue: expand_queue,
-                             properties: properties,
-                             object: object
+                             sdk_marshal: sdk_marshal
           end
 
-          def build_schema_assignment(input, output, property, api_path, sdk_operation, resource_name, flatten_queue, properties, object)
-            compile_template property_to_schema_assignment_template(property, sdk_operation, api_path),
-                             input_statement: input,
+          def build_schema_assignment(input, output, property, sdk_marshal)
+            compile_template property_to_schema_assignment_template(property, sdk_marshal.sdktype.operation, sdk_marshal.sdktype.typedef_reference),
+                             input: input,
                              output: output,
-                             api_path: api_path,
-                             sdk_operation: sdk_operation,
-                             resource_name: resource_name,
-                             flatten_queue: flatten_queue,
-                             properties: properties,
-                             object: object
+                             sdk_marshal: sdk_marshal
           end
 
-          def build_sdk_object_to_property(input, output, api_path, sdk_operation, resource_name, flatten_queue, properties, object, indentation = 4)
+          def build_sdk_object_to_property(input, output, sdk_marshal, indentation = 4)
             compile_template 'templates/azure/terraform/sdktypes/sdkobject_to_property.erb',
                              indentation: indentation,
-                             input_statement: input,
+                             input: input,
                              output: output,
-                             api_path: api_path,
-                             sdk_operation: sdk_operation,
-                             resource_name: resource_name,
-                             flatten_queue: flatten_queue,
-                             properties: properties,
-                             object: object
+                             sdk_marshal: sdk_marshal
           end
 
           def build_sdk_func_invocation(sdk_op_def)

@@ -1,5 +1,4 @@
-<%  sdk_type_defs = sdk_operation.response.has_key?(api_path) ? sdk_operation.response : sdk_operation.request -%>
-<%  input_var = "string(" + input_statement + "." + sdk_type_defs[api_path].go_field_name + ")" -%>
-<%  get_properties_matching_sdk_reference(properties, api_path, object).each do |property| -%>
-<%=   lines(build_schema_property_set(input_var, 'd', api_path, sdk_type_defs, resource_name, flatten_queue, property)) -%>
+<%  input_var = "string(" + input + "." + sdk_marshal.sdktype.type_definition.go_field_name + ")" -%>
+<%  get_properties_matching_sdk_reference(sdk_marshal.properties, sdk_marshal.sdktype.typedef_reference).each do |property| -%>
+<%=   lines(build_schema_property_set(input_var, 'd', property, sdk_marshal.clone())) -%>
 <%  end -%>

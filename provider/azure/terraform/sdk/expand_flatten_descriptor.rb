@@ -1,18 +1,16 @@
+require 'provider/azure/terraform/sdk/sdk_type_definition_descriptor'
+
 module Provider
   module Azure
     module Terraform
       module SDK
         class ExpandFlattenDescriptor
           attr_reader :property
-          attr_reader :api_path
-          attr_reader :sdk_type
-          attr_reader :sdk_type_defs
+          attr_reader :sdkmarshal
 
-          def initialize(property, api_path, sdk_type_defs)
+          def initialize(property, sdkmarshal)
             @property = property
-            @api_path = api_path
-            @sdk_type_defs = sdk_type_defs
-            @sdk_type = sdk_type_defs[api_path]
+            @sdkmarshal = sdkmarshal
           end
         end
       end

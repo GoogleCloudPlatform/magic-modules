@@ -1,4 +1,4 @@
-<%  properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_op_def.request).nil?}.each do |prop| -%>
+<%  properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_op_def.request).nil?}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
 <%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_op_def.request).go_variable_name -%>
 <%=   var_name -%> := rs.Primary.Attributes["<%= prop.name.underscore -%>"]
 <%  end -%>
