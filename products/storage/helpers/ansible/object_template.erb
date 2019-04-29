@@ -34,7 +34,7 @@ import hashlib
 import base64
 <%
   imports = object.imports || []
-  imports << 'time' if object.__product.async
+  imports << 'time' if object.async
   imports << 're' unless readonly_selflink_rrefs.empty?
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>

@@ -31,7 +31,7 @@ __metaclass__ = type
 import json
 <%
   imports = object.imports || []
-  imports << 'time' if object.__product.async
+  imports << 'time' if object.async
   imports << 're' unless readonly_selflink_rrefs.empty?
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
@@ -156,11 +156,11 @@ def main():
 -%>
 <%
   method = method_call(
-    object.__product.async ? 'wait_for_operation' : 'return_if_object',
+    object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth#{create_verb}",
                  ['link', "#{create_request}(module)"]),
-     ('kind' if !object.__product.async && object.kind?)
+     ('kind' if !object.async && object.kind?)
    ]
   )
 -%>
@@ -217,11 +217,11 @@ def main():
 <%
   update_verb = object.update_verb.to_s.downcase
   method = method_call(
-    object.__product.async ? 'wait_for_operation' : 'return_if_object',
+    object.async ? 'wait_for_operation' : 'return_if_object',
     [
      'module',
      method_call("auth.#{update_verb}", method_args),
-     ('kind' if !object.__product.async && object.kind?)
+     ('kind' if !object.async && object.kind?)
    ]
   )
 -%>
@@ -285,10 +285,10 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
   delete_verb = object.delete_verb.to_s.downcase
 
   method = method_call(
-    object.__product.async ? 'wait_for_operation' : 'return_if_object',
+    object.async ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth.#{delete_verb}", ['link']),
-     ('kind' if !object.__product.async && object.kind?)
+     ('kind' if !object.async && object.kind?)
    ]
   )
 -%>
