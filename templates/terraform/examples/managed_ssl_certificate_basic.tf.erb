@@ -4,7 +4,7 @@ resource "google_compute_managed_ssl_certificate" "default" {
   name = "<%= ctx[:vars]['cert_name'] %>"
 
   managed {
-    domains = ["sslcert.tf-test.club"]
+    domains = ["sslcert.tf-test.club."]
   }
 }
 
