@@ -20,6 +20,27 @@ versions:
     base_url: https://accesscontextmanager.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::Async
+  operation: !ruby/object:Api::Async::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360
+      update_sec: 360
+      delete_sec: 360
+  result: !ruby/object:Api::Async::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::Async::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::Async::Error
+    path: 'error'
+    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'AccessPolicy'
@@ -31,27 +52,6 @@ objects:
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
       api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
-        path: 'name'
-        base_url: '{{op_id}}'
-        wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360
-          update_sec: 360
-          delete_sec: 360
-      result: !ruby/object:Api::Async::Result
-        path: 'response'
-        resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
-        path: 'done'
-        complete: true
-        allowed:
-          - true
-          - false
-      error: !ruby/object:Api::Async::Error
-        path: 'error'
-        message: 'message'
     description: |
       AccessPolicy is a container for AccessLevels (which define the necessary
       attributes to use GCP services) and ServicePerimeters (which define
@@ -99,27 +99,6 @@ objects:
     self_link: "{{name}}"
     update_verb: :PATCH
     update_mask: true
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
-        path: 'name'
-        base_url: '{{op_id}}'
-        wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360
-          update_sec: 360
-          delete_sec: 360
-      result: !ruby/object:Api::Async::Result
-        path: 'response'
-        resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
-        path: 'done'
-        complete: true
-        allowed:
-          - true
-          - false
-      error: !ruby/object:Api::Async::Error
-        path: 'error'
-        message: 'message'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Access Policy Quickstart': 'https://cloud.google.com/access-context-manager/docs/quickstart'
@@ -326,27 +305,6 @@ objects:
       GCP project can only belong to a single regular Service Perimeter. Service
       Perimeter Bridges can contain only GCP projects as members, a single GCP
       project may belong to multiple Service Perimeter Bridges.
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
-        path: 'name'
-        base_url: '{{op_id}}'
-        wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360
-          update_sec: 360
-          delete_sec: 360
-      result: !ruby/object:Api::Async::Result
-        path: 'response'
-        resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
-        path: 'done'
-        complete: true
-        allowed:
-          - true
-          - false
-      error: !ruby/object:Api::Async::Error
-        path: 'error'
-        message: 'message'
     parameters:
       # Parent is a path parameter that _cannot_ be read or sent in the request at all.
       # This must be done at the provider level.
