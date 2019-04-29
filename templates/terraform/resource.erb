@@ -29,7 +29,7 @@ package google
     api_client_name = api_name_lower.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
-    timeouts = object.async.nil? ? Api::Timeouts.new : object.async.operation.timeouts
+    timeouts = object.__product.async.nil? ? Api::Timeouts.new : object.__product.async.operation.timeouts
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
@@ -167,7 +167,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
-<%  unless object.async.nil? -%>
+<%  unless object.__product.async.nil? -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
@@ -358,7 +358,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         if err != nil {
             return err
         }
-<%      if object.async.nil? -%>
+<%      if object.__product.async.nil? -%>
         _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      else -%>
         res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
@@ -367,7 +367,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
-<%      unless object.async.nil? -%>
+<%      unless object.__product.async.nil? -%>
 <%      if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
@@ -463,7 +463,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
 <%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
-<%  if object.async.nil? -%>
+<%  if object.__product.async.nil? -%>
     _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
 <%  else -%>
     res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
@@ -473,7 +473,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
     return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
     }
 
-<%  unless object.async.nil? -%>
+<%  unless object.__product.async.nil? -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
@@ -534,7 +534,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
 
-<%  unless object.async.nil? -%>
+<%  unless object.__product.async.nil? -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {

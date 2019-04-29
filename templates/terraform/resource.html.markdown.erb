@@ -42,7 +42,7 @@
     terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
   end
   properties = object.all_user_properties
-  timeouts = object.async.nil? ? Api::Timeouts.new : object.async.operation.timeouts
+  timeouts = object.__product.async.nil? ? Api::Timeouts.new : object.__product.async.operation.timeouts
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
