@@ -175,13 +175,11 @@ module Provider
       return if @api.objects.select(&:autogen_async).empty?
 
       product_name = @api.name.underscore
-      async = @api.objects.map(&:async).compact.first
-
       data = build_object_data(@api.objects.first, output_folder, version_name)
       dir = data.version == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data.output_folder, dir)
 
-      data.async = async
+      data.async = @api.async
       data.object = @api.objects.first
       data.generate('templates/terraform/operation.go.erb',
                     File.join(target_folder,
