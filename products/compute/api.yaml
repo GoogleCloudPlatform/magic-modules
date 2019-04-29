@@ -1041,10 +1041,6 @@ objects:
         'Adding a persistent disk':
           'https://cloud.google.com/compute/docs/disks/add-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/v1/disks'
-          - 'DONE'
-      error: !ruby/object:Api::Async::Error
-        path: 'error/errors'
-        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -3260,12 +3256,6 @@ objects:
     has_self_link: true
     description: |
        An instance is a virtual machine (VM) hosted on Google's infrastructure.
-          - 'PENDING'
-          - 'RUNNING'
-          - 'DONE'
-      error: !ruby/object:Api::Async::Error
-        path: 'error/errors'
-        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'zone'
@@ -5000,8 +4990,6 @@ objects:
         'Adding or Resizing Regional Persistent Disks':
           'https://cloud.google.com/compute/docs/disks/regional-persistent-disk'
       api: 'https://cloud.google.com/compute/docs/reference/rest/beta/regionDisks'
-        path: 'error/errors'
-        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'region'
@@ -5472,10 +5460,6 @@ objects:
     # 'createSnapshot' is a zonal operation while 'snapshot.delete' is a global
     # operation. we'll leave the object as global operation and use the disk's
     # zonal operation for the create action.
-          - 'DONE'
-      error: !ruby/object:Api::Async::Error
-        path: 'error/errors'
-        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'sourceDisk'
@@ -5674,12 +5658,6 @@ objects:
       An SslCertificate resource, used for HTTPS load balancing.  This resource
       represents a certificate for which the certificate secrets are created and
       managed by Google.
-          - 'PENDING'
-          - 'RUNNING'
-          - 'DONE'
-      error: !ruby/object:Api::Async::Error
-        path: 'error/errors'
-        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
@@ -5866,12 +5844,6 @@ objects:
       instances in all other subnets of the same VPC network, regardless of
       region, using their RFC1918 private IP addresses. You can isolate portions
       of the network, even entire subnets, using firewall rules.
-          - 'PENDING'
-          - 'RUNNING'
-          - 'DONE'
-      error: !ruby/object:Api::Async::Error
-        path: 'error/errors'
-        message: 'message'
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'

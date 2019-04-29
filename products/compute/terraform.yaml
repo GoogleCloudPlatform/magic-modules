@@ -261,6 +261,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         Because the API does not return the sensitive key value,
         we cannot confirm or reverse changes to a key outside of Terraform.
   Disk: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Larger disks were timing out at creation. Bumping up to 5 minutes.
+    # https://github.com/terraform-providers/terraform-provider-google/issues/703
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 300 # 5 minutes
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -629,6 +633,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       sourceType: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Users were experiencing timeouts. Bumping up to 6 minutes.
+    # https://github.com/terraform-providers/terraform-provider-google/issues/852
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360 # 6 minutes
+      update_sec: 360 # 6 minutes
+      delete_sec: 360 # 6 minutes
     exclude: true
   InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
@@ -921,6 +931,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 300 # 5 minutes
+      update_sec: 300 # 5 minutes
+      delete_sec: 300 # 5 minutes
     create_url: projects/{{project}}/zones/{{zone}}/disks/{{source_disk}}/createSnapshot
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -959,6 +973,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/snapshot.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
   ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360 # 6 minutes
+      update_sec: 360 # 6 minutes
+      # Deletes can take 20-30 minutes to complete, since they depend
+      # on the provisioning process either succeeding or failing completely.
+      delete_sec: 1800 # 30 minutes
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
         This resource should be used with extreme caution!  Provisioning an SSL
@@ -1093,6 +1113,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Users were experiencing timeout. Bumping up to 6 minutes.
+    # https://github.com/terraform-providers/terraform-provider-google/issues/718
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360 # 6 minutes
+      update_sec: 360 # 6 minutes
+      delete_sec: 360 # 6 minutes
     id_format: "{{region}}/{{name}}"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
