@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 // Contains functions that don't really belong anywhere else.
 
 package google
@@ -466,3 +467,13 @@ func paginatedListRequest(baseUrl string, config *Config, flattener func(map[str
 
 	return ls, nil
 }
+
+<% unless version == 'ga' -%>
+// For managed SSL certs, if new is an absolute FQDN (trailing '.') but old isn't, treat them as equals.
+func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
+	if k == "managed.0.domains.0" {
+		return old == strings.TrimRight(new, ".")
+	}
+	return old == new
+}
+<% end -%>

@@ -998,6 +998,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           {{description}}
 
           These are in the same namespace as the managed SSL certificates.
+      managed.domains: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'absoluteDomainSuppress'
   SslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
