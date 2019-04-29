@@ -734,6 +734,25 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+  NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        Due to limitations of the API is designed, Terraform cannot update the
+        number of nodes in a node group and changes to node group size either
+        through Terraform config or through external changes will cause
+        Terraform to delete and recreate the node group.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_basic"
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
+    properties:
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
