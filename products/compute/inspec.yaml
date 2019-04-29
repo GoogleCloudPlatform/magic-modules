@@ -66,6 +66,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude_resource: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
+  TargetInstance:  !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   TargetPool: !ruby/object:Overrides::Inspec::ResourceOverride
     additional_functions: |
 <%= lines(indent(compile('templates/inspec/custom_functions/google_compute_target_pool.rb'), 6)) -%>
