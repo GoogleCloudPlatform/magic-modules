@@ -70,15 +70,6 @@ git config --global user.name "Modular Magician"
 
 git add -A
 
-# This is useful for human debugging, but not necessary for the Magician.
-git status
-
-# Only run `go mod vendor` if we see changes in this downstream repo, since it takes a while to run
-if [[ ! -z $(git status -s) ]]; then
-  GO111MODULE=on go mod vendor
-  git add -A
-fi
-
 # Set the "author" to the commit's real author.
 git commit -m "$TERRAFORM_COMMIT_MSG" --author="$LAST_COMMIT_AUTHOR" || true  # don't crash if no changes
 git checkout -B "$(cat ../../branchname)"
