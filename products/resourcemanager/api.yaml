@@ -25,23 +25,6 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud Resource Manager API
     url: https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com/
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
-    kind: 'notinuse'
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
-    resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
-    path: 'done'
-    complete: true
-    allowed:
-      - True
-      - False
-  error: !ruby/object:Api::Async::Error
-    path: 'error'
-    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'Project'
@@ -52,6 +35,23 @@ objects:
       Engine Apps, VMs, and other Google Cloud Platform resources.
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'projects'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'notinuse'
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: true
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'

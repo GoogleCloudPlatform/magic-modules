@@ -329,6 +329,7 @@ module Api
 
     def async
       return @__product.async unless @async
+
       @async
     end
 

@@ -24,23 +24,6 @@ apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Cloud Spanner API
     url: https://console.cloud.google.com/apis/library/spanner.googleapis.com/
-async: !ruby/object:Api::Async
-  operation: !ruby/object:Api::Async::Operation
-    path: 'name'
-    base_url: '{{op_id}}'
-    wait_ms: 1000
-  result: !ruby/object:Api::Async::Result
-    path: 'response'
-    resource_inside_response: true
-  status: !ruby/object:Api::Async::Status
-    path: 'done'
-    complete: True
-    allowed:
-      - True
-      - False
-  error: !ruby/object:Api::Async::Error
-    path: 'error'
-    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'InstanceConfig'
@@ -73,6 +56,23 @@ objects:
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       items: 'instances'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

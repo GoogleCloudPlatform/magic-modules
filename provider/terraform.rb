@@ -179,8 +179,8 @@ module Provider
       dir = data.version == 'beta' ? 'google-beta' : 'google'
       target_folder = File.join(data.output_folder, dir)
 
-      data.async = @api.async
-      data.object = @api.objects.first
+      data.object = @api.objects.select(&:autogen_async).first
+      data.async = data.object.async
       data.generate('templates/terraform/operation.go.erb',
                     File.join(target_folder,
                               "#{product_name}_operation.go"),

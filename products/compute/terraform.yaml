@@ -813,6 +813,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         required: false
         default_from_api: true
   RegionDisk: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 300 # 5 minutes
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
