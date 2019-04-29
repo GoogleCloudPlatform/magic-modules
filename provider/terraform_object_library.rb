@@ -43,10 +43,10 @@ module Provider
     def compile_common_files(output_folder, version_name = 'ga')
       Google::LOGGER.info 'Compiling common files.'
       compile_file_list(output_folder, [
-                       ['google/config.go',
-                        'third_party/terraform/utils/config.go.erb'],
-                       ['google/utils.go',
-                        'third_party/terraform/utils/utils.go.erb']
+                          ['google/config.go',
+                           'third_party/terraform/utils/config.go.erb'],
+                          ['google/utils.go',
+                           'third_party/terraform/utils/utils.go.erb']
                         ], version_name)
     end
 
