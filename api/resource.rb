@@ -359,9 +359,9 @@ module Api
     end
 
     def async_operation_url
-      raise 'Not an async resource' if @async.nil?
+      raise 'Not an async resource' unless async.nil?
 
-      [@__product.base_url, @async.operation.base_url]
+      [@__product.base_url, async.operation.base_url]
     end
 
     def default_create_url
