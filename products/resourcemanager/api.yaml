@@ -33,6 +33,8 @@ objects:
     description: |
       Represents a GCP Project. A project is a container for ACLs, APIs, App
       Engine Apps, VMs, and other Google Cloud Platform resources.
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      items: 'projects'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'notinuse'
@@ -50,8 +52,6 @@ objects:
       error: !ruby/object:Api::Async::Error
         path: 'error'
         message: 'message'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'projects'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'

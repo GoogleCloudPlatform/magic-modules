@@ -14,6 +14,10 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Index: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 600
+      update_sec: 600
+      delete_sec: 600
     autogen_async: true
     import_format: ["{{name}}"]
     description: |
