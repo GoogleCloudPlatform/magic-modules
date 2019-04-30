@@ -51,8 +51,8 @@ EXAMPLES = '''
 
 RETURN = '''
 <%= to_yaml({
-  'items' => {
-    'description' => 'List of items',
+  'resources' => {
+    'description' => 'List of resources',
     'returned' => 'always',
     'type' => 'complex',
     'contains' => object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)
@@ -107,7 +107,7 @@ def main():
     else:
         items = []
     return_value = {
-        'items': items
+        'resources': items
     }
     module.exit_json(**return_value)
 
