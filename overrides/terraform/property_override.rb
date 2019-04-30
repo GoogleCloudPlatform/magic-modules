@@ -61,6 +61,11 @@ module Overrides
           # It translates to setting the field to Computed & Optional in the schema.
           :default_from_api,
 
+          # https://github.com/hashicorp/terraform/pull/20837
+          # Apply a ConfigMode of SchemaConfigModeAttr to the field.
+          # This should be avoided for new fields, and only used with old ones.
+          :schema_config_mode_attr,
+
           # Names of attributes that can't be set alongside this one
           :conflicts_with,
 
@@ -121,6 +126,7 @@ module Overrides
         check :is_set, type: :boolean, default: false
         check :default_from_api, type: :boolean, default: false
         check :unordered_list, type: :boolean, default: false
+        check :schema_config_mode_attr, type: :boolean, default: false
 
         check :diff_suppress_func, type: String
         check :state_func, type: String
@@ -152,6 +158,11 @@ module Overrides
                   'or Api::Type:Map. ' \
                   "Type is #{api_property.class} for property "\
                   "'#{api_property.name}'"
+          end
+
+          if @schema_mode_config_attr && !@default_from_api
+            raise 'default_from_api must be true on a nested block to set' \
+                  'schema_mode_config_attr'
           end
         end
 
