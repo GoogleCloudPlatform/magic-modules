@@ -101,7 +101,8 @@ items:
             - The ID of the Batch Account auto storage account.
             returned: always
             type: str
-            sample: "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/sample-acct"
+            sample: "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group
+                }}/providers/Microsoft.Storage/storageAccounts/{{ name }}"
         key_vault_reference:
             description:
             - A reference to the Azure key vault associated with the Batch account.
@@ -163,6 +164,7 @@ class AzureRMBatchAccountInfo(AzureRMModuleBase):
         self.mgmt_client = None
         self.resource_group = None
         self.name = None
+        self.tags = None
         self.tags = None
         super(AzureRMBatchAccountInfo, self).__init__(self.module_arg_spec, supports_tags=False)
 

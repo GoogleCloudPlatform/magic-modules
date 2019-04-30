@@ -79,7 +79,8 @@ RETURN = '''
 '''
 
 import time
-from ansible.module_utils.azure_rm_common import AzureRMModuleBase<%= lines(', normalize_location_name') if is_location_defined?(object) -%>
+from ansible.module_utils.azure_rm_common import <%= lines('normalize_location_name') if is_location_defined?(object) -%>
+from ansible.module_utils.azure_rm_common_ext import AzureRMModuleBaseExt
 from ansible.module_utils.common.dict_transformations import _snake_to_camel
 
 try:
@@ -98,7 +99,7 @@ class Actions:
     NoAction, Create, Update, Delete = range(4)
 
 
-class AzureRM<%= object.name -%>(AzureRMModuleBase):
+class AzureRM<%= object.name -%>(AzureRMModuleBaseExt):
     """Configuration class for an Azure RM <%= object.name.titleize -%> resource"""
 
     def __init__(self):
@@ -168,7 +169,10 @@ class AzureRM<%= object.name -%>(AzureRMModuleBase):
             if self.state == 'absent':
                 self.to_do = Actions.Delete
             elif self.state == 'present':
-                self.idempotency_check(old_response, self.<%= root_object_field -%>)
+                self.results['old'] = old_response
+                self.results['new'] = self.<%= lines(root_object_field) -%>
+                if not self.idempotency_check(old_response, self.<%= root_object_field -%>):
+                    self.to_do = Actions.Update
 
         if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
             self.log("Need to Create / Update the <%= object.name.titlecase -%> instance")

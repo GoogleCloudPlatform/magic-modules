@@ -162,7 +162,7 @@ objects:
           'autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             applicable_to: [python]
             python_parameter_name: auto_storage
-            python_variable_name: auto_storage
+            python_variable_name: batch_account.get('auto_storage')
           'autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [python]
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
@@ -238,7 +238,7 @@ objects:
         name: autoStorageAccountId
         description: The ID of the Batch Account auto storage account.
         azure_sdk_references: ['/autoStorage/storageAccountId', '/properties/autoStorage/storageAccountId']
-        sample_value: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/sample-acct'
+        sample_value: '/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ name }}'
       - !ruby/object:Api::Type::Enum
         name: poolAllocationMode
         description: The pool acclocation mode of the Batch Account.

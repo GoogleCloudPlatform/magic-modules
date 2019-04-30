@@ -113,7 +113,8 @@ account_endpoint:
 '''
 
 import time
-from ansible.module_utils.azure_rm_common import AzureRMModuleBase, normalize_location_name
+from ansible.module_utils.azure_rm_common import normalize_location_name
+from ansible.module_utils.azure_rm_common_ext import AzureRMModuleBaseExt
 from ansible.module_utils.common.dict_transformations import _snake_to_camel
 
 try:
@@ -131,7 +132,7 @@ class Actions:
     NoAction, Create, Update, Delete = range(4)
 
 
-class AzureRMBatchAccount(AzureRMModuleBase):
+class AzureRMBatchAccount(AzureRMModuleBaseExt):
     """Configuration class for an Azure RM Batch Account resource"""
 
     def __init__(self):
@@ -178,6 +179,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
         self.resource_group = None
         self.name = None
         self.batch_account = dict()
+        self.tags = None
 
         self.results = dict(changed=False)
         self.mgmt_client = None
@@ -203,7 +205,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
         if self.batch_account.get('auto_storage_account') is not None:
             self.batch_account['auto_storage_account'] = self.normalize_resource_id(
                 self.batch_account['auto_storage_account'],
-                '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/sample-acct')
+                '/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ name }}')
         self.batch_account['pool_allocation_mode'] = _snake_to_camel(self.batch_account['pool_allocation_mode'], True)
 
         response = None
@@ -224,7 +226,10 @@ class AzureRMBatchAccount(AzureRMModuleBase):
             if self.state == 'absent':
                 self.to_do = Actions.Delete
             elif self.state == 'present':
-                self.idempotency_check(old_response, self.batch_account)
+                self.results['old'] = old_response
+                self.results['new'] = self.batch_account
+                if not self.idempotency_check(old_response, self.batch_account):
+                    self.to_do = Actions.Update
 
         if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
             self.log("Need to Create / Update the Batch Account instance")
@@ -273,7 +278,7 @@ class AzureRMBatchAccount(AzureRMModuleBase):
                 response = self.mgmt_client.batch_account.update(resource_group_name=self.resource_group,
                                                                  account_name=self.name,
                                                                  tags=self.tags,
-                                                                 auto_storage=self.auto_storage)
+                                                                 auto_storage=self.batch_account.get('auto_storage'))
             if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
                 response = self.get_poller_result(response)
         except CloudError as exc:
