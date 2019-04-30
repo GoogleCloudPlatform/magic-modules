@@ -210,24 +210,6 @@ func TestAccComputeRegionBackendService_withSessionAffinity(t *testing.T) {
 	}
 }
 
-func testAccCheckComputeRegionBackendServiceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_compute_region_backend_service" {
-			continue
-		}
-
-		_, err := config.clientCompute.RegionBackendServices.Get(
-			config.Project, config.Region, rs.Primary.ID).Do()
-		if err == nil {
-			return fmt.Errorf("Backend service still exists")
-		}
-	}
-
-	return nil
-}
-
 func testAccCheckComputeRegionBackendServiceExists(n string, svc *compute.BackendService) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
