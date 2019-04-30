@@ -569,8 +569,14 @@ objects:
       items: 'items'
     has_self_link: true
     description: |
-      Creates a BackendService resource in the specified project using the data
-      included in the request.
+      A Backend Service defines a group of virtual machines that will serve
+      traffic for load balancing. This resource is a global backend service,
+      appropriate for external load balancing. For internal load balancing, use
+      a regional backend service instead.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
+      api: 'https://cloud.google.com/compute/docs/reference/v1/backendServices'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -618,8 +624,6 @@ objects:
                 For global HTTP(S) or TCP/SSL load balancing, the default is
                 UTILIZATION. Valid values are UTILIZATION, RATE (for HTTP(S))
                 and CONNECTION (for TCP/SSL).
-
-                This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
               default_value: 1.0
@@ -631,8 +635,6 @@ objects:
                 of its configured capacity (depending on balancingMode). A
                 setting of 0 means the group is completely drained, offering
                 0% of its available Capacity. Valid range is [0.0,1.0].
-
-                This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::String
               name: 'description'
               description: |
@@ -658,11 +660,6 @@ objects:
                 Note that you must specify an Instance Group or Network Endpoint
                 Group resource using the fully-qualified URL, rather than a
                 partial URL.
-
-                When the BackendService has load balancing scheme INTERNAL, the
-                instance group must be within the same region as the
-                BackendService. Network Endpoint Groups are not supported for
-                INTERNAL load balancing scheme.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnections'
               description: |
@@ -671,8 +668,6 @@ objects:
 
                 For CONNECTION mode, either maxConnections or
                 maxConnectionsPerInstance must be set.
-
-                This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnectionsPerInstance'
               description: |
@@ -683,8 +678,6 @@ objects:
 
                 For CONNECTION mode, either maxConnections or
                 maxConnectionsPerInstance must be set.
-
-                This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::Integer
               name: 'maxRate'
               description: |
@@ -693,8 +686,6 @@ objects:
                 Can be used with either RATE or UTILIZATION balancing modes,
                 but required if RATE mode. For RATE mode, either maxRate or
                 maxRatePerInstance must be set.
-
-                This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::Double
               name: 'maxRatePerInstance'
               description: |
@@ -702,8 +693,6 @@ objects:
                 instance can handle. This is used to calculate the capacity of
                 the group. Can be used in either balancing mode. For RATE mode,
                 either maxRate or maxRatePerInstance must be set.
-
-                This cannot be used for internal load balancing.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
               default_value: 0.8
@@ -711,8 +700,6 @@ objects:
                 Used when balancingMode is UTILIZATION. This ratio defines the
                 CPU utilization target for the group. The default is 0.8. Valid
                 range is [0.0, 1.0].
-
-                This cannot be used for internal load balancing.
       - !ruby/object:Api::Type::NestedObject
         name: 'cdnPolicy'
         description: 'Cloud CDN configuration for this BackendService.'
@@ -810,8 +797,6 @@ objects:
         name: 'enableCDN'
         description: |
           If true, enable Cloud CDN for this BackendService.
-
-          When the load balancing scheme is INTERNAL, this field is not used.
       - !ruby/object:Api::Type::Array
         name: 'healthChecks'
         item_type: Api::Type::String
@@ -822,9 +807,6 @@ objects:
            The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
            for health checking this BackendService. Currently at most one health
            check can be specified, and a health check is required.
-
-           For internal load balancing, a URL to a HealthCheck resource must be
-           specified instead.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -853,14 +835,17 @@ objects:
               OAuth2 Client Secret SHA-256 for IAP
       - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
+        input: true
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
-          load balancing cannot be used with the other. One of `INTERNAL` or
-          `EXTERNAL`. Defaults to `EXTERNAL`.
+          load balancing cannot be used with the other. Must be `EXTERNAL` for
+          a global backend service. Defaults to `EXTERNAL`.
         default_value: :EXTERNAL
+        # If you're modifying this value, it probably means Global ILB is now
+        # an option. If that's the case, all of the documentation is based on
+        # this resource supporting external load balancing only.
         values:
-          - :INTERNAL
           - :EXTERNAL
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -881,16 +866,11 @@ objects:
           Name of backend port. The same name should appear in the instance
           groups referenced by this service. Required when the load balancing
           scheme is EXTERNAL.
-
-          When the load balancing scheme is INTERNAL, this field is not used.
       - !ruby/object:Api::Type::Enum
         name: 'protocol'
         description: |
           The protocol this BackendService uses to communicate with backends.
           Possible values are HTTP, HTTPS, TCP, and SSL. The default is HTTP.
-
-          For internal load balancing, the possible values are TCP and UDP, and
-          the default is TCP.
         values:
           - :HTTP
           - :HTTPS
@@ -904,14 +884,6 @@ objects:
           'projects/{{project}}/global/backendServices/{{name}}/setSecurityPolicy'
         description: |
           The security policy associated with this backend service.
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'selfLink'
-        exclude: true
-        description: |
-          The region where the regional backend service resides.
-          This field is not applicable to global backend services.
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -920,16 +892,11 @@ objects:
           When the load balancing scheme is EXTERNAL, can be NONE, CLIENT_IP, or
           GENERATED_COOKIE.
 
-          When the load balancing scheme is INTERNAL, can be NONE, CLIENT_IP,
-          CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
-
           When the protocol is UDP, this field is not used.
         values:
           - :NONE
           - :CLIENT_IP
           - :GENERATED_COOKIE
-          - :CLIENT_IP_PROTO
-          - :CLIENT_IP_PORT_PROTO
       - !ruby/object:Api::Type::Integer
         name: 'timeoutSec'
         description: |
