@@ -55,7 +55,6 @@ module Api
       attr_reader :nested_query
 
       attr_reader :exclude
-      attr_reader :async
       attr_reader :readonly
       # Documentation references
       attr_reader :references
@@ -328,6 +327,12 @@ module Api
       !@transport&.decoder.nil?
     end
 
+    def async
+      return @__product.async unless @async
+
+      @async
+    end
+
     def min_version
       if @min_version.nil?
         @__product.default_version
@@ -355,9 +360,9 @@ module Api
     end
 
     def async_operation_url
-      raise 'Not an async resource' if @async.nil?
+      raise 'Not an async resource' if async.nil?
 
-      [@__product.base_url, @async.operation.base_url]
+      [@__product.base_url, async.operation.base_url]
     end
 
     def default_create_url

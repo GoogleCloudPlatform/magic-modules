@@ -20,6 +20,23 @@ versions:
     base_url: https://firestore.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::Async
+  operation: !ruby/object:Api::Async::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::Async::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::Async::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::Async::Error
+    path: 'error'
+    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'Index'
@@ -32,27 +49,6 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/firestore/docs/query-data/indexing'
       api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.collectionGroups.indexes'
-    async: !ruby/object:Api::Async
-      operation: !ruby/object:Api::Async::Operation
-        path: 'name'
-        base_url: '{{op_id}}'
-        wait_ms: 1000
-        timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 600
-          update_sec: 600
-          delete_sec: 600
-      result: !ruby/object:Api::Async::Result
-        path: 'response'
-        resource_inside_response: true
-      status: !ruby/object:Api::Async::Status
-        path: 'done'
-        complete: true
-        allowed:
-          - true
-          - false
-      error: !ruby/object:Api::Async::Error
-        path: 'error'
-        message: 'message'
     properties:
       - !ruby/object:Api::Type::String
         name: name

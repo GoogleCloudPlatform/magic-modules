@@ -83,6 +83,8 @@ module Api
     # Usually just the product's API
     attr_reader :apis_required
 
+    attr_reader :async
+
     include Compile::Core
 
     def validate
@@ -92,6 +94,8 @@ module Api
       check :objects, type: Array, item_type: Api::Resource, required: true
       check :scopes, type: Array, item_type: String, required: true
       check :apis_required, type: Array, item_type: Api::Product::ApiReference
+
+      check :async, type: Api::Async
 
       check_versions
     end

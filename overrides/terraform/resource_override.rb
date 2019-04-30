@@ -44,7 +44,9 @@ module Overrides
 
           # If true, exclude resource from Terraform Validator
           # (i.e. terraform-provider-conversion)
-          :exclude_validator
+          :exclude_validator,
+
+          :timeouts
         ]
       end
 
@@ -65,6 +67,8 @@ module Overrides
         check :import_format, type: Array, item_type: String, default: []
         check :autogen_async, type: :boolean, default: false
         check :exclude_import, type: :boolean, default: false
+
+        check :timeouts, type: Api::Timeouts, default: Api::Timeouts.new
       end
 
       def apply(resource)
