@@ -64,9 +64,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_expand: templates/terraform/custom_expand/computed_subscription_topic.erb
       ackDeadlineSeconds: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      expirationPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      expirationPolicy.ttl: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'comparePubsubSubscriptionExpirationPolicy'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
+      constants: templates/terraform/constants/subscription.go.erb
       decoder: templates/terraform/decoders/pubsub_subscription.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/pubsub_subscription_path.erb
       update_encoder: templates/terraform/update_encoder/pubsub_subscription.erb
 
 
