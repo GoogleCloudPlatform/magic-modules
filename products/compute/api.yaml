@@ -911,8 +911,8 @@ objects:
       items: 'items'
     has_self_link: true
     description: |
-      Creates a BackendService resource in the specified project using the data
-      included in the request.
+      A Region Backend Service defines a regionally-scoped group of virtual
+      machines that will serve traffic for load balancing. 
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -935,7 +935,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'backends'
         description: |
-          The list of backends that serve this BackendService.
+          The list of backends that serve this RegionBackendService.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::String
@@ -956,9 +956,7 @@ objects:
                 resource using the fully-qualified URL, rather than a
                 partial URL.
 
-                When the BackendService has load balancing scheme INTERNAL, the
-                instance group must be within the same region as the
-                BackendService.
+                The instance group must be within the same region as the BackendService.
       - !ruby/object:Api::Type::Enum
         name: 'loadBalancingScheme'
         description: |
@@ -1144,17 +1142,12 @@ objects:
         description: |
           Type of session affinity to use. The default is NONE.
 
-          When the load balancing scheme is EXTERNAL, can be NONE, CLIENT_IP, or
-          GENERATED_COOKIE.
-
-          When the load balancing scheme is INTERNAL, can be NONE, CLIENT_IP,
-          CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
+          Can be NONE, CLIENT_IP, CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
 
           When the protocol is UDP, this field is not used.
         values:
           - :NONE
           - :CLIENT_IP
-          - :GENERATED_COOKIE
           - :CLIENT_IP_PROTO
           - :CLIENT_IP_PORT_PROTO
       - !ruby/object:Api::Type::Integer
