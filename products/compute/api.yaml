@@ -932,6 +932,31 @@ objects:
         path: 'error/errors'
         message: 'message'
     properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+      - !ruby/object:Api::Type::Array
+        name: 'healthChecks'
+        item_type: Api::Type::String
+        required: true
+        min_size: 1
+        max_size: 1
+        description: |
+           The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
+           for health checking this BackendService. Currently at most one health
+           check can be specified, and a health check is required.
+
+           For internal load balancing, a URL to a HealthCheck resource must be
+           specified instead.
       - !ruby/object:Api::Type::Array
         name: 'backends'
         description: |
@@ -957,186 +982,28 @@ objects:
                 partial URL.
 
                 The instance group must be within the same region as the BackendService.
-      - !ruby/object:Api::Type::Enum
-        name: 'loadBalancingScheme'
+      - !ruby/object:Api::Type::String
+        name: 'description'
         description: |
-          This signifies what the ForwardingRule will be used for and can only
-          take the following values: INTERNAL, EXTERNAL The value of INTERNAL
-          means that this will be used for Internal Network Load Balancing (TCP,
-          UDP). The value of EXTERNAL means that this will be used for External
-          Load Balancing (HTTP(S) LB, External TCP/UDP LB, SSL Proxy)
-        default_value: :INTERNAL
-        values:
-          - :INTERNAL
-      - !ruby/object:Api::Type::NestedObject
-        name: 'cdnPolicy'
-        description: 'Cloud CDN configuration for this BackendService.'
-        properties:
-          - !ruby/object:Api::Type::NestedObject
-            name: 'cacheKeyPolicy'
-            description: 'The CacheKeyPolicy for this CdnPolicy.'
-            properties:
-              - !ruby/object:Api::Type::Boolean
-                name: 'includeHost'
-                description: |
-                  If true requests to different hosts will be cached separately.
-              - !ruby/object:Api::Type::Boolean
-                name: 'includeProtocol'
-                description: |
-                  If true, http and https requests will be cached separately.
-              - !ruby/object:Api::Type::Boolean
-                name: 'includeQueryString'
-                description: |
-                  If true, include query string parameters in the cache key
-                  according to query_string_whitelist and
-                  query_string_blacklist. If neither is set, the entire query
-                  string will be included.
-
-                  If false, the query string will be excluded from the cache
-                  key entirely.
-              - !ruby/object:Api::Type::Array
-                name: 'queryStringBlacklist'
-                description: |
-                  Names of query string parameters to exclude in cache keys.
-
-                  All other parameters will be included. Either specify
-                  query_string_whitelist or query_string_blacklist, not both.
-                  '&' and '=' will be percent encoded and not treated as
-                  delimiters.
-                item_type: Api::Type::String
-              - !ruby/object:Api::Type::Array
-                name: 'queryStringWhitelist'
-                description: |
-                  Names of query string parameters to include in cache keys.
-
-                  All other parameters will be excluded. Either specify
-                  query_string_whitelist or query_string_blacklist, not both.
-                  '&' and '=' will be percent encoded and not treated as
-                  delimiters.
-                item_type: Api::Type::String
-          - !ruby/object:Api::Type::Integer
-            name: 'signedUrlCacheMaxAgeSec'
-            default_value: 3600
-            description: |
-              Maximum number of seconds the response to a signed URL request
-              will be considered fresh, defaults to 1hr (3600s). After this
-              time period, the response will be revalidated before
-              being served.
-
-              When serving responses to signed URL requests, Cloud CDN will
-              internally behave as though all responses from this backend had a
-              "Cache-Control: public, max-age=[TTL]" header, regardless of any
-              existing Cache-Control header. The actual headers served in
-              responses will not be altered.
-      - !ruby/object:Api::Type::NestedObject
-        name: 'connectionDraining'
-        description: |
-          Settings for connection draining
-        properties:
-          - !ruby/object:Api::Type::Integer
-            name: 'drainingTimeoutSec'
-            default_value: 0
-            description: |
-              Time for which instance will be drained (not accept new
-              connections, but still work to finish started).
-            send_empty_value: true
-      - !ruby/object:Api::Type::Time
-        name: 'creationTimestamp'
-        description: |
-          Creation timestamp in RFC3339 text format.
-        output: true
-      - !ruby/object:Api::Type::Array
-        name: 'customRequestHeaders'
-        min_version: beta
-        item_type: Api::Type::String
-        description: |
-          Headers that the HTTP/S load balancer should add to proxied
-          requests.
+          An optional description of this resource.
       - !ruby/object:Api::Type::Fingerprint
         name: 'fingerprint'
         output: true
         description: |
           Fingerprint of this resource. A hash of the contents stored in this
           object. This field is used in optimistic locking.
-      - !ruby/object:Api::Type::String
-        name: 'description'
-        description: |
-          An optional description of this resource.
-      - !ruby/object:Api::Type::Array
-        name: 'healthChecks'
-        item_type: Api::Type::String
-        required: true
-        min_size: 1
-        max_size: 1
-        description: |
-           The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
-           for health checking this BackendService. Currently at most one health
-           check can be specified, and a health check is required.
-
-           For internal load balancing, a URL to a HealthCheck resource must be
-           specified instead.
-      - !ruby/object:Api::Type::Integer
-        name: 'id'
-        description: 'The unique identifier for the resource.'
-        output: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'iap'
-        description: Settings for enabling Cloud Identity Aware Proxy
-        properties:
-          - !ruby/object:Api::Type::Boolean
-            name: 'enabled'
-            description: Enables IAP.
-          - !ruby/object:Api::Type::String
-            name: 'oauth2ClientId'
-            required: true
-            description: |
-              OAuth2 Client ID for IAP
-          - !ruby/object:Api::Type::String
-            name: 'oauth2ClientSecret'
-            required: true
-            description: |
-              OAuth2 Client Secret for IAP
-          - !ruby/object:Api::Type::String
-            name: 'oauth2ClientSecretSha256'
-            output: true
-            description: |
-              OAuth2 Client Secret SHA-256 for IAP
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        required: true
-        input: true
-        description: |
-          Name of the resource. Provided by the client when the resource is
-          created. The name must be 1-63 characters long, and comply with
-          RFC1035. Specifically, the name must be 1-63 characters long and match
-          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
-          first character must be a lowercase letter, and all following
-          characters must be a dash, lowercase letter, or digit, except the last
-          character, which cannot be a dash.
       - !ruby/object:Api::Type::Enum
         name: 'protocol'
         description: |
           The protocol this BackendService uses to communicate with backends.
 
           The possible values are TCP and UDP, and the default is TCP.
+        # This is removed to avoid breaking terraform, as default values cannot be
+        # unspecified. Providers should include this as needed via overrides
+        # default_value: :TCP
         values:
           - :TCP
           - :UDP
-      # TODO: make a ResourceRef to Security Policy
-      - !ruby/object:Api::Type::String
-        name: 'securityPolicy'
-        update_verb: :POST
-        update_url:
-          'projects/{{project}}/regions/{{region}}/backendServices/{{name}}/setSecurityPolicy'
-        description: |
-          The security policy associated with this backend service.
-      - !ruby/object:Api::Type::ResourceRef
-        name: 'region'
-        resource: 'Region'
-        imports: 'selfLink'
-        input: true
-        description: |
-          The region where the regional backend service resides.
       - !ruby/object:Api::Type::Enum
         name: 'sessionAffinity'
         description: |
@@ -1150,11 +1017,39 @@ objects:
           - :CLIENT_IP
           - :CLIENT_IP_PROTO
           - :CLIENT_IP_PORT_PROTO
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        input: true
+        description: |
+          The region where the regional backend service resides.
       - !ruby/object:Api::Type::Integer
         name: 'timeoutSec'
         description: |
           How many seconds to wait for the backend before considering it a
           failed request. Default is 30 seconds. Valid range is [1, 86400].
+      - !ruby/object:Api::Type::NestedObject
+        name: 'connectionDraining'
+        description: |
+          Settings for connection draining
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'drainingTimeoutSec'
+            description: |
+              Time for which instance will be drained (not accept new
+              connections, but still work to finish started).
+      - !ruby/object:Api::Type::Enum
+        name: 'loadBalancingScheme'
+        description: |
+          This signifies what the ForwardingRule will be used for and can only
+          take the following values: INTERNAL, EXTERNAL The value of INTERNAL
+          means that this will be used for Internal Network Load Balancing (TCP,
+          UDP). The value of EXTERNAL means that this will be used for External
+          Load Balancing (HTTP(S) LB, External TCP/UDP LB, SSL Proxy)
+        default_value: :INTERNAL
+        values:
+          - :INTERNAL
   - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
