@@ -47,9 +47,10 @@ module Provider
                          property: property
       end
 
-      def build_property_documentation(property)
+      def build_property_documentation(property, is_data_source = false)
         compile_template 'templates/terraform/property_documentation.erb',
-                         property: property
+                         property: property,
+                         is_data_source: is_data_source
       end
 
       def build_nested_property_documentation(property)

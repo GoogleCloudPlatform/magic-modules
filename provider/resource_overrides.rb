@@ -36,6 +36,8 @@ module Provider
   #         description: 'baz'
   #   ...
   class ResourceOverrides < Api::Object
+    attr_accessor :__is_data_source
+
     def consume_config(api, config)
       @__api = api
       @__config = config
@@ -44,6 +46,7 @@ module Provider
     def validate
       return unless @__objects.nil? # allows idempotency of calling validate
       return if @__api.nil?
+      @__is_data_source ||= false
       populate_nonoverridden_objects
       convert_findings_to_hash
       override_objects
@@ -99,6 +102,7 @@ module Provider
         api_object = @__api.objects.find { |o| o.name == name }
         raise "The resource to override must exist #{name}" if api_object.nil?
         check_property_value 'overrides', override, Provider::ResourceOverride
+        override.__is_data_source = @__is_data_source
         override.apply api_object
         populate_nonoverridden_properties api_object, override
         override_properties api_object, override

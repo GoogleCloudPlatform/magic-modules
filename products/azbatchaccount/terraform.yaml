@@ -17,6 +17,10 @@ overrides: !ruby/object:Provider::ResourceOverrides
           function: azure.ValidateResourceIDOrEmpty
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_functions: products/azbatchaccount/terraform_extra_functions.erb
+    acctests:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        name: basic
+        steps: [basic]
     document_examples:
       - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
         title: Example Usage
@@ -26,3 +30,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
           storageAccounts: examplesa
           batchAccounts: example-batch-account
           location: West US
+datasources: !ruby/object:Provider::ResourceOverrides
+  BatchAccount: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    properties:
+      resourceGroupName: !ruby/object:Provider::Azure::Terraform::PropertyOverride
+        description: The Name of the Resource Group where the App Service exists.
+    acctests:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        name: basic
+        steps: [basic]
+    datasource_example_outputs:
+      batch_id: id

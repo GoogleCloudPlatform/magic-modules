@@ -26,9 +26,12 @@ module Provider
     # - 'foo.bar': Property 'bar' nested under property 'foo'
     attr_reader :properties
 
+    attr_accessor :__is_data_source
+
     # Apply this override to the given instance of Api::Resource
     def apply(api_resource)
       ensure_resource_properties
+      convert_properties_to_datasource(api_resource.all_user_properties, api_resource.azure_sdk_definition) if @__is_data_source
       update_overriden_properties(api_resource)
       update_overriden_azure_sdk_definition(api_resource)
       update_properties_default_sort_order(api_resource)
@@ -63,6 +66,23 @@ module Provider
       Api::Resource.send(:include, overriden) # override ...
       require_module overriden
       our_override_modules.each { |mod| require_module mod } # ... and verify
+    end
+
+    def convert_properties_to_datasource(properties, azure_sdk_definition)
+      properties.each do |p|
+        if p.is_a? Api::Azure::Type::ResourceGroupName
+          p.instance_variable_set('@custom_schema_definition', 'templates/azure/terraform/schemas/datasource_resource_group_name.erb')
+        elsif p.is_a? Api::Azure::Type::Location
+          p.instance_variable_set('@custom_schema_definition', 'templates/azure/terraform/schemas/datasource_location.erb')
+        elsif p.is_a? Api::Azure::Type::Tags
+          p.instance_variable_set('@custom_schema_definition', 'templates/azure/terraform/schemas/datasource_tags.erb')
+        end
+        unless p.azure_sdk_references.any?{|r| azure_sdk_definition.read.request.has_key?(r)}
+          p.instance_variable_set('@required', false)
+          p.instance_variable_set('@output', true)
+          convert_properties_to_datasource(p.properties, azure_sdk_definition) if p.respond_to?(:properties) && !p.properties.nil?
+        end
+      end
     end
 
     # Copies all overridable properties from ResourceOverride into

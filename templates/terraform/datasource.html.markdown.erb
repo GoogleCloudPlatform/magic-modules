@@ -1,0 +1,79 @@
+<%
+  resource_name = object.name.underscore
+  terraform_name = "azurerm_" + object.name.underscore
+
+  properties = object.all_user_properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}
+  input_properties = properties.reject(&:output)
+
+  sdk_operation = object.azure_sdk_definition.read
+-%>
+---
+<%= lines(autogen_notice :yaml) -%>
+layout: "azurerm"
+page_title: "Azure Resource Manager: azurerm_<%= resource_name -%>"
+sidebar_current: "docs-azurerm-datasource-<%= resource_name.gsub("_", "-") -%>"
+description: |-
+  Gets information about an existing <%= lines(object.name.titlecase) -%>
+---
+
+# Data Source: azurerm_<%= lines(resource_name) -%>
+
+Use this data source to access information about an existing <%= object.name.titlecase -%>.
+
+<%- unless object.docs.warning.nil? -%>
+~> **Warning:** <%= lines(object.docs.warning) -%>
+<%- end -%>
+
+<%  if object.respond_to?(:document_examples) && !object.document_examples.nil? -%>
+<%    object.document_examples.each do |example_ref| -%>
+<%      datasource_props = input_properties.map do |p| -%>
+<%        sdk_type = get_sdk_typedef_by_references(p.azure_sdk_references, sdk_operation.request) -%>
+<%        [p.name.underscore, example_ref.resource_name_hints[sdk_type.id_portion]] -%>
+<%      end.to_h -%>
+## <%= lines(example_ref.title) -%>
+
+```hcl
+data "<%= terraform_name -%>" "example" {
+<%= lines(build_hcl_properties(datasource_props)) -%>
+}
+<%    object.datasource_example_outputs.each do |outName, output| -%>
+
+output "<%= outName -%>" {
+  value = "${data.<%= terraform_name -%>.example.<%= output -%>}"
+}
+<%    end -%>
+```
+
+<%    end -%>
+<%  end -%>
+
+## Argument Reference
+
+The following arguments are supported:
+<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_property_documentation(prop, true)) -%>
+<% end -%>
+<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_property_documentation(prop, true)) -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+
+
+## Attributes Reference
+
+The following attributes are exported:
+<% properties.select(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_property_documentation(prop, true)) -%>
+<% end -%>
+
+<% properties.select(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<%- unless object.docs.attributes.nil? -%>
+<%= "\n" + object.docs.attributes -%>
+<% end -%>

@@ -179,5 +179,33 @@ module Provider
       # TODO: error check goimports
       # %x(goimports -w #{filepath})
     end
+
+    def compile_datasource(data)
+      dir = 'azurerm'
+      target_folder = File.join(data[:output_folder], dir)
+      FileUtils.mkpath target_folder
+      name = data[:object].name.underscore
+      product_name = data[:product_name].underscore
+
+      filepath = File.join(target_folder, "data_source_#{name}.go")
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/terraform/datasource.erb',
+        out_file: filepath
+      )
+
+      filepath = File.join(target_folder, "data_source_#{name}_test.go")
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/terraform/examples/base_configs/datasource_test.go.erb',
+        out_file: filepath
+      )
+
+      target_folder = File.join(target_folder, 'website', 'docs', 'd')
+      FileUtils.mkpath target_folder
+      filepath = File.join(target_folder, "#{name}.html.markdown")
+      generate_resource_file data.clone.merge(
+        default_template: 'templates/terraform/datasource.html.markdown.erb',
+        out_file: filepath
+      )
+    end
   end
 end

@@ -48,7 +48,7 @@
 	StateFunc: <%= property.state_func %>,
 <% end -%>
 <% if property.is_a?(Api::Type::NestedObject) -%>
-    MaxItems: 1,
+<%= lines('    MaxItems: 1,') unless property.output -%>
     Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
 <%   order_properties(property.properties).each do |prop| -%>
@@ -119,7 +119,7 @@
 <% if property.sensitive -%>
     Sensitive: true,
 <% end -%>
-<% unless property.default_value.nil? -%>
+<% if !property.default_value.nil? && !property.output -%>
     Default: <%= go_literal(property.default_value, sdk_package) -%>,
 <% end -%>
 <% unless property.conflicts_with.empty? -%>

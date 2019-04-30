@@ -5,10 +5,10 @@
     prefix = "(Optional) " if !property.required && !property.output
 
     force_new_postfix = ""
-    force_new_postfix = " Changing this forces a new resource to be created." if property.input && !property.output
+    force_new_postfix = " Changing this forces a new resource to be created." if property.input && !property.output && !is_data_source
 
     default_value_postfix = ""
-    default_value_postfix = " Defaults to `#{property.default_value}`." if property.default_value != nil
+    default_value_postfix = " Defaults to `#{property.default_value}`." if property.default_value != nil && !property.output
 -%>
 <% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
 * `<%= property.name.underscore -%>` - <%= prefix %>One<%= ' or more' unless property.is_a?(Api::Type::NestedObject) -%> `<%= property.name.underscore -%>` block defined below.<%= force_new_postfix -%>

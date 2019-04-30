@@ -24,6 +24,33 @@ import (
     "github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
+func TestAccAzureRMBatchAccount_basic(t *testing.T) {
+    resourceName := "azurerm_batch_account.test"
+    ri := tf.AccRandTimeInt()
+    location := testLocation()
+
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:     func() { testAccPreCheck(t) },
+        Providers:    testAccProviders,
+        CheckDestroy: testCheckAzureRMBatchAccountDestroy,
+        Steps: []resource.TestStep{
+            {
+                Config: testAccAzureRMBatchAccount_basic(ri, location),
+                Check: resource.ComposeTestCheckFunc(
+                    testCheckAzureRMBatchAccountExists(resourceName),
+                    resource.TestCheckResourceAttr(dataSourceName, "poolAllocationMode", "BatchService"),
+                    resource.TestCheckResourceAttrSet(dataSourceName, "storageAccountId"),
+                ),
+            },
+            {
+                ResourceName:      resourceName,
+                ImportState:       true,
+                ImportStateVerify: true,
+            },
+        },
+    })
+}
+
 
 func testCheckAzureRMBatchAccountExists(resourceName string) resource.TestCheckFunc {
     return func(s *terraform.State) error {
@@ -71,4 +98,29 @@ func testCheckAzureRMBatchAccountDestroy(s *terraform.State) error {
     }
 
     return nil
+}
+
+func testAccAzureRMBatchAccount_basic(rInt int, location string) string {
+    return fmt.Sprintf(`
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-%d"
+  location = "%s"
+}
+
+resource "azurerm_storage_account" "test" {
+  name                   = "acctestsa-%d"
+  resource_group_name    = "${azurerm_resource_group.test.name}"
+  location               = "${azurerm_resource_group.test.location}"
+  accountTier            = "Standard"
+  accountReplicationType = "LRS"
+}
+
+resource "azurerm_batch_account" "test" {
+  name                = "acctestbatch-%d"
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  location            = "${azurerm_resource_group.test.location}"
+  poolAllocationMode  = "BatchService"
+  storageAccountId    = "${azurerm_storage_account.test.id}"
+}
+`, rInt, location, rInt, rInt)
 }

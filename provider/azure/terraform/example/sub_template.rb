@@ -5,12 +5,14 @@ module Provider
     module Terraform
       class Example < Api::Object
         module SubTemplate
-          def build_test_hcl_from_example(product_name, example_name, random_vars, with_dependencies = false)
-            build_hcl_from_example(product_name, example_name, "test", {}, random_vars, true)
+          def build_test_hcl_from_example(example_name)
+            random_vars = Array.new
+            hcl = build_hcl_from_example(nil, example_name, "test", {}, random_vars, true)
+            return hcl, random_vars
           end
 
-          def build_documentation_hcl_from_example(product_name, example_name, name_hints, with_dependencies = false)
-            build_hcl_from_example(product_name, example_name, "example", name_hints, [], true)
+          def build_documentation_hcl_from_example(example_name, name_hints)
+            build_hcl_from_example(nil, example_name, "example", name_hints, [], true)
           end
 
           def build_hcl_from_example(product_name, example_name, id_hint, name_hints, random_vars, with_dependencies = false)

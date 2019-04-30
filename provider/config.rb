@@ -111,6 +111,8 @@ module Provider
       check_property :overrides, Provider::ResourceOverrides
       check_property_list :changelog, Provider::Config::Changelog \
         unless @changelog.nil?
+
+      @datasources.__is_data_source = true unless @datasources.nil?
     end
 
     # Provides the API object to any type that requires, e.g. for validation

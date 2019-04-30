@@ -90,7 +90,7 @@ To get more information about <%= object.name -%>, see:
 
 
 ```hcl
-<%= lines(build_documentation_hcl_from_example(product_ns, example_ref.example_name, example_ref.resource_name_hints, true)) -%>
+<%= lines(build_documentation_hcl_from_example(example_ref.example_name, example_ref.resource_name_hints)) -%>
 ```
 
 <%    end -%>
