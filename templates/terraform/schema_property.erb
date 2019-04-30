@@ -26,6 +26,9 @@
 <%	if property.default_from_api -%>
 	Computed: true,
 	Optional: true,
+	<% if property.schema_config_mode_attr -%>
+	ConfigMode: schema.SchemaConfigModeAttr,
+	<% end -%>
 <% elsif property.required -%>
   Required: true,
 <% elsif property.output -%>
