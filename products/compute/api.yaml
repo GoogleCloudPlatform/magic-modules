@@ -4865,14 +4865,17 @@ objects:
     properties:
       - !ruby/object:Api::Type::Time
         name: 'creationTimestamp'
-        description: 'Creation timestamp in RFC3339 text format.'
+        description: |
+          Creation timestamp in RFC3339 text format.
         output: true
       - !ruby/object:Api::Type::String
         name: 'description'
-        description: 'An optional textual description of the resource.'
+        description: |
+          An optional textual description of the resource.
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'Name of the resource.'
+        description: |
+          Name of the resource.
       - !ruby/object:Api::Type::ResourceRef
         name: 'nodeTemplate'
         resource: 'NodeTemplate'
@@ -4884,7 +4887,8 @@ objects:
         update_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}/setNodeTemplate'
       - !ruby/object:Api::Type::Integer
         name: 'size'
-        description: 'The total number of nodes in the node group.'
+        description: |
+          The total number of nodes in the node group.
         required: true
   - !ruby/object:Api::Resource
     name: 'NodeTemplate'
@@ -4894,7 +4898,7 @@ objects:
     description: |
       Represents a NodeTemplate resource. Node templates specify properties
       for creating sole-tenant nodes, such as node type, vCPU and memory
-      requirments, node affinity labels, and region. 
+      requirments, node affinity labels, and region.
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:

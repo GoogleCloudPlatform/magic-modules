@@ -737,7 +737,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
-        Due to limitations of the API is designed, Terraform cannot update the
+        Due to limitations of the API, Terraform cannot update the
         number of nodes in a node group and changes to node group size either
         through Terraform config or through external changes will cause
         Terraform to delete and recreate the node group.
