@@ -44,6 +44,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   NodeTemplate: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Inspec::ResourceOverride

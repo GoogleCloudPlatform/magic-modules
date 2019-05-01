@@ -4824,6 +4824,74 @@ objects:
           The default port used if the port number is not specified in the
           network endpoint.
   - !ruby/object:Api::Resource
+    name: 'NodeGroup'
+    kind: 'compute#NodeGroup'
+    base_url: projects/{{project}}/zones/{{zone}}/nodeGroups
+    create_url: projects/{{project}}/zones/{{zone}}/nodeGroups?initialNodeCount={{size}}
+    has_self_link: true
+    description: |
+      Represents a NodeGroup resource to manage a group of sole-tenant nodes.
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Sole-Tenant Nodes': 'https://cloud.google.com/compute/docs/nodes/'
+      api: 'https://cloud.google.com/compute/docs/reference/rest/v1/nodeGroups'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'zone'
+        resource: 'Zone'
+        imports: 'selfLink'
+        required: true
+        description: |
+          Zone where this node group is located
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: |
+          Creation timestamp in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional textual description of the resource.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource.
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'nodeTemplate'
+        resource: 'NodeTemplate'
+        imports: 'selfLink'
+        required: true
+        description: |
+          The URL of the node template to which this node group belongs.
+        update_verb: :POST
+        update_url: 'projects/{{project}}/zones/{{zone}}/nodeGroups/{{name}}/setNodeTemplate'
+      - !ruby/object:Api::Type::Integer
+        name: 'size'
+        description: |
+          The total number of nodes in the node group.
+        required: true
+        send_empty_value: true
+  - !ruby/object:Api::Resource
     name: 'NodeTemplate'
     kind: 'compute#nodeTemplate'
     base_url: projects/{{project}}/regions/{{region}}/nodeTemplates
@@ -4831,7 +4899,7 @@ objects:
     description: |
       Represents a NodeTemplate resource. Node templates specify properties
       for creating sole-tenant nodes, such as node type, vCPU and memory
-      requirments, node affinity labels, and region. 
+      requirments, node affinity labels, and region.
     input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
