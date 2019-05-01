@@ -43,22 +43,48 @@ objects:
             python_variable_name: batch_account
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
+            python_field_name: location
+          '/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [python]
+            python_field_name: auto_storage
+          '/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [python]
+            python_field_name: storage_account_id
+          '/keyVaultReference': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [python]
+            python_field_name: key_vault_reference
+          '/keyVaultReference/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [python]
+            python_field_name: id
+          '/keyVaultReference/url': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [python]
+            python_field_name: url
+          '/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
+            applicable_to: [python]
+            python_field_name: pool_allocation_mode
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [go]
             go_field_name: AccountCreateProperties
             go_type_name: AccountCreateProperties
           '/properties/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [go]
             go_field_name: AutoStorage
             go_type_name: AutoStorageBaseProperties
           '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [go]
             go_field_name: StorageAccountID
           '/properties/keyVaultReference': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [go]
             go_field_name: KeyVaultReference
             go_type_name: KeyVaultReference
           '/properties/keyVaultReference/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [go]
             go_field_name: ID
           '/properties/keyVaultReference/url': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [go]
             go_field_name: URL
           '/properties/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
+            applicable_to: [go]
             go_field_name: PoolAllocationMode
             go_enum_type_name: PoolAllocationMode
           '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject

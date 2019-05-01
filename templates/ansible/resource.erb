@@ -134,22 +134,8 @@ class AzureRM<%= object.name -%>(AzureRMModuleBaseExt):
             elif kwargs[key] is not None:
                 self.<%= root_object_field -%>[key] = kwargs[key]
 
-<%  input_properties.each do |prop| -%>
-<%    if prop.is_a? Api::Type::Enum -%>
-        self.<%= root_object_field -%>['<%= python_variable_name(prop, object.azure_sdk_definition.create) -%>'] = _snake_to_camel(self.<%= root_object_field -%>['<%= python_variable_name(prop, object.azure_sdk_definition.create) -%>'], True)
-<%    elsif is_location? prop -%>
-        resource_group = self.get_resource_group(self.resource_group)
-        if self.<%= root_object_field -%>.get('location') is None:
-            self.<%= root_object_field -%>['location'] = resource_group.location
-<%    elsif prop.is_a? Api::Azure::Type::ResourceReference -%>
-<%      prop_field_name = python_variable_name(prop, object.azure_sdk_definition.create) -%>
-<%      prop_expr = "self.#{root_object_field}['#{prop_field_name}']" -%>
-        if self.<%= root_object_field -%>.get('<%= prop_field_name -%>') is not None:
-            <%= prop_expr -%> = self.normalize_resource_id(
-                <%= prop_expr -%>,
-                <%= python_literal(prop.sample_value) -%>)
-<%    end -%>
-<%  end -%>
+<%  sdk_marshal = Provider::Azure::Ansible::SDK::MarshalDescriptor.new input_properties.reject{|p| is_tags?(p)}, object.azure_sdk_definition.create, "self.#{root_object_field}", "self.#{root_object_field}" -%>
+<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
 
         response = None
 
