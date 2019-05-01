@@ -915,8 +915,7 @@ objects:
       machines that will serve traffic for load balancing.
 
       Region backend services can only be used when using internal load balancing.
-      For external load balancing, use
-      [`google_compute_backend_service`](compute_backend_service.html) instead. 
+      For external load balancing, use a global backend service instead. 
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
