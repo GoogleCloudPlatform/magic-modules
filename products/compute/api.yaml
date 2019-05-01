@@ -914,12 +914,9 @@ objects:
       A Region Backend Service defines a regionally-scoped group of virtual
       machines that will serve traffic for load balancing.
 
-      ~> **Note**: Region backend services can only be used when using internal load balancing.
+      Region backend services can only be used when using internal load balancing.
       For external load balancing, use
       [`google_compute_backend_service`](compute_backend_service.html) instead. 
-
-
- ## Example Usage
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
