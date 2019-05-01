@@ -915,7 +915,7 @@ objects:
       machines that will serve traffic for load balancing.
 
       Region backend services can only be used when using internal load balancing.
-      For external load balancing, use a global backend service instead. 
+      For external load balancing, use a global backend service instead.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
@@ -958,12 +958,9 @@ objects:
         min_size: 1
         max_size: 1
         description: |
-           The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
-           for health checking this BackendService. Currently at most one health
-           check can be specified, and a health check is required.
-
-           For internal load balancing, a URL to a HealthCheck resource must be
-           specified instead.
+           The list of HealthChecks for checking the health of the backend service.
+           Currently at most one health check can be specified, and a health check
+           is required.
       - !ruby/object:Api::Type::Array
         name: 'backends'
         description: |
