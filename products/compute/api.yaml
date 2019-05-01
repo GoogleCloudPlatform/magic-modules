@@ -4890,6 +4890,7 @@ objects:
         description: |
           The total number of nodes in the node group.
         required: true
+        send_empty_value: true
   - !ruby/object:Api::Resource
     name: 'NodeTemplate'
     kind: 'compute#nodeTemplate'
