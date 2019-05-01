@@ -70,6 +70,11 @@ type mockTerraformResourceData struct {
 	TerraformResourceData
 }
 
+func (d *mockTerraformResourceData) GetOkExists(k string) (interface{}, bool) {
+	v, ok := d.m[k]
+	return v, ok
+}
+
 func (d *mockTerraformResourceData) GetOk(k string) (interface{}, bool) {
 	v, ok := d.m[k]
 	return v, ok
