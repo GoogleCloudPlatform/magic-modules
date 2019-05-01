@@ -60,6 +60,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         override_name: "region_status"
   RegionAutoscaler: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  RegionBackendService: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   RegionDisk: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   RegionDiskType: !ruby/object:Overrides::Inspec::ResourceOverride

@@ -903,6 +903,155 @@ objects:
           How many seconds to wait for the backend before considering it a
           failed request. Default is 30 seconds. Valid range is [1, 86400].
   - !ruby/object:Api::Resource
+    name: 'RegionBackendService'
+    kind: 'compute#backendService'
+    base_url: projects/{{project}}/regions/{{region}}/backendServices
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#backendServicesList'
+      items: 'items'
+    has_self_link: true
+    description: |
+      A Region Backend Service defines a regionally-scoped group of virtual
+      machines that will serve traffic for load balancing.
+
+      Region backend services can only be used when using internal load balancing.
+      For external load balancing, use a global backend service instead.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+      - !ruby/object:Api::Type::Array
+        name: 'healthChecks'
+        item_type: Api::Type::String
+        required: true
+        min_size: 1
+        max_size: 1
+        description: |
+           The list of HealthChecks for checking the health of the backend service.
+           Currently at most one health check can be specified, and a health check
+           is required.
+      - !ruby/object:Api::Type::Array
+        name: 'backends'
+        description: |
+          The list of backends that serve this RegionBackendService.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: |
+                An optional description of this resource.
+                Provide this property when you create the resource.
+            - !ruby/object:Api::Type::String
+              name: 'group'
+              description: |
+                The fully-qualified URL of an Instance Group. This defines the list
+                of instances that serve traffic. Member virtual machine
+                instances from each instance group must live in the same zone as
+                the instance group itself. No two backends in a backend service
+                are allowed to use same Instance Group resource.
+
+                Note that you must specify an Instance Group
+                resource using the fully-qualified URL, rather than a
+                partial URL.
+
+                The instance group must be within the same region as the BackendService.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        output: true
+        description: |
+          Fingerprint of this resource. A hash of the contents stored in this
+          object. This field is used in optimistic locking.
+      - !ruby/object:Api::Type::Enum
+        name: 'protocol'
+        description: |
+          The protocol this BackendService uses to communicate with backends.
+
+          The possible values are TCP and UDP, and the default is TCP.
+        # This is removed to avoid breaking terraform, as default values cannot be
+        # unspecified. Providers should include this as needed via overrides
+        # default_value: :TCP
+        values:
+          - :TCP
+          - :UDP
+      - !ruby/object:Api::Type::Enum
+        name: 'sessionAffinity'
+        description: |
+          Type of session affinity to use. The default is NONE.
+
+          Can be NONE, CLIENT_IP, CLIENT_IP_PROTO, or CLIENT_IP_PORT_PROTO.
+
+          When the protocol is UDP, this field is not used.
+        values:
+          - :NONE
+          - :CLIENT_IP
+          - :CLIENT_IP_PROTO
+          - :CLIENT_IP_PORT_PROTO
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'selfLink'
+        input: true
+        description: |
+          The region where the regional backend service resides.
+      - !ruby/object:Api::Type::Integer
+        name: 'timeoutSec'
+        description: |
+          How many seconds to wait for the backend before considering it a
+          failed request. Default is 30 seconds. Valid range is [1, 86400].
+      - !ruby/object:Api::Type::NestedObject
+        name: 'connectionDraining'
+        description: |
+          Settings for connection draining
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'drainingTimeoutSec'
+            description: |
+              Time for which instance will be drained (not accept new
+              connections, but still work to finish started).
+      - !ruby/object:Api::Type::Enum
+        name: 'loadBalancingScheme'
+        description: |
+          This signifies what the ForwardingRule will be used for and can only
+          be INTERNAL for RegionBackendServices
+        default_value: :INTERNAL
+        values:
+          - :INTERNAL
+  - !ruby/object:Api::Resource
     name: 'BackendServiceSignedUrlKey'
     kind: 'compute#BackendServiceSignedUrlKey'
     input: true
