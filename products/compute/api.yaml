@@ -912,7 +912,18 @@ objects:
     has_self_link: true
     description: |
       A Region Backend Service defines a regionally-scoped group of virtual
-      machines that will serve traffic for load balancing. 
+      machines that will serve traffic for load balancing.
+
+      ~> **Note**: Region backend services can only be used when using internal load balancing.
+      For external load balancing, use
+      [`google_compute_backend_service`](compute_backend_service.html) instead. 
+
+
+ ## Example Usage
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
+      api: 'https://cloud.google.com/compute/docs/reference/latest/regionBackendServices'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
@@ -1043,10 +1054,7 @@ objects:
         name: 'loadBalancingScheme'
         description: |
           This signifies what the ForwardingRule will be used for and can only
-          take the following values: INTERNAL, EXTERNAL The value of INTERNAL
-          means that this will be used for Internal Network Load Balancing (TCP,
-          UDP). The value of EXTERNAL means that this will be used for External
-          Load Balancing (HTTP(S) LB, External TCP/UDP LB, SSL Proxy)
+          be INTERNAL for RegionBackendServices
         default_value: :INTERNAL
         values:
           - :INTERNAL

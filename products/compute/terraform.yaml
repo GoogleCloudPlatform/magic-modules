@@ -244,6 +244,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
     properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
       backends: !ruby/object:Overrides::Terraform::PropertyOverride
         name: backend
         is_set: true
