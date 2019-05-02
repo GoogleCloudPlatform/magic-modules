@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -9,28 +7,28 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	computeBeta "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/compute/v1"
 )
 
 var IamComputeSubnetworkSchema = map[string]*schema.Schema{
 	"subnetwork": {
-		Type:       schema.TypeString,
-		Required:   true,
-		ForceNew:   true,
+		Type:     schema.TypeString,
+		Required: true,
+		ForceNew: true,
 	},
 
 	"project": {
-		Type:       schema.TypeString,
-		Optional:   true,
-		Computed:   true,
-		ForceNew:   true,
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+		ForceNew: true,
 	},
 
 	"region": {
-		Type:       schema.TypeString,
-		Optional:   true,
-		Computed:   true,
-		ForceNew:   true,
+		Type:     schema.TypeString,
+		Optional: true,
+		Computed: true,
+		ForceNew: true,
 	},
 }
 
@@ -101,13 +99,13 @@ func ComputeSubnetworkIdParseFunc(d *schema.ResourceData, config *Config) error 
 }
 
 func (u *ComputeSubnetworkIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	p, err := u.Config.clientComputeBeta.Subnetworks.GetIamPolicy(u.project, u.region, u.resourceId).Do()
+	p, err := u.Config.clientCompute.Subnetworks.GetIamPolicy(u.project, u.region, u.resourceId).Do()
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	cloudResourcePolicy, err := computeBetaToResourceManagerPolicy(p)
+	cloudResourcePolicy, err := computeToResourceManagerPolicy(p)
 
 	if err != nil {
 		return nil, errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -117,16 +115,16 @@ func (u *ComputeSubnetworkIamUpdater) GetResourceIamPolicy() (*cloudresourcemana
 }
 
 func (u *ComputeSubnetworkIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	computePolicy, err := resourceManagerToComputeBetaPolicy(policy)
+	computePolicy, err := resourceManagerToComputePolicy(policy)
 
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Invalid IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
-	req := &computeBeta.RegionSetPolicyRequest{
+	req := &compute.RegionSetPolicyRequest{
 		Policy: computePolicy,
 	}
-	_, err = u.Config.clientComputeBeta.Subnetworks.SetIamPolicy(u.project, u.region, u.resourceId, req).Do()
+	_, err = u.Config.clientCompute.Subnetworks.SetIamPolicy(u.project, u.region, u.resourceId, req).Do()
 
 	if err != nil {
 		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
@@ -147,8 +145,8 @@ func (u *ComputeSubnetworkIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("Compute Subnetwork %s/%s/%s", u.project, u.region, u.resourceId)
 }
 
-func resourceManagerToComputeBetaPolicy(p *cloudresourcemanager.Policy) (*computeBeta.Policy, error) {
-	out := &computeBeta.Policy{}
+func resourceManagerToComputePolicy(p *cloudresourcemanager.Policy) (*compute.Policy, error) {
+	out := &compute.Policy{}
 	err := Convert(p, out)
 	if err != nil {
 		return nil, errwrap.Wrapf("Cannot convert a resourcemanager policy to a compute policy: {{err}}", err)
@@ -156,7 +154,7 @@ func resourceManagerToComputeBetaPolicy(p *cloudresourcemanager.Policy) (*comput
 	return out, nil
 }
 
-func computeBetaToResourceManagerPolicy(p *computeBeta.Policy) (*cloudresourcemanager.Policy, error) {
+func computeToResourceManagerPolicy(p *compute.Policy) (*cloudresourcemanager.Policy, error) {
 	out := &cloudresourcemanager.Policy{}
 	err := Convert(p, out)
 	if err != nil {
@@ -164,6 +162,3 @@ func computeBetaToResourceManagerPolicy(p *computeBeta.Policy) (*cloudresourcema
 	}
 	return out, nil
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
