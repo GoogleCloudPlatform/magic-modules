@@ -15,6 +15,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   ScanConfig: !ruby/object:Overrides::Terraform::ResourceOverride
     import_format: ["{{name}}"]
     properties:
+      authentication: !ruby/object:Overrides::Terraform::PropertyOverride
+        properties:
+          googleAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+            properties:
+              password: !ruby/object:Overrides::Terraform::PropertyOverride 
+                sensitive: true
+          customAccount: !ruby/object:Overrides::Terraform::PropertyOverride
+            properties:
+              password: !ruby/object:Overrides::Terraform::PropertyOverride 
+                sensitive: true
       schedule: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           scheduleTime: !ruby/object:Overrides::Terraform::PropertyOverride
