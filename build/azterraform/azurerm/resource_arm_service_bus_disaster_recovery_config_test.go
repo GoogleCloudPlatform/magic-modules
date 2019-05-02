@@ -41,7 +41,7 @@ func testCheckAzureRMServiceBusDisasterRecoveryConfigExists(resourceName string)
 
         if resp, err := client.Get(ctx, resourceGroup, servicebusName, name); err != nil {
             if utils.ResponseWasNotFound(resp.Response) {
-                return fmt.Errorf("Bad: Service Bus Disaster Recovery Config %q (Namespace Name %q / Resource Group %q) does not exist", name, servicebusName, resourceGroup)
+                return fmt.Errorf("Bad: Service Bus Disaster Recovery Config %q (Resource Group %q / Namespace Name %q) does not exist", name, resourceGroup, servicebusName)
             }
             return fmt.Errorf("Bad: Get on serviceBusRecoveryClient: %+v", err)
         }

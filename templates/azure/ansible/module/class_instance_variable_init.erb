@@ -1,4 +1,4 @@
-<%  params = sdk_operation.request.reject {|k, v| k.start_with?("/") && k != "/"} -%>
+<%  params = sdk_operation.request.reject{|k, v| k.start_with?("/") && k != "/"} -%>
 <%  params.each do |name, value| -%>
 <%    case value -%>
 <%    when Api::Azure::SDKTypeDefinition::StringObject -%>
@@ -9,3 +9,4 @@ self.<%= value.python_variable_name -%> = dict()
 # TODO: <%= value -%> is not supported for initialization
 <%    end -%>
 <%  end -%>
+<%= lines('self.tags = None') if is_tags_defined?(object) -%>

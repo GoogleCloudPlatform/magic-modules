@@ -9,6 +9,7 @@ module Provider
         attr_reader :azure_sdk_definition
         attr_reader :acctests
         attr_reader :document_examples
+        attr_reader :datasource_example_outputs
         include Provider::Terraform::OverrideProperties
       end
 
@@ -24,6 +25,7 @@ module Provider
           check_optional_property_list :acctests, AccTestDefinition
           check_optional_property :document_examples, Array
           check_optional_property_list :document_examples, DocumentExampleReference
+          check_optional_property :datasource_example_outputs, Hash
         end
 
         class DocumentExampleReference < Api::Object
@@ -37,6 +39,17 @@ module Provider
             check_property :example_name, String
             check_optional_property :resource_name_hints, Hash
             check_optional_property_hash :resource_name_hints, String, String
+          end
+        end
+
+        class DataSourceExampleReference < Api::Object
+          attr_reader :title
+          attr_reader :example_name
+
+          def validate
+            super
+            check_property :title, String
+            check_property :example_name, String
           end
         end
 

@@ -32,10 +32,11 @@
 <%
   enum_values = property.values
   # enum_values.push "" unless property.required
+  sdk_type = get_sdk_typedef_by_references(property.azure_sdk_references, object.azure_sdk_definition.create.request)
 -%>
     ValidateFunc: validation.StringInSlice([]string{
 <%  enum_values.each do |val| -%>
-        <%= go_literal(val, sdk_package) -%>,
+        <%= go_literal((sdk_type.go_enum_const_prefix + val.to_s).to_sym, sdk_package) -%>,
 <%  end -%>
     }, false),
 <% end -%>
@@ -48,7 +49,7 @@
 	StateFunc: <%= property.state_func %>,
 <% end -%>
 <% if property.is_a?(Api::Type::NestedObject) -%>
-    MaxItems: 1,
+<%= lines('    MaxItems: 1,') unless property.output -%>
     Elem: &schema.Resource{
         Schema: map[string]*schema.Schema{
 <%   order_properties(property.properties).each do |prop| -%>
@@ -119,7 +120,7 @@
 <% if property.sensitive -%>
     Sensitive: true,
 <% end -%>
-<% unless property.default_value.nil? -%>
+<% if !property.default_value.nil? && !property.output -%>
     Default: <%= go_literal(property.default_value, sdk_package) -%>,
 <% end -%>
 <% unless property.conflicts_with.empty? -%>

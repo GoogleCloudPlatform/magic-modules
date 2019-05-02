@@ -7,8 +7,6 @@ versions:
     base_url: NotUsedInAzure
 scopes:
   - NotUsedInAzure
-azure_namespace: Microsoft.Batch
-azure_version: '2018-12-01'
 objects:
   - !ruby/object:Api::Resource
     name: BatchAccount
@@ -43,25 +41,51 @@ objects:
             python_variable_name: batch_account
           '/location': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             go_field_name: Location
+            python_field_name: location
+          '/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [python]
+            python_field_name: auto_storage
+          '/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [python]
+            python_field_name: storage_account_id
+          '/keyVaultReference': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [python]
+            python_field_name: key_vault_reference
+          '/keyVaultReference/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [python]
+            python_field_name: id
+          '/keyVaultReference/url': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [python]
+            python_field_name: url
+          '/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
+            applicable_to: [python]
+            python_field_name: pool_allocation_mode
           '/properties': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [go]
             go_field_name: AccountCreateProperties
             go_type_name: AccountCreateProperties
           '/properties/autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [go]
             go_field_name: AutoStorage
             go_type_name: AutoStorageBaseProperties
           '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [go]
             go_field_name: StorageAccountID
           '/properties/keyVaultReference': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
+            applicable_to: [go]
             go_field_name: KeyVaultReference
             go_type_name: KeyVaultReference
           '/properties/keyVaultReference/id': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [go]
             go_field_name: ID
           '/properties/keyVaultReference/url': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+            applicable_to: [go]
             go_field_name: URL
           '/properties/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
+            applicable_to: [go]
             go_field_name: PoolAllocationMode
             go_enum_type_name: PoolAllocationMode
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringMapObject
             go_field_name: Tags
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
@@ -139,7 +163,7 @@ objects:
           '/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
             applicable_to: [python]
             python_field_name: pool_allocation_mode
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringMapObject
             go_field_name: Tags
       update: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Update
@@ -162,7 +186,7 @@ objects:
           'autoStorage': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
             applicable_to: [python]
             python_parameter_name: auto_storage
-            python_variable_name: auto_storage
+            python_variable_name: batch_account.get('auto_storage')
           'autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [python]
           '/': !ruby/object:Api::Azure::SDKTypeDefinition::ComplexObject
@@ -180,7 +204,7 @@ objects:
           '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [go]
             go_field_name: StorageAccountID
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringMapObject
             applicable_to: [go]
             go_field_name: Tags
       delete: !ruby/object:Api::Azure::SDKOperationDefinition
@@ -238,7 +262,7 @@ objects:
         name: autoStorageAccountId
         description: The ID of the Batch Account auto storage account.
         azure_sdk_references: ['/autoStorage/storageAccountId', '/properties/autoStorage/storageAccountId']
-        sample_value: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Storage/storageAccounts/sample-acct'
+        sample_value: '/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ name }}'
       - !ruby/object:Api::Type::Enum
         name: poolAllocationMode
         description: The pool acclocation mode of the Batch Account.

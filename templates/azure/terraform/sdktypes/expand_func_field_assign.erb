@@ -1,7 +1,8 @@
-<%  sdk_type = sdk_type_defs[api_path] -%>
+<%= sdk_marshal.sdktype.go_field_name -%><%=   in_structure ? ': ' : ' = ' -%>
 <%  if expand_funcs.include?(property.class) -%>
-<%=   sdk_type.go_field_name -%><%= in_structure ? ': ' : ' = ' -%><%= expand_func(property) -%>(<%= property.name.camelcase(:lower) -%>)<%= ',' if in_structure -%>
+<%=   expand_func(property) -%>(<%= property.name.camelcase(:lower) -%>
 <%  else -%>
-<%    expand_or_flatten_enqueue(expand_queue, property, api_path, sdk_type_defs) -%>
-<%=   sdk_type.go_field_name -%><%= in_structure ? ': ' : ' = ' -%>expand<%= resource_name -%><%= titlelize_property(property) -%>(<%= property.name.camelcase(:lower) -%>)<%= ',' if in_structure -%>
+<%    sdk_marshal.enqueue(property) -%>
+expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(<%= property.name.camelcase(:lower) -%>
 <%  end -%>
+)<%= ',' if in_structure -%>

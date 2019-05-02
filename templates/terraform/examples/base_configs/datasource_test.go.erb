@@ -1,0 +1,82 @@
+<%= lines(autogen_notice :go) -%>
+
+package azurerm
+
+import (
+    "fmt"
+    "testing"
+
+    "github.com/hashicorp/terraform/helper/resource"
+    "github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+)
+
+<%
+    resource_name = object.name
+    terraform_name = "azurerm_" + object.name.underscore
+    azure_client_name = object.azure_sdk_definition.go_client
+
+    properties = object.all_user_properties
+    input_properties = properties.reject(&:output)
+    datasource_props = input_properties.map{|p| [p.name.underscore, "${#{terraform_name}.test.#{p.name.underscore}}"]}.to_h
+
+    test_hcls = Hash.new
+-%>
+<%
+    if object.respond_to? :acctests
+      object.acctests.each do |test|
+        test.steps.uniq.each do |name|
+          test_hcl, random_vars = build_test_hcl_from_example(name)
+          test_hcls[name] = { :hcl => test_hcl, :random_vars => random_vars }
+        end
+-%>
+func TestAccDataSourceAzureRM<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
+    dataSourceName := "data.<%= terraform_name -%>.test"
+<%      test.steps.map{|step| test_hcls[step][:random_vars]}.flatten.uniq(&:variable_name).each do |param| -%>
+    <%=   param.variable_name -%> := <%= lines(param.create_expression) -%>
+<%      end -%>
+
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:     func() { testAccPreCheck(t) },
+        Providers:    testAccProviders,
+        Steps: []resource.TestStep{
+<%      test.steps.each do |step| -%>
+<%        hcl_params = test_hcls[step][:random_vars].map(&:variable_name).uniq -%>
+<%        props_to_check = get_example_properties_to_check(step, object) -%>
+            {
+                Config: testAccDataSource<%= resource_name -%>_<%= step -%>(<%= hcl_params.join(", ") -%>),
+                Check: resource.ComposeTestCheckFunc(
+<%        props_to_check.each do |propName, propValue| -%>
+<%          if propValue == :AttrSet -%>
+                    resource.TestCheckResourceAttrSet(dataSourceName, "<%= propName -%>"),
+<%          else -%>
+                    resource.TestCheckResourceAttr(dataSourceName, "<%= propName -%>", "<%= propValue -%>"),
+<%          end -%>
+<%        end -%>
+                ),
+            },
+<%      end -%>
+        },
+    })
+}
+<%    end -%>
+<%  end -%>
+
+<%
+    if object.respond_to? :acctests
+      test_hcls.each do |name, test_hcl|
+        uniq_params = test_hcl[:random_vars].uniq(&:parameter_name).map{|p| "#{p.parameter_name} #{p.go_type}"}
+        hcl_params = test_hcl[:random_vars].map(&:parameter_name).uniq
+-%>
+func testAccDataSource<%= resource_name -%>_<%= name -%>(<%= uniq_params.join(", ") -%>) string {
+    config := testAcc<%= resource_name -%>_<%= name -%>(<%= hcl_params.join(", ") -%>)
+    return fmt.Sprintf(`
+%s
+
+data "<%= terraform_name -%>" "test" {
+<%= lines(build_hcl_properties(datasource_props)) -%>
+}
+`, config)
+}
+
+<%    end -%>
+<%  end -%>

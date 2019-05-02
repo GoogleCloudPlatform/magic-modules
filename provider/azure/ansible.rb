@@ -1,5 +1,7 @@
 require 'provider/azure/ansible/helpers'
 require 'provider/azure/ansible/sub_template'
+require 'provider/azure/ansible/sdk/sdk_marshal_descriptor'
+require 'provider/azure/ansible/sdk/property_normalize_descriptor'
 require 'provider/azure/ansible/sdk/helpers'
 require 'provider/azure/ansible/module/sub_template'
 require 'provider/azure/ansible/sdk/sub_template'

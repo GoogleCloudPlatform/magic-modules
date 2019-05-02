@@ -61,7 +61,9 @@ module Provider
           ("elements=#{quote_string(python_type(prop.item_type))}" \
             if prop.is_a? Api::Type::Array),
           ("aliases=[#{prop.aliases.map { |x| quote_string(x) }.join(', ')}]" \
-            if prop.aliases)
+            if prop.aliases),
+          ('updatable=False' if prop.input && !is_resource_group?(prop) && !is_resource_name?(prop)),
+          ("disposition='/'" if prop.input && !is_resource_group?(prop) && !is_resource_name?(prop))
         ].compact
       end
 

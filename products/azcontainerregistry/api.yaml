@@ -7,8 +7,6 @@ versions:
     base_url: NotUsedInAzure
 scopes:
   - NotUsedInAzure
-azure_namespace: 'Microsoft.ContainerRegistry'
-azure_version: 'stable/2017-10-01'
 objects:
   - !ruby/object:Api::Resource
     name: ContainerRegistry

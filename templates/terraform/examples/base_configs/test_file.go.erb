@@ -17,22 +17,21 @@ import (
     azure_client_name = object.azure_sdk_definition.go_client
     properties = object.all_user_properties
     contains_acctests = object.instance_variable_defined?(:@acctests)
-%>
+-%>
+
 <%
     test_hcls = Hash.new
     if contains_acctests
       object.acctests.each do |test|
         test.steps.uniq.each do |name|
-          random_vars = []
-          test_hcl = build_test_hcl_from_example(product_ns, name, random_vars, true)
+          test_hcl, random_vars = build_test_hcl_from_example(name)
           test_hcls[name] = { :hcl => test_hcl, :random_vars => random_vars }
         end
 -%>
 func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
     resourceName := "<%= terraform_name -%>.test"
 <%      test.steps.map{|step| test_hcls[step][:random_vars]}.flatten.uniq(&:variable_name).each do |param| -%>
-    <%=   param.variable_name -%> := <%= param.create_expression -%>
-
+    <%=   param.variable_name -%> := <%= lines(param.create_expression) -%>
 <%      end -%>
 
     resource.ParallelTest(t, resource.TestCase{
@@ -42,13 +41,17 @@ func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
         Steps: []resource.TestStep{
 <%      test.steps.each do |step| -%>
 <%        hcl_params = test_hcls[step][:random_vars].map(&:variable_name).uniq -%>
-<%        props_to_check = get_example_properties_to_check(product_ns, step, object) -%>
+<%        props_to_check = get_example_properties_to_check(step, object) -%>
             {
                 Config: testAcc<%= resource_name -%>_<%= step -%>(<%= hcl_params.join(", ") -%>),
                 Check: resource.ComposeTestCheckFunc(
                     testCheck<%= resource_name -%>Exists(resourceName),
 <%        props_to_check.each do |propName, propValue| -%>
-                    resource.TestCheckResourceAttr(resourceName, "<%= propName -%>", "<%= propValue -%>"),
+<%          if propValue == :AttrSet -%>
+                    resource.TestCheckResourceAttrSet(dataSourceName, "<%= propName -%>"),
+<%          else -%>
+                    resource.TestCheckResourceAttr(dataSourceName, "<%= propName -%>", "<%= propValue -%>"),
+<%          end -%>
 <%        end -%>
                 ),
             },

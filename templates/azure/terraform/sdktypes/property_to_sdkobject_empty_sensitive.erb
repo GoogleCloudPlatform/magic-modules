@@ -1,17 +1,16 @@
 <%
-    sdk_package = object.azure_sdk_definition.go_client_namespace
-    properties.each do |prop|
-      prop.azure_sdk_references.select{|ref| sdk_type_defs.has_key?(ref)}.each do |sdk_reference|
-        sdk_type = sdk_type_defs[sdk_reference]
+    sdk_marshal.properties.sort_by{|p| [p.order, p.name]}.each do |prop|
+      prop.azure_sdk_references.select{|ref| sdk_marshal.sdktype.type_definitions.has_key?(ref)}.each do |sdk_reference|
+        sdk_type = sdk_marshal.sdktype.type_definitions[sdk_reference]
         if sdk_type.empty_value_sensitive
           # Get the first initialized ancester
           ancesters = [sdk_reference]
           begin
             parent_ref = ancesters[-1].split('/')[0..-2].join('/')
-            parent_type = sdk_type_defs[parent_ref]
-            initialized = properties.any? do |p|
-              p.azure_sdk_references.select{|r| sdk_type_defs.has_key?(r)}.any? do |r|
-                r.start_with?(parent_ref) && !sdk_type_defs[r].empty_value_sensitive
+            parent_type = sdk_marshal.sdktype.type_definitions[parent_ref]
+            initialized = sdk_marshal.properties.any? do |p|
+              p.azure_sdk_references.select{|r| sdk_marshal.sdktype.type_definitions.has_key?(r)}.any? do |r|
+                r.start_with?(parent_ref) && !sdk_marshal.sdktype.type_definitions[r].empty_value_sensitive
               end
             end
             ancesters <<= parent_ref
@@ -21,11 +20,11 @@
 -%>
 if <%= local_var -%> != <%= go_empty_value(prop) -%> {
 <%        if ancesters.size() == 2 -%>
-    parameters.<%= ancesters.reverse[0..-2].map{|r| sdk_type_defs[r].go_field_name}.join('.') -%>.<%= lines(build_sdk_field_assignment(prop, sdk_reference, sdk_type_defs, resource_name, expand_queue, [prop], object, false)) -%>
+    parameters.<%= ancesters.reverse[0..-2].map{|r| sdk_marshal.sdktype.type_definitions[r].go_field_name}.join('.') -%>.<%= lines(build_sdk_field_assignment(prop, sdk_marshal.clone(sdk_reference, [prop]), false)) -%>
 }
 <%        else -%>
-    parameters.<%= ancesters.reverse[0..1].map{|r| sdk_type_defs[r].go_field_name}.join('.') -%> = &<%= sdk_package -%>.<%= sdk_type_defs[ancesters[-2]].go_type_name -%>{
-<%=       lines(build_property_to_sdk_object(ancesters[-2], resource_name, sdk_type_defs, expand_queue, [prop], object, 8, true)) -%>
+    parameters.<%= ancesters.reverse[0..1].map{|r| sdk_marshal.sdktype.type_definitions[r].go_field_name}.join('.') -%> = &<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.type_definitions[ancesters[-2]].go_type_name -%>{
+<%=       lines(build_property_to_sdk_object(sdk_marshal.clone(ancesters[-2], [prop]), 8, true)) -%>
     }
 }
 

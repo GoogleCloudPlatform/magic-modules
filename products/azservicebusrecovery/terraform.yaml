@@ -2,6 +2,9 @@
 name: Arm
 overrides: !ruby/object:Provider::ResourceOverrides
   ServiceBusDisasterRecoveryConfig: !ruby/object:Provider::Terraform::ResourceOverride
+    properties:
+      namespaceName: !ruby/object:Provider::Azure::Terraform::PropertyOverride
+        order: 700
     example:
       - !ruby/object:Provider::Terraform::Examples
         name: "resource_group"
