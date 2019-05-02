@@ -22,8 +22,8 @@ name: Filestore
 display_name: Cloud Filestore
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://file.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://file.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 async: !ruby/object:Api::Async
