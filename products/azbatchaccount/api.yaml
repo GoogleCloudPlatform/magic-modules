@@ -7,8 +7,6 @@ versions:
     base_url: NotUsedInAzure
 scopes:
   - NotUsedInAzure
-azure_namespace: Microsoft.Batch
-azure_version: '2018-12-01'
 objects:
   - !ruby/object:Api::Resource
     name: BatchAccount
@@ -87,7 +85,7 @@ objects:
             applicable_to: [go]
             go_field_name: PoolAllocationMode
             go_enum_type_name: PoolAllocationMode
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringMapObject
             go_field_name: Tags
       read: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Get
@@ -165,7 +163,7 @@ objects:
           '/poolAllocationMode': !ruby/object:Api::Azure::SDKTypeDefinition::EnumObject
             applicable_to: [python]
             python_field_name: pool_allocation_mode
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringMapObject
             go_field_name: Tags
       update: !ruby/object:Api::Azure::SDKOperationDefinition
         go_func_name: Update
@@ -206,7 +204,7 @@ objects:
           '/properties/autoStorage/storageAccountId': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
             applicable_to: [go]
             go_field_name: StorageAccountID
-          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringObject
+          '/tags': !ruby/object:Api::Azure::SDKTypeDefinition::StringMapObject
             applicable_to: [go]
             go_field_name: Tags
       delete: !ruby/object:Api::Azure::SDKOperationDefinition

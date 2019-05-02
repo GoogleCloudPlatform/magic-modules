@@ -7,8 +7,6 @@ versions:
     base_url: NotUsedInAzure
 scopes:
   - NotUsedInAzure
-azure_namespace: 'servicebus'
-azure_version: '2017-04-01'
 objects:
   - !ruby/object:Api::Resource
     name: ServiceBusDisasterRecoveryConfig

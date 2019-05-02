@@ -47,10 +47,13 @@ module Api
 
       class EnumObject < SDKTypeDefinition
         attr_reader :go_enum_type_name
+        attr_reader :go_enum_const_prefix
 
         def validate
           super
+          @go_enum_const_prefix ||= ''
           check_optional_property :go_enum_type_name, String
+          check_optional_property :go_enum_const_prefix, String
         end
       end
 
@@ -58,6 +61,9 @@ module Api
       end
 
       class ComplexArray < ComplexObject
+      end
+
+      class StringMapObject < SDKTypeDefinition
       end
 
     end

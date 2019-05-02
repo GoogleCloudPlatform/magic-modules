@@ -32,10 +32,11 @@
 <%
   enum_values = property.values
   # enum_values.push "" unless property.required
+  sdk_type = get_sdk_typedef_by_references(property.azure_sdk_references, object.azure_sdk_definition.create.request)
 -%>
     ValidateFunc: validation.StringInSlice([]string{
 <%  enum_values.each do |val| -%>
-        <%= go_literal(val, sdk_package) -%>,
+        <%= go_literal((sdk_type.go_enum_const_prefix + val.to_s).to_sym, sdk_package) -%>,
 <%  end -%>
     }, false),
 <% end -%>

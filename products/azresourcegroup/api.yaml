@@ -7,8 +7,6 @@ versions:
     base_url: NotUsedInAzure
 scopes:
   - NotUsedInAzure
-azure_namespace: 'Microsoft.Resources'
-azure_version: 'stable/2018-05-01'
 objects:
   - !ruby/object:Api::Resource
     name: 'ResourceGroup'
