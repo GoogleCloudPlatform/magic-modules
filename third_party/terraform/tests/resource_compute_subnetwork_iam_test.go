@@ -1,6 +1,4 @@
-<% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -25,7 +23,7 @@ func TestAccComputeSubnetworkIamBinding(t *testing.T) {
 			{
 				Config: testAccComputeSubnetworkIamBinding_basic(account, region, subnetwork, role),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_binding.foo",
 				ImportStateId:     fmt.Sprintf("%s/%s %s", region, subnetwork, role),
 				ImportState:       true,
@@ -35,7 +33,7 @@ func TestAccComputeSubnetworkIamBinding(t *testing.T) {
 				// Test Iam Binding update
 				Config: testAccComputeSubnetworkIamBinding_update(account, region, subnetwork, role),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_binding.foo",
 				ImportStateId:     fmt.Sprintf("%s/%s %s", region, subnetwork, role),
 				ImportState:       true,
@@ -62,7 +60,7 @@ func TestAccComputeSubnetworkIamMember(t *testing.T) {
 				// Test Iam Member creation (no update for member, no need to test)
 				Config: testAccComputeSubnetworkIamMember_basic(account, region, subnetwork, role),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_member.foo",
 				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", region, subnetwork, role, account, project),
 				ImportState:       true,
@@ -89,25 +87,25 @@ func TestAccComputeSubnetworkIamPolicy(t *testing.T) {
 				Config: testAccComputeSubnetworkIamPolicy_basic(account, region, subnetwork, role),
 			},
 			// Test a few import formats
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_policy.foo",
 				ImportStateId:     fmt.Sprintf("projects/%s/regions/%s/subnetworks/%s", project, region, subnetwork),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_policy.foo",
 				ImportStateId:     fmt.Sprintf("%s/%s/%s", project, region, subnetwork),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_policy.foo",
 				ImportStateId:     fmt.Sprintf("%s/%s", region, subnetwork),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_subnetwork_iam_policy.foo",
 				ImportStateId:     fmt.Sprintf("%s", subnetwork),
 				ImportState:       true,
@@ -247,6 +245,3 @@ resource "google_compute_subnetwork_iam_policy" "foo" {
 }
 `, account, subnetworkName, subnetworkName, region, roleId)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
