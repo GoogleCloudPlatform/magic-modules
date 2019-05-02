@@ -1,0 +1,5 @@
+vTime, parseErr := time.Parse(time.RFC3339, d.Get("<%= prop_name -%>").(<%= go_type(property) -%>))
+if parseErr != nil {
+	return fmt.Errorf("Error invalid time format: %+v", parseErr)
+}
+<%=   output_var -%> := fmt.Sprintf("\"\\/Date(%d)\\/\"", vTime.UnixNano() / 1000000)

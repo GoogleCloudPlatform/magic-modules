@@ -1,0 +1,7 @@
+if !d.Get("encrypted").(bool) {
+  value, err := azure.ParseAzureRmAutomationVariableValue("azurerm_automation_datetime_variable", properties.Value)
+  if err != nil {
+    return err
+  }
+  d.Set("value", value.(time.Time).Format("2006-01-02T15:04:05.999Z"))
+}
