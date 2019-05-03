@@ -181,7 +181,6 @@ deprecated in favour of `node_locations`.
 * `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
     Configuration for per-cluster autoscaling features, including node autoprovisioning. See [guide in Google docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning). Structure is documented below.
 
-
 * `database_encryption` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
     Structure is documented below.
 
