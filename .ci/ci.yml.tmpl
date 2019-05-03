@@ -318,8 +318,6 @@ jobs:
                 submodules: {{vars.all_submodules_yaml_format}}
             passed:
               - mm-generate
-              - terraform-test
-              - ansible-test
           - get: mm-initial-pr
             attempts: 2
             resource: magic-modules-new-prs
