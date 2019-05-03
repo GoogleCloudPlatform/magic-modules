@@ -181,6 +181,10 @@ deprecated in favour of `node_locations`.
 * `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
     Configuration for per-cluster autoscaling features, including node autoprovisioning. See [guide in Google docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning). Structure is documented below.
 
+
+* `database_encryption` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
+    Structure is documented below.
+
 * `description` - (Optional) Description of the cluster.
 
 * `default_max_pods_per_node` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The default maximum number of pods per node in this cluster.
@@ -323,9 +327,6 @@ The `addons_config` block supports:
     for the master.  This must be enabled in order to enable network policy for the nodes.
     It can only be disabled if the nodes already do not have network policies enabled.
     Defaults to disabled; set `disabled = false` to enable.
-
-* `database_encryption` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
-    Structure is documented below.
 
 * `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
     Structure is documented below.
