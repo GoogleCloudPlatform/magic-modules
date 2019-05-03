@@ -1651,6 +1651,38 @@ func TestAccContainerCluster_errorNoClusterCreated(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
+func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+
+	// Use the bootstrapped KMS key so we can avoid creating keys needlessly
+	// as they will pile up in the project because they can not be completely
+	// deleted.  Also, we need to create the key in the same location as the
+	// cluster as GKE does not support the "global" location for KMS keys.
+	// See https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets#creating_a_key
+	kmsData := BootstrapKMSKeyInLocation(t, "us-central1")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withDatabaseEncryption(clusterName, kmsData),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_database_encryption",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
+<% end -%>
+
 func testAccCheckContainerClusterDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
@@ -3145,7 +3177,7 @@ resource "google_container_cluster" "with_flexible_cidr" {
 	}
 
 	master_authorized_networks_config { }
-	
+
 	ip_allocation_policy {
 		cluster_secondary_range_name  = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.0.range_name}"
 		services_secondary_range_name = "${google_compute_subnetwork.container_subnetwork.secondary_ip_range.1.range_name}"
@@ -3200,3 +3232,34 @@ resource "google_container_cluster" "with_resource_labels" {
 }
 `, location)
 }
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withDatabaseEncryption(clusterName string, kmsData bootstrappedKMS) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+data "google_iam_policy" "test_kms_binding" {
+  binding {
+    role = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    members = [
+	  "serviceAccount:service-${data.google_project.project.number}@container-engine-robot.iam.gserviceaccount.com",
+    ]
+  }
+}
+
+resource "google_kms_key_ring_iam_policy" "test_key_ring_iam_policy" {
+  key_ring_id = "%[1]s"
+  policy_data = "${data.google_iam_policy.test_kms_binding.policy_data}"
+}
+
+resource "google_container_cluster" "with_database_encryption" {
+	name = "cluster-test-%[3]s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+	database_encryption {
+		state = "ENCRYPTED"
+		key_name = "%[2]s"
+	}
+}`, kmsData.KeyRing.Name, kmsData.CryptoKey.Name, clusterName)
+}
+<% end -%>
