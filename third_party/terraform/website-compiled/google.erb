@@ -368,6 +368,17 @@
     </li>
 <% end -%>
 
+<% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-security-scanner") %>>
+    <a href="#">Google Cloud Security Scanner Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-security-scanner-scan-config") %>>
+      <a href="/docs/providers/google/r/security_scanner_scan_config.html.html">google_security_scanner_scan_config</a>
+      </li>
+    </ul>
+    </li>
+<% end -%>
+
     <li<%%= sidebar_current("docs-google-compute") %>>
     <a href="#">Google Compute Engine Resources</a>
     <ul class="nav nav-visible">
