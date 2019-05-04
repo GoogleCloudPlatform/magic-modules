@@ -280,12 +280,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%  while !expand_queue.empty? -%>
 <%    descriptor = expand_queue.shift -%>
-<%=   lines(build_expand_method(descriptor.property, descriptor.sdkmarshal)) -%>
+<%=   lines(build_expand_method(descriptor)) -%>
+
 <%  end -%>
 
 <%  while !flatten_queue.empty? -%>
 <%    descriptor = flatten_queue.shift -%>
-<%=   lines(build_flatten_method(descriptor.property, descriptor.sdkmarshal)) -%>
+<%=   lines(build_flatten_method(descriptor)) -%>
+
 <%  end -%>
 
 <%  if object.custom_code.extra_functions -%>

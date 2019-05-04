@@ -11,9 +11,11 @@ module Provider
             'string'
           when Api::Type::Integer
             'int'
+          when Api::Type::Double
+            'float64'
           when Api::Type::KeyValuePairs
             'map[string]interface{}'
-          when Api::Type::NestedObject
+          when Api::Type::Array, Api::Type::NestedObject
             '[]interface{}'
           else
             'interface{}'
@@ -38,6 +40,7 @@ module Provider
             Api::Type::Boolean => 'utils.Bool',
             Api::Type::String => 'utils.String',
             Api::Type::Integer => 'utils.Int',
+            Api::Type::Double => 'utils.Float',
             Api::Azure::Type::Location => "utils.String",
             Api::Azure::Type::Tags => 'expandTags',
             Api::Azure::Type::ResourceReference => "utils.String"
@@ -53,7 +56,8 @@ module Provider
             'templates/azure/terraform/schemas/location.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::Integer, Api::Type::KeyValuePairs, Api::Type::NestedObject
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::Integer, Api::Type::Double,
+               Api::Type::Array, Api::Type::KeyValuePairs, Api::Type::NestedObject
             'templates/terraform/schemas/primitive.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
@@ -66,7 +70,8 @@ module Provider
           case property
           when Api::Azure::Type::Location
             'templates/azure/terraform/schemas/location_get.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs, Api::Type::NestedObject
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::Integer, Api::Type::Double,
+               Api::Type::Array, Api::Type::KeyValuePairs, Api::Type::NestedObject
             'templates/terraform/schemas/basic_get.erb'
           else
             'templates/terraform/schemas/unsupport.erb'
@@ -81,9 +86,10 @@ module Provider
             'templates/azure/terraform/schemas/location_set.erb'
           when Api::Azure::Type::Tags
             'templates/azure/terraform/schemas/tags_set.erb'
-          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::KeyValuePairs
+          when Api::Type::Boolean, Api::Type::Enum, Api::Type::String, Api::Type::Integer, Api::Type::Double, Api::Type::KeyValuePairs
             'templates/terraform/schemas/basic_set.erb'
-          when Api::Type::NestedObject
+          when Api::Type::Array, Api::Type::NestedObject
+            return 'templates/azure/terraform/schemas/string_array_set.erb' if property.is_a?(Api::Type::Array) && property.item_type_class == Api::Type::String
             'templates/terraform/schemas/flatten_set.erb'
           else
             'templates/terraform/schemas/unsupport.erb'

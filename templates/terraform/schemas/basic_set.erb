@@ -1,8 +1,15 @@
+<%
+    format_str = '%s'
+    case sdk_marshal.sdktype.type_definition
+    when Api::Azure::SDKTypeDefinition::Integer32Object, Api::Azure::SDKTypeDefinition::Integer64Object
+      format_str = 'int(%s)'
+    end
+-%>
 <%  if output_var == 'd' -%>
-d.Set("<%= prop_name -%>", <%= input_var -%>)
+d.Set("<%= prop_name -%>", <%= format_str % input_var -%>)
 <%  else -%>
 <%    temp_var = prop_name.camelize(:lower) -%>
 if <%= temp_var -%> := <%= input_var -%>; <%= temp_var -%> != nil {
-    <%= output_var -%>["<%= prop_name -%>"] = *<%= lines(temp_var) -%>
+    <%= output_var -%>["<%= prop_name -%>"] = <%= lines(format_str % "*#{temp_var}") -%>
 }
 <%  end -%>

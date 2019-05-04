@@ -25,8 +25,10 @@ module Provider
           end
 
           def enqueue(property)
-            existed = @queue.any?{|e| e.property == property && e.sdktype.go_type_name == @sdktype.go_type_name}
-            @queue << ExpandFlattenDescriptor.new(property, self) unless existed
+            ef_desc = ExpandFlattenDescriptor.new(property, self)
+            exist = @queue.find{|q| q.equals?(ef_desc)}
+            @queue << ef_desc if exist.nil?
+            (exist || ef_desc).func_name
           end
         end
       end

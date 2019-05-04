@@ -42,6 +42,18 @@ module Api
       class BooleanObject < SDKTypeDefinition
       end
 
+      class IntegerObject < SDKTypeDefinition
+      end
+
+      class Integer32Object < SDKTypeDefinition
+      end
+
+      class Integer64Object < SDKTypeDefinition
+      end
+
+      class FloatObject < SDKTypeDefinition
+      end
+
       class StringObject < SDKTypeDefinition
       end
 
@@ -60,7 +72,10 @@ module Api
       class ComplexObject < SDKTypeDefinition
       end
 
-      class ComplexArray < ComplexObject
+      class StringArrayObject < SDKTypeDefinition
+      end
+
+      class ComplexArrayObject < ComplexObject
       end
 
       class StringMapObject < SDKTypeDefinition

@@ -26,8 +26,12 @@ module Provider
             return property.custom_sdkfield_assign unless get_property_value(property, "custom_sdkfield_assign", nil).nil?
             return 'templates/terraform/schemas/hide_from_schema.erb' if get_property_value(property, "hide_from_schema", false)
             case sdk_type
-            when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject, Api::Azure::SDKTypeDefinition::StringMapObject
+            when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject,
+                 Api::Azure::SDKTypeDefinition::IntegerObject, Api::Azure::SDKTypeDefinition::FloatObject,
+                 Api::Azure::SDKTypeDefinition::StringArrayObject, Api::Azure::SDKTypeDefinition::StringMapObject
               'templates/azure/terraform/sdktypes/expand_func_field_assign.erb'
+            when Api::Azure::SDKTypeDefinition::Integer32Object, Api::Azure::SDKTypeDefinition::Integer64Object
+              'templates/azure/terraform/sdktypes/integer_field_assign.erb'
             when Api::Azure::SDKTypeDefinition::EnumObject
               'templates/azure/terraform/sdktypes/enum_field_assign.erb'
             when Api::Azure::SDKTypeDefinition::ComplexObject
@@ -41,7 +45,10 @@ module Provider
           def property_to_schema_assignment_template(property, sdk_operation, api_path)
             sdk_type = sdk_operation.response[api_path] || sdk_operation.request[api_path]
             case sdk_type
-            when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject, Api::Azure::SDKTypeDefinition::StringMapObject
+            when Api::Azure::SDKTypeDefinition::BooleanObject, Api::Azure::SDKTypeDefinition::StringObject,
+                 Api::Azure::SDKTypeDefinition::IntegerObject, Api::Azure::SDKTypeDefinition::Integer32Object,
+                 Api::Azure::SDKTypeDefinition::Integer64Object, Api::Azure::SDKTypeDefinition::FloatObject,
+                 Api::Azure::SDKTypeDefinition::StringArrayObject, Api::Azure::SDKTypeDefinition::StringMapObject
               'templates/azure/terraform/sdktypes/primitive_schema_assign.erb'
             when Api::Azure::SDKTypeDefinition::EnumObject
               'templates/azure/terraform/sdktypes/enum_schema_assign.erb'

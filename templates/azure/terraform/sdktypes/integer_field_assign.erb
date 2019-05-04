@@ -1,0 +1,2 @@
+<%  bit_number = sdk_marshal.sdktype.type_definition.is_a?(Api::Azure::SDKTypeDefinition::Integer32Object) ? 32 : 64 -%>
+<%= sdk_marshal.sdktype.go_field_name -%><%= in_structure ? ': ' : ' = ' -%>utils.Int<%= bit_number -%>(int<%= bit_number -%>(<%= property.name.camelcase(:lower) -%>))<%= ',' if in_structure -%>

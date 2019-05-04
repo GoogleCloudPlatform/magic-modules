@@ -12,6 +12,10 @@
   # See the License for the specific language governing permissions and
   # limitations under the License.
 -%>
+<%
+    property = descriptor.property
+    sdk_marshal = descriptor.sdkmarshal
+-%>
 <% if property.custom_expand -%>
 <%= lines(compile_template(property.custom_expand,
                            prefix: sdk_marshal.resource,
@@ -58,7 +62,7 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
   return m, nil
 }
 <%   elsif tf_types.include?(property.class) -%>
-func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(input <%= go_type(property) -%>) *<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%> {
+func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go_type(property) -%>) *<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%> {
 <%
        if !nested_properties(property).empty?
          nested_properties = nested_properties(property)

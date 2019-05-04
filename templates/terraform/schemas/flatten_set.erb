@@ -1,8 +1,8 @@
-<%  sdk_marshal.enqueue(property) -%>
+<%  flatten_func_name = sdk_marshal.enqueue(property) -%>
 <%  if output_var == 'd' -%>
-if err := d.Set("<%= prop_name -%>", flatten<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(<%= input_var -%>)); err != nil {
+if err := d.Set("<%= prop_name -%>", flatten<%= sdk_marshal.resource -%><%= flatten_func_name -%>(<%= input_var -%>)); err != nil {
     return fmt.Errorf("Error setting `<%= prop_name -%>`: %+v", err)
 }
 <%  else -%>
-<%= output_var -%>["<%= prop_name -%>"] = flatten<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(<%= input_var -%>)
+<%= output_var -%>["<%= prop_name -%>"] = flatten<%= sdk_marshal.resource -%><%= flatten_func_name -%>(<%= input_var -%>)
 <%  end -%>
