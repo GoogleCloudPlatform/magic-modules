@@ -214,8 +214,9 @@ func resourceContainerCluster() *schema.Resource {
 									},
 									"auth": {
 										Type:         schema.TypeString,
+										Default:      "AUTH_NONE",
 										Optional:     true,
-										ValidateFunc: validation.StringInSlice([]string{"AUTH_MUTUAL_TLS"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 									},
 								},
 							},
