@@ -15,6 +15,10 @@ resource "google_compute_node_template" "<%= ctx[:primary_resource_id] %>" {
   region = "us-central1"
   node_type = "${data.google_compute_node_types.central1a.names[0]}"
 
+  node_affinity_labels = {
+    foo = "baz"
+  }
+
   server_binding {
     type = "RESTART_NODE_ON_MINIMAL_SERVERS"
   }
