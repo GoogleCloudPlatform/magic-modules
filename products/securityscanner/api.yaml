@@ -52,8 +52,7 @@ objects:
         name: maxQps
         description: |
           The maximum QPS during scanning. A valid value ranges from 5 to 20 inclusively.
-          If the field is unspecified or its value is set to 0, the server will default to 15.
-          Other values outside of [5, 20] range will be rejected with INVALID_ARGUMENT error.
+          Defaults to 15.
         default_value: 15
       - !ruby/object:Api::Type::Array
         name: startingUrls
