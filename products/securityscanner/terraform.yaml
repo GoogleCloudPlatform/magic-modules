@@ -25,16 +25,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       maxQps: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(5, 20)'
-      authentication: !ruby/object:Overrides::Terraform::PropertyOverride
-        properties:
-          googleAccount: !ruby/object:Overrides::Terraform::PropertyOverride
-            properties:
-              password: !ruby/object:Overrides::Terraform::PropertyOverride 
-                sensitive: true
-          customAccount: !ruby/object:Overrides::Terraform::PropertyOverride
-            properties:
-              password: !ruby/object:Overrides::Terraform::PropertyOverride 
-                sensitive: true
+      authentication.googleAccount.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      authentication.customAccount.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
       schedule: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           scheduleTime: !ruby/object:Overrides::Terraform::PropertyOverride
