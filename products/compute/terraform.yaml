@@ -803,6 +803,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "template"
         vars:
           template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_template_server_binding"
+        min_version: beta
+        primary_resource_id: "template"
+        vars:
+          template_name: "soletenant-with-licenses"
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
