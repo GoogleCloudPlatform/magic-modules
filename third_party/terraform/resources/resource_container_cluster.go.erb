@@ -335,16 +335,12 @@ func resourceContainerCluster() *schema.Resource {
 				Default:  false,
 			},
 
+<% unless version == 'ga' -%>
 			"authenticator_groups_config": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
-<% if version.nil? || version == 'ga' -%>
-				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-				Computed: true,
-<% else -%>
 				Default:  false,
-<% end -%>
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -356,6 +352,7 @@ func resourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+<% end -%>
 
 			"initial_node_count": {
 				Type:     schema.TypeInt,
