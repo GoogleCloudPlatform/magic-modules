@@ -319,6 +319,7 @@ func resourceComputeInstanceTemplate() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"preemptible": {
@@ -866,17 +867,16 @@ func resourceComputeInstanceTemplateDelete(d *schema.ResourceData, meta interfac
 	return nil
 }
 
+// This wraps the general compute instance helper expandScheduling.
+// Default value of OnHostMaintenance depends on the value of Preemptible,
+// so we can't set a default in schema
 func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, meta interface{}) (*computeBeta.Scheduling, error) {
 	v, ok := d.GetOk("scheduling")
 	if !ok || v == nil {
+		// We can't set defaults for lists (e.g. scheduling)
 		return &computeBeta.Scheduling{
 			OnHostMaintenance: "MIGRATE",
 		}, nil
-	}
-
-	schedulings := v.([]interface{})
-	if len(schedulings) > 1 {
-		return nil, fmt.Errorf("Unable to expand scheduling, more than one `scheduling` block is defined")
 	}
 
 	expanded, err := expandScheduling(v)
@@ -884,9 +884,9 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 		return nil, err
 	}
 
+	// Make sure we have an appropriate value for OnHostMaintenance if Preemptible
 	if expanded.Preemptible && expanded.OnHostMaintenance == "" {
 		expanded.OnHostMaintenance = "TERMINATE"
-		expanded.ForceSendFields = append(expanded.ForceSendFields, "OnHostMaintenance")
 	}
 	return expanded, nil
 }
