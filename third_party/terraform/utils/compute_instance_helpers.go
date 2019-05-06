@@ -59,6 +59,7 @@ func flattenAliasIpRange(ranges []*computeBeta.AliasIpRange) []map[string]interf
 
 func expandScheduling(v interface{}) (*computeBeta.Scheduling, error) {
 	if v == nil {
+		// We can't set default values for lists.
 		return &computeBeta.Scheduling{
 			AutomaticRestart: googleapi.Bool(true),
 		}, nil
@@ -66,7 +67,7 @@ func expandScheduling(v interface{}) (*computeBeta.Scheduling, error) {
 
 	ls := v.([]interface{})
 	if len(ls) == 0 {
-		// We can't set default values for lists.
+		// We can't set default values for lists
 		return &computeBeta.Scheduling{
 			AutomaticRestart: googleapi.Bool(true),
 		}, nil
