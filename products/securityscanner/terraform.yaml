@@ -22,6 +22,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           address_name: "scan-basic-static-ip"
           scan_config_name: "terraform-scan-config"
     properties:
+      maxQps: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validation.IntBetween(5, 20)'
       authentication: !ruby/object:Overrides::Terraform::PropertyOverride
         properties:
           googleAccount: !ruby/object:Overrides::Terraform::PropertyOverride
