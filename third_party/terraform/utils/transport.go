@@ -121,7 +121,7 @@ func addQueryParams(rawurl string, params map[string]string) (string, error) {
 
 func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (string, error) {
 	// https://github.com/google/re2/wiki/Syntax
-	re := regexp.MustCompile("{{([%[:word:]]+)}}")
+	re := regexp.MustCompile("{{([[:word:]]+)}}")
 	f, err := buildReplacementFunc(re, d, config, linkTmpl)
 	if err != nil {
 		return "", err
@@ -129,9 +129,8 @@ func replaceVars(d TerraformResourceData, config *Config, linkTmpl string) (stri
 	return re.ReplaceAllStringFunc(linkTmpl, f), nil
 }
 
-// This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
+// This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform after URL-escaping them
 // It also replaces {{project}}, {{region}}, and {{zone}} with their appropriate values
-// This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
 func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Config, linkTmpl string) (func(string) string, error) {
 	var project, region, zone string
 	var err error
@@ -168,16 +167,9 @@ func buildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *Co
 		if m == "zone" {
 			return zone
 		}
-		if string(m[0]) == "%" {
-			v, ok := d.GetOkExists(m[1:])
-			if ok {
-				return url.PathEscape(fmt.Sprintf("%v", v))
-			}
-		} else {
-			v, ok := d.GetOkExists(m)
-			if ok {
-				return fmt.Sprintf("%v", v)
-			}
+		v, ok := d.GetOk(m)
+		if ok {
+			return url.PathEscape(fmt.Sprintf("%v", v))
 		}
 		return ""
 	}
