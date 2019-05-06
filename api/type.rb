@@ -84,6 +84,12 @@ module Api
       JSON.pretty_generate(self)
     end
 
+    def lineage
+      return name if __parent.nil?
+
+      __parent.lineage + '.' + name
+    end
+
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources and
       # those which will be added later
@@ -454,6 +460,8 @@ module Api
       end
 
       def properties
+        raise "Field '#{lineage}' properties are nil!" if @properties.nil?
+
         @properties.reject(&:exclude)
       end
 
