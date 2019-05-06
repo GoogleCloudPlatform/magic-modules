@@ -60,7 +60,7 @@ module Google
       end
 
       # Check if value is required.
-      raise "Missing '#{variable}'" if value.nil? && opts[:required]
+      raise "#{lineage} > Missing '#{variable}'" if value.nil? && opts[:required]
       return if value.nil?
 
       # Check type
@@ -68,7 +68,7 @@ module Google
 
       # Check item_type
       if value.is_a?(Array)
-        raise "#{variable} must have item_type on arrays" unless opts[:item_type]
+        raise "#{lineage} > #{variable} must have item_type on arrays" unless opts[:item_type]
 
         value.each_with_index do |o, index|
           check_property_value("#{variable}[#{index}]", o, opts[:item_type])
