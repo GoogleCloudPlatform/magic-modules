@@ -14,16 +14,11 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
-    # autogen_async: true
-    # id_format: "{{project}}/{{region}}/{{name}}"
-    # import_format: ["namespaces/{{project}}/services/{{name}}"]
-    # examples:
-    #   # - !ruby/object:Provider::Terraform::Examples
-    #   #   name: "cloudrun_service"
-    #   #   primary_resource_id: "service"
-    #   #   vars:
-    #   #     instance_name: "test-service"
     properties:
-    #   metadata.generateName: !ruby/object:Overrides::Terraform::PropertyOverride
-    #     default_from_api: true
-    #     exclude: false
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>
