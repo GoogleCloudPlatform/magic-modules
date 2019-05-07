@@ -3103,6 +3103,34 @@ resource "google_container_cluster" "with_resource_labels" {
 `, clusterName)
 }
 
+func testAccContainerCluster_withVerticalPodAutoscalingEnabled(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_vertical_pod_autoscaling" {
+	name = "%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+  vertical_pod_autoscaling {
+    enabled = true
+  }
+}
+`, clusterName)
+}
+
+func testAccContainerCluster_withVerticalPodAutoscalingDisabled(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_vertical_pod_autoscaling" {
+	name = "%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+  vertical_pod_autoscaling {
+    enabled = false
+  }
+}
+`, clusterName)
+}
+
 func testAccContainerCluster_withResourceLabels(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_resource_labels" {
