@@ -17,15 +17,21 @@ display_name: Google Cloud Run
 versions:
   - !ruby/object:Api::Product::Version
     name: beta
-    base_url: https://run.googleapis.com/v1alpha1
+    base_url: https://run.googleapis.com/v1alpha1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 objects:
 - !ruby/object:Api::Resource
   name: DomainMapping
   kind:
-  base_url: projects/{project}/locations/{location}/domainmappings
+  base_url: projects/{{project}}/locations/{{location}}/domainmappings
   description: Resource to hold the state and status of a user's domain mapping.
+  parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location of the cloud run instance. eg us-central1
+    url_param_only: true
+    required: true
   properties:
   - !ruby/object:Api::Type::NestedObject
     name: status
@@ -279,7 +285,7 @@ objects:
 - !ruby/object:Api::Resource
   name: Service
   kind:
-  base_url: projects/{project}/locations/{location}/services
+  base_url: projects/{{project}}/locations/{{location}}/services
   description: |-
     Service acts as a top-level container that manages a set of Routes and
     Configurations which implement a network service. Service exists to provide a
@@ -294,6 +300,12 @@ objects:
 
     See also:
     https://github.com/knative/serving/blob/master/docs/spec/overview.md#service
+  parameters:
+  - !ruby/object:Api::Type::String
+    name: location
+    description: The location of the cloud run instance. eg us-central1
+    url_param_only: true
+    required: true
   properties:
   - !ruby/object:Api::Type::NestedObject
     name: status
@@ -378,6 +390,7 @@ objects:
           description: |-
             Last time the condition transitioned from one status to another.
             +optional
+          output: true
         - !ruby/object:Api::Type::String
           name: status
           description: Status of the condition, one of True, False, Unknown.
