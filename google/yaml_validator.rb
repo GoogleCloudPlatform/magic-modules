@@ -59,8 +59,9 @@ module Google
         value = instance_variable_get("@#{variable}")
       end
 
-      # Check if value is required.
-      raise "#{lineage} > Missing '#{variable}'" if value.nil? && opts[:required]
+      # Check if value is required. Print nested path if available.
+      lineage_path = respond_to?('lineage') ? lineage : ''
+      raise "#{lineage_path} > Missing '#{variable}'" if value.nil? && opts[:required]
       return if value.nil?
 
       # Check type
@@ -68,7 +69,7 @@ module Google
 
       # Check item_type
       if value.is_a?(Array)
-        raise "#{lineage} > #{variable} must have item_type on arrays" unless opts[:item_type]
+        raise "#{lineage_path} > #{variable} must have item_type on arrays" unless opts[:item_type]
 
         value.each_with_index do |o, index|
           check_property_value("#{variable}[#{index}]", o, opts[:item_type])
