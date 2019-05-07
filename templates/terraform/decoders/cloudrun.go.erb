@@ -1,0 +1,9 @@
+// metadata is not present if the API returns an error
+if obj, ok := res["metadata"]; ok {
+	if meta, ok := obj.(map[string]interface{}); ok {
+		res["name"] = meta["name"]
+	} else {
+		return nil, fmt.Errorf("Unable to decode 'metadata' block from API response.")
+	}
+}
+return res, nil

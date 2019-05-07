@@ -190,8 +190,10 @@ all_product_files.each do |product_name|
     }
 
     provider_class = override_providers[force_provider]
-    raise "Invalid force provider option #{force_provider}" \
-      if provider_class.nil?
+    if provider_class.nil?
+      raise "Invalid force provider option #{force_provider}." \
+        + "\nPossible values #{override_providers} "
+    end
 
     provider = \
       override_providers[force_provider].new(provider_config, product_api, start_time)

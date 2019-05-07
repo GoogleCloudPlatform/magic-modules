@@ -101,16 +101,8 @@ To get more information about <%= object.name -%>, see:
 
 The following arguments are supported:
 
-<% properties.select(&:required).each do |prop| -%>
-<%   if prop.flatten_object -%>
-<%     if prop.nested_properties? -%>
-<%       prop.nested_properties.each do |p| -%>
-<%=        lines(build_property_documentation(p)) -%>
-<%       end -%>
-<%     end -%>
-<%   else -%>
+<% object.root_properties.select(&:required).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
-<%   end -%>
 <% end -%>
 
 <% properties.select(&:required).each do |prop| -%>
@@ -122,16 +114,8 @@ The following arguments are supported:
 
 - - -
 
-<% properties.reject(&:required).reject(&:output).each do |prop| -%>
-<%   if prop.flatten_object -%>
-<%     if prop.nested_properties? -%>
-<%       prop.nested_properties.each do |p| -%>
-<%=        lines(build_property_documentation(p)) -%>
-<%       end -%>
-<%     end -%>
-<%   else -%>
+<% object.root_properties.reject(&:required).reject(&:output).each do |prop| -%>
 <%=    lines(build_property_documentation(prop)) -%>
-<%   end -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}")-%>
 <%# The following new line allow for project to be bullet-formatted properly. -%>
@@ -152,7 +136,7 @@ The following arguments are supported:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-<% properties.select(&:output).each do |prop| -%>
+<% object.root_properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 <% if object.has_self_link -%>
