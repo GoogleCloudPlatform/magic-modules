@@ -34,7 +34,7 @@ describe Overrides::Validator do
       it {
         runner = Overrides::Validator.new(api, overrides)
         expect { runner.run }.to raise_error(RuntimeError,
-                                             '@blahbad does not exist on AnotherResource')
+                                             /@blahbad does not exist on AnotherResource/)
       }
     end
     describe 'should be able identify a bad property' do
@@ -54,7 +54,7 @@ describe Overrides::Validator do
       it {
         runner = Overrides::Validator.new(api, overrides)
         expect { runner.run }.to raise_error(RuntimeError,
-                                             'blahbad does not exist on AnotherResource')
+                                             /blahbad does not exist on AnotherResource/)
       }
     end
 

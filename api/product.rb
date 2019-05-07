@@ -39,6 +39,13 @@ module Api
       JSON.pretty_generate(self)
     end
 
+    # Prints a dot notation path to where the field is nested within the parent
+    # object when called on a property. eg: parent.meta.label.foo
+    # Redefined on Product to terminate the calls up the parent chain.
+    def lineage
+      name
+    end
+
     def to_json(opts = nil)
       json_out = {}
 

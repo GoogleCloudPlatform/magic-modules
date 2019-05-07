@@ -84,6 +84,10 @@ module Api
       JSON.pretty_generate(self)
     end
 
+    # Prints a dot notation path to where the field is nested within the parent
+    # object. eg: parent.meta.label.foo
+    # The only intended purpose is to allow better error messages. Some objects
+    # and at some points in the build this doesn't ouput a valid output.
     def lineage
       return name if __parent.nil?
 
