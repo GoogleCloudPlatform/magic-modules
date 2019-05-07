@@ -11,7 +11,7 @@
     default_value_postfix = " Defaults to `#{property.default_value}`." if property.default_value != nil && !property.output
 -%>
 <% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
-* `<%= property.name.underscore -%>` - <%= prefix %>One<%= ' or more' unless property.is_a?(Api::Type::NestedObject) -%> `<%= property.name.underscore -%>` block defined below.<%= force_new_postfix -%>
+* `<%= property.name.underscore -%>` - <%= prefix %>One<%= ' or more' unless property.is_a?(Api::Type::NestedObject) -%> `<%= property.name.underscore.singularize -%>` block defined below.<%= force_new_postfix -%>
 <% else -%>
 * `<%= property.name.underscore -%>` - <%= prefix %><%= property.description.strip.gsub("\n\n", "\n") -%><%= default_value_postfix -%><%= force_new_postfix -%>
 <% end -%>

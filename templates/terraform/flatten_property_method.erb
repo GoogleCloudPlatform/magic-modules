@@ -22,7 +22,7 @@
                            property: property)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
-func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>) []interface{} {
+func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= '[]' if property.is_a?(Api::Type::Array) -%><%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>) []interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
     if input == nil {
         return make([]interface{}, 0)
@@ -34,24 +34,24 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
 
     return []interface{}{result}
 <% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
-  if v == nil {
-    return v
-  }
-  l := v.([]interface{})
-  transformed := make([]interface{}, 0, len(l))
-  for _, raw := range l {
-    original := raw.(map[string]interface{})
-    transformed = append(transformed, map[string]interface{}{
-    <% property.item_type.properties.reject(&:ignore_read).each do |prop| -%>
-      "<%= prop.name.underscore -%>": flatten<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
-    <% end -%>
-    })
-  }
-  return transformed
+    results := make([]interface{}, 0)
+    if input == nil {
+        return results
+    }
+
+    for _, item := range input {
+        v := make(map[string]interface{})
+
+<%= lines(build_sdk_object_to_property('item', 'v', sdk_marshal.clone(nil, nested_properties(property)), 8)) -%>
+
+        results = append(results, v)
+    }
+
+    return results
 <% elsif property.is_a?(Api::Type::Map) -%>
-  if v == nil {
-    return v
-  }
+    if v == nil {
+      return v
+    }
   l := v.(map[string]interface{})
   transformed := make([]interface{}, 0, len(l))
   for k, raw := range l {

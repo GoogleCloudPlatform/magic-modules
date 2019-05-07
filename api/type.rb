@@ -78,8 +78,8 @@ module Api
 
       check_optional_property :sample_value, ::String
 
+      @azure_sdk_references ||= []
       check_property :azure_sdk_references, ::Array
-      check_property_non_empty_list :azure_sdk_references, ::String
 
       check_default_value_property
     end
