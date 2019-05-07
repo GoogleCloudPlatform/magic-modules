@@ -258,7 +258,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     }
 <%  end -%>
 
-<%  properties.reject{|p| p.ignore_read }.each do |prop| -%>
+<%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
 <%    if prop.flatten_object -%>
     if v, ok := res["<%= prop.api_name -%>"].(map[string]interface{}); res["<%= prop.api_name -%>"] != nil && ok {
 <%      prop.properties.each do |p| -%>
@@ -590,7 +590,7 @@ func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{
 }
 <% end -%>
 
-<% properties.reject(&:ignore_read).each do |prop| -%>
+<% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
 <%= lines(build_flatten_method(resource_name, prop), 1) -%>
 <% end -%>
 
