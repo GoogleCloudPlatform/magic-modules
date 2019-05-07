@@ -413,11 +413,6 @@ module Api
                          .reject(&:url_param_only)
     end
 
-    # Properties that will be returned in the API body
-    def gettable_properties
-      all_user_properties.reject(&:url_param_only)
-    end
-
     private
 
     # Given an array of properties, return all ResourceRefs contained within
