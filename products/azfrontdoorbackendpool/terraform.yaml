@@ -12,5 +12,6 @@ overrides: !ruby/object:Provider::ResourceOverrides
         example_name: basic
         resource_name_hints:
           resourceGroups: example-rg
+          frontDoors: example-frontdoor
           backendPools: example-backend-pool
           location: West US

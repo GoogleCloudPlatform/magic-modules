@@ -32,9 +32,16 @@ resource "azurerm_resource_group" "example" {
   location = "West US"
 }
 
+resource "azurerm_frontdoor" "example" {
+  name                = "example-frontdoor"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  location            = "${azurerm_resource_group.example.location}"
+}
+
 resource "azurerm_frontdoor_backendpool" "example" {
   name                = "example-backend-pool"
   resource_group_name = "${azurerm_resource_group.example.name}"
+  frontdoor_name      = "${azurerm_frontdoor.example.name}"
 
   backend = {
     http_port  = 88
@@ -94,5 +101,5 @@ The following attributes are exported:
 Front Door Backend Pool can be imported using the `resource id`, e.g.
 
 ```shell
-$ terraform import azurerm_front_door_backend_pool.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/frontDoors//backendPools/example-backend-pool
+$ terraform import azurerm_front_door_backend_pool.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/frontDoors/example-frontdoor/backendPools/example-backend-pool
 ```

@@ -24,6 +24,21 @@ description: |-
 Managed a Front Door on Azure.
 
 
+## Example Usage
+
+```hcl
+resource "azurerm_resource_group" "example" {
+  name     = "example-rg"
+  location = "West US"
+}
+
+resource "azurerm_frontdoor" "example" {
+  name                = "example-frontdoor"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+  location            = "${azurerm_resource_group.example.location}"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -47,3 +62,12 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - Resource ID.
+
+
+## Import
+
+Front Door can be imported using the `resource id`, e.g.
+
+```shell
+$ terraform import azurerm_front_door.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/frontDoors/example-frontdoor
+```

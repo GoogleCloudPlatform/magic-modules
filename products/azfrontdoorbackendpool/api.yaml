@@ -157,7 +157,7 @@ objects:
             python_parameter_name: backend_pool_name
             python_variable_name: name
 
-    description: Managed a Front Door on Azure.
+    description: Managed a Front Door Backend Pool on Azure.
     parameters:
       - !ruby/object:Api::Azure::Type::ResourceGroupName
         name: resourceGroupName
