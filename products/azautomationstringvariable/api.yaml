@@ -1,6 +1,6 @@
 --- !ruby/object:Api::Product
 name: Azure Automation Variable
-prefix: azautomationvariable
+prefix: azautomationstringvariable
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
