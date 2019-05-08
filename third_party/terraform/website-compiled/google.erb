@@ -713,6 +713,23 @@
     </ul>
     </li>
 
+    <% unless version == 'ga' %>
+    <li<%%= sidebar_current("docs-google-iap") %>>
+    <a href="#">Google IAP Resources</a>
+    <ul class="nav nav-visible">
+      <li<%%= sidebar_current("docs-google-iap-tunnel-instance-iam") %>>
+        <a href="/docs/providers/google/r/google_iap_tunnel_instance_iam.html">google_iap_tunnel_instance_iam_binding</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-iap-tunnel-instance-iam") %>>
+        <a href="/docs/providers/google/r/google_iap_tunnel_instance_iam.html">google_iap_tunnel_instance_iam_member</a>
+      </li>
+      <li<%%= sidebar_current("docs-google-iap-tunnel-instance-iam") %>>
+        <a href="/docs/providers/google/r/google_iap_tunnel_instance_iam.html">google_iap_tunnel_instance_iam_policy</a>
+      </li>
+    </ul>
+    </li>
+    <% end -%>
+
     <li<%%= sidebar_current("docs-google-pubsub") %>>
     <a href="#">Google PubSub Resources</a>
     <ul class="nav nav-visible">
