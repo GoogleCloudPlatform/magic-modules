@@ -262,6 +262,7 @@ func expandArmBatchAccountKeyVaultReference(input []interface{}) *batch.KeyVault
     return &result
 }
 
+
 func flattenArmBatchAccountKeyVaultReference(input *batch.KeyVaultReference) []interface{} {
     if input == nil {
         return make([]interface{}, 0)
@@ -278,6 +279,7 @@ func flattenArmBatchAccountKeyVaultReference(input *batch.KeyVaultReference) []i
 
     return []interface{}{result}
 }
+
 
 func validateAzureRMBatchAccountName(v interface{}, k string) (warnings []string, errors []error) {
     value := v.(string)

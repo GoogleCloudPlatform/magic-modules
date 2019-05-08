@@ -199,7 +199,7 @@ module Provider
         out_file: filepath
       )
 
-      target_folder = File.join(target_folder, 'website', 'docs', 'd')
+      target_folder = File.join(data[:output_folder], 'website', 'docs', 'd')
       FileUtils.mkpath target_folder
       filepath = File.join(target_folder, "#{name}.html.markdown")
       generate_resource_file data.clone.merge(

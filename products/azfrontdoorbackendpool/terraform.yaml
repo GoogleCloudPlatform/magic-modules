@@ -6,3 +6,11 @@ overrides: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: validate.NoEmptyStrings
+    document_examples:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::DocumentExampleReference
+        title: Example Usage
+        example_name: basic
+        resource_name_hints:
+          resourceGroups: example-rg
+          backendPools: example-backend-pool
+          location: West US

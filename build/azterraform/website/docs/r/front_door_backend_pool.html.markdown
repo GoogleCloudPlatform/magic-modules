@@ -24,6 +24,30 @@ description: |-
 Managed a Front Door on Azure.
 
 
+## Example Usage
+
+```hcl
+resource "azurerm_resource_group" "example" {
+  name     = "example-rg"
+  location = "West US"
+}
+
+resource "azurerm_frontdoor_backendpool" "example" {
+  name                = "example-backend-pool"
+  resource_group_name = "${azurerm_resource_group.example.name}"
+
+  backend = {
+    http_port  = 88
+    https_port = 44
+  }
+
+  backend = {
+    http_port  = 33
+    https_port = 22
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -63,3 +87,12 @@ The `backend` block supports the following:
 The following attributes are exported:
 
 * `id` - Resource ID.
+
+
+## Import
+
+Front Door Backend Pool can be imported using the `resource id`, e.g.
+
+```shell
+$ terraform import azurerm_front_door_backend_pool.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/frontDoors//backendPools/example-backend-pool
+```
