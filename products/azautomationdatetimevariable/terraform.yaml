@@ -33,3 +33,14 @@ overrides: !ruby/object:Provider::ResourceOverrides
           automationAccounts: tfex-example-account
           variables: tfex-example-var
           location: West US
+datasources: !ruby/object:Provider::ResourceOverrides
+  AutomationDatetimeVariable: !ruby/object:Provider::Azure::Terraform::ResourceOverride
+    properties:
+      resourceGroupName: !ruby/object:Provider::Azure::Terraform::PropertyOverride
+        description: The Name of the Resource Group where the App Service exists.
+    acctests:
+      - !ruby/object:Provider::Azure::Terraform::ResourceOverride::AccTestDefinition
+        name: basic
+        steps: [basic]
+    datasource_example_outputs:
+      variable_id: id
