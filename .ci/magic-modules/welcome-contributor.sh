@@ -10,6 +10,6 @@ I have detected that you are a community contributor, so your PR will be assigne
 Thanks for your contribution!  A human will be with you soon.
 EOF
 
-shuf -n 1 <(printf "ndmckinley\nrambleraptor\nchrisst\nrileykarson\nSirGitsalot\nslevenick") > comment/assignee
+shuf -n 1 <(printf "danawillow\nrambleraptor\nchrisst\nrileykarson\nSirGitsalot\nslevenick\ntysen\") > comment/assignee
 
 cat comment/assignee
