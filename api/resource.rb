@@ -172,6 +172,13 @@ module Api
       JSON.pretty_generate(self)
     end
 
+    # Prints a dot notation path to where the field is nested within the parent
+    # object when called on a property. eg: parent.meta.label.foo
+    # Redefined on Resource to terminate the calls up the parent chain.
+    def lineage
+      name
+    end
+
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources
       ignored_fields = %i[@__product @__parent @__resource @api_name @collection_url_response]

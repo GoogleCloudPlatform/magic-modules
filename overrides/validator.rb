@@ -69,12 +69,20 @@ module Overrides
 
     # Returns a property (or throws an error if it does not exist)
     def find_property(properties, path, res_name = '')
+      # Add context for debugging property name typos
+      available = []
+      prefix = ''
+
       prop = nil
       path.each do |part|
+        available = properties.map { |p| prefix + p.name } unless properties.empty?
+        prefix = prefix + part + '.'
+
         prop = properties.select { |o| o.name == part }.first
         properties = prop&.nested_properties || []
       end
-      raise "#{path.join('.')} does not exist on #{res_name}" unless prop
+      raise "#{path.join('.')} does not exist on #{res_name}.\n Possible values #{available}" \
+        unless prop
 
       prop
     end

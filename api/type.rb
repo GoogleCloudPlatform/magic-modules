@@ -84,6 +84,16 @@ module Api
       JSON.pretty_generate(self)
     end
 
+    # Prints a dot notation path to where the field is nested within the parent
+    # object. eg: parent.meta.label.foo
+    # The only intended purpose is to allow better error messages. Some objects
+    # and at some points in the build this doesn't ouput a valid output.
+    def lineage
+      return name if __parent.nil?
+
+      __parent.lineage + '.' + name
+    end
+
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources and
       # those which will be added later
@@ -454,6 +464,8 @@ module Api
       end
 
       def properties
+        raise "Field '#{lineage}' properties are nil!" if @properties.nil?
+
         @properties.reject(&:exclude)
       end
 
