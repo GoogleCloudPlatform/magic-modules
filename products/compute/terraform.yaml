@@ -705,6 +705,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "interconnect_attachment_basic"
