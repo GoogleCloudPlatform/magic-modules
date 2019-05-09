@@ -1894,6 +1894,46 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(10)
+	clusterName := fmt.Sprintf("cluster-test-%s", suffix)
+	datesetId := fmt.Sprintf("tf_test_cluster_resource_usage_%s", suffix)
+
+	resource.Test(t, resource.TestCase{
+					PreCheck:     func() { testAccPreCheck(t) },
+					Providers:    testAccProviders,
+					CheckDestroy: testAccCheckContainerClusterDestroy,
+					Steps: []resource.TestStep{
+									{
+													Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, true, false),
+													Check: resource.ComposeTestCheckFunc(
+																	resource.TestCheckResourceAttr("google_container_cluster.with_resource_usage_export_config",
+																					"resource_usage_export_config.0.bigquery_destination.0.dataset_id", datesetId),
+																	resource.TestCheckResourceAttr("google_container_cluster.with_resource_usage_export_config",
+																					"resource_usage_export_config.0.enable_network_egress_metering", "false"),
+													),
+									},
+									{
+													ResourceName:        "google_container_cluster.with_resource_usage_export_config",
+													ImportStateIdPrefix: "us-central1-a/",
+													ImportState:         true,
+													ImportStateVerify:   true,
+									},
+									{
+													Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, false, false),
+									},
+									{
+													ResourceName:        "google_container_cluster.with_resource_usage_export_config",
+													ImportStateIdPrefix: "us-central1-a/",
+													ImportState:         true,
+													ImportStateVerify:   true,
+									},
+					},
+	})
+}
 <% end -%>
 
 func testAccCheckContainerClusterDestroy(s *terraform.State) error {
@@ -3256,6 +3296,37 @@ resource "google_container_cluster" "with_pod_security_policy" {
 		enabled = %v
 	}
 }`, clusterName, enabled)
+}
+
+func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetId string, resourceUsage, egressMetering bool) string {
+	config := fmt.Sprintf(`
+	resource "google_bigquery_dataset" "default" {
+					dataset_id                  = "%s"
+					description                 = "gke resource usage dataset tests"
+					delete_contents_on_destroy  = true
+	}
+
+	resource "google_container_cluster" "with_resource_usage_export_config" {
+	name = "cluster-test-%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+	`, datasetId, clusterName)
+
+	if resourceUsage {
+					config += fmt.Sprintf(`
+					resource_usage_export_config {
+									enable_network_egress_metering = %v
+									bigquery_destination {
+													dataset_id = "${google_bigquery_dataset.default.dataset_id}"
+									}
+					}
+	}`, egressMetering)
+
+	} else {
+					config += `
+	}`
+	}
+	return config
 }
 <% end -%>
 
