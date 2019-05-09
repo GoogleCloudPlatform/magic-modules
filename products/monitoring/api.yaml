@@ -29,6 +29,7 @@ objects:
     base_url: projects/{{project}}/alertPolicies
     self_link: "{{name}}"
     update_verb: :PATCH
+    update_mask: true
     description: |
       A description of the conditions under which some aspect of your system is
       considered to be "unhealthy" and the ways to notify people or services
