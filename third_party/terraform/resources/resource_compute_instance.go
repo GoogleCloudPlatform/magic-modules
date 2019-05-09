@@ -76,10 +76,11 @@ func resourceComputeInstance() *schema.Resource {
 						},
 
 						"kms_key_self_link": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ForceNew:      true,
-							ConflictsWith: []string{"boot_disk.0.disk_encryption_key_raw"},
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							ConflictsWith:    []string{"boot_disk.0.disk_encryption_key_raw"},
+							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
 						"initialize_params": {
@@ -278,8 +279,9 @@ func resourceComputeInstance() *schema.Resource {
 						},
 
 						"kms_key_self_link": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: compareSelfLinkRelativePaths,
 						},
 
 						"disk_encryption_key_sha256": {
@@ -871,7 +873,9 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 					}
 				}
 				if key.KmsKeyName != "" {
-					di["kms_key_self_link"] = key.KmsKeyName
+					// The response for crypto keys often includes the version of the key which needs to be removed
+					// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
+					di["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
 				}
 				if key.Sha256 != "" {
 					di["disk_encryption_key_sha256"] = key.Sha256
@@ -1637,7 +1641,9 @@ func flattenBootDisk(d *schema.ResourceData, disk *computeBeta.AttachedDisk, con
 			result["disk_encryption_key_sha256"] = disk.DiskEncryptionKey.Sha256
 		}
 		if disk.DiskEncryptionKey.KmsKeyName != "" {
-			result["kms_key_self_link"] = disk.DiskEncryptionKey.KmsKeyName
+			// The response for crypto keys often includes the version of the key which needs to be removed
+			// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
+			result["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
 		}
 	}
 
