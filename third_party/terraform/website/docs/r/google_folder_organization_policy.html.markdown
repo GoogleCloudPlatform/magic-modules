@@ -94,6 +94,8 @@ can also be used to allow or deny all values. Structure is documented below.
 
 * `restore_policy` - (Optional) A restore policy is a constraint to restore the default policy. Structure is documented below.
 
+~> **Note:** One of [`boolean_policy`, `list_policy`, `restore_policy`] must be defined.
+
 - - -
 
 The `boolean_policy` block supports:
