@@ -779,6 +779,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
+  NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
+    mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_endpoint_group"
+        primary_resource_id: "neg"
+        vars:
+          neg_name: "my-lb-neg"
+          network_name: "neg-network"
+          subnetwork_name: "neg-subnetwork"
+    properties:
+      networkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        ignore_read: true
+        default_from_api: true
   NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       warning: |
