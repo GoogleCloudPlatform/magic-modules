@@ -32,6 +32,9 @@ objects:
     description: |
       A named resource to which messages are sent by publishers.
     input: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
+      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -65,6 +68,9 @@ objects:
         'Managing Subscriptions':
           'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
       api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
+      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
