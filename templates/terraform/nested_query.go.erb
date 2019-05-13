@@ -34,20 +34,24 @@
 	<% else -%>
 		item := vRaw.(map[string]interface{})
 	<% end -%>
+		var expectedV, itemV interface{}
+	  var err error
+
 	<% object.identity.each do |prop| -%>
 	<% if settable_properties.include?(prop) -%>
-		itemIdV, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
+		expectedV, err = expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
 		if err != nil {
 			return nil, err
 		}
 	<% else -%>
-		itemIdV := d.Get("<%= prop.name.underscore -%>")
+		expectedV := d.Get("<%= prop.name.underscore -%>")
 	<% end # settable_properties.include?(prop)-%>
-		actualIdV := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
-		log.Printf("[DEBUG] Checking if item's <%= prop.api_name %> (%#v) is equal to resource's (%#v)", itemIdV, actualIdV)
-		if !reflect.DeepEqual(itemIdV, actualIdV) {
+		itemV = flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
+		log.Printf("[DEBUG] Checking if item's <%= prop.api_name %> (%#v) is equal to resource's (%#v)", itemV, expectedV)
+		if !reflect.DeepEqual(itemV, expectedV) {
 			continue
 		}
+
 	<% end # object.identity.each -%>
 		return item, nil
 	}
