@@ -1364,6 +1364,24 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       tunnels: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+  VpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    name: 'ModernVpnGateway'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "modern_vpn_gateway_basic"
+        primary_resource_id: "modern_gateway"
+        vars:
+          modern_vpn_gateway_name: "modern-vpn-1"
+          network_name: "network1"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      vpnInterfaces: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
