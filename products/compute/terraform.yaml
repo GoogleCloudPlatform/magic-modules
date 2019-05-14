@@ -1365,13 +1365,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       tunnels: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
   VpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
-    name: 'ModernVpnGateway'
+    name: 'HaVpnGateway'
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "modern_vpn_gateway_basic"
-        primary_resource_id: "modern_gateway"
+        name: "ha_vpn_gateway_basic"
+        primary_resource_id: "ha_gateway"
         vars:
-          modern_vpn_gateway_name: "modern-vpn-1"
+          ha_vpn_gateway_name: "ha-vpn-1"
           network_name: "network1"
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride

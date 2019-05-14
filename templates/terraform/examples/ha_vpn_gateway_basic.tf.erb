@@ -1,6 +1,6 @@
-resource "google_compute_modern_vpn_gateway" "modern_gateway" {
+resource "google_compute_ha_vpn_gateway" "ha_gateway" {
   provider = "google-beta"
-  name     = "<%= ctx[:vars]['modern_vpn_gateway_name'] %>"
+  name     = "<%= ctx[:vars]['ha_vpn_gateway_name'] %>"
   network  = "${google_compute_network.network1.self_link}"
 }
 

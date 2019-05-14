@@ -7501,6 +7501,9 @@ objects:
       by Google, but used only by you. This type of VPN Gateway allows for the creation
       of VPN solutions with higher availability than classic Target VPN Gateways.
     references: !ruby/object:Api::Resource::ReferenceLinks
+      guides: 
+        'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
+        'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
       api: https://cloud.google.com/compute/docs/reference/rest/beta/vpnGateways
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
