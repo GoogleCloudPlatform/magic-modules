@@ -133,6 +133,14 @@ variable "regional_node_pool" {
   type = "map"
 }
 
+variable "region_backend_service_health_check" {
+  type = "map"
+}
+
+variable "region_backend_service" {
+  type = "map"
+}
+
 resource "google_compute_ssl_policy" "custom-ssl-policy" {
   name            = "${var.ssl_policy["name"]}"
   min_tls_version = "${var.ssl_policy["min_tls_version"]}"
@@ -251,6 +259,29 @@ resource "google_compute_backend_service" "gcp-inspec-backend-service" {
   }
 
   health_checks = ["${google_compute_health_check.gcp-inspec-health-check.self_link}"]
+}
+
+resource "google_compute_health_check" "gcp-inspec-region-backend-service-hc" {
+ project = "${var.gcp_project_id}"
+ name = "${var.region_backend_service_health_check["name"]}"
+
+ timeout_sec = "${var.region_backend_service_health_check["timeout_sec"]}"
+ check_interval_sec = "${var.region_backend_service_health_check["check_interval_sec"]}"
+
+ tcp_health_check {
+   port = "${var.region_backend_service_health_check["tcp_health_check_port"]}"
+ }
+}
+
+resource "google_compute_region_backend_service" "gcp-inspec-region-backend-service" {
+  project     = "${var.gcp_project_id}"
+  region      = "${var.gcp_location}"
+  name        = "${var.region_backend_service["name"]}"
+  description = "${var.region_backend_service["description"]}"
+  protocol    = "${var.region_backend_service["protocol"]}"
+  timeout_sec = "${var.region_backend_service["timeout_sec"]}"
+
+  health_checks = ["${google_compute_health_check.gcp-inspec-region-backend-service-hc.self_link}"]
 }
 
 resource "google_compute_http_health_check" "gcp-inspec-http-health-check" {
@@ -494,6 +525,7 @@ resource "google_cloudfunctions_function" "function" {
   trigger_http          = "${var.cloudfunction["trigger_http"]}"
   timeout               = "${var.cloudfunction["timeout"]}"
   entry_point           = "${var.cloudfunction["entry_point"]}"
+  runtime               = "nodejs6"
 
   environment_variables = {
     MY_ENV_VAR = "${var.cloudfunction["env_var_value"]}"

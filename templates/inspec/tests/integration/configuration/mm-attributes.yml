@@ -62,6 +62,18 @@ backend_service:
   timeout_sec: 10
   enable_cdn: true
 
+region_backend_service_health_check:
+  name: inspec-gcp-region-health-check
+  timeout_sec: 15
+  check_interval_sec: 15
+  tcp_health_check_port: 81
+
+region_backend_service:
+  name: inspec-gcp-region-backend-service
+  description: A regional description
+  protocol: TCP
+  timeout_sec: 15
+
 http_health_check:
   name: inspec-gcp-http-health-check
   request_path: /health_check
