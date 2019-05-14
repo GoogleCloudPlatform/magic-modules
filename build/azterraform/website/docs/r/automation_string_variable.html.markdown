@@ -36,10 +36,7 @@ resource "azurerm_automation_account" "example" {
   name                = "tfex-example-account"
   location            = "${azurerm_resource_group.example.location}"
   resource_group_name = "${azurerm_resource_group.example.name}"
-
-  sku = {
-    name = "Basic"
-  }
+  sku_name            = "Basic"
 }
 
 resource "azurerm_automation_string_variable" "example" {
@@ -62,7 +59,7 @@ The following arguments are supported:
 
 * `description` - (Optional) The description of the Automation Variable.
 
-* `encrypted` - (Optional) The encrypted flag of the Automation Variable. Defaults to `false`.
+* `encrypted` - (Optional) Specifies if the Automation Variable is encrypted. Defaults to `false`.
 
 * `value` - (Optional) The value of the Automation Variable.
 

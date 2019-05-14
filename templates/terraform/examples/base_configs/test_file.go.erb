@@ -48,9 +48,9 @@ func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
                     testCheck<%= resource_name -%>Exists(resourceName),
 <%        props_to_check.each do |propName, propValue| -%>
 <%          if propValue == :AttrSet -%>
-                    resource.TestCheckResourceAttrSet(dataSourceName, "<%= propName -%>"),
+                    resource.TestCheckResourceAttrSet(resourceName, "<%= propName -%>"),
 <%          else -%>
-                    resource.TestCheckResourceAttr(dataSourceName, "<%= propName -%>", "<%= propValue -%>"),
+                    resource.TestCheckResourceAttr(resourceName, "<%= propName -%>", "<%= propValue -%>"),
 <%          end -%>
 <%        end -%>
                 ),
