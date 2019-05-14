@@ -531,8 +531,8 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ObjectAccessControl'
     kind: 'storage#objectAccessControl'
-    base_url: b/{{bucket}}/o/{{object}}/acl
-    self_link: b/{{bucket}}/o/{{object}}/acl/{{entity}}
+    base_url: b/{{bucket}}/o/{{%object}}/acl
+    self_link: b/{{bucket}}/o/{{%object}}/acl/{{entity}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/storage/docs/access-control/create-manage-lists'
