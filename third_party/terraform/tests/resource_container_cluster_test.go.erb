@@ -108,27 +108,6 @@ func TestAccContainerCluster_basic(t *testing.T) {
 	})
 }
 
-func TestAccContainerCluster_withTimeout(t *testing.T) {
-	t.Parallel()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:	  func() { testAccPreCheck(t) },
-		Providers:	  testAccProviders,
-		CheckDestroy: testAccCheckContainerClusterDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withTimeout(),
-			},
-			{
-				ResourceName:		 "google_container_cluster.primary",
-				ImportStateIdPrefix: "us-central1-a/",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withAddons(t *testing.T) {
 	t.Parallel()
 
@@ -2050,25 +2029,6 @@ resource "google_container_cluster" "primary" {
 	network    = "default"
 	subnetwork = "default"
 }`, name)
-}
-
-func testAccContainerCluster_withTimeout() string {
-	return fmt.Sprintf(`
-resource "google_container_cluster" "primary" {
-	name = "cluster-test-%s"
-	zone = "us-central1-a"
-	initial_node_count = 3
-
-	ip_allocation_policy {
-    use_ip_aliases = false
-	}
-
-	timeouts {
-		create = "30m"
-		delete = "30m"
-		update = "30m"
-	}
-}`, acctest.RandString(10))
 }
 
 func testAccContainerCluster_withAddons(clusterName string) string {
