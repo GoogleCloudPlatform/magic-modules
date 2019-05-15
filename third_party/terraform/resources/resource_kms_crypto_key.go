@@ -239,7 +239,7 @@ func disableCryptoKeyRotation(cryptoKeyId *kmsCryptoKeyId, config *Config) error
 // a) marking all key versions for destruction (24hr soft-delete)
 // b) disabling rotation of the key
 // c) removing it from state
-// This disables all usage of previous versions of the ky and makes it
+// This disables all usage of previous versions of the key and makes it
 // generally useless for encryption and decryption of data.
 // Re-creation of this resource through Terraform will produce an error.
 func resourceKmsCryptoKeyDelete(d *schema.ResourceData, meta interface{}) error {
@@ -255,14 +255,12 @@ func resourceKmsCryptoKeyDelete(d *schema.ResourceData, meta interface{}) error 
 and all its CryptoKeyVersions will be destroyed, but it will still be present on the server.`, cryptoKeyId.cryptoKeyId())
 
 	// Delete all versions of the key
-	err = clearCryptoKeyVersions(cryptoKeyId, config)
-	if err != nil {
+	if err := clearCryptoKeyVersions(cryptoKeyId, config); err != nil {
 		return err
 	}
 
 	// Make sure automatic key rotation is disabled.
-	err = disableCryptoKeyRotation(cryptoKeyId, config)
-	if err != nil {
+	if err := disableCryptoKeyRotation(cryptoKeyId, config); err != nil {
 		return fmt.Errorf(
 			"While cryptoKeyVersions were cleared, Terraform was unable to disable automatic rotation of key due to an error: %s."+
 				"Please retry or manually disable automatic rotation to prevent creation of a new version of this key.", err)
