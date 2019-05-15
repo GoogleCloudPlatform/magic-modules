@@ -1,0 +1,6 @@
+// `name` is embedded in the metadata block. We don't support 1 of N nested
+// convenience fields yet so this is duplicated to a top level property.
+d.Set("name", d.Get("metadata.0.name"))
+
+// Store the ID again since it wasn't defined above
+d.SetId(d.Get("name").(string))

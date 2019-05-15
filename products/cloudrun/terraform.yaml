@@ -14,7 +14,8 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
-    properties:
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/set_name_from_metadata.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

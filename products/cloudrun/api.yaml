@@ -198,6 +198,7 @@ objects:
       output: true
     - !ruby/object:Api::Type::String
       name: namespace
+      required: true
       description: |-
         Namespace defines the space within each name must be unique, within a
         Cloud Run region. In Cloud Run the namespace must be equal to either the
@@ -211,6 +212,7 @@ objects:
         info: http://kubernetes.io/docs/user-guide/annotations +optional
     - !ruby/object:Api::Type::String
       name: name
+      required: true
       description: |-
         Name must be unique within a namespace, within a Cloud Run region.
         Is required when creating
@@ -284,7 +286,7 @@ objects:
             +optional
 - !ruby/object:Api::Resource
   name: Service
-  kind:
+  kind: Service
   base_url: projects/{{project}}/locations/{{location}}/services
   description: |-
     Service acts as a top-level container that manages a set of Routes and
@@ -307,6 +309,12 @@ objects:
     url_param_only: true
     required: true
   properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    # TODO chrisst - this needs to be a convenience field
+    url_param_only: true
+    description: |-
+      Convenience field for metadata.name
   - !ruby/object:Api::Type::NestedObject
     name: status
     description: |-
@@ -420,12 +428,19 @@ objects:
   - !ruby/object:Api::Type::String
     name: apiVersion
     description: The API version for this call such as "v1alpha1".
+  - !ruby/object:Api::Type::String
+    name: kind
+    # TODO chrisst - remove this and build a MM feature to send this.
+    required: true
+    description: This is always set to Service
   - !ruby/object:Api::Type::NestedObject
     name: spec
+    required: true
     description: Spec holds the desired state of the Service (from the client).
     properties:
     - !ruby/object:Api::Type::NestedObject
       name: runLatest
+      required: true
       description: |-
         RunLatest defines a simple Service. It will automatically
         configure a route that keeps the latest ready revision
@@ -434,6 +449,7 @@ objects:
       properties:
       - !ruby/object:Api::Type::NestedObject
         name: configuration
+        required: true
         description: The configuration for this service.
         properties:
         - !ruby/object:Api::Type::NestedObject
@@ -463,6 +479,7 @@ objects:
                 Not currently used by Cloud Run.
             - !ruby/object:Api::Type::NestedObject
               name: container
+              required: true
               description: |-
                 Container defines the unit of execution for this Revision.
                 In the context of a Revision, we disallow a number of the fields of
@@ -848,6 +865,7 @@ objects:
                         +optional
               - !ruby/object:Api::Type::String
                 name: image
+                required: true
                 description: |-
                   Docker image name.
                   More info: https://kubernetes.io/docs/concepts/containers/images
@@ -1462,6 +1480,7 @@ objects:
                     +optional
   - !ruby/object:Api::Type::NestedObject
     name: metadata
+    required: true
     description: |-
       Metadata associated with this Service, including name, namespace, labels,
       and annotations.
@@ -1536,6 +1555,7 @@ objects:
       output: true
     - !ruby/object:Api::Type::String
       name: namespace
+      required: true
       description: |-
         Namespace defines the space within each name must be unique, within a
         Cloud Run region. In Cloud Run the namespace must be equal to either the
@@ -1549,6 +1569,7 @@ objects:
         info: http://kubernetes.io/docs/user-guide/annotations +optional
     - !ruby/object:Api::Type::String
       name: name
+      required: true
       description: |-
         Name must be unique within a namespace, within a Cloud Run region.
         Is required when creating
