@@ -42,14 +42,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     access_api_results: true
     return_if_object: |
-<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+<%= lines(indent(compile('products/sqladmin/helpers/ansible/return_if_object.py'), 6)) -%>
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
     return_if_object: |
-<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+<%= lines(indent(compile('products/sqladmin/helpers/ansible/return_if_object.py'), 6)) -%>
   User: !ruby/object:Overrides::Ansible::ResourceOverride
     unwrap_resource: true
     return_if_object: |
-<%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+<%= lines(indent(compile('products/sqladmin/helpers/ansible/return_if_object.py'), 6)) -%>
   # Objects not implmented yet.
   Tier: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

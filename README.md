@@ -161,7 +161,7 @@ While most small changes won't require fiddling with overrides, each tool has
 often minor differences- the naming of a field, or whether it's required or not.
 
 You can find them under the folder for a product, with the name `{{tool}}.yaml`.
-For example, Ansible's overrides for Cloud SQL are present at `products/sql/ansible.yaml`
+For example, Ansible's overrides for Cloud SQL are present at `products/sqladmin/ansible.yaml`
 
 You can find a full reference for each tool under `provider/{{tool}}/resource_override.rb`
 and `provider/{{tool}}/property_override.rb`, as well as some other tool-specific
