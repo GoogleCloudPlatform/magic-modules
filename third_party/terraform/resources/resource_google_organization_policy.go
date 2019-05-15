@@ -225,11 +225,11 @@ func resourceGoogleOrganizationPolicyImportState(d *schema.ResourceData, meta in
 // no policy has been set even if previously one had.
 // See https://github.com/terraform-providers/terraform-provider-google/issues/3607
 func isOrganizationPolicyUnset(d *schema.ResourceData) bool {
-	list_policy := d.Get("list_policy").([]interface{})
-	boolean_policy := d.Get("boolean_policy").([]interface{})
-	restore_policy := d.Get("restore_policy").([]interface{})
+	listPolicy := d.Get("list_policy").([]interface{})
+	booleanPolicy := d.Get("boolean_policy").([]interface{})
+	restorePolicy := d.Get("restore_policy").([]interface{})
 
-	return len(list_policy)+len(boolean_policy)+len(restore_policy) == 0
+	return len(listPolicy)+len(booleanPolicy)+len(restorePolicy) == 0
 }
 
 func setOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
