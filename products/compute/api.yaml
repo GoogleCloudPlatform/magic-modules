@@ -7488,7 +7488,7 @@ objects:
         # status is not useful for state convergence
   - !ruby/object:Api::Resource
     name: 'VpnGateway'
-    kind: 'compute#targetVpnGateway'
+    kind: 'compute#vpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/vpnGateways
     collection_url_response: !ruby/object:Api::Resource::ResponseList
       kind: 'compute#vpnGatewayList'
@@ -7810,7 +7810,41 @@ objects:
         resource: 'TargetVpnGateway'
         imports: 'selfLink'
         input: true
-        required: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'vpnGateway'
+        description: |
+          URL of the VPN gateway with which this VPN tunnel is associated.
+          This must be used if a High Availability VPN gateway resource is created.
+        resource: 'VpnGateway'
+        imports: 'selfLink'
+        input: true
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'vpnGatewayInterface'
+        description: |
+          The interface ID of the VPN gateway with which this VPN tunnel is associated.
+        input: true
+        send_empty_value: true
+        min_version: beta
+      - !ruby/object:Api::Type::String
+        name: 'peerExternalGateway'
+        description: |
+          URL of the peer side external VPN gateway to which this VPN tunnel is connected.
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'peerExternalGatewayInterface'
+        description: |
+          The interface ID of the external VPN gateway to which this VPN tunnel is connected.
+        min_version: beta
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'peerGcpGateway'
+        description: |
+          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected. 
+          If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
+          ID in the peer GCP VPN gateway.
+        resource: 'VpnGateway'
+        imports: 'selfLink'
+        min_version: beta
       - !ruby/object:Api::Type::ResourceRef
         name: 'router'
         description: |
@@ -7822,7 +7856,6 @@ objects:
         name: 'peerIp'
         description: |
           IP address of the peer VPN gateway. Only IPv4 is supported.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'sharedSecret'
         description: |
