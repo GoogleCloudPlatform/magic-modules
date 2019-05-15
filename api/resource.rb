@@ -352,10 +352,10 @@ module Api
     def self_link_url
       base_url = @__product.base_url.split("\n").map(&:strip).compact
       if @self_link.nil?
-        [base_url, [@base_url, '{{name}}'].join('/')]
+        [base_url, [@base_url, '{{name}}'].join('/')].flatten.join
       else
         self_link = @self_link.split("\n").map(&:strip).compact
-        [base_url, self_link]
+        [base_url, self_link].flatten.join
       end
     end
 
@@ -363,13 +363,13 @@ module Api
       [
         @__product.base_url.split("\n").map(&:strip).compact,
         @base_url.split("\n").map(&:strip).compact
-      ]
+      ].flatten.join
     end
 
     def async_operation_url
       raise 'Not an async resource' if async.nil?
 
-      [@__product.base_url, async.operation.base_url]
+      [@__product.base_url, async.operation.base_url].flatten.join
     end
 
     def default_create_url
@@ -389,7 +389,7 @@ module Api
         [
           @__product.base_url.split("\n").map(&:strip).compact,
           @create_url.split("\n").map(&:strip).compact
-        ]
+        ].flatten.join
       end
     end
 
@@ -400,13 +400,13 @@ module Api
         [
           @__product.base_url.split("\n").map(&:strip).compact,
           @delete_url
-        ]
+        ].flatten.join
       end
     end
 
     # A regex to check if a full URL was returned or just a shortname.
     def regex_url
-      self_link_url.join.gsub('{{project}}', '.*')
+      self_link_url.gsub('{{project}}', '.*')
                    .gsub('{{name}}', '[a-z1-9\-]*')
                    .gsub('{{zone}}', '[a-z1-9\-]*')
     end

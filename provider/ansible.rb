@@ -79,14 +79,8 @@ module Provider
         return "u#{quote_string(string)}" unless string.include? 'u\''
       end
 
-      def build_url(url_parts, _extra = false)
-        full_url = if url_parts.is_a? Array
-                     url_parts.flatten.join
-                   else
-                     url_parts
-                   end
-
-        "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+      def build_url(url)
+        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.

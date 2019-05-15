@@ -364,11 +364,6 @@ module Provider
       }
     end
 
-    # This is used within Terraform and Ansible but they implement their own
-    def build_url(_url_parts, _extra = false)
-      raise 'Unimplemented build_url for this provider'
-    end
-
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
@@ -381,7 +376,7 @@ module Provider
     end
 
     def update_url(resource, url_part)
-      return build_url(resource.self_link_url) if url_part.nil?
+      return resource.self_link_url if url_part.nil?
 
       [resource.__product.base_url, url_part].flatten.join
     end
