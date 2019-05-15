@@ -1378,6 +1378,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false # the provider-default value will be used if not specified
         default_from_api: true
