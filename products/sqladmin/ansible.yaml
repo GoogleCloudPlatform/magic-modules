@@ -39,6 +39,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Flag: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
+  product:
+    name: 'Sql'
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     access_api_results: true
     return_if_object: |
