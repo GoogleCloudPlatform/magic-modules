@@ -140,12 +140,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
       cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      protocol: !ruby/object:Overrides::Terraform::PropertyOverride
-        description: |
-          The protocol this BackendService uses to communicate with backends.
-          Possible values are HTTP, HTTPS, HTTP2, TCP, and SSL. The default is
-          HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-          types and may result in errors if used with the GA provider.
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude_import: true
     exclude_validator: true
@@ -233,6 +227,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        description: |
+          The protocol this BackendService uses to communicate with backends.
+          Possible values are HTTP, HTTPS, HTTP2, TCP, and SSL. The default is
+          HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
+          types and may result in errors if used with the GA provider.
       sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
