@@ -22,7 +22,7 @@ scopes:
   - https://www.googleapis.com/auth/sqlservice.admin
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: CLoud SQL Admin API
+    name: Cloud SQL Admin API
     url: https://console.cloud.google.com/apis/library/sqladmin.googleapis.com/
 async: !ruby/object:Api::Async
   operation: !ruby/object:Api::Async::Operation
@@ -381,18 +381,18 @@ objects:
     name: 'Database'
     kind: 'sql#database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
+    has_self_link: true
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'instance'
         description: |
           The name of the Cloud SQL instance. This does not include the project
           ID.
-        resource: 'Instance'
-        imports: 'name'
         required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'charset'
@@ -402,6 +402,8 @@ objects:
         description: 'The MySQL collation value.'
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the database in the Cloud SQL instance.
           This does not include the project ID or instance name.
