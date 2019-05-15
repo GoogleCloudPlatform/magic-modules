@@ -12,7 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Sql
+name: SqlAdmin
 display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
@@ -381,19 +381,23 @@ objects:
     name: 'Database'
     kind: 'sql#database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
+    self_link: projects/{{project}}/instances/{{instance}}/databases/{{name}}
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'instance'
         description: |
           The name of the Cloud SQL instance. This does not include the project
           ID.
-        resource: 'Instance'
-        imports: 'name'
         required: true
+        input: true
     properties:
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: 'The URI of this resource.'
+        output: true
       - !ruby/object:Api::Type::String
         name: 'charset'
         description: 'The MySQL charset value.'
@@ -402,6 +406,8 @@ objects:
         description: 'The MySQL collation value.'
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the database in the Cloud SQL instance.
           This does not include the project ID or instance name.
