@@ -1486,6 +1486,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       peerIp: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validatePeerAddr'
+        default_from_api: true
       sharedSecret: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
@@ -1506,8 +1507,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: false
       router: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
-      peerIp: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/vpn_tunnel.erb
       encoder: templates/terraform/encoders/vpn_tunnel.go.erb
