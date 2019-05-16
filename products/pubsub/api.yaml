@@ -31,12 +31,12 @@ objects:
     create_verb: :PUT
     description: |
       A named resource to which messages are sent by publishers.
-    input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
         description: 'Name of the topic.'
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
