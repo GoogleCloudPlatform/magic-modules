@@ -149,7 +149,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= build_url(object.full_create_url) -%>")
+    url, err := replaceVars(d, config, "<%= object.full_create_url -%>")
     if err != nil {
         return err
     }
@@ -207,7 +207,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-    url, err := replaceVars(d, config, "<%= build_url(object.self_link_url) -%>")
+    url, err := replaceVars(d, config, "<%= object.self_link_url -%>")
     if err != nil {
         return err
     }
@@ -520,7 +520,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= build_url(object.full_delete_url) -%>")
+    url, err := replaceVars(d, config, "<%= object.full_delete_url -%>")
     if err != nil {
         return err
     }

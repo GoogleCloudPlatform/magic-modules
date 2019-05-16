@@ -321,9 +321,7 @@ objects:
       CAA, MX, CNAME, NS, etc)
     base_url: |
       projects/{{project}}/managedZones/{{managed_zone}}/changes
-    self_link: |
-      projects/{{project}}/managedZones/{{managed_zone}}/rrsets
-      ?name={{name}}&type={{type}}
+    self_link: 'projects/{{project}}/managedZones/{{managed_zone}}/rrsets?name={{name}}&type={{type}}'
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'dns#resourceRecordSetsListResponse'
       keys: ['rrsets']

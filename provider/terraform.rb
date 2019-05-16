@@ -93,10 +93,6 @@ module Provider
                              force_new?(property.parent, resource))))
     end
 
-    def build_url(url_parts, _extra = false)
-      url_parts.flatten.join
-    end
-
     # Transforms a format string with field markers to a regex string with
     # capture groups.
     #
