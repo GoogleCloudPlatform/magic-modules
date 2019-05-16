@@ -88,10 +88,10 @@ link_query_items = object&.nested_query&.keys&.first || object.collection_url_re
   private
 
   def product_url
-    '<%= object.product_url %>'
+    '<%= object.product_url || object.__product.base_url %>'
   end
 
   def resource_base_url
-    '<%= format_url(object.base_url) %>'
+    '<%= object.base_url %>'
   end
 end

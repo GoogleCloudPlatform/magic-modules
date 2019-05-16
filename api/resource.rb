@@ -348,7 +348,11 @@ module Api
       end
     end
 
-    # Returns self link in two parts - base_url + product_url
+    # Returns the "self_link_url" which is generally really the resource's GET
+    # URL. In older resources generally, this was the self_link value & was the
+    # product.base_url + resource.base_url + '/name'
+    # In newer resources there is much less standardisation in terms of value.
+    # Generally for them though, it's the product.base_url + resource.name
     def self_link_url
       base_url = @__product.base_url.split("\n").map(&:strip).compact
       if @self_link.nil?
