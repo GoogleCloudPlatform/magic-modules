@@ -310,7 +310,7 @@ module Api
 
     def collection_url
       [
-        @__product,
+        @__product.base_url,
         @base_url
       ].flatten.join
     end
