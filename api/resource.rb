@@ -348,14 +348,18 @@ module Api
       end
     end
 
-    # Returns self link in two parts - base_url + product_url
+    # Returns the "self_link_url" which is generally really the resource's GET
+    # URL. In older resources generally, this was the self_link value & was the
+    # product.base_url + resource.base_url + '/name'
+    # In newer resources there is much less standardisation in terms of value.
+    # Generally for them though, it's the product.base_url + resource.name
     def self_link_url
       base_url = @__product.base_url.split("\n").map(&:strip).compact
       if @self_link.nil?
-        [base_url, [@base_url, '{{name}}'].join('/')]
+        [base_url, [@base_url, '{{name}}'].join('/')].flatten.join
       else
         self_link = @self_link.split("\n").map(&:strip).compact
-        [base_url, self_link]
+        [base_url, self_link].flatten.join
       end
     end
 
@@ -363,13 +367,13 @@ module Api
       [
         @__product.base_url.split("\n").map(&:strip).compact,
         @base_url.split("\n").map(&:strip).compact
-      ]
+      ].flatten.join
     end
 
     def async_operation_url
       raise 'Not an async resource' if async.nil?
 
-      [@__product.base_url, async.operation.base_url]
+      [@__product.base_url, async.operation.base_url].flatten.join
     end
 
     def default_create_url
@@ -389,7 +393,7 @@ module Api
         [
           @__product.base_url.split("\n").map(&:strip).compact,
           @create_url.split("\n").map(&:strip).compact
-        ]
+        ].flatten.join
       end
     end
 
@@ -400,13 +404,13 @@ module Api
         [
           @__product.base_url.split("\n").map(&:strip).compact,
           @delete_url
-        ]
+        ].flatten.join
       end
     end
 
     # A regex to check if a full URL was returned or just a shortname.
     def regex_url
-      self_link_url.join.gsub('{{project}}', '.*')
+      self_link_url.gsub('{{project}}', '.*')
                    .gsub('{{name}}', '[a-z1-9\-]*')
                    .gsub('{{zone}}', '[a-z1-9\-]*')
     end
