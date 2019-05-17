@@ -30,6 +30,9 @@ module Provider
     # others use spaces. Eg: "app_engine" vs "appengine".
     attr_reader :legacy_name
 
+    # Some product names do not match their [golang] client name
+    attr_reader :client_name
+
     attr_reader :overrides
 
     # List of files to copy or compile into target module
