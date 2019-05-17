@@ -12,6 +12,10 @@
 # limitations under the License.
 
 require 'api/object'
+require 'api/resource/iam_policy'
+require 'api/resource/nested_query'
+require 'api/resource/reference_links'
+require 'api/resource/response_list'
 require 'google/string_utils'
 
 module Api
@@ -80,139 +84,6 @@ module Api
 
     attr_reader :__product
 
-    # Allows mapping of requests to specific API layout quirks.
-    class Wrappers < Api::Object
-      attr_reader :create
-
-      def validate
-        super
-        check :create, type: ::String, required: true
-      end
-    end
-
-    # Query information for finding resource nested in an returned API object
-    # i.e. fine-grained resources
-    class NestedQuery < Api::Object
-      # A list of keys to traverse in order.
-      # i.e. backendBucket --> cdnPolicy.signedUrlKeyNames
-      # should be ["cdnPolicy", "signedUrlKeyNames"]
-      attr_reader :keys
-
-      # If true, we expect the the nested list to be
-      # a list of IDs for the nested resource, rather
-      # than a list of nested resource objects
-      # i.e. backendBucket.cdnPolicy.signedUrlKeyNames is a list of key names
-      # rather than a list of the actual key objects
-      attr_reader :is_list_of_ids
-
-      # This is used by Ansible, but may not be necessary.
-      attr_reader :kind
-
-      def validate
-        super
-
-        check :keys, type: Array, item_type: String, required: true
-        check :is_list_of_ids, type: :boolean, default: false
-
-        check :kind, type: String
-      end
-    end
-
-    # Represents a response from the API that returns a list of objects.
-    class ResponseList < Api::Object
-      attr_reader :kind
-      attr_reader :items
-
-      def validate
-        super
-
-        check :items, default: 'items', type: ::String, required: true
-        check :kind, type: ::String
-      end
-
-      def kind?
-        !@kind.nil?
-      end
-    end
-
-    # Represents a list of documentation links.
-    class ReferenceLinks < Api::Object
-      # Hash containing
-      # name: The title of the link
-      # value: The URL to navigate on click
-      attr_reader :guides
-
-      # the url of the API guide
-      attr_reader :api
-
-      def validate
-        super
-
-        check :guides, type: Hash, default: {}, required: true
-        check :api, type: String
-      end
-    end
-
-    # Information about the IAM policy for this resource
-    # Several GCP resources have IAM policies that are scoped to
-    # and accessed via their parent resource
-    # See: https://cloud.google.com/iam/docs/overview
-    class IamPolicy < Api::Object
-      # boolean of if this binding should be generated
-      attr_reader :exclude
-
-      def validate
-        super
-
-        check :exclude, type: :boolean, default: false
-      end
-    end
-
-    def to_s
-      JSON.pretty_generate(self)
-    end
-
-    # Prints a dot notation path to where the field is nested within the parent
-    # object when called on a property. eg: parent.meta.label.foo
-    # Redefined on Resource to terminate the calls up the parent chain.
-    def lineage
-      name
-    end
-
-    def to_json(opts = nil)
-      # ignore fields that will contain references to parent resources
-      ignored_fields = %i[@__product @__parent @__resource @api_name
-                          @collection_url_response @properties @parameters]
-      json_out = {}
-
-      instance_variables.each do |v|
-        json_out[v] = instance_variable_get(v) unless ignored_fields.include? v
-      end
-
-      json_out.merge!(properties.map { |p| [p.name, p] }.to_h)
-      json_out.merge!(parameters.map { |p| [p.name, p] }.to_h)
-
-      JSON.generate(json_out, opts)
-    end
-
-    def identity
-      props = all_user_properties
-      if @identity.nil?
-        props.select { |p| p.name == Api::Type::String::NAME.name }
-      else
-        props.select { |p| @identity.include?(p.name) }
-      end
-    end
-
-    # 'identity' is already taken by Ruby.
-    def __identity
-      @identity
-    end
-
-    # Main data validation. As the validation code is simple, but long due to
-    # the number of properties, it is okay to ignore Rubocop warnings about
-    # method size and complexity.
-    #
     def validate
       super
       check :async, type: Api::Async
@@ -256,7 +127,17 @@ module Api
       check :iam_policy, type: Api::Resource::IamPolicy
       check :exclude_resource, type: :boolean, default: false
 
-      check_identity unless @identity.nil?
+      validate_identity unless @identity.nil?
+    end
+
+    # ====================
+    # Custom Getters
+    # ====================
+
+    # Returns all properties and parameters including the ones that are
+    # excluded. This is used for PropertyOverride validation
+    def all_properties
+      ((@properties || []) + (@parameters || []))
     end
 
     def properties
@@ -265,6 +146,78 @@ module Api
 
     def parameters
       (@parameters || []).reject(&:exclude)
+    end
+
+    # Return the user-facing properties in client tools; this ends up meaning
+    # both properties and parameters.
+    def all_user_properties
+      properties + parameters
+    end
+
+    def required_properties
+      all_user_properties.select(&:required)
+    end
+
+    # Returns all resourcerefs at any depth
+    def all_resourcerefs
+      resourcerefs_for_properties(all_user_properties, self)
+    end
+
+    # All settable properties in the resource.
+    # Fingerprints aren't *really" settable properties, but they behave like one.
+    # At Create, they have no value but they can just be read in anyways, and after a Read
+    # they will need ot be set in every Update.
+    def settable_properties
+      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
+                         .reject(&:url_param_only)
+    end
+
+    # Properties that will be returned in the API body
+    def gettable_properties
+      all_user_properties.reject(&:url_param_only)
+    end
+
+    # Return the product-level async object, or the resource-specific one
+    # if one exists.
+    def async
+      return @__product.async unless @async
+
+      @async
+    end
+
+    # Return the resource-specific identity properties, or a best guess of the
+    # `name` value for the resource.
+    def identity
+      props = all_user_properties
+      if @identity.nil?
+        props.select { |p| p.name == Api::Type::String::NAME.name }
+      else
+        props.select { |p| @identity.include?(p.name) }
+      end
+    end
+
+    def kind?
+      !@kind.nil?
+    end
+
+    def encoder?
+      !@transport&.encoder.nil?
+    end
+
+    def decoder?
+      !@transport&.decoder.nil?
+    end
+
+    # ====================
+    # Version-related methods
+    # ====================
+
+    def min_version
+      if @min_version.nil?
+        @__product.default_version
+      else
+        @__product.version_obj(@min_version)
+      end
     end
 
     def not_in_version?(version)
@@ -282,60 +235,9 @@ module Api
       nil
     end
 
-    # Returns all properties and parameters including the ones that are
-    # excluded. This is used for PropertyOverride validation
-    def all_properties
-      ((@properties || []) + (@parameters || []))
-    end
-
-    def all_user_properties
-      properties + parameters
-    end
-
-    def required_properties
-      all_user_properties.select(&:required)
-    end
-
-    def check_identity
-      check :identity, type: Array, item_type: String, required: true
-
-      # Ensures we have all properties defined
-      @identity.each do |i|
-        raise "Missing property/parameter for identity #{i}" \
-          if all_user_properties.select { |p| p.name == i }.empty?
-      end
-    end
-
-    # Returns all resourcerefs at any depth
-    def all_resourcerefs
-      resourcerefs_for_properties(all_user_properties, self)
-    end
-
-    def kind?
-      !@kind.nil?
-    end
-
-    def encoder?
-      !@transport&.encoder.nil?
-    end
-
-    def decoder?
-      !@transport&.decoder.nil?
-    end
-
-    def async
-      return @__product.async unless @async
-
-      @async
-    end
-
-    def min_version
-      if @min_version.nil?
-        @__product.default_version
-      else
-        @__product.version_obj(@min_version)
-      end
-    end
+    # ====================
+    # URL-related methods
+    # ====================
 
     # Returns the "self_link_url" which is generally really the resource's GET
     # URL. In older resources generally, this was the self_link value & was the
@@ -404,21 +306,48 @@ module Api
                    .gsub('{{zone}}', '[a-z1-9\-]*')
     end
 
-    # All settable properties in the resource.
-    # Fingerprints aren't *really" settable properties, but they behave like one.
-    # At Create, they have no value but they can just be read in anyways, and after a Read
-    # they will need ot be set in every Update.
-    def settable_properties
-      all_user_properties.reject { |v| v.output && !v.is_a?(Api::Type::Fingerprint) }
-                         .reject(&:url_param_only)
+    # ====================
+    # Debugging Fields
+    # ====================
+
+    # Prints a dot notation path to where the field is nested within the parent
+    # object when called on a property. eg: parent.meta.label.foo
+    # Redefined on Resource to terminate the calls up the parent chain.
+    def lineage
+      name
     end
 
-    # Properties that will be returned in the API body
-    def gettable_properties
-      all_user_properties.reject(&:url_param_only)
+    def to_s
+      JSON.pretty_generate(self)
+    end
+
+    def to_json(opts = nil)
+      # ignore fields that will contain references to parent resources
+      ignored_fields = %i[@__product @__parent @__resource @api_name
+                          @collection_url_response @properties @parameters]
+      json_out = {}
+
+      instance_variables.each do |v|
+        json_out[v] = instance_variable_get(v) unless ignored_fields.include? v
+      end
+
+      json_out.merge!(properties.map { |p| [p.name, p] }.to_h)
+      json_out.merge!(parameters.map { |p| [p.name, p] }.to_h)
+
+      JSON.generate(json_out, opts)
     end
 
     private
+
+    def validate_identity
+      check :identity, type: Array, item_type: String, required: true
+
+      # Ensures we have all properties defined
+      @identity.each do |i|
+        raise "Missing property/parameter for identity #{i}" \
+          if all_user_properties.select { |p| p.name == i }.empty?
+      end
+    end
 
     # Given an array of properties, return all ResourceRefs contained within
     # Requires:
