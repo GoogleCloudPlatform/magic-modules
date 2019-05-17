@@ -45,10 +45,10 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
     } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
 <%      else -%>
     } else {
-<%      end -%>
+<%      end # unless/else send_empty_value -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    else -%>
+<%    else # if flatten -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
     if err != nil {
         return nil, err
