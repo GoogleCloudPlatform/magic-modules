@@ -17,6 +17,8 @@
                            prefix: prefix,
                            property: property)) -%>
 <% else -%>
+
+<%# Generate expanders for Maps %>
 <%   if property.is_a?(Api::Type::Map) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]interface{}, error) {
   if v == nil {
@@ -42,10 +44,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   return m, nil
 }
 
-<%     property.nested_properties.each do |prop| -%>
-<%       next if prop.name == property.key_name -%>
-<%=        lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
-<%     end -%>
+<%# Generate expanders for KeyValuePairs %>
 <%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
   if v == nil {
@@ -57,6 +56,8 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   }
   return m, nil
 }
+
+<%# Generate expanders for flattened objects %>
 <%   elsif property.flatten_object -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(d TerraformResourceData, config *Config) (interface{}, error) {
   transformed := make(map[string]interface{})
@@ -65,11 +66,11 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(d TerraformResourc
   transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
   if err != nil {
     return nil, err
-<%       unless prop.send_empty_value -%>
-  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+<%       if prop.send_empty_value -%>
+  } else {
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%       else -%>
-  } else {
+  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 <%       end -%>
   }
@@ -78,17 +79,13 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(d TerraformResourc
 <%     end -%>
 }
 
-<%     property.nested_properties.each do |prop| -%>
-<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
-<%     end -%>
+<%# Generate expanders for everything else %>
 <%   elsif tf_types.include?(property.class) -%>
 func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 <%     if property.is_set -%>
   v = v.(*schema.Set).List()
 <%     end -%>
-<%
-       if property.nested_properties?
--%>
+<%     if property.nested_properties? -%>
   l := v.([]interface{})
 <%       if property.is_a?(Api::Type::Array) -%>
   req := make([]interface{}, 0, len(l))
@@ -128,9 +125,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
 <%       end -%>
 }
 
-<%       property.nested_properties.each do |prop| -%>
-<%=        lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
-<%       end -%>
+
 <%     elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
@@ -160,4 +155,12 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
   // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 }
 <%   end # tf_types.include?(property.class) -%>
+
+<% if property.nested_properties? -%>
+<%   property.nested_properties.each do |prop| -%>
+<%     next if property.is_a?(Api::Type::Map) && prop.name == property.key_name -%>
+<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%   end -%>
+<% end -%>
+
 <% end # custom_code check -%>
