@@ -16,7 +16,7 @@ __metaclass__ = type
   metadata_version = quote_string("1.1")
   supported_by = quote_string("community")
 
-  uri_props = object.uri_properties.reject { |para| para.nil? || para.name == 'name' }
+  uri_props = uri_properties_raw(object).reject { |para| para.nil? || para.name == 'name' }
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
                     'status': ["preview"],

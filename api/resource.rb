@@ -295,18 +295,6 @@ module Api
       all_user_properties.select(&:required)
     end
 
-    # TODO(alexstephen): Update test_constants to use this function.
-    # Returns all of the properties that are a part of the self_link or
-    # collection URLs
-    def uri_properties
-      [@base_url, @__product.base_url].map do |url|
-        parts = url.scan(/\{\{(.*?)\}\}/).flatten
-        parts << 'name'
-        parts.delete('project')
-        parts.map { |pt| all_user_properties.select { |p| p.name == pt }[0] }
-      end.flatten
-    end
-
     def check_identity
       check :identity, type: Array, item_type: String, required: true
 
