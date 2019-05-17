@@ -13,6 +13,7 @@
 
 require 'api/object'
 require 'compile/core'
+require 'provider/ansible'
 require 'provider/config'
 require 'provider/core'
 
@@ -38,14 +39,6 @@ module Provider
     module HandwrittenValuesFromExample
       def handwritten_example
         @__example.task.code
-      end
-
-      # Returns all URI properties minus those ignored.
-      def uri_properties(object, ignored_props = [])
-        object.uri_properties
-              .compact
-              .map(&:name)
-              .reject { |x| ignored_props.include? x }
       end
 
       # Grab handwritten values for a set of properties.
@@ -236,6 +229,7 @@ module Provider
 
       attr_reader :__example
       include Compile::Core
+      include Provider::Ansible
       include Provider::Ansible::HandwrittenValuesFromExample
 
       def validate
@@ -341,6 +335,7 @@ module Provider
 
       attr_reader :__example
 
+      include Provider::Ansible
       include Provider::Ansible::HandwrittenValuesFromExample
 
       def validate; end
