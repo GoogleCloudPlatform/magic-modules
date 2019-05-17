@@ -129,7 +129,7 @@ module Api
     def validate
       super
       check :async, type: Api::Async
-      check :base_url, type: String
+      check :base_url, type: String, required: true
       check :create_url, type: String
       check :delete_url, type: String
       check :update_url, type: String
