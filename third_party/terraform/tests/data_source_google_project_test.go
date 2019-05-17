@@ -43,24 +43,15 @@ func testAccDataSourceGoogleProjectCheck(dataSourceName string, resourceName str
 		dsAttr := ds.Primary.Attributes
 		rsAttr := rs.Primary.Attributes
 
-		projectAttrToCheck := []string{
-			"project_id",
-			"name",
-			"billing_account",
-			"org_id",
-			"folder_id",
-			"number",
+		errMsg := ""
+		for k, attr := range rsAttr {
+			if dsAttr[k] != attr {
+				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], attr)
+			}
 		}
 
-		for _, attr := range projectAttrToCheck {
-			if dsAttr[attr] != rsAttr[attr] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attr,
-					dsAttr[attr],
-					rsAttr[attr],
-				)
-			}
+		if errMsg != "" {
+			return fmt.Errorf(errMsg)
 		}
 
 		return nil

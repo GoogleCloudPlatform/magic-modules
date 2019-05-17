@@ -43,20 +43,15 @@ func testAccDataSourceComputeBackendServiceCheck(dsName, rsName string) resource
 		dsAttr := ds.Primary.Attributes
 		rsAttr := rs.Primary.Attributes
 
-		attrsToTest := []string{
-			"id",
-			"name",
-			"description",
-			"self_link",
-			"fingerprint",
-			"port_name",
-			"protocol",
+		errMsg := ""
+		for k, attr := range rsAttr {
+			if dsAttr[k] != attr {
+				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], attr)
+			}
 		}
 
-		for _, attrToTest := range attrsToTest {
-			if dsAttr[attrToTest] != rsAttr[attrToTest] {
-				return fmt.Errorf("%s is %s; want %s", attrToTest, dsAttr[attrToTest], rsAttr[attrToTest])
-			}
+		if errMsg != "" {
+			return fmt.Errorf(errMsg)
 		}
 
 		return nil

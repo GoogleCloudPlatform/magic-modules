@@ -58,48 +58,25 @@ func testAccDataSourceGoogleContainerClusterCheck(dataSourceName string, resourc
 		dsAttr := ds.Primary.Attributes
 		rsAttr := rs.Primary.Attributes
 
-		clusterAttrToCheck := []string{
-			"name",
-			"zone",
-			"additional_zones",
-			"addons_config",
-			"cluster_ipv4_cidr",
-			"description",
-			"enable_kubernetes_alpha",
-			"enable_tpu",
-			"enable_legacy_abac",
-			"endpoint",
-			"enable_legacy_abac",
-			"instance_group_urls",
-			"ip_allocation_policy",
-			"logging_service",
-			"maintenance_policy",
-			"master_auth",
-			"master_auth.0.password",
-			"master_auth.0.username",
-			"master_auth.0.client_certificate_config.0.issue_client_certificate",
-			"master_auth.0.client_certificate",
-			"master_auth.0.client_key",
-			"master_auth.0.cluster_ca_certificate",
-			"master_authorized_networks_config",
-			"master_version",
-			"min_master_version",
-			"monitoring_service",
-			"network",
-			"network_policy",
-			"node_version",
-			"subnetwork",
+		// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
+		ignoreFields := map[string]struct{}{
+			"enable_tpu":                   {},
+			"enable_binary_authorization":  {},
+			"pod_security_policy_config.#": {},
 		}
 
-		for _, attr := range clusterAttrToCheck {
-			if dsAttr[attr] != rsAttr[attr] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attr,
-					dsAttr[attr],
-					rsAttr[attr],
-				)
+		errMsg := ""
+		for k, attr := range rsAttr {
+			if _, ok := ignoreFields[k]; ok {
+				continue
 			}
+			if dsAttr[k] != attr {
+				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], attr)
+			}
+		}
+
+		if errMsg != "" {
+			return fmt.Errorf(errMsg)
 		}
 
 		return nil

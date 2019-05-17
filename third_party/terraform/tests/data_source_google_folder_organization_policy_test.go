@@ -42,25 +42,15 @@ func testAccDataSourceGoogleOrganizationPolicyCheck(dataSourceName string, resou
 		dsAttr := ds.Primary.Attributes
 		rsAttr := rs.Primary.Attributes
 
-		cloudFuncAttrToCheck := []string{
-			"name",
-			"folder",
-			"constraint",
-			"version",
-			"list_policy",
-			"restore_policy",
-			"boolean_policy",
+		errMsg := ""
+		for k, attr := range rsAttr {
+			if dsAttr[k] != attr {
+				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], attr)
+			}
 		}
 
-		for _, attr := range cloudFuncAttrToCheck {
-			if dsAttr[attr] != rsAttr[attr] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attr,
-					dsAttr[attr],
-					rsAttr[attr],
-				)
-			}
+		if errMsg != "" {
+			return fmt.Errorf(errMsg)
 		}
 
 		return nil
