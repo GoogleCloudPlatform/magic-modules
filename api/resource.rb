@@ -181,15 +181,16 @@ module Api
 
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources
-      ignored_fields = %i[@__product @__parent @__resource @api_name @collection_url_response]
+      ignored_fields = %i[@__product @__parent @__resource @api_name
+                          @collection_url_response @properties @parameters]
       json_out = {}
 
       instance_variables.each do |v|
         json_out[v] = instance_variable_get(v) unless ignored_fields.include? v
       end
 
-      json_out[:@properties] = properties.map { |p| [p.name, p] }.to_h
-      json_out[:@parameters] = parameters.map { |p| [p.name, p] }.to_h
+      json_out.merge!(properties.map { |p| [p.name, p] }.to_h)
+      json_out.merge!(parameters.map { |p| [p.name, p] }.to_h)
 
       JSON.generate(json_out, opts)
     end
