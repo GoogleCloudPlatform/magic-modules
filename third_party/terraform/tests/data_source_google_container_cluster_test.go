@@ -19,7 +19,14 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 			{
 				Config: testAccContainerClusterDatasource_zonal(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceGoogleContainerClusterCheck("data.google_container_cluster.kubes", "google_container_cluster.kubes"),
+					checkDataSourceStateMatchesResourceStateWithIgnores("data.google_container_cluster.kubes", "google_container_cluster.kubes",
+						// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
+						map[string]struct{}{
+							"enable_tpu":                   {},
+							"enable_binary_authorization":  {},
+							"pod_security_policy_config.#": {},
+						},
+					),
 				),
 			},
 		},
@@ -36,7 +43,14 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 			{
 				Config: testAccContainerClusterDatasource_regional(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceGoogleContainerClusterCheck("data.google_container_cluster.kubes", "google_container_cluster.kubes"),
+					checkDataSourceStateMatchesResourceStateWithIgnores("data.google_container_cluster.kubes", "google_container_cluster.kubes",
+						// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
+						map[string]struct{}{
+							"enable_tpu":                   {},
+							"enable_binary_authorization":  {},
+							"pod_security_policy_config.#": {},
+						},
+					),
 				),
 			},
 		},

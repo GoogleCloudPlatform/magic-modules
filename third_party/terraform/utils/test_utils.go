@@ -1,8 +1,11 @@
 package google
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
+
+	"github.com/hashicorp/terraform/terraform"
 )
 
 type ResourceDataMock struct {
@@ -65,4 +68,41 @@ func toBool(attribute string) (bool, error) {
 		return false, nil
 	}
 	return strconv.ParseBool(attribute)
+}
+
+func checkDataSourceStateMatchesResourceState(dataSourceName, resourceName string) func(*terraform.State) error {
+	return checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName, map[string]struct{}{})
+}
+
+func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourceName string, ignoreFields map[string]struct{}) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		ds, ok := s.RootModule().Resources[dataSourceName]
+		if !ok {
+			return fmt.Errorf("root module has no resource called %s", dataSourceName)
+		}
+
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("can't find %s in state", resourceName)
+		}
+
+		dsAttr := ds.Primary.Attributes
+		rsAttr := rs.Primary.Attributes
+
+		errMsg := ""
+		for k, attr := range rsAttr {
+			if _, ok := ignoreFields[k]; ok {
+				continue
+			}
+			if dsAttr[k] != attr {
+				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], attr)
+			}
+		}
+
+		if errMsg != "" {
+			return fmt.Errorf(errMsg)
+		}
+
+		return nil
+	}
 }
