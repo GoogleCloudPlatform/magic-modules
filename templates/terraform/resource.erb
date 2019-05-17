@@ -24,9 +24,11 @@ package google
     update_body_properties = object.settable_properties
     update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    api_name_lower = String.new(product_ns)
-    api_name_lower[0] = api_name_lower[0].downcase
-    api_client_name = api_name_lower.downcase
+    client_name_camel = String.new(if @config.client_name then @config.client_name else product_ns end)
+    client_name_camel[0] = client_name_camel[0].downcase
+    client_name_pascal = String.new(client_name_camel)
+    client_name_pascal[0] = client_name_pascal[0].upcase
+    client_name_lower = client_name_camel.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
     timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
@@ -175,18 +177,18 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%  end -%>
 <% if object.autogen_async -%>
-    waitErr := <%= api_name_lower -%>OperationWaitTime(
+    waitErr := <%= client_name_camel -%>OperationWaitTime(
     config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 <% else -%>
-    op := &<%= api_client_name -%>.Operation{}
+    op := &<%= client_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
     }
 
-    waitErr := <%= api_name_lower -%>OperationWaitTime(
-    config.client<%= product_ns -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+    waitErr := <%= client_name_camel -%>OperationWaitTime(
+    config.client<%= client_name_pascal -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 <% end -%>
 
@@ -376,19 +378,19 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      end -%>
 <% if object.autogen_async -%>
 
-        err = <%= api_name_lower -%>OperationWaitTime(
+        err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 <% else -%>
-        op := &<%= api_client_name -%>.Operation{}
+        op := &<%= client_name_lower -%>.Operation{}
         err = Convert(res, op)
         if err != nil {
             return err
         }
 
-        err = <%= api_name_lower -%>OperationWaitTime(
-            config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+        err = <%= client_name_camel -%>OperationWaitTime(
+            config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 <% end -%>
@@ -482,18 +484,18 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  end -%>
 <% if object.autogen_async -%>
 
-    err = <%= api_name_lower -%>OperationWaitTime(
+    err = <%= client_name_camel -%>OperationWaitTime(
     config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
     int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 <% else -%>
-    op := &<%= api_client_name -%>.Operation{}
+    op := &<%= client_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
     }
 
-    err = <%= api_name_lower -%>OperationWaitTime(
-    config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+    err = <%= client_name_camel -%>OperationWaitTime(
+    config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
     int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 <% end -%>
 
@@ -543,18 +545,18 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  end -%>
 <% if object.autogen_async -%>
 
-    err = <%= api_name_lower -%>OperationWaitTime(
+    err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
 <% else -%>
-    op := &<%= api_client_name -%>.Operation{}
+    op := &<%= client_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
     }
 
-    err = <%= api_name_lower -%>OperationWaitTime(
-        config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
+    err = <%= client_name_camel -%>OperationWaitTime(
+        config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
 <% end -%>
 
