@@ -57,8 +57,8 @@ module Api
       # URL / HTTP Configuration
       # ====================
       #
-      # [Optional] The "identity" URL of the resource.. Defaults to:
-      # * collection url when the create_verb is :POST
+      # [Optional] The "identity" URL of the resource. Defaults to:
+      # * base_url when the create_verb is :POST
       # * self_link when the create_verb is :PUT
       attr_reader :self_link
       # [Optional] The URL used to creating the resource. Defaults to:
