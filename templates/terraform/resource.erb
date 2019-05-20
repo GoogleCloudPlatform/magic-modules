@@ -251,17 +251,17 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
+<%# Terraform must set the top level schema field, but with flattened properties it's difficult to
+know what the top level should be. Instead we just loop over the map returned from flatten. %>
 <%    if prop.flatten_object -%>
-    if v, ok := res["<%= prop.api_name -%>"].(map[string]interface{}); res["<%= prop.api_name -%>"] != nil && ok {
-<%      prop.properties.each do |p| -%>
-      if err := d.Set("<%= p.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%><%= titlelize_property(p) -%>(v["<%= p.api_name -%>"], d)); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
-<%      end -%>
-    } else {
-<%      prop.properties.each do |p| -%>
-      d.Set("<%= p.name.underscore -%>", nil)
-<%      end -%>
+    // Handle flattened_object
+    if flattened_prop := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattened_prop != nil {
+        casted := flattened_prop.([]interface{})[0]
+        if casted != nil {
+            for k, v := range casted.(map[string]interface{}) {
+                d.Set(k, v)
+            }
+        }
     }
 <%    else -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
