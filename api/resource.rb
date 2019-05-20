@@ -29,8 +29,8 @@ module Api
       # [Required] A description of the resource that's surfaced in provider
       # documentation.
       attr_reader :description
-      # [Required] Reference links provided in downstream documentation. See
-      # api/resource/reference_links for the shape of this field's value.
+      # [Required] (Api::Resource::ReferenceLinks) Reference links provided in
+      # downstream documentation.
       attr_reader :references
       # [Required] The GCP "relative URI" of a resource, relative to the product
       # base URL. It can often be inferred from the `create` path.
@@ -46,8 +46,8 @@ module Api
       attr_reader :exclude
       # [Optional] If set to true, the resource is not able to be updated.
       attr_reader :input
-      # [Optional] If set to true, this resource uses an update mask to perform updates.
-      # This is typical of newer GCP APIs.
+      # [Optional] If set to true, this resource uses an update mask to perform
+      # updates. This is typical of newer GCP APIs.
       attr_reader :update_mask
       # [Optional] If set to true, the object has a `self_link` field. This is
       # typical of older GCP APIs.
@@ -82,10 +82,9 @@ module Api
       # Collection / Identity URL Configuration
       # ====================
       #
-      # [Optional] This is the type of response from the collection URL. It
-      # contains the name of the list of items within the json, as well as the
-      # type that this list should be. This is of
-      # type Api::Resource::ResponseList
+      # [Optional] (Api::Resource::ResponseList) This is the type of response
+      # from the collection URL. It contains the name of the list of items
+      # within the json, as well as the type that this list should be.
       attr_reader :collection_url_response
       # [Optional] This is an array with items that uniquely identify the
       # resource.
@@ -94,16 +93,17 @@ module Api
       # list.  Otherwise, it's safe to leave empty.
       # If empty, we assume that `name` is the identifier.
       attr_reader :identity
-      # [Optional] This is useful in case you need to change the query made for
-      # GET requests only. In particular, this is often used
-      # to extract an object from a parent object or a collection.
+      # [Optional] (Api::Resource::NestedQuery) This is useful in case you need
+      # to change the query made for GET requests only. In particular, this is
+      # often used to extract an object from a parent object or a collection.
       attr_reader :nested_query
 
       # ====================
       # IAM Configuration
       # ====================
       #
-      # [Optional] Configuration of a resource's resource-specific IAM Policy.
+      # [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
+      # resource-specific IAM Policy.
       attr_reader :iam_policy
       # [Optional] If set to true, don't generate the resource itself; only
       # generate the IAM policy.
