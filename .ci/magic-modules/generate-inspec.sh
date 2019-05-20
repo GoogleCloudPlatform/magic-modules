@@ -14,10 +14,6 @@ do
   bundle exec compiler -p $i -e inspec -o "build/inspec/"
 done
 
-pushd build/inspec
-rubocop -c .rubocop.yml
-popd
-
 # This command can crash - if that happens, the script should not fail.
 set +e
 INSPEC_COMMIT_MSG="$(python .ci/magic-modules/extract_from_pr_description.py --tag inspec < .git/body)"
