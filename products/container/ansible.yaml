@@ -47,6 +47,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - zone
+      initialClusterVersion: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases:
+          - cluster_version
     provider_helpers:
       - 'products/container/helpers/python/provider_cluster.py'
   KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
