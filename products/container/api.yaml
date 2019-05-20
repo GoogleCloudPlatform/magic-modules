@@ -419,6 +419,20 @@ objects:
           The time the cluster will be automatically deleted in RFC3339 text
           format.
         output: true
+      - !ruby/object:Api::Type::Map
+        name: 'resourceLabels'
+        description: >
+          The resource labels for the cluster to use to annotate any related
+          Google Compute Engine resources.
+        update_url: projects/{{project}}/locations/{{location}}/clusters/{{name}}/setResourceLabels
+        update_verb: :POST
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: |
+          The fingerprint used for optimistic locking of this resource.  Used
+          internally during updates.
+        update_url: projects/{{project}}/locations/{{location}}/clusters/{{name}}/setResourceLabels
+        update_verb: :POST
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/zones/{{location}}/clusters/{{cluster}}/nodePools
