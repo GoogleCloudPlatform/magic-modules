@@ -38,18 +38,10 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
 <%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
-    if err != nil {
-        return nil, err
-<%      unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else {
-<%      end # unless/else send_empty_value -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(nil, d, config)
 <%    else # if flatten -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+<%    end -%>
     if err != nil {
         return nil, err
 <%      unless prop.send_empty_value -%>
@@ -59,7 +51,6 @@ func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) 
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
