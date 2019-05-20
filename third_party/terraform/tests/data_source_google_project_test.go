@@ -20,7 +20,14 @@ func TestAccDataSourceGoogleProject_basic(t *testing.T) {
 			{
 				Config: testAccCheckGoogleProjectConfig(project, org),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_project.project", "google_project.project"),
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_project.project",
+						"google_project.project",
+						map[string]struct{}{
+							// Virtual fields
+							"auto_create_network": {},
+							"skip_delete":         {},
+						}),
 				),
 			},
 		},

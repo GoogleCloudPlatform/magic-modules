@@ -20,7 +20,8 @@ func TestAccDataSourceGoogleFolderOrganizationPolicy_basic(t *testing.T) {
 				Config: testAccDataSourceGoogleFolderOrganizationPolicy_basic(org, folder),
 				Check: checkDataSourceStateMatchesResourceState(
 					"data.google_folder_organization_policy.data",
-					"google_folder_organization_policy.resource"),
+					"google_folder_organization_policy.resource",
+				),
 			},
 		},
 	})
@@ -43,7 +44,7 @@ resource "google_folder_organization_policy" "resource" {
 }
 
 data "google_folder_organization_policy" "data" {
-  folder     = "${google_folder.orgpolicy.name}"
+  folder     = "${google_folder_organization_policy.resource.folder}"
   constraint = "serviceuser.services"
 }
 	`, folder, "organizations/"+org)

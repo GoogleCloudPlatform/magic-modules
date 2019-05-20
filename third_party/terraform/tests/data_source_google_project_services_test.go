@@ -20,7 +20,14 @@ func TestAccDataSourceGoogleProjectServices_basic(t *testing.T) {
 			{
 				Config: testAccCheckGoogleProjectServicesConfig(project, org),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceState("data.google_project_services.project_services", "google_project_services.project_services"),
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_project_services.project_services",
+						"google_project_services.project_services",
+						map[string]struct{}{
+							// Virtual fields
+							"disable_on_destroy": {},
+						},
+					),
 				),
 			},
 		},
@@ -36,11 +43,11 @@ resource "google_project" "project" {
 }
 
 resource "google_project_services" "project_services" {
-	project = "${google_project.project.id}"
+	project = "${google_project.project.project_id}"
 	services = ["admin.googleapis.com"]
 }
 
 data "google_project_services" "project_services" {
-	project = "${google_project.project.id}"
+	project = "${google_project_services.project_services.project}"
 }`, project, project, org)
 }
