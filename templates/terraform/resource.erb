@@ -255,8 +255,8 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 know what the top level should be. Instead we just loop over the map returned from flatten. -%>
 <%    if prop.flatten_object -%>
     // Handle flattened_object
-    if flattened_prop := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattened_prop != nil {
-        casted := flattened_prop.([]interface{})[0]
+    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattenedProp != nil {
+        casted := flattenedProp.([]interface{})[0]
         if casted != nil {
             for k, v := range casted.(map[string]interface{}) {
                 d.Set(k, v)
