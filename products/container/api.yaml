@@ -419,7 +419,7 @@ objects:
           The time the cluster will be automatically deleted in RFC3339 text
           format.
         output: true
-      - !ruby/object:Api::Type::Map
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'resourceLabels'
         description: >
           The resource labels for the cluster to use to annotate any related
