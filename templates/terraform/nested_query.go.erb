@@ -44,7 +44,7 @@
 			return nil, err
 		}
 	<% else -%>
-		expectedV := d.Get("<%= prop.name.underscore -%>")
+		expectedV = d.Get("<%= prop.name.underscore -%>")
 	<% end # settable_properties.include?(prop)-%>
 		itemV = flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
 		log.Printf("[DEBUG] Checking if item's <%= prop.api_name %> (%#v) is equal to resource's (%#v)", itemV, expectedV)
@@ -53,6 +53,6 @@
 		}
 
 	<% end # object.identity.each -%>
-		return item, nil
+		return item, err
 	}
 	return nil, nil
