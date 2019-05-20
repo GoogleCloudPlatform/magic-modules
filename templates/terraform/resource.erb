@@ -476,6 +476,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <% end # if updatable? -%>
 
 func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
+<% if object.custom_code.custom_delete -%>
+<%= lines(compile(object.custom_code.custom_delete)) -%>
+<% else -%>
     config := meta.(*Config)
 
 <%  if object.mutex -%>
@@ -532,6 +535,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
     log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
+<% end -%>
 }
 
 <% unless object.exclude_import -%>
