@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccContainerClusterDatasource_zonal(t *testing.T) {
@@ -19,7 +18,9 @@ func TestAccContainerClusterDatasource_zonal(t *testing.T) {
 			{
 				Config: testAccContainerClusterDatasource_zonal(),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores("data.google_container_cluster.kubes", "google_container_cluster.kubes",
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_container_cluster.kubes",
+						"google_container_cluster.kubes",
 						// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
 						map[string]struct{}{
 							"enable_tpu":                   {},
@@ -43,7 +44,9 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 			{
 				Config: testAccContainerClusterDatasource_regional(),
 				Check: resource.ComposeTestCheckFunc(
-					checkDataSourceStateMatchesResourceStateWithIgnores("data.google_container_cluster.kubes", "google_container_cluster.kubes",
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_container_cluster.kubes",
+						"google_container_cluster.kubes",
 						// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
 						map[string]struct{}{
 							"enable_tpu":                   {},
@@ -55,46 +58,6 @@ func TestAccContainerClusterDatasource_regional(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccDataSourceGoogleContainerClusterCheck(dataSourceName string, resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		ds, ok := s.RootModule().Resources[dataSourceName]
-		if !ok {
-			return fmt.Errorf("root module has no resource called %s", dataSourceName)
-		}
-
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("can't find %s in state", resourceName)
-		}
-
-		dsAttr := ds.Primary.Attributes
-		rsAttr := rs.Primary.Attributes
-
-		// Remove once https://github.com/hashicorp/terraform/issues/21347 is fixed.
-		ignoreFields := map[string]struct{}{
-			"enable_tpu":                   {},
-			"enable_binary_authorization":  {},
-			"pod_security_policy_config.#": {},
-		}
-
-		errMsg := ""
-		for k, attr := range rsAttr {
-			if _, ok := ignoreFields[k]; ok {
-				continue
-			}
-			if dsAttr[k] != attr {
-				errMsg += fmt.Sprintf("%s is %s; want %s\n", k, dsAttr[k], attr)
-			}
-		}
-
-		if errMsg != "" {
-			return fmt.Errorf(errMsg)
-		}
-
-		return nil
-	}
 }
 
 func testAccContainerClusterDatasource_zonal() string {
