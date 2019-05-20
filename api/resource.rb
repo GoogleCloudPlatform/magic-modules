@@ -26,52 +26,94 @@ module Api
     module Properties
       include Api::Object::Named::Properties
 
+      # [Required] A description of the resource that's surfaced in provider
+      # documentation.
       attr_reader :description
-      # GCP kind, e.g. `compute#disk`
-      attr_reader :kind
-      # URI: relative to `@api.base_url` or absolute
+      # [Required] Reference links provided in downstream documentation. See
+      # api/resource/reference_links for the shape of this field's value.
+      attr_reader :references
+      # [Required] The GCP "relative URI" of a resource, relative to the product
+      # base URL. It can often be inferred from the `create` path.
       attr_reader :base_url
-      # URL to use for creating the resource. If not specified, the
-      # collection url (when create_verb is default or :POST) or
-      # self_link (when create_verb is :PUT) is used instead.
-      attr_reader :create_url
-      # URL to use to delete the resource. If not specified, the
-      # self link is used.
-      attr_reader :delete_url
-      # URL to use for updating the resource. If not specified, the self link
-      # will be used. This currently can only be used with Terraform resources.
-      # TODO(#302): Add support for the other providers.
-      attr_reader :update_url
+
+      # ====================
+      # Common Configuration
+      # ====================
+      #
+      # [Optional] The minimum API version this resource is in. Defaults to ga.
+      attr_reader :min_version
+      # [Optional] If set to true, don't generate the resource.
+      attr_reader :exclude
+      # [Optional] If set to true, the resource is not able to be updated.
+      attr_reader :input
+      # [Optional] If set to true, this resource uses an update mask to perform updates.
+      # This is typical of newer GCP APIs.
+      attr_reader :update_mask
+      # [Optional] If set to true, the object has a `self_link` field. This is
+      # typical of older GCP APIs.
+      attr_reader :has_self_link
+
+      # ====================
+      # URL / HTTP Configuration
+      # ====================
+      #
+      # [Optional] The "identity" URL of the resource.. Defaults to:
+      # * collection url when the create_verb is :POST
+      # * self_link when the create_verb is :PUT
       attr_reader :self_link
-      # This is the type of response from the collection URL. It contains
-      # the name of the list of items within the json, as well as the
-      # type that this list should be. This is of type Api::Resource::ResponseList
+      # [Optional] The URL used to creating the resource. Defaults to:
+      # * collection url when the create_verb is :POST
+      # * self_link when the create_verb is :PUT
+      attr_reader :create_url
+      # [Optional] The URL used to delete the resource. Defaults to the self
+      # link.
+      attr_reader :delete_url
+      # [Optional] The URL used to update the resource. Defaults to the self
+      # link.
+      attr_reader :update_url
+      # [Optional] The HTTP verb used during create. Defaults to :POST.
+      attr_reader :create_verb
+      # [Optional] The HTTP verb used during update. Defaults to :PUT.
+      attr_reader :update_verb
+      # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
+      attr_reader :delete_verb
+
+      # ====================
+      # Collection / Identity URL Configuration
+      # ====================
+      #
+      # [Optional] This is the type of response from the collection URL. It
+      # contains the name of the list of items within the json, as well as the
+      # type that this list should be. This is of
+      # type Api::Resource::ResponseList
       attr_reader :collection_url_response
-      # This is an array with items that uniquely identify the resource.
+      # [Optional] This is an array with items that uniquely identify the
+      # resource.
       # This is useful in case an API returns a list result and we need
       # to fetch the particular resource we're interested in from that
       # list.  Otherwise, it's safe to leave empty.
       # If empty, we assume that `name` is the identifier.
       attr_reader :identity
-      # This is useful in case you need to change the query made for
+      # [Optional] This is useful in case you need to change the query made for
       # GET requests only. In particular, this is often used
       # to extract an object from a parent object or a collection.
       attr_reader :nested_query
 
-      attr_reader :exclude
-      attr_reader :readonly
-      # Documentation references
-      attr_reader :references
-      attr_reader :create_verb
-      attr_reader :delete_verb
-      attr_reader :update_verb
-      attr_reader :input # If true, resource is not updatable as a whole unit
-      attr_reader :min_version # Minimum API version this resource is in
-      attr_reader :update_mask
-      attr_reader :has_self_link
-
+      # ====================
+      # IAM Configuration
+      # ====================
+      #
+      # [Optional] Configuration of a resource's resource-specific IAM Policy.
       attr_reader :iam_policy
+      # [Optional] If set to true, don't generate the resource itself; only
+      # generate the IAM policy.
       attr_reader :exclude_resource
+
+      # [Optional] GCP kind, e.g. `compute#disk`
+      attr_reader :kind
+      # [Optional] If set to true, indicates that a resource is not configurable
+      # such as GCP regions.
+      attr_reader :readonly
     end
 
     include Properties
