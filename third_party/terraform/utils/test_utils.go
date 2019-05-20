@@ -94,7 +94,7 @@ func checkDataSourceStateMatchesResourceStateWithIgnores(dataSourceName, resourc
 		// make sure all fields are accounted for in the data source.
 		// If a field exists in the data source but not in the resource, its expected value should
 		// be checked separately.
-		for k, _ := range rsAttr {
+		for k := range rsAttr {
 			if _, ok := ignoreFields[k]; ok {
 				continue
 			}
