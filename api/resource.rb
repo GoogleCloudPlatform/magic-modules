@@ -307,7 +307,7 @@ module Api
     end
 
     # ====================
-    # Debugging Fields
+    # Debugging Methods
     # ====================
 
     # Prints a dot notation path to where the field is nested within the parent
