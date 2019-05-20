@@ -1489,6 +1489,39 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withVerticalPodAutoscaling(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withVerticalPodAutoscalingEnabled(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_vertical_pod_autoscaling",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withVerticalPodAutoscalingDisabled(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_vertical_pod_autoscaling",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+
+}
 <% end -%>
 
 func TestAccContainerCluster_withResourceLabels(t *testing.T) {
@@ -3103,6 +3136,7 @@ resource "google_container_cluster" "with_resource_labels" {
 `, clusterName)
 }
 
+<% unless version == 'ga' -%>
 func testAccContainerCluster_withVerticalPodAutoscalingEnabled(clusterName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_vertical_pod_autoscaling" {
@@ -3130,6 +3164,7 @@ resource "google_container_cluster" "with_vertical_pod_autoscaling" {
 }
 `, clusterName)
 }
+<% end -%>
 
 func testAccContainerCluster_withResourceLabels(clusterName string) string {
 	return fmt.Sprintf(`
