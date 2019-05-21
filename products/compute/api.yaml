@@ -4870,6 +4870,8 @@ objects:
         properties:
         - !ruby/object:Api::Type::Enum
           name: 'routingMode'
+          update_verb: :PATCH
+          update_url:  projects/{{project}}/global/networks/{{name}}
           required: true
           description: |
             The network-wide routing mode to use. If set to `REGIONAL`, this
