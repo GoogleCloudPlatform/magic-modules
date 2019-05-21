@@ -124,7 +124,6 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 
 	d.Set("peer_network", peering.Network)
 	d.Set("name", peering.Name)
-	d.Set("exchange_subnet_routes",   peering.ExchangeSubnetRoutes)
 	<% unless version == 'ga' -%>
 	d.Set("import_custom_routes", peering.ImportCustomRoutes)
 	d.Set("export_custom_routes", peering.ExportCustomRoutes)
@@ -183,7 +182,6 @@ func findPeeringFromNetwork(network *computeBeta.Network, peeringName string) *c
 	}
 	return nil
 }
-
 func expandNetworkPeering(d *schema.ResourceData) *computeBeta.NetworkPeering {
 	return &computeBeta.NetworkPeering{
 		ExportCustomRoutes:     d.Get("export_custom_routes").(bool),
