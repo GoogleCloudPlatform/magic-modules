@@ -112,13 +112,15 @@ module Provider
       end
 
       # Find URLs and surround with U()
+      # If there's a period at the end of the URL, make sure the
+      # period is outside of the ()
       def format_url(paragraph)
         paragraph.gsub(%r{
           https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
           [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
           [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
           [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
-        }x, 'U(\\0)')
+        }x, 'U(\\0)').gsub('.)', ').')
       end
     end
   end
