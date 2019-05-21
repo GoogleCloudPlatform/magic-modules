@@ -11,6 +11,24 @@
       :version_added: '2.5'
     :dnsName:
       :version_added: '2.5'
+    :dnssecConfig:
+      :version_added: '2.9'
+      :kind:
+        :version_added: '2.9'
+      :nonExistence:
+        :version_added: '2.9'
+      :state:
+        :version_added: '2.9'
+      :defaultKeySpecs:
+        :version_added: '2.9'
+        :algorithm:
+          :version_added: '2.9'
+        :keyLength:
+          :version_added: '2.9'
+        :keyType:
+          :version_added: '2.9'
+        :kind:
+          :version_added: '2.9'
     :name:
       :version_added: '2.5'
     :nameServerSet:
