@@ -251,9 +251,9 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 <%  end -%>
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
+<%    if prop.flatten_object -%>
 // Terraform must set the top level schema field, but since this object contains collapsed properties
 // it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
-<%    if prop.flatten_object -%>
     if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattenedProp != nil {
         casted := flattenedProp.([]interface{})[0]
         if casted != nil {
