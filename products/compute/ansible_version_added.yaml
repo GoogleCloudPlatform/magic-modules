@@ -615,8 +615,8 @@
         :version_added: '2.6'
       :acceleratorType:
         :version_added: '2.6'
-    :labelFingerprint:
-      :version_added: '2.6'
+    :labels:
+      :version_added: '2.9'
     :metadata:
       :version_added: '2.6'
     :machineType:
