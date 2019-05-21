@@ -32,7 +32,6 @@ module Provider
             'required' => (true if prop.required && !prop.default_value),
             'default' => prop.default_value,
             'type' => python_type(prop),
-            'choices' => (prop.values if prop.is_a?(Api::Type::Enum)),
             'elements' => (python_type(prop.item_type) \
               if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
             'aliases' => prop.aliases,
