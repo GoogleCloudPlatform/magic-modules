@@ -24,9 +24,9 @@ module Provider
     module Documentation
       def to_yaml(obj)
         if obj.is_a?(::Hash)
-          obj.reject { |_, v| v.nil? }.to_yaml(:indentation => 4).sub("---\n", '')
+          obj.reject { |_, v| v.nil? }.to_yaml(:indentation => 4, :line_width => -1).sub("---\n", '')
         else
-          obj.to_yaml(:indentation => 4).sub("---\n", '')
+          obj.to_yaml(:indentation => 4, :line_width => -1).sub("---\n", '')
         end
       end
 
@@ -38,8 +38,7 @@ module Provider
           python_variable_name(prop, object.azure_sdk_definition.create) => {
             'description' => [
               format_description(prop.description),
-              (resourceref_description(prop) \
-               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+              (resourceref_description(prop) if prop.is_a?(Api::Azure::Type::ResourceReference))
             ].flatten.compact,
             'required' => (true if required && !is_location?(prop)),
             'default' => (prop.default_value.to_s.underscore if prop.default_value),
@@ -95,14 +94,10 @@ module Provider
 
       def resourceref_description(prop)
         [
-          "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
-          'It can be specified in two ways.',
-          "You can add `register: name-of-resource` to a #{module_name(prop.resource_ref)} task",
-          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\"",
-          "Alternatively, you can set this #{prop.name.underscore} to a dictionary",
-          "with the #{prop.imports} key",
-          "where the value is the #{prop.imports} of your #{prop.resource_ref.name}"
-        ].join(' ')
+          "It can be the #{prop.resource_type_name} name which is in the same resource group.",
+          "It can be the #{prop.resource_type_name} ID. e.g.,\n#{prop.sample_value}.",
+          "It can be a dict which contains C(name) and C(resource_group) of the #{prop.resource_type_name}."
+        ]
       end
 
       # MM puts descriptions in a text block. Ansible needs it in bullets

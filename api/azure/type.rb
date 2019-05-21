@@ -25,8 +25,11 @@ module Api
       end
 
       class ResourceReference < Api::Type::String
+        attr_reader :resource_type_name
+
         def validate
           super
+          check_property :resource_type_name, ::String
         end
       end
     end

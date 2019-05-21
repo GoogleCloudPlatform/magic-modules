@@ -98,11 +98,10 @@ items:
             sample: sampleacct.westus.batch.azure.com
         auto_storage_account:
             description:
-            - The ID of the Batch Account auto storage account.
+            - Existing storage account with which to associate the Batch Account.
             returned: always
             type: str
-            sample: "/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group
-                }}/providers/Microsoft.Storage/storageAccounts/{{ name }}"
+            sample: "/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{name}"
         key_vault_reference:
             description:
             - A reference to the Azure key vault associated with the Batch account.
@@ -111,8 +110,7 @@ items:
             contains:
                 id:
                     description:
-                    - The resource ID of the Azure key vault associated with the Batch
-                        account.
+                    - The resource ID of the Azure key vault associated with the Batch account.
                     returned: always
                     type: str
                 url:

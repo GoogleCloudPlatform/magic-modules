@@ -25,6 +25,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
     properties:
       autoStorageAccountId: !ruby/object:Provider::Ansible::PropertyOverride
         name: autoStorageAccount
+        description: Existing storage account with which to associate the Batch Account.
     examples:
       - !ruby/object:Provider::Azure::ExampleReference
         example: basic

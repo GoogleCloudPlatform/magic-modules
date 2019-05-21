@@ -262,7 +262,8 @@ objects:
         name: autoStorageAccountId
         description: The ID of the Batch Account auto storage account.
         azure_sdk_references: ['/autoStorage/storageAccountId', '/properties/autoStorage/storageAccountId']
-        sample_value: '/subscriptions/{{ subscription_id }}/resourceGroups/{{ resource_group }}/providers/Microsoft.Storage/storageAccounts/{{ name }}'
+        resource_type_name: storage account
+        sample_value: '/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{name}'
       - !ruby/object:Api::Type::Enum
         name: poolAllocationMode
         description: The pool acclocation mode of the Batch Account.
@@ -293,6 +294,7 @@ objects:
       - !ruby/object:Api::Azure::Type::ResourceReference
         name: id
         description: The ID of the Batch account.
+        resource_type_name: batch account
         output: true
         azure_sdk_references: ['/id']
         sample_value: '/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myResourceGroup/providers/Microsoft.Batch/batchAccounts/sampleacct'
