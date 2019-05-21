@@ -113,8 +113,6 @@ objects:
                   name: 'kind'
                   description: 'Identifies what kind of resource this is'
                   default_value: 'dns#dnsKeySpec'
-
-
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: Unique identifier for the resource; defined by the server.
