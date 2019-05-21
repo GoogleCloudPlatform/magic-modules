@@ -31,3 +31,7 @@
       :version_added: '2.8'
     :retainAckedMessages:
       :version_added: '2.8'
+    :expirationPolicy:
+      :version_added: '2.9'
+      :ttl:
+        :version_added: '2.9'
