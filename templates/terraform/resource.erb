@@ -386,6 +386,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%  else # if object.input -%>
     obj := make(map[string]interface{})
 <%  update_body_properties.each do |prop| -%>
+    <%# flattened objects won't have something store in state so instead nil is passed to the next expander. %>
     <% param1 = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
     <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= param1 -%>, d, config)
     if err != nil {
