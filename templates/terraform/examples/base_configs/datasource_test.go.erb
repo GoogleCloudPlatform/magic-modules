@@ -68,7 +68,7 @@ func TestAccDataSourceAzureRM<%= resource_name -%>_<%= test.name -%>(t *testing.
         hcl_params = test_hcl[:random_vars].map(&:parameter_name).uniq
 -%>
 func testAccDataSource<%= resource_name -%>_<%= name -%>(<%= uniq_params.join(", ") -%>) string {
-    config := testAcc<%= resource_name -%>_<%= name -%>(<%= hcl_params.join(", ") -%>)
+    config := testAccAzureRM<%= resource_name -%>_<%= name -%>(<%= hcl_params.join(", ") -%>)
     return fmt.Sprintf(`
 %s
 

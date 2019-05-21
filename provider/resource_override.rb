@@ -77,6 +77,7 @@ module Provider
         elsif p.is_a? Api::Azure::Type::Tags
           p.instance_variable_set('@custom_schema_definition', 'templates/azure/terraform/schemas/datasource_tags.erb')
         end
+        p.instance_variable_set('@input', false)
         unless p.azure_sdk_references.any?{|r| azure_sdk_definition.read.request.has_key?(r)}
           p.instance_variable_set('@required', false)
           p.instance_variable_set('@output', true)

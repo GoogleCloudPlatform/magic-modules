@@ -1,6 +1,6 @@
 --- !ruby/object:Api::Product
 name: Azure Automation Variable
-prefix: azautomationvariable
+prefix: azautomationstringvariable
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -120,7 +120,7 @@ objects:
         azure_sdk_references: ['/properties/value']
       - !ruby/object:Api::Type::Boolean
         name: 'encrypted'
-        description: 'Specifies if the Automation Variable is encrypted. Defaults to `false`.'
+        description: 'Specifies if the Automation Variable is encrypted.'
         default_value: false
         azure_sdk_references: ['/properties/isEncrypted']
       - !ruby/object:Api::Azure::Type::ResourceReference
