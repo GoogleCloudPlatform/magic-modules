@@ -474,8 +474,8 @@ module Api
         properties
       end
 
-      # Returns the list of top-level properties once the object has been
-      # collapsed of any `flatten_object` properties.
+      # Returns the list of top-level properties once any nested objects with
+      # flatten_object set to true have been collapsed
       def root_properties
         properties.flat_map do |p|
           if p.flatten_object
