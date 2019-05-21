@@ -287,7 +287,7 @@ objects:
         name: 'settings'
         description: 'The user settings.'
         properties:
-          - !ruby/object:Api::Type::List
+          - !ruby/object:Api::Type::Array
             name: 'databaseFlags'
             description: The database flags passed to the instance at startup
             item_type: !ruby/object:Api::Type::NestedObject
