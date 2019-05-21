@@ -110,8 +110,8 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
-    <% param1 = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= param1 -%>, d, config)
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%    if prop.send_empty_value -%>
@@ -289,8 +289,8 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         obj := make(map[string]interface{})
 <%      props.each do |prop| -%>
 <%      if update_body_properties.include? prop -%>
-        <% param1 = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= param1 -%>, d, config)
+        <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
             return err
 <%#         There is some nuance in when we choose to send a value to an update function.
