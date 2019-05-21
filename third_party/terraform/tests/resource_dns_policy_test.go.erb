@@ -52,10 +52,6 @@ resource "google_dns_policy" "example-policy" {
 		}
 	}
 
-  dnssec_config {
-    state = "off" 
-  }
-
 	networks {
 		network_url =  "${google_compute_network.%s.self_link}"
 	}
