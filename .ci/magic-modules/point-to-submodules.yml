@@ -8,7 +8,7 @@ image_resource:
     type: docker-image
     source:
         repository: gcr.io/magic-modules/go-ruby
-        tag: '1.11.5-2.6.0'
+        tag: '1.11.5-2.6.0-v2'
 
 inputs:
     - name: magic-modules-branched

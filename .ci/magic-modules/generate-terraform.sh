@@ -39,7 +39,6 @@ popd
 
 pushd magic-modules-branched
 LAST_COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
-bundle install
 
 # Build all terraform products
 if [ -n "$OVERRIDE_PROVIDER" ] && [ "$OVERRIDE_PROVIDER" != "null" ]; then
