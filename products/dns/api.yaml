@@ -55,6 +55,64 @@ objects:
         description: |
           The DNS name of this managed zone, for instance "example.com.".
         required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'dnssecConfig'
+        description: DNSSEC configuration
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'kind'
+            description: Identifies what kind of resource this is
+            default_value: 'dns#managedZoneDnsSecConfig'
+          - !ruby/object:Api::Type::Enum
+            name: 'nonExistence'
+            description: >
+              Specifies the mechanism used to provide authenticated denial-of-existence responses. Output only while state is not OFF. 
+            values:
+              - "nsec"
+              - "nsec3"
+          - !ruby/object:Api::Type::Enum
+            name: 'state'
+            description: Specifies whether DNSSEC is enabled, and what mode it is in
+            values:
+              - "off"
+              - "on"
+              - "transfer"
+          - !ruby/object:Api::Type::Array
+            name: 'defaultKeySpecs'
+            description: >
+              Specifies parameters that will be used for generating initial DnsKeys
+              for this ManagedZone. Output only while state is not OFF
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Enum
+                  name: 'algorithm'
+                  description:
+                    String mnemonic specifying the DNSSEC algorithm of this key
+                  values:
+                    - "ecdsap256sha256"
+                    - "ecdsap384sha384"
+                    - "rsasha1"
+                    - "rsasha256"
+                    - "rsasha512"
+                - !ruby/object:Api::Type::Integer
+                  name: 'keyLength'
+                  description: Length of the keys in bits
+                - !ruby/object:Api::Type::Enum
+                  name: 'keyType'
+                  description: >
+                    Specifies whether this is a key signing key (KSK) or a zone
+                    signing key (ZSK). Key signing keys have the Secure Entry
+                    Point flag set and, when active, will only be used to sign
+                    resource record sets of type DNSKEY. Zone signing keys do
+                    not have the Secure Entry Point flag set and will be used
+                    to sign all other types of resource record sets. 
+                  values:
+                    - "keySigning"
+                    - "zoneSigning"
+                - !ruby/object:Api::Type::String
+                  name: 'kind'
+                  description: 'Identifies what kind of resource this is'
+                  default_value: 'dns#dnsKeySpec'
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: Unique identifier for the resource; defined by the server.
