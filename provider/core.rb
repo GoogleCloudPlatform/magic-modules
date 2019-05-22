@@ -121,7 +121,7 @@ module Provider
 
     def run_formatter(command)
       output = %x(#{command} 2>&1)
-      Google::LOGGER.error output
+      Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
     end
 
     def relative_path(target, base)
