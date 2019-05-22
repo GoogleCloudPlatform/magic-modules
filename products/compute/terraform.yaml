@@ -747,6 +747,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        # flattened objects don't pass on the attributes of the parent to
+        # the child so redefining this on the child field is necessary.
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/global/networks/{{name}}
         # while required inside routingConfig, routingMode is an optional convenience
         # field.
         required: false
