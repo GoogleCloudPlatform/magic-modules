@@ -199,7 +199,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       encoder: encode_request
       decoder: decode_response
     provider_helpers:
-      - 'products/compute/helpers/python/provider_instance.py'
+      - 'products/compute/helpers/python/provider_instance_template.py'
       - 'products/compute/helpers/python/instance_metadata.py'
   InterconnectAttachment: !ruby/object:Overrides::Ansible::ResourceOverride
     has_tests: false
