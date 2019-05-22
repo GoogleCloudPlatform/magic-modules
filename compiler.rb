@@ -29,7 +29,7 @@ require 'optparse'
 require 'provider/ansible'
 require 'provider/inspec'
 require 'provider/terraform'
-require 'provider/terraform_example'
+require 'provider/terraform_oics'
 require 'provider/terraform_object_library'
 require 'pp' if ENV['COMPILER_DEBUG']
 
@@ -135,7 +135,7 @@ product_names.each do |product_name|
 
   else
     override_providers = {
-      'examples' => Provider::TerraformExample,
+      'oics' => Provider::TerraformOiCS,
       'validator' => Provider::TerraformObjectLibrary
     }
 
