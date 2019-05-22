@@ -33,5 +33,6 @@ RUN gem update --system "$RUBYGEMS_VERSION"
 RUN gem install bundler --version "$BUNDLER_VERSION" --force
 
 ADD Gemfile Gemfile
+ADD Gemfile.lock Gemfile.lock
 RUN bundle install
 RUN rbenv rehash
