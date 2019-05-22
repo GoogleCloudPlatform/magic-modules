@@ -1707,6 +1707,7 @@ objects:
           higher precedence than a rule with priority 1). DENY rules take
           precedence over ALLOW rules having equal priority.
         default_value: 1000
+        send_empty_value: true
       - !ruby/object:Api::Type::Array
         name: 'sourceRanges'
         description: |
