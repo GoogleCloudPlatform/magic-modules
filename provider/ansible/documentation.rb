@@ -30,7 +30,9 @@ module Provider
             'description' => [
               format_description(prop.description),
               (resourceref_description(prop) \
-               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly),
+              (choices_description(prop) \
+               if prop.is_a?(Api::Type::Enum))
             ].flatten.compact,
             'required' => required,
             'default' => (
@@ -42,7 +44,6 @@ module Provider
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => prop.aliases,
             'version_added' => (version_added(prop)&.to_f),
-            'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
                 if prop.nested_properties?
                   prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
@@ -95,6 +96,10 @@ module Provider
           "#{module_name(prop.resource_ref)} task",
           "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\""
         ].join(' ')
+      end
+
+      def choices_description(prop)
+        "Some valid choices include: #{prop.values.map { |x| quote_string(x) }.join(', ')}"
       end
 
       # MM puts descriptions in a text block. Ansible needs it in bullets
