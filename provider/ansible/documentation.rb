@@ -99,7 +99,7 @@ module Provider
       end
 
       def choices_description(prop)
-        "Some valid choices include: #{prop.values.map { |x| quote_string(x.to_s) }.join(', ')}"
+        "Some valid choices include: #{prop.values.map(&:to_s).join(', ')}"
       end
 
       # MM puts descriptions in a text block. Ansible needs it in bullets
