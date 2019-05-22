@@ -219,6 +219,18 @@ module Api
       all_user_properties.reject(&:url_param_only)
     end
 
+    # Returns the list of top-level properties once any nested objects with flatten_object
+    # set to true have been collapsed
+    def root_properties
+      properties.flat_map do |p|
+        if p.flatten_object
+          p.root_properties
+        else
+          p
+        end
+      end
+    end
+
     # Return the product-level async object, or the resource-specific one
     # if one exists.
     def async
