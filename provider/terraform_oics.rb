@@ -14,8 +14,9 @@
 require 'provider/terraform'
 
 module Provider
-  # Code generator for runnable Terraform Examples
-  class TerraformExample < Provider::Terraform
+  # Code generator for runnable Terraform examples that can be run via an
+  # Open in Cloud Shell link.
+  class TerraformOiCS < Provider::Terraform
     # We don't want *any* static generation, so we override generate to only
     # generate objects.
     def generate(output_folder, types, version_name, _product_path, _dump_yaml)

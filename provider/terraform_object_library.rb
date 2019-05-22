@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'provider/terraform_example'
+require 'provider/terraform_oics'
 
 module Provider
   # Code generator for a library converting terraform state to gcp objects.
