@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 )
 
 func TestAccDataSourceComputeSslCertificate(t *testing.T) {
@@ -19,51 +18,17 @@ func TestAccDataSourceComputeSslCertificate(t *testing.T) {
 			{
 				Config: testAccDataSourceComputeSslCertificateConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceComputeSslCertificateCheck("data.google_compute_ssl_certificate.cert", "google_compute_ssl_certificate.foobar"),
+					checkDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_compute_ssl_certificate.cert",
+						"google_compute_ssl_certificate.foobar",
+						map[string]struct{}{
+							"private_key": {},
+						},
+					),
 				),
 			},
 		},
 	})
-}
-
-func testAccDataSourceComputeSslCertificateCheck(dataSourceName string, resourceName string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		ds, ok := s.RootModule().Resources[dataSourceName]
-		if !ok {
-			return fmt.Errorf("root module has no resource called %s", dataSourceName)
-		}
-
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("can't find %s in state", resourceName)
-		}
-
-		dsAttr := ds.Primary.Attributes
-		rsAttr := rs.Primary.Attributes
-
-		certificateAttrToCheck := []string{
-			"name",
-			"project",
-			"description",
-			"certificate",
-			"certificate_id",
-			"self_link",
-			"creation_timestamp",
-		}
-
-		for _, attr := range certificateAttrToCheck {
-			if dsAttr[attr] != rsAttr[attr] {
-				return fmt.Errorf(
-					"%s is %s; want %s",
-					attr,
-					dsAttr[attr],
-					rsAttr[attr],
-				)
-			}
-		}
-
-		return nil
-	}
 }
 
 func testAccDataSourceComputeSslCertificateConfig() string {
