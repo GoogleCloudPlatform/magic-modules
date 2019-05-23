@@ -430,6 +430,12 @@
       <a href="/docs/providers/google/r/compute_global_forwarding_rule.html">google_compute_global_forwarding_rule</a>
       </li>
 
+<% unless version == 'ga' %>
+      <li<%%= sidebar_current("docs-google-compute-ha-vpn-gateway") %>>
+      <a href="/docs/providers/google/r/compute_ha_vpn_gateway.html">google_compute_ha_vpn_gateway</a>
+      </li>
+
+<% end -%>
       <li<%%= sidebar_current("docs-google-compute-health-check") %>>
       <a href="/docs/providers/google/r/compute_health_check.html">google_compute_health_check</a>
       </li>

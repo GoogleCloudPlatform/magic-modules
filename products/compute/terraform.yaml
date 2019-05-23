@@ -1364,6 +1364,35 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       tunnels: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+  VpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    name: 'HaVpnGateway'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ha_vpn_gateway_basic"
+        primary_resource_id: "ha_gateway1"
+        vars:
+          ha_vpn_gateway1_name: "ha-vpn-1"
+          network1_name: "network1"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ha_vpn_gateway_gcp_to_gcp"
+        primary_resource_id: "ha_gateway1"
+        vars:
+          ha_vpn_gateway1_name: "ha-vpn-1"
+          network1_name: "network1"
+          ha_vpn_gateway2_name: "ha-vpn-2"
+          network2_name: "network2"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
   UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -1439,9 +1468,23 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       targetVpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         resource: 'VpnGateway'
+      vpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          URL of the VPN gateway with which this VPN tunnel is associated.
+          This must be used if a High Availability VPN gateway resource is created.
+          This field must reference a `google_compute_ha_vpn_gateway` resource.
+        resource: 'HaVpnGateway'
+      peerGcpGateway: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected. 
+          If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
+          ID in the peer GCP VPN gateway.
+          This field must reference a `google_compute_ha_vpn_gateway` resource.
+        resource: 'HaVpnGateway'
       peerIp: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validatePeerAddr'
+        default_from_api: true
       sharedSecret: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
