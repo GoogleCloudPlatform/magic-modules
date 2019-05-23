@@ -13,6 +13,8 @@
 
 require 'overrides/resources'
 require 'provider/terraform/custom_code'
+require 'provider/terraform/docs'
+require 'provider/terraform/examples'
 
 module Overrides
   module Terraform
