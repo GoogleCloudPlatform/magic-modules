@@ -107,6 +107,7 @@ func testAccCheckComputeNetworkPeeringAutoCreateRoutes(v bool, peering *computeB
 	}
 }
 
+<% unless version == 'ga' -%>
 func testAccCheckComputeNetworkPeeringImportCustomRoutes(v bool, peering *computeBeta.NetworkPeering) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if peering.ImportCustomRoutes != v {
@@ -126,6 +127,7 @@ func testAccCheckComputeNetworkPeeringExportCustomRoutes(v bool, peering *comput
 		return nil
 	}
 }
+<% end -%>
 
 func testAccComputeNetworkPeering_basic() string {
 	s := `
