@@ -29,7 +29,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_key_ring.erb
       decoder: templates/terraform/decoders/kms_key_ring.go.erb
-      encoder: templates/terraform/encoders/kms_key_ring.go.erb
+      encoder: templates/terraform/encoders/send_nil_body.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/kms_key_ring_self_link.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
