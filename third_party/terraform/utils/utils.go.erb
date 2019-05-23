@@ -506,10 +506,6 @@ func (s *kmsKeyRingId) keyRingId() string {
 	return fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", s.Project, s.Location, s.Name)
 }
 
-func (s *kmsKeyRingId) parentId() string {
-	return fmt.Sprintf("projects/%s/locations/%s", s.Project, s.Location)
-}
-
 func (s *kmsKeyRingId) terraformId() string {
 	return fmt.Sprintf("%s/%s/%s", s.Project, s.Location, s.Name)
 }
