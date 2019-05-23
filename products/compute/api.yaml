@@ -7487,6 +7487,97 @@ objects:
         output: true
         # status is not useful for state convergence
   - !ruby/object:Api::Resource
+    name: 'VpnGateway'
+    kind: 'compute#vpnGateway'
+    base_url: projects/{{project}}/regions/{{region}}/vpnGateways
+    collection_url_response: !ruby/object:Api::Resource::ResponseList
+      kind: 'compute#vpnGatewayList'
+      items: 'items'
+    input: true
+    has_self_link: true
+    min_version: beta
+    description: |
+      Represents a VPN gateway running in GCP. This virtual device is managed
+      by Google, but used only by you. This type of VPN Gateway allows for the creation
+      of VPN solutions with higher availability than classic Target VPN Gateways.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides: 
+        'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
+        'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
+      api: https://cloud.google.com/compute/docs/reference/rest/beta/vpnGateways
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: |
+          The region this gateway should sit in.
+        required: true
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+        input: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035.  Specifically, the name must be 1-63 characters long and
+          match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+          the first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'network'
+        resource: 'Network'
+        imports: 'selfLink'
+        description: |
+          The network this VPN gateway is accepting traffic for.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::Array
+        name: 'vpnInterfaces'
+        description: |
+          A list of interfaces on this VPN gateway.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'id'
+              description: 'The numeric ID of this VPN gateway interface.'
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              description: 'The external IP address for this VPN gateway interface.'
+  - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
@@ -7719,7 +7810,41 @@ objects:
         resource: 'TargetVpnGateway'
         imports: 'selfLink'
         input: true
-        required: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'vpnGateway'
+        description: |
+          URL of the VPN gateway with which this VPN tunnel is associated.
+          This must be used if a High Availability VPN gateway resource is created.
+        resource: 'VpnGateway'
+        imports: 'selfLink'
+        input: true
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'vpnGatewayInterface'
+        description: |
+          The interface ID of the VPN gateway with which this VPN tunnel is associated.
+        input: true
+        send_empty_value: true
+        min_version: beta
+      - !ruby/object:Api::Type::String
+        name: 'peerExternalGateway'
+        description: |
+          URL of the peer side external VPN gateway to which this VPN tunnel is connected.
+        min_version: beta
+      - !ruby/object:Api::Type::Integer
+        name: 'peerExternalGatewayInterface'
+        description: |
+          The interface ID of the external VPN gateway to which this VPN tunnel is connected.
+        min_version: beta
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'peerGcpGateway'
+        description: |
+          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected. 
+          If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
+          ID in the peer GCP VPN gateway.
+        resource: 'VpnGateway'
+        imports: 'selfLink'
+        min_version: beta
       - !ruby/object:Api::Type::ResourceRef
         name: 'router'
         description: |
@@ -7731,7 +7856,6 @@ objects:
         name: 'peerIp'
         description: |
           IP address of the peer VPN gateway. Only IPv4 is supported.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'sharedSecret'
         description: |
