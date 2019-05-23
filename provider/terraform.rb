@@ -36,6 +36,10 @@ module Provider
       # We assume that all resources share the same async properties.
       attr_accessor :async
 
+      # When generating OiCS examples, we attach the example we're
+      # generating to the data object.
+      attr_accessor :example
+
       attr_accessor :resource_name
     end
 
