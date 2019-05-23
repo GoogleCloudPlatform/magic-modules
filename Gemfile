@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem 'activesupport'
 gem 'binding_of_caller'
 gem 'rake'
+gem 'redcarpet'
 
 group :test do
   gem 'erb_lint'
