@@ -799,6 +799,8 @@ objects:
            The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
            for health checking this BackendService. Currently at most one health
            check can be specified, and a health check is required.
+
+           For internal load balancing, a URL to a HealthCheck resource must be specified instead.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: 'The unique identifier for the resource.'
@@ -831,14 +833,15 @@ objects:
         description: |
           Indicates whether the backend service will be used with internal or
           external load balancing. A backend service created for one type of
-          load balancing cannot be used with the other. Must be `EXTERNAL` for
-          a global backend service. Defaults to `EXTERNAL`.
+          load balancing cannot be used with the other. Must be `EXTERNAL` or
+          `INTERNAL_SELF_MANAGED` for a global backend service. Defaults to `EXTERNAL`.
         default_value: :EXTERNAL
         # If you're modifying this value, it probably means Global ILB is now
         # an option. If that's the case, all of the documentation is based on
         # this resource supporting external load balancing only.
         values:
           - :EXTERNAL
+          - :INTERNAL_SELF_MANAGED
       - !ruby/object:Api::Type::String
         name: 'name'
         required: true
@@ -2296,6 +2299,7 @@ objects:
 
           NOTE: Currently global forwarding rules cannot be used for INTERNAL
           load balancing.
+        default_value: :EXTERNAL
         values:
           - :INTERNAL_SELF_MANAGED
           - :EXTERNAL

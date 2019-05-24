@@ -533,6 +533,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           forwarding_rule_name: "global-rule"
           http_proxy_name: "target-proxy"
           backend_service_name: "backend"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_internal"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
     properties:
       creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -543,10 +551,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         default_from_api: true
-      loadBalancingScheme: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
       network: !ruby/object:Overrides::Terraform::PropertyOverride
-        exclude: true
+        default_from_api: true
       portRange: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portRangeDiffSuppress'
       target: !ruby/object:Overrides::Terraform::PropertyOverride
