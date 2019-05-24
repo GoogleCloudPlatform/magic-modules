@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +22,7 @@ VCR.configure do |c|
   c.allow_http_connections_when_no_cassette = true
 
   c.before_record do |i|
-    i.response.headers.delete_if { |key| key != 'Content-Type' }
-    i.request.headers.delete_if { |key| true }
+    i.request.headers.delete_if { true }
     if auth_call?(i)
       i.request.body = 'AUTH REQUEST'
       i.response.body = "{\n  \"access_token\": \"ya29.c.samsamsamsamsamsamsamsamsa-thisisnintysixcharactersoftexttolooklikeanauthtokenthisisnintysixcharactersoftexttolooklikeanaut\",\n  \"expires_in\": 3600,\n  \"token_type\": \"Bearer\"\n}"
