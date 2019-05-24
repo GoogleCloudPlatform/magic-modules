@@ -20,7 +20,7 @@ func resourceComputeRouterInterface() *schema.Resource {
 			State: resourceComputeRouterInterfaceImportState,
 		},
 
-		CustomizeDiff: diffOneOfCheck,
+		CustomizeDiff: routerInterfaceDiffOneOfCheck,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -292,7 +292,7 @@ func resourceComputeRouterInterfaceImportState(d *schema.ResourceData, meta inte
 	return []*schema.ResourceData{d}, nil
 }
 
-func diffOneOfCheck(d *schema.ResourceDiff, meta interface{}) error {
+func routerInterfaceDiffOneOfCheck(d *schema.ResourceDiff, meta interface{}) error {
 	_, ipOk := d.GetOk("ip_range")
 	_, vpnOk := d.GetOk("vpn_tunnel")
 	_, icOk := d.GetOk("interconnect_attachment")

@@ -479,7 +479,7 @@ func absoluteDomainSuppress(k, old, new string, _ *schema.ResourceData) bool {
 <% end -%>
 
 func getInterconnectAttachmentLink(config *Config, project, region, ic string) (string, error) {
-	if !strings.HasPrefix(ic, "https://www.googleapis.com/compute/") {
+	if !strings.Contains(ic, "/") {
 		icData, err := config.clientCompute.InterconnectAttachments.Get(
 			project, region, ic).Do()
 		if err != nil {
