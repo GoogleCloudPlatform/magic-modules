@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -726,8 +727,78 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	return resourceComputeInstanceTemplateRead(d, meta)
 }
 
+type diskCharacteristics struct {
+	mode        string
+	diskType    string
+	diskSizeGb  string
+	autoDelete  bool
+	sourceImage string
+}
+
+func diskCharacteristicsFromMap(m map[string]interface{}) diskCharacteristics {
+	dc := diskCharacteristics{}
+	if v := m["mode"]; v == nil || v.(string) == "" {
+		// mode has an apply-time default of READ_WRITE
+		dc.mode = "READ_WRITE"
+	} else {
+		dc.mode = v.(string)
+	}
+
+	if v := m["disk_type"]; v != nil {
+		dc.diskType = v.(string)
+	}
+
+	if v := m["disk_size_gb"]; v != nil {
+		// Terraform and GCP return ints as different types (int vs int64), so just
+		// use strings to compare for simplicity.
+		dc.diskSizeGb = fmt.Sprintf("%v", v)
+	}
+
+	if v := m["auto_delete"]; v != nil {
+		dc.autoDelete = v.(bool)
+	}
+
+	if v := m["source_image"]; v != nil {
+		dc.sourceImage = v.(string)
+	}
+	return dc
+}
+
 func flattenDisks(disks []*computeBeta.AttachedDisk, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {
-	result := make([]map[string]interface{}, 0, len(disks))
+	result := make([]map[string]interface{}, len(disks))
+
+	// Disks aren't necessarily returned from the API in the same order they were sent, so gather
+	// information about the ones in state that we can use later to map it back.
+	attachedDisksBySource := map[string]int{}
+	attachedDisksByDeviceName := map[string]int{}
+	attachedDisksByDiskName := map[string]int{}
+	attachedDisksByCharacteristics := []int{}
+	scratchDisksByInterface := map[string][]int{}
+
+	for i, d := range d.Get("disk").([]interface{}) {
+		if i == 0 {
+			// boot disk
+			continue
+		}
+		disk := d.(map[string]interface{})
+		if v := disk["type"]; v.(string) == "SCRATCH" {
+			iface := disk["interface"].(string)
+			if iface == "" {
+				// apply-time default
+				iface = "SCSI"
+			}
+			scratchDisksByInterface[iface] = append(scratchDisksByInterface[iface], i)
+		} else if v := disk["source"]; v.(string) != "" {
+			attachedDisksBySource[v.(string)] = i
+		} else if v := disk["device_name"]; v.(string) != "" {
+			attachedDisksByDeviceName[v.(string)] = i
+		} else if v := disk["disk_name"]; v.(string) != "" {
+			attachedDisksByDiskName[v.(string)] = i
+		} else {
+			attachedDisksByCharacteristics = append(attachedDisksByCharacteristics, i)
+		}
+	}
+
 	for _, disk := range disks {
 		diskMap := make(map[string]interface{})
 		if disk.InitializeParams != nil {
@@ -763,9 +834,65 @@ func flattenDisks(disks []*computeBeta.AttachedDisk, d *schema.ResourceData, def
 		diskMap["source"] = ConvertSelfLinkToV1(disk.Source)
 		diskMap["mode"] = disk.Mode
 		diskMap["type"] = disk.Type
-		result = append(result, diskMap)
+
+		// Disks aren't necessarily returned from the API in the same order they were sent, so try
+		// to figure out how to align them:
+		// 1. This resource only works if the boot disk is the first one (which should be fixed
+		//	  separately), so put the boot disk first.
+		if disk.Boot {
+			result[0] = diskMap
+
+			// 2. All disks have a unique device name
+		} else if i, ok := attachedDisksByDeviceName[diskMap["device_name"].(string)]; ok {
+			result[i] = diskMap
+
+			// 3. Scratch disks are all the same except device name and interface, so match them by
+			//    interface.
+		} else if disk.Type == "SCRATCH" {
+			indexes := scratchDisksByInterface[disk.Interface]
+			if len(indexes) > 0 {
+				result[indexes[0]] = diskMap
+				scratchDisksByInterface[disk.Interface] = indexes[1:]
+			} else {
+				result = append(result, diskMap)
+			}
+
+			// 4. Each attached disk will have a different source, so match by that.
+		} else if i, ok := attachedDisksBySource[diskMap["source"].(string)]; ok {
+			result[i] = diskMap
+
+			// 5. If a disk was created for this resource via initializeParams, it will have a
+			//    unique name.
+		} else if v, ok := diskMap["disk_name"]; ok && attachedDisksByDiskName[v.(string)] != 0 {
+			result[attachedDisksByDiskName[v.(string)]] = diskMap
+
+			// 6. If no unique keys exist on this disk, then use a combination of its remaining
+			//    characteristics to see whether it matches exactly.
+		} else {
+			found := false
+			for _, i := range attachedDisksByCharacteristics {
+				diskInState := d.Get(fmt.Sprintf("disk.%d", i)).(map[string]interface{})
+				stateDc := diskCharacteristicsFromMap(diskInState)
+				readDc := diskCharacteristicsFromMap(diskMap)
+				if reflect.DeepEqual(stateDc, readDc) {
+					result[i] = diskMap
+					found = true
+				}
+			}
+			if !found {
+				result = append(result, diskMap)
+			}
+		}
 	}
-	return result, nil
+
+	// Remove nils from map in case there were disks in the config that were not present on read
+	ds := []map[string]interface{}{}
+	for _, d := range result {
+		if d != nil {
+			ds = append(ds, d)
+		}
+	}
+	return ds, nil
 }
 
 func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{}) error {
