@@ -202,6 +202,12 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *Config, it 
 		// scratch disks were not overridden, so use the ones from the instance template
 		for _, disk := range it.Properties.Disks {
 			if disk.Type == "SCRATCH" {
+				// diskType is required to be the name for instance templates but the URL for instances
+				dt, err := readDiskType(config, zone, project, disk.InitializeParams.DiskType)
+				if err != nil {
+					return nil, fmt.Errorf("Error loading disk type %q: %s", disk.InitializeParams.DiskType, err)
+				}
+				disk.InitializeParams.DiskType = dt.SelfLink
 				disks = append(disks, disk)
 			}
 		}
