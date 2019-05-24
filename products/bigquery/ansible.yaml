@@ -25,13 +25,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     properties:
       access.view.tableId: !ruby/object:Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
-        description: >
+        description: |
           The ID of the table. The ID must contain only letters (a-z,
           A-Z), numbers (0-9), or underscores. The maximum length
           is 1,024 characters.
       datasetReference.datasetId: !ruby/object:Overrides::Ansible::PropertyOverride
         # Ansible linter doesn't like the (_) notation.
-        description: >
+        description: |
           A unique ID for this dataset, without the project name. The ID
           must contain only letters (a-z, A-Z), numbers (0-9), or
           underscores. The maximum length is 1,024 characters.

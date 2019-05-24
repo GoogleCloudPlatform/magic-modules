@@ -65,7 +65,7 @@ objects:
             default_value: 'dns#managedZoneDnsSecConfig'
           - !ruby/object:Api::Type::Enum
             name: 'nonExistence'
-            description: >
+            description: |
               Specifies the mechanism used to provide authenticated denial-of-existence responses. Output only while state is not OFF. 
             values:
               - "nsec"
@@ -79,7 +79,7 @@ objects:
               - "transfer"
           - !ruby/object:Api::Type::Array
             name: 'defaultKeySpecs'
-            description: >
+            description: |
               Specifies parameters that will be used for generating initial DnsKeys
               for this ManagedZone. Output only while state is not OFF
             item_type: !ruby/object:Api::Type::NestedObject
@@ -99,7 +99,7 @@ objects:
                   description: Length of the keys in bits
                 - !ruby/object:Api::Type::Enum
                   name: 'keyType'
-                  description: >
+                  description: |
                     Specifies whether this is a key signing key (KSK) or a zone
                     signing key (ZSK). Key signing keys have the Secure Entry
                     Point flag set and, when active, will only be used to sign
