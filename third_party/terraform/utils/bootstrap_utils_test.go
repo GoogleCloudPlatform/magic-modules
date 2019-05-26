@@ -18,15 +18,20 @@ type bootstrappedKMS struct {
 	*cloudkms.CryptoKey
 }
 
-// BootstrapKMSKey returns a KMS key in the "global" location.
-// See BootstrapKMSKeyInLocation.
+// BootstrapKMSKeyWithPurposeAlgorithm returns a KMS key in the "global" location.
+// See BootstrapKMSKeyWithPurposeAlgorithmInLocation.
+func BootstrapKMSKeyWithPurposeAlgorithm(t *testing.T, purpose, algorithm string) bootstrappedKMS {
+	return BootstrapKMSKeyWithPurposeAlgorithmInLocation(t, purpose, algorithm, "global")
+}
+
 func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 	return BootstrapKMSKeyInLocation(t, "global")
 }
 
 /**
-* BootstrapKMSKeyWithLocation will return a KMS key in a particular location
-* that can be used in tests that are testing KMS integration with other resources.
+* BootstrapKMSKeyWithPurposeAlgorithmWithLocation will return a KMS key in a
+* particular location with the given purpose and alogrithm that can be used
+* in tests that are testing KMS integration with other resources.
 *
 * This will either return an existing key or create one if it hasn't been created
 * in the project yet. The motivation is because keyrings don't get deleted and we
@@ -34,7 +39,7 @@ func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
 * to incur the overhead of creating a new project for each test that needs to use
 * a KMS key.
 **/
-func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS {
+func BootstrapKMSKeyWithPurposeAlgorithmInLocation(t *testing.T, purpose, algorithm, locationID string) bootstrappedKMS {
 	if v := os.Getenv("TF_ACC"); v == "" {
 		log.Println("Acceptance tests and bootstrapping skipped unless env 'TF_ACC' set")
 
@@ -87,8 +92,13 @@ func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS 
 	cryptoKey, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.Get(keyName).Do()
 	if err != nil {
 		if isGoogleApiErrorWithCode(err, 404) {
+			newTemplate := cloudkms.CryptoKeyVersionTemplate{
+				Algorithm: algorithm,
+			}
+
 			newKey := cloudkms.CryptoKey{
-				Purpose: "ENCRYPT_DECRYPT",
+				Purpose:         purpose,
+				VersionTemplate: &newTemplate,
 			}
 
 			cryptoKey, err = kmsClient.Projects.Locations.KeyRings.CryptoKeys.Create(keyParent, &newKey).
@@ -110,6 +120,10 @@ func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS 
 		keyRing,
 		cryptoKey,
 	}
+}
+
+func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS {
+	return BootstrapKMSKeyWithPurposeAlgorithmInLocation(t, "ENCRYPT_DECRYPT", "GOOGLE_SYMMETRIC_ENCRYPTION", locationID)
 }
 
 var serviceAccountEmail = "tf-bootstrap-service-account"
