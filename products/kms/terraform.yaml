@@ -14,6 +14,12 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   KeyRing: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+
+      ~> **Note:** KeyRings cannot be deleted from Google Cloud Platform.
+      Destroying a Terraform-managed KeyRing will remove it from state but
+      *will not delete the resource on the server.*
     id_format: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
     examples:
       - !ruby/object:Provider::Terraform::Examples
