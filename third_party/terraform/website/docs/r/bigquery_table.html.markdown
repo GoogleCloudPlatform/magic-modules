@@ -120,10 +120,6 @@ The `external_data_configuration` block supports:
 * `autodetect` - (Required) - Let BigQuery try to autodetect the schema
     and format of the table.
 
-* `bigtable_options` (Optional, Beta) - Additional options if
-    `source_format` is set to "BIGTABLE". Structure is
-    documented below.
-
 * `compression` (Optional) - The compression type of the data source.
     Valid values are "NONE" or "GZIP".
 
@@ -152,27 +148,12 @@ The `external_data_configuration` block supports:
 
 * `schema_format` (Required) - The data format. Supported values are:
     "CVS", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO",
-    "DATSTORE_BACKUP", and "BIGTABLE" (Beta). To use "GOOGLE_SHEETS"
+    and "DATSTORE_BACKUP". To use "GOOGLE_SHEETS"
     the `scopes` must include
     "https://www.googleapis.com/auth/drive.readonly".
 
 * `source_uris` - (Required) A list of the fully-qualified URIs that point to
     your data in Google Cloud.
-
-The `bigtable_options` block supports:
-
-* `column_families` (Optional) - A JSON document describing the column families.
-    For more information see the
-    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
-
-* `ignore_unspecified_column_families` (Optional) - If field is true, then
-    the column families that are not specified in "column_families" list are
-    not exposed in the table schema. Otherwise, they are read with BYTES
-    type values. The default value is false.
-
-* `read_rowkey_as_string` (Optional) - If field is true, then the rowkey
-    column families will be read and converted to string. The default
-    value is false.
 
 The `cvs_options` block supports:
 

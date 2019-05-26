@@ -80,44 +80,6 @@ func resourceBigQueryTable() *schema.Resource {
 							Type:     schema.TypeBool,
 							Required: true,
 						},
-						// BigtableOptions: [Optional] Additional options if sourceFormat is set to BIGTABLE.
-						"bigtable_options": {
-<% if version.nil? || version == 'ga' -%>
-							Removed: "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
-<% end -%>
-							Type:     schema.TypeList,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									// ColumnFamilies: [Optional] List of column families to expose in the
-									// table schema along with their types.
-									"column_families": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										ValidateFunc: validation.ValidateJsonString,
-										StateFunc: func(v interface{}) string {
-											json, _ := structure.NormalizeJsonString(v)
-											return json
-										},
-									},
-									// IgnoreUnspecifiedColumnFamilies: [Optional] If field is true, then
-									// the column families that are not specified in columnFamilies list are
-									// not exposed in the table schema.
-									"ignore_unspecified_column_families": {
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-									// ReadRowkeyAsString: [Optional] If field is true, then the rowkey
-									// column families will be read and converted to string.
-									"read_rowkey_as_string": {
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-								},
-							},
-						},
 						// Compression: [Optional] The compression type of the data source.
 						"compression": {
 							Type:         schema.TypeString,
@@ -233,7 +195,7 @@ func resourceBigQueryTable() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP", <%= version != 'ga' ? ' "BIGTABLE",' : '' %>
+								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP",
 							}, false),
 						},
 						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
@@ -630,13 +592,6 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 		edc.SourceUris = sourceUris
 	}
 
-	if v, ok := raw["bigtable_options"]; ok {
-		bigtableOpts, err := expandBigtableOptions(v)
-		if err != nil {
-			return nil, err
-		}
-		edc.BigtableOptions = bigtableOpts
-	}
 	if v, ok := raw["compression"]; ok {
 		edc.Compression = v.(string)
 	}
@@ -675,14 +630,6 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	result["autodetect"] = edc.Autodetect
 	result["source_uris"] = edc.SourceUris
 
-	if edc.BigtableOptions != nil {
-		columnFamilies, err := flattenBigtableOptions(edc.BigtableOptions)
-		if err != nil {
-			return result, err
-		}
-		result["bigtable_options"] = columnFamilies
-	}
-
 	if edc.Compression != "" {
 		result["compression"] = edc.Compression
 	}
@@ -715,56 +662,6 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	}
 
 	return result, nil
-}
-
-func expandBigtableOptions(configured interface{}) (*bigquery.BigtableOptions, error) {
-	if len(configured.([]interface{})) == 0 {
-		return nil, nil
-	}
-
-	raw := configured.([]interface{})[0].(map[string]interface{})
-	opts := &bigquery.BigtableOptions{}
-
-	if v, ok := raw["column_families"]; ok {
-		columnFamilies, err := expandColumnFamilies(v)
-		if err != nil {
-			return nil, err
-		}
-
-		opts.ColumnFamilies = columnFamilies
-	}
-
-	if v, ok := raw["ignore_unspecified_column_families"]; ok {
-		opts.IgnoreUnspecifiedColumnFamilies = v.(bool)
-	}
-
-	if v, ok := raw["read_rowkey_as_string"]; ok {
-		opts.ReadRowkeyAsString = v.(bool)
-	}
-
-	return opts, nil
-}
-
-func flattenBigtableOptions(opts *bigquery.BigtableOptions) ([]map[string]interface{}, error) {
-	result := map[string]interface{}{}
-
-	if opts.ColumnFamilies != nil {
-		columnFamilies, err := flattenColumnFamilies(opts.ColumnFamilies)
-		if err != nil {
-			return []map[string]interface{}{result}, err
-		}
-		result["column_families"] = columnFamilies
-	}
-
-	if opts.IgnoreUnspecifiedColumnFamilies == true {
-		result["ignore_unspecified_column_families"] = opts.IgnoreUnspecifiedColumnFamilies
-	}
-
-	if opts.ReadRowkeyAsString == true {
-		result["read_rowkey_as_string"] = opts.ReadRowkeyAsString
-	}
-
-	return []map[string]interface{}{result}, nil
 }
 
 func expandCsvOptions(configured interface{}) *bigquery.CsvOptions {
@@ -863,25 +760,6 @@ func flattenGoogleSheetsOptions(opts *bigquery.GoogleSheetsOptions) []map[string
 	}
 
 	return []map[string]interface{}{result}
-}
-
-func expandColumnFamilies(raw interface{}) ([]*bigquery.BigtableColumnFamily, error) {
-	var columnFamilies []*bigquery.BigtableColumnFamily
-
-	if err := json.Unmarshal([]byte(raw.(string)), &columnFamilies); err != nil {
-		return nil, err
-	}
-
-	return columnFamilies, nil
-}
-
-func flattenColumnFamilies(columnFamilies []*bigquery.BigtableColumnFamily) (string, error) {
-	cf, err := json.Marshal(columnFamilies)
-	if err != nil {
-		return "", err
-	}
-
-	return string(cf), nil
 }
 
 func expandSchema(raw interface{}) (*bigquery.TableSchema, error) {
