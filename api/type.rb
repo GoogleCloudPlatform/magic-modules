@@ -97,7 +97,8 @@ module Api
     def to_json(opts = nil)
       # ignore fields that will contain references to parent resources and
       # those which will be added later
-      ignored_fields = %i[@resource @__parent @__resource @api_name]
+      ignored_fields = %i[@resource @__parent @__resource @api_name @update_verb
+                          @__name @name @properties]
       json_out = {}
 
       instance_variables.each do |v|
@@ -111,7 +112,7 @@ module Api
       end
 
       # convert properties to a hash based on name for nested readability
-      json_out[:@properties] = properties&.map { |p| [p.name, p] }.to_h \
+      json_out.merge!(properties&.map { |p| [p.name, p] }.to_h) \
         if respond_to? 'properties'
 
       JSON.generate(json_out, opts)
@@ -471,6 +472,18 @@ module Api
 
       def nested_properties
         properties
+      end
+
+      # Returns the list of top-level properties once any nested objects with
+      # flatten_object set to true have been collapsed
+      def root_properties
+        properties.flat_map do |p|
+          if p.flatten_object
+            p.root_properties
+          else
+            p
+          end
+        end
       end
 
       def exclude_if_not_in_version!(version)

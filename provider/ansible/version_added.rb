@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CURRENT_ANSIBLE_VERSION = '2.8'.freeze
+CURRENT_ANSIBLE_VERSION = '2.9'.freeze
 
 module Provider
   module Ansible

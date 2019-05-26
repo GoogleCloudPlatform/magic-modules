@@ -1,35 +1,41 @@
+# -*- coding: utf-8 -*-
+
 # Copyright: (c) 2018, Google Inc.
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 
 class ModuleDocFragment(object):
-        # GCP doc fragment.
-        DOCUMENTATION = '''
+    # GCP doc fragment.
+    DOCUMENTATION = r'''
 options:
     project:
         description:
             - The Google Cloud Platform project to use.
-        default: null
+        type: str
     auth_kind:
         description:
             - The type of credential used.
+        type: str
         required: true
-        choices: ["machineaccount", "serviceaccount", "application"]
-    service_account_file:
-        description:
-            - The path of a Service Account JSON file if serviceaccount is selected as type.
+        choices: [ application, machineaccount, serviceaccount ]
     service_account_contents:
         description:
             - A string representing the contents of a Service Account JSON file.
-            - This should not be passed in as a dictionary, but a string has
-              the exact contents of a service account json file (valid JSON).
+            - This should not be passed in as a dictionary, but a string
+              that has the exact contents of a service account json file (valid JSON)
+        type: str
+    service_account_file:
+        description:
+            - The path of a Service Account JSON file if serviceaccount is selected as type.
     service_account_email:
         description:
             - An optional service account email address if machineaccount is selected
               and the user does not wish to use the default email.
+        type: str
     scopes:
-      description:
-          - Array of scopes to be used.
+        description:
+            - Array of scopes to be used.
+        type: list
 notes:
   - for authentication, you can set service_account_file using the
     c(gcp_service_account_file) env variable.

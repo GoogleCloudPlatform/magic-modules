@@ -6,7 +6,7 @@
   err_msg = object.async.error.message
 -%>
 <%=
-  lines(emit_link('async_op_url', build_url(object.async_operation_url, true), object, true), 2)
+  lines(emit_link('async_op_url', build_url(object.async_operation_url), object, true), 2)
 -%>
 def wait_for_operation(module, response):
     op_result = <%= method_call('return_if_object',

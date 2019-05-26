@@ -15,6 +15,8 @@ require 'provider/abstract_core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
+require 'provider/terraform/docs'
+require 'provider/terraform/examples'
 require 'overrides/terraform/resource_override'
 require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
@@ -33,6 +35,10 @@ module Provider
       # The async object used for making operations.
       # We assume that all resources share the same async properties.
       attr_accessor :async
+
+      # When generating OiCS examples, we attach the example we're
+      # generating to the data object.
+      attr_accessor :example
 
       attr_accessor :resource_name
     end
@@ -91,10 +97,6 @@ module Provider
         (property.input || (resource.input && property.update_url.nil? &&
                             (property.parent.nil? ||
                              force_new?(property.parent, resource))))
-    end
-
-    def build_url(url_parts, _extra = false)
-      url_parts.flatten.join
     end
 
     # Transforms a format string with field markers to a regex string with

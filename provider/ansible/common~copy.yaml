@@ -13,9 +13,9 @@
 
 'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
 'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
-'lib/ansible/utils/module_docs_fragments/gcp.py':
+'lib/ansible/plugins/doc_fragments/gcp.py':
   'provider/ansible/gcp_doc_frag.py'
-'test/integration/cloud-config-gcp.yml.template':
+'test/integration/cloud-config-gcp.ini.template':
   'provider/ansible/test_template.yaml'
 'test/runner/lib/cloud/gcp.py': 'provider/ansible/gcp_integration_runner.py'
 'test/units/module_utils/gcp/test_gcp_utils.py': 'provider/ansible/test_gcp_utils.py'

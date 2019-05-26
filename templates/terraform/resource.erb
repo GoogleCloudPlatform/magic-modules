@@ -24,9 +24,11 @@ package google
     update_body_properties = object.settable_properties
     update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    api_name_lower = String.new(product_ns)
-    api_name_lower[0] = api_name_lower[0].downcase
-    api_client_name = api_name_lower.downcase
+    client_name_camel = String.new(if @config.client_name then @config.client_name else product_ns end)
+    client_name_camel[0] = client_name_camel[0].downcase
+    client_name_pascal = String.new(client_name_camel)
+    client_name_pascal[0] = client_name_pascal[0].upcase
+    client_name_lower = client_name_camel.downcase
     has_project = object.base_url.include?('{{project}}')
     has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
     timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
@@ -108,29 +110,19 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 
     obj := make(map[string]interface{})
 <%  object.settable_properties.each do |prop| -%>
-<%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
-<%      unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%    else -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
-    if err != nil {
-        return err
-<%      unless prop.send_empty_value -%>
-    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
-<%      else -%>
+<%    if prop.send_empty_value -%>
     } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
-<%      end -%>
+<%    elsif prop.flatten_object -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%    else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%    end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    end -%>
 <%  end -%>
 
 <%  if object.custom_code.encoder -%>
@@ -149,7 +141,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= build_url(object.full_create_url) -%>")
+    url, err := replaceVars(d, config, "<%= object.full_create_url -%>")
     if err != nil {
         return err
     }
@@ -175,18 +167,18 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 <%  end -%>
 <% if object.autogen_async -%>
-    waitErr := <%= api_name_lower -%>OperationWaitTime(
+    waitErr := <%= client_name_camel -%>OperationWaitTime(
     config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 <% else -%>
-    op := &<%= api_client_name -%>.Operation{}
+    op := &<%= client_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
     }
 
-    waitErr := <%= api_name_lower -%>OperationWaitTime(
-    config.client<%= product_ns -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+    waitErr := <%= client_name_camel -%>OperationWaitTime(
+    config.client<%= client_name_pascal -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
 <% end -%>
 
@@ -207,7 +199,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-    url, err := replaceVars(d, config, "<%= build_url(object.self_link_url) -%>")
+    url, err := replaceVars(d, config, "<%= object.self_link_url -%>")
     if err != nil {
         return err
     }
@@ -260,16 +252,15 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
 
 <%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
 <%    if prop.flatten_object -%>
-    if v, ok := res["<%= prop.api_name -%>"].(map[string]interface{}); res["<%= prop.api_name -%>"] != nil && ok {
-<%      prop.properties.each do |p| -%>
-      if err := d.Set("<%= p.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%><%= titlelize_property(p) -%>(v["<%= p.api_name -%>"], d)); err != nil {
-        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
-    }
-<%      end -%>
-    } else {
-<%      prop.properties.each do |p| -%>
-      d.Set("<%= p.name.underscore -%>", nil)
-<%      end -%>
+// Terraform must set the top level schema field, but since this object contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattenedProp != nil {
+        casted := flattenedProp.([]interface{})[0]
+        if casted != nil {
+            for k, v := range casted.(map[string]interface{}) {
+                d.Set(k, v)
+            }
+        }
     }
 <%    else -%>
     if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
@@ -293,25 +284,13 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  if object.input -%>
     d.Partial(true)
 
-<%  properties_by_custom_update(properties).each do |key, props| -%>
-<%  top_level_props = props.reject(&:flatten_object) + props.select(&:flatten_object).flat_map(&:properties) -%>
-    if <%= top_level_props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
+<%  properties_by_custom_update(object.root_properties).each do |key, props| -%>
+if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
-<%    props.each do |prop| -%>
-<%      if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
-    if err != nil {
-        return err
-<%        unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%        else -%>
-    } else {
-<%        end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%      else -%>
-<%        if update_body_properties.include? prop -%>
-        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+<%      props.each do |prop| -%>
+<%      if update_body_properties.include? prop -%>
+        <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
             return err
 <%#         There is some nuance in when we choose to send a value to an update function.
@@ -342,7 +321,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
         <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
 <%        end # if update_body_properties.include? prop -%>
-<%      end # prop.flatten_object -%>
 <%    end # props.each -%>
 
 <%      if object.mutex -%>
@@ -376,19 +354,19 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      end -%>
 <% if object.autogen_async -%>
 
-        err = <%= api_name_lower -%>OperationWaitTime(
+        err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 <% else -%>
-        op := &<%= api_client_name -%>.Operation{}
+        op := &<%= client_name_lower -%>.Operation{}
         err = Convert(res, op)
         if err != nil {
             return err
         }
 
-        err = <%= api_name_lower -%>OperationWaitTime(
-            config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+        err = <%= client_name_camel -%>OperationWaitTime(
+            config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
             int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 
 <% end -%>
@@ -408,19 +386,9 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  else # if object.input -%>
     obj := make(map[string]interface{})
 <%  update_body_properties.each do |prop| -%>
-<%    if prop.flatten_object -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d, config)
-    if err != nil {
-        return err
-<%      unless prop.send_empty_value -%>
-    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
-<%      else -%>
-    } else {
-<%      end -%>
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-    }
-<%    else -%>
-    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+    <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
         return err
 <%      unless prop.send_empty_value -%>
@@ -430,7 +398,6 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%      end -%>
         obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
-<%    end -%>
 <%  end -%>
 
 <%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
@@ -482,18 +449,18 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  end -%>
 <% if object.autogen_async -%>
 
-    err = <%= api_name_lower -%>OperationWaitTime(
+    err = <%= client_name_camel -%>OperationWaitTime(
     config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
     int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 <% else -%>
-    op := &<%= api_client_name -%>.Operation{}
+    op := &<%= client_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
     }
 
-    err = <%= api_name_lower -%>OperationWaitTime(
-    config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+    err = <%= client_name_camel -%>OperationWaitTime(
+    config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
     int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 <% end -%>
 
@@ -520,7 +487,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= build_url(object.full_delete_url) -%>")
+    url, err := replaceVars(d, config, "<%= object.full_delete_url -%>")
     if err != nil {
         return err
     }
@@ -543,18 +510,18 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  end -%>
 <% if object.autogen_async -%>
 
-    err = <%= api_name_lower -%>OperationWaitTime(
+    err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
 <% else -%>
-    op := &<%= api_client_name -%>.Operation{}
+    op := &<%= client_name_lower -%>.Operation{}
     err = Convert(res, op)
     if err != nil {
         return err
     }
 
-    err = <%= api_name_lower -%>OperationWaitTime(
-        config.client<%= product_ns -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
+    err = <%= client_name_camel -%>OperationWaitTime(
+        config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
         int(d.Timeout(schema.TimeoutDelete).Minutes()))
 <% end -%>
 

@@ -30,7 +30,9 @@ module Provider
             'description' => [
               format_description(prop.description),
               (resourceref_description(prop) \
-               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly)
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly),
+              (choices_description(prop) \
+               if prop.is_a?(Api::Type::Enum))
             ].flatten.compact,
             'required' => required,
             'default' => (
@@ -42,7 +44,6 @@ module Provider
             'type' => ('bool' if prop.is_a? Api::Type::Boolean),
             'aliases' => prop.aliases,
             'version_added' => (version_added(prop)&.to_f),
-            'choices' => (prop.values.map(&:to_s) if prop.is_a? Api::Type::Enum),
             'suboptions' => (
                 if prop.nested_properties?
                   prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
@@ -97,6 +98,10 @@ module Provider
         ].join(' ')
       end
 
+      def choices_description(prop)
+        "Some valid choices include: #{prop.values.map { |x| "\"#{x}\"" }.join(', ')}"
+      end
+
       # MM puts descriptions in a text block. Ansible needs it in bullets
       def format_description(desc)
         desc.split(".\n").map do |paragraph|
@@ -107,13 +112,15 @@ module Provider
       end
 
       # Find URLs and surround with U()
+      # If there's a period at the end of the URL, make sure the
+      # period is outside of the ()
       def format_url(paragraph)
         paragraph.gsub(%r{
           https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
           [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
           [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
           [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
-        }x, 'U(\\0)')
+        }x, 'U(\\0)').gsub('.)', ').')
       end
     end
   end

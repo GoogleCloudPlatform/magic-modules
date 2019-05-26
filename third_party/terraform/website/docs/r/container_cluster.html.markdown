@@ -305,6 +305,9 @@ to the datasource. A `region` can have a different set of supported versions tha
 * `subnetwork` - (Optional) The name or self_link of the Google Compute Engine subnetwork in
     which the cluster's instances are launched.
 
+* `vertical_pod_autoscaling` - Vertical Pod Autoscaling automatically adjusts the resources of pods controlled by it.
+    Structure is documented below.
+
 The `addons_config` block supports:
 
 * `horizontal_pod_autoscaling` - (Optional) The status of the Horizontal Pod Autoscaling
@@ -324,6 +327,8 @@ The `addons_config` block supports:
 
 * `network_policy_config` - (Optional) Whether we should enable the network policy addon
     for the master.  This must be enabled in order to enable network policy for the nodes.
+    To enable this, you must also define a [`network_policy`](#network_policy) block,
+    otherwise nothing will happen.
     It can only be disabled if the nodes already do not have network policies enabled.
     Defaults to disabled; set `disabled = false` to enable.
 
@@ -416,6 +421,7 @@ API is `false`; afterwards, it's `true`.
     pick a specific range to use.
 
 * `node_ipv4_cidr_block` - (Optional) The IP address range of the node IPs in this cluster.
+    This should be set only if `create_subnetwork` is true.
     Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
     to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
     from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
@@ -564,7 +570,7 @@ The `private_cluster_config` block supports:
 
 * `master_ipv4_cidr_block` (Optional) - The IP range in CIDR notation to use for the hosted master network. This range will be used for
     assigning internal IP addresses to the master or set of masters, as well as the ILB VIP. This range must not overlap with any other ranges
-    in use within the cluster's network.
+    in use within the cluster's network, and it must be a /28 subnet. See [Limitations](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters#limitations) in the GCP docs.
 
 In addition, the `private_cluster_config` allows access to the following read-only fields:
 
@@ -587,6 +593,10 @@ The `workload_metadata_config` block supports:
     * UNSPECIFIED: Not Set
     * SECURE: Prevent workloads not in hostNetwork from accessing certain VM metadata, specifically kube-env, which contains Kubelet credentials, and the instance identity token. See [Metadata Concealment](https://cloud.google.com/kubernetes-engine/docs/how-to/metadata-proxy) documentation.
     * EXPOSE: Expose all VM metadata to pods.
+
+The `vertical_pod_autoscaling` block supports:
+
+* `enabled` (Required) - Enables vertical pod autoscaling
 
 ## Attributes Reference
 

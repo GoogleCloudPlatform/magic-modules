@@ -95,6 +95,9 @@
       <li<%%= sidebar_current("docs-google-datasource-compute-regions") %>>
       <a href="/docs/providers/google/d/google_compute_regions.html">google_compute_regions</a>
       </li>
+      <li<%%= sidebar_current("docs-google-datasource-compute-ssl-certificate") %>>
+        <a href="/docs/providers/google/d/datasource_compute_ssl_certificate.html">google_compute_ssl_certificate</a>
+      </li>
       <li<%%= sidebar_current("docs-google-datasource-compute-ssl-policy") %>>
         <a href="/docs/providers/google/d/datasource_compute_ssl_policy.html">google_compute_ssl_policy</a>
       </li>
@@ -398,8 +401,16 @@
       <a href="/docs/providers/google/r/compute_backend_bucket.html">google_compute_backend_bucket</a>
       </li>
 
+      <li<%%= sidebar_current("docs-google-compute-backend-bucket-signed-url-key") %>>
+      <a href="/docs/providers/google/r/compute_backend_bucket_signed_url_key.html">google_compute_backend_bucket_signed_url_key</a>
+      </li>
+
       <li<%%= sidebar_current("docs-google-compute-backend-service") %>>
       <a href="/docs/providers/google/r/compute_backend_service.html">google_compute_backend_service</a>
+      </li>
+
+      <li<%%= sidebar_current("docs-google-compute-backend-service-signed-url-key") %>>
+      <a href="/docs/providers/google/r/compute_backend_service_signed_url_key.html">google_compute_backend_service_signed_url_key</a>
       </li>
 
       <li<%%= sidebar_current("docs-google-compute-disk") %>>
@@ -422,6 +433,12 @@
       <a href="/docs/providers/google/r/compute_global_forwarding_rule.html">google_compute_global_forwarding_rule</a>
       </li>
 
+<% unless version == 'ga' %>
+      <li<%%= sidebar_current("docs-google-compute-ha-vpn-gateway") %>>
+      <a href="/docs/providers/google/r/compute_ha_vpn_gateway.html">google_compute_ha_vpn_gateway</a>
+      </li>
+
+<% end -%>
       <li<%%= sidebar_current("docs-google-compute-health-check") %>>
       <a href="/docs/providers/google/r/compute_health_check.html">google_compute_health_check</a>
       </li>
@@ -659,10 +676,33 @@
           <li<%%= sidebar_current("docs-google-dataproc-cluster") %>>
           <a href="/docs/providers/google/r/dataproc_cluster.html">google_dataproc_cluster</a>
           </li>
-        </ul>
-        <ul class="nav nav-visible">
+
+          <li<%%= sidebar_current("docs-google-dataproc-cluster-iam") %>>
+          <a href="/docs/providers/google/r/dataproc_cluster_iam.html">google_dataproc_cluster_iam_binding</a>
+          </li>
+
+          <li<%%= sidebar_current("docs-google-dataproc-cluster-iam") %>>
+          <a href="/docs/providers/google/r/dataproc_cluster_iam.html">google_dataproc_cluster_iam_member</a>
+          </li>
+
+          <li<%%= sidebar_current("docs-google-dataproc-cluster-iam") %>>
+          <a href="/docs/providers/google/r/dataproc_cluster_iam.html">google_dataproc_cluster_iam_policy</a>
+          </li>
+
           <li<%%= sidebar_current("docs-google-dataproc-job") %>>
-          <a href="/docs/providers/google/r/dataproc_job.html">google_dataproc_job</a>
+          <a href="/docs/providers/google/r/dataproc_job_iam.html">google_dataproc_job</a>
+          </li>
+
+          <li<%%= sidebar_current("docs-google-dataproc-job-iam") %>>
+          <a href="/docs/providers/google/r/dataproc_job_iam.html">google_dataproc_job_iam_binding</a>
+          </li>
+
+          <li<%%= sidebar_current("docs-google-dataproc-job-iam") %>>
+          <a href="/docs/providers/google/r/dataproc_job_iam.html">google_dataproc_job_iam_member</a>
+          </li>
+
+          <li<%%= sidebar_current("docs-google-dataproc-job-iam") %>>
+          <a href="/docs/providers/google/r/dataproc_job_iam.html">google_dataproc_job_iam_policy</a>
           </li>
         </ul>
     </li>

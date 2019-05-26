@@ -1489,6 +1489,39 @@ func TestAccContainerCluster_sharedVpc(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withVerticalPodAutoscaling(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withVerticalPodAutoscalingEnabled(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_vertical_pod_autoscaling",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withVerticalPodAutoscalingDisabled(clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_vertical_pod_autoscaling",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+
+}
 <% end -%>
 
 func TestAccContainerCluster_withResourceLabels(t *testing.T) {
@@ -2854,22 +2887,15 @@ resource "google_compute_network" "container_network" {
 	auto_create_subnetworks = false
 }
 
-resource "google_compute_subnetwork" "container_subnetwork" {
-	name		  = "${google_compute_network.container_network.name}"
-	network		  = "${google_compute_network.container_network.name}"
-	ip_cidr_range = "10.128.0.0/9"
-	region		  = "us-central1"
-}
-
 resource "google_container_cluster" "with_ip_allocation_policy" {
 	name	   = "%s"
 	zone	   = "us-central1-a"
 	network    = "${google_compute_network.container_network.name}"
-	subnetwork = "${google_compute_subnetwork.container_subnetwork.name}"
 
 	initial_node_count = 1
 	ip_allocation_policy {
 		use_ip_aliases           = true
+		create_subnetwork        = true
 		cluster_ipv4_cidr_block  = "10.0.0.0/16"
 		services_ipv4_cidr_block = "10.1.0.0/16"
 		node_ipv4_cidr_block     = "10.2.0.0/16"
@@ -3109,6 +3135,36 @@ resource "google_container_cluster" "with_resource_labels" {
 }
 `, clusterName)
 }
+
+<% unless version == 'ga' -%>
+func testAccContainerCluster_withVerticalPodAutoscalingEnabled(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_vertical_pod_autoscaling" {
+	name = "%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+  vertical_pod_autoscaling {
+    enabled = true
+  }
+}
+`, clusterName)
+}
+
+func testAccContainerCluster_withVerticalPodAutoscalingDisabled(clusterName string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_vertical_pod_autoscaling" {
+	name = "%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+  vertical_pod_autoscaling {
+    enabled = false
+  }
+}
+`, clusterName)
+}
+<% end -%>
 
 func testAccContainerCluster_withResourceLabels(clusterName string) string {
 	return fmt.Sprintf(`

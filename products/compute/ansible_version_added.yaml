@@ -299,8 +299,6 @@
       :version_added: '2.6'
     :IPProtocol:
       :version_added: '2.6'
-    :backendService:
-      :version_added: '2.6'
     :ipVersion:
       :version_added: '2.6'
     :loadBalancingScheme:
@@ -310,10 +308,6 @@
     :network:
       :version_added: '2.6'
     :portRange:
-      :version_added: '2.6'
-    :ports:
-      :version_added: '2.6'
-    :subnetwork:
       :version_added: '2.6'
     :target:
       :version_added: '2.6'
@@ -621,8 +615,8 @@
         :version_added: '2.6'
       :acceleratorType:
         :version_added: '2.6'
-    :labelFingerprint:
-      :version_added: '2.6'
+    :labels:
+      :version_added: '2.9'
     :metadata:
       :version_added: '2.6'
     :machineType:

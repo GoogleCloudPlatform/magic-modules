@@ -25,6 +25,8 @@ require 'overrides/ansible/resource_override'
 require 'overrides/ansible/property_override'
 
 module Provider
+  # Ansible Provider module containing helper functions and the Ansible Provider
+  # implementation "Core"
   module Ansible
     # Code generator for Ansible Cookbooks that manage Google Cloud Platform
     # resources.
@@ -40,6 +42,7 @@ module Provider
         'Api::Type::Path' => 'path'
       }.freeze
 
+      include Provider::Ansible
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
       include Provider::Ansible::Request
@@ -79,14 +82,8 @@ module Provider
         return "u#{quote_string(string)}" unless string.include? 'u\''
       end
 
-      def build_url(url_parts, _extra = false)
-        full_url = if url_parts.is_a? Array
-                     url_parts.flatten.join
-                   else
-                     url_parts
-                   end
-
-        "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+      def build_url(url)
+        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.
@@ -303,6 +300,26 @@ module Provider
         end
         super
       end
+    end
+
+    # Returns all URI properties minus those ignored.
+    def uri_properties(object, ignored_props = [])
+      uri_properties_raw(object)
+        .compact
+        .map(&:name)
+        .reject { |x| ignored_props.include? x }
+    end
+
+    # TODO(alexstephen): Update test_constants to use this function.
+    # Returns all of the properties that are a part of the self_link or
+    # collection URLs
+    def uri_properties_raw(object)
+      [object.base_url, object.__product.base_url].map do |url|
+        parts = url.scan(/\{\{(.*?)\}\}/).flatten
+        parts << 'name'
+        parts.delete('project')
+        parts.map { |pt| object.all_user_properties.select { |p| p.name == pt }[0] }
+      end.flatten
     end
   end
 end

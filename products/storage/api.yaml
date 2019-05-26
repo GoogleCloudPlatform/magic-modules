@@ -38,7 +38,7 @@ objects:
           - :upload
       - !ruby/object:Api::Type::Boolean
         name: 'overwrite'
-        description: >
+        description: |
           'Overwrite the file on the bucket/local machine. If overwrite is
           false and a difference exists between GCS + local, module will fail
           with error'
