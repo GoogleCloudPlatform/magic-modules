@@ -85,6 +85,7 @@ func resourceBigQueryTable() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "GZIP"}, false),
+							Default:      "NONE",
 						},
 						// CsvOptions: [Optional] Additional properties to set if
 						// sourceFormat is set to CSV.
@@ -99,6 +100,7 @@ func resourceBigQueryTable() *schema.Resource {
 									"allow_jagged_rows": {
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									// AllowQuotedNewlines: [Optional] Indicates if BigQuery
 									// should allow quoted data sections that contain newline
@@ -106,6 +108,7 @@ func resourceBigQueryTable() *schema.Resource {
 									"allow_quoted_newlines": {
 										Type:     schema.TypeBool,
 										Optional: true,
+										Default:  false,
 									},
 									// Encoding: [Optional] The character encoding of the data.
 									// The supported values are UTF-8 or ISO-8859-1.
@@ -113,23 +116,27 @@ func resourceBigQueryTable() *schema.Resource {
 										Type:         schema.TypeString,
 										Optional:     true,
 										ValidateFunc: validation.StringInSlice([]string{"ISO-8859-1", "UTF-8"}, false),
+										Default:      "UTF-8",
 									},
 									// FieldDelimiter: [Optional] The separator for fields in a CSV file.
 									"field_delimiter": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Default:  ",",
 									},
 									// Quote: [Optional] The value that is used to quote data
 									// sections in a CSV file.
 									"quote": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Default:  "\"",
 									},
 									// SkipLeadingRows: [Optional] The number of rows at the top
 									// of a CSV file that BigQuery will skip when reading the data.
 									"skip_leading_rows": {
 										Type:     schema.TypeInt,
 										Optional: true,
+										Default:  0,
 									},
 								},
 							},
