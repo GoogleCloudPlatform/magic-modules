@@ -81,7 +81,8 @@ objects:
             name: 'defaultKeySpecs'
             description: |
               Specifies parameters that will be used for generating initial DnsKeys
-              for this ManagedZone. Output only while state is not OFF
+              for this ManagedZone. If you provide a spec for keySigning or zoneSigning,
+              you must also provide one for the other.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::Enum
