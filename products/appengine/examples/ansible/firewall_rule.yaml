@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_appengine_firewall_rule
   code:
-    name: 'test-rule'
+    priority: 1000
     source_range: '10.0.0.0'
     action: 'ALLOW'
     project: <%= ctx[:project] %>

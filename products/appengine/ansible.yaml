@@ -13,7 +13,16 @@
 
 --- !ruby/object:Provider::Ansible::Config
 datasources: !ruby/object:Overrides::ResourceOverrides
+  FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: false
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
+  FirewallRule: !ruby/object:Overrides::Ansible::ResourceOverride
+    # Because of lack of state, Ansible treats identity
+    # differently than Terraform.
+    identity:
+      - priority
 files: !ruby/object:Provider::Config::Files
   compile:
 <%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
