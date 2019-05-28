@@ -242,7 +242,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           region_backend_service_name: "region-backend-service"
           health_check_name: "health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
+      constants: 'templates/terraform/constants/migrate_state_noop.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
     properties:
       region: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
