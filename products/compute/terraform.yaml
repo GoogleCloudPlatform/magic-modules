@@ -176,6 +176,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           backend_service_name: "backend-service"
           http_health_check_name: "health-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_global_internal"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: 'templates/terraform/constants/backend_service.go.erb'
       encoder: 'templates/terraform/encoders/backend_service.go.erb'
