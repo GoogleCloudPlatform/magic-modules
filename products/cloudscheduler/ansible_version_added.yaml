@@ -1,0 +1,65 @@
+---
+:facts:
+  :Job:
+    :version_added: '2.8'
+:regular:
+  :Job:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :schedule:
+      :version_added: '2.8'
+    :timeZone:
+      :version_added: '2.8'
+    :retryConfig:
+      :version_added: '2.8'
+      :retryCount:
+        :version_added: '2.8'
+      :maxRetryDuration:
+        :version_added: '2.8'
+      :minBackoffDuration:
+        :version_added: '2.8'
+      :maxBackoffDuration:
+        :version_added: '2.8'
+      :maxDoublings:
+        :version_added: '2.8'
+    :pubsubTarget:
+      :version_added: '2.8'
+      :topicName:
+        :version_added: '2.8'
+      :data:
+        :version_added: '2.8'
+      :attributes:
+        :version_added: '2.8'
+    :appEngineHttpTarget:
+      :version_added: '2.8'
+      :httpMethod:
+        :version_added: '2.8'
+      :appEngineRouting:
+        :version_added: '2.8'
+        :service:
+          :version_added: '2.8'
+        :version:
+          :version_added: '2.8'
+        :instance:
+          :version_added: '2.8'
+      :relativeUri:
+        :version_added: '2.8'
+      :body:
+        :version_added: '2.8'
+      :headers:
+        :version_added: '2.8'
+    :httpTarget:
+      :version_added: '2.8'
+      :uri:
+        :version_added: '2.8'
+      :httpMethod:
+        :version_added: '2.8'
+      :body:
+        :version_added: '2.8'
+      :headers:
+        :version_added: '2.8'
+    :region:
+      :version_added: '2.8'
