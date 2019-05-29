@@ -95,9 +95,20 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d T
       continue
     }
 <%       else -%>
-  if len(l) == 0 || l[0] == nil{
+<%         if property.allow_empty_object -%>
+  if len(l) == 0 {
     return nil, nil
   }
+
+  if l[0] == nil {
+    transformed := make(map[string]interface{})
+    return transformed, nil
+  }
+<%       else -%>
+  if len(l) == 0 || l[0] == nil {
+    return nil, nil
+  }
+<%         end -%>
   raw := l[0]
 <%       end -%>
     original := raw.(map[string]interface{})
