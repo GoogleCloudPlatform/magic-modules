@@ -55,6 +55,9 @@ objects:
         description: |
           The DNS name of this managed zone, for instance "example.com.".
         required: true
+      # TODO: Update support for dnssecConfig. Once this is added, property descriptions should be
+      # modified to state that properties (nonExistence, defaultKeySpecs) can only be updated while
+      # the state is "off".
       - !ruby/object:Api::Type::NestedObject
         name: 'dnssecConfig'
         description: DNSSEC configuration
@@ -66,7 +69,7 @@ objects:
           - !ruby/object:Api::Type::Enum
             name: 'nonExistence'
             description: |
-              Specifies the mechanism used to provide authenticated denial-of-existence responses. Output only while state is not OFF. 
+              Specifies the mechanism used to provide authenticated denial-of-existence responses.
             values:
               - "nsec"
               - "nsec3"
