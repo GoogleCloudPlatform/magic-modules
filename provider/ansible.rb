@@ -98,7 +98,8 @@ module Provider
         path = ["products/#{data[:product_name]}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        data.merge(example: (get_example(path) if File.file?(path)))
+        data
+        # data.merge(example: (get_example(path) if File.file?(path)))
       end
 
       # Given a URL and function name, emit a URL.
@@ -244,20 +245,25 @@ module Provider
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
         return unless data[:object].has_tests
-        # Unlike other providers, all resources will not be built at once or
-        # in close timing to each other (due to external PRs).
-        # This means that examples might not be built out for every resource
-        # in a GCP product.
-        return unless File.file?(path)
+        return if data[:object].inttests.empty?
 
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
 
         name = module_name(data[:object])
+        target_folder = File.join(target_folder, "test/integration/targets/#{name}")
+
         generate_resource_file data.clone.merge(
           default_template: 'templates/ansible/integration_test.erb',
-          out_file: File.join(target_folder,
-                              "test/integration/targets/#{name}/tasks/main.yml")
+          out_file: File.join(target_folder, 'tasks/main.yml')
+        )
+        generate_resource_file data.clone.merge(
+          default_template: 'templates/azure/ansible/test/meta.erb',
+          out_file: File.join(target_folder, 'meta/main.yml')
+        )
+        generate_resource_file data.clone.merge(
+          default_template: 'templates/azure/ansible/test/aliases.erb',
+          out_file: File.join(target_folder, 'aliases')
         )
       end
 

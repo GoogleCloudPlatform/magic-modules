@@ -91,13 +91,14 @@ author:
 '''
 
 EXAMPLES = '''
-  - name: Create (or update) Batch Account
+  - name: Create Batch Account
     azure_rm_batchaccount:
-        resource_group: MyResGroup
-        name: test_object
-        location: West US
-        auto_storage_account: MyStorageAccountId
-        state: present
+        resource_group: "<%= get_resource_name('resourceGroups', 'resource_group') -%>"
+        name: "<%= get_resource_name('batchAccounts', 'batch_account_name', 'ba') -%>"
+        location: eastus
+        auto_storage_account:
+            name: "<%= get_resource_name('storageAccounts', 'storage_account_name', 'st') -%>"
+        pool_allocation_mode: batch_service
 '''
 
 RETURN = '''

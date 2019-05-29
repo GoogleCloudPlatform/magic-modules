@@ -1,0 +1,8 @@
+--- !ruby/object:Provider::Azure::Example
+resource: azure_rm_storageaccount
+description: Create Storage Account
+properties:
+  resourceGroup: "<%= get_resource_name('resourceGroups', 'resource_group') -%>"
+  name: "<%= get_resource_name('storageAccounts', 'storage_account_name', 'st') -%>"
+  location: eastus
+  accountType: Standard_LRS

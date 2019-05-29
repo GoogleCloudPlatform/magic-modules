@@ -1,0 +1,10 @@
+<%  properties.each do |name, value| -%>
+<%    if value.is_a?(Hash) -%>
+<%=     name.underscore -%>:
+<%=     lines(build_yaml_properties(value)) -%>
+<%    elsif value.is_a?(String) || value.is_a?(Integer) || value.is_a?(TrueClass) || value.is_a?(FalseClass) -%>
+<%=     name.underscore -%>: <%= lines(value) -%>
+<%    else -%>
+// TODO: Unsupported property "<%= prop[0] -%>" value <%= lines(prop[1]) -%>
+<%    end -%>
+<%  end -%>

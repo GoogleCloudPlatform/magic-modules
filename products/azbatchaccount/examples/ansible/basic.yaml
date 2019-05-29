@@ -1,9 +1,14 @@
 --- !ruby/object:Provider::Azure::Example
 resource: azure_rm_batchaccount
-description: Create (or update) Batch Account
+description: Create Batch Account
+prerequisites:
+  - !ruby/object:Provider::Azure::ExampleReference
+    product: azstorageaccount
+    example: basic
 properties:
-  resourceGroup: MyResGroup
-  name: test_object
-  location: West US
-  autoStorageAccount: MyStorageAccountId
-  state: present
+  resourceGroup: "<%= get_resource_name('resourceGroups', 'resource_group') -%>"
+  name: "<%= get_resource_name('batchAccounts', 'batch_account_name', 'ba') -%>"
+  location: eastus
+  autoStorageAccount:
+    name: "<%= get_resource_name('storageAccounts', 'storage_account_name', 'st') -%>"
+  poolAllocationMode: batch_service
