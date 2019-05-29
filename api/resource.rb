@@ -81,9 +81,9 @@ module Api
       # Collection / Identity URL Configuration
       # ====================
       #
-      # [Optional] (Api::Resource::ResponseList) This is the type of response
-      # from the collection URL. It contains the name of the list of items
-      # within the json, as well as the type that this list should be.
+      # [Optional] This is the name of the list of items
+      # within the collection (list) json. Will default to the
+      # camelcase pluralize name of the resource.
       attr_reader :collection_url_key
       # [Optional] This is an array with items that uniquely identify the
       # resource.
