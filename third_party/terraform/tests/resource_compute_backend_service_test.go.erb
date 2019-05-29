@@ -660,9 +660,6 @@ func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccComputeBackendService_internalLoadBalancing(fr, proxy, backend, hc, urlmap),
-			},
 		},
 	})
 }
