@@ -12,9 +12,10 @@
 # limitations under the License.
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
-  name: gcp_cloud_scheduler_job
+  name: gcp_cloudscheduler_job
   code:
     name: 'job'
+    region: 'us-central1'
     schedule: "*/4 * * * *"
     description: "test app engine job"
     time_zone: "Europe/London"
@@ -24,7 +25,7 @@ task: !ruby/object:Provider::Ansible::Task
         service: "web"
         version: "prod"
         instance: "my-instance-001"
-    relative_uri: "/ping"
+      relative_uri: "/ping"
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>

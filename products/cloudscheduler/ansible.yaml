@@ -17,6 +17,12 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Job: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Overrides::Ansible::Transport
+      encoder: encode_request
+      decoder: decode_request
+    provider_helpers:
+      - products/cloudscheduler/helpers/python/job.py
 files: !ruby/object:Provider::Config::Files
   compile:
 <%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
