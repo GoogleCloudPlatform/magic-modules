@@ -15,7 +15,6 @@ require 'api/object'
 require 'api/resource/iam_policy'
 require 'api/resource/nested_query'
 require 'api/resource/reference_links'
-require 'api/resource/response_list'
 require 'google/string_utils'
 
 module Api
@@ -85,7 +84,7 @@ module Api
       # [Optional] (Api::Resource::ResponseList) This is the type of response
       # from the collection URL. It contains the name of the list of items
       # within the json, as well as the type that this list should be.
-      attr_reader :collection_url_response
+      attr_reader :collection_url_key
       # [Optional] This is an array with items that uniquely identify the
       # resource.
       # This is useful in case an API returns a list result and we need
@@ -148,8 +147,7 @@ module Api
               `has exactly one :identity property"'
       end
 
-      check :collection_url_response, default: Api::Resource::ResponseList.new,
-                                      type: Api::Resource::ResponseList
+      check :collection_url_key, default: @name.pluralize.downcase
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
