@@ -36,7 +36,7 @@ name = "google_#{product_ns.downcase}_#{object.name.underscore}"
   filter_table_config.connect(self, :table)
 
 <% 
-link_query_items = object&.nested_query&.keys&.first || object.collection_url_response.items
+link_query_items = object&.nested_query&.keys&.first || object.collection_url_key
 -%>
   def initialize(params = {})
     super(params.merge({ use_http_transport: true }))
