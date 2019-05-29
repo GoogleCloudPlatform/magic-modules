@@ -152,5 +152,3 @@ objects:
             name: 'service'
             description: |
               The hostname of the service that should be observed.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'functions'

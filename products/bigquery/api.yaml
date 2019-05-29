@@ -32,8 +32,6 @@ objects:
     base_url: projects/{{project}}/datasets
     description: |
       Datasets allow you to organize and control access to your tables.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'datasets'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -153,8 +151,6 @@ objects:
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
     description: |
       A Table that belongs to a Dataset
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'tables'
     parameters:
       # TODO(alexstephen): Remove once we have support for placing
       # nested object fields in URL

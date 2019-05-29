@@ -33,8 +33,6 @@ objects:
     description: |
       A role in the Identity and Access Management API
     update_mask: true
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'roles'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

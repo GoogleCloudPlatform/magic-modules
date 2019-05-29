@@ -35,9 +35,7 @@ objects:
     name: 'Address'
     kind: 'compute#address'
     base_url: projects/{{project}}/regions/{{region}}/addresses
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#addressList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
@@ -169,9 +167,7 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/zones/{{zone}}/autoscalers
     update_url: projects/{{project}}/zones/{{zone}}/autoscalers?autoscaler={{name}}
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#autoscalerList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Represents an Autoscaler resource.
@@ -412,9 +408,7 @@ objects:
     name: 'BackendBucket'
     kind: 'compute#backendBucket'
     base_url: projects/{{project}}/global/backendBuckets
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#backendBucketLists'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Backend buckets allow you to use Google Cloud Storage buckets with HTTP(S)
@@ -564,9 +558,7 @@ objects:
     name: 'BackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/global/backendServices
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#backendServicesList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       A Backend Service defines a group of virtual machines that will serve
@@ -909,9 +901,7 @@ objects:
     name: 'RegionBackendService'
     kind: 'compute#backendService'
     base_url: projects/{{project}}/regions/{{region}}/backendServices
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#backendServicesList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       A Region Backend Service defines a regionally-scoped group of virtual
@@ -1123,9 +1113,7 @@ objects:
     name: 'DiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/zones/{{zone}}/diskTypes
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#diskTypeList'
-      items: 'items'
+    collection_url_key: 'items'
     # TODO(nelsonjr): Search all documentation for references of using URL (like
     # the description below) and replace with the proper reference to the
     # corresponding type.
@@ -1225,9 +1213,7 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/zones/{{zone}}/disks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#diskList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Persistent disks are durable storage devices that function similarly to
@@ -1512,9 +1498,7 @@ objects:
     name: 'Firewall'
     kind: 'compute#firewall'
     base_url: projects/{{project}}/global/firewalls
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#firewallList'
-      items: 'items'
+    collection_url_key: 'items'
     update_verb: :PATCH
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -1778,9 +1762,7 @@ objects:
     name: 'ForwardingRule'
     kind: 'compute#forwardingRule'
     base_url: projects/{{project}}/regions/{{region}}/forwardingRules
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#forwardingRuleList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       A ForwardingRule resource. A ForwardingRule resource specifies which pool
@@ -2056,9 +2038,7 @@ objects:
     name: 'GlobalAddress'
     kind: 'compute#address'
     base_url: projects/{{project}}/global/addresses
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#addressList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Represents a Global Address resource. Global addresses are used for
@@ -2199,9 +2179,7 @@ objects:
     base_url: projects/{{project}}/global/forwardingRules
     input: true
     has_self_link: true
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#forwardingRulesList'
-      items: 'items'
+    collection_url_key: 'items'
     description: |
       Represents a GlobalForwardingRule resource. Global forwarding rules are
       used to forward traffic to the correct load balancer for HTTP load
@@ -2383,9 +2361,7 @@ objects:
     name: 'HttpHealthCheck'
     kind: 'compute#httpHealthCheck'
     base_url: projects/{{project}}/global/httpHealthChecks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#httpHealthCheckList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       An HttpHealthCheck resource. This resource defines a template for how
@@ -2482,9 +2458,7 @@ objects:
     name: 'HttpsHealthCheck'
     kind: 'compute#httpsHealthCheck'
     base_url: projects/{{project}}/global/httpsHealthChecks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#httpsHealthCheckList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       An HttpsHealthCheck resource. This resource defines a template for how
@@ -2580,9 +2554,7 @@ objects:
     name: 'HealthCheck'
     kind: 'compute#healthCheck'
     base_url: projects/{{project}}/global/healthChecks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#healthCheckList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -2854,9 +2826,7 @@ objects:
     kind: 'compute#instanceTemplate'
     input: true
     base_url: projects/{{project}}/global/instanceTemplates
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#instanceTemplatesListResponse'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Defines an Instance Template resource that provides configuration settings
@@ -3332,9 +3302,7 @@ objects:
     name: 'License'
     kind: 'compute#license'
     base_url: /projects/{{project}}/global/licenses
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#TODO???'
-      items: 'items'
+    collection_url_key: 'items'
     readonly: true
     has_self_link: true
     description: |
@@ -3360,9 +3328,7 @@ objects:
     base_url: projects/{{project}}/global/images
     input: true
     has_self_link: true
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#imageList'
-      items: 'items'
+    collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/compute/docs/images'
@@ -3643,9 +3609,7 @@ objects:
     name: 'Instance'
     kind: 'compute#instance'
     base_url: projects/{{project}}/zones/{{zone}}/instances
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#instanceList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     description: |
@@ -4154,9 +4118,7 @@ objects:
     name: 'InstanceGroup'
     kind: 'compute#instanceGroup'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroups
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#instanceGroupList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Represents an Instance Group resource. Instance groups are self-managed
@@ -4270,9 +4232,7 @@ objects:
     name: 'InstanceGroupManager'
     kind: 'compute#instanceGroupManager'
     base_url: projects/{{project}}/zones/{{zone}}/instanceGroupManagers
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#instanceGroupManagerList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Creates a managed instance group using the information that you specify in
@@ -4471,9 +4431,7 @@ objects:
     name: 'InterconnectAttachment'
     kind: 'compute#interconnectAttachment'
     base_url: 'projects/{{project}}/regions/{{region}}/interconnectAttachments'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#interconnectAttachementList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
@@ -4649,9 +4607,7 @@ objects:
     name: 'MachineType'
     kind: 'compute#machineType'
     base_url: projects/{{project}}/zones/{{zone}}/machineTypes
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#machineTypeList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     readonly: true
     description: |
@@ -4759,9 +4715,7 @@ objects:
     name: 'Network'
     kind: 'compute#network'
     base_url: projects/{{project}}/global/networks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#networkList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -5164,9 +5118,7 @@ objects:
     name: 'Region'
     kind: 'compute#region'
     base_url: projects/{{project}}/regions
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#regionList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     readonly: true
     description: |
@@ -5272,9 +5224,7 @@ objects:
     kind: 'compute#autoscaler'
     base_url: projects/{{project}}/regions/{{region}}/autoscalers
     update_url: projects/{{project}}/regions/{{region}}/autoscalers?autoscaler={{name}}
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#autoscalerList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Represents an Autoscaler resource.
@@ -5516,9 +5466,7 @@ objects:
     name: 'RegionDiskType'
     kind: 'compute#diskType'
     base_url: projects/{{project}}/regions/{{region}}/diskTypes
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#diskTypeList'
-      items: 'items'
+    collection_url_key: 'items'
     description: |
       Represents a regional DiskType resource. A DiskType resource represents
       the type of disk to use, such as a pd-ssd or pd-standard. To reference a
@@ -5607,9 +5555,7 @@ objects:
     kind: 'compute#disk'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/disks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#diskList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       Persistent disks are durable storage devices that function similarly to
@@ -5846,9 +5792,7 @@ objects:
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#routeList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     description: |
@@ -5989,9 +5933,7 @@ objects:
     name: 'Router'
     kind: 'compute#router'
     base_url: projects/{{project}}/regions/{{region}}/routers
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#routerList'
-      items: 'items'
+    collection_url_key: 'items'
     # Since Terraform has separate resources for router, router interface, and
     # router peer, calling PUT on the router will delete the interface and peer.
     # Use patch instead.
@@ -6132,9 +6074,7 @@ objects:
     input: true
     base_url: projects/{{project}}/global/snapshots
     create_url: projects/{{project}}/zones/{{zone}}/disks/{{sourceDisk}}/createSnapshot
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#snapshotList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -6311,9 +6251,7 @@ objects:
     name: 'SslCertificate'
     kind: 'compute#sslCertificate'
     base_url: projects/{{project}}/global/sslCertificates
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#sslCertificateList'
-      items: 'items'
+    collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
@@ -6383,9 +6321,7 @@ objects:
     kind: 'compute#sslCertificate'
     min_version: beta
     base_url: projects/{{project}}/global/sslCertificates
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#sslCertificateList'
-      items: 'items'
+    collection_url_key: 'items'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/ssl-certificates'
@@ -6479,9 +6415,7 @@ objects:
     name: 'SslPolicy'
     kind: 'compute#sslPolicy'
     base_url: projects/{{project}}/global/sslPolicies
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#sslPoliciesList'
-      items: 'items'
+    collection_url_key: 'items'
     update_verb: :PATCH
     has_self_link: true
     description: |
@@ -6596,9 +6530,7 @@ objects:
     name: 'Subnetwork'
     kind: 'compute#subnetwork'
     base_url: projects/{{project}}/regions/{{region}}/subnetworks
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#subnetworkList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     description: |
@@ -6808,9 +6740,7 @@ objects:
     name: 'TargetHttpProxy'
     kind: 'compute#targetHttpProxy'
     base_url: projects/{{project}}/global/targetHttpProxies
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#targetHttpProxyList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
@@ -6876,9 +6806,7 @@ objects:
     name: 'TargetHttpsProxy'
     kind: 'compute#targetHttpsProxy'
     base_url: projects/{{project}}/global/targetHttpsProxies
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#targetHttpProxyList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     input: true
     description: |
@@ -7070,9 +6998,7 @@ objects:
     name: 'TargetPool'
     kind: 'compute#targetPool'
     base_url: projects/{{project}}/regions/{{region}}/targetPools
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#targetPoolList'
-      items: 'items'
+    collection_url_key: 'items'
     description: 'Represents a TargetPool resource, used for Load Balancing.'
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -7209,9 +7135,7 @@ objects:
     name: 'TargetSslProxy'
     kind: 'compute#targetSslProxy'
     base_url: projects/{{project}}/global/targetSslProxies
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#targetSslProxyList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     description: |
@@ -7314,9 +7238,7 @@ objects:
     name: 'TargetTcpProxy'
     kind: 'compute#targetTcpProxy'
     base_url: projects/{{project}}/global/targetTcpProxies
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#targetTcpProxyList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     description: |
@@ -7394,9 +7316,7 @@ objects:
     name: 'TargetVpnGateway'
     kind: 'compute#targetVpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/targetVpnGateways
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#targetVpnGatewayList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     description: |
@@ -7491,9 +7411,7 @@ objects:
     name: 'VpnGateway'
     kind: 'compute#vpnGateway'
     base_url: projects/{{project}}/regions/{{region}}/vpnGateways
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#vpnGatewayList'
-      items: 'items'
+    collection_url_key: 'items'
     input: true
     has_self_link: true
     min_version: beta
@@ -7582,9 +7500,7 @@ objects:
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#urlMapList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     description: |
       UrlMaps are used to route requests to a backend service based on rules
@@ -7748,9 +7664,7 @@ objects:
     description: 'VPN tunnel resource.'
     input: true
     base_url: projects/{{project}}/regions/{{region}}/vpnTunnels
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#vpnTunnelList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -7915,9 +7829,7 @@ objects:
     name: 'Zone'
     kind: 'compute#zone'
     base_url: projects/{{project}}/zones
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#zoneList'
-      items: 'items'
+    collection_url_key: 'items'
     has_self_link: true
     readonly: true
     description: 'Represents a Zone resource.'

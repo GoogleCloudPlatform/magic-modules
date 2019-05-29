@@ -54,8 +54,6 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'instances'
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         path: 'name'
@@ -126,8 +124,6 @@ objects:
     description: |
       A Cloud Spanner Database which is hosted on a Spanner instance.
     input: true
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'databases'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/spanner/'
