@@ -21,6 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       Destroying a Terraform-managed KeyRing will remove it from state but
       *will not delete the resource on the server.*
     id_format: "projects/{{project}}/locations/{{location}}/keyRings/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/keyRings/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_key_ring_basic"
