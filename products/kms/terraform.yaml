@@ -40,8 +40,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
       location: !ruby/object:Overrides::Terraform::PropertyOverride
-        description: |
-          {{description}} A full list of valid locations can be found by running `gcloud kms locations list`.
         ignore_read: true
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
