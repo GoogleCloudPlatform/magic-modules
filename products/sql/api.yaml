@@ -411,9 +411,7 @@ objects:
     name: 'User'
     kind: 'sql#user'
     base_url: projects/{{project}}/instances/{{instance}}/users
-    self_link: |
-      projects/{{project}}/instances/{{instance}}/users
-      ?name={{name}}&host={{host}}
+    self_link: 'projects/{{project}}/instances/{{instance}}/users?name={{name}}&host={{host}}'
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#usersList'
       keys: ['items']
@@ -452,9 +450,7 @@ objects:
     name: 'SslCert'
     kind: 'sql#sslCert'
     base_url: projects/{{project}}/instances/{{instance}}/sslCerts
-    self_link: |
-      projects/{{project}}/instances/{{instance}}/sslCerts/
-      {{sha1_fingerprint}}
+    self_link: 'projects/{{project}}/instances/{{instance}}/sslCerts/{{sha1_fingerprint}}'
     readonly: true # we're not enforcing state as it is all server-side driven.
     description: |
       Represents an SSL certificate created for a Cloud SQL instance. To use the

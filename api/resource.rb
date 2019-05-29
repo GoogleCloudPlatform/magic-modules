@@ -299,19 +299,19 @@ module Api
     # In newer resources there is much less standardisation in terms of value.
     # Generally for them though, it's the product.base_url + resource.name
     def self_link_url
-      base_url = @__product.base_url.split("\n").map(&:strip).compact
+      base_url = @__product.base_url
       if @self_link.nil?
         [base_url, [@base_url, '{{name}}'].join('/')].flatten.join
       else
-        self_link = @self_link.split("\n").map(&:strip).compact
+        self_link = @self_link
         [base_url, self_link].flatten.join
       end
     end
 
     def collection_url
       [
-        @__product.base_url.split("\n").map(&:strip).compact,
-        @base_url.split("\n").map(&:strip).compact
+        @__product.base_url,
+        @base_url
       ].flatten.join
     end
 
@@ -336,8 +336,8 @@ module Api
         default_create_url
       else
         [
-          @__product.base_url.split("\n").map(&:strip).compact,
-          @create_url.split("\n").map(&:strip).compact
+          @__product.base_url,
+          @create_url
         ].flatten.join
       end
     end
@@ -347,7 +347,7 @@ module Api
         self_link_url
       else
         [
-          @__product.base_url.split("\n").map(&:strip).compact,
+          @__product.base_url,
           @delete_url
         ].flatten.join
       end
