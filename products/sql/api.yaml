@@ -56,6 +56,7 @@ objects:
       Represents a Cloud SQL instance. Cloud SQL instances are SQL databases
       hosted in Google's cloud. The Instances resource provides methods for
       common configuration and management tasks.
+    collection_url_key: 'items'
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'backendType'
@@ -382,6 +383,7 @@ objects:
     kind: 'sql#database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
     has_self_link: true
+    collection_url_key: 'items'
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
@@ -415,6 +417,7 @@ objects:
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#usersList'
       keys: ['items']
+    collection_url_key: 'items'
     identity:
       - name
       - host
