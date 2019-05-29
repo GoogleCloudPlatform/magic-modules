@@ -277,7 +277,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
     return nil
 }
 
-<% if updatable?(object, properties) -%>
+<% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
@@ -287,8 +287,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  properties_by_custom_update(object.root_properties).each do |key, props| -%>
 if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
-<%      props.each do |prop| -%>
-<%      if update_body_properties.include? prop -%>
+<%      custom_update_properties_by_url(properties, key[:update_url]).each.each do |prop| -%>
         <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
         <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {
@@ -317,10 +316,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%          end -%>
             obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
         }
-<%        else # if update_body_properties.include? prop -%>
-        <%= prop.api_name -%>Prop := d.Get("<%= prop.name.underscore -%>")
-        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
-<%        end # if update_body_properties.include? prop -%>
 <%    end # props.each -%>
 
 <%      if object.mutex -%>
