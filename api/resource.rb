@@ -147,7 +147,7 @@ module Api
               `has exactly one :identity property"'
       end
 
-      check :collection_url_key, default: @name.pluralize.camelize(:upper)
+      check :collection_url_key, default: @name.pluralize.camelize(:lower)
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
