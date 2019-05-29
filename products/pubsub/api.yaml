@@ -172,6 +172,8 @@ objects:
           messageRetentionDuration window.
       - !ruby/object:Api::Type::NestedObject
         name: 'expirationPolicy'
+        allow_empty_object: true
+        send_empty_value: true
         description: |
           A policy that specifies the conditions for this subscription's expiration.
           A subscription is considered active as long as any connected subscriber
