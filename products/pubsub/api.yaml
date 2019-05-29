@@ -172,7 +172,7 @@ objects:
           messageRetentionDuration window.
       - !ruby/object:Api::Type::NestedObject
         name: 'expirationPolicy'
-        handle_empty_object: true
+        allow_empty_object: true
         send_empty_value: true
         description: |
           A policy that specifies the conditions for this subscription's expiration.

@@ -51,7 +51,7 @@ module Api
       # In the case of Terraform, this occurs when a block in config has optional
       # values, and none of them are used. Terraform returns a nil instead of an
       # empty map[string]interface{} like we'd expect.
-      attr_reader :handle_empty_object
+      attr_reader :allow_empty_object
 
       attr_reader :min_version
 
@@ -78,7 +78,7 @@ module Api
       check :output, type: :boolean
       check :required, type: :boolean
       check :send_empty_value, type: :boolean
-      check :handle_empty_object, type: :boolean
+      check :allow_empty_object, type: :boolean
       check :url_param_only, type: :boolean
 
       raise 'Property cannot be output and required at the same time.' \

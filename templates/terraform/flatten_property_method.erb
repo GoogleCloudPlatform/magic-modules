@@ -24,7 +24,7 @@ func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d 
     return nil
   }
   original := v.(map[string]interface{})
-  <% unless property.handle_empty_object -%>
+  <% unless property.allow_empty_object -%>
   if len(original) == 0 {
     return nil
   }
