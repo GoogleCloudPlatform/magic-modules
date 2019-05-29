@@ -18,7 +18,4 @@
 	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<name>[^/]+)"}, d, config); err != nil {
         	return nil, err
 	}
-	res["project"] = d.Get("project").(string)
-	res["location"] = d.Get("location").(string)
-	res["name"] = d.Get("name").(string)
 return res, nil
