@@ -277,6 +277,8 @@ resource "google_project" "project" {
   billing_account = "%s"
 }
 
+data "google_client_config" "current" {}
+
 resource "google_project_service" "binauthz" {
   project = "${google_project.project.project_id}"
   service = "binaryauthorization.googleapis.com"
@@ -321,7 +323,7 @@ resource "google_binary_authorization_policy" "policy" {
     cluster = "us-central1-a.prod-cluster"
     evaluation_mode = "REQUIRE_ATTESTATION"
     enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
-    require_attestations_by = ["projects/graphite-test-rileykarson/attestors/${google_binary_authorization_attestor.attestor.name}"]
+    require_attestations_by = ["projects/${data.google_client_config.current.project}/attestors/${google_binary_authorization_attestor.attestor.name}"]
   }
 }
 `, pid, pname, org, billing, note, attestor)
