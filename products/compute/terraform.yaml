@@ -553,6 +553,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+        min_version: beta
       portRange: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portRangeDiffSuppress'
       target: !ruby/object:Overrides::Terraform::PropertyOverride
