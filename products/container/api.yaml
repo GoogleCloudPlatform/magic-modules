@@ -78,7 +78,8 @@ objects:
           object, since this configuration (along with the "nodeConfig") will be
           used to create a "NodePool" object with an auto-generated name. Do not
           use this and a nodePool at the same time.
-        required: true
+
+          This field has been deprecated. Please use nodePool.initial_node_count instead.
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeConfig'
@@ -194,6 +195,56 @@ objects:
               Whether the nodes are created as preemptible VM instances. See:
               https://cloud.google.com/compute/docs/instances/preemptible for
               more information about preemptible VM instances.
+          - !ruby/object:Api::Type::Array
+            name: 'accelerators'
+            description: |
+              A list of hardware accelerators to be attached to each node. See
+              https://cloud.google.com/compute/docs/gpus for more information
+              about support for GPUs.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                  # API calls for a String, despite this being a number.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorCount'
+                  description: The number of accelerator cards exposed to an instance.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: The accelerator type resource name
+          - !ruby/object:Api::Type::String
+            name: 'diskType'
+            description: |
+              Type of the disk attached to each node (e.g. 'pd-standard'
+              or 'pd-ssd')
+
+              If unspecified, the default disk type is 'pd-standard'
+          - !ruby/object:Api::Type::String
+            name: 'minCpuPlatform'
+            description: |
+              Minimum CPU platform to be used by this instance. The instance
+              may be scheduled on the specified or newer CPU platform.
+          - !ruby/object:Api::Type::Array
+            name: 'taints'
+            description: >
+              List of kubernetes taints to be applied to each node.
+
+              For more information, including usage and the valid values, see:
+              https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'key'
+                  description: Key for taint
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value for taint
+                - !ruby/object:Api::Type::Enum
+                  name: 'effect'
+                  description: Effect for taint
+                  values:
+                    - "EFFECT_UNSPECIFIED"
+                    - "NO_SCHEDULE"
+                    - "PREFER_NO_SCHEDULE"
+                    - "NO_EXECUTE"
       - !ruby/object:Api::Type::NestedObject
         name: 'masterAuth'
         description: |
