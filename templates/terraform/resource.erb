@@ -287,7 +287,7 @@ func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{
 <%  properties_by_custom_update(object.root_properties).each do |key, props| -%>
 if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
         obj := make(map[string]interface{})
-<%      custom_update_properties_by_url(properties, key[:update_url]).each.each do |prop| -%>
+<%      custom_update_properties_by_url(properties, key[:update_url]).each do |prop| -%>
         <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
         <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
         if err != nil {

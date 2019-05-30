@@ -383,6 +383,9 @@ module Provider
       properties_by_custom_update(properties).select do |k, _|
         k[:update_url] == update_url
       end.first.last
+      # .first is to grab the element from the select which returns a list
+      # .last is because properties_by_custom_update returns a list of
+      # [{update_url}, [properties,...]] and we only need the 2nd part
     end
 
     def update_url(resource, url_part)
