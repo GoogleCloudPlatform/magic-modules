@@ -585,7 +585,9 @@ func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}
                          settable_properties: object.settable_properties,
                          resource_name: resource_name) -%>
 }
-<% elsif object.custom_code.decoder -%>
+<% end -%>
+
+<% if object.custom_code.decoder -%>
 func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
 <%= lines(compile(object.custom_code.decoder)) -%>
 }
