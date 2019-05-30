@@ -577,7 +577,7 @@ func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta int
 <% end -%>
 
 <%  if object.nested_query -%>
-<%# Note that if both nested_uqery and custom_code.decoder are provided,
+<%# Note that if both nested_query and custom_code.decoder are provided,
   #the decoder will be included via nested_query.go.erb -%>
 func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
     <%=     compile_template('templates/terraform/nested_query.go.erb',
