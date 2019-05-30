@@ -375,6 +375,19 @@ module Provider
       end
     end
 
+    # Takes a update_url and returns the list of custom updatable properties
+    # that can be updated at that URL. This allows flattened objects
+    # to determine which parent property in the API should be updated with
+    # the contents of the flattened object
+    def custom_update_properties_by_url(properties, update_url)
+      properties_by_custom_update(properties).select do |k, _|
+        k[:update_url] == update_url
+      end.first.last
+      # .first is to grab the element from the select which returns a list
+      # .last is because properties_by_custom_update returns a list of
+      # [{update_url}, [properties,...]] and we only need the 2nd part
+    end
+
     def update_url(resource, url_part)
       return resource.self_link_url if url_part.nil?
 
