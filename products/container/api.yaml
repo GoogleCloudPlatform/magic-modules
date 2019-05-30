@@ -52,8 +52,6 @@ objects:
     name: 'Cluster'
     base_url: 'projects/{{project}}/locations/{{location}}/clusters'
     description: 'A Google Container Engine cluster.'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'clusters'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
@@ -430,8 +428,6 @@ objects:
       set of Kubernetes labels applied to them, which may be used to reference
       them during pod scheduling. They may also be resized up or down, to
       accommodate the workload.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'nodePools'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'cluster'

@@ -38,8 +38,6 @@ objects:
       A zone is a subtree of the DNS namespace under one administrative
       responsibility. A ManagedZone is a resource that represents a DNS zone
       hosted by the Cloud DNS service.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'managedZones'
     properties:
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -238,8 +236,6 @@ objects:
     description: |
       A policy is a collection of DNS rules applied to one or more Virtual
       Private Cloud resources.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'policies'
     properties:
       - !ruby/object:Api::Type::NestedObject
         name: 'alternativeNameServerConfig'
@@ -386,8 +382,7 @@ objects:
     nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'dns#resourceRecordSetsListResponse'
       keys: ['rrsets']
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'rrsets'
+    collection_url_key: 'rrsets'
     identity:
       - name
       - type
