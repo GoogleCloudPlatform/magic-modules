@@ -12,10 +12,11 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-	config := meta.(*Config)
-	res["self_link"] = d.Get("name").(string)
-	d.SetId(res["name"].(string))
-	if err := parseImportId([]string{"projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/keyRings/(?P<name>[^/]+)"}, d, config); err != nil {
-        	return nil, err
-	}
+	// Take the returned long form of the name and use it as `self_link`.
+	// Then modify the name to be the user specified form.
+	// We can't just ignore_read on `name` as the linter will
+	// complain that the returned `res` is never used afterwards.
+	// Some field needs to be actually set, and we chose `name`.
+	d.Set("self_link", res["name"].(string))
+	res["name"] = d.Get("name").(string)
 return res, nil

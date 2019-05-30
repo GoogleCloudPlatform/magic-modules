@@ -41,8 +41,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         exclude: true
       location: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-      name: !ruby/object:Overrides::Terraform::PropertyOverride
-        ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_key_ring.erb
       decoder: templates/terraform/decoders/kms_key_ring.go.erb
