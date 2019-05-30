@@ -41,12 +41,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
+    notes:
+      - This module does not create any node pools (including default). Please use
+        the M(gcp_container_node_pool) module to create node pools.
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases:
           - zone
+    post_create: |
+      delete_default_nodepool(module)
     provider_helpers:
       - 'products/container/helpers/python/provider_cluster.py'
   KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
