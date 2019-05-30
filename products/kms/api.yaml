@@ -33,8 +33,6 @@ objects:
     input: true
     description: |
       A `KeyRing` is a toplevel logical grouping of `CryptoKeys`.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'keyRings'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
