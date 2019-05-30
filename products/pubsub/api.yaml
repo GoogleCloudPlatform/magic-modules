@@ -44,8 +44,6 @@ objects:
         name: 'labels'
         description: |
           A set of key/value label pairs to assign to this Topic.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'topics'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Topics':
@@ -61,8 +59,6 @@ objects:
     update_verb: :PATCH
     update_mask: true
     update_url: projects/{{project}}/subscriptions/{{name}}
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'subscriptions'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Subscriptions':

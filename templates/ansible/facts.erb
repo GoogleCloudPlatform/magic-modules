@@ -102,8 +102,8 @@ def main():
   end
 -%>
     items = <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
-    if items.get(<%= quote_string(object.collection_url_response.items) -%>):
-        items = items.get(<%= quote_string(object.collection_url_response.items) -%>)
+    if items.get(<%= quote_string(object.collection_url_key) -%>):
+        items = items.get(<%= quote_string(object.collection_url_key) -%>)
     else:
         items = []
     return_value = {

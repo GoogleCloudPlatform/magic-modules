@@ -60,7 +60,7 @@ class <%= object.name -%> < GcpResourceBase
   end
 
   def collection_item
-    '<%= object.collection_url_response.items -%>'
+    '<%= object.collection_url_key -%>'
   end
 
   def unwrap(fetched, params)
