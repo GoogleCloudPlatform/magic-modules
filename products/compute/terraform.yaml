@@ -771,6 +771,34 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       optional_properties: |
         * `delete_default_routes_on_create`: If set to `true`, default routes (`0.0.0.0/0`) will be deleted
           immediately after network creation. Defaults to `false`.
+  NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
+    mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_endpoint"
+        primary_resource_id: "default-endpoint"
+        skip_test: true
+        vars:
+          neg_name: "my-lb-neg"
+          instance_name: "endpoint-instance"
+          network_name: "neg-network"
+          subnetwork_name: "neg-subnetwork"
+    properties:
+      instance: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
+      networkEndpointGroup: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      port: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/float64_to_int.go.erb
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/compute_network_endpoint.go.erb
+      decoder: templates/terraform/decoders/compute_network_endpoint.go.erb
+      encoder: templates/terraform/encoders/compute_network_endpoint.go.erb
   NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
