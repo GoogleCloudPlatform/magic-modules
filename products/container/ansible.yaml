@@ -47,9 +47,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
     properties:
+      locations: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['nodeLocations']
       location: !ruby/object:Overrides::Ansible::PropertyOverride
-        aliases:
-          - zone
+        aliases: ['zone']
     post_create: |
       delete_default_node_pool(module)
     provider_helpers:
