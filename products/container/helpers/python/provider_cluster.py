@@ -29,6 +29,6 @@ def encode_request(resource_request, module):
 # Deletes the default node pool on default creation.
 def delete_default_node_pool(module):
     auth = GcpSession(module, 'container')
-    link = "https://container.googleapis.com/v1/projects/%s/zones/%s/clusters/%s/nodePools/default" % \
-        module.params['project'], module.params['location'], module.params['name']
+    link = "https://container.googleapis.com/v1/projects/%s/locations/%s/clusters/%s/nodePools/default-pool" % \
+        (module.params['project'], module.params['location'], module.params['name'])
     return wait_for_operation(module, auth.delete(link))

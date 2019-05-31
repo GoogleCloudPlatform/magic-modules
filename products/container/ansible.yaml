@@ -51,7 +51,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases:
           - zone
     post_create: |
-      delete_default_nodepool(module)
+      delete_default_node_pool(module)
     provider_helpers:
       - 'products/container/helpers/python/provider_cluster.py'
   KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
