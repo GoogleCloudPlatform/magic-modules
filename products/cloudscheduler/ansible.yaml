@@ -19,7 +19,7 @@ datasources: !ruby/object:Overrides::ResourceOverrides
 overrides: !ruby/object:Overrides::ResourceOverrides
   Job: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
-      relativeUri: !ruby/object:Overrides::Ansible::PropertyOverride
+      appEngineHttpTarget.relativeUri: !ruby/object:Overrides::Ansible::PropertyOverride
         description: The relative URI.
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
