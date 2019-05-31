@@ -57,6 +57,7 @@ func iamPolicyReadWithRetry(updater ResourceIamUpdater) (*cloudresourcemanager.P
 	var policy *cloudresourcemanager.Policy
 	err := retryTime(func() (perr error) {
 		policy, perr = updater.GetResourceIamPolicy()
+		log.Printf("[DEBUG]: BINDING2 IS %+v \n", policy)
 		return perr
 	}, 10)
 	if err != nil {
