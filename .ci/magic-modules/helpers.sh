@@ -2,6 +2,7 @@
 # - name of patch directory
 # - commit message
 # - author
+# - target branch
 function apply_patches {
   # Apply necessary downstream patches.
   shopt -s nullglob
