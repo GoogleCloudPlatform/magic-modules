@@ -1108,6 +1108,7 @@ resource "google_compute_http_health_check" "zero" {
 <% end -%>
 
 <% unless version == 'ga' -%>
+<%# This test is for import functionality. It can be removed and added to examples when this goes GA %>
 func testAccComputeBackendService_internalLoadBalancing(fr, proxy, backend, hc, urlmap string) string {
 	return fmt.Sprintf(`
 resource "google_compute_global_forwarding_rule" "forwarding_rule" {
