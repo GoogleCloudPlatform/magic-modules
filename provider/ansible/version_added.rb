@@ -21,7 +21,6 @@ module Provider
       def build_version_added
         product_name = @api.name.downcase
         versions_file = "products/#{product_name}/ansible_version_added.yaml"
-        raise 'File not found' unless File.exist?(versions_file)
 
         versions = if File.exist?(versions_file)
                      YAML.safe_load(File.read(versions_file), [Symbol])
