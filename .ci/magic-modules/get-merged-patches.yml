@@ -25,4 +25,4 @@ params:
   GH_TOKEN: ""
 
 run:
-    path: magic-modules/.ci/magic-modules/download_patches.py
+    path: magic-modules/.ci/magic-modules/get_merged_patches.py
