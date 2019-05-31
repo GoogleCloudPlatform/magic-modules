@@ -13,6 +13,9 @@ import (
 func TestAccComputeRouterNat_basic(t *testing.T) {
 	t.Parallel()
 
+	project := getTestProjectFromEnv()
+	region := getTestRegionFromEnv()
+
 	testId := acctest.RandString(10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -24,6 +27,25 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_router_nat.foobar",
+				// implicitly: ImportStateId:     fmt.Sprintf("%s/%s/router-nat-test-%s/router-nat-test-%s", project, region, testId, testId),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/router-nat-test-%s/router-nat-test-%s", project, region, testId, testId),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportStateId:     fmt.Sprintf("%s/router-nat-test-%s/router-nat-test-%s", region, testId, testId),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			resource.TestStep{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportStateId:     fmt.Sprintf("router-nat-test-%s/router-nat-test-%s", testId, testId),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
