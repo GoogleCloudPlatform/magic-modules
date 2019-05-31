@@ -33,9 +33,6 @@ objects:
       guides:
         'Official Documentation': 'https://cloud.google.com/scheduler/'
       api: 'https://cloud.google.com/scheduler/docs/reference/rest/'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      kind: 'compute#addressList'
-      items: 'jobs'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'region'
