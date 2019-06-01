@@ -15,6 +15,7 @@ module Provider
               example.resource => example.properties.transform_keys(&:underscore)
             })
             lines = yaml.split("\n")
+            lines = word_wrap_for_yaml(lines)
             lines('- ' + lines[0]) + indent(lines[1..-1], 2)
           end
 

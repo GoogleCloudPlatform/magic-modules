@@ -95,7 +95,7 @@ module Provider
       def resourceref_description(prop)
         [
           "It can be the #{prop.resource_type_name} name which is in the same resource group.",
-          "It can be the #{prop.resource_type_name} ID. e.g.,\n#{prop.sample_value}.",
+          "It can be the #{prop.resource_type_name} ID. e.g., #{prop.sample_value}.",
           "It can be a dict which contains C(name) and C(resource_group) of the #{prop.resource_type_name}."
         ]
       end

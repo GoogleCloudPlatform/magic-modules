@@ -37,7 +37,7 @@ short_description: <%= lines(object.description) -%>
 description:
     - Create, update and delete instance of Azure <%= object.name.titlecase -%>.
 
-<%= to_yaml({
+<%= lines(word_wrap_for_yaml(to_yaml({
   'options' => [
     input_properties.reject{|p| is_tags?(p)}.map{|p| documentation_for_property(p, object)},
     {
@@ -57,7 +57,7 @@ description:
       object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
     ].flatten.compact if object.references
   )
-})-%>
+}).split("\n"))) -%>
 
 extends_documentation_fragment:
     - azure

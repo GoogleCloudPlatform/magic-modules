@@ -35,6 +35,31 @@ module Provider
         def always_has_value?(property)
           property.required || !property.default_value.nil?
         end
+
+        def word_wrap_for_yaml(lines, width = 150)
+          wrapped = Array.new
+          lines.each do |line|
+            while line.length > width
+              striped = line.lstrip
+              spaces = line.length - striped.length
+              spaces += 2 if striped.start_with? '- '
+              wb_index = -1
+              wb_index_try = line.index(/[ \t@=,;]/)
+              while !wb_index_try.nil? && wb_index_try < width
+                wb_index = wb_index_try
+                wb_index_try = line.index(/[ \t@=,;]/, wb_index_try + 1)
+              end
+              break if wb_index == -1
+              wb_char = line[wb_index]
+              cur_line = line[0..wb_index - 1]
+              cur_line += wb_char unless wb_char == ' '
+              line = ' ' * spaces + line[wb_index + 1..-1]
+              wrapped << cur_line
+            end
+            wrapped << line
+          end
+          wrapped
+        end
       end
     end
   end
