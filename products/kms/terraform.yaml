@@ -57,8 +57,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       any data previously encrypted with these keys will be irrecoverable.
       For this reason, it is strongly recommended that you add lifecycle hooks
       to the resource to prevent accidental destruction.
-    id_format: "{{keyRing}}/cryptoKeys/{{name}}"
-    import_format: ["{{keyRing}}/cryptoKeys/{{name}}"]
+    id_format: "{{key_ring}}/cryptoKeys/{{name}}"
+    import_format: ["{{key_ring}}/cryptoKeys/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "kms_crypto_key_basic"
@@ -66,7 +66,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         skip_test: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
-        * `self_link`: The self link of the created CryptoKey. Its format is `{{keyRing}}/cryptoKeys/{{name}}`.
+        * `self_link`: The self link of the created CryptoKey. Its format is `{{key_ring}}/cryptoKeys/{{name}}`.
     properties:
       creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
@@ -78,10 +78,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       rotationPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
+      versionTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
       decoder: templates/terraform/decoders/kms_crypto_key.go.erb
       encoder: templates/terraform/encoders/kms_crypto_key.go.erb
+      update_encoder: templates/terraform/update_encoder/kms_crypto_key.go.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/kms_self_link.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files

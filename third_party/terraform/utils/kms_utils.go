@@ -171,7 +171,7 @@ func parseKmsCryptoKeyId(id string, config *Config) (*kmsCryptoKeyId, error) {
 			Name: parts[4],
 		}, nil
 	}
-	return nil, fmt.Errorf("Invalid CryptoKey id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}` or `{locationId}/{keyRingName}/{cryptoKeyName}.`")
+	return nil, fmt.Errorf("Invalid CryptoKey id format, expecting `{projectId}/{locationId}/{KeyringName}/{cryptoKeyName}` or `{locationId}/{keyRingName}/{cryptoKeyName}, got id: %s`", id)
 }
 
 func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, config *Config) error {

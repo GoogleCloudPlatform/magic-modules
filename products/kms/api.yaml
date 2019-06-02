@@ -58,8 +58,8 @@ objects:
       api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings'
   - !ruby/object:Api::Resource
     name: 'CryptoKey'
-    base_url: '{{keyRing}}/cryptoKeys?cryptoKeyId={{name}}}'
-    self_link: '{{keyRing}}/cryptoKeys/{{name}}'
+    base_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
+    self_link: '{{key_ring}}/cryptoKeys/{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -119,7 +119,6 @@ objects:
             values:
               - "SOFTWARE"
               - "HSM"
-            default_value: :SOFTWARE
             input: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:

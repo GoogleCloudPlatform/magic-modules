@@ -12,7 +12,20 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// `name` and `keyRing` are used only for path building and are not sent to the server.
-delete(obj, "name")
-delete(obj, "key_ring")
-return obj, nil
+	// `name` and `keyRing` are used only for path building and are not sent to the server.
+	delete(obj, "name")
+	delete(obj, "keyRing")
+
+	// if rotationPeriod is set, nextRotationTime must also be set.
+	if d.Get("rotation_period") != "" {
+		rotationPeriod := d.Get("rotation_period").(string)
+		nextRotation, err := kmsCryptoKeyNextRotation(time.Now(), rotationPeriod)
+
+		if err != nil {
+			return nil, fmt.Errorf("Error setting CryptoKey rotation period: %s", err.Error())
+		}
+
+		obj["nextRotationTime"] = nextRotation
+	}
+
+	return obj, nil
