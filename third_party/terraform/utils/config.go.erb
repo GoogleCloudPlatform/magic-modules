@@ -52,6 +52,9 @@ import (
 	"google.golang.org/api/sqladmin/v1beta4"
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
+<% unless version == 'ga' -%>
+	healthcare "google.golang.org/api/healthcare/v1beta1"
+<% end -%>
 )
 
 // Config is the configuration structure used to instantiate the Google
@@ -185,6 +188,10 @@ type Config struct {
 
 	StorageTransferBasePath string
 	clientStorageTransfer   *storagetransfer.Service
+	clientStorageTransfer        *storagetransfer.Service
+	<% unless version == 'ga' -%>
+	clientHealthcare						 *healthcare.Service
+	<% end -%>
 
 	bigtableClientFactory *BigtableClientFactory
 }
@@ -546,6 +553,15 @@ func (c *Config) LoadAndValidate() error {
 	}
 	c.clientStorageTransfer.UserAgent = userAgent
   c.clientStorageTransfer.BasePath = storageTransferClientBasePath
+
+	<% unless version == 'ga' -%>
+	log.Printf("[INFO] Instantiating IAP Client...")
+	c.clientHealthcare, err = healthcare.NewService(context, option.WithHTTPClient(client))
+	if err != nil {
+		return err
+	}
+	c.clientHealthcare.UserAgent = userAgent
+	<% end -%>
 
 	return nil
 }

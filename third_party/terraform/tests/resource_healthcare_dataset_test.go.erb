@@ -1,0 +1,163 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+)
+
+func TestDatasetIdParsing(t *testing.T) {
+	cases := map[string]struct {
+		ImportId            string
+		ExpectedError       bool
+		ExpectedTerraformId string
+		ExpectedDatasetId   string
+		Config              *Config
+	}{
+		"id is in project/location/datasetName format": {
+			ImportId:            "test-project/us-central1/test-dataset",
+			ExpectedError:       false,
+			ExpectedTerraformId: "test-project/us-central1/test-dataset",
+			ExpectedDatasetId:   "projects/test-project/locations/us-central1/datasets/test-dataset",
+		},
+		"id is in domain:project/location/datasetName format": {
+			ImportId:            "example.com:test-project/us-central1/test-dataset",
+			ExpectedError:       false,
+			ExpectedTerraformId: "example.com:test-project/us-central1/test-dataset",
+			ExpectedDatasetId:   "projects/example.com:test-project/locations/us-central1/datasets/test-dataset",
+		},
+		"id is in location/datasetName format": {
+			ImportId:            "us-central1/test-dataset",
+			ExpectedError:       false,
+			ExpectedTerraformId: "test-project/us-central1/test-dataset",
+			ExpectedDatasetId:   "projects/test-project/locations/us-central1/datasets/test-dataset",
+			Config:              &Config{Project: "test-project"},
+		},
+		"id is in location/datasetName format without project in config": {
+			ImportId:      "us-central1/test-dataset",
+			ExpectedError: true,
+			Config:        &Config{Project: ""},
+		},
+	}
+
+	for tn, tc := range cases {
+		datasetId, err := parseHealthcareDatasetId(tc.ImportId, tc.Config)
+
+		if tc.ExpectedError && err == nil {
+			t.Fatalf("bad: %s, expected an error", tn)
+		}
+
+		if err != nil {
+			if tc.ExpectedError {
+				continue
+			}
+			t.Fatalf("bad: %s, err: %#v", tn, err)
+		}
+
+		if datasetId.terraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, datasetId.terraformId())
+		}
+
+		if datasetId.datasetId() != tc.ExpectedDatasetId {
+			t.Fatalf("bad: %s, expected Dataset ID to be `%s` but is `%s`", tn, tc.ExpectedDatasetId, datasetId.datasetId())
+		}
+	}
+}
+
+func TestAccHealthcareDataset_basic(t *testing.T) {
+	projectId := "terraform-" + acctest.RandString(10)
+	projectOrg := getTestOrgFromEnv(t)
+	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckGoogleHealthcareDatasetWasRemovedFromState("google_healthcare_dataset.dataset"),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleHealthcareDataset_basic(projectId, projectOrg, projectBillingAccount, datasetName),
+			},
+			{
+				ResourceName:      "google_healthcare_dataset.dataset",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareDataset_removed(projectId, projectOrg, projectBillingAccount),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareDatasetWasRemovedFromState("google_healthcare_dataset.dataset"),
+				),
+			},
+		},
+	})
+}
+
+/*
+	KMS Datasets cannot be deleted. This ensures that the Dataset resource was removed from state,
+	even though the server-side resource was not removed.
+*/
+func testAccCheckGoogleHealthcareDatasetWasRemovedFromState(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		_, ok := s.RootModule().Resources[resourceName]
+
+		if ok {
+			return fmt.Errorf("Resource was not removed from state: %s", resourceName)
+		}
+
+		return nil
+	}
+}
+
+/*
+	This test runs in its own project, otherwise the test project would start to get filled
+	with undeletable resources
+*/
+func testGoogleHealthcareDataset_basic(projectId, projectOrg, projectBillingAccount, datasetName string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name			= "%s"
+	project_id		= "%s"
+	org_id			= "%s"
+	billing_account	= "%s"
+}
+
+resource "google_project_services" "acceptance" {
+	project  = "${google_project.acceptance.project_id}"
+	services = [
+		"healthcare.googleapis.com"
+	]
+}
+
+resource "google_healthcare_dataset" "dataset" {
+	project  = "${google_project_services.acceptance.project}"
+	name     = "%s"
+	location = "us-central1"
+}
+	`, projectId, projectId, projectOrg, projectBillingAccount, datasetName)
+}
+
+func testGoogleHealthcareDataset_removed(projectId, projectOrg, projectBillingAccount string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name 			= "%s"
+	project_id		= "%s"
+	org_id			= "%s"
+	billing_account	= "%s"
+}
+
+resource "google_project_services" "acceptance" {
+	project  = "${google_project.acceptance.project_id}"
+	services = [
+		"healthcare.googleapis.com"
+	]
+}
+	`, projectId, projectId, projectOrg, projectBillingAccount)
+}
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
