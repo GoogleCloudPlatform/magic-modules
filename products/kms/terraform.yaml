@@ -64,6 +64,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         name: "kms_crypto_key_basic"
         primary_resource_id: "example-key"
         skip_test: true
+      - !ruby/object:Provider::Terraform::Examples
+        name: "kms_crypto_key_assymmetric_sign"
+        primary_resource_id: "example-assymmetric-sign-key"
+        skip_test: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
         * `self_link`: The self link of the created CryptoKey. Its format is `{{key_ring}}/cryptoKeys/{{name}}`.
@@ -79,6 +83,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
       versionTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      versionTemplate.protectionLevel: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
