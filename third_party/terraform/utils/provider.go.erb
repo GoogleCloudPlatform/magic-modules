@@ -204,6 +204,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 			GeneratedBinaryAuthorizationResourcesMap,
 			GeneratedContainerAnalysisResourcesMap,
 			GeneratedSecurityScannerResourcesMap,
+			GeneratedHealthcareResourcesMap,
 			// end beta-only products
 			<% end -%>
 			GeneratedAccessContextManagerResourcesMap,
@@ -279,9 +280,21 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 				"google_folder_iam_policy":                     ResourceIamPolicyWithImport(IamFolderSchema, NewFolderIamUpdater, FolderIdParseFunc),
 				"google_folder_organization_policy":            resourceGoogleFolderOrganizationPolicy(),
 <% unless version == 'ga' -%>
-				"google_iap_tunnel_instance_iam_binding":                ResourceIamBindingWithImport(IamIapTunnelInstanceSchema, NewIapTunnelInstanceIamUpdater, IapTunnelInstanceIdParseFunc),
-				"google_iap_tunnel_instance_iam_member":                 ResourceIamMemberWithImport(IamIapTunnelInstanceSchema, NewIapTunnelInstanceIamUpdater, IapTunnelInstanceIdParseFunc),
-				"google_iap_tunnel_instance_iam_policy":                 ResourceIamPolicyWithImport(IamIapTunnelInstanceSchema, NewIapTunnelInstanceIamUpdater, IapTunnelInstanceIdParseFunc),
+				"google_healthcare_dataset_iam_binding":        ResourceIamBindingWithImport(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc),
+				"google_healthcare_dataset_iam_member":         ResourceIamMemberWithImport(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc),
+				"google_healthcare_dataset_iam_policy":         ResourceIamPolicyWithImport(IamHealthcareDatasetSchema, NewHealthcareDatasetIamUpdater, DatasetIdParseFunc),
+				"google_healthcare_dicom_store_iam_binding":    ResourceIamBindingWithImport(IamHealthcareDicomStoreSchema, NewHealthcareDicomStoreIamUpdater, DicomStoreIdParseFunc),
+				"google_healthcare_dicom_store_iam_member":     ResourceIamMemberWithImport(IamHealthcareDicomStoreSchema, NewHealthcareDicomStoreIamUpdater, DicomStoreIdParseFunc),
+				"google_healthcare_dicom_store_iam_policy":     ResourceIamPolicyWithImport(IamHealthcareDicomStoreSchema, NewHealthcareDicomStoreIamUpdater, DicomStoreIdParseFunc),
+				"google_healthcare_fhir_store_iam_binding":     ResourceIamBindingWithImport(IamHealthcareFhirStoreSchema, NewHealthcareFhirStoreIamUpdater, FhirStoreIdParseFunc),
+				"google_healthcare_fhir_store_iam_member":      ResourceIamMemberWithImport(IamHealthcareFhirStoreSchema, NewHealthcareFhirStoreIamUpdater, FhirStoreIdParseFunc),
+				"google_healthcare_fhir_store_iam_policy":      ResourceIamPolicyWithImport(IamHealthcareFhirStoreSchema, NewHealthcareFhirStoreIamUpdater, FhirStoreIdParseFunc),
+				"google_healthcare_hl7v2_store_iam_binding":    ResourceIamBindingWithImport(IamHealthcareHl7V2StoreSchema, NewHealthcareHl7V2StoreIamUpdater, Hl7V2StoreIdParseFunc),
+				"google_healthcare_hl7v2_store_iam_member":     ResourceIamMemberWithImport(IamHealthcareHl7V2StoreSchema, NewHealthcareHl7V2StoreIamUpdater, Hl7V2StoreIdParseFunc),
+				"google_healthcare_hl7v2_store_iam_policy":     ResourceIamPolicyWithImport(IamHealthcareHl7V2StoreSchema, NewHealthcareHl7V2StoreIamUpdater, Hl7V2StoreIdParseFunc),
+				"google_iap_tunnel_instance_iam_binding":       ResourceIamBindingWithImport(IamIapTunnelInstanceSchema, NewIapTunnelInstanceIamUpdater, IapTunnelInstanceIdParseFunc),
+				"google_iap_tunnel_instance_iam_member":        ResourceIamMemberWithImport(IamIapTunnelInstanceSchema, NewIapTunnelInstanceIamUpdater, IapTunnelInstanceIdParseFunc),
+				"google_iap_tunnel_instance_iam_policy":        ResourceIamPolicyWithImport(IamIapTunnelInstanceSchema, NewIapTunnelInstanceIamUpdater, IapTunnelInstanceIdParseFunc),
 <% end -%>
 				"google_logging_billing_account_sink":          resourceLoggingBillingAccountSink(),
 				"google_logging_billing_account_exclusion":     ResourceLoggingExclusion(BillingAccountLoggingExclusionSchema, NewBillingAccountLoggingExclusionUpdater, billingAccountLoggingExclusionIdParseFunc),

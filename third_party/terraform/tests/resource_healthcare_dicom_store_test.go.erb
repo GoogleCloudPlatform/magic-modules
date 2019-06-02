@@ -1,0 +1,181 @@
+<% autogen_exception -%>
+package google
+<% unless version == 'ga' -%>
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"testing"
+)
+
+func TestDicomStoreIdParsing(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		ImportId            string
+		ExpectedError       bool
+		ExpectedTerraformId string
+		ExpectedDicomStoreId string
+		Config              *Config
+	}{
+		"id is in project/location/datasetName/dicomStoreName format": {
+			ImportId:            "test-project/us-central1/test-dataset/test-store-name",
+			ExpectedError:       false,
+			ExpectedTerraformId: "test-project/us-central1/test-dataset/test-store-name",
+			ExpectedDicomStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
+		},
+		"id is in domain:project/location/datasetName/dicomStoreName format": {
+			ImportId:            "example.com:test-project/us-central1/test-dataset/test-store-name",
+			ExpectedError:       false,
+			ExpectedTerraformId: "example.com:test-project/us-central1/test-dataset/test-store-name",
+			ExpectedDicomStoreId: "projects/example.com:test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
+		},
+		"id is in location/datasetName/dicomStoreName format": {
+			ImportId:            "us-central1/test-dataset/test-store-name",
+			ExpectedError:       false,
+			ExpectedTerraformId: "test-project/us-central1/test-dataset/test-store-name",
+			ExpectedDicomStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
+			Config:              &Config{Project: "test-project"},
+		},
+		"id is in location/datasetName/dicomStoreName format without project in config": {
+			ImportId:      "us-central1/test-dataset/test-store-name",
+			ExpectedError: true,
+			Config:        &Config{Project: ""},
+		},
+	}
+
+	for tn, tc := range cases {
+		dicomStoreId, err := parseHealthcareDicomStoreId(tc.ImportId, tc.Config)
+
+		if tc.ExpectedError && err == nil {
+			t.Fatalf("bad: %s, expected an error", tn)
+		}
+
+		if err != nil {
+			if tc.ExpectedError {
+				continue
+			}
+			t.Fatalf("bad: %s, err: %#v", tn, err)
+		}
+
+		if dicomStoreId.terraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, dicomStoreId.terraformId())
+		}
+
+		if dicomStoreId.dicomStoreId() != tc.ExpectedDicomStoreId {
+			t.Fatalf("bad: %s, expected DicomStore ID to be `%s` but is `%s`", tn, tc.ExpectedDicomStoreId, dicomStoreId.dicomStoreId())
+		}
+	}
+}
+
+func TestAccHealthcareDicomStore_basic(t *testing.T) {
+	t.Parallel()
+
+	projectId := "terraform-" + acctest.RandString(10)
+	projectOrg := getTestOrgFromEnv(t)
+	projectBillingAccount := getTestBillingAccountFromEnv(t)
+	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	dicomStoreName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleHealthcareDicomStore_basic(projectId, projectOrg, projectBillingAccount, datasetName, dicomStoreName),
+			},
+			{
+				ResourceName:      "google_healthcare_dicom_store.dicom_store",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Use a separate TestStep rather than a CheckDestroy because we need the project to still exist.
+			{
+				Config: testGoogleHealthcareDicomStore_removed(projectId, projectOrg, projectBillingAccount, datasetName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareDicomStoreWasRemovedFromState("google_healthcare_dicom_store.dicom_store"),
+				),
+			},
+		},
+	})
+}
+
+// Healthcare Datasets cannot be deleted. This ensures that the DicomStore resource was removed from state,
+// even though the server-side resource was not removed.
+func testAccCheckGoogleHealthcareDicomStoreWasRemovedFromState(resourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		_, ok := s.RootModule().Resources[resourceName]
+
+		if ok {
+			return fmt.Errorf("Resource was not removed from state: %s", resourceName)
+		}
+
+		return nil
+	}
+}
+
+// This test runs in its own project, otherwise the test project would start to get filled
+// with undeletable resources
+func testGoogleHealthcareDicomStore_basic(projectId, projectOrg, projectBillingAccount, datasetName, dicomStoreName string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_services" "acceptance" {
+	project = "${google_project.acceptance.project_id}"
+
+	services = [
+	  "healthcare.googleapis.com",
+	]
+}
+
+resource "google_healthcare_dataset" "dataset" {
+	project  = "${google_project_services.acceptance.project}"
+	name     = "%s"
+	location = "us-central1"
+}
+
+resource "google_healthcare_dicom_store" "dicom_store" {
+	name            = "%s"
+	dataset        = "${google_healthcare_dataset.dataset.self_link}"
+	rotation_period = "1000000s"
+	version_template {
+		algorithm =        "GOOGLE_SYMMETRIC_ENCRYPTION"
+		protection_level = "SOFTWARE"
+	}
+}
+	`, projectId, projectId, projectOrg, projectBillingAccount, datasetName, dicomStoreName)
+}
+
+func testGoogleHealthcareDicomStore_removed(projectId, projectOrg, projectBillingAccount, datasetName string) string {
+	return fmt.Sprintf(`
+resource "google_project" "acceptance" {
+	name            = "%s"
+	project_id      = "%s"
+	org_id          = "%s"
+	billing_account = "%s"
+}
+
+resource "google_project_services" "acceptance" {
+	project = "${google_project.acceptance.project_id}"
+
+	services = [
+	  "healthcare.googleapis.com",
+	]
+}
+
+resource "google_healthcare_dataset" "dataset" {
+	project  = "${google_project_services.acceptance.project}"
+	name     = "%s"
+	location = "us-central1"
+}
+	`, projectId, projectId, projectOrg, projectBillingAccount, datasetName)
+}
+<% else %>
+// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
+<% end -%>
