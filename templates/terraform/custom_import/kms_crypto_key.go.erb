@@ -1,0 +1,24 @@
+
+	config := meta.(*Config)
+
+	// import ID is in the form `{{keyRing}}/cryptoKeys/{{name}}` and `keyRing` is in the
+	// form `projects/{{keyRing_project}}/locations/{{keyRing_location}}/keyRings/{{keyRing_name}}`
+	// current import_formats can't import fields with forward slashes in their value, so we
+	// need to manually parse it.
+	if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+		return nil, err
+	}
+
+	stringParts := strings.Split(d.Get("name").(string), "/")
+	if len(stringParts) != 8 {
+		return nil, fmt.Errorf(
+				"Saw %s when the name is expected to have shape %s",
+				d.Get("name"),
+				"{{key_ring}}/cryptoKeys/{{name}}",
+			)
+	}
+
+	d.Set("key_ring", fmt.Sprintf("projects/%s/locations/%s/keyRings/%s", stringParts[1], stringParts[3], stringParts[5]))
+	// set the name to the short form.
+	d.Set("name", stringParts[7])
+	return []*schema.ResourceData{d}, nil

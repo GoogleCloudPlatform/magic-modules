@@ -87,7 +87,7 @@ objects:
         name: 'purpose'
         description: |
           The immutable purpose of this CryptoKey. See the
-          [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose).
+          [purpose reference](https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings.cryptoKeys#CryptoKeyPurpose)
           for possible inputs.
         values:
           - "ENCRYPT_DECRYPT"

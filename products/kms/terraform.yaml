@@ -88,6 +88,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
+      custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb
       decoder: templates/terraform/decoders/kms_crypto_key.go.erb
       encoder: templates/terraform/encoders/kms_crypto_key.go.erb
       update_encoder: templates/terraform/update_encoder/kms_crypto_key.go.erb
