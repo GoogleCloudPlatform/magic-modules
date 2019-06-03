@@ -106,7 +106,13 @@ module Provider
     #   projects/{{project}}/global/networks/{{name}}
     # is transformed to
     #   projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
+    #
+    # Values marked with % are URL-encoded, and will match any number of /'s.
+    #
+    # Note: ?P indicates a Python-compatible named capture group. Named groups
+    # aren't isn't common in JS-based regex flavours, but are in Perl-based ones
     def format2regex(format)
+      format.gsub(/{{%([[:word:]]+)}}/, '(?P<\1>.+)')
       format.gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
     end
 
