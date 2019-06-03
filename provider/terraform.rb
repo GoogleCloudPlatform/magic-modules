@@ -113,8 +113,8 @@ module Provider
     # aren't isn't common in JS-based regex flavours, but are in Perl-based ones
     def format2regex(format)
       format
-          .gsub(/{{%([[:word:]]+)}}/, '(?P<\1>.+)')
-          .gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
+        .gsub(/{{%([[:word:]]+)}}/, '(?P<\1>.+)')
+        .gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
     end
 
     # Capitalize the first letter of a property name.
