@@ -1,5 +1,5 @@
-resource "google_healthcare_hl7v2_store" "default" {
-  name                          = "<%= ctx[:vars]['hl7v2_store_name'] %>"
+resource "google_healthcare_hl7_v2_store" "default" {
+  name                          = "<%= ctx[:vars]['hl7_v2_store_name'] %>"
   dataset                       = "${google_healthcare_dataset.dataset.id}"
 
   parser_config {
@@ -11,17 +11,20 @@ resource "google_healthcare_hl7v2_store" "default" {
     pubsub_topic = "${google_pubsub_topic.topic.id}"
   }
 
-  labels {
+  labels = {
     label1 = "labelvalue1"
   }
+  provider     = "google-beta"
 }
 
 resource "google_pubsub_topic" "topic" {
   name         = "<%= ctx[:vars]['pubsub_topic']%>"
+  provider     = "google-beta"
 }
 
 resource "google_healthcare_dataset" "dataset" {
   name         = "<%= ctx[:vars]['dataset_name'] %>"
   location     = "us-central1"
+  provider     = "google-beta"
 }
 
