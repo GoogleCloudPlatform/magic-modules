@@ -12,20 +12,18 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  Address: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Address: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{region}}/{{name}}"
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "address_basic"
         primary_resource_id: "ip_address"
-        version: <%= _version_name %>
         vars:
           address_name: "my-address"
       - !ruby/object:Provider::Terraform::Examples
         name: "address_with_subnetwork"
         primary_resource_id: "internal_with_subnet_and_address"
-        version: <%= _version_name %>
         vars:
           address_name: "my-internal-address"
           network_name: "my-network"
@@ -34,112 +32,307 @@ overrides: !ruby/object:Provider::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "instance_with_ip"
         primary_resource_id: "static"
-        version: <%= _version_name %>
         vars:
          address_name: "ipv4-address"
          instance_name: "vm-instance"
     properties:
-      address: !ruby/object:Provider::Terraform::PropertyOverride
+      address: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      addressType: !ruby/object:Provider::Terraform::PropertyOverride
+      addressType: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.erb'
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
-      networkTier: !ruby/object:Provider::Terraform::PropertyOverride
+      networkTier: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
         description: |
           The Region in which the created address should reside.
           If it is not provided, the provider region is used.
-      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
           * `address` - The IP of the created resource.
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
-  Autoscaler: !ruby/object:Provider::Terraform::ResourceOverride
+  Autoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{zone}}/{{name}}"
-    example:
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "autoscaler_single_instance"
+        primary_resource_id: "default"
+        min_version: 'beta'
+        vars:
+          autoscaler_name: "my-autoscaler"
+          instance_template_name: "my-instance-template"
+          target_pool_name: "my-target-pool"
+          igm_name: "my-igm"
       - !ruby/object:Provider::Terraform::Examples
         name: "autoscaler_basic"
         primary_resource_id: "foobar"
-        version: <%= _version_name %>
         vars:
           autoscaler_name: "my-autoscaler"
           instance_template_name: "my-instance-template"
           target_pool_name: "my-target-pool"
           igm_name: "my-igm"
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
-      target: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: minReplicas
+        # Even though this field isn't actually required by the API, it makes our
+        # lives easier if we treat it as a required field. It has a default that is
+        # set by the API based on the value of maxNumReplicas. Normally in this case
+        # we would just set it to Optional+Computed. However, this currently doesn't
+        # work with nested fields. Make it required so we don't set the field to zero
+        # when our users aren't expecting us to. For more info, see
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/305.
+        required: true
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: maxReplicas
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: cooldownPeriod
+      autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: metric
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: name
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: type
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
+      target: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
-      zone: !ruby/object:Provider::Terraform::PropertyOverride
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
-  BackendBucket: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  BackendBucket: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "backend_bucket_basic"
         primary_resource_id: "image_backend"
-        version: <%= _version_name %>
         vars:
           backend_bucket_name: "image-backend-bucket"
           bucket_name: "image-store-bucket"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
-  BackendService: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-  Disk: !ruby/object:Provider::Terraform::ResourceOverride
+      cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  BackendBucketSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true
+    exclude_validator: true
+    mutex: signedUrlKey/{{project}}/backendBuckets/{{backend_bucket}}/
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_bucket_signed_url_key"
+        primary_resource_id: "backend_key"
+        vars:
+          key_name: "test-key"
+          backend_name: "test-signed-backend-bucket"
+          bucket_name: "test-storage-bucket"
+        skip_test: true
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
-      zone: !ruby/object:Provider::Terraform::PropertyOverride
+      backendBucket: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      keyValue: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the key's value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        Because the API does not return the sensitive key value,
+        we cannot confirm or reverse changes to a key outside of Terraform.
+  BackendService: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_basic"
+        primary_resource_id: "default"
+        vars:
+          backend_service_name: "backend-service"
+          http_health_check_name: "health-check"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/backend_service.go.erb'
+      encoder: 'templates/terraform/encoders/backend_service.go.erb'
+      decoder: 'templates/terraform/decoders/backend_service.go.erb'
+      post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
+      post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/backend_service.go.erb'
+    properties:
+      backends: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: backend
+        is_set: true
+        set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
+      backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+      cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      cdnPolicy.cacheKeyPolicy.queryStringBlacklist: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: connection_draining_timeout_sec
+      customRequestHeaders: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
+      healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: 'selfLinkRelativePathHash'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
+      iap: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+      iap.enabled: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      iap.oauth2ClientSecret: !ruby/object:Overrides::Terraform::PropertyOverride
+        send_empty_value: true
+        # We don't support ignore_read on nested fields
+        ignore_read: true
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/compute_backend_service_iap_oauth2_client_secret.go.erb
+      iap.oauth2ClientSecretSha256: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      portName: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      protocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      securityPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  RegionBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_backend_service_basic"
+        primary_resource_id: "default"
+        vars:
+          region_backend_service_name: "region-backend-service"
+          health_check_name: "health-check"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants: 'templates/terraform/constants/migrate_state_noop.go.erb'
+      resource_definition: 'templates/terraform/resource_definition/region_backend_service.go.erb'
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        required: false
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          The Region in which the created backend service should reside.
+          If it is not provided, the provider region is used.
+      backends: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: backend
+        is_set: true
+        set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
+      backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link.go.erb
+      connectionDraining: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      connectionDraining.drainingTimeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: connection_draining_timeout_sec
+        default_value: 0
+        send_empty_value: true
+      healthChecks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: 'selfLinkRelativePathHash'
+        custom_flatten: templates/terraform/custom_flatten/guard_self_link_array.go.erb
+      protocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  BackendServiceSignedUrlKey: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude_import: true
+    exclude_validator: true
+    mutex: signedUrlKey/{{project}}/backendServices/{{backend_service}}/
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "backend_service_signed_url_key"
+        primary_resource_id: "backend_key"
+        vars:
+          key_name: "test-key"
+          backend_name: "my-backend-service"
+        skip_test: true
+    properties:
+      backendService: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+      keyValue: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        ignore_read: true
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        All arguments including the key's value will be stored in the raw
+        state as plain-text. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
+        Because the API does not return the sensitive key value,
+        we cannot confirm or reverse changes to a key outside of Terraform.
+  Disk: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Larger disks were timing out at creation. Bumping up to 5 minutes.
+    # https://github.com/terraform-providers/terraform-provider-google/issues/703
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 300 # 5 minutes
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: size
+        default_from_api: true
+      sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: snapshot
+        description: |
+          {{description}}* `snapshot`
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        default_value: 'pd-standard'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        input: true
+      licenses: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      sourceImage: !ruby/object:Provider::Terraform::PropertyOverride
-        # sourceImage must be overridden first because it creates the 'image' property
-        override_order: -1
+      sourceImage: !ruby/object:Overrides::Terraform::PropertyOverride
         name: image
         diff_suppress_func: 'diskImageDiffSuppress'
-      diskEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
-        name: "kmsKeySelfLink"
-        description: |
-          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
-          in the cloud console. In order to use this additional
-          IAM permissions need to be set on the Compute Engine Service Agent. See
-          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      sourceSnapshotEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
-        name: "kmsKeySelfLink"
-        description: |
-          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
-          in the cloud console. In order to use this additional
-          IAM permissions need to be set on the Compute Engine Service Agent. See
-          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      sourceImageEncryptionKey.kmsKeyName: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkRelativePaths'
-        name: "kmsKeySelfLink"
-        description: |
-          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
-          in the cloud console. In order to use this additional
-          IAM permissions need to be set on the Compute Engine Service Agent. See
-          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
-      image: !ruby/object:Provider::Terraform::PropertyOverride
-        override_order: 5
         description: |
           The image from which to initialize this disk. This can be
           one of: the image's `self_link`, `projects/{project}/global/images/{image}`,
@@ -150,9 +343,34 @@ overrides: !ruby/object:Provider::ResourceOverrides
           [google_compute_image data source](/docs/providers/google/d/datasource_compute_image.html).
           For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
           These images can be referred by family name here.
+      diskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: "kmsKeySelfLink"
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. In order to use this additional
+          IAM permissions need to be set on the Compute Engine Service Agent. See
+          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      sourceSnapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: "kmsKeySelfLink"
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. In order to use this additional
+          IAM permissions need to be set on the Compute Engine Service Agent. See
+          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      sourceImageEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+        name: "kmsKeySelfLink"
+        description: |
+          The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
+          in the cloud console. In order to use this additional
+          IAM permissions need to be set on the Compute Engine Service Agent. See
+          https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      physicalBlockSizeBytes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
-      post_import: templates/terraform/post_import/disk.erb
       constants: templates/terraform/constants/disk.erb
       encoder: templates/terraform/encoders/disk.erb
       extra_schema_entry: templates/terraform/extra_schema_entry/disk.erb
@@ -163,21 +381,19 @@ overrides: !ruby/object:Provider::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "disk_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           disk_name: "test-disk"
-  DiskType: !ruby/object:Provider::Terraform::ResourceOverride
+  DiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  Firewall: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  Firewall: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "firewall_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           firewall_name: "test-firewall"
           network_name: "test-network"
@@ -185,131 +401,164 @@ overrides: !ruby/object:Provider::ResourceOverrides
       constants: templates/terraform/constants/firewall.erb
       resource_definition: templates/terraform/resource_definition/firewall.erb
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      allowed: !ruby/object:Provider::Terraform::PropertyOverride     
+      allowed: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'allow'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
-        conflicts_with:
-          - 'deny'
-      allowed.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+      allowed.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
-      denied: !ruby/object:Provider::Terraform::PropertyOverride     
+      denied: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'deny'
         is_set: true
         set_hash_func: 'resourceComputeFirewallRuleHash'
-        conflicts_with:
-            - 'allow'
-      denied.ip_protocol: !ruby/object:Provider::Terraform::PropertyOverride
+      denied.ip_protocol: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'protocol'
-      destinationRanges: !ruby/object:Provider::Terraform::PropertyOverride
-        is_set: true 
+      destinationRanges: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
         default_from_api: true
-        conflicts_with:
-          - source_ranges
-          - source_tags
-      direction: !ruby/object:Provider::Terraform::PropertyOverride
+      direction: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+        # Because most fields on this resource are `Computed`, it is easy
+        # for a user to wind up in a broken state if they switch a rule from
+        # being ingress to egress without examining the diff carefully.
+        # See terraform issue #2713 for more context.
+        input: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      network: !ruby/object:Provider::Terraform::PropertyOverride
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
           The name or self_link of the network to attach this firewall to.
-      priority: !ruby/object:Provider::Terraform::PropertyOverride
+      priority: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validation.IntBetween(0, 65535)'
-      sourceRanges: !ruby/object:Provider::Terraform::PropertyOverride
-        is_set: true 
-        default_from_api: true
-      sourceTags: !ruby/object:Provider::Terraform::PropertyOverride
-        is_set: true 
-      sourceServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
-        is_set: true 
-        conflicts_with:
-          - source_tags
-          - target_tags
-      targetServiceAccounts: !ruby/object:Provider::Terraform::PropertyOverride
-        is_set: true 
-        conflicts_with:
-          - source_tags
-          - target_tags
-      targetTags: !ruby/object:Provider::Terraform::PropertyOverride
+      sourceRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-  ForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+        default_from_api: true
+      sourceTags: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      sourceServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      targetServiceAccounts: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      targetTags: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+  ForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "forwarding_rule_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           forwarding_rule_name: "website-forwarding-rule"
           target_pool_name: "website-target-pool"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "forwarding_rule_internallb"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "website-forwarding-rule"
+          backend_name: "website-backend"
+          network_name: "website-net"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      portRange: !ruby/object:Provider::Terraform::PropertyOverride
+      portRange: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'portRangeDiffSuppress'
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
-      IPAddress: !ruby/object:Provider::Terraform::PropertyOverride
+      IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      IPProtocol: !ruby/object:Provider::Terraform::PropertyOverride
+      IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'caseDiffSuppress'
         default_from_api: true
-      loadBalancingScheme: !ruby/object:Provider::Terraform::PropertyOverride
+      loadBalancingScheme: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :EXTERNAL
-      network: !ruby/object:Provider::Terraform::PropertyOverride
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      subnetwork: !ruby/object:Provider::Terraform::PropertyOverride
+      subnetwork: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      backendService: !ruby/object:Provider::Terraform::PropertyOverride
+      backendService: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
-      networkTier: !ruby/object:Provider::Terraform::PropertyOverride
+      networkTier: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
-      target: !ruby/object:Provider::Terraform::PropertyOverride
+      target: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
         custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
-      ports: !ruby/object:Provider::Terraform::PropertyOverride
+      ports: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         custom_expand: 'templates/terraform/custom_expand/set_to_list.erb'
-      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      serviceLabel: !ruby/object:Provider::Terraform::PropertyOverride
+      serviceLabel: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-  GlobalAddress: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  GlobalAddress: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "global_address_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           global_address_name: "global-appserver-ip"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      ipVersion: !ruby/object:Provider::Terraform::PropertyOverride
+      address: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      ipVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("IPV4")'
-      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      addressType: !ruby/object:Provider::Terraform::PropertyOverride
+      addressType: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'emptyOrDefaultStringSuppress("EXTERNAL")'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       post_create: templates/terraform/post_create/labels.erb
-  GlobalForwardingRule: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-  HttpHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+  GlobalForwardingRule: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_http"
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "global_forwarding_rule_internal"
+        min_version: beta
+        primary_resource_id: "default"
+        vars:
+          forwarding_rule_name: "global-rule"
+          http_proxy_name: "target-proxy"
+          backend_service_name: "backend"
+    properties:
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      IPAddress: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      IPProtocol: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'caseDiffSuppress'
+        default_from_api: true
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        min_version: beta
+      portRange: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portRangeDiffSuppress'
+      target: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      post_create: templates/terraform/post_create/labels.erb
+  HttpHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}
 
@@ -318,29 +567,28 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "http_health_check_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           http_health_check_name: "authentication-health-check"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
+      checkIntervalSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 5
-      healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+      healthyThreshold: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 2
-      port: !ruby/object:Provider::Terraform::PropertyOverride
+      port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 80
-      requestPath: !ruby/object:Provider::Terraform::PropertyOverride
+      requestPath: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: "/"
-      timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
+      timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 5
-      unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+      unhealthyThreshold: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 2
-  HttpsHealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
+  HttpsHealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}
 
@@ -349,168 +597,331 @@ overrides: !ruby/object:Provider::ResourceOverrides
       should be preferred for all uses except
       [Network Load Balancers](https://cloud.google.com/compute/docs/load-balancing/network/)
       which still require the legacy version.
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "https_health_check_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           https_health_check_name: "authentication-health-check"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      checkIntervalSec: !ruby/object:Provider::Terraform::PropertyOverride
+      checkIntervalSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 5
-      healthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+      healthyThreshold: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 2
-      port: !ruby/object:Provider::Terraform::PropertyOverride
+      port: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 443
-      requestPath: !ruby/object:Provider::Terraform::PropertyOverride
+      requestPath: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: "/"
-      timeoutSec: !ruby/object:Provider::Terraform::PropertyOverride
+      timeoutSec: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 5
-      unhealthyThreshold: !ruby/object:Provider::Terraform::PropertyOverride
+      unhealthyThreshold: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 2
-  HealthCheck: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  HealthCheck: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "health_check_basic"
         primary_resource_id: "internal-health-check"
-        version: <%= _version_name %>
         vars:
           health_check_name: "internal-service-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
     properties:
-     id: !ruby/object:Provider::Terraform::PropertyOverride
+     id: !ruby/object:Overrides::Terraform::PropertyOverride
        exclude: true
-     type: !ruby/object:Provider::Terraform::PropertyOverride
+     type: !ruby/object:Overrides::Terraform::PropertyOverride
        output: true
        description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
-     httpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'https_health_check'
-         - 'tcp_health_check'
-         - 'ssl_health_check'
-     httpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+     httpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
        exclude: true
-     httpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+     httpHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
        default_value: 80
-     httpsHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'http_health_check'
-         - 'tcp_health_check'
-         - 'ssl_health_check'
-     httpsHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+     httpsHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
        exclude: true
-     httpsHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+     httpsHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
        default_value: 443
-     tcpHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'http_health_check'
-         - 'https_health_check'
-         - 'ssl_health_check'
-     tcpHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+     tcpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
        exclude: true
-     tcpHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+     tcpHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
        default_value: 80
-     sslHealthCheck: !ruby/object:Provider::Terraform::PropertyOverride
-       conflicts_with:
-         - 'http_health_check'
-         - 'https_health_check'
-         - 'tcp_health_check'
-     sslHealthCheck.portName: !ruby/object:Provider::Terraform::PropertyOverride
+     sslHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
        exclude: true
-     sslHealthCheck.port: !ruby/object:Provider::Terraform::PropertyOverride
+     sslHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
        default_value: 443
-  Image: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
+  Image: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "image_basic"
+        primary_resource_id: "example"
+        vars:
+          image_name: "example-image"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      deprecated: !ruby/object:Provider::Terraform::PropertyOverride
+      diskSizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      deprecated: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      guestOsFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+      guestOsFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      imageEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+      imageEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      rawDisk.sha1Checksum: !ruby/object:Provider::Terraform::PropertyOverride
+      licenses: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      rawDisk.sha1Checksum: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'sha1'
-      sourceDiskEncryptionKey: !ruby/object:Provider::Terraform::PropertyOverride
+      rawDisk.containerType: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: :TAR
+      rawDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      sourceDiskId: !ruby/object:Provider::Terraform::PropertyOverride
+      sourceDiskId: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      sourceType: !ruby/object:Provider::Terraform::PropertyOverride
+      sourceType: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      licenses: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-  Instance: !ruby/object:Provider::Terraform::ResourceOverride
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Users were experiencing timeouts. Bumping up to 6 minutes.
+    # https://github.com/terraform-providers/terraform-provider-google/issues/852
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360 # 6 minutes
+      update_sec: 360 # 6 minutes
+      delete_sec: 360 # 6 minutes
     exclude: true
-  InstanceGroup: !ruby/object:Provider::Terraform::ResourceOverride
+  InstanceGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  InstanceGroupManager: !ruby/object:Provider::Terraform::ResourceOverride
+  InstanceGroupManager: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  InstanceTemplate: !ruby/object:Provider::Terraform::ResourceOverride
+  InstanceTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  InterconnectAttachment: !ruby/object:Provider::Terraform::ResourceOverride
+  InterconnectAttachment: !ruby/object:Overrides::Terraform::ResourceOverride
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
-      router: !ruby/object:Provider::Terraform::PropertyOverride
+      router: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-      interconnect: !ruby/object:Provider::Terraform::PropertyOverride
+      interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-    examples: |
-      ```hcl
-      resource "google_compute_router" "foobar" {
-        name    = "my-router"
-        network = "${google_compute_network.foobar.name}"
-      }
-
-      resource "google_compute_interconnect_attachment" "default" {
-        name         = "test-interconnect"
-        interconnect = "my-interconnect-id"
-        router       = "${google_compute_router.foobar.self_link}"
-      }
-      ```
-  License: !ruby/object:Provider::Terraform::ResourceOverride
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "interconnect_attachment_basic"
+        primary_resource_id: "on_prem"
+        skip_test: true
+        vars:
+          interconnect_attachment_name: "on-prem-attachment"
+          router_name: "router"
+  License: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  MachineType: !ruby/object:Provider::Terraform::ResourceOverride
+  MachineType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  Network: !ruby/object:Provider::Terraform::ResourceOverride
+  Network: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_basic"
+        primary_resource_id: "vpc_network"
+        vars:
+          network_name: "vpc-network"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      # We want this to be the smallest change possible, so exclude this for now.
+      # TODO: remove exclusion
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      # We could include this, but it won't be correct mid-apply when subnetworks
+      # are modified, so it's probably better to exclude.
+      subnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      autoCreateSubnetworks: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_value: True
+        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
+        conflicts: []
+      ipv4_range: !ruby/object:Overrides::Terraform::PropertyOverride
+        # autoCreateSubnetworks defaults to true, so we need to disable it explicitly
+        conflicts: []
+      routingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        flatten_object: true
+      routingConfig.routingMode: !ruby/object:Overrides::Terraform::PropertyOverride
+        # flattened objects don't pass on the attributes of the parent to
+        # the child so redefining this on the child field is necessary.
+        update_verb: :PATCH
+        update_url:  projects/{{project}}/global/networks/{{name}}
+        # while required inside routingConfig, routingMode is an optional convenience
+        # field.
+        required: false
+        default_from_api: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      extra_schema_entry: templates/terraform/extra_schema_entry/compute_network_delete_default_route.erb
+      post_create: templates/terraform/post_create/compute_network_delete_default_route.erb
+      post_import: templates/terraform/custom_import/compute_network_delete_default_route.erb
+      encoder: templates/terraform/encoders/network.erb
+      decoder: templates/terraform/decoders/network.erb
+    docs: !ruby/object:Provider::Terraform::Docs
+      optional_properties: |
+        * `delete_default_routes_on_create`: If set to `true`, default routes (`0.0.0.0/0`) will be deleted
+          immediately after network creation. Defaults to `false`.
+  NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "network_endpoint_group"
+        primary_resource_id: "neg"
+        vars:
+          neg_name: "my-lb-neg"
+          network_name: "neg-network"
+          subnetwork_name: "neg-subnetwork"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+  NodeGroup: !ruby/object:Overrides::Terraform::ResourceOverride
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        Due to limitations of the API, Terraform cannot update the
+        number of nodes in a node group and changes to node group size either
+        through Terraform config or through external changes will cause
+        Terraform to delete and recreate the node group.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_group_basic"
+        primary_resource_id: "nodes"
+        vars:
+          group_name: "soletenant-group"
+          template_name: "soletenant-tmpl"
+    properties:
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  NodeTemplate: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_template_basic"
+        primary_resource_id: "template"
+        vars:
+          template_name: "soletenant-tmpl"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "node_template_server_binding"
+        min_version: beta
+        primary_resource_id: "template"
+        vars:
+          template_name: "soletenant-with-licenses"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        description: |
+          Region where nodes using the node template will be created.
+          If it is not provided, the provider region is used.
+      serverBinding: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  Region: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  Region: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-  RegionAutoscaler: !ruby/object:Provider::Terraform::ResourceOverride
+  RegionAutoscaler: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
-    example:
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "region_autoscaler_beta"
+        primary_resource_id: "foobar"
+        min_version: 'beta'
+        vars:
+          region_autoscaler_name: "my-region-autoscaler"
+          instance_template_name: "my-instance-template"
+          target_pool_name: "my-target-pool"
+          rigm_name: "my-region-igm"
       - !ruby/object:Provider::Terraform::Examples
         name: "region_autoscaler_basic"
         primary_resource_id: "foobar"
-        version: <%= _version_name %>
         vars:
           region_autoscaler_name: "my-region-autoscaler"
           instance_template_name: "my-instance-template"
           target_pool_name: "my-target-pool"
           rigm_name: "my-region-igm"
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/autoscaler_overrides.yaml'), 6) %>
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: minReplicas
+        # Even though this field isn't actually required by the API, it makes our
+        # lives easier if we treat it as a required field. It has a default that is
+        # set by the API based on the value of maxNumReplicas. Normally in this case
+        # we would just set it to Optional+Computed. However, this currently doesn't
+        # work with nested fields. Make it required so we don't set the field to zero
+        # when our users aren't expecting us to. For more info, see
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/305.
+        required: true
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: maxReplicas
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: cooldownPeriod
+      autoscalingPolicy.cpuUtilization: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: metric
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: name
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: type
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: target
+        required: true # See comment for minReplicas
+      target: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
-  RegionDisk: !ruby/object:Provider::Terraform::ResourceOverride
+  RegionDisk: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 300 # 5 minutes
     properties:
-<%= indent(compile_file({}, 'products/compute/helpers/terraform/disk_overrides.yaml'), 6) %>
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      sizeGb: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: size
+        default_from_api: true
+      sourceSnapshot: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: snapshot
+        description: |
+          {{description}}* `snapshot`
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+        default_value: 'pd-standard'
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        input: true
+      licenses: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      physicalBlockSizeBytes: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/detach_disk.erb
       encoder: templates/terraform/encoders/disk.erb
@@ -521,35 +932,33 @@ overrides: !ruby/object:Provider::ResourceOverrides
         All arguments including the disk encryption key will be stored in the raw
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "region_disk_basic"
         primary_resource_id: "regiondisk"
-        version: <%= _version_name %>
         vars:
           region_disk_name: "my-region-disk"
           disk_name: "my-disk"
           snapshot_name: "my-snapshot"
-  RegionDiskType: !ruby/object:Provider::Terraform::ResourceOverride
+  RegionDiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
-  Route: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  Route: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "route_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           route_name: "network-route"
           network_name: "compute-network"
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-      network: !ruby/object:Provider::Terraform::PropertyOverride
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-      priority: !ruby/object:Provider::Terraform::PropertyOverride
+      priority: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: 1000
-      nextHopGateway: !ruby/object:Provider::Terraform::PropertyOverride
+      nextHopGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
         # Description here is overridden because puppet won't compile if you ask
@@ -562,8 +971,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           * `projects/project/global/gateways/default-internet-gateway`
           * `global/gateways/default-internet-gateway`
           * The string `default-internet-gateway`.
-      nextHopInstance: !ruby/object:Provider::Terraform::PropertyOverride
-        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      nextHopInstance: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/route_instance.erb
         # Description here is overridden because puppet won't compile if you ask
         # it to include docs greater than 80 characters.
@@ -574,8 +982,7 @@ overrides: !ruby/object:Provider::ResourceOverrides
           * `projects/project/zones/zone/instances/instance`
           * `zones/zone/instances/instance`
           * Just the instance name, with the zone in `next_hop_instance_zone`.
-          
-      tags: !ruby/object:Provider::Terraform::PropertyOverride
+      tags: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/set_to_list.erb
         is_set: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -587,49 +994,133 @@ overrides: !ruby/object:Provider::ResourceOverrides
             specified)  The zone of the instance specified in
             `next_hop_instance`.  Omit if `next_hop_instance` is specified as
             a URL.
-  Router: !ruby/object:Provider::Terraform::ResourceOverride
+  Router: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{region}}/{{name}}"
     mutex: router/{{region}}/{{name}}
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "router_basic"
         primary_resource_id: "foobar"
-        version: <%= _version_name %>
         vars:
           router_name: "my-router"
           network_name: "my-network"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  Snapshot: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-  SslCertificate: !ruby/object:Provider::Terraform::ResourceOverride
+  Snapshot: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 300 # 5 minutes
+      update_sec: 300 # 5 minutes
+      delete_sec: 300 # 5 minutes
+    create_url: projects/{{project}}/zones/{{zone}}/disks/{{source_disk}}/createSnapshot
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "snapshot_basic"
+        primary_resource_id: "snapshot"
+        vars:
+          snapshot_name: "my-snapshot"
+          disk_name: "debian-disk"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'snapshot_id'
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+        default_from_api: true
+        required: false
+      snapshotEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        # This is _correct_, but we don't support ignore_read on nested fields
+        # so we use a custom_flatten for now.
+        # https://github.com/GoogleCloudPlatform/magic-modules/issues/1019
+        ignore_read: true
+        sensitive: true
+        custom_flatten: templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.erb
+      snapshotEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        # This is a beta field that showed up in GA. Removed from both.
+        exclude: true
+      sourceDisk: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
+      sourceDiskEncryptionKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      sourceDiskEncryptionKey.rawKey: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+      sourceDiskEncryptionKey.kmsKeyName: !ruby/object:Overrides::Terraform::PropertyOverride
+        # This is a beta field that showed up in GA. Removed from both.
+        exclude: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/snapshot.go.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/snapshot.erb
+  ManagedSslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360 # 6 minutes
+      update_sec: 360 # 6 minutes
+      # Deletes can take 20-30 minutes to complete, since they depend
+      # on the provisioning process either succeeding or failing completely.
+      delete_sec: 1800 # 30 minutes
+    docs: !ruby/object:Provider::Terraform::Docs
+      warning: |
+        This resource should be used with extreme caution!  Provisioning an SSL
+        certificate is complex.  Ensure that you understand the lifecycle of a
+        certificate before attempting complex tasks like cert rotation automatically.
+        This resource will "return" as soon as the certificate object is created,
+        but post-creation the certificate object will go through a "provisioning"
+        process.  The provisioning process can complete only when the domain name
+        for which the certificate is created points to a target pool which, itself,
+        points at the certificate.  Depending on your DNS provider, this may take
+        some time, and migrating from self-managed certificates to Google-managed
+        certificates may entail some downtime while the certificate provisions.
+
+        In conclusion: Be extremely cautious.
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "managed_ssl_certificate_basic"
+        primary_resource_id: "default"
+        vars:
+          cert_name: "test-cert"
+          proxy_name: "test-proxy"
+          url_map_name: "url-map"
+          backend_service_name: "backend-service"
+          dns_zone_name: "dnszone"
+          forwarding_rule_name: "forwarding-rule"
+          http_health_check_name: "http-health-check"
+    description: |
+      {{description}}
+      For a resource where you provide the key, see the
+      SSL Certificate resource.
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'certificate_id'
+        default_from_api: true
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+
+          These are in the same namespace as the managed SSL certificates.
+      managed.domains: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'absoluteDomainSuppress'
+  SslCertificate: !ruby/object:Overrides::Terraform::ResourceOverride
     docs: !ruby/object:Provider::Terraform::Docs
       optional_properties: |
         * `name_prefix` - (Optional) Creates a unique name beginning with the
          specified prefix. Conflicts with `name`.
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         ignore_read_extra:
           - "name_prefix"
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_random_provider"
         primary_resource_id: "default"
-        version: <%= _version_name %>
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_certificate_target_https_proxies"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           target_https_proxy_name: "test-proxy"
           url_map_name: "url-map"
@@ -640,27 +1131,29 @@ overrides: !ruby/object:Provider::ResourceOverrides
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       extra_schema_entry: templates/terraform/extra_schema_entry/ssl_certificate.erb
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
         custom_expand: 'templates/terraform/custom_expand/name_or_name_prefix.go.erb'
-        conflicts_with:
-        - 'name_prefix'
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+        description: |
+          {{description}}
+
+          These are in the same namespace as the managed SSL certificates.
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: 'certificate_id'
-      certificate: !ruby/object:Provider::Terraform::PropertyOverride
+      certificate: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
-      privateKey: !ruby/object:Provider::Terraform::PropertyOverride
+      privateKey: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
-  SslPolicy: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
-    example:
+        custom_flatten: 'templates/terraform/custom_flatten/sha256.erb'
+        diff_suppress_func: 'sha256DiffSuppress'
+  SslPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "ssl_policy_basic"
         primary_resource_id: "prod-ssl-policy"
-        version: <%= _version_name %>
         vars:
           production_ssl_policy_name: "production-ssl-policy"
           nonprod_ssl_policy_name: "nonprod-ssl-policy"
@@ -670,9 +1163,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
       resource_definition: 'templates/terraform/resource_definition/ssl_policy.erb'
       update_encoder: 'templates/terraform/update_encoder/ssl_policy.erb'
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      customFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+      customFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         # TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/187) replace references automatically
         # Overriding the whole description because original has references to
@@ -688,9 +1181,9 @@ overrides: !ruby/object:Provider::ResourceOverrides
           for which ciphers are available to use. **Note**: this argument
           *must* be present when using the `CUSTOM` profile. This argument
           *must not* be present when using any other profile.
-      enabledFeatures: !ruby/object:Provider::Terraform::PropertyOverride
+      enabledFeatures: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-      profile: !ruby/object:Provider::Terraform::PropertyOverride
+      profile: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :COMPATIBLE
         description: |
           {{description}}
@@ -698,70 +1191,84 @@ overrides: !ruby/object:Provider::ResourceOverrides
           for information on what cipher suites each profile provides. If
           `CUSTOM` is used, the `custom_features` attribute **must be set**.
           Default is `COMPATIBLE`.
-      minTlsVersion: !ruby/object:Provider::Terraform::PropertyOverride
+      minTlsVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :TLS_1_0
         description : '{{description}} Default is `TLS_1_0`.'
-      warnings: !ruby/object:Provider::Terraform::PropertyOverride
+      warnings: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-  Subnetwork: !ruby/object:Provider::Terraform::ResourceOverride
+  Subnetwork: !ruby/object:Overrides::Terraform::ResourceOverride
+    # Users were experiencing timeout. Bumping up to 6 minutes.
+    # https://github.com/terraform-providers/terraform-provider-google/issues/718
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360 # 6 minutes
+      update_sec: 360 # 6 minutes
+      delete_sec: 360 # 6 minutes
     id_format: "{{region}}/{{name}}"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      secondaryIpRanges: !ruby/object:Provider::Terraform::PropertyOverride
+      secondaryIpRanges: !ruby/object:Overrides::Terraform::PropertyOverride
         name: secondaryIpRange
         unordered_list: true
         default_from_api: true
-      secondaryIpRanges.rangeName: !ruby/object:Provider::Terraform::PropertyOverride
+        schema_config_mode_attr: true
+        send_empty_value: true
+      secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
-      secondaryIpRanges.ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
+      secondaryIpRanges.ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
-      fingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+      fingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      ipCidrRange: !ruby/object:Provider::Terraform::PropertyOverride
+      ipCidrRange: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateIpCidrRange'
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         input: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      logConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/subnetwork.erb
       resource_definition: templates/terraform/resource_definition/subnetwork.erb
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "subnetwork_basic"
         primary_resource_id: "network-with-private-secondary-ip-ranges"
-        version: <%= _version_name %>
         vars:
           subnetwork_name: "test-subnetwork"
           network_name: "test-network"
-  TargetHttpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "subnetwork_logging_config_beta"
+        primary_resource_id: "subnet-with-logging"
+        min_version: beta
+        vars:
+          subnetwork_name: "log-test-subnetwork"
+          network_name: "log-test-network"
+  TargetHttpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_http_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           target_http_proxy_name: "test-proxy"
           url_map_name: "url-map"
           backend_service_name: "backend-service"
           http_health_check_name: "http-health-check"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
-  TargetHttpsProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  TargetHttpsProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_https_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           target_https_proxy_name: "test-proxy"
           ssl_certificate_name: "my-certificate"
@@ -769,88 +1276,80 @@ overrides: !ruby/object:Provider::ResourceOverrides
           backend_service_name: "backend-service"
           http_health_check_name: "http-health-check"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
-      sslPolicy: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: false
-  TargetPool: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: true
-    examples: |
-      ```hcl
-      resource "google_compute_target_pool" "default" {
-        name = "instance-pool"
-
-        instances = [
-          "us-central1-a/myinstance1",
-          "us-central1-b/myinstance2",
-        ]
-
-        health_checks = [
-          "${google_compute_http_health_check.default.name}",
-        ]
-      }
-
-      resource "google_compute_http_health_check" "default" {
-        name               = "default"
-        request_path       = "/"
-        check_interval_sec = 1
-        timeout_sec        = 1
-      }
-      ```
+  TargetInstance: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "target_instance_basic"
+        primary_resource_id: "default"
+        vars:
+          target_name: "target"
+          instance_name: "target-vm"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: true
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
         required: false # the provider-default value will be used if not specified
-      sessionAffinity: !ruby/object:Provider::Terraform::PropertyOverride
+      instance:  !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+        custom_expand: 'templates/terraform/custom_expand/self_link_from_name.erb'
+        description: |
+          The Compute instance VM handling traffic for this target instance.
+          Accepts the instance self-link, relative path
+          (e.g. `projects/project/zones/zone/instances/instance`) or name. If
+          name is given, the zone will default to the given zone or
+          the provider-default zone and the project will default to the
+          provider-level project.
+  TargetPool: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+      sessionAffinity: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
       # TODO: Custom code needed for updating `instances` and `healthCheck`.
       #       Update methods are (add|remove)Instance, (add/remove)HealthCheck
-  TargetSslProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  TargetSslProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_ssl_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           target_ssl_proxy_name: "test-proxy"
           ssl_certificate_name: "default-cert"
           backend_service_name: "backend-service"
           health_check_name: "health-check"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
-      proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
+      proxyHeader: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
-      service: !ruby/object:Provider::Terraform::PropertyOverride
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
         name: backendService
-      sslPolicy: !ruby/object:Provider::Terraform::PropertyOverride
-        exclude: false
-  TargetTcpProxy: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  TargetTcpProxy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_tcp_proxy_basic"
         primary_resource_id: "default"
-        version: <%= _version_name %>
         vars:
           target_tcp_proxy_name: "test-proxy"
           backend_service_name: "backend-service"
           health_check_name: "health-check"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: proxyId
-      service: !ruby/object:Provider::Terraform::PropertyOverride
+      service: !ruby/object:Overrides::Terraform::PropertyOverride
         name: backendService
-      proxyHeader: !ruby/object:Provider::Terraform::PropertyOverride
+      proxyHeader: !ruby/object:Overrides::Terraform::PropertyOverride
         default_value: :NONE
-  TargetVpnGateway: !ruby/object:Provider::Terraform::ResourceOverride
+  TargetVpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
     name: 'VpnGateway'
-    exclude: false
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "target_vpn_gateway_basic"
         primary_resource_id: "target_gateway"
-        version: <%= _version_name %>
         vars:
           target_vpn_gateway_name: "vpn1"
           network_name: "network1"
@@ -861,22 +1360,50 @@ overrides: !ruby/object:Provider::ResourceOverrides
           vpn_tunnel_name: "tunnel1"
           route_name: "route1"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false # the provider-default value will be used if not specified
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      forwardingRules: !ruby/object:Provider::Terraform::PropertyOverride
+      forwardingRules: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-      tunnels: !ruby/object:Provider::Terraform::PropertyOverride
+      tunnels: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
-  UrlMap: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  VpnGateway: !ruby/object:Overrides::Terraform::ResourceOverride
+    name: 'HaVpnGateway'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ha_vpn_gateway_basic"
+        primary_resource_id: "ha_gateway1"
+        vars:
+          ha_vpn_gateway1_name: "ha-vpn-1"
+          network1_name: "network1"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "ha_vpn_gateway_gcp_to_gcp"
+        primary_resource_id: "ha_gateway1"
+        vars:
+          ha_vpn_gateway1_name: "ha-vpn-1"
+          network1_name: "network1"
+          ha_vpn_gateway2_name: "ha-vpn-2"
+          network2_name: "network2"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          function: 'validateGCPName'
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      creationTimestamp: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false # the provider-default value will be used if not specified
+        default_from_api: true
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+  UrlMap: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "url_map_basic"
         primary_resource_id: "urlmap"
-        version: <%= _version_name %>
         vars:
           url_map_name: "urlmap"
           login_backend_service_name: "login"
@@ -885,39 +1412,51 @@ overrides: !ruby/object:Provider::ResourceOverrides
           backend_bucket_name: "static-asset-backend-bucket"
           storage_bucket_name: "static-asset-bucket"
     properties:
-      id: !ruby/object:Provider::Terraform::PropertyOverride
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "map_id"
-      defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+      defaultService: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket to use when none of the given rules match.
-      hostRules: !ruby/object:Provider::Terraform::PropertyOverride
+      hostRules: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "host_rule"
         is_set: true
-      hostRules.hosts: !ruby/object:Provider::Terraform::PropertyOverride
+      hostRules.hosts: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-      pathMatchers: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "path_matcher"
-      pathMatchers.defaultService: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers.defaultService: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket to use when none of the given paths match.
-      pathMatchers.pathRules: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers.pathRules: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "path_rule"
-      pathMatchers.pathRules.paths: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers.pathRules.paths: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
-      pathMatchers.pathRules.service: !ruby/object:Provider::Terraform::PropertyOverride
+      pathMatchers.pathRules.service: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket to use if any of the given paths match.
-      tests.service: !ruby/object:Provider::Terraform::PropertyOverride
+      tests.service: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/url_map_only_set_string.go.erb'
         description: The backend service or backend bucket link that should be matched by this test.
-      tests: !ruby/object:Provider::Terraform::PropertyOverride
+      tests: !ruby/object:Overrides::Terraform::PropertyOverride
         name: "test"
-  VpnTunnel: !ruby/object:Provider::Terraform::ResourceOverride
-    example:
+  VpnTunnel: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vpn_tunnel_basic"
         primary_resource_id: "tunnel1"
-        version: <%= _version_name %>
+        vars:
+          vpn_tunnel_name: "tunnel1"
+          target_vpn_gateway_name: "vpn1"
+          network_name: "network1"
+          address_name: "vpn-static-ip"
+          esp_forwarding_rule_name: "fr-esp"
+          udp500_forwarding_rule_name: "fr-udp500"
+          udp4500_forwarding_rule_name: "fr-udp4500"
+          route_name: "route1"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "vpn_tunnel_beta"
+        primary_resource_id: "tunnel1"
+        min_version: beta
         vars:
           vpn_tunnel_name: "tunnel1"
           target_vpn_gateway_name: "vpn1"
@@ -933,33 +1472,50 @@ overrides: !ruby/object:Provider::ResourceOverrides
         state as plain-text.
         [Read more about sensitive data in state](/docs/state/sensitive-data.html).
     properties:
-      targetVpnGateway: !ruby/object:Provider::Terraform::PropertyOverride
+      targetVpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         resource: 'VpnGateway'
-      peerIp: !ruby/object:Provider::Terraform::PropertyOverride
+      vpnGateway: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          URL of the VPN gateway with which this VPN tunnel is associated.
+          This must be used if a High Availability VPN gateway resource is created.
+          This field must reference a `google_compute_ha_vpn_gateway` resource.
+        resource: 'HaVpnGateway'
+      peerGcpGateway: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected. 
+          If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
+          ID in the peer GCP VPN gateway.
+          This field must reference a `google_compute_ha_vpn_gateway` resource.
+        resource: 'HaVpnGateway'
+      peerIp: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validatePeerAddr'
-      sharedSecret: !ruby/object:Provider::Terraform::PropertyOverride
+        default_from_api: true
+      sharedSecret: !ruby/object:Overrides::Terraform::PropertyOverride
         sensitive: true
         ignore_read: true
-      region: !ruby/object:Provider::Terraform::PropertyOverride
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
         default_from_api: true
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      localTrafficSelector: !ruby/object:Provider::Terraform::PropertyOverride
+        description: '{{description}} If unset, is set to the region of `target_vpn_gateway`.'
+      localTrafficSelector: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         default_from_api: true
-      remoteTrafficSelector: !ruby/object:Provider::Terraform::PropertyOverride
+      remoteTrafficSelector: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
         default_from_api: true
-      detailedStatus: !ruby/object:Provider::Terraform::PropertyOverride
+      detailedStatus: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      labelFingerprint: !ruby/object:Provider::Terraform::PropertyOverride
+      labelFingerprint: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: false
-      router: !ruby/object:Provider::Terraform::PropertyOverride
+      router: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: 'templates/terraform/custom_expand/compute_full_url.erb'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       constants: templates/terraform/constants/vpn_tunnel.erb
-  Zone: !ruby/object:Provider::Terraform::ResourceOverride
+      encoder: templates/terraform/encoders/vpn_tunnel.go.erb
+      post_create: templates/terraform/post_create/labels.erb
+  Zone: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
 
 # This is for copying files over

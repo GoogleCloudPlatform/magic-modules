@@ -23,10 +23,10 @@ func TestAccMonitoringAlertPolicy_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName, "ALIGN_RATE", filter),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_monitoring_alert_policy.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -49,18 +49,18 @@ func TestAccMonitoringAlertPolicy_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName, aligner1, filter1),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_monitoring_alert_policy.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccMonitoringAlertPolicy_basic(alertName, conditionName, aligner2, filter2),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_monitoring_alert_policy.basic",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -80,10 +80,10 @@ func TestAccMonitoringAlertPolicy_full(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlertPolicyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccMonitoringAlertPolicy_full(alertName, conditionName1, conditionName2),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_monitoring_alert_policy.full",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -120,24 +120,21 @@ resource "google_monitoring_alert_policy" "basic" {
   enabled      = true
   combiner     = "OR"
 
-  conditions = [
-    {
-      display_name = "%s"
+  conditions {
+    display_name = "%s"
 
-      condition_threshold = {
-        aggregations = [
-          {
-            alignment_period   = "60s"
-            per_series_aligner = "%s"
-          },
-        ]
-
-        duration   = "60s"
-        comparison = "COMPARISON_GT"
-        filter     = "%s"
+    condition_threshold {
+      aggregations {
+        alignment_period   = "60s"
+        per_series_aligner = "%s"
       }
-    },
-  ]
+
+      duration        = "60s"
+      comparison      = "COMPARISON_GT"
+      filter          = "%s"
+      threshold_value = "0.5"
+    }
+  }
 }
 `, alertName, conditionName, aligner, filter)
 }
@@ -149,66 +146,61 @@ resource "google_monitoring_alert_policy" "full" {
   combiner     = "OR"
   enabled      = true
 
-  conditions = [
-    {
-      display_name = "%s"
+  conditions {
+    display_name = "%s"
 
-      condition_threshold = {
-        threshold_value = 50
+    condition_threshold {
+      threshold_value = 50
+      filter          = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
+      duration        = "60s"
+      comparison      = "COMPARISON_GT"
 
-        aggregations = [
-          {
-            alignment_period     = "60s"
-            per_series_aligner   = "ALIGN_RATE"
-            cross_series_reducer = "REDUCE_MEAN"
+      aggregations {
+        alignment_period     = "60s"
+        per_series_aligner   = "ALIGN_RATE"
+        cross_series_reducer = "REDUCE_MEAN"
 
-            group_by_fields = [
-              "metric.label.device_name",
-              "project",
-              "resource.label.instance_id",
-              "resource.label.zone",
-            ]
-          },
+        group_by_fields = [
+          "metric.label.device_name",
+          "project",
+          "resource.label.instance_id",
+          "resource.label.zone",
         ]
-
-        duration   = "60s"
-        comparison = "COMPARISON_GT"
-
-        trigger = {
-          percent = 10
-        }
-
-        filter = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
-      }
-    },
-    {
-      condition_absent {
-        duration = "3600s"
-        filter   = "metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\""
-
-        aggregations {
-          alignment_period     = "60s"
-          cross_series_reducer = "REDUCE_MEAN"
-          per_series_aligner   = "ALIGN_MEAN"
-
-          group_by_fields = [
-            "project",
-            "resource.label.instance_id",
-            "resource.label.zone",
-          ]
-        }
-
-        trigger {
-          count = 1
-        }
       }
 
-      display_name = "%s"
-    },
-  ]
+      trigger {
+        percent = 10
+      }
+    }
+  }
+
+  conditions {
+    display_name = "%s"
+
+    condition_absent {
+      duration = "3600s"
+      filter   = "metric.type=\"compute.googleapis.com/instance/cpu/utilization\" AND resource.type=\"gce_instance\""
+
+      aggregations {
+        alignment_period     = "60s"
+        cross_series_reducer = "REDUCE_MEAN"
+        per_series_aligner   = "ALIGN_MEAN"
+
+        group_by_fields = [
+          "project",
+          "resource.label.instance_id",
+          "resource.label.zone",
+        ]
+      }
+
+      trigger {
+        count = 1
+      }
+    }
+  }
 
   documentation {
-    content = "test content"
+    content   = "test content"
     mime_type = "text/markdown"
   }
 }

@@ -13,8 +13,7 @@
 
 require 'api/object'
 require 'compile/core'
-require 'provider/resource_override'
-require 'provider/resource_overrides'
+require 'overrides/runner'
 
 module Provider
   # Settings for the provider
@@ -22,26 +21,19 @@ module Provider
     include Compile::Core
     extend Compile::Core
 
-    attr_reader :overrides
     # Overrides for datasources
     attr_reader :datasources
-    attr_reader :properties # TODO(nelsonjr): Remove this once bug 193 is fixed.
-    attr_reader :tests
     attr_reader :files
-    attr_reader :changelog
-    # Product names are complicated in MagicModules.  They are given by
-    # product.prefix, which is in the format 'g<nameofproduct>', e.g.
-    # gcompute or gresourcemanager.  This is munged in many places.
-    # Some examples:
-    #   - prefix[1:-1] ('compute' / 'resourcemanager') for the
-    #     directory to fetch chef / puppet examples.
-    #   - camelCase(prefix[1:-1]) for resource namespaces.
-    #   - TitleCase(prefix[1:-1]) for resource names in terraform.
-    #   - prefix[1:-1] again, for working with libraries directly.
-    # This override does not change any of those inner workings, but
-    # instead is passed directly to the template as `product_ns` if
-    # set.  Otherwise, the normal logic applies.
-    attr_reader :name
+
+    # Some tool-specific names may be in use, and they won't all match;
+    # For Terraform, some products use the API client name w/o spaces and
+    # others use spaces. Eg: "app_engine" vs "appengine".
+    attr_reader :legacy_name
+
+    # Some product names do not match their [golang] client name
+    attr_reader :client_name
+
+    attr_reader :overrides
 
     # List of files to copy or compile into target module
     class Files < Api::Object
@@ -50,48 +42,32 @@ module Provider
 
       def validate
         super
-        check_optional_property :compile, Hash
-        check_optional_property :copy, Hash
+        check :compile, type: Hash
+        check :copy, type: Hash
       end
     end
 
-    # Identifies all changes releted to a release of the compiled artifact.
-    class Changelog < Api::Object
-      attr_reader :version
-      attr_reader :date
-      attr_reader :general
-      attr_reader :features
-      attr_reader :fixes
+    def self.parse(cfg_file, api = nil, version_name = 'ga')
+      raise 'Version passed to the compiler cannot be nil' if version_name.nil?
 
-      def validate
-        super
-        check_property :version, String
-        check_property :date, Time
-        check_optional_property :general, String
-        check_property_list :features, String
-        check_property_list :fixes, String
-
-        raise "Required general/features/fixes for change #{@version}." \
-          if @general.nil? && @features.nil? && @fixes.nil?
-      end
-    end
-
-    def self.parse(cfg_file, api = nil, _version_name = nil)
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
       config = Google::YamlValidator.parse(source)
-      raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
-        unless config.class <= Provider::Config
-      # Config must be validated so items are properly setup for next compile
-      config.validate
-      # Compile step #2: Now that we have the target class, compile with that
-      # class features
+      # Compile step 2: compile with target class (this is in case the config
+      # requires info from the config to compile)
       source = config.compile(cfg_file)
       config = Google::YamlValidator.parse(source)
-      config.default_overrides
+      raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
+        unless config.class <= Provider::Config
+
+      config.validate
+      api = Overrides::Runner.build(api, config.overrides,
+                                    config.resource_override,
+                                    config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
-      config
+      api.validate
+      [api, config]
     end
 
     def provider
@@ -105,6 +81,7 @@ module Provider
     def validate
       super
 
+<<<<<<< HEAD
       default_overrides
 
       check_optional_property :files, Provider::Config::Files
@@ -113,6 +90,11 @@ module Provider
         unless @changelog.nil?
 
       @datasources.__is_data_source = true unless @datasources.nil?
+=======
+      check :files, type: Provider::Config::Files
+      check :overrides, type: Overrides::ResourceOverrides,
+                        default: Overrides::ResourceOverrides.new
+>>>>>>> master
     end
 
     # Provides the API object to any type that requires, e.g. for validation
@@ -122,6 +104,7 @@ module Provider
       object.instance_variables.each do |var|
         var_value = object.instance_variable_get(var)
         next if visited.include?(var_value)
+
         visited << var_value
         var_value.consume_api api if var_value.respond_to?(:consume_api)
         var_value.consume_config api, self \
@@ -130,9 +113,12 @@ module Provider
       end
     end
 
-    # TODO(nelsonjr): Investigate why we need to call default_overrides twice.
-    def default_overrides
-      @overrides ||= Provider::ResourceOverrides.new
+    def resource_override
+      Overrides::ResourceOverride
+    end
+
+    def property_override
+      Overrides::PropertyOverride
     end
   end
 end

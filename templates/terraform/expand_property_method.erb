@@ -20,9 +20,17 @@
 <%= lines(compile_template(property.custom_expand,
                            prefix: sdk_marshal.resource,
                            property: property)) -%>
+<<<<<<< HEAD
 <%  else -%>
 <%    if property.is_a?(Api::Type::Map) -%>
 func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
+=======
+<% else -%>
+
+<%# Generate expanders for Maps %>
+<%   if property.is_a?(Api::Type::Map) -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+>>>>>>> master
   if v == nil {
     return map[string]interface{}{}, nil
   }
@@ -31,27 +39,44 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
     original := raw.(map[string]interface{})
     transformed := make(map[string]interface{})
 
+<<<<<<< HEAD
 <%      nested_properties(property.value_type).each do |prop| -%>
 <%        next if prop.name == property.key_name -%>
     transformed<%= titlelize_property(prop) -%>, err := expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+=======
+<%     property.nested_properties.each do |prop| -%>
+<%       next if prop.name == property.key_name -%>
+    transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+>>>>>>> master
     if err != nil {
       return nil, err
     }
     transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
 
+<<<<<<< HEAD
 <%      end -%>
+=======
+<%     end -%>
+>>>>>>> master
 
     m[original["<%= property.key_name -%>"].(string)] = transformed
   }
   return m, nil
 }
+<%# End expanders for Maps %>
 
+<<<<<<< HEAD
 <%      nested_properties(property.value_type).each do |prop| -%>
 <%        next if prop.name == property.key_name -%>
 <%#      lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%      end -%>
 <%    elsif property.is_a?(Api::Type::KeyValuePairs) -%>
 func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
+=======
+<%# Generate expanders for KeyValuePairs %>
+<%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (map[string]string, error) {
+>>>>>>> master
   if v == nil {
     return map[string]string{}, nil
   }
@@ -61,6 +86,7 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
   }
   return m, nil
 }
+<<<<<<< HEAD
 <%    elsif tf_types.include?(property.class) -%>
 func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go_type(property) -%>) *<%= '[]' if property.is_a?(Api::Type::Array) -%><%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%> {
 <%
@@ -80,6 +106,77 @@ func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go
 <%            output_var = var_name || prop.name.camelcase(:lower) -%>
 <%=           lines(build_schema_property_get('v', output_var, prop, sdk_marshal, 4)) -%>
 <%          end -%>
+=======
+
+<%# Generate expanders for flattened objects %>
+<%   elsif property.flatten_object -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+  transformed := make(map[string]interface{})
+<%     property.nested_properties.each do |prop| -%>
+  <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+  transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+  if err != nil {
+    return nil, err
+<%       if prop.send_empty_value -%>
+  } else {
+    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%       else -%>
+  } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%       end -%>
+  }
+
+<%     end -%>
+  return transformed, nil
+}
+
+<%# Generate expanders for everything else %>
+<%   elsif tf_types.include?(property.class) -%>
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
+<%     if property.is_set -%>
+  v = v.(*schema.Set).List()
+<%     end -%>
+<%     if property.nested_properties? -%>
+  l := v.([]interface{})
+<%       if property.is_a?(Api::Type::Array) -%>
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    if raw == nil {
+      continue
+    }
+<%       else -%>
+<%         if property.allow_empty_object -%>
+  if len(l) == 0 {
+    return nil, nil
+  }
+
+  if l[0] == nil {
+    transformed := make(map[string]interface{})
+    return transformed, nil
+  }
+<%       else -%>
+  if len(l) == 0 || l[0] == nil {
+    return nil, nil
+  }
+<%         end -%>
+  raw := l[0]
+<%       end -%>
+    original := raw.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+<%       property.nested_properties.each do |prop| -%>
+      transformed<%= titlelize_property(prop) -%>, err := expand<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.name.underscore -%>"], d, config)
+      if err != nil {
+        return nil, err
+<%         unless prop.send_empty_value -%>
+      } else if val := reflect.ValueOf(transformed<%= titlelize_property(prop) -%>); val.IsValid() && !isEmptyValue(val) {
+        transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%         else -%>
+      } else {
+        transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+<%         end -%>
+      }
+>>>>>>> master
 
     result := <%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>{
 <%=         lines(build_property_to_sdk_object(sdk_marshal.clone(nil, nested_properties), 8)) -%>
@@ -104,10 +201,15 @@ func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go
 <%        end -%>
 }
 
+<<<<<<< HEAD
 <%        nested_properties.each do |prop| -%>
 <%#        lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%        end -%>
 <%      elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+=======
+
+<%     elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+>>>>>>> master
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
   for _, raw := range l {
@@ -136,4 +238,14 @@ func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go
   // TODO: Expand Property '<%= property.name -%>' of type <%= property.class -%> is not supported
 }
 <%   end # tf_types.include?(property.class) -%>
+
+<% if property.nested_properties? -%>
+<%   property.nested_properties.each do |prop| -%>
+<%# Map is a map from {key -> object} in the API, but Terraform can't represent that
+so we treat the key as a property of the object in Terraform schema. %>
+<%     next if property.is_a?(Api::Type::Map) && prop.name == property.key_name -%>
+<%=      lines(build_expand_method(prefix + titlelize_property(property), prop), 1) -%>
+<%   end -%>
+<% end -%>
+
 <% end # custom_code check -%>

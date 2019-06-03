@@ -21,13 +21,13 @@ func resourceComputeProjectMetadata() *schema.Resource {
 		SchemaVersion: 0,
 
 		Schema: map[string]*schema.Schema{
-			"metadata": &schema.Schema{
+			"metadata": {
 				Type:     schema.TypeMap,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -54,25 +54,28 @@ func resourceComputeProjectMetadataCreateOrUpdate(d *schema.ResourceData, meta i
 		return fmt.Errorf("SetCommonInstanceMetadata failed: %s", err)
 	}
 
+	d.SetId(projectID)
+
 	return resourceComputeProjectMetadataRead(d, meta)
 }
 
 func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	if d.Id() == "" {
-		projectID, err := getProject(d, config)
-		if err != nil {
-			return err
-		}
-		d.SetId(projectID)
-	}
+	// At import time, we have no state to draw from. We'll wrongly pull the
+	// provider default project if we use a normal getProject, so we need to
+	// rely on the `id` field being set to the project.
+	// At any other time we can use getProject, as state will have the correct
+	// value; the project pulled from config / the provider / at import time.
+	//
+	// Note that if a user imports a project other than their provider project
+	// and has left the project field unspecified, Terraform will not see a diff
+	// but would create metadata for the provider project on a destroy/create.
+	projectId := d.Id()
 
-	// Load project service
-	log.Printf("[DEBUG] Loading project service: %s", d.Id())
-	project, err := config.clientCompute.Projects.Get(d.Id()).Do()
+	project, err := config.clientCompute.Projects.Get(projectId).Do()
 	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Project metadata for project %q", d.Id()))
+		return handleNotFoundError(err, d, fmt.Sprintf("Project metadata for project %q", projectId))
 	}
 
 	err = d.Set("metadata", flattenMetadata(project.CommonInstanceMetadata))
@@ -80,8 +83,8 @@ func resourceComputeProjectMetadataRead(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error setting metadata: %s", err)
 	}
 
-	d.Set("project", d.Id())
-	d.SetId(d.Id())
+	d.Set("project", projectId)
+
 	return nil
 }
 

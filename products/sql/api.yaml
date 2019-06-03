@@ -12,14 +12,36 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud SQL
-prefix: gsql
+name: Sql
+display_name: Cloud SQL
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/sql/v1beta4/
 scopes:
   - https://www.googleapis.com/auth/sqlservice.admin
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud SQL Admin API
+    url: https://console.cloud.google.com/apis/library/sqladmin.googleapis.com/
+async: !ruby/object:Api::Async
+  operation: !ruby/object:Api::Async::Operation
+    kind: 'sql#operation'
+    path: 'name'
+    base_url: 'projects/{{project}}/operations/{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::Async::Result
+    path: 'targetLink'
+  status: !ruby/object:Api::Async::Status
+    path: 'status'
+    complete: 'DONE'
+    allowed:
+      - 'PENDING'
+      - 'RUNNING'
+      - 'DONE'
+  error: !ruby/object:Api::Async::Error
+    path: 'error/errors'
+    message: 'message'
 objects:
   # 'BackupRun' is not idempotent and will not be covered.
   # | - !ruby/object:Api::Resource
@@ -34,9 +56,7 @@ objects:
       Represents a Cloud SQL instance. Cloud SQL instances are SQL databases
       hosted in Google's cloud. The Instances resource provides methods for
       common configuration and management tasks.
-    exports:
-      - name
-<%= indent(compile('templates/async.yaml.erb'), 4) %>
+    collection_url_key: 'items'
     properties:
       - !ruby/object:Api::Type::Enum
         name: 'backendType'
@@ -88,7 +108,7 @@ objects:
             description: |
               The availability status of the failover replica. A false status
               indicates that the failover replica is out of sync. The master
-              can only failover to the falover replica when the status is true.
+              can only failover to the failover replica when the status is true.
             output: true
           - !ruby/object:Api::Type::String
             name: 'name'
@@ -206,8 +226,7 @@ objects:
                 name: 'clientKey'
                 description: |
                   PEM representation of the slave's private key. The
-                  corresponsing public key is encoded in the client's asf asd
-                  certificate.
+                  corresponding public key is encoded in the client's certificate.
               - !ruby/object:Api::Type::Integer
                 name: 'connectRetryInterval'
                 description: |
@@ -268,6 +287,24 @@ objects:
         name: 'settings'
         description: 'The user settings.'
         properties:
+          - !ruby/object:Api::Type::Array
+            name: 'databaseFlags'
+            description: The database flags passed to the instance at startup
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'name'
+                  description: |
+                    The name of the flag. These flags are passed at instance
+                    startup, so include both server options and system
+                    variables for MySQL. Flags should be specified with
+                    underscores, not hyphens.
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: |
+                    The value of the flag. Booleans should be set to on for
+                    true and off for false. This field must be omitted if the
+                    flag doesn't take a value.
           #- !ruby/object:Api::Type::Constant
           #  name: 'kind'
           #  value: 'sql#settings'
@@ -321,6 +358,35 @@ objects:
               example db-n1-standard-1. For MySQL instances, this field
               determines whether the instance is Second Generation (recommended)
               or First Generation.
+          - !ruby/object:Api::Type::Enum
+            name: 'availabilityType'
+            description: |
+              The availabilityType define if your postgres instance is run zonal 
+              or regional.
+            values:
+            - :ZONAL
+            - :REGIONAL
+          - !ruby/object:Api::Type::NestedObject
+            name: 'backupConfiguration'
+            description: |
+              The daily backup configuration for the instance.
+            properties:
+              #- !ruby/object:Api::Type::Constant
+              #  name: 'kind'
+              #  value: 'sql#backupConfiguration'
+              - !ruby/object:Api::Type::Boolean
+                name: 'enabled'
+                description: |
+                  Enable Autobackup for your instance.
+              - !ruby/object:Api::Type::Boolean
+                name: 'binaryLogEnabled'
+                description: |
+                  Whether binary log is enabled. If backup configuration 
+                  is disabled, binary log must be disabled as well. MySQL only.
+              - !ruby/object:Api::Type::String
+                name: 'startTime'
+                description: |
+                  Define the backup start time in UTC (HH:MM)
           - !ruby/object:Api::Type::Integer
             name: 'settingsVersion'
             output: true
@@ -334,19 +400,19 @@ objects:
     name: 'Database'
     kind: 'sql#database'
     base_url: projects/{{project}}/instances/{{instance}}/databases
+    has_self_link: true
+    collection_url_key: 'items'
     description: |
       Represents a SQL database inside the Cloud SQL instance, hosted in
       Google's cloud.
-<%= indent(compile('templates/async.yaml.erb'), 4) %>
     parameters:
-      - !ruby/object:Api::Type::ResourceRef
+      - !ruby/object:Api::Type::String
         name: 'instance'
         description: |
           The name of the Cloud SQL instance. This does not include the project
           ID.
-        resource: 'Instance'
-        imports: 'name'
         required: true
+        input: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'charset'
@@ -356,6 +422,8 @@ objects:
         description: 'The MySQL collation value.'
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
+        input: true
         description: |
           The name of the database in the Cloud SQL instance.
           This does not include the project ID or instance name.
@@ -363,18 +431,16 @@ objects:
     name: 'User'
     kind: 'sql#user'
     base_url: projects/{{project}}/instances/{{instance}}/users
-    self_link: |
-      projects/{{project}}/instances/{{instance}}/users
-      ?name={{name}}&host={{host}}
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    self_link: 'projects/{{project}}/instances/{{instance}}/users?name={{name}}&host={{host}}'
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#usersList'
-      items: 'items'
+      keys: ['items']
+    collection_url_key: 'items'
     identity:
       - name
       - host
     description: |
       The Users resource represents a database user in a Cloud SQL instance.
-<%= indent(compile('templates/async.yaml.erb'), 4) %>
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'instance'
@@ -405,9 +471,7 @@ objects:
     name: 'SslCert'
     kind: 'sql#sslCert'
     base_url: projects/{{project}}/instances/{{instance}}/sslCerts
-    self_link: |
-      projects/{{project}}/instances/{{instance}}/sslCerts/
-      {{sha1_fingerprint}}
+    self_link: 'projects/{{project}}/instances/{{instance}}/sslCerts/{{sha1_fingerprint}}'
     readonly: true # we're not enforcing state as it is all server-side driven.
     description: |
       Represents an SSL certificate created for a Cloud SQL instance. To use the
@@ -456,9 +520,9 @@ objects:
       'Represents a flag that can be configured for a Cloud SQL instance.'
     base_url: flags
     self_link: flags
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#flagsList'
-      items: 'items'
+      keys: ['items']
     readonly: true
     properties:
       - !ruby/object:Api::Type::Array
@@ -509,9 +573,9 @@ objects:
       Generation, or MySQL First Generation instances.
     base_url: projects/{{project}}/tiers
     self_link: projects/{{project}}/tiers
-    self_link_query: !ruby/object:Api::Resource::ResponseList
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'sql#tiersList'
-      items: 'items'
+      keys: ['items']
     identity:
       - tier
     readonly: true

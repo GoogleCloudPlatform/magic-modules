@@ -1,0 +1,18 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% route = grab_attributes['route'] -%>
+<% gcp_network_name = "#{external_attribute('gcp_network_name', doc_generation)}" -%>
+describe google_compute_route(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{route['name']}'" : "route['name']" -%>) do
+  it { should exist }
+  its('dest_range') { should eq <%= doc_generation ? "'#{route['dest_range']}'" : "route['dest_range']" -%> }
+<% if doc_generation -%>
+  its('network') { should match /\/<%= "#{gcp_network_name}".gsub('\'', '') -%>$/ }
+<% else -%>
+  its('network') { should match /\/#{gcp_network_name}$/ }
+<% end -%>
+  its('next_hop_ip') { should eq <%= doc_generation ? "'#{route['next_hop_ip']}'" : "route['next_hop_ip']" -%> }
+  its('priority') { should eq <%= doc_generation ? "'#{route['priority']}'" : "route['priority']" -%> }
+end
+
+describe google_compute_route(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

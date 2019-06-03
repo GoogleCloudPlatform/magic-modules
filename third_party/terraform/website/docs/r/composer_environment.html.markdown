@@ -99,16 +99,16 @@ resource "google_composer_environment" "test" {
 
   config {
     software_config {
-      airflow_config_overrides {
+      airflow_config_overrides = {
         core-load_example = "True"
       }
 
-      pypi_packages {
+      pypi_packages = {
         numpy = ""
         scipy = "==1.1.0"
       }
 
-      env_variables {
+      env_variables = {
          FOO = "bar"
       }
     }
@@ -167,15 +167,11 @@ The `config` block supports:
 The `node_config` block supports:
 
 * `zone` -
-  (Optional)
+  (Required)
   The Compute Engine zone in which to deploy the VMs running the
   Apache Airflow software, specified as the zone name or
   relative resource name (e.g. "projects/{project}/zones/{zone}"). Must belong to the enclosing environment's project 
   and region.
-
-  If both zone and machineType are specified, machineType must belong to this zone. If neither is specified, the service 
-  will pick default values in the specified resource's region. If only one of zone or machineType is specified, the 
-  location information from the specified field will be used for the location-unspecified field.
 
 * `machine_type` -
   (Optional)
@@ -183,10 +179,6 @@ The `node_config` block supports:
   specified as a name or relative resource name. For example:
   "projects/{project}/zones/{zone}/machineTypes/{machineType}". Must belong to the enclosing environment's project and 
   region/zone.
-
-  If both zone and machineType are specified, machineType must belong to this zone. If neither is specified, the service 
-  will pick default values in the specified resource's region. If only one of zone or machineType is specified, the 
-  location information from the specified field will be used for the location-unspecified field.
 
 * `network` -
   (Optional)
@@ -272,6 +264,20 @@ The `software_config` block supports:
   SQL_USER
   ```
 
+* `image_version` (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) -
+  The version of the software running in the environment. This encapsulates both the version of Cloud Composer
+  functionality and the version of Apache Airflow. It must match the regular expression 
+  `composer-[0-9]+\.[0-9]+(\.[0-9]+)?-airflow-[0-9]+\.[0-9]+(\.[0-9]+.*)?`.
+  The Cloud Composer portion of the version is a semantic version. 
+  The portion of the image version following 'airflow-' is an official Apache Airflow repository release name.
+  See [documentation](https://cloud.google.com/composer/docs/reference/rest/v1beta1/projects.locations.environments#softwareconfig)
+  for allowed release names. This field can only be set in the [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+  provider, but is an output-only attribute in the GA provider.
+
+* `python_version` (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) -
+  The major version of Python used to run the Apache Airflow scheduler, worker, and webserver processes.
+  Can be set to '2' or '3'. If not specified, the default is '2'. Cannot be updated.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -289,13 +295,6 @@ In addition to the arguments listed above, the following computed attributes are
 * `config.airflow_uri` -
   The URI of the Apache Airflow Web UI hosted within this
   environment.
-
-* `config.software_config.image_version` -
-  The version of the software running in the environment. This encapsulates both the version of Cloud Composer
-  functionality and the version of Apache Airflow. It must match the regular expression 
-  `composer-[0-9]+\.[0-9]+(\.[0-9]+)?-airflow-[0-9]+\.[0-9]+(\.[0-9]+.*)?`.
-  The Cloud Composer portion of the version is a semantic version. 
-  The portion of the image version following 'airflow-' is an official Apache Airflow repository release name.
 
 ## Timeouts
 

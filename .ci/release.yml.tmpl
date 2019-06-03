@@ -4,20 +4,20 @@ resource_types:
     - name: git-branch
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
-          repository: nmckinley/concourse-git-resource
-          tag: v0.1.7
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/concourse-git-resource
+          tag: '1.0'
 
     - name: gcs-resource
       type: docker-image
       source:
         repository: frodenas/gcs-resource
 
-    - name: puppet-forge
+    - name: github-pull-request
       type: docker-image
       source:
-        repository: nmckinley/concourse-puppet-forge-resource
-        tag: v0.0.9
+          repository: gcr.io/magic-modules/concourse-github-pr-resource
+          tag: '1.1'
 
 resources:
     - name: magic-modules-gcp
@@ -25,33 +25,6 @@ resources:
       source:
           uri: git@github.com:GoogleCloudPlatform/magic-modules.git
           private_key: ((repo-key.private_key))
-
-{% for module in vars.puppet_modules %}
-{% if module not in vars.puppet_no_release %}
-    - name: puppet-{{module}}-forge
-      type: puppet-forge
-      source:
-        username: ((puppet-forge.username))
-        password: ((puppet-forge.password))
-        module_name: google-g{{module}}
-{% endif %}
-{% endfor %}
-
-    # Logging is not generated, but it still needs to be released with the rest of the
-    # modules.
-    - name: puppet-logging-forge
-      type: puppet-forge
-      source:
-        username: ((puppet-forge.username))
-        password: ((puppet-forge.password))
-        module_name: google-glogging
-
-    - name: puppet-bundle-forge
-      type: puppet-forge
-      source:
-        username: ((puppet-forge.username))
-        password: ((puppet-forge.password))
-        module_name: google-cloud
 
     - name: gcp-bucket
       type: gcs-resource
@@ -72,90 +45,28 @@ resources:
       source:
           uri: git@github.com:terraform-providers/terraform-provider-google.git
           private_key: ((repo-key.private_key))
-
 jobs:
-    - name: test-puppet
+    - name: ansible-nightly-release
       plan:
-        - get: magic-modules
-          resource: magic-modules-gcp
-        - get: night-trigger
-          trigger: true
-        - aggregate:
-          {% for module in vars.puppet_modules %}
-          {% if module != "bigquery" %}
-          - task: test-{{module}}
-            file: magic-modules/.ci/unit-tests/puppet.yml
-            timeout: 30m
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+            trigger: false
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/release-ansible.yml
             params:
-              PRODUCT: {{module}}
-            {%- if vars.puppet_test_excludes.get(module) %}
-              EXCLUDE_PATTERN: {{','.join(vars.puppet_test_excludes[module])}}
-            {%- endif %}
-          {% endif %}
-          {% endfor %}
-
-    - name: release-puppet-patch
+                GITHUB_TOKEN: ((github-account.password))
+                CREDS: ((repo-key.private_key))
+    - name: coverage-spreadsheet-release
       plan:
-        - get: magic-modules-gcp
-          passed: ['test-puppet']
-          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
-          trigger: false
-
-
-    {% for module in vars.puppet_modules + ["logging"]  %}
-      {% if module not in vars.puppet_no_release %}
-    - name: release-{{module}}-patch
-      plan:
-        - get: magic-modules-gcp
-          passed: ['test-puppet', 'release-puppet-patch']
-          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
-          trigger: false
-        - put: puppet-{{module}}-forge
-          params:
-            patch_bump: true
-            repo: magic-modules-gcp/build/puppet/{{module}}
-      {% endif %}
-    {% endfor %}
-
-    - name: release-puppet-minor
-      plan:
-        - get: magic-modules-gcp
-          passed: ['test-puppet']
-          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
-          trigger: false
-
-    {% for module in vars.puppet_modules + ["logging"] %}
-      {% if module not in vars.puppet_no_release %}
-    - name: release-{{module}}-minor
-      plan:
-        - get: magic-modules-gcp
-          passed: ['test-puppet', 'release-puppet-minor']
-          # EXPLICITLY TRIGGER = FALSE - this is manual-only.
-          trigger: false
-        - put: puppet-{{module}}-forge
-          params:
-            patch_bump: false
-            repo: magic-modules-gcp/build/puppet/{{module}}
-      {% endif %}
-    {% endfor %}
-
-
-    - name: release-bundle
-      plan:
-        {% for module in vars.puppet_modules + ["logging"] %}
-        {% if module not in vars.puppet_no_release %}
-        - get: puppet-{{module}}-forge
-        {% endif %}
-        {% endfor %}
-        - get: magic-modules
-          resource: magic-modules-gcp
-        - task: create-bundle-manifest
-          file: magic-modules/.ci/release/create_bundle_manifest.yml
-        - put: puppet-bundle-forge
-          params:
-            patch_bump: false
-            repo: magic-modules/build/puppet/_bundle
-
+          - get: night-trigger
+            trigger: true
+          - get: magic-modules-gcp
+            trigger: false
+          - task: build
+            file: magic-modules-gcp/.ci/magic-modules/coverage-spreadsheet-upload.yml
+            params:
+                SERVICE_ACCOUNT: ((magic-modules-service-account))
     - name: nightly-build
       plan:
           - get: night-trigger
@@ -166,10 +77,54 @@ jobs:
           - task: build
             file: magic-modules-gcp/.ci/magic-modules/generate-terraform-all-platforms.yml
 
-          {% for arch in ['darwin_amd64', 'freebsd_386', 'freebsd_amd64', 'freebsd_arm',
-          'linux_386', 'linux_amd64', 'linux_arm', 'openbsd_386', 'openbsd_amd64',
-          'solaris_amd64', 'windows_386.exe', 'windows_amd64.exe'] %}
+{% for arch in ['darwin_amd64', 'freebsd_386', 'freebsd_amd64', 'freebsd_arm',
+'linux_386', 'linux_amd64', 'linux_arm', 'openbsd_386', 'openbsd_amd64',
+'solaris_amd64', 'windows_386.exe', 'windows_amd64.exe'] %}
           - put: gcp-bucket
             params:
               file: dist/terraform-provider-google.{{arch}}
-          {% endfor %}
+{% endfor %}
+
+    - name: inspec-integration-test
+      serial: true
+      plan:
+        - get: night-trigger
+          trigger: true
+        - get: magic-modules-gcp
+        - task: inspec-integration
+          file: magic-modules-gcp/.ci/acceptance-tests/inspec-integration.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
+{% for v in vars.terraform_v.itervalues() %}
+    - name: {{v.short_name}}-integration-test
+      serial: true
+      serial_groups: [terraform-integration]
+      plan:
+{% if v.short_name == "terraform-beta" %}
+        - get: night-trigger
+          trigger: true
+{% endif %}
+        - get: magic-modules-gcp
+        - task: {{v.short_name}}-integration
+          file: magic-modules-gcp/.ci/acceptance-tests/terraform-integration.yml
+          params:
+            PROVIDER_NAME: {{v.provider_name}}
+            SHORT_NAME: {{v.short_name}}
+            TEST_DIR: {{v.test_dir}}
+{% endfor %}
+
+    - name: ansible-integration-test
+      serial: true
+      plan:
+        - get: night-trigger
+          trigger: true
+        - get: magic-modules-gcp
+        - task: ansible-integration
+          file: magic-modules-gcp/.ci/acceptance-tests/ansible-integration.yml
+          params:
+            SERVICE_ACCOUNT_KEY: ((ansible-integration-key))
+            ANSIBLE_TEMPLATE: ((ansible-integration-template))
+            IMAGE_KEY: ((image-key))

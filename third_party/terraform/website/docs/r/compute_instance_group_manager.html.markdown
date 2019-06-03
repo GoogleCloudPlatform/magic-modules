@@ -57,19 +57,21 @@ resource "google_compute_instance_group_manager" "appserver" {
 ## Example Usage with multiple versions (`google-beta` provider)
 ```hcl
 resource "google_compute_instance_group_manager" "appserver" {
+  provider = "google-beta"
   name = "appserver-igm"
 
   base_instance_name = "app"
-  update_strategy    = "NONE"
   zone               = "us-central1-a"
 
   target_size  = 5
 
   version {
+    name = "appserver"
     instance_template  = "${google_compute_instance_template.appserver.self_link}"
   }
 
   version {
+    name = "appserver-canary"
     instance_template  = "${google_compute_instance_template.appserver-canary.self_link}"
     target_size {
       fixed = 1
@@ -89,15 +91,13 @@ The following arguments are supported:
     appending a hyphen and a random four-character string to the base instance
     name.
 
-* `instance_template` - (Optional) The full URL to an instance template from
-    which all new instances will be created. This field is only present in the
-    `google` provider.
+* `instance_template` - (Required, [GA](https://terraform.io/docs/providers/google/provider_versions.html)) The
+  full URL to an instance template from which all new instances
+  will be created. This field is only present in the `google` provider.
 
-* `version` - (Optional) Application versions managed by this instance group. Each
+* `version` - (Required, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Application versions managed by this instance group. Each
     version deals with a specific instance template, allowing canary release scenarios.
     Structure is documented below.
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
 * `name` - (Required) The name of the instance group manager. Must be 1-63
     characters long and comply with
@@ -138,14 +138,10 @@ The following arguments are supported:
 
 ---
 
-* `auto_healing_policies` - (Optional) The autohealing policies for this managed instance
+* `auto_healing_policies` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The autohealing policies for this managed instance
 group. You can specify only one value. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances#monitoring_groups).
-This property is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
-* `update_policy` - (Optional) The update policy for this managed instance group. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/patch)
-This property is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
+* `update_policy` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The update policy for this managed instance group. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/patch)
 - - -
 
 The `update_policy` block supports:
@@ -243,8 +239,10 @@ exported:
 
 ## Import
 
-Instance group managers can be imported using the `name`, e.g.
+Instance group managers can be imported using any of these accepted formats:
 
 ```
-$ terraform import google_compute_instance_group_manager.appserver appserver-igm
+$ terraform import google_compute_instance_group_manager.appserver {{project}}/{{zone}}/{{name}}
+$ terraform import google_compute_instance_group_manager.appserver {{project}}/{{name}}
+$ terraform import google_compute_instance_group_manager.appserver {{name}}
 ```

@@ -1,0 +1,91 @@
+resource "google_compute_managed_ssl_certificate" "default" {
+  provider = "google-beta"
+
+  name = "<%= ctx[:vars]['cert_name'] %>"
+
+  managed {
+    domains = ["sslcert.tf-test.club."]
+  }
+}
+
+resource "google_compute_target_https_proxy" "default" {
+  provider = "google-beta"
+
+  name             = "<%= ctx[:vars]['proxy_name'] %>"
+  url_map          = "${google_compute_url_map.default.self_link}"
+  ssl_certificates = ["${google_compute_managed_ssl_certificate.default.self_link}"]
+}
+
+resource "google_compute_url_map" "default" {
+  provider = "google-beta"
+
+  name        = "<%= ctx[:vars]['url_map_name'] %>"
+  description = "a description"
+
+  default_service = "${google_compute_backend_service.default.self_link}"
+
+  host_rule {
+    hosts        = ["sslcert.tf-test.club"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name            = "allpaths"
+    default_service = "${google_compute_backend_service.default.self_link}"
+
+    path_rule {
+      paths   = ["/*"]
+      service = "${google_compute_backend_service.default.self_link}"
+    }
+  }
+}
+
+resource "google_compute_backend_service" "default" {
+  provider = "google-beta"
+
+  name        = "<%= ctx[:vars]['backend_service_name'] %>"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = ["${google_compute_http_health_check.default.self_link}"]
+}
+
+resource "google_compute_http_health_check" "default" {
+  provider = "google-beta"
+
+  name               = "<%= ctx[:vars]['http_health_check_name'] %>"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+
+resource "google_dns_managed_zone" "zone" {
+  provider = "google-beta"
+
+  name     = "<%= ctx[:vars]['dns_zone_name'] %>"
+  dns_name = "sslcert.tf-test.club."
+}
+
+resource "google_compute_global_forwarding_rule" "default" {
+  provider = "google-beta"
+
+  name       = "<%= ctx[:vars]['forwarding_rule_name'] %>"
+  target     = "${google_compute_target_https_proxy.default.self_link}"
+  port_range = 443
+}
+
+resource "google_dns_record_set" "set" {
+  provider = "google-beta"
+
+  name         = "sslcert.tf-test.club."
+  type         = "A"
+  ttl          = 3600
+  managed_zone = "${google_dns_managed_zone.zone.name}"
+  rrdatas      = ["${google_compute_global_forwarding_rule.default.ip_address}"]
+}
+
+provider "google-beta"{
+  region = "us-central1"
+  zone   = "us-central1-a"
+}

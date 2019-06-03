@@ -1,0 +1,108 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Firestore
+display_name: Cloud Firestore
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://firestore.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::Async
+  operation: !ruby/object:Api::Async::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::Async::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::Async::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::Async::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Index'
+    base_url: projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes
+    self_link: '{{name}}'
+    input: true
+    description: |
+      Cloud Firestore indexes enable simple and complex queries against documents in a database.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/firestore/docs/query-data/indexing'
+      api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.collectionGroups.indexes'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          A server defined name for this index. Format:
+          `projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes/{{server_generated_id}}`
+      - !ruby/object:Api::Type::String
+        name: database
+        default_value: '(default)'
+        description: |
+          The Firestore database id. Defaults to `"(default)"`.
+      - !ruby/object:Api::Type::String
+        name: collection
+        required: true
+        description: |
+          The collection being indexed.
+      - !ruby/object:Api::Type::Enum
+        name: queryScope
+        description: |
+          The scope at which a query is run. Defaults to `"COLLECTION"`.
+        default_value: :COLLECTION
+        values:
+          - :COLLECTION
+      - !ruby/object:Api::Type::Array
+        name: fields
+        description: |
+          The fields supported by this index. The last field entry is always for
+          the field path `__name__`. If, on creation, `__name__` was not
+          specified as the last field, it will be added automatically with the
+          same direction as that of the last field defined. If the final field
+          in a composite index is not directional, the `__name__` will be
+          ordered `"ASCENDING"` (unless explicitly specified otherwise).
+        required: true
+        # Single field indexes _exist_, but the API only lets us manage composite ones.
+        min_size: 2
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'fieldPath'
+              description: |
+                Name of the field.
+            - !ruby/object:Api::Type::Enum
+              name: 'order'
+              description: |
+                Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
+                Only one of `order` and `arrayConfig` can be specified.
+              values:
+                - :ASCENDING
+                - :DESCENDING
+            - !ruby/object:Api::Type::Enum
+              name: 'arrayConfig'
+              description: |
+                Indicates that this field supports operations on arrayValues. Only one of `order` and `arrayConfig` can
+                be specified.
+              values:
+                - :CONTAINS

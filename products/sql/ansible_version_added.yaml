@@ -1,0 +1,111 @@
+---
+:facts:
+  :Instance:
+    :version_added: '2.8'
+  :Database:
+    :version_added: '2.8'
+  :User:
+    :version_added: '2.8'
+:regular:
+  :Instance:
+    :version_added: '2.7'
+    :backendType:
+      :version_added: '2.7'
+    :connectionName:
+      :version_added: '2.7'
+    :databaseVersion:
+      :version_added: '2.7'
+    :failoverReplica:
+      :version_added: '2.7'
+      :name:
+        :version_added: '2.7'
+    :instanceType:
+      :version_added: '2.7'
+    :ipv6Address:
+      :version_added: '2.7'
+    :masterInstanceName:
+      :version_added: '2.7'
+    :maxDiskSize:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :region:
+      :version_added: '2.7'
+    :replicaConfiguration:
+      :version_added: '2.7'
+      :failoverTarget:
+        :version_added: '2.7'
+      :mysqlReplicaConfiguration:
+        :version_added: '2.7'
+        :caCertificate:
+          :version_added: '2.7'
+        :clientCertificate:
+          :version_added: '2.7'
+        :clientKey:
+          :version_added: '2.7'
+        :connectRetryInterval:
+          :version_added: '2.7'
+        :dumpFilePath:
+          :version_added: '2.7'
+        :masterHeartbeatPeriod:
+          :version_added: '2.7'
+        :password:
+          :version_added: '2.7'
+        :sslCipher:
+          :version_added: '2.7'
+        :username:
+          :version_added: '2.7'
+        :verifyServerCertificate:
+          :version_added: '2.7'
+      :replicaNames:
+        :version_added: '2.7'
+      :serviceAccountEmailAddress:
+        :version_added: '2.7'
+    :settings:
+      :version_added: '2.7'
+      :ipConfiguration:
+        :version_added: '2.7'
+        :ipv4Enabled:
+          :version_added: '2.7'
+        :authorizedNetworks:
+          :version_added: '2.7'
+          :expirationTime:
+            :version_added: '2.7'
+          :name:
+            :version_added: '2.7'
+          :value:
+            :version_added: '2.7'
+        :requireSsl:
+          :version_added: '2.7'
+      :tier:
+        :version_added: '2.7'
+      :availabilityType:
+        :version_added: '2.7'
+      :backupConfiguration:
+        :version_added: '2.7'
+        :enabled:
+          :version_added: '2.7'
+        :binaryLogEnabled:
+          :version_added: '2.7'
+        :startTime:
+          :version_added: '2.7'
+  :Database:
+    :version_added: '2.7'
+    :charset:
+      :version_added: '2.7'
+    :collation:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :instance:
+      :version_added: '2.7'
+  :User:
+    :version_added: '2.7'
+    :host:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :instance:
+      :version_added: '2.7'
+    :password:
+      :version_added: '2.7'

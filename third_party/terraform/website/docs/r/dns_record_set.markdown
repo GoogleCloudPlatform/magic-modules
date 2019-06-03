@@ -117,6 +117,25 @@ resource "google_dns_managed_zone" "prod" {
 }
 ```
 
+### Adding a CNAME record
+
+ The list of `rrdatas` should only contain a single string corresponding to the Canonical Name intended.
+
+```hcl
+resource "google_dns_record_set" "cname" {
+  name = "frontend.${google_dns_managed_zone.prod.dns_name}"
+  managed_zone = "${google_dns_managed_zone.prod.name}"
+  type = "CNAME"
+  ttl  = 300
+  rrdatas = ["frontend.mydomain.com."]
+}
+
+resource "google_dns_managed_zone" "prod" {
+  name        = "prod-zone"
+  dns_name    = "prod.mydomain.com."
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -127,7 +146,7 @@ The following arguments are supported:
 * `name` - (Required) The DNS name this record set will apply to.
 
 * `rrdatas` - (Required) The string data for the records in this record set
-    whose meaning depends on the DNS type. For TXT record, if the string data contains spaces, add surrounding `\"` if you don't want your string to get split on spaces.
+    whose meaning depends on the DNS type. For TXT record, if the string data contains spaces, add surrounding `\"` if you don't want your string to get split on spaces. To specify a single record value longer than 255 characters such as a TXT record for DKIM, add `\"\"` inside the Terraform configuration string (e.g. `"first255characters\"\"morecharacters"`).
 
 * `ttl` - (Required) The time-to-live of this record set (seconds).
 

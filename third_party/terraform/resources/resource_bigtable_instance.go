@@ -34,20 +34,24 @@ func resourceBigtableInstance() *schema.Resource {
 						"cluster_id": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"zone": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"num_nodes": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							ForceNew:     true,
 							ValidateFunc: validation.IntAtLeast(3),
 						},
 						"storage_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "SSD",
+							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"SSD", "HDD"}, false),
 						},
 					},
@@ -134,9 +138,6 @@ func resourceBigtableInstanceCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	conf.Clusters = expandBigtableClusters(d.Get("cluster").(*schema.Set).List(), conf.InstanceID)
-	if err != nil {
-		return fmt.Errorf("error expanding clusters: %s", err.Error())
-	}
 
 	c, err := config.bigtableClientFactory.NewInstanceAdminClient(project)
 	if err != nil {

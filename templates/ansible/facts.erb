@@ -10,11 +10,10 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 <%
-  metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       object))
-  supported_by = quote_string(@config.manifest.get('supported_by', object))
+  metadata_version = quote_string("1.1")
+  supported_by = quote_string("community")
 
-  uri_props = object.uri_properties.reject { |para| para.nil? || para.name == 'name' }
+  uri_props = uri_properties_raw(object).reject { |para| para.nil? || para.name == 'name' }
 -%>
 <%
     python_sdk_client = object.azure_sdk_definition.python_client.split(".")[0]
@@ -24,7 +23,7 @@ __metaclass__ = type
     output_properties = object.all_user_properties.sort_by{|p| [p.order, p.name]}
 -%>
 ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', object) -%>,
+                    'status': ["preview"],
                     'supported_by': <%= supported_by -%>}
 
 DOCUMENTATION = '''
@@ -36,6 +35,15 @@ description:
     - Gather info for Azure <%= object.name.titlecase -%>.
 
 <%= to_yaml({
+<<<<<<< HEAD
+=======
+  'module' => "#{module_name(object)}_facts",
+  'description' => ["Gather facts for GCP #{object.name}"],
+  'short_description' => "Gather facts for GCP #{object.name}",
+  'version_added' => version_added(object, :facts).to_f,
+  'author' => "Google Inc. (@googlecloudplatform)",
+  'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"],
+>>>>>>> master
   'options' => [
     input_properties.map{|p| documentation_for_property(p, object)},
     (documentation_for_property(get_tags_property(object), object) if is_tags_defined?(object))
@@ -58,8 +66,8 @@ EXAMPLES = '''
 
 RETURN = '''
 <%= to_yaml({
-  'items' => {
-    'description' => 'List of items',
+  'resources' => {
+    'description' => 'List of resources',
     'returned' => 'always',
     'type' => 'complex',
     'contains' => output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)
@@ -67,6 +75,7 @@ RETURN = '''
 })-%>
 '''
 
+<<<<<<< HEAD
 from ansible.module_utils.azure_rm_common import AzureRMModuleBase
 
 try:
@@ -170,6 +179,87 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
 <%  end -%>
         }
         return d
+=======
+################################################################################
+# Imports
+################################################################################
+<%
+  import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
+  import += ', replace_resource_dict' unless uri_props.select { |p| p.is_a?(Api::Type::ResourceRef) && !p.resource_ref.readonly }.empty?
+-%>
+<%= lines(import) -%>
+import json
+
+################################################################################
+# Main
+################################################################################
+
+
+def main():
+<%
+  mod_props = object.facts.has_filters ? [object.facts.filter] : []
+  mod_props += uri_props
+-%>
+    module = GcpModule(
+<%=
+  indent(remove_outside_dict(python_literal({
+    'argument_spec'=> ansible_module(mod_props),
+  })), 12)
+-%>
+    )
+
+    if not module.params['scopes']:
+        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
+
+<%
+  query_param = nil
+  if object.facts.has_filters
+    if object.facts.query_options
+      query_param = "query_options(module.params['#{object.facts.filter.name}'])"
+    else
+      query_param = "module.params['#{object.facts.filter.name.underscore}']"
+    end
+  end
+-%>
+    items = <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
+    if items.get(<%= quote_string(object.collection_url_key) -%>):
+        items = items.get(<%= quote_string(object.collection_url_key) -%>)
+    else:
+        items = []
+    return_value = {
+        'resources': items
+    }
+    module.exit_json(**return_value)
+
+
+<%= lines(emit_link('collection', build_url(object.collection_url), object)) -%>
+
+
+<%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
+<% prod_name = object.__product.api_name -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    response = <%= method_call('auth.get', ['link', ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
+    return return_if_object(module, response)
+
+
+<% if object.facts.has_filters && object.facts.query_options -%>
+def query_options(filters):
+    if not filters:
+        return ''
+
+    if len(filters) == 1:
+        return filters[0]
+    else:
+        queries = []
+        for f in filters:
+            # For multiple queries, all queries should have ()
+            if f[0] != '(' and f[-1] != ')':
+                queries.append("(%s)" % ''.join(f))
+            else:
+                queries.append(f)
+
+        return ' '.join(queries)
+>>>>>>> master
 
 
 def main():

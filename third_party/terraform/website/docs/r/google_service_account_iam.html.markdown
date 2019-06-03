@@ -8,7 +8,7 @@ description: |-
 
 # IAM policy for service account
 
-When managing IAM roles, you can treat a service account either as a resource or as an identity. This resource is to add iam policy bindings to a service account resource to configure permissions for who can edit the service account. To configure permissions for a service account to act as an identity that can manage other GCP resources, use the [google_project_iam](google_project_iam.html) set of resources.
+When managing IAM roles, you can treat a service account either as a resource or as an identity. This resource is to add iam policy bindings to a service account resource **to configure permissions for who can edit the service account**. To configure permissions for a service account to act as an identity that can manage other GCP resources, use the [google_project_iam](google_project_iam.html) set of resources.
 
 Three different resources help you manage your IAM policy for a service account. Each of these resources serves a different use case:
 
@@ -25,7 +25,7 @@ Three different resources help you manage your IAM policy for a service account.
 ```hcl
 data "google_iam_policy" "admin" {
   binding {
-    role = "roles/editor"
+    role = "roles/iam.serviceAccountUser"
 
     members = [
       "user:jane@example.com",
@@ -33,18 +33,29 @@ data "google_iam_policy" "admin" {
   }
 }
 
+resource "google_service_account" "sa" {
+  account_id   = "my-service-account"
+  display_name = "A service account that only Jane can interact with"
+}
+
 resource "google_service_account_iam_policy" "admin-account-iam" {
-	service_account_id = "your-service-account-id"
-	policy_data = "${data.google_iam_policy.admin.policy_data}"
+  service_account_id = "${google_service_account.sa.name}"
+  policy_data        = "${data.google_iam_policy.admin.policy_data}"
 }
 ```
 
 ## google\_service\_account\_iam\_binding
 
 ```hcl
+
+resource "google_service_account" "sa" {
+  account_id   = "my-service-account"
+  display_name = "A service account that only Jane can use"
+}
+
 resource "google_service_account_iam_binding" "admin-account-iam" {
-  service_account_id = "your-service-account-id"
-  role        = "roles/editor"
+  service_account_id = "${google_service_account.sa.name}"
+  role               = "roles/iam.serviceAccountUser"
 
   members = [
     "user:jane@example.com",
@@ -55,10 +66,24 @@ resource "google_service_account_iam_binding" "admin-account-iam" {
 ## google\_service\_account\_iam\_member
 
 ```hcl
+data "google_compute_default_service_account" "default" { }
+
+resource "google_service_account" "sa" {
+  account_id   = "my-service-account"
+  display_name = "A service account that Jane can use"
+}
+
 resource "google_service_account_iam_member" "admin-account-iam" {
-  service_account_id = "your-service-account-id"
-  role        = "roles/editor"
-  member      = "user:jane@example.com"
+  service_account_id = "${google_service_account.sa.name}"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "user:jane@example.com"
+}
+
+# Allow SA service account use the default GCE account
+resource "google_service_account_iam_member" "gce-default-account-iam" {
+  service_account_id = "${data.google_compute_default_service_account.default.name}"
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${google_service_account.sa.email}"
 }
 ```
 
@@ -66,7 +91,7 @@ resource "google_service_account_iam_member" "admin-account-iam" {
 
 The following arguments are supported:
 
-* `service_account_id` - (Required) The service account id to apply policy to.
+* `service_account_id` - (Required) The fully-qualified name of the service account to apply policy to.
 
 * `member/members` - (Required) Identities that will be granted the privilege in `role`.
   Each entry can have one of the following values:
@@ -93,12 +118,12 @@ exported:
 
 ## Import
 
-Service account IAM resources can be imported using the project, service account email, role and member.
+Service account IAM resources can be imported using the project, service account email, role and member identity.
 
 ```
 $ terraform import google_service_account_iam_policy.admin-account-iam projects/{your-project-id}/serviceAccounts/{your-service-account-email}
 
 $ terraform import google_service_account_iam_binding.admin-account-iam "projects/{your-project-id}/serviceAccounts/{your-service-account-email} roles/editor"
 
-$ terraform import google_service_account_iam_member.admin-account-iam "projects/{your-project-id}/serviceAccounts/{your-service-account-email} roles/editor foo@example.com"
+$ terraform import google_service_account_iam_member.admin-account-iam "projects/{your-project-id}/serviceAccounts/{your-service-account-email} roles/editor user:foo@example.com"
 ```

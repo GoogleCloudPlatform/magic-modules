@@ -1,0 +1,28 @@
+if d.Get("delete_default_routes_on_create").(bool) {
+	token := ""
+	for paginate := true; paginate; {
+		networkLink := fmt.Sprintf("%s/%s", url, d.Get("name").(string))
+		filter := fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", networkLink)
+		log.Printf("[DEBUG] Getting routes for network %q with filter '%q'", d.Get("name").(string), filter)
+		resp, err := config.clientCompute.Routes.List(project).Filter(filter).Do()
+		if err != nil {
+			return fmt.Errorf("Error listing routes in proj: %s", err)
+		}
+
+		log.Printf("[DEBUG] Found %d routes rules in %q network", len(resp.Items), d.Get("name").(string))
+
+		for _, route := range resp.Items {
+			op, err := config.clientCompute.Routes.Delete(project, route.Name).Do()
+			if err != nil {
+				return fmt.Errorf("Error deleting route: %s", err)
+			}
+			err = computeSharedOperationWait(config.clientCompute, op, project, "Deleting Route")
+			if err != nil {
+				return err
+			}
+		}
+
+		token = resp.NextPageToken
+		paginate = token != ""
+	}
+}

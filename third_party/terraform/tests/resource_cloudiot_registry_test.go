@@ -19,7 +19,7 @@ func TestAccCloudIoTRegistry_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCloudIoTRegistry_basic(registryName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudIoTRegistryExists(
@@ -45,7 +45,7 @@ func TestAccCloudIoTRegistry_extended(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCloudIoTRegistry_extended(registryName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudIoTRegistryExists(
@@ -71,17 +71,17 @@ func TestAccCloudIoTRegistry_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCloudIoTRegistryDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCloudIoTRegistry_basic(registryName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCloudIoTRegistryExists(
 						"google_cloudiot_registry.foobar"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCloudIoTRegistry_extended(registryName),
 			},
-			resource.TestStep{
+			{
 				Config: testAccCloudIoTRegistry_basic(registryName),
 			},
 			{
@@ -168,14 +168,12 @@ resource "google_cloudiot_registry" "foobar" {
     mqtt_enabled_state = "MQTT_DISABLED"
   }
 
-  credentials = [
-    {
-      "public_key_certificate" = {
-        format      = "X509_CERTIFICATE_PEM"
-        certificate = "${file("test-fixtures/rsa_cert.pem")}"
-      }
-    },
-  ]
+  credentials {
+    public_key_certificate = {
+      format      = "X509_CERTIFICATE_PEM"
+      certificate = "${file("test-fixtures/rsa_cert.pem")}"
+    }
+  }
 }
 `, acctest.RandString(10), acctest.RandString(10), registryName)
 }

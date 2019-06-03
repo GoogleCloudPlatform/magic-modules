@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Resource Manager
-prefix: gresourcemanager
+name: ResourceManager
+display_name: Resource Manager
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -21,6 +21,10 @@ versions:
 scopes:
   # All access is needed to create projects.
   - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Resource Manager API
+    url: https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Project'
@@ -46,8 +50,6 @@ objects:
       error: !ruby/object:Api::Async::Error
         path: 'error'
         message: 'message'
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'projects'
     parameters:
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -112,17 +114,16 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Lien'
     base_url: liens
-    exclude: true
     # This resource has some issues - it returns a list when you query for it.
     # You can't use the same URL for GET and DELETE.  This here is the URL that
     # we use for GET, and the DELETE is in custom code.  If this happens a lot,
     # we might build a more general solution, but this is the only resource I know
     # of where that happens.
     self_link: liens?parent={{parent}}
-    self_link_query: !ruby/object:Api::Resource::ResponseList
-      # This isn't a real 'kind' - this API has some inconsistencies and doesn't return one.
+    nested_query: !ruby/object:Api::Resource::NestedQuery
       kind: 'resourceManager#liensList'
-      items: 'liens'
+      keys:
+        - liens
     identity:
       - name
     description: A Lien represents an encumbrance on the actions that can be performed on a resource.
@@ -172,3 +173,89 @@ objects:
         name: 'createTime'
         description: 'Time of creation'
         output: true
+  - !ruby/object:Api::Resource
+    name: 'Folder'
+    base_url: 'folders?parent={{parent}}'
+    self_link: '{{name}}'
+    description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: parent
+        input: true
+        required: true
+        description: |
+          The Folder’s parent's resource name. Updates to the folder's parent
+          must be performed via folders.move.
+      - !ruby/object:Api::Type::String
+        name: displayName
+        description: |
+          The folder’s display name. A folder’s display name must be unique
+          amongst its siblings, e.g. no two folders with the same parent can
+          share the same display name. The display name must start and end with
+          a letter or digit, may contain letters, digits, spaces, hyphens and
+          underscores and can be no longer than 30 characters. This is captured
+          by the regular expression: `[\p{L}\p{N}]([\p{L}\p{N}_- ]{0,28}[\p{L}\p{N}])?`.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the Folder. Its format is folders/{folder_id},
+          for example: "folders/1234".
+      - !ruby/object:Api::Type::Enum
+        name: 'lifecycleState'
+        description: |
+          The lifecycle state of the folder. Updates to the lifecycleState
+          must be performed via folders.delete and folders.undelete.
+        output: true
+        values:
+          - :LIFECYCLE_STATE_UNSPECIFIED
+          - :ACTIVE
+          - :DELETE_REQUESTED
+      - !ruby/object:Api::Type::Time
+        name: 'createTime'
+        description: 'Time of creation'
+        output: true
+  - !ruby/object:Api::Resource
+    name: 'Organization'
+    base_url: 'organizations'
+    collection_url: organizations:search
+    description: A Folder in an Organization's resource hierarchy, used to organize that Organization's resources.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          The resource name of the organization. This is the organization's relative path in the API.
+          Its format is "organizations/[organizationId]". For example, "organizations/1234".
+      - !ruby/object:Api::Type::String
+        name: displayName
+        output: true
+        description: |
+          A human-readable string that refers to the Organization in the GCP Console UI.
+          This string is set by the server and cannot be changed. The string will be set
+          to the primary domain (for example, "google.com") of the G Suite customer that
+          owns the organization.
+      - !ruby/object:Api::Type::Enum
+        name: 'lifecycleState'
+        description: |
+          The lifecycle state of the folder. Updates to the lifecycleState
+          must be performed via folders.delete and folders.undelete.
+        output: true
+        values:
+          - :LIFECYCLE_STATE_UNSPECIFIED
+          - :ACTIVE
+          - :DELETE_REQUESTED
+      - !ruby/object:Api::Type::Time
+        name: 'creationTime'
+        output: true
+        description: |
+          Timestamp when the Organization was created. Assigned by the server.
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'owner'
+        description: The entity that owns the Organization
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'directoryCustomerId'
+            description: The G Suite customer id used in the Directory API

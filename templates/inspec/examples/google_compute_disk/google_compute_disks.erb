@@ -1,0 +1,7 @@
+<% gcp_compute_disk_image = "#{external_attribute('gcp_compute_disk_image', doc_generation).gsub('\'', '')}" -%>
+most_recent_image = google_compute_image(project: <%= doc_generation ? "'#{gcp_compute_disk_image.split('/').first}'" : "gcp_compute_disk_image.split('/').first" -%>, name: <%= doc_generation ? "'#{gcp_compute_disk_image.split('/').last}'" : "gcp_compute_disk_image.split('/').last" -%>)
+describe google_compute_disks(project: <%= "#{external_attribute('gcp_project_id', doc_generation)}" -%>, zone: <%= "#{external_attribute('gcp_zone', doc_generation)}" -%>) do
+  it { should exist }
+  its('names') { should include <%= "#{external_attribute('gcp_compute_disk_name', doc_generation)}" -%> }
+  its('source_images') { should include most_recent_image.self_link }
+end

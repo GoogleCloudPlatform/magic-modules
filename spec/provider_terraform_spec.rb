@@ -24,9 +24,9 @@ describe Provider::Terraform do
   context 'good file product' do
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
     let(:config) do
-      Provider::Config.parse('spec/data/terraform-config.yaml', product)
+      Provider::Config.parse('spec/data/terraform-config.yaml', product)[1]
     end
-    let(:provider) { Provider::Terraform.new(config, product) }
+    let(:provider) { Provider::Terraform.new(config, product, Time.now) }
     let(:resource) { product.objects[0] }
 
     before do
@@ -63,7 +63,7 @@ describe Provider::Terraform do
     end
 
     describe '#collection_url' do
-      subject { provider.build_url(resource.collection_url) }
+      subject { resource.collection_url }
       it do
         version = product.version_obj_or_default(nil)
         product.set_properties_based_on_version(version)
@@ -72,7 +72,7 @@ describe Provider::Terraform do
     end
 
     describe '#collection_url beta' do
-      subject { provider.build_url(resource.collection_url) }
+      subject { resource.collection_url }
       it do
         version = product.version_obj_or_default('beta')
         product.set_properties_based_on_version(version)
@@ -81,7 +81,7 @@ describe Provider::Terraform do
     end
 
     describe '#self_link_url' do
-      subject { provider.build_url(resource.self_link_url) }
+      subject { resource.self_link_url }
       it do
         version = product.version_obj_or_default(nil)
         product.set_properties_based_on_version(version)
@@ -92,7 +92,7 @@ describe Provider::Terraform do
     end
 
     describe '#self_link_url beta' do
-      subject { provider.build_url(resource.self_link_url) }
+      subject { resource.self_link_url }
       it do
         version = product.version_obj_or_default('beta')
         product.set_properties_based_on_version(version)

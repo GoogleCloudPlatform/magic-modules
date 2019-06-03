@@ -1,0 +1,151 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: Tpu
+display_name: Google Cloud TPU
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://tpu.googleapis.com/v1/
+    default: true
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::Async
+  operation: !ruby/object:Api::Async::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::Async::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::Async::Status
+    path: 'done'
+    complete: true
+    allowed:
+      - true
+      - false
+  error: !ruby/object:Api::Async::Error
+    path: 'error'
+    message: 'message'
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Node'
+    input: true
+    base_url: projects/{{project}}/locations/{{zone}}/nodes
+    create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
+    self_link: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
+    description: |
+      A Cloud TPU instance.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation':
+          'https://cloud.google.com/tpu/docs/'
+      api: 'https://cloud.google.com/tpu/docs/reference/rest/'
+    parameters:
+      - !ruby/object:Api::Type::String # TODO: resourceref?
+        name: 'zone'
+        description: |
+          The GCP location for the TPU.
+        required: true
+        input: true
+        url_param_only: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        required: true
+        input: true
+        description: |
+          The immutable name of the TPU.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        input: true
+        description: |
+          The user-supplied description of the TPU. Maximum of 512 characters.
+      - !ruby/object:Api::Type::String
+        name: 'acceleratorType'
+        required: true
+        input: true
+        description: |
+          The type of hardware accelerators associated with this node.
+      - !ruby/object:Api::Type::String
+        name: 'tensorflowVersion'
+        required: true
+        update_url: 'projects/{{project}}/locations/{{zone}}/nodes/{{name}}:reimage'
+        update_verb: :POST
+        description: |
+          The version of Tensorflow running in the Node.
+      - !ruby/object:Api::Type::String
+        name: 'network'
+        input: true
+        description: |
+          The name of a network to peer the TPU node to. It must be a
+          preexisting Compute Engine network inside of the project on which
+          this API has been activated. If none is provided, "default" will be
+          used.
+      - !ruby/object:Api::Type::String
+        name: 'cidrBlock'
+        required: true
+        input: true
+        description: |
+          The CIDR block that the TPU node will use when selecting an IP
+          address. This CIDR block must be a /29 block; the Compute Engine
+          networks API forbids a smaller block, and using a larger block would
+          be wasteful (a node can only consume one IP address).
+
+          Errors will occur if the CIDR block has already been used for a
+          currently existing TPU node, the CIDR block conflicts with any
+          subnetworks in the user's provided network, or the provided network
+          is peered with another network that is using that CIDR block.
+      - !ruby/object:Api::Type::String
+        name: 'serviceAccount'
+        output: true
+        description: |
+          The service account used to run the tensor flow services within the
+          node. To share resources, including Google Cloud Storage data, with
+          the Tensorflow job running in the Node, this account must have
+          permissions to that data.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'schedulingConfig'
+        input: true
+        description: |
+          Sets the scheduling options for this TPU instance.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'preemptible'
+            description: |
+              Defines whether the TPU instance is preemptible.
+            default_value: false
+      - !ruby/object:Api::Type::Array
+        name: 'networkEndpoints'
+        output: true
+        description: |
+          The network endpoints where TPU workers can be accessed and sent work.
+          It is recommended that Tensorflow clients of the node first reach out
+          to the first (index 0) entry.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              output: true
+              description: |
+                The IP address of this network endpoint.
+            - !ruby/object:Api::Type::Integer
+              name: 'port'
+              output: true
+              description: |
+                The port of this network endpoint.
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        input: true
+        description: Resource labels to represent user provided metadata.

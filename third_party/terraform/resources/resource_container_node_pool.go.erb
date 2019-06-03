@@ -37,27 +37,36 @@ func resourceContainerNodePool() *schema.Resource {
 		Schema: mergeSchemas(
 			schemaNodePool,
 			map[string]*schema.Schema{
-				"project": &schema.Schema{
+				"project": {
 					Type:     schema.TypeString,
 					Optional: true,
 					Computed: true,
 					ForceNew: true,
 				},
-				"zone": &schema.Schema{
-					Type:     schema.TypeString,
-					Optional: true,
-					Computed: true,
-					ForceNew: true,
-				},
-				"cluster": &schema.Schema{
+				"cluster": {
 					Type:     schema.TypeString,
 					Required: true,
 					ForceNew: true,
 				},
-				"region": &schema.Schema{
+				"zone": {
 					Type:       schema.TypeString,
 					Optional:   true,
+					Computed:   true,
+					Deprecated: "use location instead",
 					ForceNew:   true,
+				},
+				"region": {
+					Type:       schema.TypeString,
+					Optional:   true,
+					Computed:   true,
+					Deprecated: "use location instead",
+					ForceNew:   true,
+				},
+				"location": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
 				},
 			}),
 	}
@@ -142,8 +151,6 @@ var schemaNodePool = map[string]*schema.Schema{
 		Optional: true,
 		Computed: true,
 		ForceNew: true,
-		Removed: "Use the random provider instead. See migration instructions at " +
-			"https://github.com/terraform-providers/terraform-provider-google/issues/1054#issuecomment-377390209",
 	},
 
 	"node_config": schemaNodeConfig,
@@ -254,9 +261,9 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId(fmt.Sprintf("%s/%s/%s", nodePoolInfo.location, nodePoolInfo.cluster, nodePool.Name))
 
-	waitErr := containerBetaOperationWait(config,
+	waitErr := containerOperationWait(config,
 		operation, nodePoolInfo.project,
-		nodePoolInfo.location, "creating GKE NodePool", int(timeout.Minutes()), 3)
+		nodePoolInfo.location, "creating GKE NodePool", int(timeout.Minutes()))
 
 	if waitErr != nil {
 		// The resource didn't actually create
@@ -312,6 +319,7 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 		d.Set("region", nodePoolInfo.location)
 	}
 
+	d.Set("location", nodePoolInfo.location)
 	d.Set("project", nodePoolInfo.project)
 
 	return nil
@@ -372,7 +380,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	}
 
 	// Wait until it's deleted
-	waitErr := containerBetaOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "deleting GKE NodePool", timeoutInMinutes, 2)
+	waitErr := containerOperationWait(config, op, nodePoolInfo.project, nodePoolInfo.location, "deleting GKE NodePool", timeoutInMinutes)
 	if waitErr != nil {
 		return waitErr
 	}
@@ -417,6 +425,7 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 			d.Set("region", location)
 		}
 
+		d.Set("location", location)
 		d.Set("cluster", parts[1])
 		d.Set("name", parts[2])
 	case 4:
@@ -429,13 +438,14 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 			d.Set("region", location)
 		}
 
+		d.Set("location", location)
 		d.Set("cluster", parts[2])
 		d.Set("name", parts[3])
 
 		// override the inputted ID with the <location>/<cluster>/<name> format
 		d.SetId(strings.Join(parts[1:], "/"))
 	default:
-		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {zone}/{cluster}/{name} or {project}/{zone}/{cluster}/{name}")
+		return nil, fmt.Errorf("Invalid container cluster specifier. Expecting {location}/{cluster}/{name} or {project}/{location}/{cluster}/{name}")
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -444,7 +454,12 @@ func resourceContainerNodePoolStateImporter(d *schema.ResourceData, meta interfa
 func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodePool, error) {
 	var name string
 	if v, ok := d.GetOk(prefix + "name"); ok {
+		if _, ok := d.GetOk(prefix + "name_prefix"); ok {
+			return nil, fmt.Errorf("Cannot specify both name and name_prefix for a node_pool")
+		}
 		name = v.(string)
+	} else if v, ok := d.GetOk(prefix + "name_prefix"); ok {
+		name = resource.PrefixedUniqueId(v.(string))
 	} else {
 		name = resource.UniqueId()
 	}
@@ -477,7 +492,7 @@ func expandNodePool(d *schema.ResourceData, prefix string) (*containerBeta.NodeP
 		}
 	}
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	if v, ok := d.GetOk(prefix + "max_pods_per_node"); ok {
 		np.MaxPodsConstraint = &containerBeta.MaxPodsConstraint{
 			MaxPodsPerNode: int64(v.(int)),
@@ -520,6 +535,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 	}
 	nodePool := map[string]interface{}{
 		"name":                np.Name,
+		"name_prefix":         d.Get(prefix + "name_prefix"),
 		"initial_node_count":  np.InitialNodeCount,
 		"node_count":          size / len(np.InstanceGroupUrls),
 		"node_config":         flattenNodeConfig(np.Config),
@@ -536,7 +552,7 @@ func flattenNodePool(d *schema.ResourceData, config *Config, np *containerBeta.N
 		}
 	}
 
-	<% unless version.nil? || version == 'ga' -%>
+	<% unless version == 'ga' -%>
 	if np.MaxPodsConstraint != nil {
 		nodePool["max_pods_per_node"] = np.MaxPodsConstraint.MaxPodsPerNode
 	}
@@ -588,10 +604,10 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 
 			// Wait until it's updated
-			return containerBetaOperationWait(config, op,
+			return containerOperationWait(config, op,
 				nodePoolInfo.project,
 				nodePoolInfo.location, "updating GKE node pool",
-				timeoutInMinutes, 2)
+				timeoutInMinutes)
 		}
 
 		// Call update serially.
@@ -622,10 +638,10 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 				}
 
 				// Wait until it's updated
-				return containerBetaOperationWait(config, op,
+				return containerOperationWait(config, op,
 					nodePoolInfo.project,
 					nodePoolInfo.location, "updating GKE node pool",
-					timeoutInMinutes, 2)
+					timeoutInMinutes)
 			}
 
 			// Call update serially.
@@ -654,10 +670,10 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 
 			// Wait until it's updated
-			return containerBetaOperationWait(config, op,
+			return containerOperationWait(config, op,
 				nodePoolInfo.project,
 				nodePoolInfo.location, "updating GKE node pool size",
-				timeoutInMinutes, 2)
+				timeoutInMinutes)
 		}
 
 		// Call update serially.
@@ -693,9 +709,9 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 
 			// Wait until it's updated
-			return containerBetaOperationWait(config, op,
+			return containerOperationWait(config, op,
 				nodePoolInfo.project,
-				nodePoolInfo.location, "updating GKE node pool management", timeoutInMinutes, 2)
+				nodePoolInfo.location, "updating GKE node pool management", timeoutInMinutes)
 		}
 
 		// Call update serially.
@@ -713,7 +729,7 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 	if d.HasChange(prefix + "version") {
 		req := &containerBeta.UpdateNodePoolRequest{
 			NodePoolId:  name,
-			NodeVersion: d.Get("version").(string),
+			NodeVersion: d.Get(prefix + "version").(string),
 		}
 		updateF := func() error {
 			op, err := config.clientContainerBeta.Projects.
@@ -724,9 +740,9 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 			}
 
 			// Wait until it's updated
-			return containerBetaOperationWait(config, op,
+			return containerOperationWait(config, op,
 				nodePoolInfo.project,
-				nodePoolInfo.location, "updating GKE node pool version", timeoutInMinutes, 2)
+				nodePoolInfo.location, "updating GKE node pool version", timeoutInMinutes)
 		}
 
 		// Call update serially.
@@ -745,5 +761,6 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 }
 
 func getNodePoolName(id string) string {
+	// name can be specified with name, name_prefix, or neither, so read it from the id.
 	return strings.Split(id, "/")[2]
 }

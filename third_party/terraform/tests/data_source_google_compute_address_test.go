@@ -81,7 +81,7 @@ func TestAccDataSourceComputeAddress(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDataSourceComputeAddressDestroy(rsFullName),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDataSourceComputeAddressConfig(rsName, dsName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceComputeAddressCheck(dsFullName, rsFullName),
@@ -141,6 +141,9 @@ func testAccCheckDataSourceComputeAddressDestroy(resource_name string) resource.
 		}
 
 		addressId, err := parseComputeAddressId(rs.Primary.ID, nil)
+		if err != nil {
+			return err
+		}
 
 		_, err = config.clientCompute.Addresses.Get(
 			config.Project, addressId.Region, addressId.Name).Do()

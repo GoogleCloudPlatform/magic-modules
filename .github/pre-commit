@@ -1,0 +1,16 @@
+#!/bin/sh
+
+FILES=`git diff --cached --name-status | awk '$1 != "D" { print $2 }'`
+RUBO=""
+
+for FILE in $FILES ; do
+  if [[ $FILE == *.rb ]]; then
+    RUBO=1
+  fi
+done
+
+if [ $RUBO ]
+then
+  echo "ruby file changed, running rubocop"
+  bundle exec rake rubocop
+fi

@@ -15,35 +15,6 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-func TestAccComputeFirewall_basic(t *testing.T) {
-	t.Parallel()
-
-	var firewall compute.Firewall
-	networkName := fmt.Sprintf("firewall-test-%s", acctest.RandString(10))
-	firewallName := fmt.Sprintf("firewall-test-%s", acctest.RandString(10))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeFirewallDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeFirewall_basic(networkName, firewallName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeFirewallExists(
-						"google_compute_firewall.foobar", &firewall),
-					testAccCheckComputeFirewallApiVersion(&firewall),
-				),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_firewall.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccComputeFirewall_update(t *testing.T) {
 	t.Parallel()
 
@@ -284,7 +255,7 @@ func TestAccComputeFirewall_disabled(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeFirewall_enableLogging(t *testing.T) {
 	t.Parallel()
 
@@ -357,6 +328,7 @@ func testAccCheckComputeFirewallExists(n string, firewall *compute.Firewall) res
 	}
 }
 
+<% unless version == 'ga' -%>
 func testAccCheckComputeBetaFirewallExists(n string, firewall *computeBeta.Firewall) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -385,6 +357,7 @@ func testAccCheckComputeBetaFirewallExists(n string, firewall *computeBeta.Firew
 		return nil
 	}
 }
+<% end -%>
 
 func testAccCheckComputeFirewallHasPriority(firewall *compute.Firewall, priority int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -447,18 +420,6 @@ func testAccCheckComputeFirewallServiceAccounts(sourceSa, targetSa string, firew
 	}
 }
 
-func testAccCheckComputeFirewallBetaApiVersion(firewall *computeBeta.Firewall) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// The self-link of the network field is used to determine which API was used when fetching
-		// the state from the API.
-		if !strings.Contains(firewall.Network, "compute/beta") {
-			return fmt.Errorf("firewall beta API was not used")
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckComputeFirewallApiVersion(firewall *compute.Firewall) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// The self-link of the network field is used to determine which API was used when fetching
@@ -471,7 +432,7 @@ func testAccCheckComputeFirewallApiVersion(firewall *compute.Firewall) resource.
 	}
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccCheckComputeFirewallLoggingEnabled(firewall *computeBeta.Firewall, enabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if firewall == nil || firewall.EnableLogging != enabled {
@@ -657,7 +618,7 @@ func testAccComputeFirewall_disabled(network, firewall string) string {
 	}`, network, firewall)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeFirewall_enableLogging(network, firewall string, enableLogging bool) string {
 	enableLoggingCfg := ""
 	if enableLogging {

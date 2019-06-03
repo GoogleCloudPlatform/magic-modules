@@ -14,25 +14,62 @@
 # TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
-name: Google Cloud IAM
-prefix: giam
+name: Iam
+display_name: Cloud IAM
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://iam.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/iam
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Identity and Access Management (IAM) API
+    url: https://console.cloud.google.com/apis/library/iam.googleapis.com/
 objects:
+  - !ruby/object:Api::Resource
+    name: 'Role'
+    base_url: projects/{{project}}/roles
+    description: |
+      A role in the Identity and Access Management API
+    update_mask: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: The name of the role.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'title'
+        description: |
+          A human-readable title for the role. Typically this is limited to 100
+          UTF-8 bytes.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: "Human-readable description for the role"
+      - !ruby/object:Api::Type::Array
+        name: 'includedPermissions'
+        description: Names of permissions this role grants when bound in an IAM policy.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::Enum
+        name: 'stage'
+        description: The current launch stage of the role.
+        values:
+          - :ALPHA
+          - :BETA
+          - :GA
+          - :DEPRECATED
+          - :DISABLED
+          - :EAP
+      - !ruby/object:Api::Type::Boolean
+        name: 'deleted'
+        description: The current deleted state of the role
+        output: true
   - !ruby/object:Api::Resource
     name: 'ServiceAccount'
     base_url: projects/{{project}}/serviceAccounts
-    transport: !ruby/object:Api::Resource::Transport
-      encoder: encode_request
-      decoder: decode_response
+    collection_url_key: 'items'
     description: |
       A service account in the Identity and Access Management API.
-    exports:
-      - name
     properties:
       - !ruby/object:Api::Type::String
         name: name
@@ -60,8 +97,6 @@ objects:
   - !ruby/object:Api::Resource
     name: 'ServiceAccountKey'
     base_url: projects/{{project}}/serviceAccounts/{{service_account}}/keys
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_response
     description: |
       A service account in the Identity and Access Management API.
     parameters:
@@ -71,7 +106,7 @@ objects:
         resource: ServiceAccount
         imports: name
       # A non-API property to allow writing results to a specific output file.
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Path
         name: path
         description: |
           The full name of the file that will hold the service account private
@@ -79,17 +114,6 @@ objects:
           sync_file parameter.
 
           File path must be absolute.
-      # A non-API property to allow writing results to a specific output file.
-      - !ruby/object:Api::Type::String
-        name: key_id
-        description: |
-          Used to ensure the deletion of the key in the absence of a key file.
-      - !ruby/object:Api::Type::Boolean
-        name: fail_if_mismatch
-        description: |
-          If set to 'true' protects the target file from being rewritten with a
-          new private key. By default the file is always ensured to have a valid
-          private key on final state.
     properties:
       - !ruby/object:Api::Type::String
         name: name

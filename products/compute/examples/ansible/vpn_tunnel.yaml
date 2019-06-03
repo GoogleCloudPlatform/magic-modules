@@ -16,7 +16,7 @@ dependencies:
     name: gcp_compute_network
     register: network
     code:
-      name: <%= dependency_name('network', 'vpn_tunnel') %>
+      name: <%= dependency_name('network', 'vpn-tunnel') %>
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
       service_account_file: <%= ctx[:service_account_file] %>
@@ -24,7 +24,7 @@ dependencies:
     name: gcp_compute_router
     register: router
     code:
-      name: <%= dependency_name('router', 'vpn_tunnel') %>
+      name: <%= dependency_name('router', 'vpn-tunnel') %>
       network: "{{ network }}"
       bgp:
         asn: 64514
@@ -42,7 +42,7 @@ dependencies:
     name: gcp_compute_target_vpn_gateway
     register: gateway
     code:
-      name: <%= dependency_name('gateway', 'vpn_tunnel') %>
+      name: <%= dependency_name('gateway', 'vpn-tunnel') %>
       region: us-west1
       network: "{{ network }}"
       project: <%= ctx[:project] %>

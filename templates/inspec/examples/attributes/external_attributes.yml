@@ -1,0 +1,12 @@
+gcp_project_id: chef-gcp-inspec
+gcp_zone: 'zone'
+gcp_compute_disk_name: 'my_disk'
+gcp_compute_disk_image: 'debian/debian-8-jessie-v20170523'
+gcp_compute_disk_type: 'pd-standard'
+gcp_lb_mig1_name: 'gcp-managed-group-name'
+gcp_ext_vm_name: 'gcp_ext_vm_name'
+gcp_location: europe-west2
+gcp_network_name: gcp-inspec-network
+gcp_organization_id: 190694428152
+gcp_storage_bucket_name: gcp-inspec-storage-bucket
+gcp_cloud_function_region: europe-west1

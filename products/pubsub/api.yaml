@@ -12,14 +12,18 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Pub/Sub
-prefix: gpubsub
+name: Pubsub
+display_name: Cloud Pub/Sub
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://pubsub.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/pubsub
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Pub/Sub API
+    url: https://console.cloud.google.com/apis/library/pubsub.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Topic'
@@ -27,16 +31,24 @@ objects:
     create_verb: :PUT
     description: |
       A named resource to which messages are sent by publishers.
-    exports:
-      - name
+    input: true
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
+      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        required: true
         description: 'Name of the topic.'
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_request
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'topics'
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this Topic.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Managing Topics':
+          'https://cloud.google.com/pubsub/docs/admin#managing_topics'
+      api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.topics'
   - !ruby/object:Api::Resource
     name: 'Subscription'
     base_url: projects/{{project}}/subscriptions
@@ -44,21 +56,35 @@ objects:
     description: |
       A named resource representing the stream of messages from a single,
       specific topic, to be delivered to the subscribing application.
-    input: true
-    transport: !ruby/object:Api::Resource::Transport
-      decoder: decode_request
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'subscriptions'
+    update_verb: :PATCH
+    update_mask: true
+    update_url: projects/{{project}}/subscriptions/{{name}}
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Managing Subscriptions':
+          'https://cloud.google.com/pubsub/docs/admin#managing_subscriptions'
+      api: 'https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions'
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: true
+      method_name_separator: ':'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'Name of the subscription.'
+        required: true
+        input: true
       - !ruby/object:Api::Type::ResourceRef
         name: 'topic'
         resource: 'Topic'
         imports: 'name'
         description: |
           A reference to a Topic resource.
+        required: true
+        input: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          A set of key/value label pairs to assign to this Subscription.
       - !ruby/object:Api::Type::NestedObject
         name: 'pushConfig'
         description: |
@@ -72,6 +98,33 @@ objects:
               A URL locating the endpoint to which messages should be pushed.
               For example, a Webhook endpoint might use
               "https://example.com/push".
+            required: true
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'attributes'
+            description: |
+              Endpoint configuration attributes.
+
+              Every endpoint has a set of API supported attributes that can
+              be used to control different aspects of the message delivery.
+
+              The currently supported attribute is x-goog-version, which you
+              can use to change the format of the pushed message. This
+              attribute indicates the version of the data expected by
+              the endpoint. This controls the shape of the pushed message
+              (i.e., its fields and metadata). The endpoint version is
+              based on the version of the Pub/Sub API.
+
+              If not present during the subscriptions.create call,
+              it will default to the version of the API used to make
+              such call. If not present during a subscriptions.modifyPushConfig
+              call, its value will not be changed. subscriptions.get
+              calls will always return a valid version, even if the
+              subscription was created without this attribute.
+
+              The possible values for this attribute are:
+
+              - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
+              - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
       - !ruby/object:Api::Type::Integer
         name: 'ackDeadlineSeconds'
         description: |
@@ -93,3 +146,45 @@ objects:
 
           If the subscriber never acknowledges the message, the Pub/Sub system
           will eventually redeliver the message.
+      - !ruby/object:Api::Type::String
+        name: 'messageRetentionDuration'
+        default_value: '604800s'
+        description: |
+          How long to retain unacknowledged messages in the subscription's
+          backlog, from the moment a message is published. If
+          retainAckedMessages is true, then this also configures the retention
+          of acknowledged messages, and thus configures how far back in time a
+          subscriptions.seek can be done. Defaults to 7 days. Cannot be more
+          than 7 days (`"604800s"`) or less than 10 minutes (`"600s"`).
+
+          A duration in seconds with up to nine fractional digits, terminated
+          by 's'. Example: `"600.5s"`.
+      - !ruby/object:Api::Type::Boolean
+        name: 'retainAckedMessages'
+        description: |
+          Indicates whether to retain acknowledged messages. If `true`, then
+          messages are not expunged from the subscription's backlog, even if
+          they are acknowledged, until they fall out of the
+          messageRetentionDuration window.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'expirationPolicy'
+        allow_empty_object: true
+        send_empty_value: true
+        description: |
+          A policy that specifies the conditions for this subscription's expiration.
+          A subscription is considered active as long as any connected subscriber
+          is successfully consuming messages from the subscription or is issuing
+          operations on the subscription. If expirationPolicy is not set, a default
+          policy with ttl of 31 days will be used. The minimum allowed value for
+          expirationPolicy.ttl is 1 day.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'ttl'
+            description: |
+              Specifies the "time-to-live" duration for an associated resource. The
+              resource expires if it is not active for a period of ttl. The definition
+              of "activity" depends on the type of the associated resource. The minimum
+              and maximum allowed values for ttl depend on the type of the associated
+              resource, as well. If ttl is not set, the associated resource never expires.
+              A duration in seconds with up to nine fractional digits, terminated by 's'.
+              Example - "3.5s".

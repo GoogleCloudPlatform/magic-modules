@@ -1,0 +1,37 @@
+---
+:facts:
+  :Topic:
+    :version_added: '2.8'
+  :Subscription:
+    :version_added: '2.8'
+:regular:
+  :Topic:
+    :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :labels:
+      :version_added: '2.8'
+  :Subscription:
+    :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :topic:
+      :version_added: '2.6'
+    :labels:
+      :version_added: '2.8'
+    :pushConfig:
+      :version_added: '2.6'
+      :pushEndpoint:
+        :version_added: '2.6'
+      :attributes:
+        :version_added: '2.6'
+    :ackDeadlineSeconds:
+      :version_added: '2.6'
+    :messageRetentionDuration:
+      :version_added: '2.8'
+    :retainAckedMessages:
+      :version_added: '2.8'
+    :expirationPolicy:
+      :version_added: '2.9'
+      :ttl:
+        :version_added: '2.9'

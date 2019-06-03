@@ -1,0 +1,24 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% dataset = grab_attributes['dataset'] -%>
+describe google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>) do
+  it { should exist }
+
+  its('friendly_name') { should eq <%= doc_generation ? "'#{dataset['friendly_name']}'" : "dataset['friendly_name']" -%> }
+  its('location') { should eq <%= doc_generation ? "'#{dataset['location']}'" : "dataset['location']" -%> }
+  its('description') { should eq <%= doc_generation ? "'#{dataset['description']}'" : "dataset['description']" -%> }
+  its('name') { should eq <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%> }
+  its('default_table_expiration_ms') { should cmp <%= doc_generation ? "'#{dataset['default_table_expiration_ms']}'" : "dataset['default_table_expiration_ms']" -%> }
+end
+
+describe.one do
+  google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>).access.each do |dataset_access|
+    describe dataset_access do
+      its('role') { should eq <%= doc_generation ? "'#{dataset['access_writer_role']}'" : "dataset['access_writer_role']" -%> }
+      its('special_group') { should eq <%= doc_generation ? "'#{dataset['access_writer_special_group']}'" : "dataset['access_writer_special_group']" -%> }
+    end
+  end
+end
+
+describe google_bigquery_dataset(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

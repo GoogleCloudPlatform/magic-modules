@@ -23,7 +23,7 @@ resource "google_bigquery_dataset" "default" {
   location                    = "EU"
   default_table_expiration_ms = 3600000
 
-  labels {
+  labels = {
     env = "default"
   }
 }
@@ -36,7 +36,7 @@ resource "google_bigquery_table" "default" {
     type = "DAY"
   }
 
-  labels {
+  labels = {
     env = "default"
   }
 
@@ -87,6 +87,10 @@ The `time_partitioning` block supports:
 
 * `type` - (Required) The only type supported is DAY, which will generate
     one partition per day based on data loading time.
+
+* `require_partition_filter` - (Optional) If set to true, queries over this table
+    require a partition filter that can be used for partition elimination to be
+    specified.
 
 The `view` block supports:
 

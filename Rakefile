@@ -25,38 +25,10 @@ PROVIDER_FOLDERS = {
 require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
 require 'tempfile'
-
-# Requires for YAML linting.
-require 'api/async'
-require 'api/bundle'
-require 'api/product'
-require 'api/resource'
-require 'api/type'
-require 'compile/core'
-require 'google/yaml_validator'
+require 'erb_lint/cli'
 
 RSpec::Core::RakeTask.new(:spec)
 RuboCop::RakeTask.new
-
-# YAML Linting
-# This class calls our provider code to get the printed contents of the
-# compiled YAML. We run the linter on this printed version (so, no embedded
-# ERB)
-class YamlLinter
-  include Compile::Core
-
-  def yaml_contents(file)
-    source = compile(file)
-    config = Google::YamlValidator.parse(source)
-    unless config.class <= Api::Product
-      raise StandardError, "#{file} is #{config.class}"\
-        ' instead of Api::Product' \
-    end
-    # Compile step #2: Now that we have the target class, compile with that
-    # class features
-    config.compile(file, 0)
-  end
-end
 
 # Handles finding the list of products for a given provider.
 class Providers
@@ -95,20 +67,24 @@ class Providers
   end
 end
 
+# API Linter Tasks
+desc 'Runs the API Linter'
+RSpec::Core::RakeTask.new(:lint) do |t|
+  t.rspec_opts = '--pattern tools/linter/run.rb'
+end
+
 # Test Tasks
 desc 'Run all of the MM tests (rubocop, rspec)'
-multitask test: %w[rubocop spec]
+multitask test: %w[rubocop spec erblint]
 
-desc 'Lints all of the compiled YAML files'
-task :yamllint do
-  Providers.all_products.each do |file|
-    tempfile = Tempfile.new
-    tempfile.write(YamlLinter.new.yaml_contents(file))
-    tempfile.rewind
-    puts %x(yamllint -c #{File.join(File.dirname(__FILE__), '.yamllint')} #{tempfile.path})
-    tempfile.close
-    tempfile.unlink
-  end
+desc 'Lints all of the ERB templates'
+task :erblint do
+  current_directory = File.dirname(__FILE__)
+  ERBLint::CLI.new.run([
+                         '--config',
+                         current_directory + '/.erb-lint.yml',
+                         current_directory + '/templates/**/*.erb'
+                       ])
 end
 
 # Compiling Tasks

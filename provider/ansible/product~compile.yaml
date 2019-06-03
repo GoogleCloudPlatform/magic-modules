@@ -15,23 +15,24 @@
 
 <% unless config.nil? -%>
 <%
-  version = api.version_obj_or_default(_version_name)
+  return unless api.objects.first.__product
+  version = api.version_obj_or_default(version_name)
   # Overrides have not been assembled yet.
   overrides = config.overrides
   excludes = overrides.instance_variables
-                      .select { |x| overrides.instance_variable_get(x).exclude }
+                      .select { |x| overrides.instance_variable_get(x).instance_variable_get('@exclude') }
                       .map { |x| x.to_s.tr(':@', '') }
   object_names = api.objects
+                    .reject { |o| o.exclude }
+                    .reject { |o| o.not_in_version?(version) }
                     .select { |o| !excludes.include?(o.name) }
-                    .select { |o| !o.exclude_if_not_in_version(version) }
                     .map do |object|
-                      ["gcp_#{object.__product.prefix[1..-1]}",
+                      ["gcp_#{object.__product.api_name}",
                        object.name.underscore].join('_')
                     end
 -%>
 <% object_names.each do |obj_name| -%>
 'test/integration/targets/<%= obj_name -%>/aliases': 'templates/ansible/aliases'
-'test/integration/targets/<%= obj_name -%>/defaults/main.yml': 'templates/ansible/defaults_main.yaml'
 'test/integration/targets/<%= obj_name -%>/meta/main.yml': 'provider/ansible/blank_file.yaml'
 <% end -%>
 

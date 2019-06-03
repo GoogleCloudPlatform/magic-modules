@@ -25,16 +25,15 @@ module Provider
       end
 
       def resource_override
-        Provider::Ansible::ResourceOverride
+        Overrides::Ansible::ResourceOverride
       end
 
       def property_override
-        Provider::Ansible::PropertyOverride
+        Overrides::Ansible::PropertyOverride
       end
 
       def validate
         super
-        check_optional_property :manifest, Provider::Ansible::Manifest
       end
     end
   end

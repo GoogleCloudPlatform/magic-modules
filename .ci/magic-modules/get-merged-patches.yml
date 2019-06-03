@@ -12,8 +12,8 @@ image_resource:
     source:
         # This task requires a container with python and the pip
         # package 'pygithub'.
-        repository: nmckinley/python
-        tag: 'v0.0.2'
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
 
 inputs:
     - name: magic-modules
@@ -25,4 +25,4 @@ params:
   GH_TOKEN: ""
 
 run:
-    path: magic-modules/.ci/magic-modules/download_patches.py
+    path: magic-modules/.ci/magic-modules/get_merged_patches.py

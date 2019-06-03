@@ -8,21 +8,29 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccComputeVpnTunnel_basic(t *testing.T) {
+func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 	t.Parallel()
+	region := "us-central1"
+	if getTestRegionFromEnv() == region {
+		// Make sure we choose a region that isn't the provider default
+		// in order to test getting the region from the gateway and not the
+		// provider.
+		region = "us-west1"
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeVpnTunnel_basic(),
+			{
+				Config: testAccComputeVpnTunnel_regionFromGateway(region),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/%s/", getTestProjectFromEnv(), region),
 				ImportStateVerifyIgnore: []string{"shared_secret"},
 			},
 		},
@@ -38,10 +46,10 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeVpnTunnelRouter(router),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -59,10 +67,10 @@ func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeVpnTunnelDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(),
 			},
-			resource.TestStep{
+			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
@@ -72,16 +80,17 @@ func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	})
 }
 
-func testAccComputeVpnTunnel_basic() string {
+func testAccComputeVpnTunnel_regionFromGateway(region string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
 	name = "tunnel-test-%s"
+	auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "foobar" {
 	name = "tunnel-test-subnetwork-%s"
 	network = "${google_compute_network.foobar.self_link}"
 	ip_cidr_range = "10.0.0.0/16"
-	region = "us-central1"
+	region = "%s"
 }
 resource "google_compute_address" "foobar" {
 	name = "tunnel-test-%s"
@@ -117,13 +126,14 @@ resource "google_compute_forwarding_rule" "foobar_udp4500" {
 }
 resource "google_compute_vpn_tunnel" "foobar" {
 	name = "tunnel-test-%s"
-	region = "${google_compute_forwarding_rule.foobar_udp4500.region}"
 	target_vpn_gateway = "${google_compute_vpn_gateway.foobar.self_link}"
 	shared_secret = "unguessable"
 	peer_ip = "8.8.8.8"
 	local_traffic_selector = ["${google_compute_subnetwork.foobar.ip_cidr_range}"]
 	remote_traffic_selector = ["192.168.0.0/24", "192.168.1.0/24"]
-}`, acctest.RandString(10), acctest.RandString(10), acctest.RandString(10),
+
+	depends_on = ["google_compute_forwarding_rule.foobar_udp4500"]
+}`, acctest.RandString(10), acctest.RandString(10), region, acctest.RandString(10),
 		acctest.RandString(10), acctest.RandString(10), acctest.RandString(10),
 		acctest.RandString(10), acctest.RandString(10))
 }
@@ -133,6 +143,7 @@ func testAccComputeVpnTunnelRouter(router string) string {
 	return fmt.Sprintf(`
 		resource "google_compute_network" "foobar" {
 			name = "tunnel-test-%s"
+			auto_create_subnetworks = false
 		}
 		resource "google_compute_subnetwork" "foobar" {
 			name = "tunnel-test-subnetwork-%s"

@@ -1,0 +1,4 @@
+obj["createStatement"] = fmt.Sprintf("CREATE DATABASE `%s`", obj["name"])
+delete(obj, "name")
+delete(obj, "instance")
+return obj, nil

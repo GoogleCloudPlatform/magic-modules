@@ -39,24 +39,56 @@ module Google
 
     def set_variable(value, property)
       Google::LOGGER.debug "Setting variable of #{value} to #{self}"
-      ensure_property_does_not_exist property
       instance_variable_set("@#{property}", value)
     end
 
-    private
+    # Does all validation checking for a particular variable.
+    # options:
+    # :default   - the default value for this variable if its nil
+    # :type      - the allowed types (single or array) that this value can be
+    # :item_type - the allowed types that all values in this array should be
+    #              (impllied that type == array)
+    # :allowed   - the allowed values that this non-array variable should be.
+    # :required  - is the variable required? (defaults: false)
+    def check(variable, **opts)
+      value = instance_variable_get("@#{variable}")
 
-    def check_types(objects, type)
-      return if objects.nil?
-      objects.each do |object|
-        log_check_type object
-        check_type object, type
+      # Set default value.
+      if !opts[:default].nil? && value.nil?
+        instance_variable_set("@#{variable}", opts[:default])
+        value = instance_variable_get("@#{variable}")
       end
+
+      # Check if value is required. Print nested path if available.
+      lineage_path = respond_to?('lineage') ? lineage : ''
+      raise "#{lineage_path} > Missing '#{variable}'" if value.nil? && opts[:required]
+      return if value.nil?
+
+      # Check type
+      check_property_value(variable, value, opts[:type]) if opts[:type]
+
+      # Check item_type
+      if value.is_a?(Array)
+        raise "#{lineage_path} > #{variable} must have item_type on arrays" unless opts[:item_type]
+
+        value.each_with_index do |o, index|
+          check_property_value("#{variable}[#{index}]", o, opts[:item_type])
+        end
+      end
+
+      # Check if value is allowed
+      return unless opts[:allowed]
+      raise "#{value} on #{variable} should be one of #{opts[:allowed]}" \
+        unless opts[:allowed].include?(value)
     end
+
+    private
 
     def check_type(name, object, type)
       if type == :boolean
         return unless [TrueClass, FalseClass].find_index(object.class).nil?
       elsif type.is_a? ::Array
+        return if type.find_index(:boolean) && [TrueClass, FalseClass].find_index(object.class)
         return unless type.find_index(object.class).nil?
       elsif object.is_a?(type)
         return
@@ -72,23 +104,13 @@ module Google
       end
     end
 
-    def check_property(property, type = nil)
-      check_property_value property, instance_variable_get("@#{property}"), type
-    end
-
-    def check_optional_property(property, type = nil)
-      value = instance_variable_get("@#{property}")
-      return if value.nil?
-      check_property_value property, value, type
-    end
-
     def check_property_value(property, prop_value, type)
       Google::LOGGER.debug "Checking '#{property}' on #{object_display_name}"
-      raise "Missing '#{property}' on #{object_display_name}" if prop_value.nil?
       check_type property, prop_value, type unless type.nil?
       prop_value.validate if prop_value.is_a?(Api::Object)
     end
 
+<<<<<<< HEAD
     def default_value_property(property, def_value)
       value = instance_variable_get("@#{property}")
       instance_variable_set("@#{property}", def_value) if value.nil?
@@ -100,16 +122,20 @@ module Google
         unless valid_values.include?(prop_value)
     end
 
+=======
+>>>>>>> master
     def check_extraneous_properties
       instance_variables.each do |variable|
         var_name = variable.id2name[1..-1]
         next if var_name.start_with?('__')
+
         Google::LOGGER.debug "Validating '#{var_name}' on #{object_display_name}"
         raise "Extraneous variable '#{var_name}' in #{object_display_name}" \
           unless methods.include?(var_name.intern)
       end
     end
 
+<<<<<<< HEAD
     def check_property_list(name, type = nil)
       obj_list = instance_variable_get("@#{name}")
       if obj_list.nil?
@@ -185,8 +211,11 @@ module Google
       check_property_oneof_default(prop, valid_values, default, type)
     end
 
+=======
+>>>>>>> master
     def set_variables(objects, property)
       return if objects.nil?
+
       objects.each do |object|
         object.set_variable(self, property) if object.respond_to?(:set_variable)
       end

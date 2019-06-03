@@ -1,0 +1,9 @@
+---
+:facts:
+  :Repository:
+    :version_added: '2.8'
+:regular:
+  :Repository:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'

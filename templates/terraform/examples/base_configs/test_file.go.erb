@@ -12,6 +12,7 @@ import (
     "github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 <%
+<<<<<<< HEAD
     resource_name = "AzureRM" + object.name
     terraform_name = "azurerm_" + object.name.underscore
     azure_client_name = object.azure_sdk_definition.go_client
@@ -27,6 +28,41 @@ import (
           test_hcl, random_vars = build_test_hcl_from_example(name)
           test_hcls[name] = { :hcl => test_hcl, :random_vars => random_vars }
         end
+=======
+raise 'skip_test should be true if resource is not importable' \
+  if object.exclude_import
+resource_name = product_ns + object.name
+if @config.legacy_name.nil?
+	terraform_name = "google_" + (product_ns + object.name).underscore
+else
+	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+end
+%>
+<%
+# @api.version_obj_or_default(version) is slightly wrong; we want the _object_ version or the generation version.
+# Ultimately this won't matter though, since the API default should always be less than the object default.
+object.examples
+         .reject(&:skip_test)
+         .reject { |e| @api.version_obj_or_default(version) < @api.version_obj_or_default(e.min_version) }
+         .each do |example| -
+
+
+	# {Compute}{Address}_{addressBasic}
+	test_slug = "#{resource_name}_#{example.name.camelize(:lower)}Example"
+	  ignore_read = object.all_user_properties
+                 .select(&:ignore_read)
+                 .map { |p| p.name.underscore }
+                 .concat(example.ignore_read_extra)
+
+
+	# If we've set an explicit version for the example use that, otherwise use the
+	# object version.
+  if example.min_version.nil?
+  	example_version = object.min_version.name
+  else
+    example_version = example.min_version
+  end
+>>>>>>> master
 -%>
 func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
     resourceName := "<%= terraform_name -%>.test"
@@ -34,6 +70,7 @@ func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
     <%=   param.variable_name -%> := <%= lines(param.create_expression) -%>
 <%      end -%>
 
+<<<<<<< HEAD
     resource.ParallelTest(t, resource.TestCase{
         PreCheck:     func() { testAccPreCheck(t) },
         Providers:    testAccProviders,
@@ -93,17 +130,92 @@ func testCheck<%= resource_name -%>Exists(resourceName string) resource.TestChec
 
         return nil
     }
+=======
+func TestAcc<%= test_slug -%>(t *testing.T) {
+  t.Parallel()
+
+	context := map[string]interface{} {
+	<% example.test_env_vars.each do |var_name, var_type| -%>
+		<% if var_type == :ORG_ID  -%>
+			"<%= var_name -%>": getTestOrgFromEnv(t),
+		<% elsif var_type == :CREDENTIALS -%>
+			"<%= var_name -%>": getTestCredsFromEnv(t),
+		<% elsif var_type == :REGION -%>
+			"<%= var_name -%>": getTestRegionFromEnv(t),
+		<% elsif var_type == :ORG_TARGET -%>
+			"<%= var_name -%>": getTestOrgTargetFromEnv(t),
+		<% elsif var_type == :BILLING_ACCT -%>
+			"<%= var_name -%>": getTestBillingAccountFromEnv(t),
+		<% elsif var_type == :SERVICE_ACCT -%>
+			"<%= var_name -%>": getTestServiceAccountFromEnv(t),
+		<% elsif var_type == :PROJECT_NAME -%>
+			"<%= var_name -%>": getTestProjectFromEnv(t),
+		<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
+			"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
+		<% end -%>
+	<% end -%>
+			"random_suffix": acctest.RandString(10),
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		<% if example_version == 'ga' -%>
+		Providers:    testAccProviders,
+		<% else -%>
+		Providers:    testAccProvidersOiCS,
+		<% end -%>
+		CheckDestroy: testAccCheck<%= "#{resource_name}" -%>Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= test_slug -%>(context),
+			},
+		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
+		<% if example_version == 'ga' -%>
+			{
+				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
+				ImportState:       true,
+				ImportStateVerify: true,
+        <%- unless ignore_read.empty? -%>
+        ImportStateVerifyIgnore: <%= go_literal(ignore_read) %>,
+        <%- end -%>
+			},
+		<% end -%>
+		},
+	})
 }
 
+func testAcc<%= test_slug -%>(context map[string]interface{}) string {
+<%= example.config_test -%>
+>>>>>>> master
+}
+
+<<<<<<< HEAD
 func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
     client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
+=======
+func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
+	for name, rs := range s.RootModule().Resources {
+		if rs.Type != "<%= terraform_name -%>" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
+			continue
+		}
+>>>>>>> master
 
     ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
+<<<<<<< HEAD
     for _, rs := range s.RootModule().Resources {
         if rs.Type != "<%= terraform_name -%>" {
             continue
         }
+=======
+	url, err := replaceVarsForTest(rs, "<%= object.self_link_url -%>")
+	if err != nil {
+		return err
+	}
+>>>>>>> master
 
 <%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties)) -%>
 

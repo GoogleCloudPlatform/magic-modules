@@ -12,6 +12,7 @@
 # limitations under the License.
 
 require 'api/object'
+require 'api/timeout'
 
 module Api
   # Represents an asynchronous operation definition
@@ -24,10 +25,10 @@ module Api
     def validate
       super
 
-      check_property :operation, Operation
-      check_property :result, Result
-      check_property :status, Status
-      check_property :error, Error
+      check :operation, type: Operation, required: true
+      check :result, type: Result, required: true
+      check :status, type: Status, required: true
+      check :error, type: Error, required: true
     end
 
     # Represents the operations (requests) issues to watch for completion
@@ -41,38 +42,10 @@ module Api
       def validate
         super
 
-        @timeouts ||= Timeouts.new
-
-        check_property :kind, String
-        check_property :path, String
-        check_property :base_url, String
-        check_property :wait_ms, Integer
-        check_property :timeouts, Timeouts
-      end
-
-      # Provides timeout information for the different operation types
-      class Timeouts < Api::Object
-        # Default timeout for all operation types is 4 minutes. This can be
-        # overridden for each resource.
-        DEFAULT_INSERT_TIMEOUT_SEC = 4 * 60
-        DEFAULT_UPDATE_TIMEOUT_SEC = 4 * 60
-        DEFAULT_DELETE_TIMEOUT_SEC = 4 * 60
-
-        attr_reader :insert_sec
-        attr_reader :update_sec
-        attr_reader :delete_sec
-
-        def validate
-          super
-
-          @insert_sec ||= DEFAULT_INSERT_TIMEOUT_SEC
-          @update_sec ||= DEFAULT_UPDATE_TIMEOUT_SEC
-          @delete_sec ||= DEFAULT_DELETE_TIMEOUT_SEC
-
-          check_property :insert_sec, Integer
-          check_property :update_sec, Integer
-          check_property :delete_sec, Integer
-        end
+        check :kind, type: String
+        check :path, type: String, required: true
+        check :base_url, type: String, required: true
+        check :wait_ms, type: Integer, required: true
       end
     end
 
@@ -83,10 +56,8 @@ module Api
 
       def validate
         super
-        default_value_property :resource_inside_response, false
-
-        check_optional_property :path, String
-        check_optional_property :resource_inside_response, :boolean
+        check :resource_inside_response, type: :boolean, default: false
+        check :path, type: String
       end
     end
 
@@ -99,8 +70,8 @@ module Api
 
       def validate
         super
-        check_property :path, String
-        check_property :allowed, Array
+        check :path, type: String, required: true
+        check :allowed, type: Array, item_type: [::String, :boolean], required: true
       end
     end
 
@@ -111,8 +82,8 @@ module Api
 
       def validate
         super
-        check_property :path, String
-        check_property :message, String
+        check :path, type: String, required: true
+        check :message, type: String, required: true
       end
     end
   end

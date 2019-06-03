@@ -1,0 +1,13 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% region_backend_service = grab_attributes['region_backend_service'] -%>
+describe google_compute_region_backend_service(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{region_backend_service['name']}'" : "region_backend_service['name']" -%>) do
+  it { should exist }
+  its('description') { should eq <%= doc_generation ? "'#{region_backend_service['description']}'" : "region_backend_service['description']" -%> }
+  its('protocol') { should eq <%= doc_generation ? "'#{region_backend_service['protocol']}'" : "region_backend_service['protocol']" -%> }
+  its('timeout_sec') { should eq <%= doc_generation ? "'#{region_backend_service['timeout_sec']}'" : "region_backend_service['timeout_sec']" -%> }
+end
+
+describe google_compute_region_backend_service(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

@@ -1,4 +1,4 @@
-<%# # the license inside this if block pertains to this file
+<%# The license inside this block applies to this file.
 	# Copyright 2018 Google Inc.
 	# Licensed under the Apache License, Version 2.0 (the "License");
 	# you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 #%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	var certName string
 	if v, ok := d.GetOk("name"); ok {
 		certName = v.(string)

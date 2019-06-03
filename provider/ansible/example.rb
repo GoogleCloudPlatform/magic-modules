@@ -13,9 +13,9 @@
 
 require 'api/object'
 require 'compile/core'
+require 'provider/ansible'
 require 'provider/config'
 require 'provider/core'
-require 'provider/ansible/manifest'
 
 module Provider
   module Ansible
@@ -41,13 +41,6 @@ module Provider
         @__example.task.code
       end
 
-      # Returns all URI properties minus those ignored.
-      def uri_properties(object, ignored_props = [])
-        object.uri_properties
-              .map(&:name)
-              .reject { |x| ignored_props.include? x }
-      end
-
       # Grab handwritten values for a set of properties.
       # Returns a hash where { parameter_name => handwritten_value }
       def handwritten_vals_for_properties(object, properties)
@@ -71,16 +64,16 @@ module Provider
       attr_reader :verifier
       attr_reader :dependencies
       attr_reader :facts
+      attr_reader :vars
 
       def validate
         super
-        default_value_property :facts, FactsTask.new
-        default_value_property :verifier, FactsVerifier.new
 
-        check_property :task, Task
-        check_optional_property :verifier, Verifier
-        check_optional_property_list :dependencies, Task
-        check_optional_property :facts, Task
+        check :task, type: Task, required: true
+        check :verifier, type: Verifier, default: FactsVerifier.new
+        check :dependencies, item_type: Task, type: Array
+        check :facts, type: Task, default: FactsTask.new
+        check :vars, type: Hash, default: {}
 
         @facts&.set_variable(self, :__example)
         @verifier.set_variable(self, :__example) if @verifier.respond_to?(:__example)
@@ -99,29 +92,62 @@ module Provider
 
       def validate
         super
+<<<<<<< HEAD
         check_property :name, String
         check_property :code, Hash
         check_optional_property :description, String
         check_optional_property_list :scopes, ::String
+=======
+        check :name, type: String, required: true
+        check :code, type: Hash, required: true
+        check :scopes, type: Array, item_type: ::String
+>>>>>>> master
       end
 
       def build_test(state, object, noop = false)
-        build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)
+        to_yaml([build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)])
       end
 
       def build_example(state, object)
-        build_task(state, EXAMPLE_DEFAULTS, object)
+        to_yaml([build_task(state, EXAMPLE_DEFAULTS, object)])
       end
 
       private
 
-      # All of the arguments are used inside the ERB file, so we need
-      # to disable rubocop complaining about unused methods
-      # rubocop:disable Lint/UnusedMethodArgument
-      def build_task(state, hash, object, noop = false)
-        compile 'templates/ansible/tasks/task.yaml.erb'
+      def build_task(state, hash, _object, noop = false)
+        {
+          'name' => message(state, @name, noop),
+          @name => compiled_code(@code, hash).merge('state' => state),
+          'register' => @register
+        }.reject { |_, v| v.nil? }
       end
-      # rubocop:enable Lint/UnusedMethodArgument
+
+      def message(state, name, noop)
+        verb = {
+          present: 'create',
+          absent: 'delete'
+        }[state.to_sym]
+        again = if noop && state == 'present'
+                  ' that already exists'
+                elsif noop && state == 'absent'
+                  ' that does not exist'
+                else
+                  ''
+                end
+        "#{verb} a #{object_name_from_module_name(name)}#{again}"
+      end
+
+      def compiled_code(code, hash)
+        if code.is_a?(Array)
+          code.map { |x| compiled_code(x, hash) }
+        elsif code.is_a?(Hash)
+          code.map { |k, vv| [k, compiled_code(vv, hash)] }.to_h
+        elsif code.is_a?(TrueClass) || code.is_a?(FalseClass) || code.is_a?(String)
+          compile_string(hash, code.to_s.delete("\n")).join
+        else
+          code
+        end
+      end
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name
@@ -154,8 +180,8 @@ module Provider
       def validate
         @failure ||= FailureCondition.new
 
-        check_property :command, String
-        check_property :failure, FailureCondition
+        check :command, type: String, required: true
+        check :failure, type: FailureCondition, default: FailureCondition.new
       end
 
       # All of the arguments are used inside the ERB file, so we need
@@ -211,10 +237,11 @@ module Provider
 
       attr_reader :__example
       include Compile::Core
+      include Provider::Ansible
       include Provider::Ansible::HandwrittenValuesFromExample
 
       def validate
-        @failure ||= FailureCondition.new
+        true
       end
 
       def build_task(_state, object)
@@ -246,7 +273,7 @@ module Provider
       end
 
       def name_parameter
-        compile_string(INTEGRATION_TEST_DEFAULTS, @__example.task.code['name']).join
+        compile_string(INTEGRATION_TEST_DEFAULTS, (@__example.task.code['name'] || '')).join
       end
     end
 
@@ -263,14 +290,10 @@ module Provider
       attr_reader :test
 
       def validate
-        check_optional_property :name, ::String
-        check_optional_property :enabled, [TrueClass, FalseClass]
-        check_optional_property :test, ::String
-
-        @enabled ||= true
-        @name ||= '{{ resource_name }}'
+        check :name, type: ::String, default: '{{ resource_name }}'
         @error ||= "#{@name} was not found."
-        @test ||= "\"\\\"#{@error.strip}\\\" in results.stderr\""
+        check :enabled, type: [TrueClass, FalseClass], default: true
+        check :test, type: ::String, default: "\"\\\"#{@error.strip}\\\" in results.stderr\""
       end
     end
 
@@ -283,7 +306,7 @@ module Provider
         raise 'Region must be slash delineated (e.g. regions/us-west1)' \
           unless @region == 'global' || @region.match?(%r{.*\/.*})
 
-        check_optional_property :type, ::String
+        check :type, type: ::String
 
         @name ||= '{{ resource_name }}'
         @error = [
@@ -300,8 +323,8 @@ module Provider
       attr_reader :plural
 
       def validate
-        check_optional_property :single, ::String
-        check_optional_property :plural, ::String
+        check :single, type: ::String
+        check :plural, type: ::String
 
         @name ||= '{{ resource_name }}'
         @error = [
@@ -320,13 +343,14 @@ module Provider
 
       attr_reader :__example
 
+      include Provider::Ansible
       include Provider::Ansible::HandwrittenValuesFromExample
 
       def validate; end
 
       def build_test(state, object, noop = false)
         @code = build_code(object, INTEGRATION_TEST_DEFAULTS)
-        @name = ["gcp_#{object.__product.prefix[1..-1]}",
+        @name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
                  'facts'].join('_')
         super(state, object, noop)
@@ -334,7 +358,7 @@ module Provider
 
       def build_example(state, object)
         @code = build_code(object, EXAMPLE_DEFAULTS)
-        @name = ["gcp_#{object.__product.prefix[1..-1]}",
+        @name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
                  'facts'].join('_')
         super(state, object)

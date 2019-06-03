@@ -3,11 +3,6 @@ Concourse CI tools for MagicModules and Google Providers
 
 These tools manage the downstream repositories of [magic-modules](https://github.com/GoogleCloudPlatform/magic-modules), and are collectively referred to as "The Magician".
 
-Currently, they manage:
-
-* terraform
-* ansible
-
 # CI For Downstream Developers
 If you're interested in developing the repositories that MagicModules manages, here are the things you'll want to know.
 
@@ -32,7 +27,16 @@ This will give you a command line interface which is rich and will allow you to 
 If you develop MagicModules (code generation features), here are the things you'll want to know.
 
 ## Deploying the pipeline
-The pipeline config is generated using jinja2.  You'll want `j2cli`: `pip install j2cli`.  To generate the pipeline, use `j2 .ci/ci.yml.tmpl`.  To deploy it, use `fly -t sunrise sp -c <(j2 ci.yml.tmpl) -p magician`.
+The pipeline config is generated using jinja2.  To generate it;
+
+* Install `j2cli` with `pip install j2cli`
+* Enter the `.ci` directory; if you're in the repo root, that's with `cd .ci`
+* Test generating the pipeline with `j2 ci.yml.tmpl`
+  * Invocations from outside `.ci` won't work, `j2` will fail trying to import a dependency
+  
+Finally, if you'd like to deploy it:
+
+* To deploy it, use `fly -t sunrise sp -c <(j2 ci.yml.tmpl) -p magician` 
 
 ## Adding Tests
 You can easily add things to the test suites.  The version of the `.yml` and `.sh` files in this subdirectory which are run when you call `fly execute` are the versions at HEAD in your local copy of the repository.  If you write new tests which require some setup, you can just add them to the shell scripts which are already being executed - if the overall shell script exits with a nonzero code, the task will be marked as failing.
@@ -57,11 +61,14 @@ Concourse has three primitives - Resources, Jobs, and Tasks.
 
 Concourse is strongly based on containers, and consequently it's worth keeping track of which containers the pipeline uses.
 
-### nmckinley/concourse-github-pr-resource
-This is based on https://github.com/jtarchie/github-pullrequest-resource.  It contains a few features that haven't been merged into that repo yet, which you can see at this fork: https://github.com/ndmckinley/github-pullrequest-resource.  It is probably not necessary to update this container often.  The credhub instance associated with sunrise contains the username / password for that dockerhub account.
+### gcr.io/magic-modules/concourse-github-pr-resource
+This is based on https://github.com/jtarchie/github-pullrequest-resource.  It contains a few features that haven't been merged into that repo yet, which you can see at this fork: https://github.com/ndmckinley/github-pullrequest-resource.  It is probably not necessary to update this container often.
 
-### nmckinley/concourse-git-resource
-This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  It is probably not necessary to update this container ever, but if for some reason you did need to do that, you would want to rebase the changes in that pull request onto the new master of `concourse/git-resource` and push a new version.  The credhub instance associated with sunrise contains the username / password for that dockerhub account.
+### gcr.io/magic-modules/concourse-git-resource
+This is based on https://github.com/concourse/git-resource/pull/172.  This PR can't be accepted into that repository as-is, because it makes drastic changes, but the proposed replacements aren't ready yet.  It is probably not necessary to update this container ever, but if for some reason you did need to do that, you would want to rebase the changes in that pull request onto the new master of `concourse/git-resource` and push a new version.
+
+### Updating Containers
+Containers are stored in the `magic-modules` GCP project using GCR. Information on using GCR can be found here: https://cloud.google.com/container-registry/docs/pushing-and-pulling. Upon modifying an image please update the Dockerfile within the relevant sub-directory.
 
 -------
 

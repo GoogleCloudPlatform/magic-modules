@@ -8,85 +8,147 @@ description: |-
 
 # google\_container\_cluster
 
-Creates a Google Kubernetes Engine (GKE) cluster. For more information see
+Manages a Google Kubernetes Engine (GKE) cluster. For more information see
 [the official documentation](https://cloud.google.com/container-engine/docs/clusters)
-and
-[API](https://cloud.google.com/container-engine/reference/rest/v1/projects.zones.clusters).
+and [the API reference](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters).
 
-~> **Note:** All arguments including the username and password will be stored in the raw state as plain-text.
-[Read more about sensitive data in state](/docs/state/sensitive-data.html).
+~> **Note:** All arguments and attributes, including basic auth username and
+passwords as well as certificate outputs will be stored in the raw state as
+plaintext. [Read more about sensitive data in state](/docs/state/sensitive-data.html).
 
-## Example usage
+## Example Usage - with a separately managed node pool (recommended)
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name     = "my-gke-cluster"
+  location = "us-central1"
+
+  # We can't create a cluster with no node pool defined, but we want to only use
+  # separately managed node pools. So we create the smallest possible default
+  # node pool and immediately delete it.
+  remove_default_node_pool = true
+  initial_node_count = 1
+
+  master_auth {
+    username = ""
+    password = ""
+
+    client_certificate_config {
+      issue_client_certificate = false
+    }
+  }
+}
+
+resource "google_container_node_pool" "primary_preemptible_nodes" {
+  name       = "my-node-pool"
+  location   = "us-central1"
+  cluster    = "${google_container_cluster.primary.name}"
+  node_count = 1
+
+  node_config {
+    preemptible  = true
+    machine_type = "n1-standard-1"
+
+    metadata {
+      disable-legacy-endpoints = "true"
+    }
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+```
+
+## Example Usage - with the default node pool
 
 ```hcl
 resource "google_container_cluster" "primary" {
   name               = "marcellus-wallace"
-  zone               = "us-central1-a"
+  location           = "us-central1-a"
   initial_node_count = 3
 
-  additional_zones = [
-    "us-central1-b",
-    "us-central1-c",
-  ]
-
   master_auth {
-    username = "mr.yoda"
-    password = "adoy.rm"
+    username = ""
+    password = ""
+
+    client_certificate_config {
+      issue_client_certificate = false
+    }
   }
 
   node_config {
     oauth_scopes = [
-      "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/devstorage.read_only",
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
     ]
 
-    labels {
+    metadata {
+      disable-legacy-endpoints = "true"
+    }
+
+    labels = {
       foo = "bar"
     }
 
     tags = ["foo", "bar"]
   }
-}
 
-# The following outputs allow authentication and connectivity to the GKE Cluster.
-output "client_certificate" {
-  value = "${google_container_cluster.primary.master_auth.0.client_certificate}"
-}
-
-output "client_key" {
-  value = "${google_container_cluster.primary.master_auth.0.client_key}"
-}
-
-output "cluster_ca_certificate" {
-  value = "${google_container_cluster.primary.master_auth.0.cluster_ca_certificate}"
+  timeouts {
+    create = "30m"
+    update = "40m"
+  }
 }
 ```
 
 ## Argument Reference
 
 * `name` - (Required) The name of the cluster, unique within the project and
-    zone.
+location.
 
 - - -
 
-* `zone` - (Optional) The zone that the master and the number of nodes specified
-    in `initial_node_count` should be created in. Only one of `zone` and `region`
-    may be set. If neither zone nor region are set, the provider zone is used.
+* `location` - (Optional) The location (region or zone) in which the cluster
+master will be created, as well as the default node location. If you specify a
+zone (such as `us-central1-a`), the cluster will be a zonal cluster with a
+single cluster master. If you specify a region (such as `us-west1`), the
+cluster will be a regional cluster with multiple masters spread across zones in
+the region, and with default node locations in those zones as well.
 
-* `region` (Optional)
-    The region to create the cluster in, for
-    [Regional Clusters](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-zone-and-regional-clusters#regional).
-    In a Regional Cluster, the number of nodes specified in `initial_node_count` is 
-    created in three zones of the region (this can be changed by setting `additional_zones`).
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
+* `zone` - (Optional, Deprecated) The zone that the cluster master and nodes
+should be created in. If specified, this cluster will be a zonal cluster. `zone`
+has been deprecated in favour of `location`.
 
-* `additional_zones` - (Optional) The list of additional Google Compute Engine
-    locations in which the cluster's nodes should be located. If additional zones are
-    configured, the number of nodes specified in `initial_node_count` is created in
-    all specified zones.
+* `region` (Optional, Deprecated) The region that the cluster master and nodes
+should be created in. If specified, this cluster will be a [regional clusters](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-zone-and-regional-clusters#regional)
+where the cluster master and nodes (by default) will be created in several zones
+throughout the region. `region` has been deprecated in favour of `location`.
+
+~> Only one of `location`, `zone`, and `region` may be set. If none are set,
+the provider zone is used to create a zonal cluster.
+
+* `node_locations` - (Optional) The list of zones in which the cluster's nodes
+should be located. These must be in the same region as the cluster zone for
+zonal clusters, or in the region of a regional cluster. In a multi-zonal cluster,
+the number of nodes specified in `initial_node_count` is created in
+all specified zones as well as the primary zone. If specified for a regional
+cluster, nodes will be created in only these zones.
+
+-> A "multi-zonal" cluster is a zonal cluster with at least one additional zone
+defined; in a multi-zonal cluster, the cluster master is only present in a
+single zone while nodes are present in each of the primary zone and the node
+locations. In contrast, in a regional cluster, cluster master nodes are present
+in multiple zones in the region. For that reason, regional clusters should be
+preferred.
+
+* `additional_zones` - (Optional) The list of zones in which the cluster's nodes
+should be located. These must be in the same region as the cluster zone for
+zonal clusters, or in the region of a regional cluster. In a multi-zonal cluster,
+the number of nodes specified in `initial_node_count` is created in
+all specified zones as well as the primary zone. If specified for a regional
+cluster, nodes will only be created in these zones. `additional_zones` has been
+deprecated in favour of `node_locations`.
 
 * `addons_config` - (Optional) The configuration for addons supported by GKE.
     Structure is documented below.
@@ -94,21 +156,29 @@ output "cluster_ca_certificate" {
 * `cluster_ipv4_cidr` - (Optional) The IP address range of the kubernetes pods in
     this cluster. Default is an automatically assigned CIDR.
 
+* `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+    Configuration for per-cluster autoscaling features, including node autoprovisioning. See [guide in Google docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning). Structure is documented below.
+
+* `database_encryption` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
+    Structure is documented below.
+
 * `description` - (Optional) Description of the cluster.
 
-* `enable_binary_authorization` - (Optional) Enable Binary Authorization for this cluster.
+* `default_max_pods_per_node` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The default maximum number of pods per node in this cluster.
+    Note that this does not work on node pools which are "route-based" - that is, node
+    pools belonging to clusters that do not have IP Aliasing enabled.
+    See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr)
+    for more information.
+
+* `enable_binary_authorization` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Enable Binary Authorization for this cluster.
     If enabled, all container images will be validated by Google Binary Authorization.
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
 * `enable_kubernetes_alpha` - (Optional) Whether to enable Kubernetes Alpha features for
     this cluster. Note that when this option is enabled, the cluster cannot be upgraded
     and will be automatically deleted after 30 days.
 
-* `enable_tpu` - (Optional) Whether to enable Cloud TPU resources in this cluster.
+* `enable_tpu` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Whether to enable Cloud TPU resources in this cluster.
     See the [official documentation](https://cloud.google.com/tpu/docs/kubernetes-engine-setup).
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
 * `enable_legacy_abac` - (Optional) Whether the ABAC authorizer is enabled for this cluster.
     When enabled, identities in the system, including service accounts, nodes, and controllers,
@@ -116,11 +186,15 @@ output "cluster_ca_certificate" {
     Defaults to `false`
 
 * `initial_node_count` - (Optional) The number of nodes to create in this
-    cluster (not including the Kubernetes master). Must be set if `node_pool` is not set.
+    cluster's default node pool. Must be set if `node_pool` is not set. If
+    you're using `google_container_node_pool` objects with no default node pool,
+    you'll need to set this to a value of at least `1`, alongside setting
+    `remove_default_node_pool` to `true`.
 
 * `ip_allocation_policy` - (Optional) Configuration for cluster IP allocation. As of now, only pre-allocated subnetworks (custom type with secondary ranges) are supported.
     This will activate IP aliases. See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/ip-aliases)
-    Structure is documented below.
+    Structure is documented below. This field is marked to use [Attribute as Block](/docs/configuration/attr-as-blocks.html)
+    in order to support explicit removal with `ip_allocation_policy = []`.
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`,
@@ -140,7 +214,16 @@ output "cluster_ca_certificate" {
     will auto-update the master to new versions, so this does not guarantee the
     current master version--use the read-only `master_version` field to obtain that.
     If unset, the cluster's version will be set by GKE to the version of the most recent
-    official release (which is not necessarily the latest version).
+    official release (which is not necessarily the latest version).  Most users will find
+    the `google_container_engine_versions` data source useful - it indicates which versions
+    are available, and can be use to approximate fuzzy versions in a
+    Terraform-compatible way. If you intend to specify versions manually,
+    [the docs](https://cloud.google.com/kubernetes-engine/versioning-and-upgrades#specifying_cluster_version)
+    describe the various acceptable formats for this field.
+
+-> If you are using the `google_container_engine_versions` datasource with a regional cluster, ensure that you have provided a `region`
+to the datasource. A `region` can have a different set of supported versions than its corresponding `zone`s, and not all `zone`s in a
+`region` are guaranteed to support the same version.
 
 * `monitoring_service` - (Optional) The monitoring service that the cluster
     should write metrics to.
@@ -158,36 +241,50 @@ output "cluster_ca_certificate" {
     [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/networkpolicies/)
     feature. Structure is documented below.
 
-* `node_config` -  (Optional) Parameters used in creating the cluster's nodes.
-    Structure is documented below.
+* `node_config` -  (Optional) Parameters used in creating the default node pool.
+    Generally, this field should not be used at the same time as a
+    `google_container_node_pool` or a `node_pool` block; this configuration
+    manages the default node pool, which isn't recommended to be used with
+    Terraform. Structure is documented below.
 
 * `node_pool` - (Optional) List of node pools associated with this cluster.
     See [google_container_node_pool](container_node_pool.html) for schema.
+    **Warning:** node pools defined inside a cluster can't be changed (or added/removed) after
+    cluster creation without deleting and recreating the entire cluster. Unless you absolutely need the ability
+    to say "these are the _only_ node pools associated with this cluster", use the
+    [google_container_node_pool](container_node_pool.html) resource instead of this property.
 
 * `node_version` - (Optional) The Kubernetes version on the nodes. Must either be unset
     or set to the same value as `min_master_version` on create. Defaults to the default
-    version set by GKE which is not necessarily the latest version.
+    version set by GKE which is not necessarily the latest version. This only affects
+    nodes in the default node pool. While a fuzzy version can be specified, it's
+    recommended that you specify explicit versions as Terraform will see spurious diffs
+    when fuzzy versions are used. See the `google_container_engine_versions` data source's
+    `version_prefix` field to approximate fuzzy versions in a Terraform-compatible way.
+    To update nodes in other node pools, use the `version` attribute on the node pool.
 
-* `pod_security_policy_config` - (Optional) Configuration for the
+* `pod_security_policy_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration for the
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is documented below.
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
 * `private_cluster_config` - (Optional) A set of options for creating
     a private cluster. Structure is documented below.
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
-* `remove_default_node_pool` - (Optional) If true, deletes the default node pool upon cluster creation.
+* `remove_default_node_pool` - (Optional) If `true`, deletes the default node
+    pool upon cluster creation. If you're using `google_container_node_pool`
+    resources with no default node pool, this should be set to `true`, alongside
+    setting `initial_node_count` to at least `1`.
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
 * `subnetwork` - (Optional) The name or self_link of the Google Compute Engine subnetwork in
     which the cluster's instances are launched.
+
+* `vertical_pod_autoscaling` - Vertical Pod Autoscaling automatically adjusts the resources of pods controlled by it.
+    Structure is documented below.
 
 The `addons_config` block supports:
 
@@ -197,16 +294,28 @@ The `addons_config` block supports:
     It ensures that a Heapster pod is running in the cluster, which is also used by the Cloud Monitoring service.
     It is enabled by default;
     set `disabled = true` to disable.
+
 * `http_load_balancing` - (Optional) The status of the HTTP (L7) load balancing
     controller addon, which makes it easy to set up HTTP load balancers for services in a
     cluster. It is enabled by default; set `disabled = true` to disable.
+
 * `kubernetes_dashboard` - (Optional) The status of the Kubernetes Dashboard
     add-on, which controls whether the Kubernetes Dashboard is enabled for this cluster.
     It is enabled by default; set `disabled = true` to disable.
+
 * `network_policy_config` - (Optional) Whether we should enable the network policy addon
     for the master.  This must be enabled in order to enable network policy for the nodes.
+    To enable this, you must also define a [`network_policy`](#network_policy) block,
+    otherwise nothing will happen.
     It can only be disabled if the nodes already do not have network policies enabled.
-    Set `disabled = true` to disable.
+    Defaults to disabled; set `disabled = false` to enable.
+
+* `istio_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
+    Structure is documented below.
+
+* `cloudrun_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
+    The status of the CloudRun addon. It requires `istio_config` enabled. It is disabled by default.
+    Set `disabled = false` to enable. This addon can only be enabled at cluster creation time.
 
 This example `addons_config` disables two addons:
 
@@ -220,6 +329,37 @@ addons_config {
   }
 }
 ```
+
+The `database_encryption` block supports:
+
+* `state` - (Required) `ENCRYPTED` or `DECRYPTED`
+
+* `key_name` - (Required) the key to use to encrypt/decrypt secrets.  See the [DatabaseEncryption definition](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#Cluster.DatabaseEncryption) for more information.
+
+The `istio_config` block supports:
+
+* `disabled` - (Optional) The status of the Istio addon, which makes it easy to set up Istio for services in a
+    cluster. It is disabled by default. Set `disabled = false` to enable.
+
+* `auth` - (Optional) The authentication type between services in Istio. Available options include `AUTH_MUTUAL_TLS`.
+
+The `cluster_autoscaling` block supports:
+
+* `enabled` - (Required) Whether cluster-wide autoscaling is enabled (i.e.node autoprovisioning is enabled). To set this to true, make sure your config meets the rest of the requirements.  Notably, you'll need `min_master_version` of at least `1.11.2`.
+
+* `resource_limits` - (Optional) A list of limits on the autoprovisioning.
+    See [the docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
+    for an explanation of what options are available.  If enabling autoprovisioning, make
+    sure to set at least `cpu` and `memory`.  Structure is documented below.
+
+The `resource_limits` block supports:
+
+* `resource_type` - (Required) See [the docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
+    for a list of permitted types - `cpu`, `memory`, and others.
+
+* `minimum` - (Optional) The minimum value for the resource type specified.
+
+* `maximum` - (Optional) The maximum value for the resource type specified.
 
 The `maintenance_policy` block supports:
 
@@ -237,6 +377,11 @@ maintenance_policy {
 
 The `ip_allocation_policy` block supports:
 
+* `use_ip_aliases` - (Optional) Whether alias IPs will be used for pod IPs in
+the cluster. Defaults to `true` if the `ip_allocation_policy` block is defined,
+and to the API default otherwise. Prior to June 17th 2019, the default on the
+API is `false`; afterwards, it's `true`.
+
 * `cluster_secondary_range_name` - (Optional) The name of the secondary range to be
     used as for the cluster CIDR block. The secondary range will be used for pod IP
     addresses. This must be an existing secondary range associated with the cluster
@@ -248,6 +393,13 @@ The `ip_allocation_policy` block supports:
     subnetwork.
 
 * `cluster_ipv4_cidr_block` - (Optional) The IP address range for the cluster pod IPs.
+    Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
+    to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
+    from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
+    pick a specific range to use.
+
+* `node_ipv4_cidr_block` - (Optional) The IP address range of the node IPs in this cluster.
+    This should be set only if `create_subnetwork` is true.
     Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14)
     to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14)
     from the RFC-1918 private networks (e.g. 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) to
@@ -266,11 +418,11 @@ The `ip_allocation_policy` block supports:
 
 The `master_auth` block supports:
 
-* `password` - (Required) The password to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint
+* `password` - (Optional) The password to use for HTTP basic authentication when accessing
+    the Kubernetes master endpoint.
 
-* `username` - (Required) The username to use for HTTP basic authentication when accessing
-    the Kubernetes master endpoint
+* `username` - (Optional) The username to use for HTTP basic authentication when accessing
+    the Kubernetes master endpoint. If not present basic auth will be disabled.
 
 * `client_certificate_config` - (Optional) Whether client certificate authorization is enabled for this cluster.  For example:
 
@@ -287,8 +439,8 @@ This block also contains several computed attributes, documented below. If this 
 
 The `master_authorized_networks_config` block supports:
 
-* `cidr_blocks` - (Optional) Defines up to 20 external networks that can access
-    Kubernetes master through HTTPS.
+* `cidr_blocks` - (Optional) External networks that can access the
+    Kubernetes cluster master through HTTPS.
 
 The `master_authorized_networks_config.cidr_blocks` block supports:
 
@@ -313,6 +465,8 @@ The `node_config` block supports:
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure documented below.
+    To support removal of guest_accelerators in Terraform 0.12 this field is an
+    [Attribute as Block](/docs/configuration/attr-as-blocks.html)
 
 * `image_type` - (Optional) The image type to use for this node. Note that changing the image type
     will delete and recreate all nodes in the node pool.
@@ -327,7 +481,10 @@ The `node_config` block supports:
     [here](https://cloud.google.com/compute/docs/reference/latest/instances#machineType).
 
 * `metadata` - (Optional) The metadata key/value pairs assigned to instances in
-    the cluster.
+    the cluster. From GKE `1.12` onwards, `disable-legacy-endpoints` is set to
+    `true` by the API; if `metadata` is set but that default value is not
+    included, Terraform will attempt to unset the value. To avoid this, set the
+    value in your config.
 
 * `min_cpu_platform` - (Optional) Minimum CPU platform to be used by this instance.
     The instance may be scheduled on the specified or newer CPU platform. Applicable
@@ -340,8 +497,10 @@ The `node_config` block supports:
     either FQDNs, or scope aliases. The following scopes are necessary to ensure
     the correct functioning of the cluster:
 
-  * `compute-rw` (`https://www.googleapis.com/auth/compute`)
-  * `storage-ro` (`https://www.googleapis.com/auth/devstorage.read_only`)
+  * `storage-ro` (`https://www.googleapis.com/auth/devstorage.read_only`),
+    if the cluster must read private images from GCR.
+    Note this will grant read access to ALL GCS content unless you also
+    specify a custom role. See https://cloud.google.com/kubernetes-engine/docs/how-to/access-scopes
   * `logging-write` (`https://www.googleapis.com/auth/logging.write`),
     if `logging_service` points to Google
   * `monitoring` (`https://www.googleapis.com/auth/monitoring`),
@@ -353,19 +512,21 @@ The `node_config` block supports:
 
 * `service_account` - (Optional) The service account to be used by the Node VMs.
     If not specified, the "default" service account is used.
+    In order to use the configured `oauth_scopes` for logging and monitoring, the service account being used needs the
+    [roles/logging.logWriter](https://cloud.google.com/iam/docs/understanding-roles#stackdriver_logging_roles) and
+    [roles/monitoring.metricWriter](https://cloud.google.com/iam/docs/understanding-roles#stackdriver_monitoring_roles) roles.
+
+     -> Projects that enable the [Cloud Compute Engine API](https://cloud.google.com/compute/) with Terraform may need these roles added manually to the service account. Projects that enable the API in the Cloud Console should have them added automatically.
 
 * `tags` - (Optional) The list of instance tags applied to all nodes. Tags are used to identify
     valid sources or targets for network firewalls.
 
-* `taint` - (Optional) List of
+* `taint` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) List of
     [kubernetes taints](https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/)
-    to apply to each node. Structure is documented below. This property is in beta, and should be
-    used with the terraform-provider-google-beta provider. See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html)
-    for more details on beta fields.
+    to apply to each node. Structure is documented below.
 
-* `workload_metadata_config` - (Optional) Metadata configuration to expose to workloads on the node pool.
-    Structure is documented below. This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
+* `workload_metadata_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Metadata configuration to expose to workloads on the node pool.
+    Structure is documented below.
 
 The `guest_accelerator` block supports:
 
@@ -387,7 +548,7 @@ The `private_cluster_config` block supports:
 
 * `master_ipv4_cidr_block` (Optional) - The IP range in CIDR notation to use for the hosted master network. This range will be used for
     assigning internal IP addresses to the master or set of masters, as well as the ILB VIP. This range must not overlap with any other ranges
-    in use within the cluster's network.
+    in use within the cluster's network, and it must be a /28 subnet. See [Limitations](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters#limitations) in the GCP docs.
 
 In addition, the `private_cluster_config` allows access to the following read-only fields:
 
@@ -410,6 +571,10 @@ The `workload_metadata_config` block supports:
     * UNSPECIFIED: Not Set
     * SECURE: Prevent workloads not in hostNetwork from accessing certain VM metadata, specifically kube-env, which contains Kubelet credentials, and the instance identity token. See [Metadata Concealment](https://cloud.google.com/kubernetes-engine/docs/how-to/metadata-proxy) documentation.
     * EXPOSE: Expose all VM metadata to pods.
+
+The `vertical_pod_autoscaling` block supports:
+
+* `enabled` (Required) - Enables vertical pod autoscaling
 
 ## Attributes Reference
 
@@ -438,6 +603,10 @@ exported:
     be different than the `min_master_version` set in the config if the master
     has been updated by GKE.
 
+* `tpu_ipv4_cidr_block` - ([Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The IP address range of the Cloud TPUs in this cluster, in
+    [CIDR](http://en.wikipedia.org/wiki/Classless_Inter-Domain_Routing)
+    notation (e.g. `1.2.3.4/29`).
+
 <a id="timeouts"></a>
 ## Timeouts
 
@@ -445,13 +614,12 @@ exported:
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
 - `create` - (Default `30 minutes`) Used for clusters
-- `update` - (Default `10 minutes`) Used for updates to clusters
-- `delete` - (Default `10 minutes`) Used for destroying clusters.
+- `update` - (Default `30 minutes`) Used for updates to clusters
+- `delete` - (Default `30 minutes`) Used for destroying clusters.
 
 ## Import
 
-GKE clusters can be imported using the `project` , `zone` or `region` (`region`
-is deprecated, see above), and `name`. If the project is omitted, the default
+GKE clusters can be imported using the `project` , `zone` or `region`, and `name`. If the project is omitted, the default
 provider value will be used. Examples:
 
 ```
@@ -459,3 +627,10 @@ $ terraform import google_container_cluster.mycluster my-gcp-project/us-east1-a/
 
 $ terraform import google_container_cluster.mycluster us-east1-a/my-cluster
 ```
+
+~> **Note:** This resource has several fields that control Terraform-specific behavior and aren't present in the API. If they are set in config and you import a cluster, Terraform may need to perform an update immediately after import. Most of these updates should be no-ops but some may modify your cluster if the imported state differs.
+
+For example, the following fields will show diffs if set in config:
+
+- `min_master_version`
+- `remove_default_node_pool`

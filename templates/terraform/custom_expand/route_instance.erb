@@ -1,4 +1,4 @@
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 		if v == "" {
 				return v, nil
 		}

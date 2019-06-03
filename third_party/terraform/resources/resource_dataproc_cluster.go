@@ -144,7 +144,7 @@ func resourceDataprocCluster() *schema.Resource {
 									},
 
 									"tags": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
 										Optional: true,
 										ForceNew: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
@@ -177,7 +177,7 @@ func resourceDataprocCluster() *schema.Resource {
 										Default:  false,
 									},
 
-									"metadata": &schema.Schema{
+									"metadata": {
 										Type:     schema.TypeMap,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
@@ -215,10 +215,12 @@ func resourceDataprocCluster() *schema.Resource {
 
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-
-												// API does not honour this if set ...
-												// It simply ignores it completely
-												// "num_local_ssds": { ... }
+												"num_local_ssds": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Computed: true,
+													ForceNew: true,
+												},
 
 												"boot_disk_size_gb": {
 													Type:         schema.TypeInt,
@@ -226,6 +228,14 @@ func resourceDataprocCluster() *schema.Resource {
 													Computed:     true,
 													ForceNew:     true,
 													ValidateFunc: validation.IntAtLeast(10),
+												},
+
+												"boot_disk_type": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													ForceNew:     true,
+													ValidateFunc: validation.StringInSlice([]string{"pd-standard", "pd-ssd", ""}, false),
+													Default:      "pd-standard",
 												},
 											},
 										},
@@ -274,7 +284,7 @@ func resourceDataprocCluster() *schema.Resource {
 									// get a diff. To make this easier, 'properties' simply contains the computed
 									// values (including overrides) for all properties, whilst override_properties
 									// is only for properties the user specifically wants to override. If nothing
-									// is overriden, this will be empty.
+									// is overridden, this will be empty.
 								},
 							},
 						},
@@ -300,6 +310,19 @@ func resourceDataprocCluster() *schema.Resource {
 								},
 							},
 						},
+						"encryption_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"kms_key_name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -319,6 +342,13 @@ func instanceConfigSchema() *schema.Schema {
 					Type:     schema.TypeInt,
 					Optional: true,
 					Computed: true,
+				},
+
+				"image_uri": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
 				},
 
 				"machine_type": {
@@ -439,10 +469,12 @@ func resourceDataprocClusterCreate(d *schema.ResourceData, meta interface{}) err
 
 	// Wait until it's created
 	timeoutInMinutes := int(d.Timeout(schema.TimeoutCreate).Minutes())
-	waitErr := dataprocClusterOperationWait(config, op, "creating Dataproc cluster", timeoutInMinutes, 3)
+	waitErr := dataprocClusterOperationWait(config, op, "creating Dataproc cluster", timeoutInMinutes)
 	if waitErr != nil {
 		// The resource didn't actually create
-		d.SetId("")
+		// Note that we do not remove the ID here - this resource tends to leave
+		// partially created clusters behind, so we'll let the next Read remove
+		// it.
 		return waitErr
 	}
 
@@ -481,6 +513,10 @@ func expandClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.Clus
 
 	if v, ok := d.GetOk("cluster_config.0.initialization_action"); ok {
 		conf.InitializationActions = expandInitializationActions(v)
+	}
+
+	if cfg, ok := configOptions(d, "cluster_config.0.encryption_config"); ok {
+		conf.EncryptionConfig = expandEncryptionConfig(cfg)
 	}
 
 	if cfg, ok := configOptions(d, "cluster_config.0.master_config"); ok {
@@ -532,7 +568,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *Config) (*dataproc.G
 		conf.SubnetworkUri = snf.RelativeLink()
 	}
 	if v, ok := cfg["tags"]; ok {
-		conf.Tags = convertStringArr(v.([]interface{}))
+		conf.Tags = convertStringSet(v.(*schema.Set))
 	}
 	if v, ok := cfg["service_account"]; ok {
 		conf.ServiceAccount = v.(string)
@@ -565,6 +601,14 @@ func expandSoftwareConfig(cfg map[string]interface{}) *dataproc.SoftwareConfig {
 	}
 	if v, ok := cfg["image_version"]; ok {
 		conf.ImageVersion = v.(string)
+	}
+	return conf
+}
+
+func expandEncryptionConfig(cfg map[string]interface{}) *dataproc.EncryptionConfig {
+	conf := &dataproc.EncryptionConfig{}
+	if v, ok := cfg["kms_key_name"]; ok {
+		conf.GcePdKmsKeyName = v.(string)
 	}
 	return conf
 }
@@ -602,6 +646,12 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			if v, ok := dcfg["boot_disk_size_gb"]; ok {
 				icg.DiskConfig.BootDiskSizeGb = int64(v.(int))
 			}
+			if v, ok := dcfg["num_local_ssds"]; ok {
+				icg.DiskConfig.NumLocalSsds = int64(v.(int))
+			}
+			if v, ok := dcfg["boot_disk_type"]; ok {
+				icg.DiskConfig.BootDiskType = v.(string)
+			}
 		}
 	}
 	return icg
@@ -615,6 +665,9 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 	}
 	if v, ok := cfg["machine_type"]; ok {
 		icg.MachineTypeUri = GetResourceNameFromSelfLink(v.(string))
+	}
+	if v, ok := cfg["image_uri"]; ok {
+		icg.ImageUri = v.(string)
 	}
 
 	if dc, ok := cfg["disk_config"]; ok {
@@ -712,7 +765,7 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		}
 
 		// Wait until it's updated
-		waitErr := dataprocClusterOperationWait(config, op, "updating Dataproc cluster ", timeoutInMinutes, 2)
+		waitErr := dataprocClusterOperationWait(config, op, "updating Dataproc cluster ", timeoutInMinutes)
 		if waitErr != nil {
 			return waitErr
 		}
@@ -768,6 +821,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"master_config":             flattenInstanceGroupConfig(d, cfg.MasterConfig),
 		"worker_config":             flattenInstanceGroupConfig(d, cfg.WorkerConfig),
 		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
+		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -785,6 +839,18 @@ func flattenSoftwareConfig(d *schema.ResourceData, sc *dataproc.SoftwareConfig) 
 		"image_version":       sc.ImageVersion,
 		"properties":          sc.Properties,
 		"override_properties": d.Get("cluster_config.0.software_config.0.override_properties").(map[string]interface{}),
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenEncryptionConfig(d *schema.ResourceData, ec *dataproc.EncryptionConfig) []map[string]interface{} {
+	if ec == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"kms_key_name": ec.GcePdKmsKeyName,
 	}
 
 	return []map[string]interface{}{data}
@@ -828,7 +894,7 @@ func flattenInitializationActions(nia []*dataproc.NodeInitializationAction) ([]m
 func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterConfig) []map[string]interface{} {
 
 	gceConfig := map[string]interface{}{
-		"tags":             gcc.Tags,
+		"tags":             schema.NewSet(schema.HashString, convertStringArrToInterface(gcc.Tags)),
 		"service_account":  gcc.ServiceAccount,
 		"zone":             GetResourceNameFromSelfLink(gcc.ZoneUri),
 		"internal_ip_only": gcc.InternalIpOnly,
@@ -857,6 +923,8 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
+			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
+			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
 		}
 	}
 
@@ -871,6 +939,7 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 	if icg != nil {
 		data["num_instances"] = icg.NumInstances
 		data["machine_type"] = GetResourceNameFromSelfLink(icg.MachineTypeUri)
+		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
@@ -913,7 +982,7 @@ func resourceDataprocClusterDelete(d *schema.ResourceData, meta interface{}) err
 	}
 
 	// Wait until it's deleted
-	waitErr := dataprocClusterOperationWait(config, op, "deleting Dataproc cluster", timeoutInMinutes, 3)
+	waitErr := dataprocClusterOperationWait(config, op, "deleting Dataproc cluster", timeoutInMinutes)
 	if waitErr != nil {
 		return waitErr
 	}

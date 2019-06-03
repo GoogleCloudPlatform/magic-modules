@@ -1,0 +1,6 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% global_forwarding_rule = grab_attributes['global_forwarding_rule'] -%>
+describe google_compute_global_forwarding_rules(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>) do
+  its('count') { should be >= 1 }
+  its('port_ranges') { should include <%= doc_generation ? "'#{global_forwarding_rule['port_range']}'" : "global_forwarding_rule['port_range']" -%> }
+end

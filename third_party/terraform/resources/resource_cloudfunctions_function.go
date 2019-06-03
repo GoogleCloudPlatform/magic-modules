@@ -27,10 +27,6 @@ var functionAllowedMemory = map[int]bool{
 	2048: true,
 }
 
-// For now CloudFunctions are allowed only in the following locations.
-// Please see https://cloud.google.com/about/locations/
-var validCloudFunctionRegion = validation.StringInSlice([]string{"us-central1", "us-east1", "europe-west1", "asia-northeast1"}, true)
-
 const functionDefaultAllowedMemoryMb = 256
 
 type cloudFunctionId struct {
@@ -52,11 +48,7 @@ func (s *cloudFunctionId) terraformId() string {
 }
 
 func parseCloudFunctionId(id string, config *Config) (*cloudFunctionId, error) {
-	parts := strings.Split(id, "/")
-
-	cloudFuncIdRegex := regexp.MustCompile("^([a-z0-9-]+)/([a-z0-9-])+/([a-zA-Z0-9_-]{1,63})$")
-
-	if cloudFuncIdRegex.MatchString(id) {
+	if parts := strings.Split(id, "/"); len(parts) == 3 {
 		return &cloudFunctionId{
 			Project: parts[0],
 			Region:  parts[1],
@@ -74,6 +66,28 @@ func joinMapKeys(mapToJoin *map[int]bool) string {
 		keys = append(keys, strconv.Itoa(key))
 	}
 	return strings.Join(keys, ",")
+}
+
+func validateResourceCloudFunctionsFunctionName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if len(value) > 48 {
+		errors = append(errors, fmt.Errorf(
+			"%q cannot be longer than 48 characters", k))
+	}
+	if !regexp.MustCompile("^[a-zA-Z0-9-_]+$").MatchString(value) {
+		errors = append(errors, fmt.Errorf(
+			"%q can only contain letters, numbers, underscores and hyphens", k))
+	}
+	if !regexp.MustCompile("^[a-zA-Z]").MatchString(value) {
+		errors = append(errors, fmt.Errorf(
+			"%q must start with a letter", k))
+	}
+	if !regexp.MustCompile("[a-zA-Z0-9]$").MatchString(value) {
+		errors = append(errors, fmt.Errorf(
+			"%q must end with a number or a letter", k))
+	}
+	return
 }
 
 func resourceCloudFunctionsFunction() *schema.Resource {
@@ -95,40 +109,39 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-
-					if len(value) > 48 {
-						errors = append(errors, fmt.Errorf(
-							"%q cannot be longer than 48 characters", k))
-					}
-					if !regexp.MustCompile("^[a-zA-Z0-9-]+$").MatchString(value) {
-						errors = append(errors, fmt.Errorf(
-							"%q can only contain letters, numbers and hyphens", k))
-					}
-					if !regexp.MustCompile("^[a-zA-Z]").MatchString(value) {
-						errors = append(errors, fmt.Errorf(
-							"%q must start with a letter", k))
-					}
-					if !regexp.MustCompile("[a-zA-Z0-9]$").MatchString(value) {
-						errors = append(errors, fmt.Errorf(
-							"%q must end with a number or a letter", k))
-					}
-					return
-				},
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateResourceCloudFunctionsFunctionName,
 			},
 
 			"source_archive_bucket": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"source_archive_object": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+			},
+
+			"source_repository": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"source_archive_bucket", "source_archive_object"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"url": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"deployed_url": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 
 			"description": {
@@ -172,7 +185,14 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			"runtime": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "nodejs6",
+			},
+
+			"service_account_email": {
+				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 
 			"environment_variables": {
@@ -244,11 +264,11 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 				Computed: true,
 			},
 
-			"retry_on_failure": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				Removed:  "This field is removed. Use `event_trigger.failure_policy.retry` instead.",
+			"max_instances": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      0,
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 
 			"project": {
@@ -259,11 +279,10 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"region": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validCloudFunctionRegion,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -281,14 +300,6 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	if err != nil {
 		return err
 	}
-	// We do this extra validation here since most regions are not valid, and the
-	// error message that Cloud Functions has for "wrong region" is not specific.
-	// Provider-level region fetching skips validation, because it's not possible
-	// for the provider-level region to know about the field-level validator.
-	_, errs := validCloudFunctionRegion(region, "region")
-	if len(errs) > 0 {
-		return errs[0]
-	}
 
 	cloudFuncId := &cloudFunctionId{
 		Project: project,
@@ -297,14 +308,23 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	function := &cloudfunctions.CloudFunction{
-		Name:            cloudFuncId.cloudFunctionId(),
-		Runtime:         d.Get("runtime").(string),
-		ForceSendFields: []string{},
+		Name:                cloudFuncId.cloudFunctionId(),
+		Runtime:             d.Get("runtime").(string),
+		ServiceAccountEmail: d.Get("service_account_email").(string),
+		ForceSendFields:     []string{},
 	}
 
-	sourceArchiveBucket := d.Get("source_archive_bucket").(string)
-	sourceArchiveObj := d.Get("source_archive_object").(string)
-	function.SourceArchiveUrl = fmt.Sprintf("gs://%v/%v", sourceArchiveBucket, sourceArchiveObj)
+	sourceRepos := d.Get("source_repository").([]interface{})
+	if len(sourceRepos) > 0 {
+		function.SourceRepository = expandSourceRepository(sourceRepos)
+	} else {
+		sourceArchiveBucket := d.Get("source_archive_bucket").(string)
+		sourceArchiveObj := d.Get("source_archive_object").(string)
+		if sourceArchiveBucket == "" || sourceArchiveObj == "" {
+			return fmt.Errorf("either source_repository or both of source_archive_bucket+source_archive_object must be set")
+		}
+		function.SourceArchiveUrl = fmt.Sprintf("gs://%v/%v", sourceArchiveBucket, sourceArchiveObj)
+	}
 
 	if v, ok := d.GetOk("available_memory_mb"); ok {
 		availableMemoryMb := v.(int)
@@ -340,6 +360,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.EnvironmentVariables = expandEnvironmentVariables(d)
 	}
 
+	if v, ok := d.GetOk("max_instances"); ok {
+		function.MaxInstances = int64(v.(int))
+	}
+
 	log.Printf("[DEBUG] Creating cloud function: %s", function.Name)
 	op, err := config.clientCloudFunctions.Projects.Locations.Functions.Create(
 		cloudFuncId.locationId(), function).Do()
@@ -350,7 +374,8 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	// Name of function should be unique
 	d.SetId(cloudFuncId.terraformId())
 
-	err = cloudFunctionsOperationWait(config.clientCloudFunctions, op, "Creating CloudFunctions Function")
+	err = cloudFunctionsOperationWait(config.clientCloudFunctions, op, "Creating CloudFunctions Function",
+		int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		return err
 	}
@@ -383,6 +408,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("timeout", timeout)
 	d.Set("labels", function.Labels)
 	d.Set("runtime", function.Runtime)
+	d.Set("service_account_email", function.ServiceAccountEmail)
 	d.Set("environment_variables", function.EnvironmentVariables)
 	if function.SourceArchiveUrl != "" {
 		// sourceArchiveUrl should always be a Google Cloud Storage URL (e.g. gs://bucket/object)
@@ -396,6 +422,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 		d.Set("source_archive_bucket", bucket)
 		d.Set("source_archive_object", object)
 	}
+	d.Set("source_repository", flattenSourceRepository(function.SourceRepository))
 
 	if function.HttpsTrigger != nil {
 		d.Set("trigger_http", true)
@@ -403,7 +430,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	d.Set("event_trigger", flattenEventTrigger(function.EventTrigger))
-
+	d.Set("max_instances", function.MaxInstances)
 	d.Set("region", cloudFuncId.Region)
 	d.Set("project", cloudFuncId.Project)
 
@@ -444,6 +471,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "sourceArchiveUrl")
 	}
 
+	if d.HasChange("source_repository") {
+		function.SourceRepository = expandSourceRepository(d.Get("source_repository").([]interface{}))
+		updateMaskArr = append(updateMaskArr, "sourceRepository")
+	}
+
 	if d.HasChange("description") {
 		function.Description = d.Get("description").(string)
 		updateMaskArr = append(updateMaskArr, "description")
@@ -466,12 +498,17 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 
 	if d.HasChange("environment_variables") {
 		function.EnvironmentVariables = expandEnvironmentVariables(d)
-		updateMaskArr = append(updateMaskArr, "environment_variables")
+		updateMaskArr = append(updateMaskArr, "environmentVariables")
 	}
 
 	if d.HasChange("event_trigger") {
 		function.EventTrigger = expandEventTrigger(d.Get("event_trigger").([]interface{}), project)
 		updateMaskArr = append(updateMaskArr, "eventTrigger", "eventTrigger.failurePolicy.retry")
+	}
+
+	if d.HasChange("max_instances") {
+		function.MaxInstances = int64(d.Get("max_instances").(int))
+		updateMaskArr = append(updateMaskArr, "maxInstances")
 	}
 
 	if len(updateMaskArr) > 0 {
@@ -484,8 +521,8 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 			return fmt.Errorf("Error while updating cloudfunction configuration: %s", err)
 		}
 
-		err = cloudFunctionsOperationWait(config.clientCloudFunctions, op,
-			"Updating CloudFunctions Function")
+		err = cloudFunctionsOperationWait(config.clientCloudFunctions, op, "Updating CloudFunctions Function",
+			int(d.Timeout(schema.TimeoutUpdate).Minutes()))
 		if err != nil {
 			return err
 		}
@@ -507,7 +544,8 @@ func resourceCloudFunctionsDestroy(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
-	err = cloudFunctionsOperationWait(config.clientCloudFunctions, op, "Deleting CloudFunctions Function")
+	err = cloudFunctionsOperationWait(config.clientCloudFunctions, op, "Deleting CloudFunctions Function",
+		int(d.Timeout(schema.TimeoutDelete).Minutes()))
 	if err != nil {
 		return err
 	}
@@ -535,6 +573,10 @@ func expandEventTrigger(configured []interface{}, project string) *cloudfunction
 		shape = "projects/%s/buckets/%s"
 	case strings.HasPrefix(eventType, "providers/cloud.pubsub/eventTypes/"):
 		shape = "projects/%s/topics/%s"
+	case strings.HasPrefix(eventType, "providers/cloud.firestore/eventTypes/"):
+		// Firestore doesn't not yet support multiple databases, so "(default)" is assumed.
+		// https://cloud.google.com/functions/docs/calling/cloud-firestore#deploying_your_function
+		shape = "projects/%s/databases/(default)/documents/%s"
 	}
 
 	return &cloudfunctions.EventTrigger{
@@ -550,9 +592,28 @@ func flattenEventTrigger(eventTrigger *cloudfunctions.EventTrigger) []map[string
 		return result
 	}
 
+	resource := ""
+	switch {
+	case strings.HasPrefix(eventTrigger.EventType, "google.storage.object."):
+		resource = GetResourceNameFromSelfLink(eventTrigger.Resource)
+	case strings.HasPrefix(eventTrigger.EventType, "google.pubsub.topic."):
+		resource = GetResourceNameFromSelfLink(eventTrigger.Resource)
+		// Legacy style triggers
+	case strings.HasPrefix(eventTrigger.EventType, "providers/cloud.storage/eventTypes/"):
+		resource = GetResourceNameFromSelfLink(eventTrigger.Resource)
+	case strings.HasPrefix(eventTrigger.EventType, "providers/cloud.pubsub/eventTypes/"):
+		resource = GetResourceNameFromSelfLink(eventTrigger.Resource)
+	case strings.HasPrefix(eventTrigger.EventType, "providers/cloud.firestore/eventTypes/"):
+		// Simply taking the substring after the last "/" is not sufficient for firestore as resources may have slashes.
+		// For the eventTrigger.Resource "projects/my-project/databases/(default)/documents/messages/{messageId}" we extract
+		// the resource "messages/{messageId}" by taking the everything after the 5th "/"
+		parts := strings.SplitN(eventTrigger.Resource, "/", 6)
+		resource = parts[len(parts)-1]
+	}
+
 	result = append(result, map[string]interface{}{
 		"event_type":     eventTrigger.EventType,
-		"resource":       GetResourceNameFromSelfLink(eventTrigger.Resource),
+		"resource":       resource,
 		"failure_policy": flattenFailurePolicy(eventTrigger.FailurePolicy),
 	})
 
@@ -581,6 +642,31 @@ func flattenFailurePolicy(failurePolicy *cloudfunctions.FailurePolicy) []map[str
 
 	result = append(result, map[string]interface{}{
 		"retry": failurePolicy.Retry != nil,
+	})
+
+	return result
+}
+
+func expandSourceRepository(configured []interface{}) *cloudfunctions.SourceRepository {
+	if len(configured) == 0 || configured[0] == nil {
+		return &cloudfunctions.SourceRepository{}
+	}
+
+	data := configured[0].(map[string]interface{})
+	return &cloudfunctions.SourceRepository{
+		Url: data["url"].(string),
+	}
+}
+
+func flattenSourceRepository(sourceRepo *cloudfunctions.SourceRepository) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, 1)
+	if sourceRepo == nil {
+		return nil
+	}
+
+	result = append(result, map[string]interface{}{
+		"url":          sourceRepo.Url,
+		"deployed_url": sourceRepo.DeployedUrl,
 	})
 
 	return result

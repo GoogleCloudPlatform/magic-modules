@@ -12,5 +12,5 @@
 # limitations under the License.
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
-<% dir = _version_name == 'beta' ? 'google-beta' : 'google' -%>
-'<%= dir -%>/provider_<%= api.prefix[1..-1] -%>_gen.go': 'templates/terraform/provider_gen.erb'
+<% dir = version_name == 'beta' ? 'google-beta' : 'google' -%>
+'<%= dir -%>/provider_<%= api.name.underscore -%>_gen.go': 'templates/terraform/provider_gen.erb'

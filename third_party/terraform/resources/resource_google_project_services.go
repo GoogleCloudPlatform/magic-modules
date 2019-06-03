@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/googleapi"
-	"google.golang.org/api/serviceusage/v1beta1"
+	"google.golang.org/api/serviceusage/v1"
 )
 
 func resourceGoogleProjectServices() *schema.Resource {
@@ -23,7 +24,7 @@ func resourceGoogleProjectServices() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -32,10 +33,13 @@ func resourceGoogleProjectServices() *schema.Resource {
 			"services": {
 				Type:     schema.TypeSet,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: StringNotInSlice(ignoredProjectServices, false),
+				},
 			},
-			"disable_on_destroy": &schema.Schema{
+			"disable_on_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
@@ -44,13 +48,11 @@ func resourceGoogleProjectServices() *schema.Resource {
 	}
 }
 
+var ignoredProjectServices = []string{"dataproc-control.googleapis.com", "source.googleapis.com", "stackdriverprovisioning.googleapis.com"}
+
 // These services can only be enabled as a side-effect of enabling other services,
 // so don't bother storing them in the config or using them for diffing.
-var ignoreProjectServices = map[string]struct{}{
-	"dataproc-control.googleapis.com":        struct{}{},
-	"source.googleapis.com":                  struct{}{},
-	"stackdriverprovisioning.googleapis.com": struct{}{},
-}
+var ignoreProjectServices = golangSetFromStringSlice(ignoredProjectServices)
 
 func resourceGoogleProjectServicesCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
@@ -128,7 +130,9 @@ func resourceGoogleProjectServicesDelete(d *schema.ResourceData, meta interface{
 	config := meta.(*Config)
 	services := resourceServices(d)
 	for _, s := range services {
-		disableService(s, d.Id(), config)
+		if err := disableService(s, d.Id(), config, true); err != nil {
+			return err
+		}
 	}
 	d.SetId("")
 	return nil
@@ -147,27 +151,31 @@ func reconcileServices(cfgServices, apiServices []string, config *Config, pid st
 		return sm
 	}
 
+	sort.Strings(cfgServices)
 	cfgMap := m(cfgServices)
+	log.Printf("[DEBUG]: Saw the following services in config: %v", cfgServices)
 	apiMap := m(apiServices)
+	log.Printf("[DEBUG]: Saw the following services enabled: %v", apiServices)
 
-	for k, _ := range apiMap {
+	for k := range apiMap {
 		if _, ok := cfgMap[k]; !ok {
-			// The service in the API is not in the config; disable it.
-			err := disableService(k, pid, config)
+			log.Printf("[DEBUG]: Disabling %s as it's enabled upstream but not in config", k)
+			err := disableService(k, pid, config, true)
 			if err != nil {
 				return err
 			}
 		} else {
-			// The service exists in the config and the API, so we don't need
-			// to re-enable it
+			log.Printf("[DEBUG]: Skipping %s as it's enabled in both config and upstream", k)
 			delete(cfgMap, k)
 		}
 	}
 
 	keys := make([]string, 0, len(cfgMap))
-	for k, _ := range cfgMap {
+	for k := range cfgMap {
 		keys = append(keys, k)
 	}
+	sort.Strings(keys)
+	log.Printf("[DEBUG]: Enabling the following services: %v", keys)
 	err := enableServices(keys, pid, config)
 	if err != nil {
 		return err
@@ -232,7 +240,7 @@ func enableServices(s []string, pid string, config *Config) error {
 	// It's not permitted to enable more than 20 services in one API call (even
 	// for batch).
 	//
-	// https://godoc.org/google.golang.org/api/serviceusage/v1beta1#BatchEnableServicesRequest
+	// https://godoc.org/google.golang.org/api/serviceusage/v1#BatchEnableServicesRequest
 	batchSize := 20
 
 	for i := 0; i < len(s); i += batchSize {
@@ -279,7 +287,7 @@ func enableServices(s []string, pid string, config *Config) error {
 
 			// Poll for the API to return
 			activity := fmt.Sprintf("apis %q to be enabled for %s", services, pid)
-			_, waitErr := serviceUsageOperationWait(config, sop, activity)
+			waitErr := serviceUsageOperationWait(config, sop, activity)
 			if waitErr != nil {
 				return waitErr
 			}
@@ -333,15 +341,17 @@ func diffStringSlice(wanted, actual []string) []string {
 	return missing
 }
 
-func disableService(s, pid string, config *Config) error {
+func disableService(s, pid string, config *Config, disableDependentServices bool) error {
 	err := retryTime(func() error {
 		name := fmt.Sprintf("projects/%s/services/%s", pid, s)
-		sop, err := config.clientServiceUsage.Services.Disable(name, &serviceusage.DisableServiceRequest{}).Do()
+		sop, err := config.clientServiceUsage.Services.Disable(name, &serviceusage.DisableServiceRequest{
+			DisableDependentServices: disableDependentServices,
+		}).Do()
 		if err != nil {
 			return err
 		}
 		// Wait for the operation to complete
-		_, waitErr := serviceUsageOperationWait(config, sop, "api to disable")
+		waitErr := serviceUsageOperationWait(config, sop, "api to disable")
 		if waitErr != nil {
 			return waitErr
 		}

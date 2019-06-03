@@ -22,10 +22,10 @@ func TestAccComputeProjectMetadata_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -47,19 +47,19 @@ func TestAccComputeProjectMetadata_modify_1(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeProject_modify0_metadata(projectID, pname, org, billingId),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccComputeProject_modify1_metadata(projectID, pname, org, billingId),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -81,19 +81,19 @@ func TestAccComputeProjectMetadata_modify_2(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeProjectMetadataDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeProject_basic0_metadata(projectID, pname, org, billingId),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccComputeProject_basic1_metadata(projectID, pname, org, billingId),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_project_metadata.fizzbuzz",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -135,7 +135,7 @@ resource "google_project_service" "compute" {
 
 resource "google_compute_project_metadata" "fizzbuzz" {
   project = "${google_project.project.project_id}"
-  metadata {
+  metadata = {
     banana = "orange"
     sofa = "darwinism"
   }
@@ -159,7 +159,7 @@ resource "google_project_service" "compute" {
 
 resource "google_compute_project_metadata" "fizzbuzz" {
   project = "${google_project.project.project_id}"
-  metadata {
+  metadata = {
     kiwi = "papaya"
     finches = "darwinism"
   }
@@ -183,7 +183,7 @@ resource "google_project_service" "compute" {
 
 resource "google_compute_project_metadata" "fizzbuzz" {
   project = "${google_project.project.project_id}"
-  metadata {
+  metadata = {
     paper = "pen"
     genghis_khan = "french bread"
     happy = "smiling"
@@ -208,7 +208,7 @@ resource "google_project_service" "compute" {
 
 resource "google_compute_project_metadata" "fizzbuzz" {
   project = "${google_project.project.project_id}"
-  metadata {
+  metadata = {
     paper = "pen"
     paris = "french bread"
     happy = "laughing"

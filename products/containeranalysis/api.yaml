@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Container Analysis
-prefix: gcontaineranalysis
+name: ContainerAnalysis
+display_name: Container Registry
 versions:
   - !ruby/object:Api::Product::Version
     name: beta

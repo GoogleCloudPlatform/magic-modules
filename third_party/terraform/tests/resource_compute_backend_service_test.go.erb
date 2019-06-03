@@ -112,14 +112,15 @@ func TestAccComputeBackendService_withBackendAndIAP(t *testing.T) {
 				Config: testAccComputeBackendService_withBackendAndIAP(
 					serviceName, igName, itName, checkName, 10),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeBackendServiceExistsWithIAP(
-						"google_compute_backend_service.lipsum", &svc),
+					testAccCheckComputeBackendServiceExistsWithIAP("google_compute_backend_service.lipsum", &svc),
+					resource.TestCheckResourceAttr("google_compute_backend_service.lipsum", "iap.0.oauth2_client_secret", "test"),
 				),
 			},
 			resource.TestStep{
-				ResourceName:      "google_compute_backend_service.lipsum",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_backend_service.lipsum",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"iap.0.oauth2_client_secret"},
 			},
 			resource.TestStep{
 				Config: testAccComputeBackendService_withBackend(
@@ -327,24 +328,6 @@ func TestAccComputeBackendService_withSecurityPolicy(t *testing.T) {
 	})
 }
 
-func testAccCheckComputeBackendServiceDestroy(s *terraform.State) error {
-	config := testAccProvider.Meta().(*Config)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_compute_backend_service" {
-			continue
-		}
-
-		_, err := config.clientCompute.BackendServices.Get(
-			config.Project, rs.Primary.ID).Do()
-		if err == nil {
-			return fmt.Errorf("Backend service %s still exists", rs.Primary.ID)
-		}
-	}
-
-	return nil
-}
-
 func testAccCheckComputeBackendServiceExists(n string, svc *compute.BackendService) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -398,7 +381,7 @@ func testAccCheckComputeBackendServiceExistsWithIAP(n string, svc *compute.Backe
 		}
 
 		if found.Iap == nil || found.Iap.Enabled == false {
-			return fmt.Errorf("IAP not found or not enabled.")
+			return fmt.Errorf("IAP not found or not enabled. Saw %v", found.Iap)
 		}
 
 		*svc = *found
@@ -503,6 +486,38 @@ func TestAccComputeBackendService_withSessionAffinity(t *testing.T) {
 	}
 }
 
+func TestAccComputeBackendService_withAffinityCookieTtlSec(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	var svc compute.BackendService
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeBackendServiceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeBackendService_withAffinityCookieTtlSec(
+					serviceName, checkName, "description", "GENERATED_COOKIE", 300),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeBackendServiceExists(
+						"google_compute_backend_service.foobar", &svc),
+				),
+			},
+		},
+	})
+
+	if svc.SessionAffinity != "GENERATED_COOKIE" {
+		t.Errorf("Expected SessionAffinity == \"GENERATED_COOKIE\", got %s", svc.SessionAffinity)
+	}
+
+	if svc.AffinityCookieTtlSec != 300 {
+		t.Errorf("Expected AffinityCookieTtlSec == 300, got %v", svc.AffinityCookieTtlSec)
+	}
+}
+
 func TestAccComputeBackendService_withMaxConnections(t *testing.T) {
 	t.Parallel()
 
@@ -589,7 +604,7 @@ func TestAccComputeBackendService_withMaxConnectionsPerInstance(t *testing.T) {
 	}
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 	t.Parallel()
 
@@ -614,6 +629,34 @@ func TestAccComputeBackendService_withCustomHeaders(t *testing.T) {
 			},
 			resource.TestStep{
 				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+func TestAccComputeBackendService_internalLoadBalancing(t *testing.T) {
+	t.Parallel()
+
+	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeBackendServiceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendService_internalLoadBalancing(fr, proxy, backend, hc, urlmap),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.backend_service",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -713,10 +756,6 @@ resource "google_compute_instance_group_manager" "foobar" {
   base_instance_name = "foobar"
   zone               = "us-central1-f"
   target_size        = 1
-  auto_healing_policies {
-    health_check = "${google_compute_http_health_check.default.self_link}"
-    initial_delay_sec = "10"
-  }
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -825,6 +864,24 @@ resource "google_compute_http_health_check" "zero" {
   timeout_sec        = 1
 }
 `, serviceName, description, affinityName, checkName)
+}
+
+func testAccComputeBackendService_withAffinityCookieTtlSec(serviceName, checkName, description, affinityName string, affinityCookieTtlSec int64) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name                    = "%s"
+  description             = "%s"
+  health_checks           = ["${google_compute_http_health_check.zero.self_link}"]
+  session_affinity        = "%s"
+  affinity_cookie_ttl_sec = %v
+}
+ resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+`, serviceName, description, affinityName, affinityCookieTtlSec, checkName)
 }
 
 func testAccComputeBackendService_withConnectionDraining(serviceName, checkName string, drainingTimeout int64) string {
@@ -943,10 +1000,6 @@ resource "google_compute_instance_group_manager" "foobar" {
   base_instance_name = "foobar"
   zone               = "us-central1-f"
   target_size        = 1
-  auto_healing_policies {
-    health_check = "${google_compute_health_check.default.self_link}"
-    initial_delay_sec = "10"
-  }
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -1008,10 +1061,6 @@ resource "google_compute_instance_group_manager" "foobar" {
   base_instance_name = "foobar"
   zone               = "us-central1-f"
   target_size        = 1
-  auto_healing_policies {
-    health_check = "${google_compute_health_check.default.self_link}"
-    initial_delay_sec = "10"
-  }
 }
 
 resource "google_compute_instance_template" "foobar" {
@@ -1038,7 +1087,7 @@ resource "google_compute_health_check" "default" {
 `, serviceName, maxConnectionsPerInstance, igName, itName, checkName)
 }
 
-<% unless version.nil? || version == 'ga' -%>
+<% unless version == 'ga' -%>
 func testAccComputeBackendService_withCustomHeaders(serviceName, checkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_service" "foobar" {
@@ -1055,5 +1104,104 @@ resource "google_compute_http_health_check" "zero" {
   timeout_sec        = 1
 }
 `, serviceName, checkName)
+}
+<% end -%>
+
+<% unless version == 'ga' -%>
+<%# This test is for import functionality. It can be removed and added to examples when this goes GA %>
+func testAccComputeBackendService_internalLoadBalancing(fr, proxy, backend, hc, urlmap string) string {
+	return fmt.Sprintf(`
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  name                  = "%s"
+  target                = "${google_compute_target_http_proxy.default.self_link}"
+  port_range            = "80"
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+  ip_address            = "0.0.0.0"
+}
+
+resource "google_compute_target_http_proxy" "default" {
+  name        = "%s"
+  description = "a description"
+  url_map     = "${google_compute_url_map.default.self_link}"
+}
+
+resource "google_compute_backend_service" "backend_service" {
+  name                  = "%s"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "INTERNAL_SELF_MANAGED"
+
+  backend {
+    group = "${google_compute_instance_group_manager.foobar.instance_group}"
+    balancing_mode = "RATE"
+    capacity_scaler = 0.4
+    max_rate_per_instance = 50
+  }
+
+  health_checks = ["${google_compute_health_check.default.self_link}"]
+}
+
+resource "google_compute_health_check" "default" {
+  name               = "%s"
+  check_interval_sec = 1
+  timeout_sec        = 1
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_url_map" "default" {
+  name            = "%s"
+  description     = "a description"
+  default_service = "${google_compute_backend_service.backend_service.self_link}"
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name            = "allpaths"
+    default_service = "${google_compute_backend_service.backend_service.self_link}"
+
+    path_rule {
+      paths   = ["/*"]
+      service = "${google_compute_backend_service.backend_service.self_link}"
+    }
+  }
+}
+
+data "google_compute_image" "debian_image" {
+  family   = "debian-9"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_group_manager" "foobar" {
+  name               = "igm-internal"
+  version {
+    instance_template  = "${google_compute_instance_template.foobar.self_link}"
+    name               = "primary"
+  }
+  base_instance_name = "foobar"
+  zone               = "us-central1-f"
+  target_size        = 1
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "instance-template-internal"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = "${data.google_compute_image.debian_image.self_link}"
+    auto_delete  = true
+    boot         = true
+  }
+}`, fr, proxy, backend, hc, urlmap)
 }
 <% end -%>

@@ -11,19 +11,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'google/ruby_utils'
 require 'provider/config'
 require 'provider/core'
-require 'provider/inspec/manifest'
-require 'provider/inspec/resource_override'
-require 'provider/inspec/property_override'
+require 'overrides/inspec/resource_override'
+require 'overrides/inspec/property_override'
 require 'active_support/inflector'
+require 'google/yaml_validator'
 
 module Provider
   # Code generator for Example Cookbooks that manage Google Cloud Platform
   # resources.
   class Inspec < Provider::Core
-    include Google::RubyUtils
     # Settings for the provider
     class Config < Provider::Config
       attr_reader :manifest
@@ -32,133 +30,171 @@ module Provider
       end
 
       def resource_override
-        Provider::Inspec::ResourceOverride
+        Overrides::Inspec::ResourceOverride
       end
 
       def property_override
-        Provider::Inspec::PropertyOverride
+        Overrides::Inspec::PropertyOverride
       end
+    end
+
+    # Subclass of FileTemplate with InSpec specific fields
+    class InspecFileTemplate < Provider::FileTemplate
+      # Used within doc template to pluralize names
+      attr_accessor :plural
+      # If this is a file that is being compiled for doc generation
+      # This is accessed within the test templates to output an example name
+      # for documentation rather than a variable name
+      attr_accessor :doc_generation
+      # Used to compile InSpec attributes that are used within integration tests
+      attr_accessor :attribute_file_name
+      # If this is a privileged resource, which will make integration tests unusable
+      # unless the user is an admin of the GCP organization
+      attr_accessor :privileged
+    end
+
+    # Subclass of FileTemplate with InSpec specific fields
+    class NestedObjectFileTemplate < Provider::FileTemplate
+      # Property to generate this file for
+      attr_accessor :property
     end
 
     # This function uses the resource templates to create singular and plural
     # resources that can be used by InSpec
     def generate_resource(data)
-      target_folder = File.join(data[:output_folder], 'libraries')
-      FileUtils.mkpath target_folder
-      name = data[:object].name.underscore
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/singular_resource.erb',
-        out_file: File.join(target_folder, "google_#{data[:product_name]}_#{name}.rb")
+      target_folder = File.join(data.output_folder, 'libraries')
+      name = data.object.name.underscore
+
+      data.generate(
+        'templates/inspec/singular_resource.erb',
+        File.join(target_folder, "google_#{data.product.api_name}_#{name}.rb"),
+        self
       )
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/plural_resource.erb',
-        out_file: \
-          File.join(target_folder, "google_#{data[:product_name]}_#{name}".pluralize + '.rb')
+
+      data.generate(
+        'templates/inspec/plural_resource.erb',
+        File.join(target_folder, "google_#{data.product.api_name}_#{name}".pluralize + '.rb'),
+        self
       )
-      generate_documentation(data)
-      generate_properties(data)
+
+      generate_documentation(data.clone, name, false)
+      generate_documentation(data.clone, name, true)
+      generate_properties(data.clone, data.object.all_user_properties)
     end
 
-    def generate_properties(data)
-      object = data[:object]
-      nested_object_arrays = object.properties.select\
-        { |type| typed_array?(type) && nested_object?(type.item_type) }
+    # Generate the IAM policy for this object. This is used to query and test
+    # IAM policies separately from the resource itself
+    def generate_iam_policy(data)
+      target_folder = File.join(data.output_folder, 'libraries')
+      name = data.object.name.underscore
 
-      nested_objects = object.properties.select { |prop| nested_object?(prop) }
+      iam_policy_resource_name = "google_#{data.product.api_name}_#{name}_iam_policy"
+      data.generate(
+        'templates/inspec/iam_policy/iam_policy.erb',
+        File.join(target_folder, "#{iam_policy_resource_name}.rb"),
+        self
+      )
 
-      prop_map = nested_objects.map\
-        { |nested_object| emit_nested_object(nested_object_data(data, nested_object)) }
-
-      prop_map << nested_object_arrays.map\
-        { |array| emit_nested_object(nested_object_array_data(data, array)) }
-
-      generate_property_files(prop_map, data)
-      nested_objects.map { |prop| generate_properties(data.clone.merge(object: prop)) }
-      nested_object_arrays.map\
-        { |prop| generate_properties(data.clone.merge(object: prop.item_type)) }
-    end
-
-    def nested_object_data(data, nested_object)
-      data.clone.merge(
-        emit_array: false,
-        api_name: nested_object.name.underscore,
-        property: nested_object,
-        nested_properties: nested_object.properties,
-        obj_name: data[:object].name.underscore
+      markdown_target_folder = File.join(data.output_folder, 'docs/resources')
+      data.generate(
+        'templates/inspec/iam_policy/iam_policy.md.erb',
+        File.join(markdown_target_folder, "#{iam_policy_resource_name}.md"),
+        self
       )
     end
 
-    def nested_object_array_data(data, nested_object_array)
-      data.clone.merge(
-        emit_array: true,
-        api_name: nested_object_array.name.underscore,
-        property: nested_object_array,
-        nested_properties: nested_object_array.item_type.properties,
-        obj_name: data[:object].name.underscore
-      )
+    def generate_properties(data, props)
+      nested_objects = props.select(&:nested_properties?)
+      return if nested_objects.empty?
+
+      # Create property files for any nested objects.
+      generate_property_files(nested_objects, data)
+
+      # Create property files for any deeper nested objects.
+      nested_objects.each { |prop| generate_properties(data, prop.nested_properties) }
     end
 
     # Generate the files for the properties
-    def generate_property_files(prop_map, data)
-      prop_map.flatten.compact.each do |prop|
-        compile_file_list(
-          data[:output_folder],
-          { prop[:target] => prop[:source] },
-          {
-            product_ns: data[:product_name].camelize(:upper),
-            prop_ns_dir: data[:product_name].downcase
-          }.merge((prop[:overrides] || {}))
+    def generate_property_files(properties, data)
+      properties.flatten.compact.each do |property|
+        nested_object_template = NestedObjectFileTemplate.new(
+          data.output_folder,
+          data.name,
+          data.product,
+          data.version,
+          data.env
         )
+        nested_object_template.property = property
+        source = File.join('templates', 'inspec', 'nested_object.erb')
+        target = File.join(
+          nested_object_template.output_folder,
+          "libraries/#{nested_object_requires(property)}.rb"
+        )
+        nested_object_template.generate(source, target, self)
       end
     end
 
+    def build_object_data(object, output_folder, version)
+      InspecFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
+    end
+
     # Generates InSpec markdown documents for the resource
-    def generate_documentation(data)
-      name = data[:object].name.underscore
-      docs_folder = File.join(data[:output_folder], 'docs', 'resources')
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/inspec/doc-template.md.erb',
-        out_file: File.join(docs_folder, "google_#{data[:product_name]}_#{name}.md")
+    def generate_documentation(data, base_name, plural)
+      docs_folder = File.join(data.output_folder, 'docs', 'resources')
+
+      name = plural ? base_name.pluralize : base_name
+
+      data.name = name
+      data.plural = plural
+      data.doc_generation = true
+      data.generate(
+        'templates/inspec/doc_template.md.erb',
+        File.join(docs_folder, "google_#{data.product.api_name}_#{name}.md"),
+        self
       )
     end
 
     # Format a url that may be include newlines into a single line
     def format_url(url)
       return url.join('') if url.is_a?(Array)
+
       url.split("\n").join('')
     end
 
     # Copies InSpec tests to build folder
     def generate_resource_tests(data)
-      target_folder = File.join(data[:output_folder], 'test')
+      target_folder = File.join(data.output_folder, 'test')
       FileUtils.mkpath target_folder
+
       FileUtils.cp_r 'templates/inspec/tests/.', target_folder
+
+      name = "google_#{data.product.api_name}_#{data.object.name.underscore}"
+
+      generate_inspec_test(data.clone, name, target_folder, name)
+
+      # Build test for plural resource
+      generate_inspec_test(data.clone, name.pluralize, target_folder, name)
     end
 
-    def emit_nested_object(data)
-      target = if data[:emit_array]
-                 data[:property].item_type.property_file
-               else
-                 data[:property].property_file
-               end
-      {
-        source: File.join('templates', 'inspec', 'nested_object.erb'),
-        target: "libraries/#{target}.rb",
-        overrides: emit_nested_object_overrides(data)
-      }
-    end
+    def generate_inspec_test(data, name, target_folder, attribute_file_name)
+      data.name = name
+      data.attribute_file_name = attribute_file_name
+      data.doc_generation = false
+      data.privileged = data.object.privileged
 
-    def emit_nested_object_overrides(data)
-      data.clone.merge(
-        api_name: data[:api_name].camelize(:upper),
-        object_type: data[:obj_name].camelize(:upper),
-        product_ns: data[:product_name].camelize(:upper),
-        class_name: if data[:emit_array]
-                      data[:property].item_type.property_class.last
-                    else
-                      data[:property].property_class.last
-                    end
+      data.generate(
+        'templates/inspec/integration_test_template.erb',
+        File.join(
+          target_folder,
+          'integration/verify/controls',
+          "#{name}.rb"
+        ),
+        self
       )
+    end
+
+    def emit_requires(requires)
+      requires.flatten.sort.uniq.map { |r| "require '#{r}'" }.join("\n")
     end
 
     def time?(property)
@@ -192,34 +228,23 @@ module Provider
     # Only arrays of nested objects and nested object properties need require statements
     # for InSpec. Primitives are all handled natively
     def generate_requires(properties)
-      nested_props = properties.select { |type| nested_object?(type) }
-      nested_object_arrays = properties.select\
-        { |type| typed_array?(type) && nested_object?(type.item_type) }
-      nested_array_requires = nested_object_arrays.collect { |type| array_requires(type) }
+      nested_props = properties.select(&:nested_properties?)
+
       # Need to include requires statements for the requirements of a nested object
-      # TODO is this needed? Not sure how ruby works so well
-      nested_prop_requires = nested_props.map\
-        { |nested_prop| generate_requires(nested_prop.properties) }
+      nested_prop_requires = nested_props.map do |nested_prop|
+        generate_requires(nested_prop.nested_properties) unless nested_prop.is_a?(Api::Type::Array)
+      end.compact
       nested_object_requires = nested_props.map\
         { |nested_object| nested_object_requires(nested_object) }
-      nested_object_requires + nested_prop_requires + nested_array_requires
-    end
-
-    def array_requires(type)
-      File.join(
-        'google',
-        type.__resource.__product.prefix[1..-1],
-        'property',
-        [type.__resource.name.downcase, type.item_type.name.underscore].join('_')
-      )
+      nested_object_requires + nested_prop_requires
     end
 
     def nested_object_requires(nested_object_type)
       File.join(
         'google',
-        nested_object_type.__resource.__product.prefix[1..-1],
+        nested_object_type.__resource.__product.api_name,
         'property',
-        [nested_object_type.__resource.name, nested_object_type.name.underscore].join('_')
+        qualified_property_class(nested_object_type)
       ).downcase
     end
 
@@ -236,7 +261,64 @@ module Provider
     end
 
     def markdown_format(property)
-      "    * `#{property.name}`: #{property.description.split("\n").join(' ')}"
+      "    * `#{property.out_name}`: #{property.description.split("\n").join(' ')}"
+    end
+
+    def grab_attributes
+      YAML.load_file('templates/inspec/tests/integration/configuration/mm-attributes.yml')
+    end
+
+    # Returns a variable name OR default value for that variable based on
+    # defaults from the existing inspec-gcp tests that do not exist within MM
+    # Default values are used within documentation to show realistic examples
+    def external_attribute(attribute_name, doc_generation = false)
+      return attribute_name unless doc_generation
+
+      external_attribute_file = 'templates/inspec/examples/attributes/external_attributes.yml'
+      "'#{YAML.load_file(external_attribute_file)[attribute_name]}'"
+    end
+
+    def qualified_property_class(property)
+      name = property.name.underscore
+      other = property.__resource.name
+      until property.parent.nil?
+        property = property.parent
+        next if typed_array?(property)
+
+        name = property.name.underscore + '_' + name
+      end
+
+      other + '_' + name
+    end
+
+    def modularized_property_class(property)
+      class_name = qualified_property_class(property).camelize(:upper)
+      product_name = property.__resource.__product.name.camelize(:upper)
+      "GoogleInSpec::#{product_name}::Property::#{class_name}"
+    end
+
+    # Returns Ruby code that will parse the given property from a hash
+    # This is used in several places that need to parse an arbitrary property
+    # from a JSON representation
+    def parse_code(property, hash_name)
+      item_from_hash = "#{hash_name}['#{property.api_name}']"
+      return "parse_time_string(#{item_from_hash})" if time?(property)
+
+      if primitive?(property)
+        return "name_from_self_link(#{item_from_hash})" \
+          if property.name_from_self_link
+
+        return item_from_hash.to_s
+      elsif typed_array?(property)
+        class_name = modularized_property_class(property.item_type)
+        return "#{class_name}Array.parse(#{item_from_hash}, to_s)"
+      end
+      "#{modularized_property_class(property)}.new(#{item_from_hash}, to_s)"
+    end
+
+    # Extracts identifiers of a resource in the form {{identifier}} from a url
+    def extract_identifiers(url)
+      url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
     end
   end
 end

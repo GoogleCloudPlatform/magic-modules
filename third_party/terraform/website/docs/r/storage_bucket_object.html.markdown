@@ -34,12 +34,11 @@ The following arguments are supported:
 
 * `bucket` - (Required) The name of the containing bucket.
 
-* `name` - (Required) The name of the object.
+* `name` - (Required) The name of the object. If you're interpolating the name of this object, see `output_name` instead.
 
 One of the following is required:
 
-* `content` - (Optional) Data as `string` to be uploaded. Must be defined if
-    `source` is not.
+* `content` - (Optional, Sensitive) Data as `string` to be uploaded. Must be defined if `source` is not. **Note**: The `content` field is marked as sensitive. To view the raw contents of the object, please define an [output](/docs/configuration/outputs.html).
 
 * `source` - (Optional) A path to the data you want to upload. Must be defined
     if `content` is not.
@@ -69,3 +68,8 @@ exported:
 * `crc32c` - (Computed) Base 64 CRC32 hash of the uploaded data.
 
 * `md5hash` - (Computed) Base 64 MD5 hash of the uploaded data.
+
+* `self_link` - (Computed) A url reference to this object.
+
+* `output_name` - (Computed) The name of the object. Use this field in interpolations with `google_storage_object_acl` to recreate
+`google_storage_object_acl` resources when your `google_storage_bucket_object` is recreated.

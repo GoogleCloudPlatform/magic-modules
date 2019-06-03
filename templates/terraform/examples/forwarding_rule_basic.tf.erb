@@ -1,4 +1,4 @@
-resource "google_compute_forwarding_rule" "default" {
+resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
   name       = "<%= ctx[:vars]['forwarding_rule_name'] %>"
   target     = "${google_compute_target_pool.default.self_link}"
   port_range = "80"

@@ -16,15 +16,11 @@
 *#
 *.swp
 
-coverage/*
 *.pyc
 
 # IDEA files
 .idea/*
 *.iml
-
-# Keep project coverage statistics under source control
-!coverage/.last_run.json
 
 # OS generated files
 .DS_Store
@@ -35,4 +31,11 @@ coverage/*
 ehthumbs.db
 Thumbs.db
 
+<<<<<<< HEAD
 .vscode/
+=======
+final_api.yaml
+# Ansible PR Script
+tools/ansible-pr/templates/*
+!tools/ansible-pr/templates/.keep
+>>>>>>> master

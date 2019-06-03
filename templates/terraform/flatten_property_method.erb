@@ -22,6 +22,7 @@
                            property: property)) -%>
 <% else -%>
 <% if tf_types.include?(property.class) -%>
+<<<<<<< HEAD
 func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= '[]' if property.is_a?(Api::Type::Array) -%><%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>) []interface{} {
 <% if property.is_a?(Api::Type::NestedObject) -%>
     if input == nil {
@@ -48,6 +49,65 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
     }
 
     return results
+=======
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+<% if property.is_a?(Api::Type::NestedObject) -%>
+  if v == nil {
+    return nil
+  }
+  original := v.(map[string]interface{})
+  <% unless property.allow_empty_object -%>
+  if len(original) == 0 {
+    return nil
+  }
+  <% end -%>
+  transformed := make(map[string]interface{})
+  <% property.properties.each do |prop| -%>
+    <% if prop.flatten_object -%>
+    if <%= prop.api_name -%> := flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d); <%= prop.api_name -%> != nil {
+      obj := <%= prop.api_name -%>.([]interface{})[0]
+      for k, v := range obj.(map[string]interface{}) {
+        transformed[k] = v
+      }
+    }
+    <% else -%>
+    transformed["<%= prop.name.underscore -%>"] =
+    flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d)
+    <% end -%>
+  <% end -%>
+  return []interface{}{transformed}
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
+  if v == nil {
+    return v
+  }
+  l := v.([]interface{})
+<%   if property.is_set -%>
+<%     if property.set_hash_func.nil? -%>
+  transformed := schema.NewSet(schema.HashResource(<%= prefix.camelize(:lower) -%><%= property.name.camelize -%>Schema()), []interface{}{})
+<%     else -%>
+  transformed := schema.NewSet(<%= property.set_hash_func -%>, []interface{}{})
+<%     end -%>
+<%   else -%>
+  transformed := make([]interface{}, 0, len(l))
+<%   end -%>
+  for _, raw := range l {
+    original := raw.(map[string]interface{})
+    if len(original) < 1 {
+      // Do not include empty json objects coming back from the api
+      continue
+    }
+<%   if property.is_set -%>
+    transformed.Add(map[string]interface{}{
+<%   else -%>
+    transformed = append(transformed, map[string]interface{}{
+<%   end -%>
+    <% property.item_type.properties.reject(&:ignore_read).each do |prop| -%>
+      "<%= prop.name.underscore -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
+    <% end -%>
+    })
+  }
+  return transformed
+>>>>>>> master
 <% elsif property.is_a?(Api::Type::Map) -%>
     if v == nil {
       return v
@@ -59,7 +119,11 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
     transformed = append(transformed, map[string]interface{}{
       "<%= property.key_name -%>": k,
     <% property.value_type.properties.each do |prop| -%>
+<<<<<<< HEAD
       "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
+=======
+      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= prefix -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"], d),
+>>>>>>> master
     <% end -%>
     })
   }
@@ -82,7 +146,7 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
     return v
   }
   return ConvertSelfLinkToV1(v.(string))
-<% elsif property.is_set -%>
+<% elsif property.is_set # item_type won't be NestedObject -%>
   if v == nil {
     return v
   }
@@ -96,9 +160,15 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
 }
+<<<<<<< HEAD
 <% if !nested_properties(property).empty? -%>
   <% nested_properties(property).each do |prop| -%>
     <%# lines(build_flatten_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+=======
+<% if property.nested_properties? -%>
+  <% property.nested_properties.each do |prop| -%>
+    <%= lines(build_flatten_method(prefix + titlelize_property(property), prop), 1) -%>
+>>>>>>> master
   <% end -%>
 <% end -%>
 <% else -%>

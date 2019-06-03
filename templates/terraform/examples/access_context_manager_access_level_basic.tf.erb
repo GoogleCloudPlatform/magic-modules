@@ -1,0 +1,20 @@
+resource "google_access_context_manager_access_level" "<%= ctx[:primary_resource_id] %>" {
+  parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/<%= ctx[:vars]['access_level_name'] %>"
+  title       = "<%= ctx[:vars]['access_level_name'] %>"
+  basic {
+    conditions {
+      device_policy {
+        require_screen_lock = false
+        os_constraints {
+          os_type = "DESKTOP_CHROME_OS"
+        }
+      }
+    }
+  }
+}
+
+resource "google_access_context_manager_access_policy" "access-policy" {
+  parent = "organizations/123456789"
+  title  = "my policy"
+}

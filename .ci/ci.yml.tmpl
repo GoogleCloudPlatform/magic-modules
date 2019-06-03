@@ -2,18 +2,25 @@
 
 # These resource types are here until the PRs get merged in upstream.  :)
 resource_types:
+    - name: merged-downstreams
+      type: docker-image
+      source:
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/merged-prs-resource
+          tag: '1.1'
+
     - name: git-branch
       type: docker-image
       source:
-          # Note: resource types cannot use credhub substitution - "nmckinley" is hardcoded here.
-          repository: nmckinley/concourse-git-resource
-          tag: v0.1.7
+          # Note: resource types cannot use credhub substitution - "gcr.io/magic-modules" is hardcoded here.
+          repository: gcr.io/magic-modules/concourse-git-resource
+          tag: '1.0'
 
     - name: github-pull-request
       type: docker-image
       source:
-          repository: nmckinley/concourse-github-pr-resource
-          tag: v0.1.14
+          repository: gcr.io/magic-modules/concourse-github-pr-resource
+          tag: '1.1'
 
 resources:
     - name: magic-modules
@@ -28,12 +35,22 @@ resources:
           uri: git@github.com:GoogleCloudPlatform/magic-modules.git
           private_key: ((repo-key.private_key))
 
+    - name: magic-modules-new-external-prs
+      type: github-pull-request
+      source:
+          repo: GoogleCloudPlatform/magic-modules
+          private_key: ((repo-key.private_key))
+          access_token: ((github-account.password))
+          community_only: true
+          no_label: community
+
     - name: magic-modules-external-prs
       type: github-pull-request
       source:
           repo: GoogleCloudPlatform/magic-modules
           private_key: ((repo-key.private_key))
           access_token: ((github-account.password))
+          community_only: true
 
     - name: magic-modules-new-prs
       type: github-pull-request
@@ -75,7 +92,32 @@ resources:
           check_dependent_prs: true
           label: downstream-generated
 
+    - name: merged-prs
+      type: merged-downstreams
+      check_every: 5m
+      source:
+        repo: GoogleCloudPlatform/magic-modules
+        token: ((github-account.password))
+
 jobs:
+    - name: respond-to-community-pr
+      plan:
+          - get: magic-modules-new-external-prs
+            trigger: true
+          - get: magic-modules-gcp
+            # NOTE: we do NOT run a script from the external PR!
+          - task: write-welcome-message
+            file: magic-modules-gcp/.ci/magic-modules/welcome-contributor.yml
+          - put: magic-modules-external-prs
+            params:
+                status: pending
+                path: magic-modules-new-external-prs
+                label: community
+                comment: comment/pr_comment
+                assignee_file: comment/assignee
+            get_params:
+                skip_clone: true
+
     - name: authorize-single-rev
       plan:
           - get: magic-modules-external-prs
@@ -84,6 +126,8 @@ jobs:
             params:
                 status: pending
                 path: magic-modules-external-prs
+            get_params:
+                skip_clone: true
 
     - name: mm-generate
       plan:
@@ -91,15 +135,12 @@ jobs:
             resource: magic-modules-new-prs
             version: every
             trigger: true
+            attempts: 2
             params:
               fetch_merge: true
-            # consumes: magic-modules (because that's where the code is)
-            # products: patches
           - aggregate:
-            - task: get-merged-patches
-              file: magic-modules/.ci/magic-modules/get-merged-patches.yml
-              params:
-                GH_TOKEN: ((github-account.password))
+            - get: patches
+              resource: merged-prs
               # consumes: magic-modules (detached HEAD)
               # produces: magic-modules-branched (new branch, with submodule)
             - task: branch-magic-modules
@@ -112,6 +153,8 @@ jobs:
               params:
                 status: pending
                 path: magic-modules
+              get_params:
+                skip_clone: true
           - aggregate:
             {% for k, v in vars.terraform_v.iteritems() %}
             - do:
@@ -123,6 +166,8 @@ jobs:
                   VERSION: {{k}}
                   PROVIDER_NAME: {{v.provider_name}}
                   SHORT_NAME: {{v.short_name}}
+                  GITHUB_ORG: {{v.github_org}}
+                  OVERRIDE_PROVIDER: {{v.override_provider}}
               # Puts 'terraform-generated' into the robot's fork.
               - aggregate:
                 - put: {{v.short_name}}-intermediate
@@ -131,6 +176,8 @@ jobs:
                       branch_file: magic-modules-branched/branchname
                       only_if_diff: true
                       force: true
+                  get_params:
+                      skip_clone: true
             {% endfor %}
             - do:
                 # consumes: magic-modules-branched
@@ -144,6 +191,8 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
+                get_params:
+                    skip_clone: true
             - do:
                 # consumes: magic-modules-branched
                 # produces: inspec-generated
@@ -156,12 +205,16 @@ jobs:
                     branch_file: magic-modules-branched/branchname
                     only_if_diff: true
                     force: true
+                get_params:
+                    skip_clone: true
             on_failure:
               put: magic-modules-new-prs
               params:
                 status: failure
                 context: code-generation
                 path: magic-modules
+              get_params:
+                skip_clone: true
 
             # consumes: magic-modules-branched
             # produces: magic-modules-submodules
@@ -182,6 +235,8 @@ jobs:
                 repository: magic-modules-submodules
                 branch_file: magic-modules-branched/branchname
                 force: true
+            get_params:
+                skip_clone: true
 
     - name: terraform-test
       plan:
@@ -210,6 +265,8 @@ jobs:
                   status: failure
                   context: terraform-tests
                   path: magic-modules-new-prs
+                get_params:
+                  skip_clone: true
 
     - name: ansible-test
       plan:
@@ -231,27 +288,26 @@ jobs:
                   status: failure
                   context: ansible-tests
                   path: magic-modules-new-prs
+                get_params:
+                  skip_clone: true
 
-    - name: inspec-test
+    - name: inspec-unit-test
       plan:
+        - get: magic-modules-new-prs
+          passed: [mm-generate]
         - get: magic-modules
           version: every
           trigger: true
           params:
-              submodules: [build/inspec]
+            submodules: [build/inspec]
           passed: [mm-generate]
         - task: test
           file: magic-modules/.ci/unit-tests/inspec.yml
           timeout: 30m
-          on_failure:
-              do:
-              - get: magic-modules-new-prs
-                passed: [mm-generate]
-              - put: magic-modules-new-prs
-                params:
-                  status: failure
-                  context: inspec-tests
-                  path: magic-modules-new-prs
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
 
     - name: create-prs
       plan:
@@ -262,10 +318,8 @@ jobs:
                 submodules: {{vars.all_submodules_yaml_format}}
             passed:
               - mm-generate
-              - terraform-test
-              - ansible-test
-              - inspec-test
           - get: mm-initial-pr
+            attempts: 2
             resource: magic-modules-new-prs
             passed: [mm-generate]
             version: every
@@ -273,22 +327,8 @@ jobs:
           # or, if a PR already exists, it uses 'git branch -f' to update the branch
           # that PR is from to point at the commit generated earlier from this run
           # of the pipeline.
-          - task: create-or-update-pr
-            file: magic-modules/.ci/magic-modules/create-pr.yml
-            params:
-                GITHUB_TOKEN: ((github-account.password))
-                # This is what tells us which terraform repo to write PRs against - this
-                # is what you change if you want to test this in a non-live environment.
-                TERRAFORM_REPO_USER: terraform-providers
-                ANSIBLE_REPO_USER: modular-magician
-                INSPEC_REPO_USER: modular-magician
-                TERRAFORM_VERSIONS: "{{','.join(vars.terraform_properties_serialized)}}"
-            on_failure:
-              put: magic-modules-new-prs
-              params:
-                  status: failure
-                  context: pr-creation
-                  path: mm-initial-pr
+          - task: write-original-branch-name
+            file: mm-initial-pr/.ci/magic-modules/write-branch-name.yml
           # This will be a no-op the first time through the pipeline.  This pushes the updated
           # branch named "codegen-pr-$MM_PR_NUMBER" to the downstream terraform repo.  The
           # first time through the pipeline, that branch is unchanged by the create-prs task,
@@ -299,8 +339,8 @@ jobs:
             {% for v in vars.terraform_v.itervalues() %}
             - put: {{v.short_name}}-intermediate
               params:
-                repository: magic-modules-with-comment/build/{{ v.short_name }}
-                branch_file: magic-modules-with-comment/original_pr_branch_name
+                repository: magic-modules/build/{{ v.short_name }}
+                branch_file: branchname/original_pr_branch_name
                 # Every time a change runs through this pipeline, it will generate a commit with
                 # a different hash - the hash includes timestamps.  Therefore, even if there's no
                 # code diff, this push will update terraform's pending PR on every update to the
@@ -309,30 +349,54 @@ jobs:
                 # not push the update even though the commit hashes are different.
                 only_if_diff: true
                 force: true
+              get_params:
+                  skip_clone: true
             {% endfor %}
             - put: ansible-intermediate
               params:
-                repository: magic-modules-with-comment/build/ansible
-                branch_file: magic-modules-with-comment/original_pr_branch_name
+                repository: magic-modules/build/ansible
+                branch_file: branchname/original_pr_branch_name
                 # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
+              get_params:
+                  skip_clone: true
             - put: inspec-intermediate
               params:
-                repository: magic-modules-with-comment/build/inspec
-                branch_file: magic-modules-with-comment/original_pr_branch_name
+                repository: magic-modules/build/inspec
+                branch_file: branchname/original_pr_branch_name
                 # See comment on terraform-intermediate
                 only_if_diff: true
                 force: true
+              get_params:
+                  skip_clone: true
+          - task: create-or-update-pr
+            file: magic-modules/.ci/magic-modules/create-pr.yml
+            params:
+                GITHUB_TOKEN: ((github-account.password))
+                # This is what tells us which terraform repo to write PRs against - this
+                # is what you change if you want to test this in a non-live environment.
+                ANSIBLE_REPO_USER: modular-magician
+                INSPEC_REPO_USER: modular-magician
+                TERRAFORM_VERSIONS: "{{','.join(vars.terraform_properties_serialized)}}"
+            on_failure:
+              put: magic-modules-new-prs
+              params:
+                  status: failure
+                  context: pr-creation
+                  path: mm-initial-pr
+              get_params:
+                  skip_clone: true
 
-          # This isn't load-bearing - it's just aesthetic.  It will also be a no-op the first
-          # time through, it works the same way as the preceding push.
           - put: magic-modules
             params:
-              repository: magic-modules-with-comment/
-              branch_file: magic-modules-with-comment/original_pr_branch_name
+              repository: magic-modules/
+              branch_file: branchname/original_pr_branch_name
               only_if_diff: true
               force: true
+            get_params:
+                skip_clone: true
+
           # Once everything is done and working, post the updated information to the
           # magic-modules PR.
           - put: magic-modules-new-prs
@@ -341,15 +405,43 @@ jobs:
                 label: downstream-generated
                 path: mm-initial-pr
                 comment: magic-modules-with-comment/pr_comment
+                label_file: magic-modules-with-comment/label_file
+            get_params:
+                skip_clone: true
+    - name: terraform-acceptance-tests
+      plan:
+        - get: magic-modules
+          version: every
+          trigger: true
+          params:
+              submodules: [{{','.join(vars.terraform_submodules)}}]
+          passed: [create-prs]
+        - aggregate:
+          {% for v in vars.terraform_v.itervalues() %}
+          - task: test-{{v.short_name}}
+            file: magic-modules/.ci/acceptance-tests/terraform-acceptance.yml
+            params:
+              PROVIDER_NAME: {{v.provider_name}}
+              SHORT_NAME: {{v.short_name}}
+              TEST_DIR: {{v.test_dir}}
+          {% endfor %}
 
     - name: merge-prs
       plan:
           - get: mm-approved-prs
-          - put: mm-approved-prs
+            attempts: 2
+          - task: ensure-downstreams-merged
+            file: mm-approved-prs/.ci/magic-modules/ensure-downstreams-merged.yml
+            params:
+                GH_TOKEN: ((github-account.password))
+          - put: mark-automerged
+            resource: mm-approved-prs
             params:
               path: mm-approved-prs
               status: success
               label: automerged
+            get_params:
+              skip_clone: true
           - task: rebase-and-update
             file: mm-approved-prs/.ci/magic-modules/merge.yml
             params:
@@ -364,23 +456,60 @@ jobs:
             params:
                 repository: mm-output
                 branch_file: mm-approved-prs/.git/branch
-                only_if_diff: true
                 force: true
-          - put: mm-approved-prs
+          - put: mark-success
+            resource: mm-approved-prs
             params:
                 path: mm-output
                 status: success
-          - put: mm-approved-prs
+            get_params:
+                skip_clone: true
+          - put: merge-pr
+            resource: mm-approved-prs
             params:
                 path: mm-output
                 status: success
                 merge:
                     method: squash
                     commit_msg: mm-output/commit_message
-    - name: inspec-integration-test
+            get_params:
+                skip_clone: true
+
+    - name: inspec-vcr-record
+      serial: true
+      serial_groups: [inspec-integration]
       plan:
         - get: magic-modules-new-prs
-        - task: inspec-integration
-          file: magic-modules-new-prs/.ci/acceptance-tests/inspec-integration.yml
+        - task: inspec-vcr
+          file: magic-modules-new-prs/.ci/acceptance-tests/inspec-vcr.yml
           params:
             TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
+    - name: inspec-post-merge
+      serial: true
+      serial_groups: [inspec-integration]
+      plan:
+        - get: mm-approved-prs
+          passed: [merge-prs]
+          trigger: true
+        - task: inspec-post-merge
+          file: mm-approved-prs/.ci/acceptance-tests/inspec-post-merge.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))
+
+    - name: inspec-post-approve
+      serial: true
+      serial_groups: [inspec-integration]
+      plan:
+        - get: mm-approved-prs
+          trigger: true
+        - task: inspec-post-approve
+          file: mm-approved-prs/.ci/acceptance-tests/inspec-post-approve.yml
+          params:
+            TERRAFORM_KEY: ((terraform-key))
+            PROJECT_NAME: ((inspec-project-name))
+            PROJECT_NUMBER: ((inspec-project-number))

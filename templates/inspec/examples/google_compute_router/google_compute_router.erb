@@ -1,0 +1,22 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% gcp_location = "#{external_attribute('gcp_location', doc_generation)}" -%>
+<% router = grab_attributes['router'] -%>
+<% gcp_network_name = "#{external_attribute('gcp_network_name', doc_generation)}" -%>
+describe google_compute_router(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: <%= doc_generation ? "'#{router['name']}'" : "router['name']" -%>) do
+  it { should exist }
+  its('bgp.asn') { should eq <%= doc_generation ? "'#{router['bgp_asn']}'" : "router['bgp_asn']" -%> }
+  its('bgp.advertise_mode') { should eq <%= doc_generation ? "'#{router['bgp_advertise_mode']}'" : "router['bgp_advertise_mode']" -%> }
+  its('bgp.advertised_groups') { should include <%= doc_generation ? "'#{router['bgp_advertised_group']}'" : "router['bgp_advertised_group']" -%> }
+  its('bgp.advertised_ip_ranges.count') { should eq 2 }
+  its('bgp.advertised_ip_ranges.first.range') { should eq <%= doc_generation ? "'#{router['bgp_advertised_ip_range1']}'" : "router['bgp_advertised_ip_range1']" -%> }
+  its('bgp.advertised_ip_ranges.last.range') { should eq <%= doc_generation ? "'#{router['bgp_advertised_ip_range1']}'" : "router['bgp_advertised_ip_range2']" -%> }
+  <% if doc_generation -%>
+  its('network') { should match /\/<%= "#{gcp_network_name}".gsub('\'', '') -%>$/ }
+  <% else -%>
+  its('network') { should match /\/#{gcp_network_name}$/ }
+  <% end -%>
+end
+
+describe google_compute_router(project: <%= gcp_project_id -%>, region: <%= gcp_location -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

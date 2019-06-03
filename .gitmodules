@@ -1,15 +1,19 @@
 [submodule "build/ansible"]
 	path = build/ansible
-	url = git@github.com:modular-magician/ansible
+	url = https://github.com/modular-magician/ansible
 	branch = devel
 [submodule "build/terraform"]
 	path = build/terraform
-	url = git@github.com:terraform-providers/terraform-provider-google.git
-	branch = 2.0.0
+	url = https://github.com/terraform-providers/terraform-provider-google
+	branch = master
 [submodule "build/terraform-beta"]
 	path = build/terraform-beta
-	url = git@github.com:terraform-providers/terraform-provider-google-beta.git
-	branch = 2.0.0
+	url = https://github.com/terraform-providers/terraform-provider-google-beta
+	branch = master
 [submodule "build/inspec"]
 	path = build/inspec
-	url = git@github.com:modular-magician/inspec-gcp.git
+	url = https://github.com/modular-magician/inspec-gcp
+[submodule "build/terraform-mapper"]
+	path = build/terraform-mapper
+	url = https://github.com/GoogleCloudPlatform/terraform-google-conversion.git
+    branch = master

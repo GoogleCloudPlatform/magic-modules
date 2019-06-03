@@ -16,160 +16,9 @@ require 'api/object'
 require 'compile/core'
 require 'google/golang_utils'
 require 'provider/abstract_core'
-require 'provider/property_override'
 
 module Provider
   class Terraform < Provider::AbstractCore
-    # Inserts custom strings into terraform resource docs.
-    class Docs < Api::Object
-      # All these values should be strings, which will be inserted
-      # directly into the terraform resource documentation.  The
-      # strings should _not_ be the names of template files
-      # (This should be reconsidered if we find ourselves repeating
-      # any string more than ones), but rather the actual text
-      # (including markdown) which needs to be injected into the
-      # template.
-      # The text will be injected at the bottom of the specified
-      # section.
-      attr_reader :warning
-      attr_reader :required_properties
-      attr_reader :optional_properties
-      attr_reader :attributes
-
-      def validate
-        super
-        check_optional_property :warning, String
-        check_optional_property :required_properties, String
-        check_optional_property :optional_properties, String
-        check_optional_property :attributes, String
-      end
-    end
-
-    # Generates configs to be shown as examples in docs and outputted as tests
-    # from a shared template
-    class Examples < Api::Object
-      include Compile::Core
-      include Google::GolangUtils
-
-      # The name of the example in lower snake_case.
-      # Generally takes the form of the resource name followed by some detail
-      # about the specific test. For example, "address_with_subnetwork".
-      # The template for the example is expected at the path
-      # "templates/terraform/examples/{{name}}.tf.erb"
-      attr_reader :name
-
-      # The id of the "primary" resource in an example. Used in import tests.
-      # This is the value that will appear in the Terraform config url. For
-      # example:
-      # resource "google_compute_address" {{primary_resource_id}} {
-      #   ...
-      # }
-      attr_reader :primary_resource_id
-
-      # vars is a Hash from template variable names to output variable names
-      attr_reader :vars
-
-      # the version (ga, beta, etc.) this example is being generated at
-      attr_reader :version
-
-      # Extra properties to ignore read on during import.
-      # These properties will likely be custom code.
-      attr_reader :ignore_read_extra
-
-      # Whether to skip generating tests for this resource
-      attr_reader :skip_test
-
-      def config_documentation
-        body = lines(compile_file(
-                       {
-                         vars: vars,
-                         primary_resource_id: primary_resource_id,
-                         version: version
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-        ))
-        lines(compile_file(
-                { content: body },
-                'templates/terraform/examples/base_configs/documentation.tf.erb'
-        ))
-      end
-
-      def config_test
-        @vars ||= []
-        body = lines(compile_file(
-                       {
-                         vars: vars.map { |k, str| [k, "#{str}-%s"] }.to_h,
-                         primary_resource_id: primary_resource_id,
-                         version: version
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-        ))
-
-        body = substitute_test_paths body
-
-        lines(compile_file(
-                {
-                  content: body,
-                  count: vars.length
-                },
-                'templates/terraform/examples/base_configs/test_body.go.erb'
-        ))
-      end
-
-      def config_example
-        @vars ||= []
-        body = lines(compile_file(
-                       {
-                         vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
-                         primary_resource_id: primary_resource_id,
-                         version: version
-                       },
-                       "templates/terraform/examples/#{name}.tf.erb"
-        ))
-
-        substitute_example_paths body
-      end
-
-      def oics_link
-        hash = {
-          cloudshell_git_repo: 'https://github.com/terraform-google-modules/docs-examples.git',
-          cloudshell_working_dir: @name,
-          cloudshell_image: 'gcr.io/graphite-cloud-shell-images/terraform:latest',
-          open_in_editor: 'main.tf',
-          cloudshell_print: './motd',
-          cloudshell_tutorial: './tutorial.md'
-        }
-        URI::HTTPS.build(
-          host: 'console.cloud.google.com',
-          path: '/cloudshell/open',
-          query: URI.encode_www_form(hash)
-        )
-      end
-
-      def substitute_test_paths(config)
-        config = config.gsub('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-        config = config.gsub('path/to/private.key', 'test-fixtures/ssl_cert/test.key')
-        config.gsub('path/to/certificate.crt', 'test-fixtures/ssl_cert/test.crt')
-      end
-
-      def substitute_example_paths(config)
-        config = config.gsub('../static/img/header-logo.png', '../static/header-logo.png')
-        config = config.gsub('path/to/private.key', '../static/ssl_cert/test.key')
-        config.gsub('path/to/certificate.crt', '../static/ssl_cert/test.crt')
-      end
-
-      def validate
-        super
-        @ignore_read_extra ||= []
-
-        check_property :name, String
-        check_property :primary_resource_id, String
-        check_optional_property :vars, Hash
-        check_optional_property_list :ignore_read_extra, String
-        check_optional_property :skip_test, TrueClass
-      end
-    end
-
     # Inserts custom code into terraform resources.
     class CustomCode < Api::Object
       # Collection of fields allowed in the CustomCode section for
@@ -247,6 +96,10 @@ module Provider
       # useful to prepare an object for deletion, e.g. by detaching
       # a disk before deleting it.
       attr_reader :pre_delete
+      # This code replaces the entire delete method.  Since the delete
+      # method's function header can't be changed, the template
+      # inserts that for you - do not include it in your custom code.
+      attr_reader :custom_delete
       # This code replaces the entire import method.  Since the import
       # method's function header can't be changed, the template
       # inserts that for you - do not include it in your custom code.
@@ -261,6 +114,7 @@ module Provider
       def validate
         super
 
+<<<<<<< HEAD
         check_optional_property :extra_schema_entry, String
         check_optional_property :resource_definition, String
         check_optional_property :encoder, String
@@ -274,6 +128,20 @@ module Provider
         check_optional_property :custom_import, String
         check_optional_property :post_import, String
         check_optional_property :extra_functions, String
+=======
+        check :extra_schema_entry, type: String
+        check :resource_definition, type: String
+        check :encoder, type: String
+        check :update_encoder, type: String
+        check :decoder, type: String
+        check :constants, type: String
+        check :post_create, type: String
+        check :pre_update, type: String
+        check :post_update, type: String
+        check :pre_delete, type: String
+        check :custom_import, type: String
+        check :post_import, type: String
+>>>>>>> master
       end
     end
   end

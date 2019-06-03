@@ -1,0 +1,27 @@
+---
+:facts:
+  :Instance:
+    :version_added: '2.8'
+  :Database:
+    :version_added: '2.8'
+:regular:
+  :Instance:
+    :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :config:
+      :version_added: '2.7'
+    :displayName:
+      :version_added: '2.7'
+    :nodeCount:
+      :version_added: '2.7'
+    :labels:
+      :version_added: '2.7'
+  :Database:
+    :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :extraStatements:
+      :version_added: '2.7'
+    :instance:
+      :version_added: '2.7'

@@ -1,0 +1,37 @@
+---
+:facts:
+  :Role:
+    :version_added: '2.8'
+  :ServiceAccount:
+    :version_added: '2.8'
+  :ServiceAccountKey:
+    :version_added: '2.8'
+:regular:
+  :Role:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :title:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :includedPermissions:
+      :version_added: '2.8'
+    :stage:
+      :version_added: '2.8'
+  :ServiceAccount:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :displayName:
+      :version_added: '2.8'
+  :ServiceAccountKey:
+    :version_added: '2.8'
+    :privateKeyType:
+      :version_added: '2.8'
+    :keyAlgorithm:
+      :version_added: '2.8'
+    :serviceAccount:
+      :version_added: '2.8'
+    :path:
+      :version_added: '2.8'

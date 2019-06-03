@@ -16,18 +16,19 @@ require 'provider/core'
 require 'provider/ansible/config'
 require 'provider/ansible/documentation'
 require 'provider/ansible/example'
-require 'provider/ansible/manifest'
 require 'provider/ansible/module'
-require 'provider/ansible/property_override'
 require 'provider/ansible/request'
 require 'provider/ansible/resourceref'
-require 'provider/ansible/resource_override'
-require 'provider/ansible/property_override'
+require 'provider/ansible/version_added'
 require 'provider/ansible/facts_override'
+require 'overrides/ansible/resource_override'
+require 'overrides/ansible/property_override'
 
 require 'provider/azure/ansible'
 
 module Provider
+  # Ansible Provider module containing helper functions and the Ansible Provider
+  # implementation "Core"
   module Ansible
     # Code generator for Ansible Cookbooks that manage Google Cloud Platform
     # resources.
@@ -39,19 +40,38 @@ module Provider
         'Api::Type::Boolean' => 'bool',
         'Api::Type::Integer' => 'int',
         'Api::Type::KeyValuePairs' => 'dict',
-        'Provider::Ansible::FilterProp' => 'list'
+        'Provider::Ansible::FilterProp' => 'list',
+        'Api::Type::Path' => 'path'
       }.freeze
 
+      include Provider::Ansible
       include Provider::Ansible::Documentation
       include Provider::Ansible::Module
       include Provider::Ansible::Request
+      include Provider::Ansible::VersionAdded
 
+<<<<<<< HEAD
       include Provider::Azure::Ansible
 
       def initialize(config, api)
         super(config, api)
         @max_columns = 160
         @provider = 'ansible'
+=======
+      # FileTemplate with Ansible specific fields
+      class AnsibleFileTemplate < Provider::FileTemplate
+        # The Ansible example object.
+        attr_accessor :example
+      end
+
+      def api_version_setup(version_name)
+        version = @api.version_obj_or_default(version_name)
+        @api.set_properties_based_on_version(version)
+
+        # Generate version_added_file
+        @version_added = build_version_added
+        version
+>>>>>>> master
       end
 
       # Returns a string representation of the corresponding Python type
@@ -61,6 +81,7 @@ module Provider
         # All ResourceRefs are dicts with properties.
         if prop.is_a? Api::Type::ResourceRef
           return 'str' if prop.resource_ref.readonly
+
           return 'dict'
         end
         return 'raw' if prop.is_a? Api::Azure::Type::ResourceReference
@@ -74,32 +95,42 @@ module Provider
         return "u#{quote_string(string)}" unless string.include? 'u\''
       end
 
-      def build_url(url_parts, _extra = false)
-        full_url = if url_parts.is_a? Array
-                     url_parts.flatten.join
-                   else
-                     url_parts
-                   end
-
-        "\"#{full_url.gsub('{{', '{').gsub('}}', '}')}\""
+      def build_url(url)
+        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.
       # Example: gcp_dns_managed_zone
       def module_name(object)
+<<<<<<< HEAD
         "azure_rm_#{object.name.downcase}"
+=======
+        ["gcp_#{object.__product.api_name}",
+         object.name.underscore].join('_')
+>>>>>>> master
       end
 
       def build_object_data(object, output_folder, version)
         # Method is overriden to add Ansible example objects to the data object.
-        data = super
+        data = AnsibleFileTemplate.file_for_resource(
+          output_folder,
+          object,
+          version,
+          @config,
+          build_env
+        )
 
-        prod_name = data[:object].name.underscore
-        path = ["products/#{data[:product_name]}",
+        prod_name = data.object.name.underscore
+        path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
+<<<<<<< HEAD
         data
         # data.merge(example: (get_example(path) if File.file?(path)))
+=======
+        data.example = get_example(path) if File.file?(path)
+        data
+>>>>>>> master
       end
 
       # Given a URL and function name, emit a URL.
@@ -189,22 +220,24 @@ module Provider
               .reject { |prop| prop.resource_ref.readonly }
       end
 
-      # Converts a path in the form a/b/c/d into ['a', 'b', 'c', 'd']
-      def path2navigate(path)
-        "[#{path.split('/').map { |x| "'#{x}'" }.join(', ')}]"
-      end
-
-      # TODO(alexstephen): Standardize on one version and move to provider/core
-      # https://github.com/GoogleCloudPlatform/magic-modules/issues/30
-      def wrap_field(field, spaces)
-        # field.scan goes from 0 -> avail_columns - 1
-        # -1 to account for this
-        avail_columns = DEFAULT_FORMAT_OPTIONS[:max_columns] - spaces - 1
-        field.scan(/\S.{0,#{avail_columns}}\S(?=\s|$)|\S+/)
-      end
-
       def list_kind(object)
         "#{object.kind}List"
+      end
+
+      # Grabs all conflicting properties and returns an array of arrays without
+      # any duplicates.
+      # This does not create an optimal list, but it does create a valid list.
+      def conflicting_property_batches(object)
+        sets = object.all_user_properties.map do |p|
+          if !p.conflicting.empty?
+            p.conflicting.map(&:name).map(&:underscore) + [p.name.underscore]
+          else
+            []
+          end
+        end
+        sets.map(&:sort)
+            .uniq
+            .reject(&:empty?)
       end
 
       private
@@ -215,11 +248,13 @@ module Provider
         ex = Google::YamlValidator.parse(File.read(cfg_file))
         raise "#{cfg_file}(#{ex.class}) is not a Provider::Ansible::Example" \
           unless ex.is_a?(Provider::Ansible::Example)
+
         ex.validate
         ex
       end
 
       def generate_resource(data)
+<<<<<<< HEAD
         add_datasource_info_to_data(data)
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
@@ -228,28 +263,48 @@ module Provider
           default_template: 'templates/ansible/resource.erb',
           out_file: File.join(target_folder,
                               "lib/ansible/modules/cloud/azure/#{name}.py")
+=======
+        target_folder = data.output_folder
+        name = module_name(data.object)
+        path = File.join(target_folder,
+                         "lib/ansible/modules/cloud/google/#{name}.py")
+        data.generate(
+          data.object.template || 'templates/ansible/resource.erb',
+          path,
+          self
+>>>>>>> master
         )
       end
 
-      def example_defaults(data)
-        obj_name = data[:object].name.underscore
-        path = ["products/#{data[:product_name]}",
-                "examples/ansible/#{obj_name}.yaml"].join('/')
-
-        compile_file(EXAMPLE_DEFAULTS, path) if File.file?(path)
-      end
-
       def generate_resource_tests(data)
-        prod_name = data[:object].name.underscore
-        path = ["products/#{data[:product_name]}",
+        prod_name = data.object.name.underscore
+        path = ["products/#{data.product.api_name}",
                 "examples/ansible/#{prod_name}.yaml"].join('/')
 
+<<<<<<< HEAD
         return unless data[:object].has_tests
         return if data[:object].inttests.empty?
+=======
+        return unless data.object.has_tests
+        # Unlike other providers, all resources will not be built at once or
+        # in close timing to each other (due to external PRs).
+        # This means that examples might not be built out for every resource
+        # in a GCP product.
+        return unless File.file?(path)
+>>>>>>> master
 
-        target_folder = data[:output_folder]
-        FileUtils.mkpath target_folder
+        target_folder = data.output_folder
 
+        name = module_name(data.object)
+        path = File.join(target_folder,
+                         "test/integration/targets/#{name}/tasks/main.yml")
+        data.generate(
+          'templates/ansible/integration_test.erb',
+          path,
+          self
+        )
+
+<<<<<<< HEAD
         name = module_name(data[:object])
         target_folder = File.join(target_folder, "test/integration/targets/#{name}")
 
@@ -264,10 +319,20 @@ module Provider
         generate_resource_file data.clone.merge(
           default_template: 'templates/azure/ansible/test/aliases.erb',
           out_file: File.join(target_folder, 'aliases')
+=======
+        # Generate 'defaults' file that contains variables.
+        path = File.join(target_folder,
+                         "test/integration/targets/#{name}/defaults/main.yml")
+        data.generate(
+          'templates/ansible/integration_test_variables.erb',
+          path,
+          self
+>>>>>>> master
         )
       end
 
       def compile_datasource(data)
+<<<<<<< HEAD
         target_folder = data[:output_folder]
         FileUtils.mkpath target_folder
         name = "#{module_name(data[:object])}_info"
@@ -276,21 +341,51 @@ module Provider
           out_file: File.join(target_folder,
                               "lib/ansible/modules/cloud/azure/#{name}.py")
         )
+=======
+        target_folder = data.output_folder
+        name = "#{module_name(data.object)}_facts"
+        data.generate('templates/ansible/facts.erb',
+                      File.join(target_folder,
+                                "lib/ansible/modules/cloud/google/#{name}.py"),
+                      self)
+>>>>>>> master
       end
 
-      def add_datasource_info_to_data(data)
+      def generate_objects(output_folder, types, version_name)
         # We have two sets of overrides - one for regular modules, one for
         # datasources.
         # When building regular modules, we will potentially need some
         # information from the datasource overrides.
         # This method will give the regular module data access to the
         # datasource module overrides.
-        name = "@#{data[:object].name}".to_sym
-        facts_info = @config&.datasources&.instance_variable_get(name)&.facts
-        facts_info ||= Provider::Ansible::FactsOverride.new
-        facts_info.validate
-        data[:object].instance_variable_set(:@facts, facts_info)
+        @api.objects.each do |o|
+          facts_info = @config&.datasources&.instance_variable_get("@#{o.name}".to_sym)&.facts
+          facts_info ||= Provider::Ansible::FactsOverride.new
+          facts_info.validate
+          o.instance_variable_set(:@facts, facts_info)
+        end
+        super
       end
+    end
+
+    # Returns all URI properties minus those ignored.
+    def uri_properties(object, ignored_props = [])
+      uri_properties_raw(object)
+        .compact
+        .map(&:name)
+        .reject { |x| ignored_props.include? x }
+    end
+
+    # TODO(alexstephen): Update test_constants to use this function.
+    # Returns all of the properties that are a part of the self_link or
+    # collection URLs
+    def uri_properties_raw(object)
+      [object.base_url, object.__product.base_url].map do |url|
+        parts = url.scan(/\{\{(.*?)\}\}/).flatten
+        parts << 'name'
+        parts.delete('project')
+        parts.map { |pt| object.all_user_properties.select { |p| p.name == pt }[0] }
+      end.flatten
     end
   end
 end

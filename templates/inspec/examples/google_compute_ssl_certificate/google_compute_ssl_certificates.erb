@@ -1,0 +1,8 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% ssl_certificate = grab_attributes['ssl_certificate'] -%>
+describe google_compute_ssl_certificates(project: <%= gcp_project_id -%>) do
+
+  its('names') { should include <%= doc_generation ? "'#{ssl_certificate['name']}'" : "ssl_certificate['name']" -%> }
+  its('descriptions') { should include <%= doc_generation ? "'#{ssl_certificate['description']}'" : "ssl_certificate['description']" -%> }
+  its('certificates') { should include <%= doc_generation ? "'#{ssl_certificate['certificate']}'" : "ssl_certificate['certificate']" -%> }
+end

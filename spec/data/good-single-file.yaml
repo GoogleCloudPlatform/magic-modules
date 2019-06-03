@@ -12,8 +12,7 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: My Product
-prefix: myproduct
+name: MyProduct
 versions:
   - !ruby/object:Api::Product::Version
     name: ga

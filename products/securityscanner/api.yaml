@@ -1,0 +1,158 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+--- !ruby/object:Api::Product
+name: SecurityScanner
+display_name: Cloud Security Scanner
+versions:
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://websecurityscanner.googleapis.com/v1beta/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Web Security Scanner API
+    url: https://console.cloud.google.com/apis/library/websecurityscanner.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: ScanConfig
+    base_url: projects/{{project}}/scanConfigs
+    self_link: "{{name}}"
+    update_verb: :PATCH
+    update_mask: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Using Cloud Security Scanner': 'https://cloud.google.com/security-scanner/docs/scanning'
+      api: 'https://cloud.google.com/security-scanner/docs/reference/rest/v1beta/projects.scanConfigs'
+    description: |
+      A ScanConfig resource contains the configurations to launch a scan.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: name
+        output: true
+        description: |
+          A server defined name for this index. Format:
+          `projects/{{project}}/scanConfigs/{{server_generated_id}}`
+      - !ruby/object:Api::Type::String
+        name: displayName
+        required: true
+        description: |
+          The user provider display name of the ScanConfig.
+      - !ruby/object:Api::Type::Integer
+        name: maxQps
+        description: |
+          The maximum QPS during scanning. A valid value ranges from 5 to 20 inclusively.
+          Defaults to 15.
+        default_value: 15
+      - !ruby/object:Api::Type::Array
+        name: startingUrls
+        description: |
+          The starting URLs from which the scanner finds site pages.
+        required: true
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: authentication
+        description: |
+          The authentication configuration.
+          If specified, service will use the authentication configuration during scanning.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: googleAccount
+            description: |
+              Describes authentication configuration that uses a Google account.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: username
+                required: true
+                description: |
+                  The user name of the Google account.
+              - !ruby/object:Api::Type::String
+                name: password
+                input: true
+                required: true
+                description: |
+                  The password of the Google account. The credential is stored encrypted
+                  in GCP.
+          - !ruby/object:Api::Type::NestedObject
+            name: customAccount
+            description: |
+              Describes authentication configuration that uses a custom account.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: username
+                required: true
+                description: |
+                  The user name of the custom account.
+              - !ruby/object:Api::Type::String
+                name: password
+                input: true
+                required: true
+                description: |
+                  The password of the custom account. The credential is stored encrypted
+                  in GCP.
+              - !ruby/object:Api::Type::String
+                name: loginUrl
+                required: true
+                description: |
+                  The login form URL of the website.
+      - !ruby/object:Api::Type::Enum
+        name: userAgent
+        description: Type of the user agents used for scanning
+        default_value: :CHROME_LINUX
+        values:
+          - :USER_AGENT_UNSPECIFIED
+          - :CHROME_LINUX
+          - :CHROME_ANDROID
+          - :SAFARI_IPHONE
+      - !ruby/object:Api::Type::Array
+        name: blacklistPatterns
+        description: |
+          The blacklist URL patterns as described in
+          https://cloud.google.com/security-scanner/docs/excluded-urls
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: schedule
+        description: |
+          The schedule of the ScanConfig
+        properties:
+          - !ruby/object:Api::Type::Time
+            name: scheduleTime
+            description: |
+              A timestamp indicates when the next run will be scheduled. The value is refreshed
+              by the server after each run. If unspecified, it will default to current server time,
+              which means the scan will be scheduled to start immediately.
+          - !ruby/object:Api::Type::Integer
+            name: intervalDurationDays
+            required: true
+            description: |
+              The duration of time between executions in days
+      - !ruby/object:Api::Type::Array
+        name: targetPlatforms
+        description: |
+          Set of Cloud Platforms targeted by the scan. If empty, APP_ENGINE will be used as a default.
+        item_type: !ruby/object:Api::Type::Enum
+          name: undefined
+          description: |
+            This field only has a name and description because of MM
+            limitations. It should not appear in downstreams.
+          values:
+            - :APP_ENGINE
+            - :COMPUTE
+      - !ruby/object:Api::Type::Enum
+        name: exportToSecurityCommandCenter
+        description: |
+          Controls export of scan configurations and results to Cloud Security Command Center.
+        default_value: :ENABLED
+        values:
+          - :ENABLED
+          - :DISABLED

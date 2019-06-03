@@ -1,0 +1,11 @@
+<%
+  update_body_properties = object.settable_properties
+  update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
+-%>
+def updateMask(request, response):
+    update_mask = []
+<% update_body_properties.each do |v| -%>
+    if request.get('<%= v.name -%>') != response.get('<%= v.name -%>'):
+        update_mask.append(<%= quote_string(v.name) %>)
+<% end -%>
+    return ','.join(update_mask)

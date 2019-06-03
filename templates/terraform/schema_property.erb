@@ -1,0 +1,150 @@
+<%# The license inside this block applies to this file.
+  # Copyright 2017 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+-%>
+<% if property.flatten_object -%>
+	<% order_properties(property.properties).each do |prop| -%>
+		<%= lines(build_schema_property(prop, object)) -%>
+	<% end -%>
+<% elsif tf_types.include?(property.class) -%>
+"<%= property.name.underscore -%>": {
+  <% if property.is_set -%>
+  Type: schema.TypeSet,
+  <% else -%>
+  Type: <%= tf_type(property) %>,
+  <% end -%>
+<%	if property.default_from_api -%>
+	Computed: true,
+	Optional: true,
+	<% if property.schema_config_mode_attr -%>
+	ConfigMode: schema.SchemaConfigModeAttr,
+	<% end -%>
+<% elsif property.required -%>
+  Required: true,
+<% elsif property.output -%>
+  Computed: true,
+<% else -%>
+  Optional: true,
+<% end -%>
+<% if property.deprecated? -%>
+  Deprecated: "<%= property.deprecation_message %>",
+<% end -%>
+<% if force_new?(property, object) -%>
+  ForceNew: true,
+<% end -%>
+<% unless property.validation.nil? || property.output -%>
+	<% if !property.validation.regex.nil? -%>
+  ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
+	<% elsif !property.validation.function.nil? -%>
+	ValidateFunc: <%= property.validation.function -%>,
+	<% end # property.validation.nil?  -%>
+<% end # property.validation.nil?  -%>
+<% if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output -%>
+<%
+	enum_values = property.values
+	enum_values.push "" unless property.required
+-%>
+	ValidateFunc: validation.StringInSlice([]string{"<%= enum_values.join '","' -%>"}, false),
+<% end -%>
+<% if !property.diff_suppress_func.nil? -%>
+  DiffSuppressFunc: <%= property.diff_suppress_func %>,
+<% elsif property.is_a?(Api::Type::ResourceRef) -%>
+  DiffSuppressFunc: compareSelfLinkOrResourceName,
+<% end -%>
+<% unless property.state_func.nil? -%>
+	StateFunc: <%= property.state_func %>,
+<% end -%>
+<% if property.is_a?(Api::Type::NestedObject) -%>
+  MaxItems: 1,
+  Elem: &schema.Resource{
+    Schema: map[string]*schema.Schema{
+      <% order_properties(property.properties).each do |prop| -%>
+        <%= lines(build_schema_property(prop, object)) -%>
+      <% end -%>
+    },
+  },
+<% elsif property.is_a?(Api::Type::Array) -%>
+  <% unless property.min_size.nil? -%>
+      MinItems: <%= property.min_size %>,
+  <% end -%>
+  <% unless property.max_size.nil? -%>
+      MaxItems: <%= property.max_size %>,
+  <% end -%>
+  <% if property.item_type.is_a?(Api::Type::NestedObject) -%>
+    <% if property.is_set -%>
+      Elem: <%= namespace_property_from_object(property, object) -%>Schema(),
+    <% else -%>
+      Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+          <% order_properties(property.item_type.properties).each do |prop| -%>
+            <%= lines(build_schema_property(prop, object)) -%>
+          <% end -%>
+        },
+      },
+    <% end -%>
+  <% elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
+      Elem: &schema.Schema{
+        Type: <%= tf_types[property.item_type] -%>,
+      },
+  <% else # array of basic types -%>
+      Elem: &schema.Schema{
+        Type: <%= tf_types[property.item_type.class] -%>,
+    <% if property.item_type.is_a?(Api::Type::ResourceRef) -%>
+        DiffSuppressFunc: compareSelfLinkOrResourceName,
+    <% end -%>
+      },
+  <% end -%>
+  <% if property.is_set -%>
+    <% if !property.set_hash_func.nil? -%>
+    Set: <%= property.set_hash_func -%>,
+    <% elsif property.item_type.is_a?(String) -%>
+    Set: schema.HashString,
+    <% else -%>
+    // Default schema.HashSchema is used.
+    <% end -%>
+  <% end -%>
+<% elsif property.is_a?(Api::Type::KeyValuePairs) -%>
+  Elem: &schema.Schema{Type: schema.TypeString},
+<% elsif property.is_a?(Api::Type::Map) -%>
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"<%= property.key_name -%>": {
+				Type:     schema.TypeString,
+				Required: true,
+				<% if force_new?(property, object) -%>
+				ForceNew: true,
+				<% end -%>
+			},
+			<% order_properties(property.value_type.properties).each do |prop| -%>
+				<%= lines(build_schema_property(prop, object)) -%>
+			<% end -%>
+		},
+	},
+	<% if !property.set_hash_func.nil? -%>
+	Set: <%= property.set_hash_func -%>,
+	<% end -%>
+<% end -%>
+<% if property.sensitive -%>
+    Sensitive: true,
+<% end -%>
+<% unless property.default_value.nil? -%>
+    Default: <%= go_literal(property.default_value) -%>,
+<% end -%>
+<% unless property.conflicting().empty? -%>
+<% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
+    ConflictsWith: <%= go_literal(conflicting_props) -%>,
+<% end -%>
+},
+<% else -%>
+  // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+<% end # tf_types.include?(property.class) -%>

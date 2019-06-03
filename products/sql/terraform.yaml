@@ -1,0 +1,49 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+client_name: 'SqlAdmin'
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    mutex: "google-sql-database-instance-{{project}}-{{instance}}"
+    id_format: "{{instance}}:{{name}}"
+    import_format: ["projects/{{project}}/instances/{{instance}}/databases/{{name}}",
+                    "{{project}}/{{instance}}/{{name}}",
+                    "instances/{{instance}}/databases/{{name}}",
+                    "{{instance}}/{{name}}",
+                    "{{name}}"]
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 900
+      update_sec: 600
+      delete_sec: 600
+    properties:
+      collation: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      charset: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+  Flag: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  SslCert: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  Tier: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  User: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

@@ -1,5 +1,5 @@
 <%
-  module_name = ["gcp_#{object.__product.prefix[1..-1]}",
+  module_name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
                  'facts'].join('_')
 -%>
@@ -33,12 +33,14 @@
 - name: verify that command succeeded
   assert:
     that:
-<% if object.facts.test -%>
-      - <%= lines(object.facts.test) -%>
+<% if object.facts.test && _state == 'present' -%>
+      - <%= lines(object.facts.test.exists) -%>
+<% elsif object.facts.test && _state == 'absent' -%>
+      - <%= lines(object.facts.test.does_not_exist) -%>
 <% else # object.facts.test -%>
 <% if object.facts.has_filters -%>
-      - results['items'] | length == <%= _state == 'present' ? 1 : 0 %>
+      - results['resources'] | length == <%= _state == 'present' ? 1 : 0 %>
 <% else # object.has_filters -%>
-      - results['items'] | length <%= _state == 'present' ? '>= 1' : '== 0' %>
+      - results['resources'] | length <%= _state == 'present' ? '>= 1' : '== 0' %>
 <% end  # object.has_filters -%>
 <% end # object.facts.test -%>

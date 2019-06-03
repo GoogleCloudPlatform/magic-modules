@@ -18,113 +18,47 @@ module Provider
     module Request
       # Takes in a list of properties and outputs a python hash that takes
       # in a module and outputs a formatted JSON request.
-      def request_properties(properties, indent)
-        indent_list(
-          properties.map do |prop|
-            request_property(prop, 'module.params', 'module', indent)
-          end,
-          indent
-        )
+      def request_properties(properties, hash_name = 'module.params', module_name = 'module')
+        properties.map do |prop|
+          {
+            Google::PythonUtils::UnicodeString.new(prop.api_name) =>
+            Google::PythonUtils::PythonCode.new(request_output(prop, hash_name, module_name))
+          }
+        end.reduce({}, :merge)
       end
 
-      def response_properties(properties, indent)
-        indent_list(
-          properties.map do |prop|
-            response_property(prop, 'response', 'module', indent)
-          end,
-          indent
-        )
-      end
-
-      def request_properties_in_classes(properties, indent,
-                                        hash_name = 'self.request',
-                                        module_name = 'self.module')
-        indent_list(
-          properties.map do |prop|
-            request_property(prop, hash_name, module_name, indent)
-          end,
-          indent
-        )
-      end
-
-      def response_properties_in_classes(properties, indent,
-                                         hash_name = 'self.request',
-                                         module_name = 'self.module')
-        indent_list(
-          properties.map do |prop|
-            response_property(prop, hash_name, module_name, indent)
-          end,
-          indent
-        )
+      def response_properties(properties, hash_name = 'response', module_name = 'module')
+        properties.map do |prop|
+          {
+            Google::PythonUtils::UnicodeString.new(prop.api_name) =>
+            Google::PythonUtils::PythonCode.new(response_output(prop, hash_name, module_name))
+          }
+        end.reduce({}, :merge)
       end
 
       # This returns a list of properties that require classes being built out.
       def properties_with_classes(properties)
         properties.map do |p|
-          if p.is_a? Api::Type::NestedObject
-            [p] + properties_with_classes(p.properties)
-          elsif p.is_a?(Api::Type::Array) && \
-                p.item_type.is_a?(Api::Type::NestedObject)
-            [p] + properties_with_classes(p.item_type.properties)
-          end
+          [p] + properties_with_classes(p.nested_properties) if p.nested_properties?
         end.compact.flatten
       end
 
       private
 
-      def request_property(prop, hash_name, module_name, indent)
-        format(
-          [
-            [
-              [
-                "#{unicode_string(prop.api_name)}:",
-                request_output(prop, hash_name, module_name).to_s
-              ].join(' ')
-            ],
-            [
-              "#{unicode_string(prop.api_name)}:",
-              indent(request_output(prop, hash_name, module_name).to_s, 4)
-            ]
-          ], 0, indent, 160
-        )
-      end
-
-      def response_property(prop, hash_name, module_name, indent)
-        format(
-          [
-            [
-              [
-                "#{unicode_string(prop.api_name)}:",
-                response_output(prop, hash_name, module_name).to_s
-              ].join(' ')
-            ],
-            [
-              "#{unicode_string(prop.api_name)}:",
-              indent(response_output(prop, hash_name, module_name).to_s, 4)
-            ]
-          ], 0, indent, 160
-        )
-      end
-
+      # This is outputting code and code is easier to read on one line.
+      # rubocop:disable Metrics/LineLength
       def response_output(prop, hash_name, module_name)
         # If input true, treat like request, but use module names.
         return request_output(prop, "#{module_name}.params", module_name) \
           if prop.input
+
         if prop.is_a? Api::Type::NestedObject
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{unicode_string(prop.name)}, {})",
-            ", #{module_name}).from_response()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.api_name)}, {}), #{module_name}).from_response()"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::NestedObject)
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{unicode_string(prop.name)}, [])",
-            ", #{module_name}).from_response()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{unicode_string(prop.api_name)}, []), #{module_name}).from_response()"
         else
-          "#{hash_name}.get(#{unicode_string(prop.name)})"
+          "#{hash_name}.get(#{unicode_string(prop.api_name)})"
         end
       end
 
@@ -133,45 +67,24 @@ module Provider
           if prop.is_a? Api::Type::FetchedExternal
 
         if prop.is_a? Api::Type::NestedObject
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{quote_string(prop.out_name)}, {})",
-            ", #{module_name}).to_request()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{quote_string(prop.out_name)}, {}), #{module_name}).to_request()"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::NestedObject)
-          [
-            "#{prop.property_class[-1]}(",
-            "#{hash_name}.get(#{quote_string(prop.out_name)}, [])",
-            ", #{module_name}).to_request()"
-          ].join
+          "#{prop.property_class[-1]}(#{hash_name}.get(#{quote_string(prop.out_name)}, []), #{module_name}).to_request()"
         elsif prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly
-          prop_name = prop.name.underscore
-          [
-            "replace_resource_dict(#{hash_name}",
-            ".get(#{unicode_string(prop_name)}, {}), ",
-            "#{quote_string(prop.imports)})"
-          ].join
+          "replace_resource_dict(#{hash_name}.get(#{unicode_string(prop.name.underscore)}, {}), #{quote_string(prop.imports)})"
         elsif prop.is_a?(Api::Type::ResourceRef) && \
               prop.resource_ref.readonly && prop.imports == 'selfLink'
-          func = "#{prop.resource.underscore}_selflink"
-          [
-            "#{func}(#{hash_name}.get(#{quote_string(prop.out_name)}),",
-            "#{module_name}.params)"
-          ].join(' ')
+          "#{prop.resource.underscore}_selflink(#{hash_name}.get(#{quote_string(prop.out_name)}), #{module_name}.params)"
         elsif prop.is_a?(Api::Type::Array) && \
               prop.item_type.is_a?(Api::Type::ResourceRef) && \
               !prop.item_type.resource_ref.readonly
-          prop_name = prop.name.underscore
-          [
-            "replace_resource_dict(#{hash_name}",
-            ".get(#{quote_string(prop_name)}, []), ",
-            "#{quote_string(prop.item_type.imports)})"
-          ].join
+          "replace_resource_dict(#{hash_name}.get(#{quote_string(prop.name.underscore)}, []), #{quote_string(prop.item_type.imports)})"
         else
           "#{hash_name}.get(#{quote_string(prop.out_name)})"
         end
       end
+      # rubocop:enable Metrics/LineLength
     end
   end
 end

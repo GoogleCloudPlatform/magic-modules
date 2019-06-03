@@ -36,7 +36,7 @@ func iamMemberImport(resourceIdParser resourceIdParserFunc) schema.StateFunc {
 		s := strings.Fields(d.Id())
 		if len(s) != 3 {
 			d.SetId("")
-			return nil, fmt.Errorf("Wrong number of parts to Member id %s; expected 'resource_name role username'.", s)
+			return nil, fmt.Errorf("Wrong number of parts to Member id %s; expected 'resource_name role member'.", s)
 		}
 		id, role, member := s[0], s[1], s[2]
 
@@ -112,10 +112,10 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		}
 
 		eMember := getResourceIamMember(d)
-		p, err := updater.GetResourceIamPolicy()
+		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
 			if isGoogleApiErrorWithCode(err, 404) {
-				log.Printf("[DEBUG]: Binding of member %q with role %q does not exist for non-existant resource %s, removing from state.", eMember.Members[0], eMember.Role, updater.DescribeResource())
+				log.Printf("[DEBUG]: Binding of member %q with role %q does not exist for non-existent resource %s, removing from state.", eMember.Members[0], eMember.Role, updater.DescribeResource())
 				d.SetId("")
 				return nil
 			}
@@ -201,7 +201,7 @@ func resourceIamMemberDelete(newUpdaterFunc newResourceIamUpdaterFunc) schema.De
 		})
 		if err != nil {
 			if isGoogleApiErrorWithCode(err, 404) {
-				log.Printf("[DEBUG]: Member %q for binding for role %q does not exist for non-existant resource %q.", member.Members[0], member.Role, updater.GetResourceId())
+				log.Printf("[DEBUG]: Member %q for binding for role %q does not exist for non-existent resource %q.", member.Members[0], member.Role, updater.GetResourceId())
 				return nil
 			}
 			return err

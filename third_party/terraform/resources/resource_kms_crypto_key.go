@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"regexp"
 	"strconv"
@@ -23,23 +24,44 @@ func resourceKmsCryptoKey() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"key_ring": &schema.Schema{
+			"key_ring": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: kmsCryptoKeyRingsEquivalent,
 			},
-			"rotation_period": &schema.Schema{
+			"rotation_period": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validateKmsCryptoKeyRotationPeriod,
+				ValidateFunc: orEmpty(validateKmsCryptoKeyRotationPeriod),
 			},
-			"self_link": &schema.Schema{
+			"version_template": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"algorithm": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"protection_level": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Default:      "SOFTWARE",
+							ValidateFunc: validation.StringInSlice([]string{"SOFTWARE", "HSM", ""}, false),
+						},
+					},
+				},
+			},
+			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -66,10 +88,6 @@ func (s *kmsCryptoKeyId) cryptoKeyId() string {
 	return fmt.Sprintf("%s/cryptoKeys/%s", s.KeyRingId.keyRingId(), s.Name)
 }
 
-func (s *kmsCryptoKeyId) parentId() string {
-	return s.KeyRingId.keyRingId()
-}
-
 func (s *kmsCryptoKeyId) terraformId() string {
 	return fmt.Sprintf("%s/%s", s.KeyRingId.terraformId(), s.Name)
 }
@@ -88,7 +106,10 @@ func resourceKmsCryptoKeyCreate(d *schema.ResourceData, meta interface{}) error 
 		Name:      d.Get("name").(string),
 	}
 
-	key := cloudkms.CryptoKey{Purpose: "ENCRYPT_DECRYPT"}
+	key := cloudkms.CryptoKey{
+		Purpose:         "ENCRYPT_DECRYPT",
+		VersionTemplate: expandVersionTemplate(d.Get("version_template").([]interface{})),
+	}
 
 	if d.Get("rotation_period") != "" {
 		rotationPeriod := d.Get("rotation_period").(string)
@@ -137,6 +158,10 @@ func resourceKmsCryptoKeyUpdate(d *schema.ResourceData, meta interface{}) error 
 		key.RotationPeriod = rotationPeriod
 	}
 
+	if d.HasChange("version_template") {
+		key.VersionTemplate = expandVersionTemplate(d.Get("version_template").([]interface{}))
+	}
+
 	cryptoKey, err := config.clientKms.Projects.Locations.KeyRings.CryptoKeys.Patch(cryptoKeyId.cryptoKeyId(), &key).UpdateMask("rotation_period,next_rotation_time").Do()
 
 	if err != nil {
@@ -169,6 +194,10 @@ func resourceKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("rotation_period", cryptoKey.RotationPeriod)
 	d.Set("self_link", cryptoKey.Name)
 
+	if err = d.Set("version_template", flattenVersionTemplate(cryptoKey.VersionTemplate)); err != nil {
+		return fmt.Errorf("Error setting version_template in state: %s", err.Error())
+	}
+
 	d.SetId(cryptoKeyId.cryptoKeyId())
 
 	return nil
@@ -195,12 +224,24 @@ func clearCryptoKeyVersions(cryptoKeyId *kmsCryptoKeyId, config *Config) error {
 	return nil
 }
 
-/*
-	Because KMS CryptoKey resources cannot be deleted on GCP, we are only going to remove it from state
-	and destroy all its versions, rendering the key useless for encryption and decryption of data.
-	Re-creation of this resource through Terraform will produce an error.
-*/
+func disableCryptoKeyRotation(cryptoKeyId *kmsCryptoKeyId, config *Config) error {
+	keyClient := config.clientKms.Projects.Locations.KeyRings.CryptoKeys
+	_, err := keyClient.Patch(cryptoKeyId.cryptoKeyId(), &cloudkms.CryptoKey{
+		NullFields: []string{"rotationPeriod", "nextRotationTime"},
+	}).
+		UpdateMask("rotationPeriod,nextRotationTime").Do()
 
+	return err
+}
+
+// Because KMS CryptoKey keys cannot be deleted (in GCP proper), we "delete"
+// the key ring by
+// a) marking all key versions for destruction (24hr soft-delete)
+// b) disabling rotation of the key
+// c) removing it from state
+// This disables all usage of previous versions of the key and makes it
+// generally useless for encryption and decryption of data.
+// Re-creation of this resource through Terraform will produce an error.
 func resourceKmsCryptoKeyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -213,14 +254,47 @@ func resourceKmsCryptoKeyDelete(d *schema.ResourceData, meta interface{}) error 
 [WARNING] KMS CryptoKey resources cannot be deleted from GCP. The CryptoKey %s will be removed from Terraform state,
 and all its CryptoKeyVersions will be destroyed, but it will still be present on the server.`, cryptoKeyId.cryptoKeyId())
 
-	err = clearCryptoKeyVersions(cryptoKeyId, config)
-
-	if err != nil {
+	// Delete all versions of the key
+	if err := clearCryptoKeyVersions(cryptoKeyId, config); err != nil {
 		return err
+	}
+
+	// Make sure automatic key rotation is disabled.
+	if err := disableCryptoKeyRotation(cryptoKeyId, config); err != nil {
+		return fmt.Errorf(
+			"While cryptoKeyVersions were cleared, Terraform was unable to disable automatic rotation of key due to an error: %s."+
+				"Please retry or manually disable automatic rotation to prevent creation of a new version of this key.", err)
 	}
 
 	d.SetId("")
 	return nil
+}
+
+func expandVersionTemplate(configured []interface{}) *cloudkms.CryptoKeyVersionTemplate {
+	if configured == nil || len(configured) == 0 {
+		return nil
+	}
+
+	data := configured[0].(map[string]interface{})
+	return &cloudkms.CryptoKeyVersionTemplate{
+		Algorithm:       data["algorithm"].(string),
+		ProtectionLevel: data["protection_level"].(string),
+	}
+}
+
+func flattenVersionTemplate(versionTemplate *cloudkms.CryptoKeyVersionTemplate) []map[string]interface{} {
+	if versionTemplate == nil {
+		return nil
+	}
+
+	versionTemplateSchema := make([]map[string]interface{}, 0, 1)
+	data := map[string]interface{}{
+		"algorithm":        versionTemplate.Algorithm,
+		"protection_level": versionTemplate.ProtectionLevel,
+	}
+
+	versionTemplateSchema = append(versionTemplateSchema, data)
+	return versionTemplateSchema
 }
 
 func validateKmsCryptoKeyRotationPeriod(value interface{}, _ string) (ws []string, errors []error) {

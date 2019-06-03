@@ -1,0 +1,57 @@
+---
+:facts:
+  :ManagedZone:
+    :version_added: '2.8'
+  :ResourceRecordSet:
+    :version_added: '2.8'
+:regular:
+  :ManagedZone:
+    :version_added: '2.5'
+    :description:
+      :version_added: '2.5'
+    :dnsName:
+      :version_added: '2.5'
+    :dnssecConfig:
+      :version_added: '2.9'
+      :kind:
+        :version_added: '2.9'
+      :nonExistence:
+        :version_added: '2.9'
+      :state:
+        :version_added: '2.9'
+      :defaultKeySpecs:
+        :version_added: '2.9'
+        :algorithm:
+          :version_added: '2.9'
+        :keyLength:
+          :version_added: '2.9'
+        :keyType:
+          :version_added: '2.9'
+        :kind:
+          :version_added: '2.9'
+    :name:
+      :version_added: '2.5'
+    :nameServerSet:
+      :version_added: '2.5'
+    :labels:
+      :version_added: '2.8'
+    :visibility:
+      :version_added: '2.8'
+    :privateVisibilityConfig:
+      :version_added: '2.8'
+      :networks:
+        :version_added: '2.8'
+        :networkUrl:
+          :version_added: '2.8'
+  :ResourceRecordSet:
+    :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :type:
+      :version_added: '2.6'
+    :ttl:
+      :version_added: '2.6'
+    :target:
+      :version_added: '2.6'
+    :managed_zone:
+      :version_added: '2.6'

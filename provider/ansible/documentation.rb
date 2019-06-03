@@ -14,7 +14,6 @@
 require 'compile/core'
 require 'provider/config'
 require 'provider/core'
-require 'provider/ansible/manifest'
 
 # Rubocop doesn't like this file because the hashes are complicated.
 # Humans like this file because the hashes are explicit and easy to read.
@@ -22,6 +21,7 @@ module Provider
   module Ansible
     # Responsible for building out YAML documentation blocks.
     module Documentation
+<<<<<<< HEAD
       def to_yaml(obj)
         if obj.is_a?(::Hash)
           obj.reject { |_, v| v.nil? }.to_yaml(:indentation => 4, :line_width => -1).sub("---\n", '')
@@ -30,6 +30,8 @@ module Provider
         end
       end
 
+=======
+>>>>>>> master
       # Builds out the DOCUMENTATION for a property.
       # This will eventually be converted to YAML
       def documentation_for_property(prop, object)
@@ -38,6 +40,7 @@ module Provider
           python_variable_name(prop, object.azure_sdk_definition.create) => {
             'description' => [
               format_description(prop.description),
+<<<<<<< HEAD
               (resourceref_description(prop) if prop.is_a?(Api::Azure::Type::ResourceReference))
             ].flatten.compact,
             'required' => (true if required && !is_location?(prop)),
@@ -55,15 +58,45 @@ module Provider
                               .reduce({}, :merge)
               end
             )
+=======
+              (resourceref_description(prop) \
+               if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly),
+              (choices_description(prop) \
+               if prop.is_a?(Api::Type::Enum))
+            ].flatten.compact,
+            'required' => required,
+            'default' => (
+              if prop.default_value&.is_a?(::Hash)
+                prop.default_value
+              else
+                prop.default_value&.to_s
+              end),
+            'type' => ('bool' if prop.is_a? Api::Type::Boolean),
+            'aliases' => prop.aliases,
+            'version_added' => (version_added(prop)&.to_f),
+            'suboptions' => (
+                if prop.nested_properties?
+                  prop.nested_properties.reject(&:output).map { |p| documentation_for_property(p) }
+                                        .reduce({}, :merge)
+                end
+              )
+>>>>>>> master
           }.reject { |_, v| v.nil? }
         }
       end
 
       # Builds out the RETURNS for a property.
       # This will eventually be converted to YAML
+<<<<<<< HEAD
       def returns_for_property(prop, object)
         type = python_type(prop)
         type = 'str' if prop.is_a? Api::Azure::Type::ResourceReference
+=======
+      def returns_for_property(prop)
+        type = python_type(prop) || 'str'
+        # Type is a valid AnsibleModule type, but not a valid return type
+        type = 'str' if type == 'path'
+>>>>>>> master
         # Complex types only mentioned in reference to RETURNS YAML block
         # Complex types are nested objects traditionally, but arrays of nested
         # objects will be included to avoid linting errors.
@@ -77,10 +110,16 @@ module Provider
             'type' => type,
             'sample' => (prop.sample_value unless prop.sample_value.nil?),
             'contains' => (
+<<<<<<< HEAD
               if prop.is_a?(Api::Type::NestedObject)
                 prop.properties.map { |p| returns_for_property(p, object) }.reduce({}, :merge)
               elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject)
                 prop.item_type.properties.map { |p| returns_for_property(p, object) }.reduce({}, :merge)
+=======
+              if prop.nested_properties?
+                prop.nested_properties.map { |p| returns_for_property(p) }
+                                      .reduce({}, :merge)
+>>>>>>> master
               end
             )
           }.reject { |_, v| v.nil? }
@@ -94,10 +133,25 @@ module Provider
 
       def resourceref_description(prop)
         [
+<<<<<<< HEAD
           "It can be the #{prop.resource_type_name} name which is in the same resource group.",
           "It can be the #{prop.resource_type_name} ID. e.g., #{prop.sample_value}.",
           "It can be a dict which contains C(name) and C(resource_group) of the #{prop.resource_type_name}."
         ]
+=======
+          "This field represents a link to a #{prop.resource_ref.name} resource in GCP.",
+          'It can be specified in two ways.',
+          "First, you can place a dictionary with key '#{prop.imports}'",
+          "and value of your resource's #{prop.imports}",
+          'Alternatively, you can add `register: name-of-resource` to a',
+          "#{module_name(prop.resource_ref)} task",
+          "and then set this #{prop.name.underscore} field to \"{{ name-of-resource }}\""
+        ].join(' ')
+>>>>>>> master
+      end
+
+      def choices_description(prop)
+        "Some valid choices include: #{prop.values.map { |x| "\"#{x}\"" }.join(', ')}"
       end
 
       # MM puts descriptions in a text block. Ansible needs it in bullets
@@ -110,13 +164,15 @@ module Provider
       end
 
       # Find URLs and surround with U()
+      # If there's a period at the end of the URL, make sure the
+      # period is outside of the ()
       def format_url(paragraph)
         paragraph.gsub(%r{
           https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
           [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
           [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
           [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
-        }x, 'U(\\0)')
+        }x, 'U(\\0)').gsub('.)', ').')
       end
     end
   end

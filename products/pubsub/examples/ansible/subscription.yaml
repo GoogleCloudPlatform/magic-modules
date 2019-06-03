@@ -16,8 +16,6 @@ task: !ruby/object:Provider::Ansible::Task
   code:
     name: <%= ctx[:name] %>
     topic: "{{ topic }}"
-    push_config:
-      push_endpoint: 'https://myapp.graphite.cloudnativeapp.com/webhook/sub1'
     ack_deadline_seconds: 300
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>

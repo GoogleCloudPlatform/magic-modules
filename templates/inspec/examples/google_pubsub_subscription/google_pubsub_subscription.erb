@@ -1,0 +1,9 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% subscription = grab_attributes['subscription'] -%>
+describe google_pubsub_subscription(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{subscription['name']}'" : "subscription['name']" -%>) do
+  it { should exist }
+end
+
+describe google_pubsub_subscription(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

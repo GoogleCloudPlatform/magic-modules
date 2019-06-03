@@ -1,0 +1,177 @@
+---
+:facts:
+  :Dataset:
+    :version_added: '2.8'
+  :Table:
+    :version_added: '2.8'
+:regular:
+  :Dataset:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :access:
+      :version_added: '2.8'
+      :domain:
+        :version_added: '2.8'
+      :groupByEmail:
+        :version_added: '2.8'
+      :role:
+        :version_added: '2.8'
+      :specialGroup:
+        :version_added: '2.8'
+      :userByEmail:
+        :version_added: '2.8'
+      :view:
+        :version_added: '2.8'
+        :datasetId:
+          :version_added: '2.8'
+        :projectId:
+          :version_added: '2.8'
+        :tableId:
+          :version_added: '2.8'
+    :datasetReference:
+      :version_added: '2.8'
+      :datasetId:
+        :version_added: '2.8'
+      :projectId:
+        :version_added: '2.8'
+    :defaultTableExpirationMs:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :friendlyName:
+      :version_added: '2.8'
+    :labels:
+      :version_added: '2.8'
+    :location:
+      :version_added: '2.8'
+  :Table:
+    :version_added: '2.8'
+    :tableReference:
+      :version_added: '2.8'
+      :datasetId:
+        :version_added: '2.8'
+      :projectId:
+        :version_added: '2.8'
+      :tableId:
+        :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :friendlyName:
+      :version_added: '2.8'
+    :labels:
+      :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :view:
+      :version_added: '2.8'
+      :useLegacySql:
+        :version_added: '2.8'
+      :userDefinedFunctionResources:
+        :version_added: '2.8'
+        :inlineCode:
+          :version_added: '2.8'
+        :resourceUri:
+          :version_added: '2.8'
+    :timePartitioning:
+      :version_added: '2.8'
+      :expirationMs:
+        :version_added: '2.8'
+      :type:
+        :version_added: '2.8'
+    :schema:
+      :version_added: '2.8'
+      :fields:
+        :version_added: '2.8'
+        :description:
+          :version_added: '2.8'
+        :fields:
+          :version_added: '2.8'
+        :mode:
+          :version_added: '2.8'
+        :name:
+          :version_added: '2.8'
+        :type:
+          :version_added: '2.8'
+    :encryptionConfiguration:
+      :version_added: '2.8'
+      :kmsKeyName:
+        :version_added: '2.8'
+    :expirationTime:
+      :version_added: '2.8'
+    :externalDataConfiguration:
+      :version_added: '2.8'
+      :autodetect:
+        :version_added: '2.8'
+      :compression:
+        :version_added: '2.8'
+      :ignoreUnknownValues:
+        :version_added: '2.8'
+      :maxBadRecords:
+        :version_added: '2.8'
+      :sourceFormat:
+        :version_added: '2.8'
+      :sourceUris:
+        :version_added: '2.8'
+      :schema:
+        :version_added: '2.8'
+        :fields:
+          :version_added: '2.8'
+          :description:
+            :version_added: '2.8'
+          :fields:
+            :version_added: '2.8'
+          :mode:
+            :version_added: '2.8'
+          :name:
+            :version_added: '2.8'
+          :type:
+            :version_added: '2.8'
+      :googleSheetsOptions:
+        :version_added: '2.8'
+        :skipLeadingRows:
+          :version_added: '2.8'
+      :csvOptions:
+        :version_added: '2.8'
+        :allowJaggedRows:
+          :version_added: '2.8'
+        :allowQuotedNewlines:
+          :version_added: '2.8'
+        :encoding:
+          :version_added: '2.8'
+        :fieldDelimiter:
+          :version_added: '2.8'
+        :quote:
+          :version_added: '2.8'
+        :skipLeadingRows:
+          :version_added: '2.8'
+      :bigtableOptions:
+        :version_added: '2.8'
+        :ignoreUnspecifiedColumnFamilies:
+          :version_added: '2.8'
+        :readRowkeyAsString:
+          :version_added: '2.8'
+        :columnFamilies:
+          :version_added: '2.8'
+          :columns:
+            :version_added: '2.8'
+            :encoding:
+              :version_added: '2.8'
+            :fieldName:
+              :version_added: '2.8'
+            :onlyReadLatest:
+              :version_added: '2.8'
+            :qualifierString:
+              :version_added: '2.8'
+            :type:
+              :version_added: '2.8'
+          :encoding:
+            :version_added: '2.8'
+          :familyId:
+            :version_added: '2.8'
+          :onlyReadLatest:
+            :version_added: '2.8'
+          :type:
+            :version_added: '2.8'
+    :dataset:
+      :version_added: '2.8'

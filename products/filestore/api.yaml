@@ -12,28 +12,44 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Filestore
 # There is a problem here - the generated api is called 'file', and that's
-# a bad name for the library.  So we set the name to gfilestore, and
+# a bad name for the library.  So we set the name to Filestore, and
 # that means that Terraform in particular is going to try to import
 # 'filestore'.  But the library is called 'file', so instead we need to
 # include a small hack to rename the library - see
 # templates/terraform/constants/filestore.erb.
-prefix: gfilestore
+name: Filestore
+display_name: Cloud Filestore
 versions:
   - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://file.googleapis.com/v1beta1/
+    name: ga
+    base_url: https://file.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
+async: !ruby/object:Api::Async
+  operation: !ruby/object:Api::Async::Operation
+    path: 'name'
+    base_url: '{{op_id}}'
+    wait_ms: 1000
+  result: !ruby/object:Api::Async::Result
+    path: 'response'
+    resource_inside_response: true
+  status: !ruby/object:Api::Async::Status
+    path: 'done'
+    complete: True
+    allowed:
+      - True
+      - False
+  error: !ruby/object:Api::Async::Error
+    path: 'error'
+    message: 'message'
 objects:
   - !ruby/object:Api::Resource
     name: 'Instance'
-    exclude: true
-    base_url: |
-      projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
+    base_url:  projects/{{project}}/locations/{{zone}}/instances?instanceId={{name}}
     self_link: projects/{{project}}/locations/{{zone}}/instances/{{name}}
     update_verb: :PATCH
+    update_mask: true
     description: |
       A Google Cloud Filestore instance.
     references: !ruby/object:Api::Resource::ReferenceLinks
@@ -45,14 +61,6 @@ objects:
         'Copying Data In/Out':
           'https://cloud.google.com/filestore/docs/copying-data'
       api: 'https://cloud.google.com/filestore/docs/reference/rest/v1beta1/projects.locations.instances/create'
-<%=
-  # Tests were timing out on delete at 4 minutes.
-  indent(compile_file({timeouts: {
-                        insert_sec: 6 * 60,
-                        update_sec: 6 * 60,
-                        delete_sec: 6 * 60 }},
-                      'templates/zonal_async.yaml.erb'), 4)
-%>
     parameters:
       - !ruby/object:Api::Type::String
         name: 'zone'

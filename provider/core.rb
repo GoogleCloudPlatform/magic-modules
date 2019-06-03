@@ -15,18 +15,121 @@ require 'compile/core'
 require 'fileutils'
 require 'google/extensions'
 require 'google/logger'
-require 'google/hash_utils'
 require 'pathname'
+require 'json'
+require 'overrides/runner'
 
 require 'provider/azure/core'
 
 module Provider
-  DEFAULT_FORMAT_OPTIONS = {
-    indent: 0,
-    start_indent: 0,
-    max_columns: 100,
-    quiet: false
-  }.freeze
+  # Responsible for generating a file
+  # with a given set of parameters.
+  class FileTemplate
+    include Compile::Core
+    # The name of the resource
+    attr_accessor :name
+    # The resource itself.
+    attr_accessor :object
+    # The entire API object.
+    attr_accessor :product
+    # The API version
+    attr_accessor :version
+    # The root folder we're outputting to.
+    attr_accessor :output_folder
+    # The namespace of the product.
+    attr_accessor :product_ns
+    # The provider-specific configuration.
+    attr_accessor :config
+    # Information about the local environment
+    # (which formatters are enabled, start-time)
+    attr_accessor :env
+
+    class << self
+      # Construct a new FileTemplate based on a resource object
+      def file_for_resource(output_folder, object, version, config, env)
+        file_template = new(output_folder, object.name, object.__product, version, env)
+        file_template.object = object
+        file_template.config = config
+        file_template
+      end
+    end
+
+    def initialize(output_folder, name, product, version, env)
+      @name = name
+      @product = product
+      @product_ns = product.name
+      @output_folder = output_folder
+      @version = version
+      @env = env
+    end
+
+    # Given the data object for a file, write that file and verify that it
+    # passes these conditions:
+    #
+    # - The file has not been generated already this run
+    # - The file has an autogen exception or an autogen notice defined
+    #
+    # Once the file's contents are written, set the proper [chmod] mode and
+    # format the file with a language-appropriate formatter.
+    def generate(template, path, provider)
+      folder = File.dirname(path)
+      FileUtils.mkpath folder unless Dir.exist?(folder)
+
+      # If we've modified a file since starting an MM run, it's a reasonable
+      # assumption that it was this run that modified it.
+      if File.exist?(path) && File.mtime(path) > @env[:start_time]
+        raise "#{path} was already modified during this run"
+      end
+
+      # You're looking at some magic here!
+      # This is how variables are made available in templates; we iterate
+      # through each key:value pair in this object, and we set them
+      # in the scope of the provider.
+      #
+      # The templates get access to everything in the provider +
+      # all of the variables in this object.
+      ctx = provider.provider_binding
+      instance_variables.each do |name|
+        ctx.local_variable_set(name[1..-1], instance_variable_get(name))
+      end
+
+      # This variable is used in ansible/resource.erb
+      ctx.local_variable_set('file_relative', relative_path(path, @output_folder).to_s)
+
+      Google::LOGGER.debug "Generating #{@name}"
+      File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }
+
+      # Files are often generated in parallel.
+      # We can use thread-local variables to ensure that autogen checking
+      # stays specific to the file each thred represents.
+      raise "#{path} missing autogen" unless Thread.current[:autogen]
+
+      old_file_chmod_mode = File.stat(template).mode
+      FileUtils.chmod(old_file_chmod_mode, path)
+
+      format_output_file(path)
+    end
+
+    private
+
+    def format_output_file(path)
+      if path.end_with?('.py') && @env[:pyformat_enabled]
+        run_formatter("python3 -m black --line-length 160 -S #{path}")
+      elsif path.end_with?('.go') && @env[:goformat_enabled]
+        run_formatter("gofmt -w -s #{path}")
+        run_formatter("goimports -w #{path}")
+      end
+    end
+
+    def run_formatter(command)
+      output = %x(#{command} 2>&1)
+      Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
+    end
+
+    def relative_path(target, base)
+      Pathname.new(target).relative_path_from(Pathname.new(base))
+    end
+  end
 
   # Basic functionality for code generator providers. Provides basic services,
   # such as compiling and including files, formatting data, etc.
@@ -34,22 +137,56 @@ module Provider
     include Compile::Core
     include Provider::Azure::Core
 
-    def initialize(config, api)
+    def initialize(config, api, start_time)
       @config = config
       @api = api
+<<<<<<< HEAD
       @max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns]
       @provider = ''
+=======
+
+      # The compiler will error out if a file has been written in this compiler
+      # run already. Instead of storing all the modified files in state we'll
+      # use the time the file was modified.
+      @start_time = start_time
+      @py_format_enabled = check_pyformat
+      @go_format_enabled = check_goformat
+    end
+
+    # This provides the FileTemplate class with access to a provider.
+    def provider_binding
+      binding
+    end
+
+    def check_pyformat
+      if system('python3 -m black --help > /dev/null')
+        true
+      else
+        Google::LOGGER.warn 'Either python3 or black is not installed; python ' \
+          'code will be poorly formatted and may not pass linter checks.'
+        false
+      end
+    end
+
+    def check_goformat
+      if system('which gofmt > /dev/null') && system('which goimports > /dev/null')
+        true
+      else
+        Google::LOGGER.warn 'Either gofmt or goimports is not installed; go ' \
+          'code will be poorly formatted and will likely not compile.'
+        false
+      end
+>>>>>>> master
     end
 
     # Main entry point for the compiler. As this method is simply invoking other
     # generators, it is okay to ignore Rubocop warnings about method size and
     # complexity.
     #
-    def generate(output_folder, types, version_name)
+    def generate(output_folder, types, version_name, product_path, dump_yaml)
       generate_objects(output_folder, types, version_name)
       copy_files(output_folder) \
         unless @config.files.nil? || @config.files.copy.nil?
-      compile_changelog(output_folder) unless @config.changelog.nil?
       # Compilation has to be the last step, as some files (e.g.
       # CONTRIBUTING.md) may depend on the list of all files previously copied
       # or compiled.
@@ -61,13 +198,34 @@ module Provider
 
       generate_datasources(output_folder, types, version_name) \
         unless @config.datasources.nil?
+
+      generate_operation(output_folder, types, version_name)
+
+      # Write a file with the final version of the api, after overrides
+      # have been applied.
+      return unless dump_yaml
+
+      raise 'Path to output the final yaml was not specified.' \
+        if product_path.nil? || product_path == ''
+
+      File.open("#{product_path}/final_api.yaml", 'w') do |file|
+        file.write("# This is a generated file, its contents will be overwritten.\n")
+        file.write(YAML.dump(@api))
+      end
     end
+
+    def generate_operation(output_folder, types, version_name); end
 
     def copy_files(output_folder)
       copy_file_list(output_folder, @config.files.copy)
     end
 
-    def copy_common_files(output_folder, _version_name = nil)
+    # version_name is actually used because all of the variables in scope in this method
+    # are made available within the templates by the compile call. This means that version_name
+    # is exposed to the templating logic and version_name is used in other places in the same
+    # way so it needs to be named consistently
+    # rubocop:disable Lint/UnusedMethodArgument
+    def copy_common_files(output_folder, version_name = 'ga')
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
 
@@ -75,9 +233,22 @@ module Provider
       files = YAML.safe_load(compile("provider/#{provider_name}/common~copy.yaml"))
       copy_file_list(output_folder, files)
     end
+    # rubocop:enable Lint/UnusedMethodArgument
+
+    def copy_file_list(output_folder, files)
+      files.map do |target, source|
+        Thread.new do
+          target_file = File.join(output_folder, target)
+          target_dir = File.dirname(target_file)
+          Google::LOGGER.debug "Copying #{source} => #{target}"
+          FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
+          FileUtils.copy_entry source, target_file
+        end
+      end.map(&:join)
+    end
 
     def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version: version_name)
+      compile_file_list(output_folder, @config.files.compile, version_name)
     end
 
     def compile_common_files(output_folder, version_name = nil)
@@ -86,81 +257,50 @@ module Provider
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version: version_name)
+      compile_file_list(output_folder, files, version_name)
     end
 
-    def copy_file_list(output_folder, files)
-      files.each do |target, source|
-        target_file = File.join(output_folder, target)
-        target_dir = File.dirname(target_file)
-        Google::LOGGER.debug "Copying #{source} => #{target}"
-        FileUtils.mkpath target_dir unless Dir.exist?(target_dir)
-        FileUtils.copy_entry source, target_file
-      end
-    end
-
-    def compile_examples(output_folder)
-      compile_file_map(
-        output_folder,
-        @config.examples,
-        lambda do |_object, file|
-          ["examples/#{file}",
-           "products/#{@api.prefix[1..-1]}/files/examples~#{file}"]
+    def compile_file_list(output_folder, files, version = nil)
+      files.map do |target, source|
+        Thread.new do
+          Google::LOGGER.debug "Compiling #{source} => #{target}"
+          target_file = File.join(output_folder, target)
+          FileTemplate.new(
+            output_folder,
+            target,
+            @api,
+            version,
+            build_env
+          ).generate(source, target_file, self)
         end
-      )
+      end.map(&:join)
     end
 
-    # Generate the CHANGELOG.md file with the history of the module.
-    def compile_changelog(output_folder)
-      FileUtils.mkpath output_folder
-      generate_file(
-        changes: @config.changelog,
-        template: 'templates/CHANGELOG.md.erb',
-        output_folder: output_folder,
-        out_file: File.join(output_folder, 'CHANGELOG.md')
-      )
-    end
-
-    def compile_file_list(output_folder, files, data = {})
-      files.each do |target, source|
-        Google::LOGGER.debug "Compiling #{source} => #{target}"
-        target_file = File.join(output_folder, target)
-                          .gsub('{{product_name}}', @api.prefix[1..-1])
-
-        manifest = @config.respond_to?(:manifest) ? @config.manifest : {}
-        generate_file(
-          data.clone.merge(
-            name: target,
-            product: @api,
-            object: {},
-            config: {},
-            scopes: @api.scopes,
-            manifest: manifest,
-            tests: '',
-            template: source,
-            compiler: compiler,
-            output_folder: output_folder,
-            out_file: target_file,
-            prop_ns_dir: @api.prefix[1..-1].downcase,
-            product_ns: @api.prefix[1..-1].camelize(:upper)
-          )
-        )
-
-        %x(goimports -w #{target_file}) if File.extname(target_file) == '.go'
-      end
+    def api_version_setup(version_name)
+      version = @api.version_obj_or_default(version_name)
+      @api.set_properties_based_on_version(version)
+      version
     end
 
     def generate_objects(output_folder, types, version_name)
-      version = @api.version_obj_or_default(version_name)
-      @api.set_properties_based_on_version(version)
+      version = api_version_setup(version_name)
       (@api.objects || []).each do |object|
         if !types.empty? && !types.include?(object.name)
           Google::LOGGER.info "Excluding #{object.name} per user request"
         elsif types.empty? && object.exclude
           Google::LOGGER.info "Excluding #{object.name} per API catalog"
-        elsif types.empty? && object.exclude_if_not_in_version(version)
+        elsif types.empty? && object.not_in_version?(version)
           Google::LOGGER.info "Excluding #{object.name} per API version"
         else
+          Google::LOGGER.info "Generating #{object.name}"
+          # exclude_if_not_in_version must be called in order to filter out
+          # beta properties that are nested within GA resrouces
+          object.exclude_if_not_in_version!(version)
+
+          # Make object immutable.
+          object.freeze
+          object.all_user_properties.each(&:freeze)
+
           # version_name will differ from version.name if the resource is being
           # generated at its default version instead of the one that was passed
           # in to the compiler. Terraform needs to know which version was passed
@@ -172,14 +312,26 @@ module Provider
 
     def generate_object(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
+      unless object.exclude_resource
+        Google::LOGGER.debug "Generating #{object.name} resource"
+        generate_resource data.clone
+        Google::LOGGER.debug "Generating #{object.name} tests"
+        generate_resource_tests data.clone
+      end
 
-      generate_resource data
-      generate_resource_tests data
+      # if iam_policy is not defined or excluded, don't generate it
+      return if object.iam_policy.nil? || object.iam_policy.exclude
+
+      Google::LOGGER.debug "Generating #{object.name} IAM policy"
+      generate_iam_policy data.clone
     end
 
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources
-      @config.datasources.validate
+      @api = Overrides::Runner.build(@api, @config.datasources,
+                                     @config.resource_override,
+                                     @config.property_override)
+      @api.validate
 
       version = @api.version_obj_or_default(version_name)
       @api.set_properties_based_on_version(version)
@@ -192,7 +344,7 @@ module Provider
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API catalog"
           )
-        elsif types.empty? && object.exclude_if_not_in_version(version)
+        elsif types.empty? && object.not_in_version?(version)
           Google::LOGGER.info(
             "Excluding #{object.name} datasource per API version"
           )
@@ -205,10 +357,11 @@ module Provider
     def generate_datasource(object, output_folder, version_name)
       data = build_object_data(object, output_folder, version_name)
 
-      compile_datasource data
+      compile_datasource data.clone
     end
 
     def build_object_data(object, output_folder, version)
+<<<<<<< HEAD
       {
         name: object.out_name,
         object: object,
@@ -261,80 +414,46 @@ module Provider
 
     def false?(obj)
       obj.to_s.casecmp('false').zero?
+=======
+      FileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
+>>>>>>> master
     end
 
-    def emit_link(name, url, emit_self, extra_data = false)
-      (params, fn_args) = emit_link_var_args(url, extra_data)
-      code = ["def #{emit_self ? 'self.' : ''}#{name}(#{fn_args})",
-              indent(url, 2),
-              'end']
-
-      if emit_self
-        self_code = ['', "def #{name}(#{fn_args})",
-                     "  self.class.#{name}(#{params.join(', ')})",
-                     'end']
-      end
-
-      (code + (self_code || [])).join("\n")
-    end
-
-    # Formats the code and returns the first candidate that fits the alloted
-    # column limit.
-    def format(sources, indent = 0, start_indent = 0,
-               max_columns = @max_columns)
-      format2(sources, indent: indent,
-                       start_indent: start_indent,
-                       max_columns: max_columns)
-    end
-
-    # TODO(nelsonjr): Make format2 into format and fix all references throughout
-    # the code base.
-    def format2(sources, overrides = {})
-      options = DEFAULT_FORMAT_OPTIONS.merge(overrides)
-      output = ''
-      avail_columns = options[:max_columns] - options[:start_indent]
-      sources.each do |attempt|
-        output = indent(attempt, options[:indent])
-        return output if format_fits?(output, options[:start_indent],
-                                      options[:max_columns])
-      end
-      unless options[:on_misfit].nil?
-        (alt_fit, alt_output) = options[:on_misfit].call(sources, output,
-                                                         options, avail_columns)
-        return alt_output if alt_fit
-      end
-
-      indent([
-               '# rubocop:disable Metrics/LineLength',
-               sources.last,
-               '# rubocop:enable Metrics/LineLength'
-             ], options[:indent])
-    end
-
-    def format_fits?(output, start_indent,
-                     max_columns = DEFAULT_FORMAT_OPTIONS[:max_columns])
-      output = output.flatten.join("\n") if output.is_a?(::Array)
-      output = output.split("\n") unless output.is_a?(::Array)
-      output.select { |l| l.length > (max_columns - start_indent) }.empty?
-    end
-
-    def relative_path(target, base)
-      Pathname.new(target).relative_path_from(Pathname.new(base))
+    def build_env
+      {
+        pyformat_enabled: @py_format_enabled,
+        goformat_enabled: @go_format_enabled,
+        start_time: @start_time
+      }
     end
 
     # Filter the properties to keep only the ones requiring custom update
     # method and group them by update url & verb.
     def properties_by_custom_update(properties)
       update_props = properties.reject do |p|
-        p.update_url.nil? || p.update_verb.nil?
+        p.update_url.nil? || p.update_verb.nil? || p.update_verb == :NOOP
       end
       update_props.group_by do |p|
         { update_url: p.update_url, update_verb: p.update_verb }
       end
     end
 
+    # Takes a update_url and returns the list of custom updatable properties
+    # that can be updated at that URL. This allows flattened objects
+    # to determine which parent property in the API should be updated with
+    # the contents of the flattened object
+    def custom_update_properties_by_url(properties, update_url)
+      properties_by_custom_update(properties).select do |k, _|
+        k[:update_url] == update_url
+      end.first.last
+      # .first is to grab the element from the select which returns a list
+      # .last is because properties_by_custom_update returns a list of
+      # [{update_url}, [properties,...]] and we only need the 2nd part
+    end
+
     def update_url(resource, url_part)
-      return build_url(resource.self_link_url) if url_part.nil?
+      return resource.self_link_url if url_part.nil?
+
       [resource.__product.base_url, url_part].flatten.join
     end
 
@@ -346,6 +465,7 @@ module Provider
       requires.concat(properties.collect(&:requires))
     end
 
+<<<<<<< HEAD
     def emit_requires(requires)
       requires.flatten.sort.uniq.map { |r| "require '#{r}'" }.join("\n")
     end
@@ -433,6 +553,8 @@ module Provider
       end
     end
 
+=======
+>>>>>>> master
     def provider_name
       self.class.name.split('::').last.downcase
     end

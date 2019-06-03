@@ -19,6 +19,7 @@ module Provider
     # AnsibleModule is responsible for input validation.
     module Module
       include Google::PythonUtils
+<<<<<<< HEAD
       # Returns the Python dictionary representing a simple property for
       # validation.
       def python_dict_for_property(prop, object, spaces = 0)
@@ -89,6 +90,38 @@ module Provider
                           choices_indent + 11)
                  ]
                ], 0, choices_indent)
+=======
+      # Returns an array of all base options for a given property.
+      def ansible_module(properties)
+        properties.reject(&:output)
+                  .map { |x| python_dict_for_property(x) }
+                  .reduce({}, :merge)
+      end
+
+      def python_dict_for_property(prop)
+        {
+          prop.name.underscore => {
+            'required' => (true if prop.required && !prop.default_value),
+            'default' => prop.default_value,
+            'type' => python_type(prop),
+            'elements' => (python_type(prop.item_type) \
+              if prop.is_a?(Api::Type::Array) && python_type(prop.item_type)),
+            'aliases' => prop.aliases,
+            'options' => (if prop.nested_properties?
+                            prop.nested_properties.reject(&:output)
+                                                  .map { |x| python_dict_for_property(x) }
+                                                  .reduce({}, :merge)
+                          end
+                         )
+          }.reject { |_, v| v.nil? }
+        }
+      end
+
+      # GcpModule is acting as a dictionary and doesn't need the dict() notation on
+      # the first level.
+      def remove_outside_dict(contents)
+        contents.sub('dict(', '').chomp(')')
+>>>>>>> master
       end
     end
   end

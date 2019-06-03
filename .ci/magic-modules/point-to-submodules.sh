@@ -22,7 +22,7 @@ if [ "$TERRAFORM_ENABLED" = "true" ]; then
     SUBMODULE_DIR="${TERRAFORM_DATA[1]}"
 
     git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.branch" "$BRANCH"
-    git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.url" "git@github.com:$GH_USERNAME/$PROVIDER_NAME.git"
+    git config -f .gitmodules "submodule.build/$SUBMODULE_DIR.url" "https://github.com/$GH_USERNAME/$PROVIDER_NAME.git"
     git submodule sync "build/$SUBMODULE_DIR"
     ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/$SUBMODULE_DIR"
     git add "build/$SUBMODULE_DIR"
@@ -31,7 +31,7 @@ fi
 
 if [ "$ANSIBLE_ENABLED" = "true" ]; then
   git config -f .gitmodules submodule.build/ansible.branch "$BRANCH"
-  git config -f .gitmodules submodule.build/ansible.url "git@github.com:$GH_USERNAME/ansible.git"
+  git config -f .gitmodules submodule.build/ansible.url "https://github.com/$GH_USERNAME/ansible.git"
   git submodule sync build/ansible
   ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/ansible"
   git add build/ansible
@@ -39,7 +39,7 @@ fi
 
 if [ "$INSPEC_ENABLED" = "true" ]; then
   git config -f .gitmodules submodule.build/inspec.branch "$BRANCH"
-  git config -f .gitmodules submodule.build/inspec.url "git@github.com:$GH_USERNAME/inspec-gcp.git"
+  git config -f .gitmodules submodule.build/inspec.url "https://github.com/$GH_USERNAME/inspec-gcp.git"
   git submodule sync build/inspec
   ssh-agent bash -c "ssh-add ~/github_private_key; git submodule update --remote --init build/inspec"
   git add build/inspec
