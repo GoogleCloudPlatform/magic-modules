@@ -1,4 +1,4 @@
-# Copyright 2019 Google Inc.
+# Copyright 2017 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,28 +10,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Verify that firewall network names match what the API returns
 
-require 'api/object'
-require 'google/string_utils'
+def encode_request(request, module):
+    request['name'] = "projects/%s/locations/%s/jobs/%s" %(module.params['project'], module.params['region'], module.params['name'])
+    return request
 
-module Api
-  # An object available in the product
-  class Resource < Api::Object::Named
-    # Represents a response from the API that returns a list of objects.
-    class ResponseList < Api::Object
-      attr_reader :kind
-      attr_reader :items
+def decode_request(response, module):
+    if 'name' in response:
+        response['name'] = response['name'].split('/')[-1]
 
-      def validate
-        super
-
-        check :items, default: 'items', type: ::String, required: true
-        check :kind, type: ::String
-      end
-
-      def kind?
-        !@kind.nil?
-      end
-    end
-  end
-end
+    return response

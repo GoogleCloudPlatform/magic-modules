@@ -43,6 +43,6 @@ class <%= object.name -%>IamPolicy < GcpResourceBase
 
 <% individual_url = object.self_link || object.base_url + '/{{name}}' -%>
   def resource_base_url
-    '<%= individual_url -%>/getIamPolicy'
+    '<%= individual_url -%><%= object.iam_policy.method_name_separator -%>getIamPolicy'
   end
 end

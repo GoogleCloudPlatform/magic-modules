@@ -31,6 +31,7 @@ objects:
     create_verb: :POST
     description: |
       A Cloud Function that contains user computation executed in response to an event.
+    collection_url_key: 'functions'
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -152,5 +153,3 @@ objects:
             name: 'service'
             description: |
               The hostname of the service that should be observed.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'functions'

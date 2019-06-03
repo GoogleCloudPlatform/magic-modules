@@ -50,8 +50,6 @@ objects:
     update_mask: true
     description: |
       A Google Cloud Redis instance.
-    collection_url_response: !ruby/object:Api::Resource::ResponseList
-      items: 'instances'
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation':
