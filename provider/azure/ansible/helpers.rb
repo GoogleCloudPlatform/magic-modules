@@ -39,10 +39,20 @@ module Provider
         def word_wrap_for_yaml(lines, width = 150)
           wrapped = Array.new
           lines.each do |line|
+            quoted = false
             while line.length > width
+              # Calculate leading spaces for the following lines
               striped = line.lstrip
               spaces = line.length - striped.length
               spaces += 2 if striped.start_with? '- '
+
+              # Quote the whole line using quotation mark if not quoted
+              unless quoted
+                line = line[0..spaces - 1] + '"' + line[spaces..-1] + '"' if line[spaces] != '"'
+                quoted = true
+              end
+
+              # Find the last possible word-break character
               wb_index = -1
               wb_index_try = line.index(/[ \t@=,;]/)
               while !wb_index_try.nil? && wb_index_try < width
@@ -50,6 +60,8 @@ module Provider
                 wb_index_try = line.index(/[ \t@=,;]/, wb_index_try + 1)
               end
               break if wb_index == -1
+
+              # Break this line into two
               wb_char = line[wb_index]
               cur_line = line[0..wb_index - 1]
               cur_line += wb_char unless wb_char == ' '

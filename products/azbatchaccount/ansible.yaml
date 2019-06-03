@@ -26,6 +26,13 @@ overrides: !ruby/object:Provider::ResourceOverrides
       autoStorageAccountId: !ruby/object:Provider::Ansible::PropertyOverride
         name: autoStorageAccount
         description: Existing storage account with which to associate the Batch Account.
+      keyVaultReference: !ruby/object:Provider::Azure::Ansible::PropertyOverride
+        name: keyVault
+        description: Existing key vault with which to associate the Batch Account.
+        new_type: Api::Azure::Type::ResourceReference
+        resource_type_name: key vault
+        sample_value: '/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.KeyVault/vaults/{name}'
+        custom_normalize: products/azbatchaccount/ansible_keyvault_normalize.erb
     examples:
       - !ruby/object:Provider::Azure::Ansible::ResourceOverride::DocumentExampleReference
         example: basic

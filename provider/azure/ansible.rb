@@ -8,6 +8,7 @@ require 'provider/azure/ansible/sdk/sub_template'
 require 'provider/azure/ansible/example/sub_template'
 
 require 'provider/azure/ansible/resource_override'
+require 'provider/azure/ansible/property_override'
 
 module Provider
   module Azure

@@ -1,0 +1,8 @@
+id = self.normalize_resource_id(
+    self.batch_account.pop('key_vault'),
+    '<%= norm_desc.property.sample_value -%>')
+url = 'https://' + id.split('/').pop() + '.vault.azure.net/'
+self.batch_account['key_vault_reference'] = {
+    'id': id,
+    'url': url
+}

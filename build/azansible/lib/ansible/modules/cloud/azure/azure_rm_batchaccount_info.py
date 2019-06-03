@@ -100,22 +100,12 @@ items:
             returned: always
             type: str
             sample: "/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Storage/storageAccounts/{name}"
-        key_vault_reference:
+        key_vault:
             description:
-            - A reference to the Azure key vault associated with the Batch account.
+            - Existing key vault with which to associate the Batch Account.
             returned: always
-            type: complex
-            contains:
-                id:
-                    description:
-                    - The resource ID of the Azure key vault associated with the Batch account.
-                    returned: always
-                    type: str
-                url:
-                    description:
-                    - The URL of the Azure key vault associated with the Batch account.
-                    returned: always
-                    type: str
+            type: str
+            sample: "/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.KeyVault/vaults/{name}"
         pool_allocation_mode:
             description:
             - The pool acclocation mode of the Batch Account.
@@ -216,7 +206,7 @@ class AzureRMBatchAccountInfo(AzureRMModuleBase):
             'location': d['location'],
             'account_endpoint': d['account_endpoint'],
             'auto_storage_account': d['auto_storage']['storage_account_id'],
-            'key_vault_reference': d['key_vault_reference'],
+            'key_vault': d['key_vault_reference'],
             'pool_allocation_mode': d['pool_allocation_mode'],
             'tags': d['tags'],
         }

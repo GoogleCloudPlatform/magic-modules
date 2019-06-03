@@ -9,7 +9,8 @@ module Provider
           end
 
           def build_property_normalization(norm_desc, in_structure, indentation = 4)
-            result = compile 'templates/azure/ansible/sdktypes/property_normalization.erb', 1
+            template = norm_desc.property.custom_normalize || 'templates/azure/ansible/sdktypes/property_normalization.erb'
+            result = compile template, 1
             indent result, indentation
           end
 
