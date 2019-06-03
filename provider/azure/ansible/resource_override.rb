@@ -1,4 +1,5 @@
 require 'provider/ansible/resource_override'
+require 'provider/azure/example/example'
 
 module Provider
   module Azure
@@ -25,6 +26,16 @@ module Provider
         class IntegrationTestDefinition < ExampleReference
           def validate
             super
+          end
+        end
+
+        class DocumentExampleReference < ExampleReference
+          attr_reader :resource_name_hints
+  
+          def validate
+            super
+            check_optional_property :resource_name_hints, Hash
+            check_optional_property_hash :resource_name_hints, String, String
           end
         end
 

@@ -16,9 +16,9 @@ datasources: !ruby/object:Provider::ResourceOverrides
       name: !ruby/object:Provider::Ansible::PropertyOverride
         required: false
     examples:
-      - !ruby/object:Provider::Azure::ExampleReference
+      - !ruby/object:Provider::Azure::Ansible::ResourceOverride::DocumentExampleReference
         example: infoget
-      - !ruby/object:Provider::Azure::ExampleReference
+      - !ruby/object:Provider::Azure::Ansible::ResourceOverride::DocumentExampleReference
         example: infolist
 overrides: !ruby/object:Provider::ResourceOverrides
   BatchAccount: !ruby/object:Provider::Azure::Ansible::ResourceOverride
@@ -27,8 +27,12 @@ overrides: !ruby/object:Provider::ResourceOverrides
         name: autoStorageAccount
         description: Existing storage account with which to associate the Batch Account.
     examples:
-      - !ruby/object:Provider::Azure::ExampleReference
+      - !ruby/object:Provider::Azure::Ansible::ResourceOverride::DocumentExampleReference
         example: basic
+        resource_name_hints:
+          resourceGroups: MyResGroup
+          storageAccounts: mystorageaccountname
+          batchAccounts: mybatchaccount
     inttests:
       - !ruby/object:Provider::Azure::Ansible::ResourceOverride::IntegrationTestDefinition
         example: basic

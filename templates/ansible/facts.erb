@@ -50,7 +50,7 @@ author:
 '''
 
 <%  unless object.examples.empty? -%>
-<%    code = object.examples.map{|exref| lines(build_documentation_yaml_from_example(get_example_by_reference(exref)))} -%>
+<%    code = object.examples.map{|exref| lines(build_documentation_yaml_from_example(exref))} -%>
 EXAMPLES = '''
 <%=   lines(indent(code.join("\n"), 2)) -%>
 '''

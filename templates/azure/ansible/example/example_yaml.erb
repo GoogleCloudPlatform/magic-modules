@@ -5,5 +5,5 @@
 <%  end -%>
 - name: <%= lines(example.description + (!name_postfix.nil? && !name_postfix.empty? ? " -- #{name_postfix}" : '')) -%>
   <%= example.resource -%>:
-<%= lines(build_yaml_properties(example.properties, 4)) -%>
+<%= indent lines(build_yaml_properties(example.properties, 2)), 4 -%>
 <%= "  register: #{register_name}" unless register_name.nil? || register_name.empty? -%>

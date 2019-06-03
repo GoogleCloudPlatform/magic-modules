@@ -1,7 +1,7 @@
 <%  properties.each do |name, value| -%>
 <%    if value.is_a?(Hash) -%>
 <%=     name.underscore -%>:
-<%=     lines(build_yaml_properties(value)) -%>
+<%=     lines(build_yaml_properties(value, indentation)) -%>
 <%    elsif value.is_a?(String) || value.is_a?(Integer) || value.is_a?(TrueClass) || value.is_a?(FalseClass) -%>
 <%=     name.underscore -%>: <%= lines(value) -%>
 <%    else -%>

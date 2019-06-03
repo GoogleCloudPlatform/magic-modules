@@ -10,13 +10,7 @@ module Provider
           end
 
           def build_documentation_yaml_from_example(example)
-            yaml = to_yaml({
-              'name' => example.description,
-              example.resource => example.properties.transform_keys(&:underscore)
-            })
-            lines = yaml.split("\n")
-            lines = word_wrap_for_yaml(lines)
-            lines('- ' + lines[0]) + indent(lines[1..-1], 2)
+            build_yaml_from_example(nil, example.example, Set.new, nil, example.resource_name_hints, nil, false)
           end
 
           def build_yaml_from_example(product_name, example_name, random_variables, name_postfix, name_hints, register_name, with_dependencies)
@@ -49,7 +43,7 @@ module Provider
             end
   
             def get_resource_name(name_hint, random_var_name, random_var_prefix = '')
-              return name_hints[name_hint] if name_hints.has_key?(name_hint)
+              return "#{name_hints[name_hint]}\n" if name_hints.has_key?(name_hint)
               @random_variables << RandomizedVariable.new(:Standard, random_var_name, random_var_prefix)
               "\"{{ #{random_var_name} }}\"\n"
             end
