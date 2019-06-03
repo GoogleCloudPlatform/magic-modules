@@ -112,7 +112,7 @@ module Provider
     # Note: ?P indicates a Python-compatible named capture group. Named groups
     # aren't isn't common in JS-based regex flavours, but are in Perl-based ones
     def format2regex(format)
-      format.gsub(/{{%([[:word:]]+)}}/, '(?P<\1>.+)')
+      format.gsub(/{{\%([[:word:]]+)}}/, '(?P<\1>.+)')
       format.gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
     end
 
