@@ -17,9 +17,7 @@ const DEFAULT_HEALTHCARE_TEST_LOCATION = "us-central1"
 func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	projectId := acctest.RandomWithPrefix("tf-test")
-	billingAccount := getTestBillingAccountFromEnv(t)
+	projectId := getTestProjectFromEnv()
 	account := acctest.RandomWithPrefix("tf-test")
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -36,7 +34,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
-				Config: testAccHealthcareDatasetIamBinding_basic(projectId, orgId, billingAccount, account, datasetName, roleId),
+				Config: testAccHealthcareDatasetIamBinding_basic(account, datasetName, roleId),
 				Check: testAccCheckGoogleHealthcareDatasetIam(datasetId.datasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
@@ -49,7 +47,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 			},
 			{
 				// Test Iam Binding update
-				Config: testAccHealthcareDatasetIamBinding_update(projectId, orgId, billingAccount, account, datasetName, roleId),
+				Config: testAccHealthcareDatasetIamBinding_update(account, datasetName, roleId),
 				Check: testAccCheckGoogleHealthcareDatasetIam(datasetId.datasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, projectId),
@@ -68,9 +66,7 @@ func TestAccHealthcareDatasetIamBinding(t *testing.T) {
 func TestAccHealthcareDatasetIamMember(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	projectId := acctest.RandomWithPrefix("tf-test")
-	billingAccount := getTestBillingAccountFromEnv(t)
+	projectId := getTestProjectFromEnv()
 	account := acctest.RandomWithPrefix("tf-test")
 	roleId := "roles/healthcare.datasetViewer"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -87,7 +83,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccHealthcareDatasetIamMember_basic(projectId, orgId, billingAccount, account, datasetName, roleId),
+				Config: testAccHealthcareDatasetIamMember_basic(account, datasetName, roleId),
 				Check: testAccCheckGoogleHealthcareDatasetIam(datasetId.datasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
@@ -105,9 +101,7 @@ func TestAccHealthcareDatasetIamMember(t *testing.T) {
 func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	projectId := acctest.RandomWithPrefix("tf-test")
-	billingAccount := getTestBillingAccountFromEnv(t)
+	projectId := getTestProjectFromEnv()
 	account := acctest.RandomWithPrefix("tf-test")
 	roleId := "roles/healthcare.datasetAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -123,7 +117,7 @@ func TestAccHealthcareDatasetIamPolicy(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccHealthcareDatasetIamPolicy_basic(projectId, orgId, billingAccount, account, datasetName, roleId),
+				Config: testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId),
 				Check: testAccCheckGoogleHealthcareDatasetIam(datasetId.datasetId(), roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
@@ -165,33 +159,14 @@ func testAccCheckGoogleHealthcareDatasetIam(datasetId, role string, members []st
 
 // We are using a custom role since iam_binding is authoritative on the member list and
 // we want to avoid removing members from an existing role to prevent unwanted side effects.
-func testAccHealthcareDatasetIamBinding_basic(projectId, orgId, billingAccount, account, datasetName, roleId string) string {
+func testAccHealthcareDatasetIamBinding_basic(account, datasetName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project      = "${google_project_services.test_project.project}"
   location = "us-central1"
   name     = "%s"
 }
@@ -201,42 +176,22 @@ resource "google_healthcare_dataset_iam_binding" "foo" {
   role        = "%s"
   members     = ["serviceAccount:${google_service_account.test_account.email}"]
 }
-`, projectId, orgId, billingAccount, account, datasetName, roleId)
+`, account, datasetName, roleId)
 }
 
-func testAccHealthcareDatasetIamBinding_update(projectId, orgId, billingAccount, account, datasetName, roleId string) string {
+func testAccHealthcareDatasetIamBinding_update(account, datasetName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_service_account" "test_account_2" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s-2"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project  = "${google_project_services.test_project.project}"
   location = "%s"
   name     = "%s"
 }
@@ -249,36 +204,17 @@ resource "google_healthcare_dataset_iam_binding" "foo" {
     "serviceAccount:${google_service_account.test_account_2.email}"
   ]
 }
-`, projectId, orgId, billingAccount, account, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
+`, account, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
 }
 
-func testAccHealthcareDatasetIamMember_basic(projectId, orgId, billingAccount, account, datasetName, roleId string) string {
+func testAccHealthcareDatasetIamMember_basic(account, datasetName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project  = "${google_project_services.test_project.project}"
   location = "%s"
   name     = "%s"
 }
@@ -288,36 +224,17 @@ resource "google_healthcare_dataset_iam_member" "foo" {
   role        = "%s"
   member      = "serviceAccount:${google_service_account.test_account.email}"
 }
-`, projectId, orgId, billingAccount, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
+`, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
 }
 
-func testAccHealthcareDatasetIamPolicy_basic(projectId, orgId, billingAccount, account, datasetName, roleId string) string {
+func testAccHealthcareDatasetIamPolicy_basic(account, datasetName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project  = "${google_project_services.test_project.project}"
   location = "%s"
   name     = "%s"
 }
@@ -334,7 +251,7 @@ resource "google_healthcare_dataset_iam_policy" "foo" {
   dataset_id = "${google_healthcare_dataset.dataset.id}"
   policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
-`, projectId, orgId, billingAccount, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
+`, account, DEFAULT_HEALTHCARE_TEST_LOCATION, datasetName, roleId)
 }
 <% else %>
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.

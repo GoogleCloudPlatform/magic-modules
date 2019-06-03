@@ -147,6 +147,11 @@ objects:
           The time that this resource was created on the server.
           This is in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualifed name of this dataset
+        output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a fhirStore':
@@ -266,6 +271,11 @@ objects:
           The time that this resource was created on the server.
           This is in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualifed name of this dataset
+        output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Creating a fhirStore':
@@ -357,6 +367,11 @@ objects:
         description: |
           The time that this resource was created on the server.
           This is in RFC3339 text format.
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'selfLink'
+        description: |
+          The fully qualifed name of this dataset
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:

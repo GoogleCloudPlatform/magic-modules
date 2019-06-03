@@ -15,9 +15,7 @@ import (
 func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	projectId := acctest.RandomWithPrefix("tf-test")
-	billingAccount := getTestBillingAccountFromEnv(t)
+	projectId := getTestProjectFromEnv()
 	account := acctest.RandomWithPrefix("tf-test")
 	roleId := "roles/healthcare.fhirStoreAdmin"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -34,7 +32,7 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Binding creation
-				Config: testAccHealthcareFhirStoreIamBinding_basic(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId),
+				Config: testAccHealthcareFhirStoreIamBinding_basic(account, datasetName, fhirStoreName, roleId),
 				Check: testAccCheckGoogleHealthcareFhirStoreIamBindingExists("foo", roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				}),
@@ -47,7 +45,7 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 			},
 			{
 				// Test Iam Binding update
-				Config: testAccHealthcareFhirStoreIamBinding_update(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId),
+				Config: testAccHealthcareFhirStoreIamBinding_update(account, datasetName, fhirStoreName, roleId),
 				Check: testAccCheckGoogleHealthcareFhirStoreIamBindingExists("foo", roleId, []string{
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 					fmt.Sprintf("serviceAccount:%s-2@%s.iam.gserviceaccount.com", account, projectId),
@@ -66,9 +64,7 @@ func TestAccHealthcareFhirStoreIamBinding(t *testing.T) {
 func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	projectId := acctest.RandomWithPrefix("tf-test")
-	billingAccount := getTestBillingAccountFromEnv(t)
+	projectId := getTestProjectFromEnv()
 	account := acctest.RandomWithPrefix("tf-test")
 	roleId := "roles/healthcare.fhirResourceEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -85,7 +81,7 @@ func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAccHealthcareFhirStoreIamMember_basic(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId),
+				Config: testAccHealthcareFhirStoreIamMember_basic(account, datasetName, fhirStoreName, roleId),
 				Check: testAccCheckGoogleHealthcareFhirStoreIamMemberExists("foo", roleId,
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				),
@@ -103,9 +99,7 @@ func TestAccHealthcareFhirStoreIamMember(t *testing.T) {
 func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	orgId := getTestOrgFromEnv(t)
-	projectId := acctest.RandomWithPrefix("tf-test")
-	billingAccount := getTestBillingAccountFromEnv(t)
+	projectId := getTestProjectFromEnv()
 	account := acctest.RandomWithPrefix("tf-test")
 	roleId := "roles/healthcare.fhirResourceEditor"
 	datasetName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -122,14 +116,14 @@ func TestAccHealthcareFhirStoreIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Policy creation (no update for policy, no need to test)
-				Config: testAccHealthcareFhirStoreIamPolicy_basic(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId),
+				Config: testAccHealthcareFhirStoreIamPolicy_basic(account, datasetName, fhirStoreName, roleId),
 				Check: testAccCheckGoogleHealthcareFhirStoreIamPolicyExists("foo", roleId,
 					fmt.Sprintf("serviceAccount:%s@%s.iam.gserviceaccount.com", account, projectId),
 				),
 			},
 			{
 				ResourceName:      "google_healthcare_fhir_store_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("%s/%s %s serviceAccount:%s@%s.iam.gserviceaccount.com", datasetId.terraformId(), fhirStoreName, roleId, account, projectId),
+				ImportStateId:     fmt.Sprintf("%s/%s", datasetId.terraformId(), fhirStoreName),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -245,33 +239,14 @@ func testAccCheckGoogleHealthcareFhirStoreIamPolicyExists(n, role, policy string
 
 // We are using a custom role since iam_binding is authoritative on the member list and
 // we want to avoid removing members from an existing role to prevent unwanted side effects.
-func testAccHealthcareFhirStoreIamBinding_basic(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId string) string {
+func testAccHealthcareFhirStoreIamBinding_basic(account, datasetName, fhirStoreName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project      = "${google_project_services.test_project.project}"
   location = "us-central1"
   name     = "%s"
 }
@@ -286,42 +261,22 @@ resource "google_healthcare_fhir_store_iam_binding" "foo" {
   role          = "%s"
   members       = ["serviceAccount:${google_service_account.test_account.email}"]
 }
-`, projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId)
+`, account, datasetName, fhirStoreName, roleId)
 }
 
-func testAccHealthcareFhirStoreIamBinding_update(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId string) string {
+func testAccHealthcareFhirStoreIamBinding_update(account, datasetName, fhirStoreName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_service_account" "test_account_2" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s-2"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project  = "${google_project_services.test_project.project}"
   location = "us-central1"
   name     = "%s"
 }
@@ -339,36 +294,17 @@ resource "google_healthcare_fhir_store_iam_binding" "foo" {
     "serviceAccount:${google_service_account.test_account_2.email}"
   ]
 }
-`, projectId, orgId, billingAccount, account, account, datasetName, fhirStoreName, roleId)
+`, account, account, datasetName, fhirStoreName, roleId)
 }
 
-func testAccHealthcareFhirStoreIamMember_basic(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId string) string {
+func testAccHealthcareFhirStoreIamMember_basic(account, datasetName, fhirStoreName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project  = "${google_project_services.test_project.project}"
   location = "us-central1"
   name     = "%s"
 }
@@ -382,36 +318,17 @@ resource "google_healthcare_fhir_store_iam_member" "foo" {
   role          = "%s"
   member        = "serviceAccount:${google_service_account.test_account.email}"
 }
-`, projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId)
+`, account, datasetName, fhirStoreName, roleId)
 }
 
-func testAccHealthcareFhirStoreIamPolicy_basic(projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId string) string {
+func testAccHealthcareFhirStoreIamPolicy_basic(account, datasetName, fhirStoreName, roleId string) string {
 	return fmt.Sprintf(`
-resource "google_project" "test_project" {
-  name            = "Test project"
-  project_id      = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
-}
-
-resource "google_project_services" "test_project" {
-  project = "${google_project.test_project.project_id}"
-
-  services = [
-     "healthcare.googleapis.com",
-     "iam.googleapis.com",
-     "iamcredentials.googleapis.com",
-  ]
-}
-
 resource "google_service_account" "test_account" {
-  project      = "${google_project_services.test_project.project}"
   account_id   = "%s"
   display_name = "Iam Testing Account"
 }
 
 resource "google_healthcare_dataset" "dataset" {
-  project  = "${google_project_services.test_project.project}"
   location = "us-central1"
   name     = "%s"
 }
@@ -432,7 +349,7 @@ resource "google_healthcare_fhir_store_iam_policy" "foo" {
   fhir_store_id = "${google_healthcare_fhir_store.fhir_store.id}"
   policy_data = "${data.google_iam_policy.foo.policy_data}"
 }
-`, projectId, orgId, billingAccount, account, datasetName, fhirStoreName, roleId)
+`, account, datasetName, fhirStoreName, roleId)
 }
 <% else %>
 // Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.

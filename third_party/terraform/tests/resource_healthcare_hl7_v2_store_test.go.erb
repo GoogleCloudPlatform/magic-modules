@@ -5,36 +5,36 @@ import (
 	"testing"
 )
 
-func TestDicomStoreIdParsing(t *testing.T) {
+func TestHl7V2StoreIdParsing(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
 		ImportId             string
 		ExpectedError        bool
 		ExpectedTerraformId  string
-		ExpectedDicomStoreId string
+		ExpectedHl7V2StoreId string
 		Config               *Config
 	}{
-		"id is in project/location/datasetName/dicomStoreName format": {
+		"id is in project/location/datasetName/hl7V2StoreName format": {
 			ImportId:             "test-project/us-central1/test-dataset/test-store-name",
 			ExpectedError:        false,
 			ExpectedTerraformId:  "test-project/us-central1/test-dataset/test-store-name",
-			ExpectedDicomStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
+			ExpectedHl7V2StoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/hl7V2Stores/test-store-name",
 		},
-		"id is in domain:project/location/datasetName/dicomStoreName format": {
+		"id is in domain:project/location/datasetName/hl7V2StoreName format": {
 			ImportId:             "example.com:test-project/us-central1/test-dataset/test-store-name",
 			ExpectedError:        false,
 			ExpectedTerraformId:  "example.com:test-project/us-central1/test-dataset/test-store-name",
-			ExpectedDicomStoreId: "projects/example.com:test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
+			ExpectedHl7V2StoreId: "projects/example.com:test-project/locations/us-central1/datasets/test-dataset/hl7V2Stores/test-store-name",
 		},
-		"id is in location/datasetName/dicomStoreName format": {
+		"id is in location/datasetName/hl7V2StoreName format": {
 			ImportId:             "us-central1/test-dataset/test-store-name",
 			ExpectedError:        false,
 			ExpectedTerraformId:  "test-project/us-central1/test-dataset/test-store-name",
-			ExpectedDicomStoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/dicomStores/test-store-name",
+			ExpectedHl7V2StoreId: "projects/test-project/locations/us-central1/datasets/test-dataset/hl7V2Stores/test-store-name",
 			Config:               &Config{Project: "test-project"},
 		},
-		"id is in location/datasetName/dicomStoreName format without project in config": {
+		"id is in location/datasetName/hl7V2StoreName format without project in config": {
 			ImportId:      "us-central1/test-dataset/test-store-name",
 			ExpectedError: true,
 			Config:        &Config{Project: ""},
@@ -42,7 +42,7 @@ func TestDicomStoreIdParsing(t *testing.T) {
 	}
 
 	for tn, tc := range cases {
-		dicomStoreId, err := parseHealthcareDicomStoreId(tc.ImportId, tc.Config)
+		hl7V2StoreId, err := parseHealthcareHl7V2StoreId(tc.ImportId, tc.Config)
 
 		if tc.ExpectedError && err == nil {
 			t.Fatalf("bad: %s, expected an error", tn)
@@ -55,12 +55,12 @@ func TestDicomStoreIdParsing(t *testing.T) {
 			t.Fatalf("bad: %s, err: %#v", tn, err)
 		}
 
-		if dicomStoreId.terraformId() != tc.ExpectedTerraformId {
-			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, dicomStoreId.terraformId())
+		if hl7V2StoreId.terraformId() != tc.ExpectedTerraformId {
+			t.Fatalf("bad: %s, expected Terraform ID to be `%s` but is `%s`", tn, tc.ExpectedTerraformId, hl7V2StoreId.terraformId())
 		}
 
-		if dicomStoreId.dicomStoreId() != tc.ExpectedDicomStoreId {
-			t.Fatalf("bad: %s, expected DicomStore ID to be `%s` but is `%s`", tn, tc.ExpectedDicomStoreId, dicomStoreId.dicomStoreId())
+		if hl7V2StoreId.hl7V2StoreId() != tc.ExpectedHl7V2StoreId {
+			t.Fatalf("bad: %s, expected Hl7V2Store ID to be `%s` but is `%s`", tn, tc.ExpectedHl7V2StoreId, hl7V2StoreId.hl7V2StoreId())
 		}
 	}
 }

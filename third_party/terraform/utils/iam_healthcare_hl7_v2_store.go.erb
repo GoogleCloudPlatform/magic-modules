@@ -12,7 +12,7 @@ import (
 )
 
 var IamHealthcareHl7V2StoreSchema = map[string]*schema.Schema{
-	"hl7v2_store_id": {
+	"hl7_v2_store_id": {
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
@@ -25,7 +25,7 @@ type HealthcareHl7V2StoreIamUpdater struct {
 }
 
 func NewHealthcareHl7V2StoreIamUpdater(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
-	hl7V2Store := d.Get("hl7v2_store_id").(string)
+	hl7V2Store := d.Get("hl7_v2_store_id").(string)
 	hl7V2StoreId, err := parseHealthcareHl7V2StoreId(hl7V2Store, config)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func Hl7V2StoreIdParseFunc(d *schema.ResourceData, config *Config) error {
 	if err != nil {
 		return err
 	}
-	d.Set("hl7v2_store_id", hl7V2StoreId.hl7V2StoreId())
+	d.Set("hl7_v2_store_id", hl7V2StoreId.hl7V2StoreId())
 	d.SetId(hl7V2StoreId.hl7V2StoreId())
 	return nil
 }
@@ -87,7 +87,7 @@ func (u *HealthcareHl7V2StoreIamUpdater) GetResourceId() string {
 }
 
 func (u *HealthcareHl7V2StoreIamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-healthcare-hl7V2-store-%s", u.resourceId)
+	return fmt.Sprintf("iam-healthcare-hl7-v2-store-%s", u.resourceId)
 }
 
 func (u *HealthcareHl7V2StoreIamUpdater) DescribeResource() string {
