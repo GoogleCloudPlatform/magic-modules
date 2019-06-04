@@ -23,6 +23,7 @@ func TestAccComputeNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 		"random_suffix": acctest.RandString(10),
 	}
 
+	secondEndpt := &networkEndptTestId{}
 	initialEndpt := &networkEndptTestId{}
 	modifiedEndpt := &networkEndptTestId{}
 
@@ -34,11 +35,13 @@ func TestAccComputeNetworkEndpoint_networkEndpointsBasic(t *testing.T) {
 				Config: testAccComputeNetworkEndpoint_networkEndpointsBasic(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeNetworkEndpointExists("google_compute_network_endpoint.default-endpoint", initialEndpt),
+					testAccCheckComputeNetworkEndpointExists("google_compute_network_endpoint.second-endpoint", secondEndpt),
 				),
 			},
 			{
 				Config: testAccComputeNetworkEndpoint_networkEndpointsModified(context),
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkEndpointExists("google_compute_network_endpoint.second-endpoint", secondEndpt),
 					testAccCheckComputeNetworkEndpointExists("google_compute_network_endpoint.default-endpoint", modifiedEndpt),
 					testAccCheckComputeNetworkEndpointDestroyed("google_compute_network_endpoint.default-endpoint", initialEndpt),
 				),
@@ -73,6 +76,58 @@ resource "google_compute_network_endpoint" "default-endpoint" {
  instance    = "${google_compute_instance.default.name}"
  ip_address  = "${google_compute_instance.default.network_interface.0.network_ip}"
  port        = "100"
+}
+`, context) + testAccComputeNetworkEndpoint_withoutNetworkEndpointsConfig(context)
+}
+
+func testAccComputeNetworkEndpoint_networkEndpointsBasic(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network_endpoint" "default-endpoint" {
+ provider               = "google-beta"
+
+ zone                   = "us-central1-a"
+ network_endpoint_group = "${google_compute_network_endpoint_group.neg.name}"
+
+ instance    = "${google_compute_instance.default.name}"
+ ip_address  = "${google_compute_instance.default.network_interface.0.network_ip}"
+ port        = "${google_compute_network_endpoint_group.neg.default_port}"
+}
+
+resource "google_compute_network_endpoint" "second-endpoint" {
+ provider               = "google-beta"
+
+ zone                   = "us-central1-a"
+ network_endpoint_group = "${google_compute_network_endpoint_group.neg.name}"
+
+ instance    = "${google_compute_instance.default.name}"
+ ip_address  = "${google_compute_instance.default.network_interface.0.network_ip}"
+ port        = "91"
+}
+`, context) + testAccComputeNetworkEndpoint_withoutNetworkEndpointsConfig(context)
+}
+
+func testAccComputeNetworkEndpoint_networkEndpointsModified(context map[string]interface{}) string {
+	return Nprintf(`
+resource "google_compute_network_endpoint" "default-endpoint" {
+ provider               = "google-beta"
+
+ zone                   = "us-central1-a"
+ network_endpoint_group = "${google_compute_network_endpoint_group.neg.name}"
+
+ instance    = "${google_compute_instance.default.name}"
+ ip_address  = "${google_compute_instance.default.network_interface.0.network_ip}"
+ port        = "100"
+}
+
+resource "google_compute_network_endpoint" "second-endpoint" {
+ provider               = "google-beta"
+
+ zone                   = "us-central1-a"
+ network_endpoint_group = "${google_compute_network_endpoint_group.neg.name}"
+
+ instance    = "${google_compute_instance.default.name}"
+ ip_address  = "${google_compute_instance.default.network_interface.0.network_ip}"
+ port        = "91"
 }
 `, context) + testAccComputeNetworkEndpoint_withoutNetworkEndpointsConfig(context)
 }
