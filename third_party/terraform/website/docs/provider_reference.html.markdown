@@ -97,6 +97,13 @@ authenticate HTTP requests to GCP APIs. This is an alternative to `credentials`,
 and ignores the `scopes` field. If both are specified, `access_token` will be
 used over the `credentials` field.
 
+* `{{product}}_base_path` - (Optional) A base path used for a product's APIs,
+such as `compute_base_path`. Defaults to the production GCP base path for the
+product. This can be used to configure the Google provider to communicate with
+GCP-like APIs such as [the Cloud Functions emulator](https://github.com/googlearchive/cloud-functions-emulator).
+Values are expected to include the version of the product, such as
+`https://www.googleapis.com/compute/v1/`.
+
 ### Full Reference
 
 * `credentials` - (Optional) Either the path to or the contents of a
@@ -190,6 +197,21 @@ an access token using the service account key specified in `credentials`.
     * https://www.googleapis.com/auth/cloud-platform
     * https://www.googleapis.com/auth/ndev.clouddns.readwrite
     * https://www.googleapis.com/auth/devstorage.full_control
+
+---
+
+* `{{product}}_base_path` - (Optional) A base path used for a product's APIs,
+such as `compute_base_path`. Defaults to the production GCP base path for the
+product. This can be used to configure the Google provider to communicate with
+GCP-like APIs such as [the Cloud Functions emulator](https://github.com/googlearchive/cloud-functions-emulator).
+Values are expected to include the version of the product, such as
+`https://www.googleapis.com/compute/v1/`.
+
+A full list of configurable keys, their default value, and an environment
+variable that can be used for configuration are below:
+
+* `compute_base_path` (`GOOGLE_COMPUTE_BASE_PATH`) - `https://www.googleapis.com/compute/v1/`
+* `cloud_functions_base_path` (`GOOGLE_CLOUD_FUNCTIONS_BASE_PATH`) - `https://cloudfunctions.googleapis.com/v1/`
 
 [OAuth 2.0 access token]: https://developers.google.com/identity/protocols/OAuth2
 [service account key file]: https://cloud.google.com/iam/docs/creating-managing-service-account-keys

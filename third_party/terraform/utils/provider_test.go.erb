@@ -164,6 +164,37 @@ func TestProvider_loadCredentialsFromJSON(t *testing.T) {
 	}
 }
 
+func TestAccProviderBasePath_setBasePath(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeAddressDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProviderBasePath_setBasePath(acctest.RandString(10)),
+			},
+			{
+				ResourceName:      "google_compute_address.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccProviderBasePath_setBasePath(i string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  compute_base_path = "https://www.googleapis.com/compute/beta/"
+}
+
+resource "google_compute_address" "default" {
+	name = "address-test-%s"
+}`, i)
+}
+
 // getTestRegion has the same logic as the provider's getRegion, to be used in tests.
 func getTestRegion(is *terraform.InstanceState, config *Config) (string, error) {
 	if res, ok := is.Attributes["region"]; ok {

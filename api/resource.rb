@@ -305,57 +305,64 @@ module Api
     # In newer resources there is much less standardisation in terms of value.
     # Generally for them though, it's the product.base_url + resource.name
     def self_link_url
-      base_url = @__product.base_url
+      [@__product.base_url, self_link_uri].flatten.join
+    end
+
+    # Returns the partial uri / relative path of a resource. In newer resources,
+    # this is the name. This fn is named self_link_uri for consistency, but
+    # could otherwise be considered to be "path"
+    def self_link_uri
       if @self_link.nil?
-        [base_url, [@base_url, '{{name}}'].join('/')].flatten.join
+        [@base_url, '{{name}}'].join('/')
       else
-        self_link = @self_link
-        [base_url, self_link].flatten.join
+        @self_link
       end
     end
 
     def collection_url
-      [
-        @__product.base_url,
-        @base_url
-      ].flatten.join
+      [@__product.base_url, collection_uri].flatten.join
+    end
+
+    def collection_uri
+      @base_url
     end
 
     def async_operation_url
-      raise 'Not an async resource' if async.nil?
-
-      [@__product.base_url, async.operation.base_url].flatten.join
+      [@__product.base_url, async_operation_uri].flatten.join
     end
 
-    def default_create_url
-      if @create_verb.nil? || @create_verb == :POST
-        collection_url
-      elsif @create_verb == :PUT
-        self_link_url
-      else
-        raise "unsupported create verb #{@create_verb}"
-      end
+    def async_operation_uri
+      raise 'Not an async resource' if async.nil?
+      async.operation.base_url
     end
 
     def full_create_url
+      [@__product.base_url, create_uri].flatten.join
+    end
+
+    def create_uri
       if @create_url.nil?
-        default_create_url
+        if @create_verb.nil? || @create_verb == :POST
+          collection_uri
+        elsif @create_verb == :PUT
+          self_link_uri
+        else
+          raise "unsupported create verb #{@create_verb}"
+        end
       else
-        [
-          @__product.base_url,
-          @create_url
-        ].flatten.join
+        @create_url
       end
     end
 
     def full_delete_url
+      [@__product.base_url, delete_uri].flatten.join
+    end
+
+    def delete_uri
       if @delete_url.nil?
-        self_link_url
+        self_link_uri
       else
-        [
-          @__product.base_url,
-          @delete_url
-        ].flatten.join
+        @delete_url
       end
     end
 

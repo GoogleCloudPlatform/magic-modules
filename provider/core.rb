@@ -389,9 +389,13 @@ module Provider
     end
 
     def update_url(resource, url_part)
-      return resource.self_link_url if url_part.nil?
+      [resource.__product.base_url, update_uri(resource, url_part)].flatten.join
+    end
 
-      [resource.__product.base_url, url_part].flatten.join
+    def update_uri(resource, url_part)
+      return resource.self_link_uri if url_part.nil?
+
+      url_part
     end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
