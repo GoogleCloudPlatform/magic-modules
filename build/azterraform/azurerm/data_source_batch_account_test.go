@@ -43,7 +43,7 @@ func TestAccDataSourceAzureRMBatchAccount_basic(t *testing.T) {
 }
 
 func testAccDataSourceBatchAccount_basic(rInt int, location string) string {
-    config := testAccBatchAccount_basic(rInt, location)
+    config := testAccAzureRMBatchAccount_basic(rInt, location)
     return fmt.Sprintf(`
 %s
 

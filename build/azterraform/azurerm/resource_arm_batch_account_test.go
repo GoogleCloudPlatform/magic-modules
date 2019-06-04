@@ -38,8 +38,8 @@ func TestAccAzureRMBatchAccount_basic(t *testing.T) {
                 Config: testAccAzureRMBatchAccount_basic(ri, location),
                 Check: resource.ComposeTestCheckFunc(
                     testCheckAzureRMBatchAccountExists(resourceName),
-                    resource.TestCheckResourceAttr(dataSourceName, "poolAllocationMode", "BatchService"),
-                    resource.TestCheckResourceAttrSet(dataSourceName, "storageAccountId"),
+                    resource.TestCheckResourceAttr(resourceName, "poolAllocationMode", "BatchService"),
+                    resource.TestCheckResourceAttrSet(resourceName, "storageAccountId"),
                 ),
             },
             {
