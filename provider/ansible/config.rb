@@ -18,6 +18,7 @@ module Provider
   module Ansible
     # Settings for the Ansible provider
     class Config < Provider::Config
+      attr_accessor :cfg_file
       attr_reader :manifest
 
       def provider

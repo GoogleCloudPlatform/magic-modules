@@ -91,6 +91,7 @@ module Provider
       config.default_overrides
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
+      config.cfg_file = cfg_file
       config
     end
 

@@ -291,5 +291,5 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <%  end -%>
 
 <%  if object.custom_code.extra_functions -%>
-<%=   lines(compile(object.custom_code.extra_functions)) -%>
+<%=   lines(compile(get_custom_template_path(object.custom_code.extra_functions))) -%>
 <%  end -%>

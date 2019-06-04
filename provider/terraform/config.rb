@@ -18,6 +18,8 @@ module Provider
   class Terraform < Provider::AbstractCore
     # Settings for the provider
     class Config < Provider::Config
+      attr_accessor :cfg_file
+
       def provider
         Provider::Terraform
       end
