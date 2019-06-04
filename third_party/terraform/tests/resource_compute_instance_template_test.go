@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -235,8 +236,8 @@ func TestAccComputeInstanceTemplate_disksInvalid(t *testing.T) {
 		CheckDestroy: testAccCheckComputeInstanceTemplateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_disksInvalid(),
-				// ExpectError: regexp.MustCompile(`Some Error Here`),
+				Config:      testAccComputeInstanceTemplate_disksInvalid(),
+				ExpectError: regexp.MustCompile("Cannot use `source`.*"),
 			},
 		},
 	})
