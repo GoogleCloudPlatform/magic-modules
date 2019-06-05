@@ -2,48 +2,72 @@ package google
 
 import (
 	"fmt"
+	"log"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
-	"google.golang.org/api/pubsub/v1"
 )
 <% resource_name = product_ns + object.name -%>
+<% 
+individual_url = object.self_link_url
+params = individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+-%>
 
 var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
-	"topic": {
+<% params.each do |param| -%>
+	"<%= param -%>": {
 		Type:             schema.TypeString,
-		Required:         true,
-		ForceNew:         true,
-		DiffSuppressFunc: compareSelfLinkOrResourceName,
-	},
-	"project": {
-		Type:     schema.TypeString,
-		Optional: true,
+<% if param == 'project' -%>
 		Computed: true,
-		ForceNew: true,
+		Optional: true,
+<% else -%>
+		Required: true,
+<% end # if param == 'project' -%>
+		ForceNew:         true,
+<% if param == object.name.underscore -%>
+		DiffSuppressFunc: compareSelfLinkOrResourceName,
+<% end # param == object.name -%>
 	},
+<% end # params.each -%>
 }
 
 type <%= resource_name -%>IamUpdater struct {
-	topic   string
-	project string
+<% params.each do |param| -%>
+	<%= param -%> string
+<% end # params.each -%>
 	d       *schema.ResourceData
 	Config  *Config
 }
 
 func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
+	values := make(map[string]string)
+	
+<% if params.include?('project') -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
 	}
 
-	split := strings.Split(d.Get("topic").(string), "/")
-	tn := split[len(split)-1]
+	values["project"] = project
+<% end -%>
 
-	return &PubsubTopicIamUpdater{
-		topic:   tn,
-		project: project,
+	m, err := samParseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= object.name.downcase -%>").(string))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range m {
+    values[k] = v
+	}
+
+	return &<%= resource_name -%>IamUpdater{
+<% params.each do |param| -%>
+		<%= param -%>: values["<%= param -%>"],
+<% end -%>
 		d:       d,
 		Config:  config,
 	}, nil
@@ -55,7 +79,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url := QualifyUrl(u)
+	url := qualifyUrl(u, "getIamPolicy")
 
 	policy, err := sendRequest(u.Config, "GET", url, nil)
 	if err != nil {
@@ -65,50 +89,113 @@ func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresource
 	out := &cloudresourcemanager.Policy{}
 	err = Convert(policy, out)
 	if err != nil {
-		return nil, errwrap.Wrapf("Cannot convert a pubsub policy to a v1 policy: {{err}}", err)
+		return nil, errwrap.Wrapf("Cannot convert a policy to a resource manager policy: {{err}}", err)
 	}
 
 	return out, nil
 }
 
 func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
-	pubsubPolicy, err := resourceManagerToPubsubPolicy(policy)
+	json, err := ConvertToMap(policy)
 	if err != nil {
 		return err
 	}
 
-	url := QualifyUrl(u)
+	obj := make(map[string]interface{})
+	obj["policy"] = json
 
-	_, err := sendRequestWithTimeout(u.Config, "PUT", url, pubsubPolicy, d.Timeout(schema.TimeoutCreate))
+	url := qualifyUrl(u, "setIamPolicy")
+	
+	_, err = sendRequestWithTimeout(u.Config, "POST", url, obj, u.d.Timeout(schema.TimeoutCreate))
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource(), err))
+		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
 	}
 
 	return nil
 }
 
-func (u *PubsubTopicIamUpdater) QualifyUrl() string {
-	return fmt.Sprintf("https://pubsub.googleapis.com/v1/projects/%s/topics/%s:getIamPolicy", u.project, u.topic)
+func qualifyUrl(u *<%= resource_name -%>IamUpdater, methodIdentifier string) string {
+	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", u.GetResourceId(), methodIdentifier)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
-	return getComputedTopicName(u.project, u.topic)
+	return fmt.Sprintf("projects/%s/topics/%s", <%= params.map{|param| "u.#{param}"}.join(', ') -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-pubsub-topic-%s", getComputedTopicName(u.project, u.topic))
+	return fmt.Sprintf("iam-<%= product_ns.downcase -%>-<%= object.name.downcase -%>-%s", u.GetResourceId())
 }
 
 func (u *<%= resource_name -%>IamUpdater) DescribeResource() string {
-	return fmt.Sprintf("pubsub topic %q", getComputedTopicName(u.project, u.topic))
+	return fmt.Sprintf("<%= product_ns.downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
 }
 
-// v1 and v2beta policy are identical
-func resourceManagerToPubsubPolicy(in *cloudresourcemanager.Policy) (*pubsub.Policy, error) {
-	out := &pubsub.Policy{}
-	err := Convert(in, out)
-	if err != nil {
-		return nil, errwrap.Wrapf("Cannot convert a v1 policy to a pubsub policy: {{err}}", err)
+// Parse an import id extracting field values using the given list of regexes.
+// They are applied in order. The first in the list is tried first.
+//
+// e.g:
+// - projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+) (applied first)
+// - (?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+),
+// - (?P<name>[^/]+) (applied last)
+func samParseImportId(idRegexes []string, d TerraformResourceData, config *Config, id string) (map[string]string, error) {
+	for _, idFormat := range idRegexes {
+		re, err := regexp.Compile(idFormat)
+
+		if err != nil {
+			log.Printf("[DEBUG] Could not compile %s.", idFormat)
+			return nil, fmt.Errorf("Import is not supported. Invalid regex formats.")
+		}
+
+		if fieldValues := re.FindStringSubmatch(id); fieldValues != nil {
+			var result map[string]string
+			result = make(map[string]string)
+			log.Printf("[DEBUG] matching ID %s to regex %s.", id, idFormat)
+			// Starting at index 1, the first match is the full string.
+			for i := 1; i < len(fieldValues); i++ {
+				fieldName := re.SubexpNames()[i]
+				fieldValue := fieldValues[i]
+				result[fieldName] = fieldValue
+			}
+
+			// The first id format is applied first and contains all the fields.
+			defaults, err := samSetDefaultValues(idRegexes[0], d, config)
+			if err != nil {
+				return nil, err
+			}
+
+			for k, v := range defaults {
+				result[k] = v
+			}
+
+			return result, nil
+		}
 	}
-	return out, nil
+	return nil, fmt.Errorf("Resource id %q doesn't match any of the accepted formats: %v", id, idRegexes)
+}
+
+func samSetDefaultValues(idRegex string, d TerraformResourceData, config *Config) (map[string]string, error) {
+	var result map[string]string
+	result = make(map[string]string)
+	if _, ok := d.GetOk("project"); !ok && strings.Contains(idRegex, "?P<project>") {
+		project, err := getProject(d, config)
+		if err != nil {
+			return nil, err
+		}
+		result["project"] = project
+	}
+	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
+		region, err := getRegion(d, config)
+		if err != nil {
+			return nil, err
+		}
+		result["region"] = region
+	}
+	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
+		zone, err := getZone(d, config)
+		if err != nil {
+			return nil, err
+		}
+		result["zone"] = zone
+	}
+	return result, nil
 }
