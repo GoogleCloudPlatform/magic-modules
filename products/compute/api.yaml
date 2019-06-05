@@ -5841,6 +5841,170 @@ objects:
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
   - !ruby/object:Api::Resource
+    name: 'ResourcePolicy'
+    min_version: beta
+    kind: 'compute#resourcePolicy'
+    base_url: projects/{{project}}/regions/{{region}}/resourcePolicies
+    input: true
+    has_self_link: true
+    description: |
+      A policy that can be attached to a resource to specify or schedule actions on that resource.
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: region
+        resource: Region
+        imports: name
+        description: Region where resource policy resides.
+        input: true
+        required: true
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          The name of the resource, provided by the client when initially creating
+          the resource. The resource name must be 1-63 characters long, and comply
+          with RFC1035. Specifically, the name must be 1-63 characters long and
+          match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the
+          first character must be a lowercase letter, and all following characters
+          must be a dash, lowercase letter, or digit, except the last character,
+          which cannot be a dash.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'snapshotSchedulePolicy'
+        description: |
+          Policy for creating snapshots of persistent disks.
+        properties:
+          - !ruby/object:Api::Type::NestedObject
+            name: 'schedule'
+            description: |
+              Contains one of an `hourlySchedule`, `dailySchedule`, or `weeklySchedule`.
+            required: true
+            properties:
+              - !ruby/object:Api::Type::NestedObject
+                name: 'hourlySchedule'
+                description: |
+                  The policy will execute every nth hour starting at the specified time.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'hoursInCycle'
+                    description: |
+                      The number of hours between snapshots.
+                    required: true
+                  - !ruby/object:Api::Type::String
+                    name: 'startTime'
+                    description: |
+                      Time within the window to start the operations.
+                      It must be in format "HH:MM",
+                      where HH : [00-23] and MM : [00-00] GMT.
+                    required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: 'dailySchedule'
+                description: |
+                  The policy will execute every nth day at the specified time.
+                properties:
+                  - !ruby/object:Api::Type::Integer
+                    name: 'daysInCycle'
+                    description: |
+                      The number of days between snapshots.
+                    required: true
+                  - !ruby/object:Api::Type::String
+                    name: 'startTime'
+                    description: |
+                      This must be in UTC format that resolves to one of
+                      00:00, 04:00, 08:00, 12:00, 16:00, or 20:00. For example,
+                      both 13:00-5 and 08:00 are valid.
+                    required: true
+              - !ruby/object:Api::Type::NestedObject
+                name: 'weeklySchedule'
+                description: |
+                  Allows specifying a snapshot time for each day of the week.
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'dayOfWeeks'
+                    description: |
+                      May contain up to seven (one for each day of the week) snapshot times.
+                    required: true
+                    min_size: 1
+                    max_size: 7
+                    item_type: !ruby/object:Api::Type::NestedObject
+                      properties:
+                        - !ruby/object:Api::Type::String
+                          name: 'startTime'
+                          description: |
+                            Time within the window to start the operations.
+                            It must be in format "HH:MM", where HH : [00-23] and MM : [00-00] GMT.
+                          required: true
+                        - !ruby/object:Api::Type::Enum
+                          name: 'day'
+                          description: |
+                            The day of the week to create the snapshot. e.g. MONDAY
+                          required: true
+                          values:
+                            - :MONDAY
+                            - :TUESDAY
+                            - :WEDNESDAY
+                            - :THURSDAY
+                            - :FRIDAY
+                            - :SATURDAY
+                            - :SUNDAY
+          - !ruby/object:Api::Type::NestedObject
+            name: 'retentionPolicy'
+            description: |
+              Retention policy applied to snapshots created by this resource policy.
+            properties:
+              - !ruby/object:Api::Type::Integer
+                name: 'maxRetentionDays'
+                description: |
+                  Maximum age of the snapshot that is allowed to be kept.
+                required: true
+              - !ruby/object:Api::Type::Enum
+                name: 'onSourceDiskDelete'
+                description: |
+                  Specifies the behavior to apply to scheduled snapshots when
+                  the source disk is deleted.
+                  Valid options are KEEP_AUTO_SNAPSHOTS and APPLY_RETENTION_POLICY
+                default_value: :KEEP_AUTO_SNAPSHOTS
+                values:
+                  - :KEEP_AUTO_SNAPSHOTS
+                  - :APPLY_RETENTION_POLICY
+          - !ruby/object:Api::Type::NestedObject
+            name: 'snapshotProperties'
+            description: |
+              Properties with which the snapshots are created, such as labels.
+            properties:
+              - !ruby/object:Api::Type::KeyValuePairs
+                name: 'labels'
+                description: |
+                  A set of key-value pairs.
+              - !ruby/object:Api::Type::Array
+                name: 'storageLocations'
+                max_size: 1
+                description: |
+                  GCS bucket location in which to store the snapshot (regional or multi-regional).
+                item_type: Api::Type::String
+              - !ruby/object:Api::Type::Boolean
+                name: 'guestFlush'
+                description: |
+                  Whether to perform a 'guest aware' snapshot.
+  - !ruby/object:Api::Resource
     name: 'Route'
     kind: 'compute#route'
     base_url: projects/{{project}}/global/routes

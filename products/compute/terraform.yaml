@@ -942,6 +942,26 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           snapshot_name: "my-snapshot"
   RegionDiskType: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  ResourcePolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_basic"
+        primary_resource_id: "foo"
+        vars:
+          name: "policy"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "resource_policy_full"
+        primary_resource_id: "bar"
+        vars:
+          name: "policy"
+    properties:
+      region: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
+        default_from_api: true
+      snapshotSchedulePolicy.schedule.weeklySchedule.dayOfWeeks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+      snapshotSchedulePolicy.snapshotProperties.storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
