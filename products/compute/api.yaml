@@ -4973,30 +4973,6 @@ objects:
           to a VM in GCE (either the primary IP or as part of an aliased IP
           range).
         required: true
-      - !ruby/object:Api::Type::String
-        name: 'healthBackendService'
-        output: true
-        description: |
-          URL of the backend service associated with the health state of the
-          network endpoint.
-      - !ruby/object:Api::Type::String
-        name: 'healthCheck'
-        output: true
-        description: |
-          URL of the health check associated with the health state of the
-          network endpoint.
-      - !ruby/object:Api::Type::String
-        name: 'healthForwardingRule'
-        output: true
-        description: |
-          URL of the forwarding rule associated with the health state of the
-          network endpoint.
-      - !ruby/object:Api::Type::String
-        name: 'healthState'
-        output: true
-        description: |
-          Health state of the network endpoint determined based on the health
-          checks configured.
   - !ruby/object:Api::Resource
     name: 'NetworkEndpointGroup'
     kind: 'compute#networkEndpointGroup'
