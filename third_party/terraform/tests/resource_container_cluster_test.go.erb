@@ -1649,6 +1649,31 @@ func TestAccContainerCluster_withVerticalPodAutoscaling(t *testing.T) {
 	})
 
 }
+
+func TestAccContainerCluster_withWorkloadIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("cluster-test-%s", acctest.RandString(10))
+	pid := getTestProjectFromEnv()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withWorkloadIdentityConfigEnabled(pid, clusterName),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_workload_identity_config",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+
+}
 <% end -%>
 
 func TestAccContainerCluster_withResourceLabels(t *testing.T) {
@@ -3361,6 +3386,24 @@ resource "google_container_cluster" "with_vertical_pod_autoscaling" {
   }
 }
 `, clusterName)
+}
+
+func testAccContainerCluster_withWorkloadIdentityConfigEnabled(projectID string, clusterName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+	project_id = "%s"
+}
+
+resource "google_container_cluster" "with_workload_identity_config" {
+	name = "%s"
+	zone = "us-central1-a"
+	initial_node_count = 1
+
+	workload_identity_config {
+		identity_namespace = "${data.google_project.project.project_id}.svc.id.goog"
+	}
+}
+`, projectID, clusterName)
 }
 <% end -%>
 
