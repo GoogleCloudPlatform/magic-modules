@@ -55,5 +55,10 @@ resource "google_compute_subnetwork" "default" {
   network       = "${google_compute_network.default.self_link}"
 }
 
+provider "google-beta" {
+  region = "us-central1"
+  zone = "us-central1-a"
+}
+
 
 
