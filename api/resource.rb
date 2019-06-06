@@ -72,11 +72,12 @@ module Api
       attr_reader :update_url
       # [Optional] The HTTP verb used during create. Defaults to :POST.
       attr_reader :create_verb
+      # [Optional] The HTTP verb used during read. Defaults to :GET.
+      attr_reader :read_verb
       # [Optional] The HTTP verb used during update. Defaults to :PUT.
       attr_reader :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
-
       # ====================
       # Collection / Identity URL Configuration
       # ====================
@@ -150,6 +151,7 @@ module Api
       check :collection_url_key, default: @name.pluralize.camelize(:lower)
 
       check :create_verb, type: Symbol, default: :POST, allowed: %i[POST PUT]
+      check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
 
