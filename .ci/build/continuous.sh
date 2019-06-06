@@ -5,4 +5,6 @@ set -e
 # Display commands being run.
 set -x
 
-echo "yaaaay"
+env | grep KOKORO
+
+ruby --version
