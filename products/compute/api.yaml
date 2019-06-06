@@ -563,7 +563,7 @@ objects:
     description: |
       A Backend Service defines a group of virtual machines that will serve
       traffic for load balancing. This resource is a global backend service,
-      appropriate for external load balancing or self-managed internal load balancing. 
+      appropriate for external load balancing or self-managed internal load balancing.
       For managed internal load balancing, use a regional backend service instead.
 
       Currently self-managed internal load balancing is only available in beta.
@@ -5969,7 +5969,7 @@ objects:
           The name of the resource, provided by the client when initially creating
           the resource. The resource name must be 1-63 characters long, and comply
           with RFC1035. Specifically, the name must be 1-63 characters long and
-          match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the
+          match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])`? which means the
           first character must be a lowercase letter, and all following characters
           must be a dash, lowercase letter, or digit, except the last character,
           which cannot be a dash.
@@ -7722,7 +7722,7 @@ objects:
       by Google, but used only by you. This type of VPN Gateway allows for the creation
       of VPN solutions with higher availability than classic Target VPN Gateways.
     references: !ruby/object:Api::Resource::ReferenceLinks
-      guides: 
+      guides:
         'Choosing a VPN': https://cloud.google.com/vpn/docs/how-to/choosing-a-vpn
         'Cloud VPN Overview': 'https://cloud.google.com/vpn/docs/concepts/overview'
       api: https://cloud.google.com/compute/docs/reference/rest/beta/vpnGateways
@@ -8057,7 +8057,7 @@ objects:
       - !ruby/object:Api::Type::ResourceRef
         name: 'peerGcpGateway'
         description: |
-          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected. 
+          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
           If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
           ID in the peer GCP VPN gateway.
         resource: 'VpnGateway'
