@@ -1,9 +1,4 @@
-<%  if with_dependencies && !example.prerequisites.nil? -%>
-<%    example.prerequisites.each do |pre_ex| -%>
-<%=     lines(build_yaml_from_example(pre_ex.product, pre_ex.example, random_variables, nil, name_hints, nil, false), 1) -%>
-<%    end -%>
-<%  end -%>
 - name: <%= lines(example.description + (!name_postfix.nil? && !name_postfix.empty? ? " -- #{name_postfix}" : '')) -%>
   <%= example.resource -%>:
-<%= indent lines(build_yaml_properties(example.properties, 2)), 4 -%>
-<%= "  register: #{register_name}" unless register_name.nil? || register_name.empty? -%>
+<%= lines(indent lines(build_yaml_properties(example.properties, 2)), 4) -%>
+<%= lines("  register: #{register_name}") unless register_name.nil? || register_name.empty? -%>

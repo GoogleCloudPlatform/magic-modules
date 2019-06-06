@@ -1,12 +1,13 @@
 ---
 <%= lines(autogen_notice :yaml) -%>
-<%  yaml, random_vars = build_test_yaml_from_example(object.inttests[0]) -%>
+<%  deps_yaml, yaml, random_vars = build_test_yaml_from_example(object.inttests[0].example) -%>
 - name: Prepare random number
   set_fact:
 <%  random_vars.reject{|v| v.variable_name == 'resource_group'}.each do |rnd| -%>
     <%= rnd.variable_name -%>: "<%= rnd.variable_value -%>"
 <%  end -%>
   run_once: yes
+<%= lines(deps_yaml) -%>
 
 <%= lines(yaml) -%>
 
@@ -15,10 +16,19 @@
     that:
       - output.changed
 
-<%  same_yaml, _ = build_test_yaml_from_example(object.inttests[0], false, 'idempotent') -%>
+<%  _, same_yaml, _ = build_test_yaml_from_example(object.inttests[0].example, 'idempotent') -%>
 <%= lines(same_yaml) -%>
 
 - name: Assert the resource was created
   assert:
     that:
       - not output.changed
+
+<%  deps_yaml, delete_yaml, _ = build_test_yaml_from_example(object.inttests[0].delete_example) -%>
+<%= lines(delete_yaml) -%>
+
+- name: Assert that state has changed
+  assert:
+    that:
+      - output.changed
+<%= lines(deps_yaml) -%>

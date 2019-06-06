@@ -3,21 +3,25 @@ module Provider
     module Ansible
       module Example
         module SubTemplate
-          def build_test_yaml_from_example(example, with_dependencies = true, name_postfix = nil, register_name = 'output')
+          def build_test_yaml_from_example(example_name, name_postfix = nil, register_name = 'output')
             random_vars = Set.new
-            yaml = build_yaml_from_example(nil, example.example, random_vars, name_postfix, {}, register_name, with_dependencies)
-            return yaml, random_vars
+            deps, main = build_yaml_from_example(nil, example_name, random_vars, name_postfix, {}, register_name)
+            return deps, main, random_vars
           end
 
           def build_documentation_yaml_from_example(example)
-            build_yaml_from_example(nil, example.example, Set.new, nil, example.resource_name_hints, nil, false)
+            _, main = build_yaml_from_example(nil, example.example, Set.new, nil, example.resource_name_hints, nil)
+            return main
           end
 
-          def build_yaml_from_example(product_name, example_name, random_variables, name_postfix, name_hints, register_name, with_dependencies)
+          def build_yaml_from_example(product_name, example_name, random_variables, name_postfix, name_hints, register_name)
             example = get_example_by_names(example_name, product_name)
+            yaml_deps = compile 'templates/azure/ansible/example/example_deps_yaml.erb', 1
             yaml_raw = compile 'templates/azure/ansible/example/example_yaml.erb', 1
             context = ExampleContextBinding.new(name_hints, random_variables)
-            compile_string context.get_binding, yaml_raw
+            yaml_deps = compile_string context.get_binding, yaml_deps
+            yaml_raw = compile_string context.get_binding, yaml_raw
+            return yaml_deps, yaml_raw
           end
 
           def build_yaml_properties(properties, indentation = 2)

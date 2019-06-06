@@ -24,8 +24,11 @@ module Provider
         end
 
         class IntegrationTestDefinition < ExampleReference
+          attr_reader :delete_example
+
           def validate
             super
+            check_property :delete_example, String
           end
         end
 
