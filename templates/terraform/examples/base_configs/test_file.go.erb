@@ -119,7 +119,7 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 		return err
 	}
 
-	_, err = sendRequest(config, "GET", url, nil)
+	_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil)
 	if err == nil {
 			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 		}
