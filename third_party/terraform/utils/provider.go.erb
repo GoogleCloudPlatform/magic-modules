@@ -77,8 +77,8 @@ func Provider() terraform.ResourceProvider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"compute_base_path":         ComputeBasePathEntry,
-			"cloud_functions_base_path": CloudFunctionsBasePathEntry,
+			"compute_custom_endpoint":         ComputeCustomEndpointEntry,
+			"cloud_functions_custom_endpoint": CloudFunctionsCustomEndpointEntry,
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -324,8 +324,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Scopes[i] = scope.(string)
 	}
 
-	config.ComputeBasePath = d.Get("compute_base_path").(string)
-	config.CloudFunctionsBasePath = d.Get("cloud_functions_base_path").(string)
+	config.ComputeBasePath = d.Get("compute_custom_endpoint").(string)
+	config.CloudFunctionsBasePath = d.Get("cloud_functions_custom_endpoint").(string)
 
 	if err := config.LoadAndValidate(); err != nil {
 		return nil, err

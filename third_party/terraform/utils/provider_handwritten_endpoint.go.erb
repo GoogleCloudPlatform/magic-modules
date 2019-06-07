@@ -14,15 +14,15 @@ import (
 	googleoauth "golang.org/x/oauth2/google"
 )
 
-// For generated resources, base path entries live in product-specific provider
+// For generated resources, endpoint entries live in product-specific provider
 // files. Collect handwritten ones here.
 
 var CloudFunctionsDefaultBasePath = "https://cloudfunctions.googleapis.com/v1/"
 
-var CloudFunctionsBasePathEntry = &schema.Schema{
+var CloudFunctionsCustomEndpointEntry = &schema.Schema{
 	Type:     schema.TypeString,
 	Optional: true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_CLOUD_FUNCTIONS_BASE_PATH",
+		"GOOGLE_CLOUD_FUNCTIONS_CUSTOM_ENDPOINT",
 	}, CloudFunctionsDefaultBasePath),
 }

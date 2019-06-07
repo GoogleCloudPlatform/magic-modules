@@ -20,11 +20,11 @@ import "github.com/hashicorp/terraform/helper/schema"
 
 var <%= product_ns -%>DefaultBasePath = "<%= product.base_url -%>"
 
-var <%= product_ns -%>BasePathEntry = &schema.Schema{
+var <%= product_ns -%>CustomEndpointEntry = &schema.Schema{
 	Type:     schema.TypeString,
 	Optional: true,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_<%= product_ns.underscore.upcase -%>_BASE_PATH",
+		"GOOGLE_<%= product_ns.underscore.upcase -%>_CUSTOM_ENDPOINT",
 	}, <%= product_ns -%>DefaultBasePath),
 }
 

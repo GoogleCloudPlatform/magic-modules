@@ -203,7 +203,7 @@ func TestAccProviderBasePath_setInvalidBasePath(t *testing.T) {
 func testAccProviderBasePath_setBasePath(endpoint, name string) string {
 	return fmt.Sprintf(`
 provider "google" {
-  compute_base_path = "%s"
+  compute_custom_endpoint = "%s"
 }
 
 resource "google_compute_address" "default" {
