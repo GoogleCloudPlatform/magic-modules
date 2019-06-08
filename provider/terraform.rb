@@ -208,6 +208,9 @@ module Provider
       filepath = File.join(target_folder, "resource_#{product_name}_#{name}_iam_policy.go")
 
       data.generate('templates/terraform/iam_policy.go.erb', filepath, self)
+
+      filepath = File.join(target_folder, "resource_#{product_name}_#{name}_iam_policy_generated_test.go")
+      data.generate('templates/terraform/examples/base_configs/iam_test_file.go.erb', filepath, self)
     end
 
     def build_object_data(object, output_folder, version)

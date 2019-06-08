@@ -21,12 +21,12 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 <% params.each do |param| -%>
 	"<%= param -%>": {
 		Type:             schema.TypeString,
-<% if param == 'project' -%>
+<% if ['project', 'zone', 'region', 'location'].include?(param) -%>
 		Computed: true,
 		Optional: true,
 <% else -%>
 		Required: true,
-<% end # if param == 'project' -%>
+<% end # if ...include?(param) -%>
 		ForceNew:         true,
 <% if param == object.name.underscore -%>
 		DiffSuppressFunc: compareSelfLinkOrResourceName,
@@ -118,8 +118,9 @@ func qualifyUrl(u *<%= resource_name -%>IamUpdater, methodIdentifier string) str
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", u.GetResourceId(), methodIdentifier)
 }
 
+<% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("projects/%s/topics/%s", <%= params.map{|param| "u.#{param}"}.join(', ') -%>)
+	return fmt.Sprintf("<%= import_url -%>", <%= params.map{|param| "u.#{param}"}.join(', ') -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {

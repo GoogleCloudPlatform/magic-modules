@@ -30,11 +30,14 @@ module Api
       # While Compute subnetwork uses {resource}/getIamPolicy
       attr_reader :method_name_separator
 
+      attr_reader :primary_resource_name
+
       def validate
         super
 
         check :exclude, type: :boolean, default: false
         check :method_name_separator, type: String, default: '/'
+        check :primary_resource_name, type: String
       end
     end
   end

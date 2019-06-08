@@ -1,0 +1,176 @@
+<%= lines(autogen_notice :go) -%>
+
+package google
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform/helper/resource"
+)
+
+<% example = object.examples.reject(&:skip_test)
+         .reject { |e| @api.version_obj_or_default(version) < @api.version_obj_or_default(e.min_version) }
+         .first -%>
+<% resource_name = product_ns + object.name -%>
+<% 
+individual_url = object.self_link_url
+params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+-%>
+func TestAcc<%= resource_name -%>IamBinding(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(10),
+		"role":          "roles/editor",
+	}
+
+<% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
+<% import_str = Array.new(params.length, '%s').join('/') -%>
+<% import_qualifiers = [] -%>
+<% params.each do |param| -%>
+	<% if param == 'project' -%>
+		<% import_qualifiers.push('getTestProjectFromEnv()') -%>
+	<% elsif param == 'zone' -%>
+		<% import_qualifiers.push('getTestZoneFromEnv(t)') -%>
+	<% elsif param == 'region' || param == 'location' -%>
+		<% import_qualifiers.push('getTestRegionFromEnv(t)') -%>
+	<% end -%>
+<% end -%>
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheck<%= resource_name -%>Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamBinding_basic(context),
+			},
+			{
+				ResourceName:      "google_<%= resource_name.underscore -%>_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Test Iam Binding update
+				Config: testAcc<%= resource_name -%>IamBinding_update(context),
+			},
+			{
+				ResourceName:      "google_<%= resource_name.underscore -%>_iam_binding.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAcc<%= resource_name -%>IamMember(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(10),
+		"role": "roles/editor",
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: testAccCheck<%= resource_name -%>Destroy,
+		Steps: []resource.TestStep{
+			{
+				// Test Iam Member creation (no update for member, no need to test)
+				Config: testAcc<%= resource_name -%>IamMember_basic(context),
+			},
+			{
+				ResourceName:      "google_<%= resource_name.underscore -%>_iam_member.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor user:admin@hashicorptest.com", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAcc<%= resource_name -%>IamPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(10),
+		"role": "roles/editor",
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: testAccCheck<%= resource_name -%>Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc<%= resource_name -%>IamPolicy_basic(context),
+			},
+			// Test a few import formats
+			{
+				ResourceName:      "google_<%= resource_name.underscore -%>_iam_policy.foo",
+				ImportStateId:     fmt.Sprintf("<%= import_url -%>", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAcc<%= resource_name -%>IamMember_basic(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "google_<%= resource_name.underscore -%>_iam_member" "foo" {
+	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+	role          = "%{role}"
+	member        = "user:admin@hashicorptest.com"
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamPolicy_basic(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+data "google_iam_policy" "foo" {
+	binding {
+		role    = "%{role}"
+		members = ["user:admin@hashicorptest.com"]
+	}
+}
+
+resource "google_<%= resource_name.underscore -%>_iam_policy" "foo" {
+	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+	policy_data   = "${data.google_iam_policy.foo.policy_data}"
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamBinding_basic(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "google_<%= resource_name.underscore -%>_iam_binding" "foo" {
+	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+	role          = "%{role}"
+	members       = ["user:admin@hashicorptest.com"]
+}
+`, context)
+}
+
+func testAcc<%= resource_name -%>IamBinding_update(context map[string]interface{}) string {
+	return Nprintf(`
+<%= example.config_test_body -%>
+
+resource "google_<%= resource_name.underscore -%>_iam_binding" "foo" {
+	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+	role          = "%{role}"
+	members       = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+}
+`, context)
+}

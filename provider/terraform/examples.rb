@@ -117,6 +117,16 @@ module Provider
       end
 
       def config_test
+        body = config_test_body
+        lines(compile_file(
+                {
+                  content: body,
+                },
+                'templates/terraform/examples/base_configs/test_body.go.erb'
+              ))
+      end
+
+      def config_test_body
         @vars ||= {}
         @test_env_vars ||= {}
         body = lines(compile_file(
@@ -128,15 +138,7 @@ module Provider
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
 
-        body = substitute_test_paths body
-
-        lines(compile_file(
-                {
-                  content: body,
-                  count: vars.length
-                },
-                'templates/terraform/examples/base_configs/test_body.go.erb'
-              ))
+        return substitute_test_paths body
       end
 
       def config_example
