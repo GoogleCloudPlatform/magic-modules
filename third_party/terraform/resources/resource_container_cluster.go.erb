@@ -218,7 +218,8 @@ func resourceContainerCluster() *schema.Resource {
 									"auth": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										DiffSuppressFunc: istioConfigAuthDiffSuppress,
+										// We can't use a Terraform-level default because it won't be true when the block is disabled: true
+										DiffSuppressFunc: emptyOrDefaultStringSuppress("AUTH_NONE"),
 										ValidateFunc: validation.StringInSlice([]string{"AUTH_NONE", "AUTH_MUTUAL_TLS"}, false),
 									},
 								},
@@ -2651,13 +2652,6 @@ func containerClusterPrivateClusterConfigSuppress(k, old, new string, d *schema.
 }
 
 <% unless version == 'ga' -%>
-func istioConfigAuthDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// if old is "" and new is "AUTH_NONE", return true. Fall through to string-based diff otherwise.
-	// We can't use a default + default_if_empty style behaviour because the field will also be empty
-	// when the Istio on GKE addon isn't enabled (disabled: true).
-	return old == "" && new == "AUTH_NONE"
-}
-
 func podSecurityPolicyCfgSuppress(k, old, new string, r *schema.ResourceData) bool {
 	if k == "pod_security_policy_config.#" && old == "1" && new == "0" {
 		if v, ok := r.GetOk("pod_security_policy_config"); ok {
