@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -206,14 +207,14 @@ func resourceDataprocCluster() *schema.Resource {
 									// API does not honour this if set ...
 									// It always uses whatever is specified for the worker_config
 									// "machine_type": { ... }
-
+<% unless version == 'ga' -%>
 									"min_cpu_platform": {
 										Type:     schema.TypeString,
 										Optional: true,
 										Computed: true,
 										ForceNew: true,
 									},
-
+<% end -%>
 									"disk_config": {
 										Type:     schema.TypeList,
 										Optional: true,
@@ -673,9 +674,11 @@ func expandInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGro
 	if v, ok := cfg["machine_type"]; ok {
 		icg.MachineTypeUri = GetResourceNameFromSelfLink(v.(string))
 	}
+	<% unless version == 'ga' -%>
 	if v, ok := cfg["min_cpu_platform"]; ok {
 		icg.MinCpuPlatform = v.(string)
 	}
+	<% end -%>
 	if v, ok := cfg["image_uri"]; ok {
 		icg.ImageUri = v.(string)
 	}
@@ -949,7 +952,9 @@ func flattenInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGr
 	if icg != nil {
 		data["num_instances"] = icg.NumInstances
 		data["machine_type"] = GetResourceNameFromSelfLink(icg.MachineTypeUri)
+		<% unless version == 'ga' -%>
 		data["min_cpu_platform"] = icg.MinCpuPlatform
+		<% end -%>
 		data["image_uri"] = icg.ImageUri
 		data["instance_names"] = icg.InstanceNames
 		if icg.DiskConfig != nil {
