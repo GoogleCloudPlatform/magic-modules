@@ -177,7 +177,7 @@ type Config struct {
 	StorageTransferBasePath string
 	clientStorageTransfer   *storagetransfer.Service
 
-	bigtableclientFactory *BigtableClientFactory
+	bigtableClientFactory *BigtableClientFactory
 }
 
 var defaultClientScopes = []string{
@@ -272,7 +272,7 @@ func (c *Config) LoadAndValidate() error {
 		return err
 	}
 	c.clientDnsBeta.UserAgent = userAgent
-	c.clientDnsBeta = dnsBetaClientBasePath
+	c.clientDnsBeta.BasePath = dnsBetaClientBasePath
 
 	kmsClientBasePath := removeBasePathVersion(c.KmsBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud KMS client for path %s", kmsClientBasePath)
@@ -480,8 +480,8 @@ func (c *Config) LoadAndValidate() error {
 	c.clientDataprocBeta.UserAgent = userAgent
 	c.clientDataprocBeta.BasePath = dataprocClientBasePath
 
-	filestoreBasePath := removeBasePathVersion(c.FilestoreBasePath)
-	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreBasePath)
+	filestoreClientBasePath := removeBasePathVersion(c.FilestoreBasePath)
+	log.Printf("[INFO] Instantiating Filestore client for path %s", filestoreClientBasePath)
 	c.clientFilestore, err = file.NewService(context, option.WithHTTPClient(client))
 	if err != nil {
 		return err
@@ -518,7 +518,7 @@ func (c *Config) LoadAndValidate() error {
 
 	<% unless version == 'ga' -%>
 	serviceNetworkingClientBasePath := removeBasePathVersion(c.ServiceNetworkingBasePath)
-	log.Printf("[INFO] Instantiating Service Networking client for path %s", serviceNetworkingBasePath)
+	log.Printf("[INFO] Instantiating Service Networking client for path %s", serviceNetworkingClientBasePath)
 	c.clientServiceNetworking, err = servicenetworking.NewService(context, option.WithHTTPClient(client))
 	if err != nil {
 		return err

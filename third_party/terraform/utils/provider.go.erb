@@ -95,19 +95,17 @@ func Provider() terraform.ResourceProvider {
 			FirestoreCustomEndpointEntryKey:            FirestoreCustomEndpointEntry,
 			KmsCustomEndpointEntryKey:                  KmsCustomEndpointEntry,
 			PubsubCustomEndpointEntryKey:               PubsubCustomEndpointEntry,
-			RedisCustomEndpointEntryKey:                RedisCustomEndpointEntry,
 			ResourceManagerCustomEndpointEntryKey:      ResourceManagerCustomEndpointEntry,
 			SourceRepoCustomEndpointEntryKey:           SourceRepoCustomEndpointEntry,
 			SpannerCustomEndpointEntryKey:              SpannerCustomEndpointEntry,
 			SqlCustomEndpointEntryKey:                  SqlCustomEndpointEntry,
 			StorageCustomEndpointEntryKey:              StorageCustomEndpointEntry,
-			TpuCustomEndpointEntryKey:                  TpuCustomEndpointEntry,
-			MonitoringCustomEndpointEntryKey:           MonitoringCustomEndpointEntry,
 
 			// Handwritten Products / Versioned / Atypical Entries
 			<% unless version == 'ga' -%>
 			// start beta-only products
 			IAPCustomEndpointEntryKey: IAPCustomEndpointEntry,
+			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			// end beta-only products
 			<% end -%>
 			CloudBillingCustomEndpointEntryKey:           CloudBillingCustomEndpointEntry,
@@ -129,7 +127,6 @@ func Provider() terraform.ResourceProvider {
 			BigQueryCustomEndpointEntryKey:                BigQueryCustomEndpointEntry,
 			CloudFunctionsCustomEndpointEntryKey:         CloudFunctionsCustomEndpointEntry,
 			CloudIoTCustomEndpointEntryKey:               CloudIoTCustomEndpointEntry,
-			ServiceNetworkingCustomEndpointEntryKey:      ServiceNetworkingCustomEndpointEntry,
 			StorageTransferCustomEndpointEntryKey:        StorageTransferCustomEndpointEntry,
 		},
 
@@ -376,32 +373,22 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Scopes[i] = scope.(string)
 	}
 
-	<% unless version == 'ga' -%>
-	config.BinaryAuthorizationBasePath = d.Get(BinaryAuthorizationCustomEndpointEntryKey).(string)
-	config.ContainerAnalysisBasePath = d.Get(ContainerAnalysisCustomEndpointEntryKey).(string)
-	config.SecurityScannerBasePath = d.Get(SecurityScannerCustomEndpointEntryKey).(string)
-	<% end -%>
-	config.AccessContextManagerBasePath = d.Get(AccessContextManagerCustomEndpointEntryKey).(string)
 	config.AppEngineBasePath = d.Get(AppEngineCustomEndpointEntryKey).(string)
 	config.ComputeBasePath = d.Get(ComputeCustomEndpointEntryKey).(string)
 	config.CloudBuildBasePath = d.Get(CloudBuildCustomEndpointEntryKey).(string)
-	config.CloudSchedulerBasePath = d.Get(CloudSchedulerCustomEndpointEntryKey).(string)
 	config.DnsBasePath = d.Get(DnsCustomEndpointEntryKey).(string)
 	config.FilestoreBasePath = d.Get(FilestoreCustomEndpointEntryKey).(string)
-	config.FirestoreBasePath = d.Get(FirestoreCustomEndpointEntryKey).(string)
 	config.KmsBasePath = d.Get(KmsCustomEndpointEntryKey).(string)
 	config.PubsubBasePath = d.Get(PubsubCustomEndpointEntryKey).(string)
-	config.RedisBasePath = d.Get(RedisCustomEndpointEntryKey).(string)
 	config.ResourceManagerBasePath = d.Get(ResourceManagerCustomEndpointEntryKey).(string)
 	config.SourceRepoBasePath = d.Get(SourceRepoCustomEndpointEntryKey).(string)
 	config.SpannerBasePath = d.Get(SpannerCustomEndpointEntryKey).(string)
 	config.SqlBasePath = d.Get(SqlCustomEndpointEntryKey).(string)
 	config.StorageBasePath = d.Get(StorageCustomEndpointEntryKey).(string)
-	config.TpuBasePath = d.Get(TpuCustomEndpointEntryKey).(string)
-	config.MonitoringBasePath = d.Get(MonitoringCustomEndpointEntryKey).(string)
 
 	<% unless version == 'ga' -%>
 	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
+	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	<% end -%>
 	config.CloudBillingBasePath = d.Get(CloudBillingCustomEndpointEntryKey).(string)
 	config.ComposerBasePath = d.Get(ComposerCustomEndpointEntryKey).(string)
@@ -422,7 +409,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.BigQueryBasePath = d.Get(BigQueryCustomEndpointEntryKey).(string)
 	config.CloudFunctionsBasePath = d.Get(CloudFunctionsCustomEndpointEntryKey).(string)
 	config.CloudIoTBasePath = d.Get(CloudIoTCustomEndpointEntryKey).(string)
-	config.ServiceNetworkingBasePath = d.Get(ServiceNetworkingCustomEndpointEntryKey).(string)
 	config.StorageTransferBasePath = d.Get(StorageTransferCustomEndpointEntryKey).(string)
 
 	if err := config.LoadAndValidate(); err != nil {
