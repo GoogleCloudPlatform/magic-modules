@@ -269,7 +269,11 @@ res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil
 <%    end -%>
 <%  end -%>
 <%  if object.has_self_link -%>
+<% if version == "ga" -%>
     if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+<% else -%>
+    if err := d.Set("self_link", ConvertSelfLinkToBeta(res["selfLink"].(string))); err != nil {
+<% end -%>
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
 <%  end -%>

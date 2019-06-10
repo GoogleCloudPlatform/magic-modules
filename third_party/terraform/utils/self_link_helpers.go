@@ -75,6 +75,11 @@ func ConvertSelfLinkToV1(link string) string {
 	return reg.ReplaceAllString(link, "/compute/v1/projects/")
 }
 
+func ConvertSelfLinkToBeta(link string) string {
+	reg := regexp.MustCompile("/compute/[a-zA-Z0-9]*/projects/")
+	return reg.ReplaceAllString(link, "/compute/beta/projects/")
+}
+
 func GetResourceNameFromSelfLink(link string) string {
 	parts := strings.Split(link, "/")
 	return parts[len(parts)-1]
