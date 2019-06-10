@@ -20,9 +20,15 @@ import (
 var CloudFunctionsDefaultBasePath = "https://cloudfunctions.googleapis.com/v1/"
 
 var CloudFunctionsCustomEndpointEntry = &schema.Schema{
-	Type:     schema.TypeString,
-	Optional: true,
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 		"GOOGLE_CLOUD_FUNCTIONS_CUSTOM_ENDPOINT",
 	}, CloudFunctionsDefaultBasePath),
+}
+
+func validateCustomEndpoint(v interface{}, k string) (ws []string, errors []error) {
+	re := `.*/[^/]+/$`
+	return validateRegexp(re)(v, k)
 }
