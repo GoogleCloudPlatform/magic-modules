@@ -8,5 +8,8 @@ set -e
 # Display commands being run.
 set -x
 
-bundle exec compiler -p products/monitoring -e terraform -o /Users/chrisst/work/go/src/github.com/terraform-providers/terraform-provider-google
+# bundle exec compiler -p products/monitoring -e terraform -o /Users/chrisst/work/go/src/github.com/terraform-providers/terraform-provider-google
+ruby --version
+
+bundle -v
 
