@@ -8118,8 +8118,11 @@ objects:
         input: true
         send_empty_value: true
         min_version: beta
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'peerExternalGateway'
+        resource: 'ExternalVpnGateway'
+        imports: 'selfLink'
+        input: true
         description: |
           URL of the peer side external VPN gateway to which this VPN tunnel is connected.
         min_version: beta
