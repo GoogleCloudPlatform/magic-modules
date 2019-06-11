@@ -262,10 +262,9 @@ The following keys are available exclusively in the `google-beta` provider:
 * `service_networking_custom_endpoint` (`GOOGLE_SERVICE_NETWORKING_CUSTOM_ENDPOINT`) - `https://servicenetworking.googleapis.com/v1beta/`
 
 -> Note that some endpoints are a versioned variant of another. These exist in
-cases where the `google` provider uses multiple distinct endpoints, and while
-they'll often be identical to their versioned counterpart in `google-beta` that
-won't necessarily always be the case.
-
+cases where the `google` provider uses multiple distinct endpoints, and both
+need to be set. Additionally, in `google-beta`, they'll often use the same value
+as their versioned counterpart but that won't necessarily always be the case.
 
 [OAuth 2.0 access token]: https://developers.google.com/identity/protocols/OAuth2
 [service account key file]: https://cloud.google.com/iam/docs/creating-managing-service-account-keys

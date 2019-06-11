@@ -18,29 +18,16 @@ import (
 // files. Collect handwritten ones here. If any of these are modified, be sure
 // to update the provider_reference docs page.
 
-<% unless version == 'ga' -%>
-var IAPDefaultBasePath = "https://iap.googleapis.com/v1beta1/"
-var IAPCustomEndpointEntryKey = "iap_custom_endpoint"
-var IAPCustomEndpointEntry = &schema.Schema{
+var BigQueryDefaultBasePath = "https://www.googleapis.com/bigquery/v2/"
+var BigQueryCustomEndpointEntryKey = "bigquery_custom_endpoint"
+var BigQueryCustomEndpointEntry = &schema.Schema{
 	Type:         schema.TypeString,
 	Optional:     true,
 	ValidateFunc: validateCustomEndpoint,
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_IAP_CUSTOM_ENDPOINT",
-	}, IAPDefaultBasePath),
+		"GOOGLE_BIGQUERY_CUSTOM_ENDPOINT",
+	}, BigQueryDefaultBasePath),
 }
-
-var ServiceNetworkingDefaultBasePath = "https://servicenetworking.googleapis.com/v1beta/"
-var ServiceNetworkingCustomEndpointEntryKey = "service_networking_custom_endpoint"
-var ServiceNetworkingCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_SERVICE_NETWORKING_CUSTOM_ENDPOINT",
-	}, ServiceNetworkingDefaultBasePath),
-}
-<% end -%>
 
 var CloudBillingDefaultBasePath = "https://cloudbilling.googleapis.com/v1/"
 var CloudBillingCustomEndpointEntryKey = "cloud_billing_custom_endpoint"
@@ -52,6 +39,30 @@ var CloudBillingCustomEndpointEntry = &schema.Schema{
 		"GOOGLE_CLOUD_BILLING_CUSTOM_ENDPOINT",
 	}, CloudBillingDefaultBasePath),
 }
+
+var CloudFunctionsDefaultBasePath = "https://cloudfunctions.googleapis.com/v1/"
+var CloudFunctionsCustomEndpointEntryKey = "cloud_functions_custom_endpoint"
+var CloudFunctionsCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_CLOUD_FUNCTIONS_CUSTOM_ENDPOINT",
+	}, CloudFunctionsDefaultBasePath),
+}
+
+
+var CloudIoTDefaultBasePath = "https://cloudiot.googleapis.com/v1/"
+var CloudIoTCustomEndpointEntryKey = "cloud_iot_custom_endpoint"
+var CloudIoTCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_CLOUD_IOT_CUSTOM_ENDPOINT",
+	}, CloudIoTDefaultBasePath),
+}
+
 
 var ComposerDefaultBasePath = "https://composer.googleapis.com/v1beta1/"
 var ComposerCustomEndpointEntryKey = "composer_custom_endpoint"
@@ -140,6 +151,17 @@ var DnsBetaCustomEndpointEntry = &schema.Schema{
 	}, DnsBetaDefaultBasePath),
 }
 
+var IAMDefaultBasePath = "https://iam.googleapis.com/v1/"
+var IAMCustomEndpointEntryKey = "iam_custom_endpoint"
+var IAMCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_IAM_CUSTOM_ENDPOINT",
+	}, IAMDefaultBasePath),
+}
+
 var IamCredentialsDefaultBasePath = "https://iamcredentials.googleapis.com/v1/"
 var IamCredentialsCustomEndpointEntryKey = "iam_credentials_custom_endpoint"
 var IamCredentialsCustomEndpointEntry = &schema.Schema{
@@ -151,6 +173,19 @@ var IamCredentialsCustomEndpointEntry = &schema.Schema{
 	}, IamCredentialsDefaultBasePath),
 }
 
+<% unless version == 'ga' -%>
+var IAPDefaultBasePath = "https://iap.googleapis.com/v1beta1/"
+var IAPCustomEndpointEntryKey = "iap_custom_endpoint"
+var IAPCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_IAP_CUSTOM_ENDPOINT",
+	}, IAPDefaultBasePath),
+}
+
+<% end -%>
 var ResourceManagerV2Beta1DefaultBasePath = "https://cloudresourcemanager.googleapis.com/v2beta1/"
 var ResourceManagerV2Beta1CustomEndpointEntryKey = "resource_manager_v2beta1_custom_endpoint"
 var ResourceManagerV2Beta1CustomEndpointEntry = &schema.Schema{
@@ -173,17 +208,6 @@ var RuntimeconfigCustomEndpointEntry = &schema.Schema{
 	}, RuntimeconfigDefaultBasePath),
 }
 
-var IAMDefaultBasePath = "https://iam.googleapis.com/v1/"
-var IAMCustomEndpointEntryKey = "iam_custom_endpoint"
-var IAMCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_IAM_CUSTOM_ENDPOINT",
-	}, IAMDefaultBasePath),
-}
-
 var ServiceManagementDefaultBasePath = "https://servicemanagement.googleapis.com/v1/"
 var ServiceManagementCustomEndpointEntryKey = "service_management_custom_endpoint"
 var ServiceManagementCustomEndpointEntry = &schema.Schema{
@@ -195,6 +219,19 @@ var ServiceManagementCustomEndpointEntry = &schema.Schema{
 	}, ServiceManagementDefaultBasePath),
 }
 
+<% unless version == 'ga' -%>
+var ServiceNetworkingDefaultBasePath = "https://servicenetworking.googleapis.com/v1beta/"
+var ServiceNetworkingCustomEndpointEntryKey = "service_networking_custom_endpoint"
+var ServiceNetworkingCustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_SERVICE_NETWORKING_CUSTOM_ENDPOINT",
+	}, ServiceNetworkingDefaultBasePath),
+}
+
+<% end -%>
 var ServiceUsageDefaultBasePath = "https://serviceusage.googleapis.com/v1/"
 var ServiceUsageCustomEndpointEntryKey = "service_usage_custom_endpoint"
 var ServiceUsageCustomEndpointEntry = &schema.Schema{
@@ -204,39 +241,6 @@ var ServiceUsageCustomEndpointEntry = &schema.Schema{
 	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 		"GOOGLE_SERVICE_USAGE_CUSTOM_ENDPOINT",
 	}, ServiceUsageDefaultBasePath),
-}
-
-var BigQueryDefaultBasePath = "https://www.googleapis.com/bigquery/v2/"
-var BigQueryCustomEndpointEntryKey = "bigquery_custom_endpoint"
-var BigQueryCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_BIGQUERY_CUSTOM_ENDPOINT",
-	}, BigQueryDefaultBasePath),
-}
-
-var CloudFunctionsDefaultBasePath = "https://cloudfunctions.googleapis.com/v1/"
-var CloudFunctionsCustomEndpointEntryKey = "cloud_functions_custom_endpoint"
-var CloudFunctionsCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_CLOUD_FUNCTIONS_CUSTOM_ENDPOINT",
-	}, CloudFunctionsDefaultBasePath),
-}
-
-var CloudIoTDefaultBasePath = "https://cloudiot.googleapis.com/v1/"
-var CloudIoTCustomEndpointEntryKey = "cloud_iot_custom_endpoint"
-var CloudIoTCustomEndpointEntry = &schema.Schema{
-	Type:         schema.TypeString,
-	Optional:     true,
-	ValidateFunc: validateCustomEndpoint,
-	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-		"GOOGLE_CLOUD_IOT_CUSTOM_ENDPOINT",
-	}, CloudIoTDefaultBasePath),
 }
 
 var StorageTransferDefaultBasePath = "https://storagetransfer.googleapis.com/v1/"
