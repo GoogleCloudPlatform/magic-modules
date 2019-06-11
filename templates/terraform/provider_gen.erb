@@ -18,6 +18,8 @@ package google
 
 import "github.com/hashicorp/terraform/helper/schema"
 
+// If the base path has changed as a result of your PR, make sure to update
+// the provider_reference page!
 var <%= product_ns -%>DefaultBasePath = "<%= product.base_url -%>"
 var <%= product_ns -%>CustomEndpointEntryKey = "<%= product_ns.underscore -%>_custom_endpoint"
 var <%= product_ns -%>CustomEndpointEntry = &schema.Schema{
