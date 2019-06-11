@@ -35,12 +35,34 @@
         :version_added: '2.6'
       :preemptible:
         :version_added: '2.6'
+      :accelerators:
+        :version_added: '2.9'
+        :acceleratorCount:
+          :version_added: '2.9'
+        :acceleratorType:
+          :version_added: '2.9'
+      :diskType:
+        :version_added: '2.9'
+      :minCpuPlatform:
+        :version_added: '2.9'
+      :taints:
+        :version_added: '2.9'
+        :key:
+          :version_added: '2.9'
+        :value:
+          :version_added: '2.9'
+        :effect:
+          :version_added: '2.9'
     :masterAuth:
       :version_added: '2.6'
       :username:
         :version_added: '2.6'
       :password:
         :version_added: '2.6'
+      :clientCertificateConfig:
+        :version_added: '2.9'
+        :issueClientCertificate:
+          :version_added: '2.9'
     :loggingService:
       :version_added: '2.6'
     :monitoringService:
@@ -67,8 +89,34 @@
         :version_added: '2.6'
         :disabled:
           :version_added: '2.6'
+      :networkPolicyConfig:
+        :version_added: '2.9'
+        :disabled:
+          :version_added: '2.9'
     :subnetwork:
       :version_added: '2.6'
+    :locations:
+      :version_added: '2.9'
+    :resourceLabels:
+      :version_added: '2.9'
+    :legacyAbac:
+      :version_added: '2.9'
+      :enabled:
+        :version_added: '2.9'
+    :networkPolicy:
+      :version_added: '2.9'
+      :provider:
+        :version_added: '2.9'
+      :enabled:
+        :version_added: '2.9'
+    :defaultMaxPodsConstraint:
+      :version_added: '2.9'
+      :maxPodsPerNode:
+        :version_added: '2.9'
+    :enableTpu:
+      :version_added: '2.9'
+    :tpuIpv4CidrBlock:
+      :version_added: '2.9'
     :location:
       :version_added: '2.8'
   :NodePool:

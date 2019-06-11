@@ -78,7 +78,8 @@ objects:
           object, since this configuration (along with the "nodeConfig") will be
           used to create a "NodePool" object with an auto-generated name. Do not
           use this and a nodePool at the same time.
-        required: true
+
+          This field has been deprecated. Please use nodePool.initial_node_count instead.
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'nodeConfig'
@@ -194,18 +195,61 @@ objects:
               Whether the nodes are created as preemptible VM instances. See:
               https://cloud.google.com/compute/docs/instances/preemptible for
               more information about preemptible VM instances.
+          - !ruby/object:Api::Type::Array
+            name: 'accelerators'
+            description: |
+              A list of hardware accelerators to be attached to each node. See
+              https://cloud.google.com/compute/docs/gpus for more information
+              about support for GPUs.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                  # API calls for a String, despite this being a number.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorCount'
+                  description: The number of accelerator cards exposed to an instance.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: The accelerator type resource name
+          - !ruby/object:Api::Type::String
+            name: 'diskType'
+            description: |
+              Type of the disk attached to each node (e.g. 'pd-standard'
+              or 'pd-ssd')
+
+              If unspecified, the default disk type is 'pd-standard'
+          - !ruby/object:Api::Type::String
+            name: 'minCpuPlatform'
+            description: |
+              Minimum CPU platform to be used by this instance. The instance
+              may be scheduled on the specified or newer CPU platform.
+          - !ruby/object:Api::Type::Array
+            name: 'taints'
+            description: >
+              List of kubernetes taints to be applied to each node.
+
+              For more information, including usage and the valid values, see:
+              https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'key'
+                  description: Key for taint
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value for taint
+                - !ruby/object:Api::Type::Enum
+                  name: 'effect'
+                  description: Effect for taint
+                  values:
+                    - "EFFECT_UNSPECIFIED"
+                    - "NO_SCHEDULE"
+                    - "PREFER_NO_SCHEDULE"
+                    - "NO_EXECUTE"
       - !ruby/object:Api::Type::NestedObject
         name: 'masterAuth'
         description: |
           The authentication information for accessing the master endpoint.
         properties:
-          # TODO(nelsonjr): Make this a ResourceRef pointing to the Compute
-          # resources (external to this product)
-          # | - !ruby/object:Api::Type::ResourceRef
-          # |   name: 'machineType'
-          # |   product: 'Compute'
-          # |   resource: 'MachineType'
-          # |   imports: 'name'
           - !ruby/object:Api::Type::String
             name: 'username'
             description: |
@@ -217,6 +261,16 @@ objects:
               The password to use for HTTP basic authentication to the master
               endpoint. Because the master endpoint is open to the Internet, you
               should create a strong password.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'clientCertificateConfig'
+            description: |
+              Configuration for client certificate authentication on the
+              cluster. For clusters before v1.12, if no configuration is
+              specified, a client certificate is issued.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'issueClientCertificate'
+                description: Issue a client certificate.
           - !ruby/object:Api::Type::String
             name: 'clusterCaCertificate'
             description: |
@@ -348,15 +402,77 @@ objects:
                   the cluster. When enabled, it ensures that a Heapster pod is
                   running in the cluster, which is also used by the Cloud
                   Monitoring service.
-      # TODO(nelsonjr): This is a ResourceRef but on a resource on another
-      # product (Compute). Figure out how to represent/implement this. For now
-      # making it a string.
+          # kubernetesDashboard is deprecated.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'networkPolicyConfig'
+            description: |
+              Configuration for NetworkPolicy. This only tracks whether the
+              addon is enabled or not on the Master, it does not track whether
+              network policy is enabled for the nodes.
+            properties:
+              - !ruby/object:Api::Type::Boolean
+                name: 'disabled'
+                description: Whether NetworkPolicy is enabled for this cluster.
       - !ruby/object:Api::Type::String
         name: 'subnetwork'
         description: |
           The name of the Google Compute Engine subnetwork to which the cluster
           is connected.
-      # 'enableKubernetesAlpha' not supported: we are only producing GA API.
+      # TODO: figure out nodePools[]
+      - !ruby/object:Api::Type::Array
+        name: 'locations'
+        description: |
+          The list of Google Compute Engine zones in which the cluster's nodes
+          should be located.
+        item_type: Api::Type::String
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'resourceLabels'
+        description: |
+          The resource labels for the cluster to use to annotate any related
+          Google Compute Engine resources.
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'labelFingerprint'
+        description: The fingerprint of the set of labels for this cluster.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'legacyAbac'
+        description: Configuration for the legacy ABAC authorization mode.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: |
+              Whether the ABAC authorizer is enabled for this cluster. When
+              enabled, identities in the system, including service accounts,
+              nodes, and controllers, will have statically granted permissions
+              beyond those provided by the RBAC configuration or IAM.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'networkPolicy'
+        description: |
+          Configuration options for the NetworkPolicy feature.
+        properties:
+          - !ruby/object:Api::Type::Enum
+            name: 'provider'
+            description: The selected network policy provider.
+            values:
+              - "PROVIDER_UNSPECIFIED"
+              - "CALICO"
+          - !ruby/object:Api::Type::Boolean
+            name: 'enabled'
+            description: Whether network policy is enabled on the cluster.
+      - !ruby/object:Api::Type::NestedObject
+            name: 'defaultMaxPodsConstraint'
+            description: |
+              The default constraint on the maximum number of pods that can be
+              run simultaneously on a node in the node pool of this cluster.
+              Only honored if cluster created with IP Alias support.
+            properties:
+              - !ruby/object:Api::Type::String
+                name: 'maxPodsPerNode'
+                description: Constraint enforced on the max num of pods per node.
+
+
+
+
+
       - !ruby/object:Api::Type::String
         name: 'endpoint'
         description: |
@@ -391,8 +507,22 @@ objects:
         description: |
           The time the cluster was created, in RFC3339 text format.
         output: true
-      # | 'status' is not applicable for state enforcement
-      # | 'statusMessage' is not applicable for state enforcement
+      - !ruby/object:Api::Type::Enum
+        name: 'status'
+        description: The current status of this cluster.
+        output: true
+        values: 
+          - STATUS_UNSPECIFIED
+          - PROVISIONING
+          - RUNNING
+          - RECONCILING
+          - STOPPING
+          - ERROR
+          - DEGRADED
+      - !ruby/object:Api::Type::String
+        name: 'statusMessage'
+        description: Additional information about the current status of this cluster, if available.
+        output: true
       - !ruby/object:Api::Type::Integer
         name: 'nodeIpv4CidrSize'
         description: |
@@ -418,6 +548,24 @@ objects:
           The time the cluster will be automatically deleted in RFC3339 text
           format.
         output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'enableTpu'
+        description: Enable the ability to use Cloud TPUs in this cluster.
+      - !ruby/object:Api::Type::String
+        name: 'tpuIpv4CidrBlock'
+        description: The IP address range of the Cloud TPUs in this cluster, in CIDR notation
+      - !ruby/object:Api::Type::Array
+        name: 'conditions'
+        description: Which conditions caused the current cluster state.
+        output: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'code'
+              description: Machine-friendly representation of the condition
+            - !ruby/object:Api::Type::String
+              name: 'message'
+              description: Human-friendly representation of the condition
   - !ruby/object:Api::Resource
     name: 'NodePool'
     base_url: projects/{{project}}/zones/{{location}}/clusters/{{cluster}}/nodePools
