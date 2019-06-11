@@ -333,6 +333,7 @@ module Api
 
     def async_operation_uri
       raise 'Not an async resource' if async.nil?
+
       async.operation.base_url
     end
 
