@@ -10,14 +10,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
---- !ruby/object:Provider::Ansible::Config
-datasources: !ruby/object:Overrides::ResourceOverrides
-  Node: !ruby/object:Overrides::Ansible::ResourceOverride
-    facts: !ruby/object:Provider::Ansible::FactsOverride
-      has_filters: false
-overrides: !ruby/object:Overrides::ResourceOverrides
-files: !ruby/object:Provider::Config::Files
-  copy:
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::Task
+  name: gcp_tpu_node
+  code:
+    name: <%= ctx[:name] %>
+    zone: 'us-central1-b'
+    accelerator_type: 'v3-8'
+    tensorflow_version: '1.11'
+    cidr_block: '10.2.0.0/29'
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
