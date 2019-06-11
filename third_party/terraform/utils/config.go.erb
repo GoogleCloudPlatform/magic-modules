@@ -548,63 +548,6 @@ func (c *Config) LoadAndValidate() error {
 	return nil
 }
 
-
-// For a consumer of config.go that isn't a full fledged provider and doesn't
-// have its own endpoint mechanism such as sweepers, init {{service}}BasePath
-// values to a default. After using this, you should call LoadAndValidate.
-func (c *Config) SetDefaultBasePaths() {
-	// Generated Products
-	<% unless version == 'ga' -%>
-	// start beta-only products
-	c.BinaryAuthorizationBasePath = BinaryAuthorizationDefaultBasePath
-	c.ContainerAnalysisBasePath = ContainerAnalysisDefaultBasePath
-	c.SecurityScannerBasePath = SecurityScannerDefaultBasePath
-	// end beta-only products
-	<% end -%>
-	c.AccessContextManagerBasePath = AccessContextManagerDefaultBasePath
-	c.AppEngineBasePath = AppEngineDefaultBasePath
-	c.ComputeBasePath = ComputeDefaultBasePath
-	c.CloudBuildBasePath = CloudBuildDefaultBasePath
-	c.CloudSchedulerBasePath = CloudSchedulerDefaultBasePath
-	c.DnsBasePath = DnsDefaultBasePath
-	c.FilestoreBasePath = FilestoreDefaultBasePath
-	c.FirestoreBasePath = FirestoreDefaultBasePath
-	c.KmsBasePath = KmsDefaultBasePath
-	c.PubsubBasePath = PubsubDefaultBasePath
-	c.ResourceManagerBasePath = ResourceManagerDefaultBasePath
-	c.SourceRepoBasePath = SourceRepoDefaultBasePath
-	c.SpannerBasePath = SpannerDefaultBasePath
-	c.SqlBasePath = SqlDefaultBasePath
-	c.StorageBasePath = StorageDefaultBasePath
-
-	// Handwritten Products / Versioned / Atypical Entries
-	<% unless version == 'ga' -%>
-	// start beta-only products
-	c.IAPBasePath = IAPDefaultBasePath
-	c.ServiceNetworkingBasePath = ServiceNetworkingDefaultBasePath
-	// end beta-only products
-	<% end -%>
-	c.CloudBillingBasePath = CloudBillingDefaultBasePath
-	c.ComposerBasePath = ComposerDefaultBasePath
-	c.ComputeBetaBasePath = ComputeBetaDefaultBasePath
-	c.ContainerBasePath = ContainerDefaultBasePath
-	c.ContainerBetaBasePath = ContainerBetaDefaultBasePath
-	c.DataprocBasePath = DataprocDefaultBasePath
-	c.DataflowBasePath = DataflowDefaultBasePath
-	c.DnsBetaBasePath = DnsBetaDefaultBasePath
-	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
-	c.LoggingBasePath = LoggingDefaultBasePath
-	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
-	c.RuntimeconfigBasePath = RuntimeconfigDefaultBasePath
-	c.IAMBasePath = IAMDefaultBasePath
-	c.ServiceManagementBasePath = ServiceManagementDefaultBasePath
-	c.ServiceUsageBasePath = ServiceUsageDefaultBasePath
-	c.BigQueryBasePath = BigQueryDefaultBasePath
-	c.CloudFunctionsBasePath = CloudFunctionsDefaultBasePath
-	c.CloudIoTBasePath = CloudIoTDefaultBasePath
-	c.StorageTransferBasePath = StorageTransferDefaultBasePath
-}
-
 func (c *Config) getTokenSource(clientScopes []string) (oauth2.TokenSource, error) {
 	if c.AccessToken != "" {
 		contents, _, err := pathorcontents.Read(c.AccessToken)

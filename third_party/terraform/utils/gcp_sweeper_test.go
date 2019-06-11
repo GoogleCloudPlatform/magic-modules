@@ -30,7 +30,7 @@ func sharedConfigForRegion(region string) (*Config, error) {
 		Project:     project,
 	}
 
-	conf.SetDefaultBasePaths()
+	BasePathsConfigure(conf)
 
 	return conf, nil
 }
