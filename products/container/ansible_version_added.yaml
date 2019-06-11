@@ -145,6 +145,24 @@
         :version_added: '2.6'
       :preemptible:
         :version_added: '2.6'
+      :accelerators:
+        :version_added: '2.9'
+        :acceleratorCount:
+          :version_added: '2.9'
+        :acceleratorType:
+          :version_added: '2.9'
+      :diskType:
+        :version_added: '2.9'
+      :minCpuPlatform:
+        :version_added: '2.9'
+      :taints:
+        :version_added: '2.9'
+        :key:
+          :version_added: '2.9'
+        :value:
+          :version_added: '2.9'
+        :effect:
+          :version_added: '2.9'
     :initialNodeCount:
       :version_added: '2.6'
     :version:
@@ -165,6 +183,14 @@
         :version_added: '2.6'
       :upgradeOptions:
         :version_added: '2.6'
+    :maxPodsConstraint:
+      :version_added: '2.9'
+      :maxPodsPerNode:
+        :version_added: '2.9'
+    :conditions:
+      :version_added: '2.9'
+      :code:
+        :version_added: '2.9'
     :cluster:
       :version_added: '2.6'
     :location:

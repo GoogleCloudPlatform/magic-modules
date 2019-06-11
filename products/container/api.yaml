@@ -741,11 +741,11 @@ objects:
         input: true
       - !ruby/object:Api::Type::String
         name: 'status'
-        descipriont: 'Status of nodes in this pool instance'
+        description: 'Status of nodes in this pool instance'
         output: true
       - !ruby/object:Api::Type::String
         name: 'statusMessage'
-        descipriont: 'Additional information about the current status of this node pool instance'
+        description: 'Additional information about the current status of this node pool instance'
         output: true
       # | 'instanceGroupUrls' not supported as it is dynamically created by the
       # |  server and admin has no way to predict it
