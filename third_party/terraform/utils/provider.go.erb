@@ -373,6 +373,16 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Scopes[i] = scope.(string)
 	}
 
+	<% unless version == 'ga' -%>
+	config.BinaryAuthorizationBasePath = d.Get(BinaryAuthorizationCustomEndpointEntryKey).(string)
+	config.ContainerAnalysisBasePath = d.Get(ContainerAnalysisCustomEndpointEntryKey).(string)
+	config.SecurityScannerBasePath = d.Get(SecurityScannerCustomEndpointEntryKey).(string)
+	<% end -%>
+
+	config.AccessContextManagerBasePath = d.Get(AccessContextManagerCustomEndpointEntryKey).(string)
+	config.CloudSchedulerBasePath = d.Get(CloudSchedulerCustomEndpointEntryKey).(string)
+	config.FirestoreBasePath = d.Get(FirestoreCustomEndpointEntryKey).(string)
+
 	config.AppEngineBasePath = d.Get(AppEngineCustomEndpointEntryKey).(string)
 	config.ComputeBasePath = d.Get(ComputeCustomEndpointEntryKey).(string)
 	config.CloudBuildBasePath = d.Get(CloudBuildCustomEndpointEntryKey).(string)
