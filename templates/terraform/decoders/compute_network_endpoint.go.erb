@@ -14,38 +14,13 @@
 -%>
 transformed := map[string]interface{}{}
 
-  v, ok := res["networkEndpoint"]
-  if !ok || v == nil {
-    return res, nil
-  }
+v, ok := res["networkEndpoint"]
+if !ok || v == nil {
+  return res, nil
+}
 
-  networkEndpt := v.(map[string]interface{})
-  for k, v := range networkEndpt {
-    transformed[k] = v
-  }
-
-  v, ok = res["healths"]
-  if !ok || res == nil {
-    return transformed, nil
-  }
-
-  healths := v.(map[string]interface{})
-  if v, ok := healths["forwardingRule"]; ok {
-    frobj := v.(map[string]interface{})
-    if frv, ok := frobj["forwardingRule"]; ok {
-      transformed["healthForwardingRule"] = frv
-    }
-  }
-  if v, ok := healths["backendService"]; ok {
-    frobj := v.(map[string]interface{})
-    if frv, ok := frobj["backendService"]; ok {
-      transformed["healthBackendService"] = frv
-    }
-  }
-  if v, ok := healths["healthCheck"]; ok {
-    frobj := v.(map[string]interface{})
-    if frv, ok := frobj["healthCheck"]; ok {
-      transformed["healthCheck"] = frv
-    }
-  }
-  return transformed, nil
+networkEndpt := v.(map[string]interface{})
+for k, v := range networkEndpt {
+  transformed[k] = v
+}
+return transformed, nil
