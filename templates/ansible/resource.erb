@@ -419,6 +419,9 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return <%= lines(python_literal(response_properties(object.properties), use_hash_brackets: true)) -%>
+<% if object.name_pattern -%>
+<%= lines(compile('templates/ansible/name_pattern.py.erb')) -%>
+<% end -%>
 <% readonly_selflink_rrefs.each do |resource| -%>
 
 
