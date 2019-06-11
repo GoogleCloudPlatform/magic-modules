@@ -1,0 +1,27 @@
+---
+:facts:
+  :Node:
+    :version_added: '2.8'
+:regular:
+  :Node:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :acceleratorType:
+      :version_added: '2.8'
+    :tensorflowVersion:
+      :version_added: '2.8'
+    :network:
+      :version_added: '2.8'
+    :cidrBlock:
+      :version_added: '2.8'
+    :schedulingConfig:
+      :version_added: '2.8'
+      :preemptible:
+        :version_added: '2.8'
+    :labels:
+      :version_added: '2.8'
+    :zone:
+      :version_added: '2.8'
