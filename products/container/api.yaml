@@ -696,6 +696,41 @@ objects:
               Whether the nodes are created as preemptible VM instances. See:
               https://cloud.google.com/compute/docs/instances/preemptible for
               more information about preemptible VM instances.
+          - !ruby/object:Api::Type::Array
+            name: 'accelerators'
+            description: A list of hardware accelerators to be attached to each node
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::Integer
+                  name: 'acceleratorCount'
+                  description: The number of the accelerator cards exposed to an instance.
+                - !ruby/object:Api::Type::String
+                  name: 'acceleratorType'
+                  description: The accelerator type resource name
+          - !ruby/object:Api::Type::String
+            name: 'diskType'
+            description: |
+              Type of the disk attached to each node (e.g. 'pd-standard' or 'pd-ssd')
+
+              If unspecified, the default disk type is 'pd-standard'
+          - !ruby/object:Api::Type::String
+            name: 'minCpuPlatform'
+            description: |
+              Minimum CPU platform to be used by this instance. The instance may be scheduled on the specified or newer CPU platform
+          - !ruby/object:Api::Type::Array
+            name: 'taints'
+            description: List of kubernetes taints to be applied to each node.
+            item_type: !ruby/object:Api::Type::NestedObject
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'key'
+                  description: Key for taint
+                - !ruby/object:Api::Type::String
+                  name: 'value'
+                  description: Value for taint
+                - !ruby/object:Api::Type::String
+                  name: 'effect'
+                  description: Effect for taint
       - !ruby/object:Api::Type::Integer
         name: 'initialNodeCount'
         description: |
@@ -704,6 +739,14 @@ objects:
           must also have available firewall and routes quota.
         required: true
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'status'
+        description: 'Status of nodes in this pool instance'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'statusMessage'
+        description: 'Additional information about the current status of this node pool instance'
+        output: true
       # | 'instanceGroupUrls' not supported as it is dynamically created by the
       # |  server and admin has no way to predict it
       # NodePool updates use a different name for version for updating.
@@ -769,6 +812,32 @@ objects:
                   This field is set when upgrades are about to commence with the
                   description of the upgrade.
                 output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'maxPodsConstraint'
+        description: |
+          The constraint on the maximum number of pods that can be run simultaneously on a node in the node pool.
+        properties:
+          - !ruby/object:Api::Type::Integer
+            name: 'maxPodsPerNode'
+            description: Constraint enforced on the max num of pods per node.
+      - !ruby/object:Api::Type::Array
+        name: 'conditions'
+        description: Which conditions caused the current node pool state.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Enum
+              name: 'code'
+              description: Machine-friendly representation of the condition
+              values:
+                - UNKNOWN
+                - GCE_STOCKOUT
+                - GKE_SERVICE_ACCOUNT_DELETED
+                - GCE_QUOTA_EXCEEDED
+                - SET_BY_OPERATOR
+      - !ruby/object:Api::Type::Integer
+        name: 'podIpv4CidrSize'
+        description: The pod CIDR block size per node in this node pool.
+        output: true
   - !ruby/object:Api::Resource
     name: 'KubeConfig'
     base_url: 'unused'
