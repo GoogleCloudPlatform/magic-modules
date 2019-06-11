@@ -310,7 +310,7 @@ func (c *Config) LoadAndValidate() error {
 	c.clientStorage.UserAgent = userAgent
 	c.clientStorage.BasePath = storageClientBasePath
 
-	sqlClientBasePath := removeBasePathVersion(c.SqlBasePath)
+	sqlClientBasePath := removeBasePathVersion(c.SqlBasePath) + "v1beta4/"
 	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", sqlClientBasePath)
 	c.clientSqlAdmin, err = sqladmin.NewService(context, option.WithHTTPClient(client))
 	if err != nil {
