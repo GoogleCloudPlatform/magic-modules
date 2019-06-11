@@ -626,12 +626,11 @@ func expandExternalDataConfiguration(cfg interface{}) (*bigquery.ExternalDataCon
 		edc.SourceFormat = v.(string)
 	}
 
-
 	return edc, nil
 
 }
 
-func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (map[string]interface{}, error) {
+func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) ([]map[string]interface{}, error) {
 	result := map[string]interface{}{}
 
 	result["autodetect"] = edc.Autodetect
@@ -659,7 +658,7 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 	if edc.Schema != nil {
 		schema, err := flattenSchema(edc.Schema)
 		if err != nil {
-			return result, err
+			return []map[string]interface{}{result}, err
 		}
 		result["schema"] = schema
 	}
@@ -668,7 +667,7 @@ func flattenExternalDataConfiguration(edc *bigquery.ExternalDataConfiguration) (
 		result["source_format"] = edc.SourceFormat
 	}
 
-	return result, nil
+	return []map[string]interface{}{result}, nil
 }
 
 func expandCsvOptions(configured interface{}) *bigquery.CsvOptions {
