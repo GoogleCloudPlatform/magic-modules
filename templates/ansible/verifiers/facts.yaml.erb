@@ -1,7 +1,7 @@
 <%
   module_name = ["gcp_#{object.__product.api_name}",
                  object.name.underscore,
-                 'facts'].join('_')
+                 'info'].join('_')
 -%>
 - name: verify that <%= object.name.underscore -%> was <%= lines(verbs[_state.to_sym]) -%>
   <%= module_name -%>:

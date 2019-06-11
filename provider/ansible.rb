@@ -278,7 +278,7 @@ module Provider
 
       def compile_datasource(data)
         target_folder = data.output_folder
-        name = "#{module_name(data.object)}_facts"
+        name = "#{module_name(data.object)}_info"
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
                                 "lib/ansible/modules/cloud/google/#{name}.py"),
