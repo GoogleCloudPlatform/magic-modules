@@ -12,15 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-transformed := map[string]interface{}{}
-
 v, ok := res["networkEndpoint"]
 if !ok || v == nil {
   return res, nil
 }
 
-networkEndpt := v.(map[string]interface{})
-for k, v := range networkEndpt {
-  transformed[k] = v
-}
-return transformed, nil
+return v.(map[string]interface{}), nil
