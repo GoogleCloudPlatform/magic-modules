@@ -2398,6 +2398,7 @@ func expandResourceUsageExportConfig(configured interface{}) *containerBeta.Reso
 
 	result := &containerBeta.ResourceUsageExportConfig{
 			EnableNetworkEgressMetering: resourceUsageConfig["enable_network_egress_metering"].(bool),
+			ForceSendFields: []string{"EnableNetworkEgressMetering"},
 	}
 	if _, ok := resourceUsageConfig["bigquery_destination"]; ok {
 			if len(resourceUsageConfig["bigquery_destination"].([]interface{})) > 0 {
