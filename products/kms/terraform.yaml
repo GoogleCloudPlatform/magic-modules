@@ -82,6 +82,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       rotationPeriod: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'orEmpty(validateKmsCryptoKeyRotationPeriod)'
+        update_mask_fields:
+          - "rotationPeriod"
+          - "nextRotationTime"
       versionTemplate: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       versionTemplate.protectionLevel: !ruby/object:Overrides::Terraform::PropertyOverride

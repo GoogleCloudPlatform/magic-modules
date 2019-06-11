@@ -1,5 +1,4 @@
 updateMask := []string{}
-
 <% update_body_properties.each do |prop| -%>
 <%# UpdateMask documentation is not not obvious about which fields are supported or
    how deeply nesting is supported.  For instance, if we change the field foo.bar.baz,
@@ -10,7 +9,13 @@ updateMask := []string{}
    far.
 -#%>
 if d.HasChange("<%= prop.name.underscore -%>") {
-  updateMask = append(updateMask, "<%= prop.api_name -%>")
+<%
+mask = prop.api_name
+if prop.update_mask_fields
+  mask = prop.update_mask_fields.join(',')
+end
+-%>
+  updateMask = append(updateMask, "<%= mask -%>")
 }
 <% end -%>
 // updateMask is a URL parameter but not present in the schema, so replaceVars
