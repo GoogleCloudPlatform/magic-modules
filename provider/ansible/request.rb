@@ -48,6 +48,10 @@ module Provider
       # This is outputting code and code is easier to read on one line.
       # rubocop:disable Metrics/LineLength
       def response_output(prop, hash_name, module_name)
+        # If name + name_pattern, use the function.
+        return "name_full_to_partial(#{hash_name}.get('name'), #{module_name}.params)" \
+          if prop.name == 'name' && prop.__resource.name_pattern
+
         # If input true, treat like request, but use module names.
         return request_output(prop, "#{module_name}.params", module_name) \
           if prop.input
@@ -63,6 +67,10 @@ module Provider
       end
 
       def request_output(prop, hash_name, module_name)
+        # If name + name_pattern, use the function.
+        return "name_partial_to_full(#{hash_name}.get('name'), module.params)" \
+          if prop.name == 'name' && prop.__resource.name_pattern
+
         return "response.get(#{quote_string(prop.name)})" \
           if prop.is_a? Api::Type::FetchedExternal
 

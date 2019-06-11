@@ -324,7 +324,7 @@ module Provider
 
     # Convert a URL to a regex.
     def regex_url(url)
-      url.gsub(/{{.*}}/, '.*')
+      url.gsub(/{{[a-z]*}}/, '.*')
     end
   end
 end

@@ -2,20 +2,22 @@ def name_partial_to_full(name, params):
     if name is None:
         return
 
-    url = r<%= lines(build_url(object.name_pattern)) -%>
+    url = r<%= lines(build_url(regex_url(object.name_pattern))) -%>
 
     if not re.match(url, name):
         name = <%= build_url(object.name_pattern) -%>.format(**module.params)
 
     return name
 
+
 def name_full_to_partial(name, params):
+    
     if name is None:
         return
 
-    url = r<%= lines(build_url(object.name_pattern)) -%>
+    url = r<%= lines(build_url(regex_url(object.name_pattern))) -%>
 
     if not re.match(url, name):
-        name = <%= build_url(object.name_pattern) -%>.format(**params)
+        name = name.split('/')[-1]
 
     return name
