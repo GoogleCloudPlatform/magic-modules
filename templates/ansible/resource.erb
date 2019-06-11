@@ -30,7 +30,9 @@ __metaclass__ = type
 <%= lines(import) -%>
 import json
 <%
-  imports = object.imports + ['time', 're']
+  imports = object.imports || []
+  imports << 'time' if object.async
+  imports << 're' if !readonly_selflink_rrefs.empty? || object.name_pattern
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
