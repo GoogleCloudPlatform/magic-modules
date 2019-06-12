@@ -74,12 +74,15 @@ type Config struct {
 	<% unless version == 'ga' -%>
 	BinaryAuthorizationBasePath string
 	ContainerAnalysisBasePath   string
+	MonitoringBasePath           string
 	SecurityScannerBasePath     string
 	<% end -%>
 
 	AccessContextManagerBasePath string
 	CloudSchedulerBasePath       string
 	FirestoreBasePath            string
+	RedisBasePath                string
+	TpuBasePath                  string
 
 	CloudBillingBasePath string
 	clientBilling        *cloudbilling.APIService
@@ -277,7 +280,7 @@ func (c *Config) LoadAndValidate() error {
 		return err
 	}
 	c.clientDns.UserAgent = userAgent
-	c.clientDns.BasePath = removeBasePathVersion(dnsClientBasePath)
+	c.clientDns.BasePath = dnsClientBasePath
 
 	dnsBetaClientBasePath := removeBasePathVersion(c.DnsBetaBasePath) + "v1beta2/projects/"
 	log.Printf("[INFO] Instantiating Google Cloud DNS Beta client for path %s", dnsBetaClientBasePath)
@@ -306,7 +309,7 @@ func (c *Config) LoadAndValidate() error {
 	c.clientLogging.UserAgent = userAgent
 	c.clientLogging.BasePath = loggingClientBasePath
 
-	storageClientBasePath := removeBasePathVersion(c.StorageBasePath)
+	storageClientBasePath := removeBasePathVersion(c.StorageBasePath) + "v1/"
 	log.Printf("[INFO] Instantiating Google Storage client for path %s", storageClientBasePath)
 	c.clientStorage, err = storage.NewService(context, option.WithHTTPClient(client))
 	if err != nil {

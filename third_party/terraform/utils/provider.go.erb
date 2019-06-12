@@ -82,6 +82,7 @@ func Provider() terraform.ResourceProvider {
 			// start beta-only products
 			BinaryAuthorizationCustomEndpointEntryKey: BinaryAuthorizationCustomEndpointEntry,
 			ContainerAnalysisCustomEndpointEntryKey:   ContainerAnalysisCustomEndpointEntry,
+			MonitoringCustomEndpointEntryKey:           MonitoringCustomEndpointEntry,
 			SecurityScannerCustomEndpointEntryKey:     SecurityScannerCustomEndpointEntry,
 			// end beta-only products
 			<% end -%>
@@ -95,11 +96,13 @@ func Provider() terraform.ResourceProvider {
 			FirestoreCustomEndpointEntryKey:            FirestoreCustomEndpointEntry,
 			KmsCustomEndpointEntryKey:                  KmsCustomEndpointEntry,
 			PubsubCustomEndpointEntryKey:               PubsubCustomEndpointEntry,
+			RedisCustomEndpointEntryKey:                RedisCustomEndpointEntry,
 			ResourceManagerCustomEndpointEntryKey:      ResourceManagerCustomEndpointEntry,
 			SourceRepoCustomEndpointEntryKey:           SourceRepoCustomEndpointEntry,
 			SpannerCustomEndpointEntryKey:              SpannerCustomEndpointEntry,
 			SqlCustomEndpointEntryKey:                  SqlCustomEndpointEntry,
 			StorageCustomEndpointEntryKey:              StorageCustomEndpointEntry,
+			TpuCustomEndpointEntryKey:                  TpuCustomEndpointEntry,
 
 			// Handwritten Products / Versioned / Atypical Entries
 			<% unless version == 'ga' -%>
@@ -376,6 +379,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	<% unless version == 'ga' -%>
 	config.BinaryAuthorizationBasePath = d.Get(BinaryAuthorizationCustomEndpointEntryKey).(string)
 	config.ContainerAnalysisBasePath = d.Get(ContainerAnalysisCustomEndpointEntryKey).(string)
+	config.MonitoringBasePath = d.Get(MonitoringCustomEndpointEntryKey).(string)
 	config.SecurityScannerBasePath = d.Get(SecurityScannerCustomEndpointEntryKey).(string)
 	<% end -%>
 
@@ -395,6 +399,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.SpannerBasePath = d.Get(SpannerCustomEndpointEntryKey).(string)
 	config.SqlBasePath = d.Get(SqlCustomEndpointEntryKey).(string)
 	config.StorageBasePath = d.Get(StorageCustomEndpointEntryKey).(string)
+	config.TpuBasePath = d.Get(TpuCustomEndpointEntryKey).(string)
 
 	<% unless version == 'ga' -%>
 	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
@@ -431,12 +436,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 // For a consumer of config.go that isn't a full fledged provider and doesn't
 // have its own endpoint mechanism such as sweepers, init {{service}}BasePath
 // values to a default. After using this, you should call config.LoadAndValidate.
-func BasePathsConfigure(c *Config) {
+func ConfigureBasePaths(c *Config) {
 	// Generated Products
 	<% unless version == 'ga' -%>
 	// start beta-only products
 	c.BinaryAuthorizationBasePath = BinaryAuthorizationDefaultBasePath
 	c.ContainerAnalysisBasePath = ContainerAnalysisDefaultBasePath
+	c.MonitoringBasePath = MonitoringDefaultBasePath
 	c.SecurityScannerBasePath = SecurityScannerDefaultBasePath
 	// end beta-only products
 	<% end -%>
@@ -450,11 +456,13 @@ func BasePathsConfigure(c *Config) {
 	c.FirestoreBasePath = FirestoreDefaultBasePath
 	c.KmsBasePath = KmsDefaultBasePath
 	c.PubsubBasePath = PubsubDefaultBasePath
+	c.RedisBasePath = RedisDefaultBasePath
 	c.ResourceManagerBasePath = ResourceManagerDefaultBasePath
 	c.SourceRepoBasePath = SourceRepoDefaultBasePath
 	c.SpannerBasePath = SpannerDefaultBasePath
 	c.SqlBasePath = SqlDefaultBasePath
 	c.StorageBasePath = StorageDefaultBasePath
+	c.TpuBasePath = TpuDefaultBasePath
 
 	// Handwritten Products / Versioned / Atypical Entries
 	<% unless version == 'ga' -%>
