@@ -2199,6 +2199,9 @@ resource "google_container_cluster" "with_cloudrun_enabled" {
 	initial_node_count = 1
 
 	addons_config {
+		http_load_balancing {
+			disabled = false
+		}
 		istio_config {
 			disabled = false
 		}
