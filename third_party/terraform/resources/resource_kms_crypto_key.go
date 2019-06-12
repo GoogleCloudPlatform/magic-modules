@@ -200,6 +200,7 @@ func resourceKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", cryptoKeyId.Name)
 	d.Set("rotation_period", cryptoKey.RotationPeriod)
 	d.Set("self_link", cryptoKey.Name)
+	d.Set("purpose", cryptoKey.Purpose)
 
 	if err = d.Set("version_template", flattenVersionTemplate(cryptoKey.VersionTemplate)); err != nil {
 		return fmt.Errorf("Error setting version_template in state: %s", err.Error())
