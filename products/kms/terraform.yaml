@@ -90,7 +90,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         update_mask_fields:
           - "versionTemplate.algorithm"
       versionTemplate.protectionLevel: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_from_api: true
+        default_value: :SOFTWARE
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_delete: templates/terraform/custom_delete/kms_crypto_key.erb
       custom_import: templates/terraform/custom_import/kms_crypto_key.go.erb
