@@ -65,8 +65,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example-key"
         skip_test: true
       - !ruby/object:Provider::Terraform::Examples
-        name: "kms_crypto_key_assymmetric_sign"
-        primary_resource_id: "example-assymmetric-sign-key"
+        name: "kms_crypto_key_asymmetric_sign"
+        primary_resource_id: "example-asymmetric-sign-key"
         skip_test: true
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
