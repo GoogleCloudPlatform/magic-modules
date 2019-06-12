@@ -37,6 +37,7 @@ objects:
         'Official Documentation': 'https://cloud.google.com/source-repositories/'
       api: 'https://cloud.google.com/source-repositories/docs/reference/rest/v1/projects.repos'
     collection_url_key: 'repos'
+    name_pattern: 'projects/{{project}}/repos/{{name}}'
     description: |
       A repository (or repo) is a Git repository storing versioned source content.
     properties:

@@ -32,7 +32,7 @@ import json
 <%
   imports = object.imports || []
   imports << 'time' if object.async
-  imports << 're' unless readonly_selflink_rrefs.empty?
+  imports << 're' if !readonly_selflink_rrefs.empty? || object.name_pattern
 -%>
 <%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
@@ -419,13 +419,16 @@ def is_different(module, response):
 # This is for doing comparisons with Ansible's current parameters.
 def response_to_hash(module, response):
     return <%= lines(python_literal(response_properties(object.properties), use_hash_brackets: true)) -%>
+<% if object.name_pattern -%>
+<%= lines(compile('templates/ansible/name_pattern.py.erb')) -%>
+<% end -%>
 <% readonly_selflink_rrefs.each do |resource| -%>
 
 
 def <%= resource.name.underscore -%>_selflink(name, params):
     if name is None:
         return
-    url = r<%= lines(build_url(resource.regex_url)) -%>
+    url = r<%= lines(build_url(regex_url(resource.self_link_url))) -%>
     if not re.match(url, name):
         name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
     return name
