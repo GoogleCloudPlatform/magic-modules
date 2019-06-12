@@ -40,6 +40,13 @@ func resourceKmsCryptoKey() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: orEmpty(validateKmsCryptoKeyRotationPeriod),
 			},
+			"purpose": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "ENCRYPT_DECRYPT",
+				ValidateFunc: validation.StringInSlice([]string{"ENCRYPT_DECRYPT", "ASYMMETRIC_SIGN", "ASYMMETRIC_DECRYPT"}, false),
+			},
 			"version_template": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -107,7 +114,7 @@ func resourceKmsCryptoKeyCreate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	key := cloudkms.CryptoKey{
-		Purpose:         "ENCRYPT_DECRYPT",
+		Purpose:         d.Get("purpose").(string),
 		VersionTemplate: expandVersionTemplate(d.Get("version_template").([]interface{})),
 	}
 
