@@ -63,6 +63,10 @@ module Provider
       end
 
       def request_output(prop, hash_name, module_name)
+        # If name + name_pattern, use the function.
+        return "name_partial_to_full(#{hash_name}.get('name'), module.params)" \
+          if prop.name == 'name' && prop.__resource.name_pattern
+
         return "response.get(#{quote_string(prop.name)})" \
           if prop.is_a? Api::Type::FetchedExternal
 

@@ -98,6 +98,11 @@ module Api
       # often used to extract an object from a parent object or a collection.
       attr_reader :nested_query
 
+      # [Optional] If a resource requires a partial URL when sending the name
+      # in the API request, this is the pattern that maps a name to a
+      # partial URL.
+      attr_reader :name_pattern
+
       # ====================
       # IAM Configuration
       # ====================
@@ -154,6 +159,7 @@ module Api
       check :read_verb, type: Symbol, default: :GET, allowed: %i[GET POST]
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
+      check :name_pattern, type: String
 
       check :input, type: :boolean
       check :min_version, type: String
@@ -351,13 +357,6 @@ module Api
           @delete_url
         ].flatten.join
       end
-    end
-
-    # A regex to check if a full URL was returned or just a shortname.
-    def regex_url
-      self_link_url.gsub('{{project}}', '.*')
-                   .gsub('{{name}}', '[a-z1-9\-]*')
-                   .gsub('{{zone}}', '[a-z1-9\-]*')
     end
 
     # ====================
