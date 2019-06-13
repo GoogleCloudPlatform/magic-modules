@@ -124,7 +124,7 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
 
         return results
 
-<%  sdk_operation = object.azure_sdk_definition.list_by_rg -%>
+<%  sdk_operation = object.azure_sdk_definition.list_by_resource_group -%>
 <%  unless sdk_operation.nil? -%>
     def list(self):
         response = None
