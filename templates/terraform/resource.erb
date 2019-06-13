@@ -141,7 +141,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= object.full_create_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }
@@ -199,7 +199,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-    url, err := replaceVars(d, config, "<%= object.self_link_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
@@ -327,7 +327,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         defer mutexKV.Unlock(lockName)
 <%      end -%>
 
-        url, err := replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
+        url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
         if err != nil {
             return err
         }
@@ -417,7 +417,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
         return err
     }
@@ -485,7 +485,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= object.full_delete_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
     if err != nil {
         return err
     }

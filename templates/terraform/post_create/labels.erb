@@ -16,7 +16,7 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     labelFingerprintProp := d.Get("label_fingerprint")
     obj["labelFingerprint"] = labelFingerprintProp
 
-    url, err = replaceVars(d, config, "<%= object.self_link_url -%>/setLabels")
+    url, err = replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>/setLabels")
     if err != nil {
         return err
     }

@@ -3,7 +3,7 @@ if d.Get("networks.#").(int) > 0 {
 	patched := make(map[string]interface{})
 	patched["networks"] = nil
 
-	url, err := replaceVars(d, config, "https://www.googleapis.com/dns/v1beta2/projects/{{project}}/policies/{{name}}")
+	url, err := replaceVars(d, config, "{{DnsBasePath}}projects/{{project}}/policies/{{name}}")
 	if err != nil {
 		return err
 	}

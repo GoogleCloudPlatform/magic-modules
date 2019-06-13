@@ -2,7 +2,7 @@
 // in theory, we should find a way to disable the default URL and not construct
 // both, but that's a problem for another day. Today, we cheat.
 log.Printf("[DEBUG] replacing URL %q with a custom delete URL", url)
-url, err = replaceVars(d, config, "<%= object.__product.base_url -%><%=object.base_url-%>/{{name}}")
+url, err = replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}" -%><%=object.base_url-%>/{{name}}")
 if err != nil {
 	return err
 }
