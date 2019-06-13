@@ -366,6 +366,14 @@ func instanceConfigSchema() *schema.Schema {
 					ForceNew: true,
 				},
 
+<% unless version == 'ga' -%>
+				"min_cpu_platform": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+					ForceNew: true,
+				},
+<% end -%>
 				"disk_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -662,6 +670,12 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			}
 		}
 	}
+
+	<% unless version == 'ga' -%>
+	if v, ok := cfg["min_cpu_platform"]; ok {
+		icg.MinCpuPlatform = v.(string)
+	}
+	<% end -%>
 	return icg
 }
 
@@ -934,6 +948,9 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 	if icg != nil {
 		data["num_instances"] = icg.NumInstances
 		data["instance_names"] = icg.InstanceNames
+		<% unless version == 'ga' -%>
+		data["min_cpu_platform"] = icg.MinCpuPlatform
+		<% end -%>
 		if icg.DiskConfig != nil {
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds

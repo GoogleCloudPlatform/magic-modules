@@ -383,6 +383,11 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
     computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
 
+* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The name of a minimum generation of CPU family
+   for the master. If not specified, GCP will default to a predetermined computed value
+   for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+   for details about which CPU families are available (and defaulted) for each zone.
+
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each preemptible worker node. Defaults to 0.
 
