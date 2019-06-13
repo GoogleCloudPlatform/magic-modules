@@ -394,6 +394,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.FilestoreBasePath = d.Get(FilestoreCustomEndpointEntryKey).(string)
 	config.KmsBasePath = d.Get(KmsCustomEndpointEntryKey).(string)
 	config.PubsubBasePath = d.Get(PubsubCustomEndpointEntryKey).(string)
+	config.RedisBasePath = d.Get(RedisCustomEndpointEntryKey).(string)
 	config.ResourceManagerBasePath = d.Get(ResourceManagerCustomEndpointEntryKey).(string)
 	config.SourceRepoBasePath = d.Get(SourceRepoCustomEndpointEntryKey).(string)
 	config.SpannerBasePath = d.Get(SpannerCustomEndpointEntryKey).(string)
