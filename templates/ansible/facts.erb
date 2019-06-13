@@ -91,7 +91,6 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
         )
         self.mgmt_client = None
 <%= lines(build_class_instance_variable_init(object.azure_sdk_definition.read, object)) -%>
-<%= lines(indent('self.tags = None', 8)) if is_tags_defined?(object) -%>
         super(AzureRM<%= object.name -%>Info, self).__init__(self.module_arg_spec, supports_tags=False)
 
     def exec_module(self, **kwargs):
@@ -153,20 +152,7 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
         d = item.as_dict()
         d = {
 <%  output_properties.each do |prop| -%>
-<%    py_var = python_variable_name(prop, object.azure_sdk_definition.create) -%>
-<%    py_fields = [] -%>
-<%    sdk_ref = get_applicable_reference(prop.azure_sdk_references, sdk_operation.response) -%>
-<%    unless sdk_ref.nil? -%>
-<%      sdk_refs = sdk_ref.split('/').reject(&:empty?) -%>
-<%      sdk_ref = '' -%>
-<%      sdk_refs.each do |ref| -%>
-<%        sdk_ref += '/' + ref -%>
-<%        sdk_type_def = sdk_operation.response[sdk_ref] -%>
-<%        py_fields <<= sdk_type_def.python_field_name || prop.name.underscore -%>
-<%      end -%>
-<%    end -%>
-<%    access_chain = py_fields.map{|f| "['#{f}']"}.join -%>
-            '<%= py_var -%>': <%= py_fields.empty? ? "self.#{py_var}" : "d#{access_chain}" -%>,
+<%=   lines(build_property_inline_response_format(prop, sdk_operation)) -%>
 <%  end -%>
         }
         return d

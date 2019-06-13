@@ -1,0 +1,16 @@
+<%
+    py_var = python_variable_name(property, sdk_operation)
+    py_fields = []
+    sdk_ref = get_applicable_reference(property.azure_sdk_references, sdk_operation.response)
+    unless sdk_ref.nil?
+      sdk_refs = sdk_ref.split('/').reject(&:empty?)
+      sdk_ref = ''
+      sdk_refs.each do |ref|
+        sdk_ref += '/' + ref
+        sdk_type_def = sdk_operation.response[sdk_ref]
+        py_fields <<= sdk_type_def.python_field_name || property.name.underscore
+      end
+    end
+    access_chain = py_fields.map{|f| "['#{f}']"}.join
+-%>
+'<%= py_var -%>': <%= py_fields.empty? ? "self.#{py_var}" : "d#{access_chain}" -%>,
