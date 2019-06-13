@@ -229,6 +229,7 @@ be used for configuration are below:
 * `container_custom_endpoint` (`GOOGLE_CONTAINER_CUSTOM_ENDPOINT`) - `https://container.googleapis.com/v1/`
 * `container_beta_custom_endpoint` (`GOOGLE_CONTAINER_BETA_CUSTOM_ENDPOINT`) - `https://container.googleapis.com/v1beta1/`
 * `dataproc_custom_endpoint` (`GOOGLE_DATAPROC_CUSTOM_ENDPOINT`) - `https://dataproc.googleapis.com/v1/`
+* `dataproc_beta_custom_endpoint` (`GOOGLE_DATAPROC_BETA_CUSTOM_ENDPOINT`) - `https://dataproc.googleapis.com/v1beta2/`
 * `dataflow_custom_endpoint` (`GOOGLE_DATAFLOW_CUSTOM_ENDPOINT`) - `https://dataflow.googleapis.com/v1b3/`
 * `dns_custom_endpoint` (`GOOGLE_DNS_CUSTOM_ENDPOINT`) - `https://www.googleapis.com/dns/v1/` | `https://www.googleapis.com/dns/v1beta2/`
 * `dns_beta_custom_endpoint` (`GOOGLE_DNS_BETA_CUSTOM_ENDPOINT`) - `https://www.googleapis.com/dns/v1beta2/`
