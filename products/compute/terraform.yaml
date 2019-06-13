@@ -774,6 +774,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
+    # Fine-grained resources don't actually exist as standalone GCP resource
+    # in Cloud Asset Inventory
     exclude_validator: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
