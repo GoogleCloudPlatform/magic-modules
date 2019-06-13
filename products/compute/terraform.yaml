@@ -774,6 +774,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   NetworkEndpoint: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{zone}}/{{network_endpoint_group}}/{{instance}}/{{ip_address}}/{{port}}"
     mutex: networkEndpoint/{{project}}/{{zone}}/{{network_endpoint_group}}
+    exclude_validator: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "network_endpoint"
