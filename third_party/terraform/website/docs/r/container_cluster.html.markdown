@@ -601,7 +601,7 @@ The `resource_usage_export_config` block supports:
 * `enable_network_egress_metering` (Optional) - Whether to enable network egress metering for this cluster. If enabled, a daemonset will be created
     in the cluster to meter network egress traffic.
 
-* `bigquery_destination` (Optional) - Parameters for using BigQuery as the destination of resource usage export.
+* `bigquery_destination` (Required) - Parameters for using BigQuery as the destination of resource usage export.
 
 * `bigquery_destination.dataset_id` (Required) - The ID of a BigQuery Dataset. For Example:
 
