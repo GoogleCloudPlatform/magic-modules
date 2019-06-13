@@ -76,8 +76,6 @@ module Api
       check_optional_property :order, ::Integer
       @order ||= 750
 
-      check_optional_property :sample_value, ::String
-
       @azure_sdk_references ||= []
       check_property :azure_sdk_references, ::Array
 
