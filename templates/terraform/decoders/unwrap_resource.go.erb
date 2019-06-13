@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-v, ok := res["networkEndpoint"]
+v, ok := res["<%= object.name.camelize(:lower) %>"]
 if !ok || v == nil {
   return res, nil
 }

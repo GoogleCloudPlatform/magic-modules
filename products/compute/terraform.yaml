@@ -801,7 +801,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       pre_delete: templates/terraform/pre_delete/compute_network_endpoint.go.erb
-      decoder: templates/terraform/decoders/compute_network_endpoint.go.erb
+      decoder: templates/terraform/decoders/unwrap_resource.go.erb
       encoder: templates/terraform/encoders/compute_network_endpoint.go.erb
   NetworkEndpointGroup: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
