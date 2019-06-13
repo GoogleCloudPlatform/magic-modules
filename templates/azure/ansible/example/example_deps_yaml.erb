@@ -1,5 +1,6 @@
 <%  if !example.prerequisites.nil? -%>
 <%    example.prerequisites.each do |pre_ex| -%>
-<%=     lines(build_yaml_from_example(pre_ex.product, pre_ex.example, random_variables, nil, name_hints, nil), 1) -%>
+<%      _, yml = build_yaml_from_example(pre_ex.product, pre_ex.example, random_variables, nil, name_hints, nil) -%>
+<%=     lines(yml, 1) -%>
 <%    end -%>
 <%  end -%>
