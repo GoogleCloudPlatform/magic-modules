@@ -71,7 +71,7 @@ from ansible.module_utils.azure_rm_common import AzureRMModuleBase
 
 try:
     from msrestazure.azure_exceptions import CloudError
-    from <%= object.azure_sdk_definition.python_client_namespace -%> import <%= python_sdk_client -%>
+    from <%= object.azure_sdk_definition.python_client_namespace -%> import <%= lines(python_sdk_client) -%>
     from msrest.serialization import Model
 except ImportError:
     # This is handled in azure_rm_common
