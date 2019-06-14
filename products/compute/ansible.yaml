@@ -45,6 +45,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
@@ -243,6 +245,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   # Ansible tasks must alter infrastructure.
   # This means that virtual objects are a poor fit.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

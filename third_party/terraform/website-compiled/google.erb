@@ -420,6 +420,12 @@
       <a href="/docs/providers/google/r/compute_disk.html">google_compute_disk</a>
       </li>
 
+<% unless version == 'ga' %>
+      <li<%%= sidebar_current("docs-google-compute-external-vpn-gateway") %>>
+      <a href="/docs/providers/google/r/compute_external_vpn_gateway.html">google_compute_external_vpn_gateway</a>
+      </li>
+
+<% end -%>
       <li<%%= sidebar_current("docs-google-compute-firewall") %>>
       <a href="/docs/providers/google/r/compute_firewall.html">google_compute_firewall</a>
       </li>

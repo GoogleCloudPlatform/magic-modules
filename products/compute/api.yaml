@@ -7799,6 +7799,81 @@ objects:
               name: 'ipAddress'
               description: 'The external IP address for this VPN gateway interface.'
   - !ruby/object:Api::Resource
+    name: 'ExternalVpnGateway'
+    kind: 'compute#externalVpnGateway'
+    base_url: projects/{{project}}/global/externalVpnGateways
+    collection_url_key: 'items'
+    input: true
+    has_self_link: true
+    min_version: beta
+    description: |
+      Represents a VPN gateway managed outside of GCP.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: https://cloud.google.com/compute/docs/reference/rest/beta/externalVpnGateways
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035.  Specifically, the name must be 1-63 characters long and
+          match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+          the first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'redundancyType'
+        description: |
+          Indicates the redundancy type of this external VPN gateway
+        values:
+          - :FOUR_IPS_REDUNDANCY
+          - :SINGLE_IP_INTERNALLY_REDUNDANT
+          - :TWO_IPS_REDUNDANCY
+      - !ruby/object:Api::Type::Array
+        name: 'interfaces'
+        description: |
+          A list of interfaces on this external VPN gateway.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'id'
+              send_empty_value: true
+              description: |
+                The numberic ID for this interface. Allowed values are based on the redundancy type
+                of this external VPN gateway
+                * `0 - SINGLE_IP_INTERNALLY_REDUNDANT`
+                * `0, 1 - TWO_IPS_REDUNDANCY`
+                * `0, 1, 2, 3 - FOUR_IPS_REDUNDANCY`
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              description: |
+                IP address of the interface in the external VPN gateway.
+                Only IPv4 is supported. This IP address can be either from
+                your on-premise gateway or another Cloud provider’s VPN gateway,
+                it cannot be an IP address from Google Compute Engine.
+  - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
@@ -8043,8 +8118,11 @@ objects:
         input: true
         send_empty_value: true
         min_version: beta
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'peerExternalGateway'
+        resource: 'ExternalVpnGateway'
+        imports: 'selfLink'
+        input: true
         description: |
           URL of the peer side external VPN gateway to which this VPN tunnel is connected.
         min_version: beta
