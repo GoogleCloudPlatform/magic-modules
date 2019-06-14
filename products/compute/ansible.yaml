@@ -31,6 +31,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -251,6 +255,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

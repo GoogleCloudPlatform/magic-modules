@@ -4898,7 +4898,6 @@ objects:
       single subnet. **NOTE**: Network endpoints cannot be created outside of a
       network endpoint group.
     input: true
-    min_version: beta
     create_verb: :POST
     create_url: projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/attachNetworkEndpoints
     delete_verb: :POST
@@ -4978,7 +4977,6 @@ objects:
     kind: 'compute#networkEndpointGroup'
     base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
     input: true
-    min_version: beta
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
