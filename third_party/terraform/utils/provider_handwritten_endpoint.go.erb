@@ -219,7 +219,6 @@ var ServiceManagementCustomEndpointEntry = &schema.Schema{
 	}, ServiceManagementDefaultBasePath),
 }
 
-<% unless version == 'ga' -%>
 var ServiceNetworkingDefaultBasePath = "https://servicenetworking.googleapis.com/v1/"
 var ServiceNetworkingCustomEndpointEntryKey = "service_networking_custom_endpoint"
 var ServiceNetworkingCustomEndpointEntry = &schema.Schema{
@@ -231,7 +230,6 @@ var ServiceNetworkingCustomEndpointEntry = &schema.Schema{
 	}, ServiceNetworkingDefaultBasePath),
 }
 
-<% end -%>
 var ServiceUsageDefaultBasePath = "https://serviceusage.googleapis.com/v1/"
 var ServiceUsageCustomEndpointEntryKey = "service_usage_custom_endpoint"
 var ServiceUsageCustomEndpointEntry = &schema.Schema{
