@@ -1,10 +1,9 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"github.com/hashicorp/terraform/helper/resource"
-	"google.golang.org/api/servicenetworking/v1beta"
+	"google.golang.org/api/servicenetworking/v1"
 )
 
 type ServiceNetworkingOperationWaiter struct {
@@ -30,6 +29,3 @@ func serviceNetworkingOperationWaitTime(config *Config, op *servicenetworking.Op
 	}
 	return OperationWait(w, activity, timeoutMinutes)
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
