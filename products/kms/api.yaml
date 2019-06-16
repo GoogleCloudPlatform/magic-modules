@@ -71,6 +71,7 @@ objects:
           The resource name for the CryptoKey.
         required: true
         input: true
+        url_param_only: true
       - !ruby/object:Api::Type::Time
         name: 'creationTime'
         description: |
@@ -83,6 +84,7 @@ objects:
           The id of the `KeyRing` to which the key shall belong.
         required: true
         input: true
+        url_param_only: true
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         description: |

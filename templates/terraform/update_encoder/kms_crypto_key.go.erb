@@ -12,10 +12,6 @@
         # See the License for the specific language governing permissions and
         # limitations under the License.
 -%>
-        // `name` and `keyRing` are used only for path building and are not sent to the server.
-        delete(obj, "name")
-        delete(obj, "keyRing")
-
         // if rotationPeriod is changed, nextRotationTime must also be set.
 	if d.HasChange("rotation_period") && d.Get("rotation_period") != "" {		
  		rotationPeriod := d.Get("rotation_period").(string)		
