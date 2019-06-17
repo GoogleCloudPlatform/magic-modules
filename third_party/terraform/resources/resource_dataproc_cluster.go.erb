@@ -208,12 +208,7 @@ func resourceDataprocCluster() *schema.Resource {
 									// It always uses whatever is specified for the worker_config
 									// "machine_type": { ... }
 <% unless version == 'ga' -%>
-									"min_cpu_platform": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-										ForceNew: true,
-									},
+									// "min_cpu_platform": { ... }
 <% end -%>
 									"disk_config": {
 										Type:     schema.TypeList,
@@ -670,12 +665,6 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			}
 		}
 	}
-
-	<% unless version == 'ga' -%>
-	if v, ok := cfg["min_cpu_platform"]; ok {
-		icg.MinCpuPlatform = v.(string)
-	}
-	<% end -%>
 	return icg
 }
 
@@ -948,9 +937,6 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 	if icg != nil {
 		data["num_instances"] = icg.NumInstances
 		data["instance_names"] = icg.InstanceNames
-		<% unless version == 'ga' -%>
-		data["min_cpu_platform"] = icg.MinCpuPlatform
-		<% end -%>
 		if icg.DiskConfig != nil {
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
