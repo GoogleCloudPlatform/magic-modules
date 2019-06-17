@@ -310,6 +310,7 @@ func resourceDnsRecordSetImportState(d *schema.ResourceData, _ interface{}) ([]*
 		d.Set("managed_zone", parts[1])
 		d.Set("name", parts[2])
 		d.Set("type", parts[3])
+		d.SetId(parts[1] + "/" + parts[2] + "/" + parts[3])
 	} else {
 		return nil, fmt.Errorf("Invalid dns record specifier. Expecting {zone-name}/{record-name}/{record-type} or {project}/{zone-name}/{record-name}/{record-type}. The record name must include a trailing '.' at the end.")
 	}
