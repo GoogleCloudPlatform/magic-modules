@@ -18,17 +18,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'webstore' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'webstore' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'webstore' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'webstore' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
