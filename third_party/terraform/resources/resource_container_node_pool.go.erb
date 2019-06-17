@@ -34,6 +34,10 @@ func resourceContainerNodePool() *schema.Resource {
 			State: resourceContainerNodePoolStateImporter,
 		},
 
+		CustomizeDiff: customdiff.All(
+			resourceNodeConfigGuestAcceleratorCustomizeDiff,
+		),
+
 		Schema: mergeSchemas(
 			schemaNodePool,
 			map[string]*schema.Schema{

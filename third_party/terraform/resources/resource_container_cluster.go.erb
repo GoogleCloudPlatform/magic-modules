@@ -55,7 +55,10 @@ func resourceContainerCluster() *schema.Resource {
 		Update: resourceContainerClusterUpdate,
 		Delete: resourceContainerClusterDelete,
 
-		CustomizeDiff: resourceContainerClusterIpAllocationCustomizeDiff,
+		CustomizeDiff: customdiff.All(
+			resourceContainerClusterIpAllocationCustomizeDiff,
+			resourceNodeConfigGuestAcceleratorCustomizeDiff,
+		),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -782,6 +785,32 @@ func resourceContainerCluster() *schema.Resource {
 			},
 		},
 	}
+}
+
+// Setting 0 for guest accelerator count has the effect of removing all of the guest_accelerators. Since the API
+// returns an empty block we are squelching the diff if the API block is empty but the count is zero.
+//
+// This could also be modelled by setting `guest_accelerator = []` in the config. However since the
+// previous syntax requires that schema.SchemaConfigModeAttr is set on the field it is advisable that
+// we have a work around for removing guest accelerators.
+// See https://github.com/terraform-providers/terraform-provider-google/issues/3786
+func resourceNodeConfigGuestAcceleratorCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
+	old, new := diff.GetChange("node_config.0.guest_accelerator")
+	oList := old.([]interface{})
+	nList := new.([]interface{})
+
+	if len(nList) == len(oList) {
+		return nil
+	}
+
+	if len(oList) == 0 && len(nList) > 0 {
+		accel := nList[0].(map[string]interface{})
+		if accel["count"].(int) == 0 {
+			return diff.Clear("node_config.0.guest_accelerator")
+		}
+	}
+
+	return nil
 }
 
 func resourceContainerClusterIpAllocationCustomizeDiff(diff *schema.ResourceDiff, meta interface{}) error {
