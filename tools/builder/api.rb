@@ -14,12 +14,17 @@
 require 'net/http'
 require 'json'
 require 'active_support/inflector'
+
 require 'api/product'
 require 'api/resource'
 require 'api/type'
 require 'api/compiler'
 require 'api/async'
 
+# All properties are read-only in Magic Modules
+# Creating an api.yaml involves a lot of setting values.
+# This will create setters for all fields on an api.yaml
+# (but only in the context of the linter)
 module Api
   class Object
     # Create a setter if the setter doesn't exist
@@ -40,7 +45,7 @@ end
 TYPES = {
   'string': 'String',
   'boolean': 'Boolean',
-  'object': 'NameValues',
+  'object': 'Map',
   'integer': 'Integer',
   'number': 'Double',
   'array': 'Array'
@@ -67,10 +72,6 @@ class DiscoveryProperty
     prop.values = enum if @schema.dig('enum')
     prop.properties = nested if prop.is_a?(Api::Type::NestedObject)
     prop.item_type = array if prop.is_a?(Api::Type::Array)
-    if prop.is_a?(Api::Type::NameValues)
-      prop.key_type = 'Api::Type::String'
-      prop.value_type = 'Api::Type::String'
-    end
     prop
   end
 
@@ -132,12 +133,12 @@ class DiscoveryResource
   end
 
   def resource
-    @methods = @__product.get_methods_for_resource(@schema.dig('id'), @__product.doc.resource_path)
+    #@methods = @__product.get_methods_for_resource(@schema.dig('id'))
 
     res = Api::Resource.new
     res.name = @schema.dig('id')
     res.kind = @schema.dig('properties', 'kind', 'default')
-    res.base_url = base_url_format(@methods['list']['path'])
+    #res.base_url = base_url_format(@methods['list']['path'])
     res.description = @schema.dig('description')
     res.properties = properties
     res
@@ -161,14 +162,14 @@ class DiscoveryProduct
   attr_reader :results
   attr_reader :doc
 
-  def initialize(doc)
-    @doc = doc
-    @results = send_request(@doc.url)
+  def initialize(url, object)
+    @results = send_request(url)
+    @object = object
   end
 
   def get_resources
     @results['schemas'].map do |name, _|
-      next unless @doc.objects.include?(name)
+      next if name != @object
       get_resource(name).resource
     end.compact
   end
@@ -191,9 +192,6 @@ class DiscoveryProduct
 
   def get_product
     product = Api::Product.new
-    product.name = @doc.name
-    product.prefix = @doc.prefix
-    product.scopes = @doc.scopes
     product.versions = [version]
     product.objects = get_resources
     product
