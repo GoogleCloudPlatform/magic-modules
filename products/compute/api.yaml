@@ -673,6 +673,16 @@ objects:
                 For CONNECTION mode, either maxConnections or
                 maxConnectionsPerInstance must be set.
             - !ruby/object:Api::Type::Integer
+              name: 'maxConnectionsPerEndpoint'
+              description: |
+                The max number of simultaneous connections that a single backend
+                network endpoint can handle. This is used to calculate the
+                capacity of the group. Can be used in either CONNECTION or
+                UTILIZATION balancing modes.
+
+                For CONNECTION mode, either
+                maxConnections or maxConnectionsPerEndpoint must be set.
+            - !ruby/object:Api::Type::Integer
               name: 'maxRate'
               description: |
                 The max requests per second (RPS) of the group.
@@ -687,6 +697,13 @@ objects:
                 instance can handle. This is used to calculate the capacity of
                 the group. Can be used in either balancing mode. For RATE mode,
                 either maxRate or maxRatePerInstance must be set.
+            - !ruby/object:Api::Type::Double
+              name: 'maxRatePerEndpoint'
+              description: |
+                The max requests per second (RPS) that a single backend network
+                endpoint can handle. This is used to calculate the capacity of
+                the group. Can be used in either balancing mode. For RATE mode,
+                either maxRate or maxRatePerEndpoint must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
               default_value: 0.8
@@ -4974,6 +4991,7 @@ objects:
     kind: 'compute#networkEndpointGroup'
     base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
     input: true
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
