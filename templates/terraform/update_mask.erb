@@ -1,16 +1,20 @@
 updateMask := []string{}
-
 <% update_body_properties.each do |prop| -%>
 <%# UpdateMask documentation is not not obvious about which fields are supported or
    how deeply nesting is supported.  For instance, if we change the field foo.bar.baz,
    it seems that *sometimes*, 'foo' is a valid value.  Other times, it needs to be
-   'foo.bar', and other times 'foo.bar.baz'.  For now, this only works on top-level
-   fields - this has not been a problem yet.  It might be someday!  Consider modeling
-   the nesting off of what you see in `schema_property.erb` - that nests arbitrarily
-   far.
+   'foo.bar', and other times 'foo.bar.baz'. If the defaults don't work for you,
+   You can customize the exact list of fields that are passed for a property
+   using `update_mask_fields`.
 -#%>
 if d.HasChange("<%= prop.name.underscore -%>") {
-  updateMask = append(updateMask, "<%= prop.api_name -%>")
+<%
+mask = prop.api_name
+if prop.update_mask_fields
+  mask = prop.update_mask_fields.join(',')
+end
+-%>
+  updateMask = append(updateMask, "<%= mask -%>")
 }
 <% end -%>
 // updateMask is a URL parameter but not present in the schema, so replaceVars
