@@ -32,7 +32,7 @@ async: !ruby/object:Api::Async
   operation: !ruby/object:Api::Async::Operation
     kind: 'container#operation'
     path: 'name'
-    base_url: 'projects/{{project}}/zones/{{zone}}/operations/{{op_id}}'
+    base_url: 'projects/{{project}}/locations/{{location}}/operations/{{op_id}}'
     wait_ms: 1000
   result: !ruby/object:Api::Async::Result
     path: 'targetLink'
@@ -568,7 +568,7 @@ objects:
               description: Human-friendly representation of the condition
   - !ruby/object:Api::Resource
     name: 'NodePool'
-    base_url: projects/{{project}}/zones/{{location}}/clusters/{{cluster}}/nodePools
+    base_url: projects/{{project}}/locations/{{location}}/clusters/{{cluster}}/nodePools
     description: |
       NodePool contains the name and configuration for a cluster's node pool.
       Node pools are a set of nodes (i.e. VM's), with a common configuration and
