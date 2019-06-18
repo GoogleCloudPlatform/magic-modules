@@ -600,13 +600,22 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 			},
 			{
 				// Test alternative way to specify an empty node pool
-				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np),
+				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, 1),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
+			},
+
+			{
+				// Test alternative way to specify an empty node pool
+				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, 2),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
 			},
 		},
 	})
@@ -1236,7 +1245,7 @@ resource "google_container_node_pool" "np" {
 }`, cluster, np)
 }
 
-func testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np string) string {
+func testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np string, count int) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
 	name               = "%s"
@@ -1257,9 +1266,9 @@ resource "google_container_node_pool" "np" {
 		}
 
 		guest_accelerator {
-			count = 1
+			count = %d
 			type  = "nvidia-tesla-p100"
 		}
 	}
-}`, cluster, np)
+}`, cluster, np, count)
 }
