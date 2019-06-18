@@ -176,13 +176,9 @@ class DiscoveryProduct
     DiscoveryResource.new(@results['schemas'][resource], self)
   end
 
-  def get_methods_for_resource(resource, resource_path = nil)
-    resource_path = 'resources' if resource_path.nil?
-    # Discovery docs aren't created equal and some define resources at different nesting levels.
-    @resources = @results
-    resource_path.split('.').each{|k| @resources = @resources[k]}
-
-    @resources[resource.pluralize.camelize(:lower)]['methods']
+  def get_methods_for_resource(resource)
+    return if resource.nil?
+    @results.dig 'resources', resource.pluralize.camelize(:lower), 'methods'
   end
 
   def get_product
