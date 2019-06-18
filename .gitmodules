@@ -13,3 +13,6 @@
 [submodule "build/inspec"]
 	path = build/inspec
 	url = git@github.com:modular-magician/inspec-gcp.git
+[submodule "azure/magic-module-specs"]
+	path = azure/magic-module-specs
+	url = git@github.com:Azure/magic-module-specs.git
