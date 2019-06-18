@@ -51,6 +51,39 @@ TYPES = {
   'array': 'Array'
 }
 
+class HumanApi
+  def initialize(discovery, handwritten)
+    @discovery = discovery
+    @written = written
+  end
+
+  def build
+    # For each product, inject extra properties.
+    @handwritten.products.each { |prod| add_missing_properties(prod.properties) }
+
+    # Inject extra products at end
+    missing_products = @discovery.products.select { |x| @handwritten.products.map(&:name).includes?(x.name) }
+    @written.products.append(missing_products)
+    return @written
+  end
+
+  def add_missing_properties(disc_props, hand_props)
+    # If nested property, recurse.
+    hand_props.select { |p| p.nested_properties? }
+              .each do |p|
+      matching_discovery_prop = disc_props.select { |d| d.name == p.name }.first
+      if p.is_a?(Api::Type::NestedObject)
+        add_missing_properties(matching_discovery_prop.properties, p.properties)
+      elsif p.is_a?(Api::Type::Array) && p.item_type.is_a?(Api::Type::NestedObject)
+        add_missing_properties(matching_discovery_prop.item_type.properties, p.item_type.properties)
+      end
+    end
+    # Inject new properties.
+    missing_properties = disc_props.select { |p| !hand_props.any? { |d| d.name == p.name }}
+    hand_props.append(missing_properties)
+  end
+end
+
 class DiscoveryProperty
   attr_reader :schema
   attr_reader :name
