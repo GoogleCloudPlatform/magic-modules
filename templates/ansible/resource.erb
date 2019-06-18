@@ -75,7 +75,7 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml(output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)) -%>
+<%= lines(word_wrap_for_yaml(to_yaml(output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)).split("\n"))) -%>
 '''
 
 import time

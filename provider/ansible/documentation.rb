@@ -70,12 +70,13 @@ module Provider
         type = 'complex' if prop.is_a?(Api::Type::NestedObject) \
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
+        sample = prop.document_sample_value || prop.sample_value
         {
           python_variable_name(prop, object.azure_sdk_definition.read) => {
             'description' => format_description(prop.description),
             'returned' => 'always',
             'type' => type,
-            'sample' => (prop.sample_value unless prop.sample_value.nil?),
+            'sample' => (sample unless sample.nil?),
             'contains' => (
               if prop.is_a?(Api::Type::NestedObject)
                 prop.properties.map { |p| returns_for_property(p, object) }.reduce({}, :merge)
@@ -88,15 +89,14 @@ module Provider
       end
 
       def autogen_notice_contrib
-        []
-        # ['Please read more about how to change this file at',
-        #  'https://www.github.com/GoogleCloudPlatform/magic-modules']
+        ['Please read more about how to change this file at',
+         'https://github.com/Azure/magic-module-specs']
       end
 
       def resourceref_description(prop)
         [
           "It can be the #{prop.resource_type_name} name which is in the same resource group.",
-          "It can be the #{prop.resource_type_name} ID. e.g., #{prop.sample_value}.",
+          "It can be the #{prop.resource_type_name} ID. e.g., #{prop.document_sample_value || prop.sample_value}.",
           "It can be a dict which contains C(name) and C(resource_group) of the #{prop.resource_type_name}."
         ]
       end

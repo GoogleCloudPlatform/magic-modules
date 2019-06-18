@@ -36,30 +36,31 @@ module Provider
           property.required || !property.default_value.nil?
         end
 
-        def word_wrap_for_yaml(lines, width = 150)
+        def word_wrap_for_yaml(lines, width = 160)
           wrapped = Array.new
           lines.each do |line|
             quoted = false
+            first_line = true
             while line.length > width
               # Calculate leading spaces for the following lines
               striped = line.lstrip
               spaces = line.length - striped.length
-              spaces += 2 if striped.start_with? '- '
+              if first_line
+                spaces += 2
+                first_line = false
+              end
 
               # Quote the whole line using quotation mark if not quoted
+              quoted = true unless striped.start_with? '- '
               unless quoted
                 line = line[0..spaces - 1] + '"' + line[spaces..-1] + '"' if line[spaces] != '"'
                 quoted = true
               end
 
               # Find the last possible word-break character
-              wb_index = -1
-              wb_index_try = line.index(/[ \t@=,;]/)
-              while !wb_index_try.nil? && wb_index_try < width
-                wb_index = wb_index_try
-                wb_index_try = line.index(/[ \t@=,;]/, wb_index_try + 1)
-              end
-              break if wb_index == -1
+              wb_index = find_word_break_index(line, /[ \t@=,;]/, width - spaces)
+              wb_index = find_word_break_index(line, /[ \t@=,;\/]/, width - spaces) if wb_index.nil? || wb_index <= spaces
+              break if wb_index.nil? || wb_index <= spaces
 
               # Break this line into two
               wb_char = line[wb_index]
@@ -71,6 +72,16 @@ module Provider
             wrapped << line
           end
           wrapped
+        end
+
+        private
+
+        def find_word_break_index(line, wb_chars, width)
+          wb_index = line.rindex(wb_chars)
+          while !wb_index.nil? && wb_index > width
+            wb_index = line.rindex(wb_chars, wb_index - 1)
+          end
+          wb_index
         end
       end
     end

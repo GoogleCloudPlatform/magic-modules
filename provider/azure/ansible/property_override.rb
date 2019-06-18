@@ -5,6 +5,7 @@ module Provider
     module Ansible
       module OverrideFields
         attr_reader :resource_type_name
+        attr_reader :document_sample_value
         attr_reader :custom_normalize
         attr_reader :inline_custom_response_format
         include Provider::Ansible::OverrideFields
@@ -16,6 +17,7 @@ module Provider
         def validate
           super
           check_optional_property :resource_type_name, String
+          check_optional_property :document_sample_value, String
           check_optional_property :custom_normalize, String
           check_optional_property :inline_custom_response_format, String
         end

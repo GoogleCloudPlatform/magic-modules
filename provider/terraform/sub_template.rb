@@ -61,8 +61,8 @@ module Provider
       private
 
       def autogen_notice_contrib
-        ['Please read more about how to change this file in',
-         '.github/CONTRIBUTING.md.']
+        ['Please read more about how to change this file at',
+         'https://github.com/Azure/magic-module-specs']
       end
 
       def autogen_notice_text(line)

@@ -35,12 +35,18 @@ short_description: Gather info for Azure <%= lines(object.name.titlecase) -%>
 description:
     - Gather info for Azure <%= object.name.titlecase -%>.
 
+<%
+    if is_tags_defined?(object)
+      tags_prop = get_tags_property(object).clone
+      tags_prop.instance_variable_set(:@description, "Limit results by providing a list of tags. Format tags as 'key' or 'key:value'.")
+    end
+-%>
 <%= to_yaml({
   'options' => [
     input_properties.map{|p| documentation_for_property(p, object)},
-    (documentation_for_property(get_tags_property(object), object) if is_tags_defined?(object))
+    (documentation_for_property(tags_prop, object) if is_tags_defined?(object))
   ].flatten.compact.reduce({}, :merge)
-})-%>
+}) -%>
 
 extends_documentation_fragment:
     - azure
@@ -57,14 +63,14 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml({
+<%= lines(word_wrap_for_yaml(to_yaml({
   'items' => {
     'description' => 'List of items',
     'returned' => 'always',
     'type' => 'complex',
     'contains' => output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)
   }
-})-%>
+}).split("\n"))) -%>
 '''
 
 from ansible.module_utils.azure_rm_common import AzureRMModuleBase
