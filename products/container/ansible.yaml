@@ -21,9 +21,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'my-cluster' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-cluster' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'my-cluster' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-cluster' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -34,9 +34,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'my-pool' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-pool' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'my-pool' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'my-pool' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
