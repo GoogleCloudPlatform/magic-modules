@@ -608,14 +608,17 @@ func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
 			},
-
 			{
-				// Test alternative way to specify an empty node pool
-				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, 2),
+				// Assert that changes in count from 1 result in a diff
+				Config:             testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, 2),
+				ExpectNonEmptyPlan: true,
+				PlanOnly:           true,
 			},
 			{
-				ResourceName:            "google_container_node_pool.np",
-				ImportState:             true,
+				// Assert that adding another accelerator block will also result in a diff
+				Config:             testAccContainerNodePool_PartialEmptyGuestAccelerator2(cluster, np),
+				ExpectNonEmptyPlan: true,
+				PlanOnly:           true,
 			},
 		},
 	})
@@ -1271,4 +1274,37 @@ resource "google_container_node_pool" "np" {
 		}
 	}
 }`, cluster, np, count)
+}
+
+func testAccContainerNodePool_PartialEmptyGuestAccelerator2(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	initial_node_count = 3
+}
+
+resource "google_container_node_pool" "np" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	cluster            = "${google_container_cluster.cluster.name}"
+	initial_node_count = 1
+
+	node_config {
+		guest_accelerator {
+			count = 0
+			type  = "nvidia-tesla-p100"
+		}
+
+		guest_accelerator {
+			count = 1
+			type  = "nvidia-tesla-p100"
+		}
+
+		guest_accelerator {
+			count = 1
+			type  = "nvidia-tesla-p9000"
+		}
+	}
+}`, cluster, np)
 }
