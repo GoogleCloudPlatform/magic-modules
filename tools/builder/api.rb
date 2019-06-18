@@ -54,16 +54,20 @@ TYPES = {
 class HumanApi
   def initialize(discovery, handwritten)
     @discovery = discovery
-    @written = written
+    @written = handwritten
   end
 
   def build
     # For each product, inject extra properties.
-    @handwritten.products.each { |prod| add_missing_properties(prod.properties) }
+    @written.objects.each do |prod|
+      matching_object = @discovery.objects.select { |o| o.name == prod.name }.first
+      next unless matching_object
+      add_missing_properties(matching_object.properties, prod.properties)
+    end
 
     # Inject extra products at end
-    missing_products = @discovery.products.select { |x| @handwritten.products.map(&:name).includes?(x.name) }
-    @written.products.append(missing_products)
+    missing_products = @discovery.objects.select { |x| !@written.objects.map(&:name).include?(x.name) }
+    @written.objects.append(missing_products)
     return @written
   end
 

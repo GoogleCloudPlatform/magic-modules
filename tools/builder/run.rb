@@ -12,6 +12,6 @@ url = ARGV.first
 object = ARGV[1]
 product = ARGV[2]
 
-discovery = DiscoveryProduct.new(url, object)
-new_handwritten = HumanApi.new(discovery, Api::Compiler.new("products/#{product}/api.yaml").run)
-File.write("products/#{product}/api.yaml", new_handwritten)
+discovery = DiscoveryProduct.new(url, object).get_product
+new_handwritten = HumanApi.new(discovery, Api::Compiler.new("products/#{product}/api.yaml").run).build
+File.write("products/#{product}/api.yaml", YAML.dump(new_handwritten))
