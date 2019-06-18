@@ -125,7 +125,7 @@ class DiscoveryResource
   def initialize(schema, product)
     @schema = schema
     @__product = product
-
+    @methods = @__product.get_methods_for_resource(@schema.dig('id'))
   end
 
   def exists?
@@ -133,12 +133,10 @@ class DiscoveryResource
   end
 
   def resource
-    #@methods = @__product.get_methods_for_resource(@schema.dig('id'))
-
     res = Api::Resource.new
     res.name = @schema.dig('id')
     res.kind = @schema.dig('properties', 'kind', 'default')
-    #res.base_url = base_url_format(@methods['list']['path'])
+    res.base_url = base_url_format(@methods['list']['path'])
     res.description = @schema.dig('description')
     res.properties = properties
     res
@@ -183,9 +181,6 @@ class DiscoveryProduct
     # Discovery docs aren't created equal and some define resources at different nesting levels.
     @resources = @results
     resource_path.split('.').each{|k| @resources = @resources[k]}
-
-    raise "Cannot find #{resource} at api path: root.#{resource_path}" unless @resources[resource.pluralize.camelize(:lower)]
-    return unless @resources[resource.pluralize.camelize(:lower)]
 
     @resources[resource.pluralize.camelize(:lower)]['methods']
   end
