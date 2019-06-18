@@ -111,11 +111,11 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
 -%>
 <%  if support_subs && support_rgs -%>
         if self.resource_group is not None and self.name is not None:
-          self.results['items'] = self.get()
+            self.results['items'] = self.get()
         elif self.resource_group is not None:
-          self.results['items'] = self.list_by_resource_group()
+            self.results['items'] = self.list_by_resource_group()
         else:
-          self.results['items'] = self.list_by_subscription()
+            self.results['items'] = self.list_by_subscription()
 <%  else -%>
         # TODO: Implement more info list here
 <%  end -%>
