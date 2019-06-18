@@ -35,7 +35,7 @@ func resourceContainerNodePool() *schema.Resource {
 		},
 
 		CustomizeDiff: customdiff.All(
-			resourceNodeConfigGuestAcceleratorCustomizeDiff,
+			resourceNodeConfigEmptyGuestAccelerator,
 		),
 
 		Schema: mergeSchemas(

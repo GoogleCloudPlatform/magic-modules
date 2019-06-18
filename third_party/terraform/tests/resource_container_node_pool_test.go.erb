@@ -573,9 +573,34 @@ func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
 			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-nodepool-test-%s", acctest.RandString(10))
+	np := fmt.Sprintf("tf-nodepool-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		Steps: []resource.TestStep{
 			{
 				// Test alternative way to specify an empty node pool
-				Config: testAccContainerNodePool_012_ConfigModeAttr3(cluster, np),
+				Config: testAccContainerNodePool_EmptyGuestAccelerator(cluster, np),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
+			},
+			{
+				// Test alternative way to specify an empty node pool
+				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -1188,7 +1213,7 @@ resource "google_container_node_pool" "np" {
 }`, cluster, np)
 }
 
-func testAccContainerNodePool_012_ConfigModeAttr3(cluster, np string) string {
+func testAccContainerNodePool_EmptyGuestAccelerator(cluster, np string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
 	name               = "%s"
@@ -1205,6 +1230,34 @@ resource "google_container_node_pool" "np" {
 	node_config {
 		guest_accelerator {
 			count = 0
+			type  = "nvidia-tesla-p100"
+		}
+	}
+}`, cluster, np)
+}
+
+func testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	initial_node_count = 3
+}
+
+resource "google_container_node_pool" "np" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	cluster            = "${google_container_cluster.cluster.name}"
+	initial_node_count = 1
+
+	node_config {
+		guest_accelerator {
+			count = 0
+			type  = "nvidia-tesla-p100"
+		}
+
+		guest_accelerator {
+			count = 1
 			type  = "nvidia-tesla-p100"
 		}
 	}
