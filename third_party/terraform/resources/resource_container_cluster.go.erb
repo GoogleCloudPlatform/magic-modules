@@ -787,8 +787,9 @@ func resourceContainerCluster() *schema.Resource {
 	}
 }
 
-// Setting 0 for guest accelerator count has the effect of removing that block of guest_accelerators from the
-// API request body. If all blocks are count=0 this will remove all guest_accelerators from the instance
+// Setting a guest accelerator block to count=0 is the equivalent to omitting the block: it won't get
+// sent to the API and it won't be stored in state. This diffFunc will try to compare the old + new state
+// by only comparing the blocks with a positive count and ignoring those with count=0
 //
 // One quirk with this approach is that configs with mixed count=0 and count>0 accelerator blocks will
 // show a confusing diff if one of there are config changes that result in a legitimate diff as the count=0
@@ -808,10 +809,10 @@ func resourceNodeConfigEmptyGuestAccelerator(diff *schema.ResourceDiff, meta int
 		return nil
 	}
 	var hasAcceleratorWithEmptyCount bool
-	index := 0
 	// the list of blocks in a desired state with count=0 accelerator blocks in it
 	// will be longer than the current state.
 	// this index tracks the location of positive count accelerator blocks
+	index := 0
 	for i, item := range nList {
 		accel := item.(map[string]interface{})
 		if accel["count"].(int) == 0 {
