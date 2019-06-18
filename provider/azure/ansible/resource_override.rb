@@ -25,10 +25,14 @@ module Provider
 
         class IntegrationTestDefinition < ExampleReference
           attr_reader :delete_example
+          attr_reader :info_by_name_example
+          attr_reader :info_by_resource_group_example
 
           def validate
             super
             check_property :delete_example, String
+            check_optional_property :info_by_name_example, String
+            check_optional_property :info_by_resource_group_example, String
           end
         end
 

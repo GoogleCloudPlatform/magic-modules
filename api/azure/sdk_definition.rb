@@ -14,6 +14,7 @@ module Api
       attr_reader :update
       attr_reader :delete
       attr_reader :list_by_resource_group
+      attr_reader :list_by_subscription
 
       def validate
         super
@@ -27,6 +28,7 @@ module Api
         check_optional_property :update, Api::Azure::SDKOperationDefinition
         check_property :delete, Api::Azure::SDKOperationDefinition
         check_optional_property :list_by_resource_group, Api::Azure::SDKOperationDefinition
+        check_optional_property :list_by_subscription, Api::Azure::SDKOperationDefinition
       end
 
       def filter_language!(language)

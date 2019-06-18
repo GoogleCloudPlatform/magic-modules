@@ -42,7 +42,7 @@ module Provider
             ].flatten.compact,
             'required' => (true if required && !is_location?(prop)),
             'default' => (prop.default_value.to_s.underscore if prop.default_value),
-            'type' => ('bool' if prop.is_a? Api::Type::Boolean),
+            'type' => python_type(prop),
             'aliases' => (prop.aliases if prop.aliases),
             'version_added' => (prop.version_added.to_f if prop.version_added),
             'choices' => (prop.values.map{|v| v.to_s.underscore} if prop.is_a? Api::Type::Enum),

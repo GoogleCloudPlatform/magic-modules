@@ -5,6 +5,7 @@ require 'provider/azure/ansible/sdk/property_normalize_descriptor'
 require 'provider/azure/ansible/sdk/helpers'
 require 'provider/azure/ansible/module/sub_template'
 require 'provider/azure/ansible/sdk/sub_template'
+require 'provider/azure/ansible/example/helpers'
 require 'provider/azure/ansible/example/sub_template'
 
 require 'provider/azure/ansible/resource_override'
@@ -18,6 +19,7 @@ module Provider
       include Provider::Azure::Ansible::SubTemplate
       include Provider::Azure::Ansible::Module::SubTemplate
       include Provider::Azure::Ansible::SDK::SubTemplate
+      include Provider::Azure::Ansible::Example::Helpers
       include Provider::Azure::Ansible::Example::SubTemplate
     end
   end

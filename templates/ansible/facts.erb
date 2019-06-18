@@ -105,10 +105,20 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
         self.mgmt_client = self.get_mgmt_svc_client(<%= python_sdk_client -%>,
                                                     base_url=self._cloud_environment.endpoints.resource_manager)
 
-        if (self.name):
-            self.results['items'] = self.get()
+<%
+    support_subs = !object.azure_sdk_definition.list_by_subscription.nil?
+    support_rgs = !object.azure_sdk_definition.list_by_resource_group.nil?
+-%>
+<%  if support_subs && support_rgs -%>
+        if self.resource_group is not None and self.name is not None:
+          self.results['items'] = self.get()
+        elif self.resource_group is not None:
+          self.results['items'] = self.list_by_resource_group()
         else:
-            self.results['items'] = self.list()
+          self.results['items'] = self.list_by_subscription()
+<%  else -%>
+        # TODO: Implement more info list here
+<%  end -%>
         return self.results
 
 <%  sdk_operation = object.azure_sdk_definition.read -%>
@@ -132,7 +142,30 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
 
 <%  sdk_operation = object.azure_sdk_definition.list_by_resource_group -%>
 <%  unless sdk_operation.nil? -%>
-    def list(self):
+    def list_by_resource_group(self):
+        response = None
+        results = []
+        try:
+<%= lines(build_sdk_method_invocation(python_sdk_sub_client, sdk_operation)) -%>
+            self.log("Response : {0}".format(response))
+        except CloudError as e:
+            self.log('Could not get info for <%= object.name.titlecase -%>.')
+
+        if response is not None:
+            for item in response:
+<%    if is_tags_defined?(object) -%>
+                if self.has_tags(item.tags, self.tags):
+                    results.append(self.format_response(item))
+<%    else -%>
+                # TODO: Implement format response without tags
+<%    end -%>
+
+        return results
+<%  end -%>
+
+<%  sdk_operation = object.azure_sdk_definition.list_by_subscription -%>
+<%  unless sdk_operation.nil? -%>
+    def list_by_subscription(self):
         response = None
         results = []
         try:

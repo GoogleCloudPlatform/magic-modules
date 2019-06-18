@@ -25,6 +25,28 @@
     that:
       - not output.changed
 
+<%  unless object.inttests[0].info_by_name_example.nil? -%>
+<%    _, info_yaml, _ = build_test_yaml_from_example(object.inttests[0].info_by_name_example) -%>
+<%=   lines(info_yaml) -%>
+
+- name: Assert that info is returned
+  assert:
+    that:
+      - not output.changed
+<%= lines(indent(generate_info_assert_list(object.inttests[0].example), 6)) -%>
+
+<%  end -%>
+<%  unless object.inttests[0].info_by_resource_group_example.nil? -%>
+<%    _, info_yaml, _ = build_test_yaml_from_example(object.inttests[0].info_by_resource_group_example) -%>
+<%=   lines(info_yaml) -%>
+
+- name: Assert that info is returned
+  assert:
+    that:
+      - not output.changed
+<%= lines(indent(generate_info_assert_list(object.inttests[0].example), 6)) -%>
+
+<%  end -%>
 <%  deps_yaml, delete_yaml, _ = build_test_yaml_from_example(object.inttests[0].delete_example) -%>
 <%= lines(delete_yaml) -%>
 
