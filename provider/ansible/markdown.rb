@@ -42,8 +42,9 @@ module Provider
         LIST_DELIMITER = '%%%'.freeze
         # Returns a paragraph with delimiters showing where it should be split.
         def paragraph(text)
-          text.split(". ").map do |paragraph|
+          text.split(/\.[ \n]/).map do |paragraph|
             paragraph += '.' unless paragraph.end_with?('.')
+            format_url(paragraph)
             paragraph.tr("\n", ' ').strip.squeeze(' ')
           end.join(DELIMITER)
         end
@@ -74,6 +75,20 @@ module Provider
         # list() is called.
         def list_item(text, list_type)
           "#{text.sub("\n", '')}#{LIST_DELIMITER}"
+        end
+
+        private
+
+        # Find URLs and surround with U()
+        # If there's a period at the end of the URL, make sure the
+        # period is outside of the ()
+        def format_url(paragraph)
+          paragraph.gsub(%r{
+            https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]
+            [a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+
+            [a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))
+            [a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9]\.[^\s]{2,}
+          }x, 'U(\\0)').gsub('.)', ').')
         end
       end
     end
