@@ -190,18 +190,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         set_hash_func: 'resourceGoogleComputeBackendServiceBackendHash'
       backends.group: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkRelativePaths'
-      backends.maxConnections: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
-      backends.maxConnectionsPerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
-      backends.maxConnectionsPerInstance: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
-      backends.maxRate: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
-      backends.maxRatePerEndpoint: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
-      backends.maxRatePerInstance: !ruby/object:Overrides::Terraform::PropertyOverride
-        send_empty_value: true
       cdnPolicy: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       cdnPolicy.cacheKeyPolicy.queryStringWhitelist: !ruby/object:Overrides::Terraform::PropertyOverride

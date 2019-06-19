@@ -620,6 +620,7 @@ objects:
                 and CONNECTION (for TCP/SSL).
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
+              send_empty_value: true
               default_value: 1.0
               description: |
                 A multiplier applied to the group's maximum servicing capacity
@@ -656,6 +657,7 @@ objects:
                 partial URL.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnections'
+              send_empty_value: true
               description: |
                 The max number of simultaneous connections for the group. Can
                 be used with either CONNECTION or UTILIZATION balancing modes.
@@ -665,6 +667,7 @@ objects:
                 as appropriate for group type, must be set.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnectionsPerInstance'
+              send_empty_value: true
               description: |
                 The max number of simultaneous connections that a single
                 backend instance can handle. This is used to calculate the
@@ -675,6 +678,7 @@ objects:
                 maxConnectionsPerInstance must be set.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnectionsPerEndpoint'
+              send_empty_value: true
               description: |
                 The max number of simultaneous connections that a single backend
                 network endpoint can handle. This is used to calculate the
@@ -685,6 +689,7 @@ objects:
                 maxConnections or maxConnectionsPerEndpoint must be set.
             - !ruby/object:Api::Type::Integer
               name: 'maxRate'
+              send_empty_value: true
               description: |
                 The max requests per second (RPS) of the group.
 
@@ -694,6 +699,7 @@ objects:
                 group type, must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxRatePerInstance'
+              send_empty_value: true
               description: |
                 The max requests per second (RPS) that a single backend
                 instance can handle. This is used to calculate the capacity of
@@ -701,6 +707,7 @@ objects:
                 either maxRate or maxRatePerInstance must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxRatePerEndpoint'
+              send_empty_value: true
               description: |
                 The max requests per second (RPS) that a single backend network
                 endpoint can handle. This is used to calculate the capacity of
@@ -708,6 +715,7 @@ objects:
                 either maxRate or maxRatePerEndpoint must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
+              send_empty_value: true
               default_value: 0.8
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
