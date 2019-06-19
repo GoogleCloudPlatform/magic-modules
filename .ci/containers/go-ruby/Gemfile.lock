@@ -71,6 +71,7 @@ GEM
       loofah (~> 2.2, >= 2.2.2)
     rainbow (3.0.0)
     rake (12.3.1)
+    redcarpet (3.4.0)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -113,6 +114,7 @@ DEPENDENCIES
   octokit
   parallel_tests
   rake
+  redcarpet
   rspec
   rubocop (~> 0.63.1)
 
