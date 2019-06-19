@@ -54,7 +54,7 @@ module Provider
         end
 
         def codespan(code)
-          code
+          "\"#{code}\""
         end
 
         def normal_text(text)
