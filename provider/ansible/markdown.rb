@@ -25,8 +25,11 @@ module Provider
       DELIMITER = '$$$'.freeze
 
       def description(text)
+        # Description texts should have leading + trailing spaces
+        # removed so that they are not mistaken for code blocks by the
+        # Markdown parser.
         Redcarpet::Markdown.new(AnsibleDescriptionRender)
-                           .render(text.gsub(/\n^\n/, ' '))
+                           .render(text.strip)
                            .split(DELIMITER)
       end
 
