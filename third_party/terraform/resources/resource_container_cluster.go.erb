@@ -2125,10 +2125,10 @@ func expandMaintenancePolicy(configured interface{}) *containerBeta.MaintenanceP
 func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *containerBeta.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-    return &containerBeta.ClusterAutoscaling{
-      EnableNodeAutoprovisioning: false,
-      ForceSendFields:            []string{"EnableNodeAutoprovisioning"},
-    }
+		return &containerBeta.ClusterAutoscaling{
+			EnableNodeAutoprovisioning: false,
+			ForceSendFields:            []string{"EnableNodeAutoprovisioning"},
+		}
 	}
 
 	config := l[0].(map[string]interface{})
@@ -2142,23 +2142,23 @@ func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *c
 	var resourceLimits []*containerBeta.ResourceLimit
 	if limits, ok := config["resource_limits"]; ok {
 		resourceLimits = make([]*containerBeta.ResourceLimit, 0)
-    if lmts, ok := limits.([]interface{}); ok {
-      for _, v := range lmts {
-        limit := v.(map[string]interface{})
-        resourceLimits = append(resourceLimits,
-        	&containerBeta.ResourceLimit{
-            ResourceType: limit["resource_type"].(string),
-            // Here we're relying on *not* setting ForceSendFields for 0-values.
-            Minimum: int64(limit["minimum"].(int)),
-            Maximum: int64(limit["maximum"].(int)),
-          })
-      }
-    }
-  }
+		if lmts, ok := limits.([]interface{}); ok {
+			for _, v := range lmts {
+				limit := v.(map[string]interface{})
+				resourceLimits = append(resourceLimits,
+					&containerBeta.ResourceLimit{
+						ResourceType: limit["resource_type"].(string),
+						// Here we're relying on *not* setting ForceSendFields for 0-values.
+						Minimum: int64(limit["minimum"].(int)),
+						Maximum: int64(limit["maximum"].(int)),
+					})
+			}
+		}
+	}
 	return &containerBeta.ClusterAutoscaling{
 		EnableNodeAutoprovisioning: config["enabled"].(bool),
 		ResourceLimits:             resourceLimits,
-  }
+	}
 }
 <% end -%>
 
