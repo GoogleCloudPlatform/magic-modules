@@ -62,8 +62,8 @@ class TestUpstreamPullRequests(unittest.TestCase):
     test_client = Github(os.environ.get(TOKEN_ENV_VAR))
     result = get_downstream_urls(self.test_client,self.TEST_PR_NUM)
 
-    expected_cnt = len(self.EXPECTED_DOWNSTREAM_URLS)
-    self.assertEquals(len(result), expected_cnt,
+    expected_len = len(self.EXPECTED_DOWNSTREAM_URLS)
+    self.assertEquals(len(result), expected_len,
       "expected %d downstream urls, got %d" % (expected_cnt, len(result)))
     for url in result:
       self.assertIn(str(url), self.EXPECTED_DOWNSTREAM_URLS)
