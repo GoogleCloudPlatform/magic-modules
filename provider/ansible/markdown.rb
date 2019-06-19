@@ -49,7 +49,6 @@ module Provider
           end.join(DELIMITER)
         end
 
-        
         def codespan(code)
           "`#{code}`"
         end
@@ -58,7 +57,7 @@ module Provider
           text
         end
 
-        def link(link, title, content)
+        def link(link, _title, content)
           if content
             "L(#{content},#{link})"
           else
@@ -66,14 +65,14 @@ module Provider
           end
         end
 
-        def list(content, list_type)
+        def list(content, _list_type)
           content.split(LIST_DELIMITER).join(', ')
         end
 
         # List items come first. We have to place special delimiters
         # because all of the list strings are joined together before
         # list() is called.
-        def list_item(text, list_type)
+        def list_item(text, _list_type)
           "#{text.sub("\n", '')}#{LIST_DELIMITER}"
         end
 
