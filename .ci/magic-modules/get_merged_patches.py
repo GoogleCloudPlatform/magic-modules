@@ -1,25 +1,45 @@
 #!/usr/bin/env python
-import get_downstream_prs
-import itertools
-import re
-import operator
 import os
 import urllib
-
 from github import Github
+from pyutils import downstreams
+
+def get_merged_patches(gh):
+  """Download all merged patches for open upstream PRs.
+
+  Args:
+    gh: Github client to make calls to Github with.
+  """
+  open_pulls = gh.get_repo('GoogleCloudPlatform/magic-modules')\
+                 .get_pulls(state='open')
+  for open_pr in open_pulls:
+    print 'Downloading patches for upstream PR %d...' % open_pr.number
+    parsed_urls = downstreams.get_parsed_downstream_urls(gh, open_pr.number)
+    for repo_name, pulls in parsed_urls:
+      repo = gh.get_repo(repo_name)
+      for r, pr_num in pulls:
+          print 'Check to see if %s/%s is merged and should be downloaded\n' % (
+            r, pr_num)
+          downstream_pr = repo.get_pull(int(pr_num))
+          if downstream_pr.is_merged():
+            download_patch(r, downstream_pr)
+
+def download_patch(repo, pr):
+  """Download merged downstream PR patch.
+
+  Args:
+    pr: Github Pull request to download patch for
+  """
+  download_location = os.path.join('./patches', repo_name, '%d.patch' % pr.id)
+  print download_location
+  # Skip already downloaded patches
+  if os.path.exists(download_location):
+    return
+
+  if not os.path.exists(os.path.dirname(download_location)):
+      os.makedirs(os.path.dirname(download_location))
+  urllib.urlretrieve(pr.patch_url, download_location)
 
 if __name__ == '__main__':
-  g = Github(os.environ.get('GH_TOKEN'))
-  open_pulls = g.get_repo('GoogleCloudPlatform/magic-modules').get_pulls(state='open')
-  depends = [item for sublist in [get_downstream_prs.get_github_dependencies(g, open_pull.number) for open_pull in open_pulls] for item in sublist]
-  parsed_dependencies = [re.match(r'https://github.com/([\w-]+/[\w-]+)/pull/(\d+)', d).groups() for d in depends]
-  for r, pulls in itertools.groupby(parsed_dependencies, key=operator.itemgetter(0)):
-    repo = g.get_repo(r)
-    for pull in pulls:
-      pr = repo.get_pull(int(pull[1]))
-      print 'Checking %s to see if it should be downloaded.' % (pr,)
-      if pr.is_merged():
-        download_location = os.path.join('./patches', pull[0], pull[1] + '.patch')
-        if not os.path.exists(os.path.dirname(download_location)):
-          os.makedirs(os.path.dirname(download_location))
-        urllib.urlretrieve(pr.patch_url, download_location)
+  gh = Github(os.environ.get('GH_TOKEN'))
+  get_merged_patches(gh)
