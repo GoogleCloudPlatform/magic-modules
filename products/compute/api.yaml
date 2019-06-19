@@ -2204,15 +2204,11 @@ objects:
         description: |
           The purpose of the resource. For global internal addresses it can be
 
-          * GCE_ENDPOINT for addresses that are used by VM instances, alias IP ranges, internal load balancers, and similar resources.
-          * DNS_RESOLVER for a DNS resolver address in a subnetwork
-          * VPC_PEERING for addresses that are reserved for VPC peer networks.
-          * NAT_AUTO for addresses that are external IP addresses automatically reserved for Cloud NAT.
+          * VPC_PEERING - for peer networks
+
+          This should only be set when using an Internal address.
         values:
-        - :GCE_ENDPOINT
-        - :DNS_RESOLVER
         - :VPC_PEERING
-        - :NAT_AUTO
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
