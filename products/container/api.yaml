@@ -65,6 +65,8 @@ objects:
 
           The file will not be created if this path is unset.
 
+          Any existing file at this path will be completely overridden.
+
           This requires the PyYaml library.
         required: true
       - !ruby/object:Api::Type::String
