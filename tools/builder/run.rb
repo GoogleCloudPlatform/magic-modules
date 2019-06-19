@@ -6,12 +6,27 @@ Dir.chdir(File.join(File.dirname(__FILE__), '../../'))
 
 require 'tools/builder/api'
 require 'api/compiler'
+require 'optparse'
 
-raise "Must include a URL, object_name and product" unless ARGV.length == 3
-url = ARGV.first
-object = ARGV[1]
-product = ARGV[2]
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "api.yaml builder: run.rb [options]"
 
-discovery = DiscoveryProduct.new(url, object).get_product
-new_handwritten = HumanApi.new(discovery, Api::Compiler.new("products/#{product}/api.yaml").run).build
-File.write("products/#{product}/api.yaml", YAML.dump(new_handwritten))
+  opts.on("-u", "--url URL", "Discovery Doc URL") do |url|
+    options[:url] = v
+  end
+
+  opts.on("-o", "--object OBJECT", "The object you want to generate") do |obj|
+    options[:obj] = obj
+  end
+
+  opts.on("-p", "--product product", "The name of the product you're building") do |prod|
+    options[:prod] = prod
+  end
+end
+
+raise "Must include a URL, object_name and product" unless options.keys.length == 3
+
+discovery = DiscoveryProduct.new(options[:url], options[:obj]).get_product
+new_handwritten = HumanApi.new(discovery, Api::Compiler.new("products/#{options[:product]}/api.yaml").run).build
+File.write("api.yaml", YAML.dump(new_handwritten))
