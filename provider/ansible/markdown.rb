@@ -42,9 +42,9 @@ module Provider
         LIST_DELIMITER = '%%%'.freeze
         # Returns a paragraph with delimiters showing where it should be split.
         def paragraph(text)
-          text.split(/\.\n/).map do |paragraph|
+          text.split(".\n").map do |paragraph|
             paragraph += '.' unless paragraph.end_with?('.')
-            format_url(paragraph)
+            paragraph = format_url(paragraph)
             paragraph.tr("\n", ' ').strip.squeeze(' ')
           end.join(DELIMITER)
         end
