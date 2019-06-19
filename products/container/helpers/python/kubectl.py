@@ -1,5 +1,5 @@
 class Kubectl(object):
-    def initialize(self, module):
+    def __init__(self, module):
         self.module = module
 
     """
@@ -7,7 +7,7 @@ class Kubectl(object):
     kubectl_path must be set or this will fail.
     """
     def write_file(self):
-        with open(module.params['kubectl_path'], 'w') as f:
+        with open(self.module.params['kubectl_path'], 'w') as f:
             f.write(yaml.dump(self._contents()))
 
     """
@@ -15,10 +15,10 @@ class Kubectl(object):
     """
     def _contents(self):
         token = self._auth_token()
-        endpoint = "https://{}".format(fetch["endpoint"])
-        context = module.params.get('kubectl_context')
+        endpoint = "https://{}".format(self.fetch["endpoint"])
+        context = self.module.params.get('kubectl_context')
         if not context:
-            context = module.params['name']
+            context = self.module.params['name']
 
         return {
           'apiVersion': 'v1',
@@ -27,7 +27,7 @@ class Kubectl(object):
               'name': context,
               'cluster': {
                 'certificate-authority-data':
-                  self.fetch['masterAuth']['clusterCaCertificate'],
+                  str(self.fetch['masterAuth']['clusterCaCertificate']),
                 'server': endpoint,
               }
             }
@@ -58,8 +58,8 @@ class Kubectl(object):
                   },
                   'name': 'gcp'
                 },
-                'username': self.fetch['masterAuth']['username'],
-                'password': self.fetch['masterAuth']['password']
+                'username': str(self.fetch['masterAuth']['username']),
+                'password': str(self.fetch['masterAuth']['password'])
               }
             }
           ]
@@ -70,7 +70,7 @@ class Kubectl(object):
     This also sets the 'fetch' variable used in creating the kubectl
     """
     def _auth_token(self):
-        auth = GcpSession(module, 'auth')
-        response = auth.get(self_link(module))
+        auth = GcpSession(self.module, 'auth')
+        response = auth.get(self_link(self.module))
         self.fetch = response.json()
-        return response.request.headers.authorization.split(' ')[1]
+        return response.request.headers['authorization'].split(' ')[1]
