@@ -526,7 +526,7 @@ The `node_config` block supports:
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
     for more information. Defaults to false.
 
-* `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "cos_containerd"` and `node_version = "1.12.6-gke.8"` or later to use it. 
+* `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it. 
     Structure is documented below.
 
 * `service_account` - (Optional) The service account to be used by the Node VMs.
