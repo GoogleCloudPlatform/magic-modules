@@ -835,7 +835,10 @@ func resourceNodeConfigEmptyGuestAccelerator(diff *schema.ResourceDiff, meta int
 	if hasAcceleratorWithEmptyCount && index == len(oList) {
 		// If the number of count>0 blocks match, there are count=0 blocks present and we
 		// haven't already returned due to a legitimate diff
-		diff.Clear("node_config.0.guest_accelerator")
+		err := diff.Clear("node_config.0.guest_accelerator")
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
