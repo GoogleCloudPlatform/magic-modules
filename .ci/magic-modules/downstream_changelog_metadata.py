@@ -66,10 +66,17 @@ def set_changelog_info(gh_pull, release_note, labels_to_add):
   downstream_pull.set_labels(*new_labels)
 
 if __name__ == '__main__':
+  downstream_urls = os.environ.get('DOWNSTREAM_REPOS').split(',')
+  if len(downstream_urls) == 0:
+    puts "Skipping, no downstreams repos given to downstream changelog info for"
+    sys.exit(0)
+  gh = Github(os.environ.get('GITHUB_TOKEN'))
+
   assert len(sys.argv) == 2, "expected id filename as argument"
   with open(sys.argv[1]) as f:
     pr_num = int(f.read())
 
-    gh = Github(os.environ.get('GITHUB_TOKEN'))
-    downstream_urls = os.environ.get('DOWNSTREAM_REPOS').split(',')
-    downstream_changelog_info(gh, downstream_urls)
+    # TODO(emilymye): Replace this no-op print statement with code after
+    # deploying pipeline so we can verify code.
+    puts "I'll try to downstream your pr changes later! This is a pipeline test"
+    # downstream_changelog_info(gh, downstream_urls)
