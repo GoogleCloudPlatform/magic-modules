@@ -64,6 +64,8 @@ objects:
           The path that the kubectl config file will be written to.
 
           The file will not be created if this path is unset.
+
+          This requires the PyYaml library.
         required: true
       - !ruby/object:Api::Type::String
         name: 'kubectlContext'
