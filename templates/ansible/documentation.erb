@@ -14,7 +14,7 @@ DOCUMENTATION = '''
 ---
 <%= to_yaml({
   'module' => module_name(object),
-  'description' => format_description(object.description),
+  'description' => description(object.description),
   'short_description' => "Creates a GCP #{object.name}",
   'version_added' => version_added(object).to_f,
   'author' => "Google Inc. (@googlecloudplatform)",
