@@ -28,9 +28,10 @@ module Provider
         # Description texts should have leading + trailing spaces
         # removed so that they are not mistaken for code blocks by the
         # Markdown parser.
-        Redcarpet::Markdown.new(AnsibleDescriptionRender)
-                           .render(text.strip)
-                           .split(DELIMITER)
+        test = Redcarpet::Markdown.new(AnsibleDescriptionRender)
+                                  .render(text.strip.squeeze("\n"))
+                                  .split(DELIMITER)
+                                  .map(&:strip)
       end
 
       # This is a rendering class that takes in
@@ -48,7 +49,7 @@ module Provider
           text.split(".\n").map do |paragraph|
             paragraph += '.' unless paragraph.end_with?('.')
             paragraph = format_url(paragraph)
-            paragraph.tr("\n", ' ').strip.squeeze(' ')
+            paragraph.tr("\n", ' ').squeeze(' ')
           end.join(DELIMITER)
         end
 
