@@ -39,7 +39,6 @@ func TestAccComputeGlobalAddress_ipv6(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccComputeGlobalAddress_internal(t *testing.T) {
 	t.Parallel()
 
@@ -59,7 +58,6 @@ func TestAccComputeGlobalAddress_internal(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func testAccCheckComputeGlobalAddressExists(n string, addr *compute.Address) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -125,7 +123,6 @@ resource "google_compute_global_address" "foobar" {
 }`, acctest.RandString(10))
 }
 
-<% unless version == 'ga' -%>
 func testAccComputeGlobalAddress_internal() string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -142,4 +139,3 @@ resource "google_compute_global_address" "foobar" {
   network = "${google_compute_network.foobar.self_link}"
 }`, acctest.RandString(10), acctest.RandString(10))
 }
-<% end -%>
