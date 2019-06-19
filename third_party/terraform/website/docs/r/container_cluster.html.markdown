@@ -579,7 +579,8 @@ The `sandbox_type` block supports:
 
 * `sandbox_type` (Required) Which sandbox to use for pods in the node pool.
     Accepted values are:
-    * gvisor: Pods run within a gVisor sandbox.
+
+    * `"gvisor"`: Pods run within a gVisor sandbox.
 
 The `taint` block supports:
 
