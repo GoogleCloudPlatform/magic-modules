@@ -251,13 +251,15 @@ func resourceContainerCluster() *schema.Resource {
 
 			"cluster_autoscaling": {
 				Type:     schema.TypeList,
-				Computed: true,
 				MaxItems: 1,
 <% if version.nil? || version == 'ga' -%>
 				Removed:  "This field is in beta. Use it in the the google-beta provider instead. See https://terraform.io/docs/providers/google/provider_versions.html for more details.",
 <% else -%>
+				// This field is Optional + Computed because we automatically set the
+				// enabled value to false if the block is not returned in API responses.
 				Optional: true,
 <% end -%>
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -2123,58 +2125,40 @@ func expandMaintenancePolicy(configured interface{}) *containerBeta.MaintenanceP
 func expandClusterAutoscaling(configured interface{}, d *schema.ResourceData) *containerBeta.ClusterAutoscaling {
 	l, ok := configured.([]interface{})
 	if !ok || l == nil || len(l) == 0 || l[0] == nil {
-		// Before master version 1.11.2, we must send 'nil' values if autoscaling isn't
-		// turned on - the cluster will return an error even if we're setting
-		// EnableNodeAutoprovisioning to false.
-		cmv, err := version.NewVersion(d.Get("master_version").(string))
-		if err != nil {
-			log.Printf("[DEBUG] Could not parse master_version into version (%q), trying min_master_version.", d.Get("master_version").(string))
-			cmv, err = version.NewVersion(d.Get("min_master_version").(string))
-			if err != nil {
-				log.Printf("[DEBUG] Could not parse min_master_version into version (%q), assuming we are not already using cluster autoscaling.", d.Get("min_master_version").(string))
-				// This deserves a little explanation.  The only reason we would ever want to send
-				// `EnableNodeAutoprovisioning: false` is because we think we might need to
-				// disable it (e.g. it is already enabled).  Otherwise, there is no difference
-				// between sending `nil` and sending `EnableNodeAutoprovisioning: false`.
-				// The only circumstance in which neither master_version nor min_master_version
-				// can be parsed into version objects would be if the user has not set either one,
-				// and we have not yet had a `read` call.  e.g. first-time creates, and possibly
-				// some circumstance related to import.  It is probably safe to assume that
-				// we are not going to be changing cluster autoscaling from on to off in those
-				// circumstances.  Therefore, if we don't know what version we're running, and
-				// the user has not requested cluster autoscaling, we'll fail "safe" and not touch
-				// it.
-				cmv, _ = version.NewVersion("0.0.0")
-			}
-		}
-		dmv, _ := version.NewVersion("1.11.2")
-		if cmv.LessThan(dmv) {
-			return nil
-		} else {
-			return &containerBeta.ClusterAutoscaling{
-				EnableNodeAutoprovisioning: false,
-				ForceSendFields:            []string{"EnableNodeAutoprovisioning"},
-			}
+		return &containerBeta.ClusterAutoscaling{
+			EnableNodeAutoprovisioning: false,
+			ForceSendFields:            []string{"EnableNodeAutoprovisioning"},
 		}
 	}
-	r := &containerBeta.ClusterAutoscaling{}
-	if config, ok := l[0].(map[string]interface{}); ok {
-		r.EnableNodeAutoprovisioning = config["enabled"].(bool)
-		if limits, ok := config["resource_limits"]; ok {
-			if lmts, ok := limits.([]interface{}); ok {
-				for _, v := range lmts {
-					limit := v.(map[string]interface{})
-					r.ResourceLimits = append(r.ResourceLimits, &containerBeta.ResourceLimit{
+
+	config := l[0].(map[string]interface{})
+
+	// Conditionally provide an empty list to preserve a legacy 2.X behaviour
+	// when `enabled` is false and resource_limits is unset, allowing users to
+	// explicitly disable the feature. resource_limits don't work when node
+	// auto-provisioning is disabled at time of writing. This may change API-side
+	// in the future though, as the feature is intended to apply to both node
+	// auto-provisioning and node autoscaling.
+	var resourceLimits []*containerBeta.ResourceLimit
+	if limits, ok := config["resource_limits"]; ok {
+		resourceLimits = make([]*containerBeta.ResourceLimit, 0)
+		if lmts, ok := limits.([]interface{}); ok {
+			for _, v := range lmts {
+				limit := v.(map[string]interface{})
+				resourceLimits = append(resourceLimits,
+					&containerBeta.ResourceLimit{
 						ResourceType: limit["resource_type"].(string),
 						// Here we're relying on *not* setting ForceSendFields for 0-values.
 						Minimum: int64(limit["minimum"].(int)),
 						Maximum: int64(limit["maximum"].(int)),
 					})
-				}
 			}
 		}
 	}
-	return r
+	return &containerBeta.ClusterAutoscaling{
+		EnableNodeAutoprovisioning: config["enabled"].(bool),
+		ResourceLimits:             resourceLimits,
+	}
 }
 <% end -%>
 
