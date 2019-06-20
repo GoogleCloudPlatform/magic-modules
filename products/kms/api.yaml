@@ -58,8 +58,8 @@ objects:
       api: 'https://cloud.google.com/kms/docs/reference/rest/v1/projects.locations.keyRings'
   - !ruby/object:Api::Resource
     name: 'CryptoKey'
-    base_url: '{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
-    self_link: '{{key_ring}}/cryptoKeys/{{name}}'
+    base_url: 'projects/{{project}}/keyRings/{{key_ring}}/cryptoKeys?cryptoKeyId={{name}}'
+    self_link: 'projects/{{projects}}/keyRings/{{key_ring}}/cryptoKeys/{{name}}'
     update_verb: :PATCH
     update_mask: true
     description: |
