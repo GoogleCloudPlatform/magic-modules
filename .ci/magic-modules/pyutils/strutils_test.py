@@ -3,6 +3,7 @@ import unittest
 import os
 from github import Github
 
+
 class TestStringUtils(unittest.TestCase):
   def test_find_dependency_urls(self):
     test_urls = [
@@ -31,6 +32,98 @@ class TestStringUtils(unittest.TestCase):
         self.assertEquals(result[0], expected[0])
         self.assertEquals(int(result[1]), expected[1])
 
+  def test_get_release_note(self):
+    upstream_body = """
+      ```releasenote
+      This is a release note
+      ```
+    """
+    test_cases = {
+      ("releasenote text not found", ""),
+      ("""
+        Empty release note:
+        ```releasenote
+        ```
+        """, ""),
+      ("""
+        Random code block
+        ```
+        This is not a release note
+        ```
+        """, ""),
+      ("""
+        Empty release note with non-empty code block:
+        ```releasenote
+        ```
+
+        ```
+        This is not a release note
+        ```
+        """, ""),
+      ("""
+        Empty code block with non-empty release note:
+
+        ```invalid
+        ```
+
+        ```releasenote
+        This is a release note
+        ```
+        """, "This is a release note"),
+      ("""```releasenote
+        This is a release note
+        ```
+        """, "This is a release note"),
+    }
+    for k, v in test_cases:
+      self.assertEqual(get_release_note(k), v)
+
+  def test_set_release_note(self):
+    downstream_body = """
+      All of the blocks below should be replaced
+
+      ```releasenote
+      This should be replaced
+      ```
+
+      More text
+
+      ```releasenote
+      ```
+
+      ```test
+      ```
+      """
+    release_note = "The release note was replaced"
+
+    replaced = set_release_note(release_note, downstream_body)
+    self.assertIn(
+      "```releasenote\nThe release note was replaced\n```\n",
+      replaced)
+
+    self.assertEqual(len(re.findall("```releasenote", replaced)), 1,
+      "expected only one release note block in text. Result:\n%s" % replaced)
+
+    self.assertNotIn("This should be replaced", replaced)
+    self.assertIn("All of the blocks below should be replaced\n", replaced)
+    self.assertIn("More text\n", replaced)
+
+  def test_find_prefixed_labels(self):
+    self.assertFalse(find_prefixed_labels([]))
+    self.assertFalse(find_prefixed_labels(["", ""]))
+
+    test_labels = [
+      "test: foo",
+      "test: bar",
+      # Not valid changelog labels
+      "not a changelog label",
+      "test: "
+    ]
+    result = find_prefixed_labels(test_labels, prefix="test: ")
+
+    self.assertEqual(len(result), 2, "expected only 2 labels returned")
+    self.assertIn("test: foo", result)
+    self.assertIn("test: bar", result)
 if __name__ == '__main__':
     unittest.main()
 
