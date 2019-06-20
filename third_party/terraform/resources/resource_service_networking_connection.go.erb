@@ -144,11 +144,8 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 		}
 
 		// The API docs don't specify that you can do connections/-, but that's what gcloud does,
-		// and it's easier than grabbing the connection name. The docs also mention an update mask,
-		// but manual testing shows that by putting both the network and ranges in the request,
-		// it only updates the peering for that network (rather than overwriting everything). This
-		// also matches gcloud's behavior.
-		op, err := config.clientServiceNetworking.Services.Connections.Patch(parentService+"/connections/-", connection).Force(true).Do()
+		// and it's easier than grabbing the connection name.
+		op, err := config.clientServiceNetworking.Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true).Do()
 		if err != nil {
 			return err
 		}
