@@ -1,0 +1,149 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  ManagedZone: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_basic"
+        primary_resource_id: "example-zone"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_private"
+        primary_resource_id: "private-zone"
+        vars:
+          zone_name: "private-zone"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_private_forwarding"
+        primary_resource_id: "private-zone"
+        skip_test: true
+        vars:
+          zone_name: "private-zone"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_managed_zone_private_peering"
+        min_version: 'beta'
+        primary_resource_id: "peering-zone"
+        vars:
+          zone_name: "peering-zone"
+          network_source_name: "network-source"
+          network_target_name: "network-target"
+    properties:
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          A textual description field. Defaults to 'Managed by Terraform'.
+        default_value: 'Managed by Terraform'
+        required: false
+      dnssecConfig.defaultKeySpecs: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      dnssecConfig.nonExistence: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      nameServerSet: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      privateVisibilityConfig.networks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if url, ok := raw["network_url"]; ok {
+              return selfLinkNameHash(url)
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsManagedZonePrivateVisibilityConfigNetworksSchema())
+            return hashcode.String(buf.String())
+          }
+        # TODO(drebes) Remove this description override once the Terraform 0.12 SDK is used.
+        description: |
+          {{description}} Until the provider updates to use the Terraform 0.12 SDK in a future release, you
+          may experience issues with this resource while updating. If you've defined a `networks` block and
+          add another `networks` block while keeping the old block, Terraform will see an incorrect diff
+          and apply an incorrect update to the resource. If you encounter this issue, remove all `networks`
+          blocks in an update and then apply another update adding all of them back simultaneously.
+      privateVisibilityConfig.networks.networkUrl: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      forwardingConfig.targetNameServers: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if address, ok := raw["ipv4_address"]; ok {
+              hashcode.String(address.(string))
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsManagedZoneForwardingConfigTargetNameServersSchema())
+            return hashcode.String(buf.String())
+          }
+      visibility: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'caseDiffSuppress'
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+  Policy: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "dns_policy_basic"
+        primary_resource_id: "example-policy"
+        vars:
+          policy_name: "example-policy"
+          network_1_name: "network-1"
+          network_2_name: "network-2"
+    properties:
+      alternativeNameServerConfig.targetNameServers: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if address, ok := raw["ipv4_address"]; ok {
+              hashcode.String(address.(string))
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsPolicyAlternativeNameServerConfigTargetNameServersSchema())
+            return hashcode.String(buf.String())
+          }
+      description: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          A textual description field. Defaults to 'Managed by Terraform'.
+        default_value: 'Managed by Terraform'
+        required: false
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      networks: !ruby/object:Overrides::Terraform::PropertyOverride
+        is_set: true
+        set_hash_func: |-
+          func(v interface{}) int {
+            raw := v.(map[string]interface{})
+            if url, ok := raw["network_url"]; ok {
+              return selfLinkNameHash(url)
+            }
+            var buf bytes.Buffer
+            schema.SerializeResourceForHash(&buf, raw, dnsPolicyNetworksSchema())
+            return hashcode.String(buf.String())
+          }
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      pre_delete: templates/terraform/pre_delete/detach_network.erb
+  ResourceRecordSet: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+  Project: !ruby/object:Overrides::Terraform::ResourceOverride
+    exclude: true
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

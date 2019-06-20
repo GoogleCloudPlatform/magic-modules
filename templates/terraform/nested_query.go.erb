@@ -1,0 +1,72 @@
+var v interface{}
+var ok bool
+
+<% object.nested_query.keys[0...-1].each do |k| -%>
+v, ok = res["<%=k-%>"]
+if !ok || v == nil {
+  return nil, nil
+}
+res = v.(map[string]interface{})
+
+<% end -%>
+v, ok = res["<%=object.nested_query.keys[-1]-%>"]
+if !ok || v == nil {
+  return nil, nil
+}
+
+switch v.(type) {
+case []interface{}:
+  break
+case map[string]interface{}:
+  // Construct list out of single nested resource
+  v = []interface{}{v}
+default:
+  return nil, fmt.Errorf("expected list or map for value <%= object.nested_query.keys.join(".") -%>. Actual value: %v", v)
+}
+
+<% object.identity.each do |prop| -%>
+<% if settable_properties.include?(prop) -%>
+expected<%= titlelize_property(prop) -%>, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, meta.(*Config))
+if err != nil {
+  return nil, err
+}
+<% else -%>
+expected<%= titlelize_property(prop) -%> := d.Get("<%= prop.name.underscore -%>")
+<% end # settable_properties.include?(prop)-%>
+<% end # object.identity.each -%>
+
+// Search list for this resource.
+items := v.([]interface{})
+for _, itemRaw := range items {
+	if itemRaw == nil {
+    continue
+  }
+	<% if object.nested_query.is_list_of_ids -%>
+  // List response only contains the ID - construct a response object.
+  item := map[string]interface{}{
+    "<%=object.identity.first.api_name%>": itemRaw,
+  }
+	<% else -%>
+  item := itemRaw.(map[string]interface{})
+	<% end -%>
+
+	<% if object.custom_code.decoder -%>
+  // Decode list item before comparing.
+  item, err := resource<%= resource_name -%>Decoder(d, meta, item)
+  if err != nil {
+      return nil, err
+  }
+	<% end -%>
+
+	<% object.identity.each do |prop| -%>
+	item<%= titlelize_property(prop) -%> := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(item["<%= prop.api_name %>"], d)
+  if !reflect.DeepEqual(item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>) {
+  	log.Printf("[DEBUG] Skipping item with <%= prop.api_name %>= %#v, looking for %#v)", item<%= titlelize_property(prop) -%>, expected<%= titlelize_property(prop) -%>)
+    continue
+  }
+  <% end -%>
+	log.Printf("[DEBUG] Found item for resource %q: %#v)", d.Id(), item)
+  return item, nil
+}
+
+return nil, nil

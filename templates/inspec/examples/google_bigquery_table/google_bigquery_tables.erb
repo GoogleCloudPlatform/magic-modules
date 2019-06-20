@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% bigquery_table = grab_attributes['bigquery_table'] -%>
+<% dataset = grab_attributes['dataset'] -%>
+describe.one do
+  google_bigquery_tables(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, dataset: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>).table_references.each do |table_reference|
+    describe google_bigquery_table(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, dataset: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>, name: table_reference.table_id) do
+      its('expiration_time') { should cmp <%= doc_generation ? "'#{bigquery_table['expiration_time']}'" : "bigquery_table['expiration_time']" -%> }
+      its('description') { should eq <%= doc_generation ? "'#{bigquery_table['description']}'" : "bigquery_table['description']" -%> }
+    end
+  end
+end

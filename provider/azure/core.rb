@@ -3,6 +3,7 @@ require 'provider/azure/example/example'
 module Provider
   module Azure
     module Core
+
       def get_example_by_reference(reference)
         get_example_by_names reference.example, reference.product
       end
@@ -22,6 +23,7 @@ module Provider
         spec_dir = File.dirname(@config.cfg_file)
         File.join(spec_dir, template_path)
       end
+
     end
   end
 end

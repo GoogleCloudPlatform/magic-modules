@@ -41,12 +41,11 @@ class SOAForwardable(object):
 
 
 def prefetch_soa_resource(module):
-    name = module.params['name'].split('.')[1:]
 
     resource = SOAForwardable({
         'type': 'SOA',
         'managed_zone': module.params['managed_zone'],
-        'name': '.'.join(name),
+        'name': replace_resource_dict(module.params['managed_zone'], 'dnsName'),
         'project': module.params['project'],
         'scopes': module.params['scopes'],
         'service_account_file': module.params['service_account_file'],
@@ -58,7 +57,8 @@ def prefetch_soa_resource(module):
                                     'dns#resourceRecordSetsListResponse',
                                     'rrsets')
     if not result:
-        raise ValueError("Google DNS Managed Zone %s not found" % module.params['managed_zone']['name'])
+        raise ValueError("Google DNS Managed Zone %s not found" %
+replace_resource_dict(module.params['managed_zone'], 'name'))
     return result
 
 

@@ -1,7 +1,6 @@
 
 <%
-  nested_properties = nested_properties(property)
-  if !nested_properties.empty?
+  if property.nested_properties? && (property.flatten_object.nil? || !property.flatten_object)
 -%>
 ---
 
@@ -9,11 +8,11 @@ The `<%= property.name.underscore.singularize -%>` block <%= if property.output 
 <%- if property.is_a?(Api::Type::Map) %>
 * `<%= property.key_name.underscore -%>` - (Required) The identifier for this object. Format specified above.
 <% end -%>
-<% nested_properties.each do |prop| -%>
+<% property.nested_properties.each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
 
-<% nested_properties.each do |prop| -%>
+<% property.nested_properties.each do |prop| -%>
 <%= lines(build_nested_property_documentation(prop)) -%>
 <% end -%>
 <% end -%>

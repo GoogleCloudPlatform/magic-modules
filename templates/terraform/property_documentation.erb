@@ -1,17 +1,19 @@
 
-<%
-    prefix = ""
-    prefix = "(Required) " if property.required && !property.output
-    prefix = "(Optional) " if !property.required && !property.output
-
-    force_new_postfix = ""
-    force_new_postfix = " Changing this forces a new resource to be created." if property.input && !property.output && !is_data_source
-
-    default_value_postfix = ""
-    default_value_postfix = " Defaults to `#{property.default_value}`." if property.default_value != nil && !property.output
--%>
-<% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
-* `<%= property.name.underscore -%>` - <%= prefix %>One<%= ' or more' unless property.is_a?(Api::Type::NestedObject) -%> `<%= property.name.underscore.singularize -%>` block defined below.<%= force_new_postfix -%>
+* `<%= property.name.underscore -%>` -
+<% if property.min_version.name == 'beta' && property.__resource.min_version.name != 'beta'-%>
+<%   if property.required -%>
+  (Required, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+<%   elsif !property.output -%>
+  (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
+<%   end -%>
 <% else -%>
-* `<%= property.name.underscore -%>` - <%= prefix %><%= property.description.strip.gsub("\n\n", "\n") -%><%= default_value_postfix -%><%= force_new_postfix -%>
+<%   if property.required -%>
+  (Required<% if property.deprecated? -%>, Deprecated<% end -%>)
+<%   elsif !property.output -%>
+  (Optional<% if property.deprecated? -%>, Deprecated<% end -%>)
+<%   end -%>
+<% end -%>
+<%= indent(property.description.strip.gsub("\n\n", "\n"), 2) -%>
+<% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
+  Structure is documented below.
 <% end -%>

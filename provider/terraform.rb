@@ -15,11 +15,12 @@ require 'provider/abstract_core'
 require 'provider/terraform/config'
 require 'provider/terraform/import'
 require 'provider/terraform/custom_code'
-require 'provider/terraform/property_override'
-require 'provider/terraform/resource_override'
+require 'provider/terraform/docs'
+require 'provider/terraform/examples'
+require 'overrides/terraform/resource_override'
+require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
-
 require 'provider/azure/terraform'
 
 module Provider
@@ -29,12 +30,19 @@ module Provider
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
-
     include Provider::Azure::Terraform
 
-    def initialize(config, api)
-      super(config, api)
-      @provider = 'terraform'
+    # FileTemplate with Terraform specific fields
+    class TerraformFileTemplate < Provider::FileTemplate
+      # The async object used for making operations.
+      # We assume that all resources share the same async properties.
+      attr_accessor :async
+
+      # When generating OiCS examples, we attach the example we're
+      # generating to the data object.
+      attr_accessor :example
+
+      attr_accessor :resource_name
     end
 
     # Sorts properties in the order they should appear in the TF schema:
@@ -49,10 +57,22 @@ module Provider
       tf_types[property.class]
     end
 
+    # "Namespace" - prefix with product and resource - a property with
+    # information from the "object" variable
+    def namespace_property_from_object(property, object)
+      name = property.name.camelize
+      until property.parent.nil?
+        property = property.parent
+        name = property.name.camelize + name
+      end
+
+      "#{property.__resource.__product.api_name.camelize(:lower)}#{object.name}#{name}"
+    end
+
     # Converts between the Magic Modules type of an object and its type in the
     # TF schema
     def tf_types
-      {
+      azure_tf_types {
         Api::Type::Boolean => 'schema.TypeBool',
         Api::Type::Double => 'schema.TypeFloat',
         Api::Type::Integer => 'schema.TypeInt',
@@ -66,8 +86,7 @@ module Provider
         Api::Type::Array => 'schema.TypeList',
         Api::Type::KeyValuePairs => 'schema.TypeMap',
         Api::Type::Map => 'schema.TypeSet',
-        Api::Type::Fingerprint => 'schema.TypeString',
-        Api::Azure::Type::ResourceReference => 'schema.TypeString'
+        Api::Type::Fingerprint => 'schema.TypeString'
       }
     end
 
@@ -82,10 +101,6 @@ module Provider
                              force_new?(property.parent, resource))))
     end
 
-    def build_url(url_parts, _extra = false)
-      url_parts.flatten.join
-    end
-
     # Transforms a format string with field markers to a regex string with
     # capture groups.
     #
@@ -93,8 +108,15 @@ module Provider
     #   projects/{{project}}/global/networks/{{name}}
     # is transformed to
     #   projects/(?P<project>[^/]+)/global/networks/(?P<name>[^/]+)
+    #
+    # Values marked with % are URL-encoded, and will match any number of /'s.
+    #
+    # Note: ?P indicates a Python-compatible named capture group. Named groups
+    # aren't common in JS-based regex flavours, but are in Perl-based ones
     def format2regex(format)
-      format.gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
+      format
+        .gsub(/{{%([[:word:]]+)}}/, '(?P<\1>.+)')
+        .gsub(/{{([[:word:]]+)}}/, '(?P<\1>[^/]+)')
     end
 
     # Capitalize the first letter of a property name.
@@ -105,107 +127,79 @@ module Provider
       p
     end
 
-    # Returns the nested properties. An empty list is returned if the property
-    # is not a NestedObject or an Array of NestedObjects.
-    def nested_properties(property)
-      if property.is_a?(Api::Type::NestedObject)
-        property.properties
-      elsif property.is_a?(Api::Type::Array) &&
-            property.item_type.is_a?(Api::Type::NestedObject)
-        property.item_type.properties
-      elsif property.is_a?(Api::Type::Map)
-        property.value_type.properties
-      else
-        []
-      end
-    end
-
     private
 
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(data)
-      # dir = data[:version] == 'beta' ? 'google-beta' : 'google'
-      dir = "azurerm"
-      target_folder = File.join(data[:output_folder], dir)
-      FileUtils.mkpath target_folder
-      name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
-      filepath = File.join(target_folder, "resource_arm_#{name}.go")
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/terraform/resource.erb',
-        out_file: filepath
-      )
-      # TODO: error check goimports
-      # %x(goimports -w #{filepath})
+      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      target_folder = File.join(data.output_folder, dir)
+
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
+      filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
+
+      data.generate('templates/terraform/resource.erb', filepath, self)
       generate_documentation(data)
     end
 
     def generate_documentation(data)
-      target_folder = data[:output_folder]
+      target_folder = data.output_folder
       target_folder = File.join(target_folder, 'website', 'docs', 'r')
       FileUtils.mkpath target_folder
-      name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
 
       filepath =
-        File.join(target_folder, "#{name}.html.markdown")
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/terraform/resource.html.markdown.erb',
-        out_file: filepath
-      )
+        File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+      data.generate('templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
     def generate_resource_tests(data)
-      # dir = data[:version] == 'beta' ? 'google-beta' : 'google'
-      dir = 'azurerm'
-      target_folder = File.join(data[:output_folder], dir)
-      FileUtils.mkpath target_folder
-      name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
+      return if data.object.examples
+                    .reject(&:skip_test)
+                    .reject do |e|
+                  @api.version_obj_or_default(data.version) \
+                < @api.version_obj_or_default(e.min_version)
+                end
+                    .empty?
+
+      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      target_folder = File.join(data.output_folder, dir)
+
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
       filepath =
         File.join(
           target_folder,
-          "resource_arm_#{name}_test.go"
+          "resource_#{product_name}_#{name}_generated_test.go"
         )
-      generate_resource_file data.clone.merge(
-        product: data[:product_name].camelize(:upper),
-        resource_name: data[:object].name.camelize(:upper),
-        default_template: 'templates/terraform/examples/base_configs/test_file.go.erb',
-        out_file: filepath
-      )
 
-      # TODO: error check goimports
-      # %x(goimports -w #{filepath})
+      data.product = data.product.name
+      data.resource_name = data.object.name.camelize(:upper)
+      data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
+                    filepath, self)
     end
 
-    def compile_datasource(data)
-      dir = 'azurerm'
-      target_folder = File.join(data[:output_folder], dir)
-      FileUtils.mkpath target_folder
-      name = data[:object].name.underscore
-      product_name = data[:product_name].underscore
+    def generate_operation(output_folder, _types, version_name)
+      return if @api.objects.select(&:autogen_async).empty?
 
-      filepath = File.join(target_folder, "data_source_#{name}.go")
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/terraform/datasource.erb',
-        out_file: filepath
-      )
+      product_name = @api.name.underscore
+      data = build_object_data(@api.objects.first, output_folder, version_name)
+      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      target_folder = File.join(data.output_folder, dir)
 
-      filepath = File.join(target_folder, "data_source_#{name}_test.go")
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/terraform/examples/base_configs/datasource_test.go.erb',
-        out_file: filepath
-      )
+      data.object = @api.objects.select(&:autogen_async).first
+      data.async = data.object.async
+      data.generate('templates/terraform/operation.go.erb',
+                    File.join(target_folder,
+                              "#{product_name}_operation.go"),
+                    self)
+    end
 
-      target_folder = File.join(data[:output_folder], 'website', 'docs', 'd')
-      FileUtils.mkpath target_folder
-      filepath = File.join(target_folder, "#{name}.html.markdown")
-      generate_resource_file data.clone.merge(
-        default_template: 'templates/terraform/datasource.html.markdown.erb',
-        out_file: filepath
-      )
+    def build_object_data(object, output_folder, version)
+      TerraformFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
   end
 end

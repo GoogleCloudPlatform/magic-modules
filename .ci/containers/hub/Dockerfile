@@ -1,4 +1,4 @@
-from nmckinley/go-ruby:1.9-2.5
+from gcr.io/magic-modules/go-ruby:1.11.5-2.6.0
 
 RUN apt-get update
 RUN apt-get install -y ca-certificates

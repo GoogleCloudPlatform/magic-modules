@@ -1,0 +1,19 @@
+---
+:facts:
+  :Project:
+    :version_added: '2.8'
+:regular:
+  :Project:
+    :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :labels:
+      :version_added: '2.8'
+    :parent:
+      :version_added: '2.8'
+      :type:
+        :version_added: '2.8'
+      :id:
+        :version_added: '2.8'
+    :id:
+      :version_added: '2.8'

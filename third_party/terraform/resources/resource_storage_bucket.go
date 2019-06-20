@@ -5,14 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
+	"github.com/hashicorp/terraform/helper/validation"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
 )
@@ -28,19 +31,19 @@ func resourceStorageBucket() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"encryption": &schema.Schema{
+			"encryption": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"default_kms_key_name": &schema.Schema{
+						"default_kms_key_name": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
@@ -48,19 +51,24 @@ func resourceStorageBucket() *schema.Resource {
 				},
 			},
 
-			"force_destroy": &schema.Schema{
+			"requester_pays": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"force_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
 
-			"labels": &schema.Schema{
+			"labels": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"location": &schema.Schema{
+			"location": {
 				Type:     schema.TypeString,
 				Default:  "US",
 				Optional: true,
@@ -70,35 +78,34 @@ func resourceStorageBucket() *schema.Resource {
 				},
 			},
 
-			"predefined_acl": &schema.Schema{
+			"predefined_acl": {
 				Type:     schema.TypeString,
 				Removed:  "Please use resource \"storage_bucket_acl.predefined_acl\" instead.",
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"self_link": &schema.Schema{
+			"self_link": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"url": &schema.Schema{
+			"url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"storage_class": &schema.Schema{
+			"storage_class": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "STANDARD",
-				ForceNew: true,
 			},
 
 			"lifecycle_rule": {
@@ -143,8 +150,16 @@ func resourceStorageBucket() *schema.Resource {
 										Optional: true,
 									},
 									"is_live": {
-										Type:     schema.TypeBool,
-										Optional: true,
+										Type:       schema.TypeBool,
+										Optional:   true,
+										Computed:   true,
+										Deprecated: "Please use `with_state` instead",
+									},
+									"with_state": {
+										Type:         schema.TypeString,
+										Computed:     true,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"LIVE", "ARCHIVED", "ANY", ""}, false),
 									},
 									"matches_storage_class": {
 										Type:     schema.TypeList,
@@ -163,7 +178,7 @@ func resourceStorageBucket() *schema.Resource {
 				},
 			},
 
-			"versioning": &schema.Schema{
+			"versioning": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
@@ -178,16 +193,16 @@ func resourceStorageBucket() *schema.Resource {
 				},
 			},
 
-			"website": &schema.Schema{
+			"website": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"main_page_suffix": &schema.Schema{
+						"main_page_suffix": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"not_found_page": &schema.Schema{
+						"not_found_page": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -195,56 +210,61 @@ func resourceStorageBucket() *schema.Resource {
 				},
 			},
 
-			"cors": &schema.Schema{
+			"cors": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"origin": &schema.Schema{
+						"origin": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"method": &schema.Schema{
+						"method": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"response_header": &schema.Schema{
+						"response_header": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
-						"max_age_seconds": &schema.Schema{
+						"max_age_seconds": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
 					},
 				},
 			},
-			"logging": &schema.Schema{
+			"logging": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"log_bucket": &schema.Schema{
+						"log_bucket": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"log_object_prefix": &schema.Schema{
+						"log_object_prefix": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
 					},
 				},
+			},
+			"bucket_policy_only": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -264,18 +284,21 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Create a bucket, setting the labels, location and name.
 	sb := &storage.Bucket{
-		Name:     bucket,
-		Labels:   expandLabels(d),
-		Location: location,
+		Name:             bucket,
+		Labels:           expandLabels(d),
+		Location:         location,
+		IamConfiguration: expandIamConfiguration(d),
 	}
 
 	if v, ok := d.GetOk("storage_class"); ok {
 		sb.StorageClass = v.(string)
 	}
 
-	if err := resourceGCSBucketLifecycleCreateOrUpdate(d, sb); err != nil {
+	lifecycle, err := expandStorageBucketLifecycle(d.Get("lifecycle_rule"))
+	if err != nil {
 		return err
 	}
+	sb.Lifecycle = lifecycle
 
 	if v, ok := d.GetOk("versioning"); ok {
 		sb.Versioning = expandBucketVersioning(v)
@@ -313,6 +336,12 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		sb.Encryption = expandBucketEncryption(v.([]interface{}))
 	}
 
+	if v, ok := d.GetOk("requester_pays"); ok {
+		sb.Billing = &storage.BucketBilling{
+			RequesterPays: v.(bool),
+		}
+	}
+
 	var res *storage.Bucket
 
 	err = retry(func() error {
@@ -337,8 +366,18 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 	sb := &storage.Bucket{}
 
 	if d.HasChange("lifecycle_rule") {
-		if err := resourceGCSBucketLifecycleCreateOrUpdate(d, sb); err != nil {
+		lifecycle, err := expandStorageBucketLifecycle(d.Get("lifecycle_rule"))
+		if err != nil {
 			return err
+		}
+		sb.Lifecycle = lifecycle
+	}
+
+	if d.HasChange("requester_pays") {
+		v := d.Get("requester_pays")
+		sb.Billing = &storage.BucketBilling{
+			RequesterPays:   v.(bool),
+			ForceSendFields: []string{"RequesterPays"},
 		}
 	}
 
@@ -356,14 +395,15 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 				return fmt.Errorf("At most one website block is allowed")
 			}
 
+			sb.Website = &storage.BucketWebsite{}
+
 			// Setting fields to "" to be explicit that the PATCH call will
 			// delete this field.
-			if len(websites) == 0 {
+			if len(websites) == 0 || websites[0] == nil {
 				sb.Website.NotFoundPage = ""
 				sb.Website.MainPageSuffix = ""
 			} else {
 				website := websites[0].(map[string]interface{})
-				sb.Website = &storage.BucketWebsite{}
 				if v, ok := website["not_found_page"]; ok {
 					sb.Website.NotFoundPage = v.(string)
 				} else {
@@ -415,6 +455,16 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	if d.HasChange("storage_class") {
+		if v, ok := d.GetOk("storage_class"); ok {
+			sb.StorageClass = v.(string)
+		}
+	}
+
+	if d.HasChange("bucket_policy_only") {
+		sb.IamConfiguration = expandIamConfiguration(d)
+	}
+
 	res, err := config.clientStorage.Buckets.Patch(d.Get("name").(string), sb).Do()
 
 	if err != nil {
@@ -436,22 +486,25 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	// Get the bucket and acl
 	bucket := d.Get("name").(string)
 	res, err := config.clientStorage.Buckets.Get(bucket).Do()
-
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
 	}
 	log.Printf("[DEBUG] Read bucket %v at location %v\n\n", res.Name, res.SelfLink)
 
-	// We need to get the project associated with this bucket because otherwise import
-	// won't work properly.  That means we need to call the projects.get API with the
-	// project number, to get the project ID - there's no project ID field in the
-	// resource response.  However, this requires a call to the Compute API, which
-	// would otherwise not be required for this resource.  So, we're going to
-	// intentionally check whether the project is set *on the resource*.  If it is,
-	// we will not try to fetch the project name.  If it is not, either because
-	// the user intends to use the default provider project, or because the resource
-	// is currently being imported, we will read it from the API.
-	if _, ok := d.GetOk("project"); !ok {
+	// We are trying to support several different use cases for bucket. Buckets are globally
+	// unique but they are associated with projects internally, but some users want to use
+	// buckets in a project agnostic way. Thus we will check to see if the project ID has been
+	// explicitly set and use that first. However if no project is explicitly set, such as during
+	// import, we will look up the ID from the compute API using the project Number from the
+	// bucket API response.
+	// If you are working in a project-agnostic way and have not set the project ID in the provider
+	// block, or the resource or an environment variable, we use the compute API to lookup the projectID
+	// from the projectNumber which is included in the bucket API response
+	if d.Get("project") == "" {
+		project, _ := getProject(d, config)
+		d.Set("project", project)
+	}
+	if d.Get("project") == "" {
 		proj, err := config.clientCompute.Projects.Get(strconv.FormatUint(res.ProjectNumber, 10)).Do()
 		if err != nil {
 			return err
@@ -471,6 +524,14 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("versioning", flattenBucketVersioning(res.Versioning))
 	d.Set("lifecycle_rule", flattenBucketLifecycle(res.Lifecycle))
 	d.Set("labels", res.Labels)
+	d.Set("bucket_policy_only", res.IamConfiguration.BucketPolicyOnly.Enabled)
+
+	if res.Billing == nil {
+		d.Set("requester_pays", nil)
+	} else {
+		d.Set("requester_pays", res.Billing.RequesterPays)
+	}
+
 	d.SetId(res.Id)
 	return nil
 }
@@ -490,22 +551,46 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 
 		if len(res.Items) != 0 {
 			if d.Get("force_destroy").(bool) {
-				// purge the bucket...
+				// GCS requires that a bucket be empty (have no objects or object
+				// versions) before it can be deleted.
 				log.Printf("[DEBUG] GCS Bucket attempting to forceDestroy\n\n")
+
+				// Create a workerpool for parallel deletion of resources. In the
+				// future, it would be great to expose Terraform's global parallelism
+				// flag here, but that's currently reserved for core use. Testing
+				// shows that NumCPUs-1 is the most performant on average networks.
+				//
+				// The challenge with making this user-configurable is that the
+				// configuration would reside in the Terraform configuration file,
+				// decreasing its portability. Ideally we'd want this to connect to
+				// Terraform's top-level -parallelism flag, but that's not plumbed nor
+				// is it scheduled to be plumbed to individual providers.
+				wp := workerpool.New(runtime.NumCPU() - 1)
 
 				for _, object := range res.Items {
 					log.Printf("[DEBUG] Found %s", object.Name)
-					if err := config.clientStorage.Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
-						log.Fatalf("Error trying to delete object: %s %s\n\n", object.Name, err)
-					} else {
-						log.Printf("Object deleted: %s \n\n", object.Name)
-					}
+					object := object
+
+					wp.Submit(func() {
+						log.Printf("[TRACE] Attempting to delete %s", object.Name)
+						if err := config.clientStorage.Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
+							// We should really return an error here, but it doesn't really
+							// matter since the following step (bucket deletion) will fail
+							// with an error indicating objects are still present, and this
+							// log line will point to that object.
+							log.Printf("[ERR] Failed to delete storage object %s: %s", object.Name, err)
+						} else {
+							log.Printf("[TRACE] Successfully deleted %s", object.Name)
+						}
+					})
 				}
 
+				// Wait for everything to finish.
+				wp.StopWait()
 			} else {
-				delete_err := errors.New("Error trying to delete a bucket containing objects without `force_destroy` set to true")
-				log.Printf("Error! %s : %s\n\n", bucket, delete_err)
-				return delete_err
+				deleteErr := errors.New("Error trying to delete a bucket containing objects without `force_destroy` set to true")
+				log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+				return deleteErr
 			}
 		} else {
 			break // 0 items, bucket empty
@@ -533,7 +618,18 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceStorageBucketStateImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	d.Set("name", d.Id())
+	// We need to support project/bucket_name and bucket_name formats. This will allow
+	// importing a bucket that is in a different project than the provider default.
+	// ParseImportID can't be used because having no project will cause an error but it
+	// is a valid state as the project_id will be retrieved in READ
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) == 1 {
+		d.Set("name", parts[0])
+	} else if len(parts) > 1 {
+		d.Set("project", parts[0])
+		d.Set("name", parts[1])
+	}
+
 	d.Set("force_destroy", false)
 	return []*schema.ResourceData{d}, nil
 }
@@ -571,9 +667,16 @@ func flattenCors(corsRules []*storage.BucketCors) []map[string]interface{} {
 
 func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {
 	encs := configured.([]interface{})
+	if encs == nil || encs[0] == nil {
+		return nil
+	}
 	enc := encs[0].(map[string]interface{})
+	keyname := enc["default_kms_key_name"]
+	if keyname == nil || keyname.(string) == "" {
+		return nil
+	}
 	bucketenc := &storage.BucketEncryption{
-		DefaultKmsKeyName: enc["default_kms_key_name"].(string),
+		DefaultKmsKeyName: keyname.(string),
 	}
 	return bucketenc
 }
@@ -677,89 +780,172 @@ func flattenBucketLifecycleRuleCondition(condition *storage.BucketLifecycleRuleC
 		"matches_storage_class": convertStringArrToInterface(condition.MatchesStorageClass),
 		"num_newer_versions":    int(condition.NumNewerVersions),
 	}
-	if condition.IsLive != nil {
-		ruleCondition["is_live"] = *condition.IsLive
+	if condition.IsLive == nil {
+		ruleCondition["with_state"] = "ANY"
+	} else {
+		if *condition.IsLive {
+			ruleCondition["with_state"] = "LIVE"
+			ruleCondition["is_live"] = true
+		} else {
+			ruleCondition["with_state"] = "ARCHIVED"
+			ruleCondition["is_live"] = false
+		}
 	}
 	return ruleCondition
 }
 
-func resourceGCSBucketLifecycleCreateOrUpdate(d *schema.ResourceData, sb *storage.Bucket) error {
-	if v, ok := d.GetOk("lifecycle_rule"); ok {
-		lifecycle_rules := v.([]interface{})
-
-		sb.Lifecycle = &storage.BucketLifecycle{}
-		sb.Lifecycle.Rule = make([]*storage.BucketLifecycleRule, 0, len(lifecycle_rules))
-
-		for _, raw_lifecycle_rule := range lifecycle_rules {
-			lifecycle_rule := raw_lifecycle_rule.(map[string]interface{})
-
-			target_lifecycle_rule := &storage.BucketLifecycleRule{}
-
-			if v, ok := lifecycle_rule["action"]; ok {
-				if actions := v.(*schema.Set).List(); len(actions) == 1 {
-					action := actions[0].(map[string]interface{})
-
-					target_lifecycle_rule.Action = &storage.BucketLifecycleRuleAction{}
-
-					if v, ok := action["type"]; ok {
-						target_lifecycle_rule.Action.Type = v.(string)
-					}
-
-					if v, ok := action["storage_class"]; ok {
-						target_lifecycle_rule.Action.StorageClass = v.(string)
-					}
-				} else {
-					return fmt.Errorf("Exactly one action is required")
-				}
-			}
-
-			if v, ok := lifecycle_rule["condition"]; ok {
-				if conditions := v.(*schema.Set).List(); len(conditions) == 1 {
-					condition := conditions[0].(map[string]interface{})
-
-					target_lifecycle_rule.Condition = &storage.BucketLifecycleRuleCondition{}
-
-					if v, ok := condition["age"]; ok {
-						target_lifecycle_rule.Condition.Age = int64(v.(int))
-					}
-
-					if v, ok := condition["created_before"]; ok {
-						target_lifecycle_rule.Condition.CreatedBefore = v.(string)
-					}
-
-					if v, ok := condition["is_live"]; ok {
-						target_lifecycle_rule.Condition.IsLive = googleapi.Bool(v.(bool))
-					}
-
-					if v, ok := condition["matches_storage_class"]; ok {
-						matches_storage_classes := v.([]interface{})
-
-						target_matches_storage_classes := make([]string, 0, len(matches_storage_classes))
-
-						for _, v := range matches_storage_classes {
-							target_matches_storage_classes = append(target_matches_storage_classes, v.(string))
-						}
-
-						target_lifecycle_rule.Condition.MatchesStorageClass = target_matches_storage_classes
-					}
-
-					if v, ok := condition["num_newer_versions"]; ok {
-						target_lifecycle_rule.Condition.NumNewerVersions = int64(v.(int))
-					}
-				} else {
-					return fmt.Errorf("Exactly one condition is required")
-				}
-			}
-
-			sb.Lifecycle.Rule = append(sb.Lifecycle.Rule, target_lifecycle_rule)
+func expandIamConfiguration(d *schema.ResourceData) *storage.BucketIamConfiguration {
+	iamConfig := &storage.BucketIamConfiguration{}
+	if v, ok := d.GetOk("bucket_policy_only"); ok {
+		iamConfig.BucketPolicyOnly = &storage.BucketIamConfigurationBucketPolicyOnly{
+			Enabled: v.(bool),
 		}
-	} else {
-		sb.Lifecycle = &storage.BucketLifecycle{
+	}
+	return iamConfig
+}
+
+func expandStorageBucketLifecycle(v interface{}) (*storage.BucketLifecycle, error) {
+	if v == nil {
+		return &storage.BucketLifecycle{
 			ForceSendFields: []string{"Rule"},
+		}, nil
+	}
+	lifecycleRules := v.([]interface{})
+	transformedRules := make([]*storage.BucketLifecycleRule, 0, len(lifecycleRules))
+
+	for _, v := range lifecycleRules {
+		rule, err := expandStorageBucketLifecycleRule(v)
+		if err != nil {
+			return nil, err
+		}
+		transformedRules = append(transformedRules, rule)
+	}
+
+	if len(transformedRules) == 0 {
+		return &storage.BucketLifecycle{
+			ForceSendFields: []string{"Rule"},
+		}, nil
+	}
+
+	return &storage.BucketLifecycle{
+		Rule: transformedRules,
+	}, nil
+}
+
+func expandStorageBucketLifecycleRule(v interface{}) (*storage.BucketLifecycleRule, error) {
+	if v == nil {
+		return nil, nil
+	}
+
+	rule := v.(map[string]interface{})
+	transformed := &storage.BucketLifecycleRule{}
+
+	if v, ok := rule["action"]; ok {
+		action, err := expandStorageBucketLifecycleRuleAction(v)
+		if err != nil {
+			return nil, err
+		}
+		transformed.Action = action
+	} else {
+		return nil, fmt.Errorf("exactly one action is required for lifecycle_rule")
+	}
+
+	if v, ok := rule["condition"]; ok {
+		cond, err := expandStorageBucketLifecycleRuleCondition(v)
+		if err != nil {
+			return nil, err
+		}
+		transformed.Condition = cond
+	}
+
+	return transformed, nil
+}
+
+func expandStorageBucketLifecycleRuleAction(v interface{}) (*storage.BucketLifecycleRuleAction, error) {
+	if v == nil {
+		return nil, fmt.Errorf("exactly one action is required for lifecycle_rule")
+	}
+
+	actions := v.(*schema.Set).List()
+	if len(actions) != 1 {
+		return nil, fmt.Errorf("exactly one action is required for lifecycle_rule")
+	}
+
+	action := actions[0].(map[string]interface{})
+	transformed := &storage.BucketLifecycleRuleAction{}
+
+	if v, ok := action["type"]; ok {
+		transformed.Type = v.(string)
+	}
+
+	if v, ok := action["storage_class"]; ok {
+		transformed.StorageClass = v.(string)
+	}
+
+	return transformed, nil
+}
+
+func expandStorageBucketLifecycleRuleCondition(v interface{}) (*storage.BucketLifecycleRuleCondition, error) {
+	if v == nil {
+		return nil, nil
+	}
+	conditions := v.(*schema.Set).List()
+	if len(conditions) != 1 {
+		return nil, fmt.Errorf("One and only one condition can be provided per lifecycle_rule")
+	}
+
+	condition := conditions[0].(map[string]interface{})
+	transformed := &storage.BucketLifecycleRuleCondition{}
+
+	if v, ok := condition["age"]; ok {
+		transformed.Age = int64(v.(int))
+	}
+
+	if v, ok := condition["created_before"]; ok {
+		transformed.CreatedBefore = v.(string)
+	}
+
+	withStateV, withStateOk := condition["with_state"]
+	// Because TF schema, withStateOk currently will always be true,
+	// do the check just in case.
+	if withStateOk {
+		switch withStateV.(string) {
+		case "LIVE":
+			transformed.IsLive = googleapi.Bool(true)
+		case "ARCHIVED":
+			transformed.IsLive = googleapi.Bool(false)
+		case "ANY":
+			// This is unnecessary, but set explicitly to nil for readability.
+			transformed.IsLive = nil
+		case "":
+			// Support deprecated `is_live` behavior
+			// is_live was always read (ok always true)
+			// so it can only support LIVE/ARCHIVED.
+			// TODO: When removing is_live, combine this case with case "ANY"
+			if v, ok := condition["is_live"]; ok {
+				log.Printf("[WARN] using deprecated field `is_live` because with_state is empty")
+				transformed.IsLive = googleapi.Bool(v.(bool))
+			}
+		default:
+			return nil, fmt.Errorf("unexpected value %q for condition.with_state", withStateV.(string))
 		}
 	}
 
-	return nil
+	if v, ok := condition["matches_storage_class"]; ok {
+		classes := v.([]interface{})
+		transformedClasses := make([]string, 0, len(classes))
+
+		for _, v := range classes {
+			transformedClasses = append(transformedClasses, v.(string))
+		}
+		transformed.MatchesStorageClass = transformedClasses
+	}
+
+	if v, ok := condition["num_newer_versions"]; ok {
+		transformed.NumNewerVersions = int64(v.(int))
+	}
+
+	return transformed, nil
 }
 
 func resourceGCSBucketLifecycleRuleActionHash(v interface{}) int {
@@ -795,8 +981,38 @@ func resourceGCSBucketLifecycleRuleConditionHash(v interface{}) int {
 		buf.WriteString(fmt.Sprintf("%s-", v.(string)))
 	}
 
-	if v, ok := m["is_live"]; ok {
-		buf.WriteString(fmt.Sprintf("%t-", v.(bool)))
+	// Note that we are keeping the boolean notation from when is_live was
+	// the only field (i.e. not deprecated) in order to prevent a diff from
+	// hash key.
+	// There are three possible states for the actual condition
+	// and correspond to the following hash codes:
+	//
+	// 1. LIVE only: "true-"
+	//    Applies for one of:
+	//      with_state = "" && is_live = true
+	//      with_state = "LIVE"
+	//
+	// 2. ARCHIVED only: "false-"
+	//    Applies for one of:
+	//      with_state = "" && is_live = false
+	//      with_state = "ARCHIVED"
+	//
+	// 3. ANY (i.e. LIVE and ARCHIVED): ""
+	//    Applies for one of:
+	//      with_state = "ANY"
+
+	withStateV, withStateOk := m["with_state"]
+	if !withStateOk || withStateV.(string) == "" {
+		if isLiveV, ok := m["is_live"]; ok {
+			buf.WriteString(fmt.Sprintf("%t-", isLiveV.(bool)))
+		}
+	} else if withStateOk {
+		switch withStateV.(string) {
+		case "LIVE":
+			buf.WriteString(fmt.Sprintf("%t-", true))
+		case "ARCHIVED":
+			buf.WriteString(fmt.Sprintf("%t-", false))
+		}
 	}
 
 	if v, ok := m["matches_storage_class"]; ok {

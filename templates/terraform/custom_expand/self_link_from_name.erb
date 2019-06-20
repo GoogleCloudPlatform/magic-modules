@@ -12,7 +12,7 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
   // This method returns a full self link from a partial self link.
   if v == nil || v.(string) == "" {
     // It does not try to construct anything from empty.
@@ -25,7 +25,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
     return "https://www.googleapis.com/compute/v1/" + v.(string), nil
   } else if strings.HasPrefix(v.(string), "regions/") || strings.HasPrefix(v.(string), "zones/") {
     // For regional or zonal resources which include their region or zone, just put the project in front.
-    url, err := replaceVars(d, config, "https://www.googleapis.com/compute/v1/projects/{{project}}/")
+    url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/")
     if err != nil {
       return nil, err
     }
@@ -34,7 +34,7 @@ func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *
   // Anything else is assumed to be a regional resource, with a partial link that begins with the resource name.
   // This isn't very likely - it's a last-ditch effort to extract something useful here.  We can do a better job
   // as soon as MultiResourceRefs are working since we'll know the types that this field is supposed to point to.
-  url, err := replaceVars(d, config, "https://www.googleapis.com/compute/v1/projects/{{project}}/regions/{{region}}/")
+  url, err := replaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/")
   if err != nil {
     return nil, err
   }

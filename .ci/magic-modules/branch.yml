@@ -9,8 +9,8 @@ image_resource:
     source:
         # This task requires a container with 'git', 'python', and the pip
         # package 'pygithub'.
-        repository: nmckinley/python
-        tag: 'v0.0.2'
+        repository: gcr.io/magic-modules/python
+        tag: '1.0'
 
 inputs:
     - name: magic-modules

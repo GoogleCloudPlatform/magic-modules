@@ -8,28 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccRedisInstance_basic(t *testing.T) {
-	t.Parallel()
-
-	name := acctest.RandomWithPrefix("tf-test")
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckRedisInstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccRedisInstance_basic(name),
-			},
-			resource.TestStep{
-				ResourceName:      "google_redis_instance.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccRedisInstance_update(t *testing.T) {
 	t.Parallel()
 
@@ -40,18 +18,18 @@ func TestAccRedisInstance_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccRedisInstance_update(name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_redis_instance.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			resource.TestStep{
+			{
 				Config: testAccRedisInstance_update2(name),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_redis_instance.test",
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -60,36 +38,36 @@ func TestAccRedisInstance_update(t *testing.T) {
 	})
 }
 
-func TestAccRedisInstance_full(t *testing.T) {
+func TestAccRedisInstance_regionFromLocation(t *testing.T) {
 	t.Parallel()
 
 	name := acctest.RandomWithPrefix("tf-test")
-	network := acctest.RandomWithPrefix("tf-test")
+
+	// Pick a zone that isn't in the provider-specified region so we know we
+	// didn't fall back to that one.
+	region := "us-west1"
+	zone := "us-west1-b"
+	if getTestRegionFromEnv() == "us-west1" {
+		region = "us-central1"
+		zone = "us-central1-a"
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRedisInstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccRedisInstance_full(name, network),
+			{
+				Config: testAccRedisInstance_regionFromLocation(name, zone),
+				Check:  resource.TestCheckResourceAttr("google_redis_instance.test", "region", region),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_redis_instance.test",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 		},
 	})
-}
-
-func testAccRedisInstance_basic(name string) string {
-	return fmt.Sprintf(`
-resource "google_redis_instance" "test" {
-	name           = "%s"
-	memory_size_gb = 1
-	region         = "us-central1"
-}`, name)
 }
 
 func testAccRedisInstance_update(name string) string {
@@ -100,12 +78,12 @@ resource "google_redis_instance" "test" {
 	memory_size_gb = 1
 	region         = "us-central1"
 
-	labels {
+	labels = {
 		my_key    = "my_val"
 		other_key = "other_val"
 	}
 
-	redis_configs {
+	redis_configs = {
 		maxmemory-policy       = "allkeys-lru"
 		notify-keyspace-events = "KEA"
 	}
@@ -119,47 +97,23 @@ resource "google_redis_instance" "test" {
 	display_name   = "post-update"
 	memory_size_gb = 1
 
-	labels {
+	labels = {
 		my_key    = "my_val"
 		other_key = "new_val"
 	}
 
-	redis_configs {
+	redis_configs = {
 		maxmemory-policy       = "noeviction"
 		notify-keyspace-events = ""
 	}
 }`, name)
 }
 
-func testAccRedisInstance_full(name, network string) string {
+func testAccRedisInstance_regionFromLocation(name, zone string) string {
 	return fmt.Sprintf(`
-resource "google_compute_network" "test" {
-	name = "%s"
-}
-
 resource "google_redis_instance" "test" {
 	name           = "%s"
-	tier           = "STANDARD_HA"
 	memory_size_gb = 1
-
-	authorized_network = "${google_compute_network.test.self_link}"
-
-	region                  = "us-central1"
-	location_id             = "us-central1-a"
-	alternative_location_id = "us-central1-f"
-
-	redis_version     = "REDIS_3_2"
-	display_name      = "Terraform Test Instance"
-	reserved_ip_range = "192.168.0.0/29"
-
-	labels {
-		my_key    = "my_val"
-		other_key = "other_val"
-	}
-
-	redis_configs {
-		maxmemory-policy       = "allkeys-lru"
-		notify-keyspace-events = "KEA"
-	}
-}`, network, name)
+	location_id    = "%s"
+}`, name, zone)
 }

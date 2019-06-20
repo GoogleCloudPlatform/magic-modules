@@ -18,11 +18,28 @@ package google
 
 import "github.com/hashicorp/terraform/helper/schema"
 
-<% api_name = @config.name || product_ns -%>
+// If the base path has changed as a result of your PR, make sure to update
+// the provider_reference page!
+var <%= product_ns -%>DefaultBasePath = "<%= product.base_url -%>"
+var <%= product_ns -%>CustomEndpointEntryKey = "<%= product_ns.underscore -%>_custom_endpoint"
+var <%= product_ns -%>CustomEndpointEntry = &schema.Schema{
+	Type:         schema.TypeString,
+	Optional:     true,
+	ValidateFunc: validateCustomEndpoint,
+	DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+		"GOOGLE_<%= product_ns.underscore.upcase -%>_CUSTOM_ENDPOINT",
+	}, <%= product_ns -%>DefaultBasePath),
+}
 
-var Generated<%= api_name -%>ResourcesMap = map[string]*schema.Resource{
-<% product.objects.reject { |r| r.exclude }.each do |object| -%>
-<% resource_name = api_name + object.name -%>
-	"google_<%= resource_name.underscore -%>": resource<%= resource_name -%>(),
+var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
+<% product.objects.reject { |r| r.exclude || r.not_in_version?(product.version_obj_or_default(version)) }.each do |object| -%>
+<%
+if @config.legacy_name.nil?
+	terraform_name = "google_" + (product_ns + object.name).underscore
+else
+	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+end
+-%>
+	"<%= terraform_name -%>": resource<%= product_ns + object.name -%>(),
 <% end -%>
 }

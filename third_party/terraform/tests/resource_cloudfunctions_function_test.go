@@ -23,6 +23,42 @@ const testHTTPTriggerPath = "./test-fixtures/cloudfunctions/http_trigger.js"
 const testHTTPTriggerUpdatePath = "./test-fixtures/cloudfunctions/http_trigger_update.js"
 const testPubSubTriggerPath = "./test-fixtures/cloudfunctions/pubsub_trigger.js"
 const testBucketTriggerPath = "./test-fixtures/cloudfunctions/bucket_trigger.js"
+const testFirestoreTriggerPath = "./test-fixtures/cloudfunctions/firestore_trigger.js"
+
+func TestCloudFunctionsFunction_nameValidator(t *testing.T) {
+	validNames := []string{
+		"a",
+		"aA",
+		"a0",
+		"has-hyphen",
+		"has_underscore",
+		"hasUpperCase",
+		"allChars_-A0",
+	}
+	for _, tc := range validNames {
+		wrns, errs := validateResourceCloudFunctionsFunctionName(tc, "function.name")
+		if len(wrns) > 0 {
+			t.Errorf("Expected no validation warnings for test case %q, got: %+v", tc, wrns)
+		}
+		if len(errs) > 0 {
+			t.Errorf("Expected no validation errors for test name %q, got: %+v", tc, errs)
+		}
+	}
+
+	invalidNames := []string{
+		"0startsWithNumber",
+		"endsWith_",
+		"endsWith-",
+		"bad*Character",
+		"aFunctionsNameThatIsLongerThanFortyEightCharacters",
+	}
+	for _, tc := range invalidNames {
+		_, errs := validateResourceCloudFunctionsFunctionName(tc, "function.name")
+		if len(errs) == 0 {
+			t.Errorf("Expected errors for invalid test name %q, got none", tc)
+		}
+	}
+}
 
 func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 	t.Parallel()
@@ -54,6 +90,8 @@ func TestAccCloudFunctionsFunction_basic(t *testing.T) {
 						"description", "test function"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"available_memory_mb", "128"),
+					resource.TestCheckResourceAttr(funcResourceName,
+						"max_instances", "10"),
 					testAccCloudFunctionsFunctionSource(fmt.Sprintf("gs://%s/index.zip", bucketName), &function),
 					testAccCloudFunctionsFunctionTrigger(FUNCTION_TRIGGER_HTTP, &function),
 					resource.TestCheckResourceAttr(funcResourceName,
@@ -121,6 +159,8 @@ func TestAccCloudFunctionsFunction_update(t *testing.T) {
 						"description", "test function updated"),
 					resource.TestCheckResourceAttr(funcResourceName,
 						"timeout", "91"),
+					resource.TestCheckResourceAttr(funcResourceName,
+						"max_instances", "15"),
 					testAccCloudFunctionsFunctionHasLabel("my-label", "my-updated-label-value", &function),
 					testAccCloudFunctionsFunctionHasLabel("a-new-label", "a-new-label-value", &function),
 					testAccCloudFunctionsFunctionHasEnvironmentVariable("TEST_ENV_VARIABLE",
@@ -195,6 +235,87 @@ func TestAccCloudFunctionsFunction_bucket(t *testing.T) {
 			},
 			{
 				Config: testAccCloudFunctionsFunction_bucketNoRetry(functionName, bucketName, zipFilePath),
+			},
+			{
+				ResourceName:      funcResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccCloudFunctionsFunction_firestore(t *testing.T) {
+	t.Parallel()
+	funcResourceName := "google_cloudfunctions_function.function"
+	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
+	zipFilePath, err := createZIPArchiveForIndexJs(testFirestoreTriggerPath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	defer os.Remove(zipFilePath) // clean up
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudFunctionsFunction_firestore(functionName, bucketName, zipFilePath),
+			},
+			{
+				ResourceName:      funcResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccCloudFunctionsFunction_sourceRepo(t *testing.T) {
+	t.Parallel()
+
+	funcResourceName := "google_cloudfunctions_function.function"
+	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	proj := getTestProjectFromEnv()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudFunctionsFunction_sourceRepo(functionName, proj),
+			},
+			{
+				ResourceName:      funcResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccCloudFunctionsFunction_serviceAccountEmail(t *testing.T) {
+	t.Parallel()
+
+	funcResourceName := "google_cloudfunctions_function.function"
+	functionName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
+	zipFilePath, err := createZIPArchiveForIndexJs(testHTTPTriggerPath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	defer os.Remove(zipFilePath) // clean up
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudFunctionsFunction_serviceAccountEmail(functionName, bucketName, zipFilePath),
 			},
 			{
 				ResourceName:      funcResourceName,
@@ -375,12 +496,13 @@ resource "google_cloudfunctions_function" "function" {
   trigger_http          = true
   timeout               = 61
   entry_point           = "helloGET"
-  labels {
+  labels = {
 	my-label = "my-label-value"
   }
-  environment_variables {
+  environment_variables = {
 	TEST_ENV_VARIABLE = "test-env-variable-value"
   }
+  max_instances = 10
 }
 `, bucketName, zipFilePath, functionName)
 }
@@ -407,14 +529,15 @@ resource "google_cloudfunctions_function" "function" {
   runtime               = "nodejs8"
   timeout               = 91
   entry_point           = "helloGET"
-  labels {
+  labels = {
 	my-label = "my-updated-label-value"
 	a-new-label = "a-new-label-value"
   }
-  environment_variables {
+  environment_variables = {
 	TEST_ENV_VARIABLE = "test-env-variable-value"
 	NEW_ENV_VARIABLE = "new-env-variable-value"
   }
+  max_instances = 15
 }`, bucketName, zipFilePath, functionName)
 }
 
@@ -437,6 +560,7 @@ resource "google_pubsub_topic" "sub" {
 
 resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
+  runtime               = "nodejs8"
   available_memory_mb   = 128
   source_archive_bucket = "${google_storage_bucket.bucket.name}"
   source_archive_object = "${google_storage_bucket_object.archive.name}"
@@ -467,6 +591,7 @@ resource "google_storage_bucket_object" "archive" {
 
 resource "google_cloudfunctions_function" "function" {
   name                  = "%s"
+  runtime               = "nodejs6"
   available_memory_mb   = 128
   source_archive_bucket = "${google_storage_bucket.bucket.name}"
   source_archive_object = "${google_storage_bucket_object.archive.name}"
@@ -506,5 +631,78 @@ resource "google_cloudfunctions_function" "function" {
     event_type = "google.storage.object.finalize"
     resource   = "${google_storage_bucket.bucket.name}"
   }
+}`, bucketName, zipFilePath, functionName)
+}
+
+func testAccCloudFunctionsFunction_firestore(functionName string, bucketName string,
+	zipFilePath string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "%s"
+}
+
+resource "google_cloudfunctions_function" "function" {
+  name                  = "%s"
+  available_memory_mb   = 128
+  source_archive_bucket = "${google_storage_bucket.bucket.name}"
+  source_archive_object = "${google_storage_bucket_object.archive.name}"
+  timeout               = 61
+  entry_point           = "helloFirestore"
+  event_trigger {
+    event_type = "providers/cloud.firestore/eventTypes/document.write"
+    resource   = "messages/{messageId}"
+  }
+}`, bucketName, zipFilePath, functionName)
+}
+
+func testAccCloudFunctionsFunction_sourceRepo(functionName, project string) string {
+	return fmt.Sprintf(`
+resource "google_cloudfunctions_function" "function" {
+  name = "%s"
+
+  source_repository {
+    // There isn't yet an API that'll allow us to create a source repository and
+    // put code in it, so we created this repository outside the test to be used
+    // here. If this test is run outside of CI, you may need to create your own
+    // source repo.
+    url = "https://source.developers.google.com/projects/%s/repos/cloudfunctions-test-do-not-delete/moveable-aliases/master/paths/"
+  }
+
+  trigger_http = true
+  entry_point  = "helloGET"
+}
+`, functionName, project)
+}
+
+func testAccCloudFunctionsFunction_serviceAccountEmail(functionName, bucketName, zipFilePath string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name = "%s"
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name   = "index.zip"
+  bucket = "${google_storage_bucket.bucket.name}"
+  source = "%s"
+}
+
+data "google_compute_default_service_account" "default" { }
+
+resource "google_cloudfunctions_function" "function" {
+  name = "%s"
+
+  source_archive_bucket = "${google_storage_bucket.bucket.name}"
+  source_archive_object = "${google_storage_bucket_object.archive.name}"
+
+  service_account_email = "${data.google_compute_default_service_account.default.email}"
+
+  trigger_http = true
+  entry_point  = "helloGET"
 }`, bucketName, zipFilePath, functionName)
 }

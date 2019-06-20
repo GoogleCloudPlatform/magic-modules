@@ -1,58 +1,76 @@
 ---
 <%= lines(autogen_notice :yaml) -%>
-<%  deps_yaml, yaml, random_vars = build_test_yaml_from_example(object.inttests[0].example) -%>
-- name: Prepare random number
-  set_fact:
-<%  random_vars.reject{|v| v.variable_name == 'resource_group'}.each do |rnd| -%>
-    <%= rnd.variable_name -%>: "<%= rnd.variable_value -%>"
-<%  end -%>
-  run_once: yes
-
-<%= lines(deps_yaml) -%>
-
-<%= lines(yaml) -%>
-
-- name: Assert the resource was created
+# Pre-test setup
+<% unless example.dependencies.nil? -%>
+<% example.dependencies.each do |depend| -%>
+<%= lines(depend.build_test('present', object, false)) -%>
+<% end # example.dependencies.each -%>
+<% end # if example.dependencies -%>
+<%= lines(example.task.build_test('absent', object, false)) -%>
+#----------------------------------------------------------
+<% resource_name = object.name.uncombine.downcase -%>
+<%= lines(example.task.build_test('present', object, false)) -%>
+  register: result
+<% if object.readonly -%>
+- name: assert changed is false
+<% else # if object.readonly -%>
+- name: assert changed is true
+<% end # if object.readonly -%>
   assert:
     that:
-      - output.changed
-
-<%  _, same_yaml, _ = build_test_yaml_from_example(object.inttests[0].example, 'idempotent') -%>
-<%= lines(same_yaml) -%>
-
-- name: Assert the resource was created
+<% if object.readonly -%>
+      # <%= object.name -%> is not altered, just verified.
+      - result.changed == false
+<% else # if object.readonly -%>
+      - result.changed == true
+<% end # if object.readonly -%>
+<% if object.kind? -%>
+      - "result.kind == <%= quote_string(object.kind) -%>"
+<% end # if object.kind -%>
+<% unless example.verifier.nil? -%>
+<%= lines(example.verifier.build_task('present', object)) -%>
+<% end -%>
+<% unless object.readonly -%>
+# ----------------------------------------------------------------------------
+<%= lines(example.task.build_test('present', object, true)) -%>
+  register: result
+- name: assert changed is false
   assert:
     that:
-      - not output.changed
-
-<%  unless object.inttests[0].info_by_name_example.nil? -%>
-<%    _, info_yaml, _ = build_test_yaml_from_example(object.inttests[0].info_by_name_example) -%>
-<%=   lines(info_yaml) -%>
-
-- name: Assert that info is returned
+      - result.changed == false
+<% if object.kind? -%>
+      - "result.kind == <%= quote_string(object.kind) -%>"
+<% end # if object.kind -%>
+#----------------------------------------------------------
+<%= lines(example.task.build_test('absent', object, false)) -%>
+  register: result
+- name: assert changed is true
   assert:
     that:
-      - not output.changed
-<%= lines(indent(generate_info_assert_list(object.inttests[0].example), 6)) -%>
-
-<%  end -%>
-<%  unless object.inttests[0].info_by_resource_group_example.nil? -%>
-<%    _, info_yaml, _ = build_test_yaml_from_example(object.inttests[0].info_by_resource_group_example) -%>
-<%=   lines(info_yaml) -%>
-
-- name: Assert that info is returned
+      - result.changed == true
+<% if object.kind? -%>
+      - result.has_key('kind') == False
+<% end # if object.kind? -%>
+<% unless example.verifier.nil? -%>
+<%= lines(example.verifier.build_task('absent', object)) -%>
+<% end -%>
+# ----------------------------------------------------------------------------
+<%= lines(example.task.build_test('absent', object, true)) -%>
+  register: result
+- name: assert changed is false
   assert:
     that:
-      - not output.changed
-<%= lines(indent(generate_info_assert_list(object.inttests[0].example), 6)) -%>
-
-<%  end -%>
-<%  deps_yaml, delete_yaml, _ = build_test_yaml_from_example(object.inttests[0].delete_example) -%>
-<%= lines(delete_yaml) -%>
-
-- name: Assert that state has changed
-  assert:
-    that:
-      - output.changed
-
-<%= lines(deps_yaml) -%>
+      - result.changed == false
+<% if object.kind? -%>
+      - result.has_key('kind') == False
+<% end # if object.kind? -%>
+<% end # object.readonly -%>
+<% if example.dependencies and !example.dependencies.empty? -%>
+#---------------------------------------------------------
+# Post-test teardown
+# If errors happen, don't crash the playbook!
+<% example.dependencies.reverse.each do |depend| -%>
+<%= lines(depend.build_test('absent', object, false)) -%>
+  ignore_errors: true
+<% end # example.dependencies.each -%>
+<% end # if example.dependencies -%>

@@ -1,0 +1,31 @@
+---
+:facts:
+  :Instance:
+    :version_added: '2.8'
+:regular:
+  :Instance:
+    :version_added: '2.8'
+    :alternativeLocationId:
+      :version_added: '2.8'
+    :authorizedNetwork:
+      :version_added: '2.8'
+    :displayName:
+      :version_added: '2.8'
+    :labels:
+      :version_added: '2.8'
+    :redisConfigs:
+      :version_added: '2.8'
+    :locationId:
+      :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :memorySizeGb:
+      :version_added: '2.8'
+    :redisVersion:
+      :version_added: '2.8'
+    :reservedIpRange:
+      :version_added: '2.8'
+    :tier:
+      :version_added: '2.8'
+    :region:
+      :version_added: '2.8'

@@ -1,0 +1,69 @@
+---
+:facts:
+  :Trigger:
+    :version_added: '2.8'
+:regular:
+  :Trigger:
+    :version_added: '2.8'
+    :id:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :disabled:
+      :version_added: '2.8'
+    :substitutions:
+      :version_added: '2.8'
+    :filename:
+      :version_added: '2.8'
+    :ignoredFiles:
+      :version_added: '2.8'
+    :includedFiles:
+      :version_added: '2.8'
+    :triggerTemplate:
+      :version_added: '2.8'
+      :projectId:
+        :version_added: '2.8'
+      :repoName:
+        :version_added: '2.8'
+      :dir:
+        :version_added: '2.8'
+      :branchName:
+        :version_added: '2.8'
+      :tagName:
+        :version_added: '2.8'
+      :commitSha:
+        :version_added: '2.8'
+    :build:
+      :version_added: '2.8'
+      :tags:
+        :version_added: '2.8'
+      :images:
+        :version_added: '2.8'
+      :steps:
+        :version_added: '2.8'
+        :name:
+          :version_added: '2.8'
+        :args:
+          :version_added: '2.8'
+        :env:
+          :version_added: '2.8'
+        :id:
+          :version_added: '2.8'
+        :entrypoint:
+          :version_added: '2.8'
+        :dir:
+          :version_added: '2.8'
+        :secretEnv:
+          :version_added: '2.8'
+        :timeout:
+          :version_added: '2.8'
+        :timing:
+          :version_added: '2.8'
+        :volumes:
+          :version_added: '2.8'
+          :name:
+            :version_added: '2.8'
+          :path:
+            :version_added: '2.8'
+        :waitFor:
+          :version_added: '2.8'

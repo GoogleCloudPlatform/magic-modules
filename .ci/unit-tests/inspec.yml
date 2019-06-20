@@ -1,11 +1,12 @@
 platform: linux
 inputs:
   - name: magic-modules
+  - name: magic-modules-new-prs
 image_resource:
   type: docker-image
   source:
-    repository: ruby
-    tag: '2.5'
+      repository: gcr.io/magic-modules/terraform-gcloud-inspec
+      tag: '0.11.10-3.9.3'
 run:
   path: magic-modules/.ci/unit-tests/inspec.sh
 params:

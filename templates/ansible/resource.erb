@@ -1,260 +1,441 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2019 <%= lines(@config.manifest.get('author', object)) -%>
-#
+# Copyright (C) 2017 Google
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
 <%= lines(autogen_notice :python) -%>
 
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
+<%= lines(compile('templates/ansible/documentation.erb'), 1) -%>
+################################################################################
+# Imports
+################################################################################
 <%
-  metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       object))
-  supported_by = quote_string(@config.manifest.get('supported_by', object))
+  readonly_selflink_rrefs = object.all_resourcerefs
+                                  .select { |prop| prop.resource_ref.readonly }
+                                  .select { |prop| prop.imports == 'selfLink' }
+                                  .map(&:resource_ref)
+                                  .uniq
+
   update_props = properties_by_custom_update(object.all_user_properties)
 -%>
+
 <%
-    combine_create_update = object.azure_sdk_definition.update.nil? || (object.azure_sdk_definition.create.python_func_name == object.azure_sdk_definition.update.python_func_name)
-    python_sdk_client = object.azure_sdk_definition.python_client.split(".")[0]
-    python_sdk_sub_client = object.azure_sdk_definition.python_client.split(".")[1]
-
-    input_properties = object.all_user_properties.reject(&:output).sort_by{|p| [p.order, p.name]}
-    output_properties = object.all_user_properties.select(&:output)
-    root_object_field = object.azure_sdk_definition.create.request["/"].python_variable_name
+  import = 'from ansible.module_utils.gcp_utils import navigate_hash, GcpSession, GcpModule, GcpRequest'
+  import += ', remove_nones_from_dict' unless properties_with_classes(object.all_user_properties).empty?
+  import += ', replace_resource_dict' if nonreadonly_rrefs(object)
 -%>
-ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': [<%= @config.manifest.get('status', object).map{|item| "'#{item}'"}.join(', ') -%>],
-                    'supported_by': <%= supported_by -%>}
+<%= lines(import) -%>
+import json
+<%
+  imports = object.imports || []
+  imports << 'time' if object.async
+  imports << 're' if !readonly_selflink_rrefs.empty? || object.name_pattern
+-%>
+<%= lines(imports.sort.uniq.map { |i| "import #{i}" }) -%>
 
-
-DOCUMENTATION = '''
----
-module: <%= lines(module_name(object)) -%>
-version_added: "<%= @config.manifest.get('version_added', object).to_f -%>"
-short_description: <%= lines(object.description) -%>
-description:
-    - Create, update and delete instance of Azure <%= object.name.titlecase -%>.
-
-<%= lines(word_wrap_for_yaml(to_yaml({
-  'options' => [
-    input_properties.reject{|p| is_tags?(p)}.map{|p| documentation_for_property(p, object)},
-    {
-      'state' => {
-        'description' => [
-          "Assert the state of the #{object.name.titlecase}.",
-          "Use 'present' to create or update a #{object.name.titlecase} and 'absent' to delete it."
-        ],
-        'default' => 'present',
-        'choices' => ['present', 'absent'],
-      },
-    }
-  ].flatten.compact.reduce({}, :merge),
-  'notes' => (
-    [
-      ("API Reference: U(#{object.references.api})" if object.references.api),
-      object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
-    ].flatten.compact if object.references
-  )
-}).split("\n"))) -%>
-
-extends_documentation_fragment:
-    - azure
-    <%= lines('- azure_tags') if is_tags_defined?(object) -%>
-
-author:
-    - "<%= @config.manifest.get('author', object) -%>"
-'''
-
-<%  unless object.examples.empty? -%>
-<%    code = object.examples.map{|exref| lines(build_documentation_yaml_from_example(exref))} -%>
-EXAMPLES = '''
-<%=   lines(indent(code.join("\n"), 2)) -%>
-'''
-<% end -%>
-
-RETURN = '''
-<%= lines(word_wrap_for_yaml(to_yaml(output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)).split("\n"))) -%>
-'''
-
-import time
-<%= lines('from ansible.module_utils.azure_rm_common import normalize_location_name') if is_location_defined?(object) -%>
-from ansible.module_utils.azure_rm_common_ext import AzureRMModuleBaseExt
-from ansible.module_utils.common.dict_transformations import _snake_to_camel
-
-try:
-    from msrestazure.azure_exceptions import CloudError
-    from msrest.polling import LROPoller
-    from msrestazure.azure_operation import AzureOperationPoller
-    from msrest.serialization import Model
-    from <%= object.azure_sdk_definition.python_client_namespace -%> import <%= python_sdk_client -%>
-
-except ImportError:
-    # This is handled in azure_rm_common
-    pass
-
-
-class Actions:
-    NoAction, Create, Update, Delete = range(4)
-
-
-class AzureRM<%= object.name -%>(AzureRMModuleBaseExt):
-    """Configuration class for an Azure RM <%= object.name.titleize -%> resource"""
-
-    def __init__(self):
-        self.module_arg_spec = dict(
-<%= lines(indent_list(input_properties.reject{|p| is_tags?(p)}.map{|p| python_dict_for_property(p, object)}, 12, true)) -%>
-            state=dict(
-                type='str',
-                default='present',
-                choices=['present', 'absent']
-            )
-        )
-
-<%= lines(build_class_instance_variable_init(object.azure_sdk_definition.create, object)) -%>
-
-        self.results = dict(changed=False)
-        self.mgmt_client = None
-        self.state = None
-        self.to_do = Actions.NoAction
-
-<%= lines(build_multiline_method_call("super(AzureRM#{object.name}, self).__init__(", [
-      "derived_arg_spec=self.module_arg_spec",
-      "supports_check_mode=True",
-      "supports_tags=#{python_literal(is_tags_defined?(object))}"
-    ], ')', 8)) -%>
-
-    def exec_module(self, **kwargs):
-        """Main module execution method"""
-
-        for key in list(self.module_arg_spec.keys())<%= " + ['tags']" if is_tags_defined?(object) -%>:
-            if hasattr(self, key):
-                setattr(self, key, kwargs[key])
-            elif kwargs[key] is not None:
-                self.<%= root_object_field -%>[key] = kwargs[key]
-
-<%  sdk_marshal = Provider::Azure::Ansible::SDK::MarshalDescriptor.new input_properties.reject{|p| is_tags?(p)}, object.azure_sdk_definition.create, "self.#{root_object_field}", "self.#{root_object_field}" -%>
-<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
-
-        response = None
-
-        self.mgmt_client = self.get_mgmt_svc_client(<%= python_sdk_client -%>,
-                                                    base_url=self._cloud_environment.endpoints.resource_manager)
-
-        old_response = self.get_<%= object.name.downcase -%>()
-
-        if not old_response:
-            self.log("<%= object.name.titlecase -%> instance doesn't exist")
-            if self.state == 'absent':
-                self.log("Old instance didn't exist")
-            else:
-                self.to_do = Actions.Create
-        else:
-            self.log("<%= object.name.titlecase -%> instance already exists")
-            if self.state == 'absent':
-                self.to_do = Actions.Delete
-            elif self.state == 'present':
-                self.results['old'] = old_response
-                self.results['new'] = self.<%= lines(root_object_field) -%>
-                if not self.idempotency_check(old_response, self.<%= root_object_field -%>):
-                    self.to_do = Actions.Update
-
-        if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
-            self.log("Need to Create / Update the <%= object.name.titlecase -%> instance")
-
-            self.results['changed'] = True
-            if self.check_mode:
-                return self.results
-
-            response = self.create_update_<%= object.name.downcase -%>()
-
-            self.log("Creation / Update done")
-        elif self.to_do == Actions.Delete:
-            self.log("<%= object.name.titlecase -%> instance deleted")
-            self.results['changed'] = True
-
-            if self.check_mode:
-                return self.results
-
-            self.delete_<%= object.name.downcase -%>()
-        else:
-            self.log("<%= object.name.titlecase -%> instance unchanged")
-            self.results['changed'] = False
-            response = old_response
-
-        if self.state == 'present':
-            self.results.update({
-<%= lines(build_response_properties_update(output_properties, object.azure_sdk_definition.read.response)) -%>
-            })
-        return self.results
-
-    def create_update_<%= object.name.downcase -%>(self):
-        '''
-        Creates or updates <%= object.name.titlecase -%> with the specified configuration.
-
-        :return: deserialized <%= object.name.titlecase -%> instance state dictionary
-        '''
-        self.log("Creating / Updating the <%= object.name.titlecase -%> instance {0}".format(self.name))
-
-        try:
-<%  if combine_create_update -%>
-<%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.create)) -%>
-<%  else -%>
-            if self.to_do == Actions.Create:
-<%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.create, 16)) -%>
-            else:
-<%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.update, 16)) -%>
-<%  end -%>
-            if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
-                response = self.get_poller_result(response)
-        except CloudError as exc:
-            self.log('Error attempting to create the <%= object.name.titlecase -%> instance.')
-            self.fail("Error creating the <%= object.name.titlecase -%> instance: {0}".format(str(exc)))
-        return response.as_dict()
-
-<%  sdk_operation = object.azure_sdk_definition.delete -%>
-    def delete_<%= object.name.downcase -%>(self):
-        '''
-        Deletes specified <%= object.name.titlecase -%> instance in the specified subscription and resource group.
-
-        :return: True
-        '''
-        self.log("Deleting the <%= object.name.titlecase -%> instance {0}".format(self.name))
-        try:
-<%= lines(build_sdk_method_invocation(python_sdk_sub_client, sdk_operation)) -%>
-        except CloudError as e:
-            self.log('Error attempting to delete the <%= object.name.titlecase -%> instance.')
-            self.fail("Error deleting the <%= object.name.titlecase -%> instance: {0}".format(str(e)))
-
-        if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
-            response = self.get_poller_result(response)
-        return True
-
-<%  sdk_operation = object.azure_sdk_definition.read -%>
-    def get_<%= object.name.downcase -%>(self):
-        '''
-        Gets the properties of the specified <%= object.name.titlecase -%>
-
-        :return: deserialized <%= object.name.titlecase -%> instance state dictionary
-        '''
-        self.log("Checking if the <%= object.name.titlecase -%> instance {0} is present".format(self.name))
-        found = False
-        try:
-<%= lines(build_sdk_method_invocation(python_sdk_sub_client, sdk_operation)) -%>
-            found = True
-            self.log("Response : {0}".format(response))
-            self.log("<%= object.name.titlecase -%> instance : {0} found".format(response.name))
-        except CloudError as e:
-            self.log('Did not find the <%= object.name.titlecase -%> instance.')
-        if found is True:
-            return response.as_dict()
-        return False
+################################################################################
+# Main
+################################################################################
 
 
 def main():
-    """Main execution"""
-    AzureRM<%= object.name -%>()
+    """Main function"""
+
+<%= lines(indent(compile('templates/ansible/module.erb'), 4)) -%>
+
+    if not module.params['scopes']:
+        module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
+
+    state = module.params['state']
+<% if object.kind? -%>
+    kind = <%= lines(quote_string(object.kind)) -%>
+<% end -%>
+
+<% if object.nested_query.nil? -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+<% if object.identity.empty? -%>
+    if module.params['id']:
+        fetch = <%= method %>
+    else:
+        fetch = {}
+<% else #object.identity.empty? -%>
+    fetch = <%= method %>
+<% end # object.identity.empty? -%>
+<% else # object.nested_query.nil? -%>
+    fetch = fetch_wrapped_resource(module, '<%= object.kind -%>',
+                                   '<%= object.nested_query.kind -%>',
+                                   '<%= object.nested_query.keys.first -%>')
+<% end # object.nested_query.nil? -%>
+    changed = False
+
+    if fetch:
+        if state == 'present':
+            if is_different(module, fetch):
+<%
+  method = method_call('update', [
+                                   'module', 'self_link(module)',
+                                   ('kind' if object.kind?),
+                                   ('fetch' if object.access_api_results || !update_props.empty? || object.update_mask)
+                                 ])
+-%>
+<%= lines(indent("#{method}", 16)) -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+                fetch = <%= method %>
+                changed = True
+        else:
+<%
+  if object.delete_url.nil?
+    delete_url = 'self_link(module)'
+  else
+    delete_url = 'delete_link(module)'
+  end
+  method = method_call('delete', [
+                                   'module', delete_url,
+                                   ('kind' if object.kind?),
+                                   ('fetch' if object.access_api_results)
+                                 ])
+-%>
+<%= lines(indent(method, 12)) -%>
+            fetch = {}
+            changed = True
+    else:
+        if state == 'present':
+<%
+  if !object.create_url.nil?
+    create_link = 'create_link(module)'
+  elsif object.create_verb.nil? || object.create_verb == :POST
+      create_link = 'collection(module)'
+  elsif object.create_verb == :PUT
+      create_link = 'self_link(module)'
+  end
+
+  create_verb = ".#{object.create_verb.to_s.downcase}"
+  method = method_call('create', ['module', create_link,
+                                  ('kind' if object.kind?)])
+-%>
+            fetch = <%= method %>
+<% if object.post_create -%>
+<%= lines(indent(object.post_create, 12)) -%>
+<% end # ifobject.post_create -%>
+            changed = True
+        else:
+            fetch = {}
+
+<% if object.post_action -%>
+<%= lines(indent(object.post_action, 4)) -%>
+<% end # ifobject.post_create -%>
+    fetch.update({'changed': changed})
+
+    module.exit_json(**fetch)
+
+
+<% prod_name = object.__product.api_name -%>
+<%# TODO: kind param not always needed.
+  # https://github.com/GoogleCloudPlatform/magic-modules/issues/45
+-%>
+<%= method_decl('create', ['module', 'link', ('kind' if object.kind?)]) %>
+<% if object.create.nil? -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<%
+  create_request = if object.custom_create_resource
+                     'resource_to_create'
+                   else
+                     'resource_to_request'
+                   end
+-%>
+<%
+  method = method_call(
+    object.async ? 'wait_for_operation' : 'return_if_object',
+    ['module',
+     method_call("auth#{create_verb}",
+                 ['link', "#{create_request}(module)"]),
+     ('kind' if !object.async && object.kind?)
+   ]
+  )
+-%>
+    return <%= method %>
+<% else -%>
+<%= lines(indent(object.create, 4)) -%>
+<% end -%>
+
+
+<%=
+  lines(method_decl('update', ['module', 'link', ('kind' if object.kind?),
+                               ('fetch' if object.access_api_results || !update_props.empty? || object.update_mask)]))
+-%>
+<%
+  update_request = if object.custom_update_resource
+                     'resource_to_update'
+                   else
+                     'resource_to_request'
+                   end
+-%>
+<% if object.update.nil? -%>
+<% unless update_props.empty? -%>
+    update_fields(module, resource_to_request(module),
+                  response_to_hash(module, fetch))
+<% end -%>
+<%   if object.input && update_props.empty? -%>
+<%=
+    indent(method_call('delete', [
+                            'module', delete_url,
+                            ('kind' if object.kind?),
+                            ('fetch' if object.access_api_results)
+                          ]), 4)
+%>
+<%=
+  indent(method_call('create', ['module', create_link,
+                         ('kind' if object.kind?)]), 4)
+%>
+<%   elsif  !object.input -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<% method_args = ['link'] -%>
+<% if object.update_mask -%>
+    params = {
+        'updateMask': updateMask(resource_to_request(module), response_to_hash(module, fetch))
+    }
+    request = resource_to_request(module)
+    del request['name']
+<%
+  method_args.append("request")
+  method_args.append("params=params")
+-%>
+<% else # update mask -%>, 
+<% method_args.append("#{update_request}(module)") -%>
+<% end # update mask -%>
+<%
+  update_verb = object.update_verb.to_s.downcase
+  method = method_call(
+    object.async ? 'wait_for_operation' : 'return_if_object',
+    [
+     'module',
+     method_call("auth.#{update_verb}", method_args),
+     ('kind' if !object.async && object.kind?)
+   ]
+  )
+-%>
+    return <%= method %>
+<% else # non-updatable, but has per-field updates -%>
+<%
+  method = method_call('fetch_resource', ['module', 'self_link(module)',
+                                          ('kind' if object.kind?),
+                                         ])
+-%>
+    return <%= method %>
+<%   end # if object.input -%>
+<% else # object.update.nil? -%>
+<%= lines(indent(object.update, 4)) -%>
+<% end # object.update.nil? -%>
+
+
+<% unless update_props.empty? -%>
+def update_fields(module, request, response):
+<% empty = update_props.values.flatten.reject { |p| p.is_a? Api::Type::FetchedExternal }.empty? -%>
+<% if empty -%>
+    pass
+<% else -%>
+<% update_props.each do |key, props| -%>
+<%
+  props_statement = props.reject { |p| p.is_a?(Api::Type::FetchedExternal) }
+  .map { |prop| "response.get(#{quote_string(prop.api_name)}) != request.get(#{quote_string(prop.api_name)})" }.join(' or ')
+-%>
+<% unless props_statement.empty? -%>
+    if <%= props_statement -%>:
+        <%= props.first.name.underscore -%>_update(module, request, response)
+<% end # unless props_statement.empty? -%>
+<% end # update_props.each -%>
+<% end # if empty -%>
+
+
+<% update_props.each do |key, props| -%>
+def <%= props.first.name.underscore -%>_update(module, request, response):
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+    auth.<%= key[:update_verb].downcase -%>(
+        ''.join([
+            "<%= object.__product.base_url -%>",
+            "<%= key[:update_url].gsub('{{', '{').gsub('}}', '}') -%>"
+        ]).format(**module.params),
+<%= lines(python_literal(request_properties(props), use_hash_brackets: true)) -%>
+    )
+
+
+<% end -%>
+<% end # unless update_props.empty? -%>
+<% if object.update_mask -%>
+<%= lines(compile('templates/ansible/update_mask.erb')) -%>
+<% end # if update_mask -%>
+<%=
+  lines(method_decl('delete', ['module', 'link', ('kind' if object.kind?),
+                               ('fetch' if object.access_api_results)]))
+-%>
+<% if object.delete.nil? -%>
+    auth = GcpSession(module, <%= quote_string(prod_name) -%>)
+<%
+  delete_verb = object.delete_verb.to_s.downcase
+
+  method = method_call(
+    object.async ? 'wait_for_operation' : 'return_if_object',
+    ['module',
+     method_call("auth.#{delete_verb}", ['link']),
+     ('kind' if !object.async && object.kind?)
+   ]
+  )
+-%>
+    return <%= method %>
+<% else # if object.delete.nil? -%>
+<%= lines(indent(object.delete, 4)) -%>
+<% end # if object.delete.nil? -%>
+
+
+def resource_to_request(module):
+<%
+  properties_in_request = [
+    object&.parameters&.select { |p| p.input },
+    object.properties.reject(&:output)
+  ].flatten.compact.reject(&:url_param_only)
+-%>
+<%
+  request_hash = {
+    Google::PythonUtils::UnicodeString.new('kind') => object.kind
+}.merge(request_properties(properties_in_request))
+-%>
+    request = <%= lines(python_literal(request_hash, use_hash_brackets: true)) -%>
+<% if object.encoder? -%>
+    request = <%= object.transport.encoder -%>(request, module)
+<% end -%>
+    return_vals = {}
+    for k, v in request.items():
+        if v or v is False:
+            return_vals[k] = v
+
+    return return_vals
+<% if object.unwrap_resource -%>
+<%
+  urf_code = [
+    'return {',
+    indent_list(
+      Hash[object.identity.map { |i| [i, "module.params[#{quote_string(i.out_name)}]"] }]
+        .map { |k, v| "#{quote_string(k.out_name)}: #{v}" }, 4
+    ),
+    '}'
+  ]
+-%>
+<%=
+  lines_before(lines(emit_method('unwrap_resource_filter', %w[module],
+                                 urf_code, file_relative), 1), 1)
+-%>
+
+def unwrap_resource(result, module):
+    query_predicate = unwrap_resource_filter(module)
+    matched_items = []
+    for item in result:
+        if all(item[k] == query_predicate[k] for k in query_predicate.keys()):
+            matched_items.append(item)
+    if len(matched_items) > 1:
+        module.fail_json(msg="More than 1 result found: %s" % matched_items)
+
+    if matched_items:
+        return matched_items[0]
+    else:
+        return None
+<% end -%>
+
+
+<%= lines(compile('templates/ansible/transport.erb'), 2) -%>
+<%= lines(emit_link('self_link', build_url(object.self_link_url), object), 2) -%>
+<%= lines(emit_link('collection', build_url(object.collection_url), object), 2) -%>
+<%- unless object.create_url.nil? -%>
+<%=lines(emit_link('create_link', build_url(object.full_create_url), object), 2)-%>
+<% end -%>
+<% unless object.delete_url.nil? -%>
+<%= lines(emit_link('delete_link', build_url(object.full_delete_url), object), 2) -%>
+<% end -%>
+<%=
+  lines(method_decl('return_if_object', ['module', 'response',
+                                         ('kind' if object.kind?),
+                                         'allow_not_found=False']))
+-%>
+<% if object.return_if_object -%>
+<%= lines(indent(object.return_if_object, 4)) -%>
+<% else # if object.return_if_object -%>
+    # If not found, return nothing.
+    if allow_not_found and response.status_code == 404:
+        return None
+
+    # If no content, return nothing.
+    if response.status_code == 204:
+        return None
+
+    try:
+        module.raise_for_status(response)
+        result = response.json()
+    except getattr(json.decoder, 'JSONDecodeError', ValueError):
+        module.fail_json(msg="Invalid JSON response with error: %s" % response.text)
+
+<% if object.decoder? -%>
+    result = <%= object.transport.decoder -%>(result, module)
+
+<% end -%>
+    if navigate_hash(result, ['error', 'errors']):
+        module.fail_json(msg=navigate_hash(result, ['error', 'errors']))
+
+    return result
+<% end # if object.return_if_object -%>
+
+
+def is_different(module, response):
+    request = resource_to_request(module)
+    response = response_to_hash(module, response)
+<% if object.decoder? -%>
+    request = <%= object.transport.decoder -%>(request, module)
+<% end -%>
+
+    # Remove all output-only from response.
+    response_vals = {}
+    for k, v in response.items():
+        if k in request:
+            response_vals[k] = v
+
+    request_vals = {}
+    for k, v in request.items():
+        if k in response:
+            request_vals[k] = v
+
+    return GcpRequest(request_vals) != GcpRequest(response_vals)
+
+
+# Remove unnecessary properties from the response.
+# This is for doing comparisons with Ansible's current parameters.
+def response_to_hash(module, response):
+    return <%= lines(python_literal(response_properties(object.properties), use_hash_brackets: true)) -%>
+<% if object.name_pattern -%>
+<%= lines(compile('templates/ansible/name_pattern.py.erb')) -%>
+<% end -%>
+<% readonly_selflink_rrefs.each do |resource| -%>
+
+
+def <%= resource.name.underscore -%>_selflink(name, params):
+    if name is None:
+        return
+    url = r<%= lines(build_url(regex_url(resource.self_link_url))) -%>
+    if not re.match(url, name):
+        name = <%= build_url(resource.self_link_url).gsub('{name}', '%s') -%>.format(**params) % name
+    return name
+<% end -%>
+<%= lines_before(compile('templates/ansible/async.erb'), 1) -%>
+<%= lines_before(compile('templates/ansible/provider_helpers.erb'), 1) -%>
+<%= lines_before(compile('templates/ansible/properties.erb'), 1) -%>
 
 
 if __name__ == '__main__':

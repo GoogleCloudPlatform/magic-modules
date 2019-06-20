@@ -1,0 +1,48 @@
+# frozen_string_literal: false
+
+<%= lines(autogen_notice :ruby) -%>
+require 'gcp_backend'
+require 'google/iam/property/iam_policy_audit_configs'
+require 'google/iam/property/iam_policy_bindings'
+
+# A provider to manage <%= @api.product_full_name -%> IAM Policy resources.
+class <%= object.name -%>IamPolicy < GcpResourceBase
+  name '<%= resource_name(object, product_ns) -%>_iam_policy'
+  desc '<%= object.name -%> Iam Policy'
+  supports platform: 'gcp'
+
+  attr_reader :params
+  attr_reader :bindings
+  attr_reader :audit_configs
+
+  def initialize(params)
+    super(params.merge({ use_http_transport: true }))
+    @params = params
+    @fetched = @connection.fetch(product_url, resource_base_url, params)
+    parse unless @fetched.nil?
+  end
+
+  def parse
+    @bindings = GoogleInSpec::Iam::Property::IamPolicyBindingsArray.parse(@fetched['bindings'], to_s)
+    @audit_configs = GoogleInSpec::Iam::Property::IamPolicyAuditConfigsArray.parse(@fetched['auditConfigs'], to_s)
+  end
+
+  def exists?
+    !@fetched.nil?
+  end
+
+  def to_s
+    "<%= object.name -%> IamPolicy #{@params[:name]}"
+  end
+
+  private
+
+  def product_url
+    '<%= object.product_url || object.__product.base_url %>'
+  end
+
+<% individual_url = object.self_link || object.base_url + '/{{name}}' -%>
+  def resource_base_url
+    '<%= individual_url -%><%= object.iam_policy.method_name_separator -%>getIamPolicy'
+  end
+end

@@ -1,0 +1,139 @@
+<%# The license inside this block applies to this file.
+  # Copyright 2017 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+-%>
+<%
+    property = descriptor.property
+    sdk_marshal = descriptor.sdkmarshal
+-%>
+<%  if property.custom_expand -%>
+<%= lines(compile_template(property.custom_expand,
+                           prefix: sdk_marshal.resource,
+                           property: property)) -%>
+<%  else -%>
+<%    if property.is_a?(Api::Type::Map) -%>
+func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]interface{}, error) {
+  if v == nil {
+    return map[string]interface{}{}, nil
+  }
+  m := make(map[string]interface{})
+  for _, raw := range v.(*schema.Set).List() {
+    original := raw.(map[string]interface{})
+    transformed := make(map[string]interface{})
+
+<%      nested_properties(property.value_type).each do |prop| -%>
+<%        next if prop.name == property.key_name -%>
+    transformed<%= titlelize_property(prop) -%>, err := expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
+    if err != nil {
+      return nil, err
+    }
+    transformed["<%= prop.api_name -%>"] = transformed<%= titlelize_property(prop) -%>
+
+<%      end -%>
+
+    m[original["<%= property.key_name -%>"].(string)] = transformed
+  }
+  return m, nil
+}
+
+<%      nested_properties(property.value_type).each do |prop| -%>
+<%        next if prop.name == property.key_name -%>
+<%#      lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+<%      end -%>
+<%    elsif property.is_a?(Api::Type::KeyValuePairs) -%>
+func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
+  if v == nil {
+    return map[string]string{}, nil
+  }
+  m := make(map[string]string)
+  for k, val := range v.(map[string]interface{}) {
+    m[k] = val.(string)
+  }
+  return m, nil
+}
+<%    elsif tf_types.include?(property.class) -%>
+func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go_type(property) -%>) *<%= '[]' if property.is_a?(Api::Type::Array) -%><%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%> {
+<%
+        if !nested_properties(property).empty?
+          nested_properties = nested_properties(property)
+          if property.is_set
+-%>
+    v := input.(*schema.Set).List()
+<%        elsif property.is_a?(Api::Type::NestedObject) -%>
+    if len(input) == 0 {
+        return nil
+    }
+    v := input[0].(map[string]interface{})
+
+<%          nested_properties.each do |prop| -%>
+<%            var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_marshal.sdktype.type_definitions).go_variable_name -%>
+<%            output_var = var_name || prop.name.camelcase(:lower) -%>
+<%=           lines(build_schema_property_get('v', output_var, prop, sdk_marshal, 4)) -%>
+<%          end -%>
+
+    result := <%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>{
+<%=         lines(build_property_to_sdk_object(sdk_marshal.clone(nil, nested_properties), 8)) -%>
+    }
+    return &result
+<%        elsif property.is_a?(Api::Type::Array) -%>
+    results := make([]<%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>, 0)
+    for _, v := range input {
+<%          nested_properties.each do |prop| -%>
+<%            var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_marshal.sdktype.type_definitions).go_variable_name -%>
+<%            output_var = var_name || prop.name.camelcase(:lower) -%>
+<%=           lines(build_schema_property_get('v', output_var, prop, sdk_marshal, 8)) -%>
+<%          end -%>
+
+        item := <%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>{
+<%=         lines(build_property_to_sdk_object(sdk_marshal.clone(nil, nested_properties), 12)) -%>
+        }
+
+        results = append(results, item)
+    }
+    return &results
+<%        end -%>
+}
+
+<%        nested_properties.each do |prop| -%>
+<%#        lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+<%        end -%>
+<%      elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+  l := v.([]interface{})
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    f, err := <%= build_expand_resource_ref('raw.(string)', property.item_type) %>
+    if err != nil {
+      return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
+    }
+    req = append(req, f.RelativeLink())
+  }
+  return req, nil
+}
+<%     else -%>
+<%       if property.is_a?(Api::Type::ResourceRef) -%>
+  f, err := <%= build_expand_resource_ref('v.(string)', property) %>
+  if err != nil {
+    return nil, fmt.Errorf("Invalid value for <%= property.name.underscore -%>: %s", err)
+  }
+  return f.RelativeLink(), nil
+}
+<%       else -%>
+  return v, nil
+}
+<%       end -%>
+<%     end # nested_properties, array of resourcerefs, else -%>
+<%   else -%>
+  // TODO: Expand Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+}
+<%   end # tf_types.include?(property.class) -%>
+<% end # custom_code check -%>

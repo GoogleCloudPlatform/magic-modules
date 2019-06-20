@@ -1,0 +1,15 @@
+// if networks are attached, they need to be detached before the policy can be deleted
+if d.Get("networks.#").(int) > 0 {
+	patched := make(map[string]interface{})
+	patched["networks"] = nil
+
+	url, err := replaceVars(d, config, "{{DnsBasePath}}projects/{{project}}/policies/{{name}}")
+	if err != nil {
+		return err
+	}
+
+	_, err = sendRequestWithTimeout(config, "PATCH", url, patched, d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return fmt.Errorf("Error updating Policy %q: %s", d.Id(), err)
+	}
+}

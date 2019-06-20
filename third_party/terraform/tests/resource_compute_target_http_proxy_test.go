@@ -9,36 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccComputeTargetHttpProxy_basic(t *testing.T) {
-	t.Parallel()
-
-	target := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	backend := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	hc := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	urlmap1 := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-	urlmap2 := fmt.Sprintf("thttp-test-%s", acctest.RandString(10))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeTargetHttpProxyDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeTargetHttpProxy_basic1(target, backend, hc, urlmap1, urlmap2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeTargetHttpProxyExists(
-						"google_compute_target_http_proxy.foobar"),
-				),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_target_http_proxy.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccComputeTargetHttpProxy_update(t *testing.T) {
 	t.Parallel()
 
@@ -53,7 +23,7 @@ func TestAccComputeTargetHttpProxy_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeTargetHttpProxyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeTargetHttpProxy_basic1(target, backend, hc, urlmap1, urlmap2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetHttpProxyExists(
@@ -61,7 +31,7 @@ func TestAccComputeTargetHttpProxy_update(t *testing.T) {
 				),
 			},
 
-			resource.TestStep{
+			{
 				Config: testAccComputeTargetHttpProxy_basic2(target, backend, hc, urlmap1, urlmap2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeTargetHttpProxyExists(

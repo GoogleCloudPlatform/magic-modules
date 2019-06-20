@@ -1,0 +1,85 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Database: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    id_format: "{{project}}/{{instance}}/{{name}}"
+    import_format:
+      - "projects/{{project}}/instances/{{instance}}/databases/{{name}}"
+      - "instances/{{instance}}/databases/{{name}}"
+      - "{{project}}/{{instance}}/{{name}}"
+      - "{{instance}}/{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_database_basic"
+        primary_resource_id: "database"
+        vars:
+          database_name: "my-database"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z][a-z0-9_\-]*[a-z0-9]$'
+      extraStatements: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: ddl
+        ignore_read: true
+      state: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/spanner_database.go.erb
+      decoder: templates/terraform/decoders/spanner_database.go.erb
+  InstanceConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    # This is appropriate for a datasource - doesn't have a create method.
+    exclude: true
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    autogen_async: true
+    id_format: "{{project}}/{{name}}"
+    import_format:
+      - "projects/{{project}}/instances/{{name}}"
+      - "{{project}}/{{name}}"
+      - "{{name}}"
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "spanner_instance_basic"
+        primary_resource_id: "example"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          {{description}}
+
+          If not provided, a random string starting with `tf-` will be selected.
+        validation: !ruby/object:Provider::Terraform::Validation
+          regex: '^[a-z][-a-z0-9]*[a-z0-9]$'
+        # This resource supports a sort of odd autogenerate-if-not-set
+        # system, which is done in the encoder.  Consequently we have
+        # to interpret "not set" as "use the name in state".
+        default_from_api: true
+      nodeCount: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: num_nodes
+      config: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: templates/terraform/custom_expand/spanner_instance_config.go.erb
+      state: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: false
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/spanner_instance.go.erb
+      update_encoder: templates/terraform/encoders/spanner_instance_update.go.erb
+      decoder: templates/terraform/decoders/spanner_instance.go.erb
+      post_create: templates/terraform/post_create/sleep.go.erb
+
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

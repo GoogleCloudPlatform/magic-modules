@@ -1,0 +1,14 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% ssl_policy = grab_attributes['ssl_policy'] -%>
+describe google_compute_ssl_policies(project: <%= gcp_project_id -%>) do
+  it { should exist }
+  its('names') { should include <%= doc_generation ? "'#{ssl_policy['name']}'" : "ssl_policy['name']" -%> }
+  its('profiles') { should include <%= doc_generation ? "'#{ssl_policy['profile']}'" : "ssl_policy['profile']" -%> }
+  its('count') { should eq 1 }
+end
+
+google_compute_ssl_policies(project: <%= gcp_project_id -%>).names.each do |policy_name|
+  describe google_compute_ssl_policy(project: <%= gcp_project_id -%>, name: policy_name) do
+    its('min_tls_version') { should eq <%= doc_generation ? "'#{ssl_policy['min_tls_version']}'" : "ssl_policy['min_tls_version']" -%> }
+  end
+end

@@ -1,0 +1,31 @@
+<%# The license inside this block applies to this file.
+  # Copyright 2018 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+-%>
+<%
+  if property.is_a?(Api::Type::Array) && property.is_set && property.item_type.is_a?(Api::Type::NestedObject)
+-%>
+func <%= namespace_property_from_object(property, object) -%>Schema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+          <% order_properties(property.item_type.properties).each do |prop| -%>
+            <%= lines(build_schema_property(prop, object)) -%>
+          <% end -%>
+		},
+	}
+}
+<% end %>
+
+<% property.nested_properties.each do |prop| -%>
+<%= lines(build_subresource_schema(prop, object), 1) -%>
+<% end -%>

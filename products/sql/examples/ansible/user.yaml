@@ -15,7 +15,9 @@ dependencies:
   - !ruby/object:Provider::Ansible::Task
     name: gcp_sql_instance
     code:
-      name: <%= dependency_name('instance', 'user') %>
+      # resource_name shared across entire test suite.
+      # All SQL instances must have unique names
+      name: "{{resource_name}}-1"
       settings:
         ip_configuration:
           authorized_networks:

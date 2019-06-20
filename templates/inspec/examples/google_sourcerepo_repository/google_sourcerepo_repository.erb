@@ -1,0 +1,9 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% repository = grab_attributes['repository'] -%>
+describe google_sourcerepo_repository(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{repository['name']}'" : "repository['name']" -%>) do
+  it { should exist }
+end
+
+describe google_sourcerepo_repository(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

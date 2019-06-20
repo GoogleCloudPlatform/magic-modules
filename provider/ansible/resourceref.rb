@@ -15,7 +15,6 @@ require 'api/object'
 require 'compile/core'
 require 'provider/config'
 require 'provider/core'
-require 'provider/ansible/manifest'
 
 module Provider
   module Ansible
@@ -28,6 +27,7 @@ module Provider
       def resourceref_handlers(object)
         rrefs = nonreadonly_rrefs(object)
         return unless rrefs.any?
+
         comments = [
           '# Converts data from:',
           '# foo:',

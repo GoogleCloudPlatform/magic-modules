@@ -1,0 +1,58 @@
+---
+<%= lines(autogen_notice :yaml) -%>
+<%  deps_yaml, yaml, random_vars = build_test_yaml_from_example(object.inttests[0].example) -%>
+- name: Prepare random number
+  set_fact:
+<%  random_vars.reject{|v| v.variable_name == 'resource_group'}.each do |rnd| -%>
+    <%= rnd.variable_name -%>: "<%= rnd.variable_value -%>"
+<%  end -%>
+  run_once: yes
+
+<%= lines(deps_yaml) -%>
+
+<%= lines(yaml) -%>
+
+- name: Assert the resource was created
+  assert:
+    that:
+      - output.changed
+
+<%  _, same_yaml, _ = build_test_yaml_from_example(object.inttests[0].example, 'idempotent') -%>
+<%= lines(same_yaml) -%>
+
+- name: Assert the resource was created
+  assert:
+    that:
+      - not output.changed
+
+<%  unless object.inttests[0].info_by_name_example.nil? -%>
+<%    _, info_yaml, _ = build_test_yaml_from_example(object.inttests[0].info_by_name_example) -%>
+<%=   lines(info_yaml) -%>
+
+- name: Assert that info is returned
+  assert:
+    that:
+      - not output.changed
+<%= lines(indent(generate_info_assert_list(object.inttests[0].example), 6)) -%>
+
+<%  end -%>
+<%  unless object.inttests[0].info_by_resource_group_example.nil? -%>
+<%    _, info_yaml, _ = build_test_yaml_from_example(object.inttests[0].info_by_resource_group_example) -%>
+<%=   lines(info_yaml) -%>
+
+- name: Assert that info is returned
+  assert:
+    that:
+      - not output.changed
+<%= lines(indent(generate_info_assert_list(object.inttests[0].example), 6)) -%>
+
+<%  end -%>
+<%  deps_yaml, delete_yaml, _ = build_test_yaml_from_example(object.inttests[0].delete_example) -%>
+<%= lines(delete_yaml) -%>
+
+- name: Assert that state has changed
+  assert:
+    that:
+      - output.changed
+
+<%= lines(deps_yaml) -%>

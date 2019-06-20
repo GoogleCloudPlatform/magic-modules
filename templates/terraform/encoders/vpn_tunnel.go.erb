@@ -1,0 +1,12 @@
+config := meta.(*Config)
+f, err := parseRegionalFieldValue("targetVpnGateways", d.Get("target_vpn_gateway").(string), "project", "region", "zone", d, config, true)
+if err != nil {
+	return nil, err
+}
+if _, ok := d.GetOk("project"); !ok {
+	d.Set("project", f.Project)
+}
+if _, ok := d.GetOk("region"); !ok {
+	d.Set("region", f.Region)
+}
+return obj, nil

@@ -9,11 +9,14 @@ if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok ||
     obj := make(map[string]interface{})
     // d.Get("labels") will have been overridden by the Read call.
     labelsProp, err := expand<%= resource_name -%>Labels(v, d, config)
+    if err != nil {
+    	return err
+    }
     obj["labels"] = labelsProp
     labelFingerprintProp := d.Get("label_fingerprint")
     obj["labelFingerprint"] = labelFingerprintProp
 
-    url, err = replaceVars(d, config, "<%= build_url(object.self_link_url) -%>/setLabels")
+    url, err = replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>/setLabels")
     if err != nil {
         return err
     }

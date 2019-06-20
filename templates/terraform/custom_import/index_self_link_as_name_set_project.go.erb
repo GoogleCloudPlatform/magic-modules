@@ -1,0 +1,19 @@
+
+	config := meta.(*Config)
+
+	// current import_formats can't import fields with forward slashes in their value
+	if err := parseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+		return nil, err
+	}
+
+	stringParts := strings.Split(d.Get("name").(string), "/")
+	if len(stringParts) != 8 {
+		return nil, fmt.Errorf(
+				"Saw %s when the name is expected to have shape %s",
+				d.Get("name"),
+				"projects/{{project}}/databases/{{database}}/collectionGroups/{{collection}}/indexes/{{server_generated_id}}",
+			)
+	}
+
+	d.Set("project", fmt.Sprintf("%s", stringParts[1]))
+	return []*schema.ResourceData{d}, nil

@@ -7,8 +7,8 @@ platform: linux
 image_resource:
     type: docker-image
     source:
-        repository: nmckinley/go-ruby-python
-        tag: '1.11-2.5.1-2.7'
+        repository: gcr.io/magic-modules/go-ruby-python
+        tag: '1.11.5-2.6.0-2.7-v2'
 
 inputs:
     - name: magic-modules-branched
@@ -21,6 +21,8 @@ run:
     path: magic-modules-branched/.ci/magic-modules/generate-terraform.sh
 
 params:
-  VERSION: ""
-  PROVIDER_NAME: ""
-  SHORT_NAME: ""
+    VERSION: ""
+    PROVIDER_NAME: ""
+    SHORT_NAME: ""
+    OVERRIDE_PROVIDER: ""
+    GITHUB_ORG: "terraform-providers"

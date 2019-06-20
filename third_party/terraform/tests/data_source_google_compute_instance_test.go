@@ -19,7 +19,7 @@ func TestAccDataSourceComputeInstance_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeInstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDataSourceComputeInstanceConfig(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceComputeInstanceCheck("data.google_compute_instance.bar", "google_compute_instance.foo"),
@@ -110,16 +110,13 @@ resource "google_compute_instance" "foo" {
     	}
 	}
 
-	metadata {
+	metadata = {
 		foo = "bar"
 		baz = "qux"
+        startup-script = "echo Hello"
 	}
 
-	metadata {
-		startup-script = "echo Hello"
-	}
-
-	labels {
+	labels = {
 		my_key       = "my_value"
 		my_other_key = "my_other_value"
     }
@@ -128,6 +125,10 @@ resource "google_compute_instance" "foo" {
 data "google_compute_instance" "bar" {
 	name = "${google_compute_instance.foo.name}"
 	zone = "us-central1-a"
+}
+
+data "google_compute_instance" "baz" {
+	self_link = "${google_compute_instance.foo.self_link}"
 }
 `, instanceName)
 }

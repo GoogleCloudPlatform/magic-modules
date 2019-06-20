@@ -1,0 +1,107 @@
+<%# The license inside this block applies to this file.
+  # Copyright 2017 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+-%>
+<%
+    property = descriptor.property
+    sdk_marshal = descriptor.sdkmarshal
+-%>
+<% if property.custom_flatten -%>
+<%= lines(compile_template(property.custom_flatten,
+                           prefix: sdk_marshal.resource,
+                           property: property)) -%>
+<% else -%>
+<% if tf_types.include?(property.class) -%>
+func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= '[]' if property.is_a?(Api::Type::Array) -%><%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%>) []interface{} {
+<% if property.is_a?(Api::Type::NestedObject) -%>
+    if input == nil {
+        return make([]interface{}, 0)
+    }
+
+    result := make(map[string]interface{})
+
+<%= lines(build_sdk_object_to_property('input', 'result', sdk_marshal.clone(nil, nested_properties(property)))) -%>
+
+    return []interface{}{result}
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
+    results := make([]interface{}, 0)
+    if input == nil {
+        return results
+    }
+
+    for _, item := range input {
+        v := make(map[string]interface{})
+
+<%= lines(build_sdk_object_to_property('item', 'v', sdk_marshal.clone(nil, nested_properties(property)), 8)) -%>
+
+        results = append(results, v)
+    }
+
+    return results
+<% elsif property.is_a?(Api::Type::Map) -%>
+    if v == nil {
+      return v
+    }
+  l := v.(map[string]interface{})
+  transformed := make([]interface{}, 0, len(l))
+  for k, raw := range l {
+    original := raw.(map[string]interface{})
+    transformed = append(transformed, map[string]interface{}{
+      "<%= property.key_name -%>": k,
+    <% property.value_type.properties.each do |prop| -%>
+      "<%= Google::StringUtils.underscore(prop.name) -%>": flatten<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= prop.api_name -%>"]),
+    <% end -%>
+    })
+  }
+  return transformed
+<% elsif property.is_a?(Api::Type::Integer) -%>
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := strconv.ParseInt(strVal, 10, 64); err == nil {
+			return intVal
+		} // let terraform core handle it if we can't convert the string to an int.
+	}
+	return v
+<% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
+  if v == nil {
+    return v
+  }
+  return convertAndMapStringArr(v.([]interface{}), ConvertSelfLinkToV1)
+<% elsif property.is_a?(Api::Type::ResourceRef) -%>
+  if v == nil {
+    return v
+  }
+  return ConvertSelfLinkToV1(v.(string))
+<% elsif property.is_set -%>
+  if v == nil {
+    return v
+  }
+  <% if !property.set_hash_func.nil? -%>
+  return schema.NewSet(<%= property.set_hash_func -%>, v.([]interface{}))
+  <% elsif property.item_type.is_a?(String) -%>
+  return schema.NewSet(schema.HashString, v.([]interface{}))
+  <% else raise 'Unknown hash function for property #{property.name}' -%>
+  <% end -%>
+<% else -%>
+  return v
+<% end # property.is_a?(Api::Type::NestedObject) -%>
+}
+<% if !nested_properties(property).empty? -%>
+  <% nested_properties(property).each do |prop| -%>
+    <%# lines(build_flatten_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+  <% end -%>
+<% end -%>
+<% else -%>
+  // TODO: Flatten Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+<% end # tf_types.include?(property.class) -%>
+<% end # custom code check -%>

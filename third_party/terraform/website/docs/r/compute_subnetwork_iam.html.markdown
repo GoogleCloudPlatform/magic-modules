@@ -53,7 +53,7 @@ resource "google_compute_subnetwork_iam_binding" "subnet" {
 }
 ```
 
-## google\compute\_subnetwork\_iam\_member
+## google\_compute\_subnetwork\_iam\_member
 
 ```hcl
 resource "google_compute_subnetwork_iam_member" "subnet" {
@@ -107,10 +107,10 @@ For all import syntaxes, the "resource in question" can take any of the followin
 * {{region}}/{{name}} (project is taken from provider project)
 * {{name}} (project and region are taken from provider project)
 
-IAM member imports use space-delimited identifiers; the resource in question, the role, and the account, e.g.
+IAM member imports use space-delimited identifiers; the resource in question, the role, and the member identity, e.g.
 
 ```
-$ terraform import google_compute_subnetwork_iam_member.subnet "project-name/region-name/subnetwork-name roles/compute.networkUser foo@example.com"
+$ terraform import google_compute_subnetwork_iam_member.subnet "project-name/region-name/subnetwork-name roles/compute.networkUser user:foo@example.com"
 ```
 
 IAM binding imports use space-delimited identifiers; the resource in question and the role, e.g.

@@ -1,0 +1,1011 @@
+---
+:facts:
+  :Address:
+    :version_added: '2.7'
+  :BackendBucket:
+    :version_added: '2.7'
+  :BackendService:
+    :version_added: '2.7'
+  :Disk:
+    :version_added: '2.7'
+  :Firewall:
+    :version_added: '2.7'
+  :ForwardingRule:
+    :version_added: '2.7'
+  :GlobalAddress:
+    :version_added: '2.7'
+  :GlobalForwardingRule:
+    :version_added: '2.7'
+  :HttpHealthCheck:
+    :version_added: '2.7'
+  :HttpsHealthCheck:
+    :version_added: '2.7'
+  :HealthCheck:
+    :version_added: '2.7'
+  :InstanceTemplate:
+    :version_added: '2.7'
+  :Image:
+    :version_added: '2.7'
+  :Instance:
+    :version_added: '2.7'
+  :InstanceGroup:
+    :version_added: '2.7'
+  :InstanceGroupManager:
+    :version_added: '2.7'
+  :InterconnectAttachment:
+    :version_added: '2.8'
+  :Network:
+    :version_added: '2.7'
+  :RegionDisk:
+    :version_added: '2.8'
+  :Route:
+    :version_added: '2.7'
+  :Router:
+    :version_added: '2.7'
+  :SslCertificate:
+    :version_added: '2.7'
+  :SslPolicy:
+    :version_added: '2.7'
+  :Subnetwork:
+    :version_added: '2.7'
+  :TargetHttpProxy:
+    :version_added: '2.7'
+  :TargetHttpsProxy:
+    :version_added: '2.7'
+  :TargetPool:
+    :version_added: '2.7'
+  :TargetSslProxy:
+    :version_added: '2.7'
+  :TargetTcpProxy:
+    :version_added: '2.7'
+  :TargetVpnGateway:
+    :version_added: '2.7'
+  :UrlMap:
+    :version_added: '2.7'
+  :VpnTunnel:
+    :version_added: '2.7'
+:regular:
+  :Address:
+    :version_added: '2.6'
+    :address:
+      :version_added: '2.6'
+    :addressType:
+      :version_added: '2.7'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :networkTier:
+      :version_added: '2.8'
+    :subnetwork:
+      :version_added: '2.7'
+    :region:
+      :version_added: '2.6'
+  :BackendBucket:
+    :version_added: '2.6'
+    :bucketName:
+      :version_added: '2.6'
+    :cdnPolicy:
+      :version_added: '2.8'
+      :signedUrlCacheMaxAgeSec:
+        :version_added: '2.8'
+    :description:
+      :version_added: '2.6'
+    :enableCdn:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+  :BackendService:
+    :version_added: '2.6'
+    :affinityCookieTtlSec:
+      :version_added: '2.6'
+    :backends:
+      :version_added: '2.6'
+      :balancingMode:
+        :version_added: '2.6'
+      :capacityScaler:
+        :version_added: '2.6'
+      :description:
+        :version_added: '2.6'
+      :group:
+        :version_added: '2.6'
+      :maxConnections:
+        :version_added: '2.6'
+      :maxConnectionsPerInstance:
+        :version_added: '2.6'
+      :maxRate:
+        :version_added: '2.6'
+      :maxRatePerInstance:
+        :version_added: '2.6'
+      :maxUtilization:
+        :version_added: '2.6'
+    :cdnPolicy:
+      :version_added: '2.6'
+      :cacheKeyPolicy:
+        :version_added: '2.6'
+        :includeHost:
+          :version_added: '2.6'
+        :includeProtocol:
+          :version_added: '2.6'
+        :includeQueryString:
+          :version_added: '2.6'
+        :queryStringBlacklist:
+          :version_added: '2.6'
+        :queryStringWhitelist:
+          :version_added: '2.6'
+      :signedUrlCacheMaxAgeSec:
+        :version_added: '2.8'
+    :connectionDraining:
+      :version_added: '2.6'
+      :drainingTimeoutSec:
+        :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :enableCDN:
+      :version_added: '2.6'
+    :healthChecks:
+      :version_added: '2.6'
+    :iap:
+      :version_added: '2.7'
+      :enabled:
+        :version_added: '2.7'
+      :oauth2ClientId:
+        :version_added: '2.7'
+      :oauth2ClientSecret:
+        :version_added: '2.7'
+    :loadBalancingScheme:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.6'
+    :portName:
+      :version_added: '2.6'
+    :protocol:
+      :version_added: '2.6'
+    :securityPolicy:
+      :version_added: '2.8'
+    :sessionAffinity:
+      :version_added: '2.6'
+    :timeoutSec:
+      :version_added: '2.6'
+  :Disk:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :labels:
+      :version_added: '2.7'
+    :licenses:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :sizeGb:
+      :version_added: '2.6'
+    :physicalBlockSizeBytes:
+      :version_added: '2.8'
+    :type:
+      :version_added: '2.7'
+    :sourceImage:
+      :version_added: '2.6'
+    :zone:
+      :version_added: '2.6'
+    :sourceImageEncryptionKey:
+      :version_added: '2.6'
+      :rawKey:
+        :version_added: '2.6'
+      :kmsKeyName:
+        :version_added: '2.6'
+    :diskEncryptionKey:
+      :version_added: '2.6'
+      :rawKey:
+        :version_added: '2.6'
+      :kmsKeyName:
+        :version_added: '2.6'
+    :sourceSnapshot:
+      :version_added: '2.6'
+    :sourceSnapshotEncryptionKey:
+      :version_added: '2.6'
+      :rawKey:
+        :version_added: '2.6'
+      :kmsKeyName:
+        :version_added: '2.6'
+  :Firewall:
+    :version_added: '2.6'
+    :allowed:
+      :version_added: '2.6'
+      :ip_protocol:
+        :version_added: '2.6'
+      :ports:
+        :version_added: '2.6'
+    :denied:
+      :version_added: '2.8'
+      :ip_protocol:
+        :version_added: '2.8'
+      :ports:
+        :version_added: '2.8'
+    :description:
+      :version_added: '2.6'
+    :destinationRanges:
+      :version_added: '2.8'
+    :direction:
+      :version_added: '2.8'
+    :disabled:
+      :version_added: '2.8'
+    :name:
+      :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :priority:
+      :version_added: '2.8'
+    :sourceRanges:
+      :version_added: '2.6'
+    :sourceServiceAccounts:
+      :version_added: '2.8'
+    :sourceTags:
+      :version_added: '2.6'
+    :targetServiceAccounts:
+      :version_added: '2.8'
+    :targetTags:
+      :version_added: '2.6'
+  :ForwardingRule:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :IPAddress:
+      :version_added: '2.6'
+    :IPProtocol:
+      :version_added: '2.6'
+    :backendService:
+      :version_added: '2.6'
+    :ipVersion:
+      :version_added: '2.6'
+    :loadBalancingScheme:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :portRange:
+      :version_added: '2.6'
+    :ports:
+      :version_added: '2.6'
+    :subnetwork:
+      :version_added: '2.6'
+    :target:
+      :version_added: '2.7'
+    :allPorts:
+      :version_added: '2.8'
+    :networkTier:
+      :version_added: '2.8'
+    :serviceLabel:
+      :version_added: '2.8'
+    :region:
+      :version_added: '2.6'
+  :GlobalAddress:
+    :version_added: '2.6'
+    :address:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :ipVersion:
+      :version_added: '2.6'
+    :addressType:
+      :version_added: '2.8'
+  :GlobalForwardingRule:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :IPAddress:
+      :version_added: '2.6'
+    :IPProtocol:
+      :version_added: '2.6'
+    :ipVersion:
+      :version_added: '2.6'
+    :loadBalancingScheme:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :portRange:
+      :version_added: '2.6'
+    :target:
+      :version_added: '2.6'
+  :HttpHealthCheck:
+    :version_added: '2.6'
+    :checkIntervalSec:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :healthyThreshold:
+      :version_added: '2.6'
+    :host:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :port:
+      :version_added: '2.6'
+    :requestPath:
+      :version_added: '2.6'
+    :timeoutSec:
+      :version_added: '2.6'
+    :unhealthyThreshold:
+      :version_added: '2.6'
+  :HttpsHealthCheck:
+    :version_added: '2.6'
+    :checkIntervalSec:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :healthyThreshold:
+      :version_added: '2.6'
+    :host:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :port:
+      :version_added: '2.6'
+    :requestPath:
+      :version_added: '2.6'
+    :timeoutSec:
+      :version_added: '2.6'
+    :unhealthyThreshold:
+      :version_added: '2.6'
+  :HealthCheck:
+    :version_added: '2.6'
+    :checkIntervalSec:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :healthyThreshold:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :timeoutSec:
+      :version_added: '2.6'
+    :unhealthyThreshold:
+      :version_added: '2.6'
+    :type:
+      :version_added: '2.6'
+    :httpHealthCheck:
+      :version_added: '2.6'
+      :host:
+        :version_added: '2.6'
+      :requestPath:
+        :version_added: '2.6'
+      :response:
+        :version_added: '2.6'
+      :port:
+        :version_added: '2.6'
+      :portName:
+        :version_added: '2.6'
+      :proxyHeader:
+        :version_added: '2.6'
+    :httpsHealthCheck:
+      :version_added: '2.6'
+      :host:
+        :version_added: '2.6'
+      :requestPath:
+        :version_added: '2.6'
+      :response:
+        :version_added: '2.6'
+      :port:
+        :version_added: '2.6'
+      :portName:
+        :version_added: '2.6'
+      :proxyHeader:
+        :version_added: '2.6'
+    :tcpHealthCheck:
+      :version_added: '2.6'
+      :request:
+        :version_added: '2.6'
+      :response:
+        :version_added: '2.6'
+      :port:
+        :version_added: '2.6'
+      :portName:
+        :version_added: '2.6'
+      :proxyHeader:
+        :version_added: '2.6'
+    :sslHealthCheck:
+      :version_added: '2.6'
+      :request:
+        :version_added: '2.6'
+      :response:
+        :version_added: '2.6'
+      :port:
+        :version_added: '2.6'
+      :portName:
+        :version_added: '2.6'
+      :proxyHeader:
+        :version_added: '2.6'
+  :InstanceTemplate:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :properties:
+      :version_added: '2.6'
+      :canIpForward:
+        :version_added: '2.6'
+      :description:
+        :version_added: '2.6'
+      :disks:
+        :version_added: '2.6'
+        :autoDelete:
+          :version_added: '2.6'
+        :boot:
+          :version_added: '2.6'
+        :deviceName:
+          :version_added: '2.6'
+        :diskEncryptionKey:
+          :version_added: '2.6'
+          :rawKey:
+            :version_added: '2.6'
+          :rsaEncryptedKey:
+            :version_added: '2.6'
+        :index:
+          :version_added: '2.6'
+        :initializeParams:
+          :version_added: '2.6'
+          :diskName:
+            :version_added: '2.6'
+          :diskSizeGb:
+            :version_added: '2.6'
+          :diskType:
+            :version_added: '2.6'
+          :sourceImage:
+            :version_added: '2.6'
+          :sourceImageEncryptionKey:
+            :version_added: '2.6'
+            :rawKey:
+              :version_added: '2.6'
+        :interface:
+          :version_added: '2.6'
+        :mode:
+          :version_added: '2.6'
+        :source:
+          :version_added: '2.6'
+        :type:
+          :version_added: '2.6'
+      :machineType:
+        :version_added: '2.6'
+      :minCpuPlatform:
+        :version_added: '2.6'
+      :metadata:
+        :version_added: '2.6'
+      :guestAccelerators:
+        :version_added: '2.6'
+        :acceleratorCount:
+          :version_added: '2.6'
+        :acceleratorType:
+          :version_added: '2.6'
+      :networkInterfaces:
+        :version_added: '2.6'
+        :accessConfigs:
+          :version_added: '2.6'
+          :name:
+            :version_added: '2.6'
+          :natIP:
+            :version_added: '2.6'
+          :type:
+            :version_added: '2.6'
+        :aliasIpRanges:
+          :version_added: '2.6'
+          :ipCidrRange:
+            :version_added: '2.6'
+          :subnetworkRangeName:
+            :version_added: '2.6'
+        :network:
+          :version_added: '2.6'
+        :networkIP:
+          :version_added: '2.6'
+        :subnetwork:
+          :version_added: '2.6'
+      :scheduling:
+        :version_added: '2.6'
+        :automaticRestart:
+          :version_added: '2.6'
+        :onHostMaintenance:
+          :version_added: '2.6'
+        :preemptible:
+          :version_added: '2.6'
+      :serviceAccounts:
+        :version_added: '2.6'
+        :email:
+          :version_added: '2.6'
+        :scopes:
+          :version_added: '2.6'
+      :tags:
+        :version_added: '2.6'
+        :fingerprint:
+          :version_added: '2.6'
+        :items:
+          :version_added: '2.6'
+  :Image:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :diskSizeGb:
+      :version_added: '2.6'
+    :family:
+      :version_added: '2.6'
+    :guestOsFeatures:
+      :version_added: '2.6'
+      :type:
+        :version_added: '2.6'
+    :imageEncryptionKey:
+      :version_added: '2.6'
+      :rawKey:
+        :version_added: '2.6'
+      :kmsKeyName:
+        :version_added: '2.6'
+    :labels:
+      :version_added: '2.8'
+    :licenses:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :rawDisk:
+      :version_added: '2.6'
+      :containerType:
+        :version_added: '2.6'
+      :sha1Checksum:
+        :version_added: '2.6'
+      :source:
+        :version_added: '2.6'
+    :sourceDisk:
+      :version_added: '2.6'
+    :sourceDiskEncryptionKey:
+      :version_added: '2.6'
+      :rawKey:
+        :version_added: '2.6'
+      :kmsKeyName:
+        :version_added: '2.6'
+    :sourceDiskId:
+      :version_added: '2.6'
+    :sourceType:
+      :version_added: '2.6'
+  :Instance:
+    :version_added: '2.6'
+    :canIpForward:
+      :version_added: '2.6'
+    :disks:
+      :version_added: '2.6'
+      :autoDelete:
+        :version_added: '2.6'
+      :boot:
+        :version_added: '2.6'
+      :deviceName:
+        :version_added: '2.6'
+      :diskEncryptionKey:
+        :version_added: '2.6'
+        :rawKey:
+          :version_added: '2.6'
+        :rsaEncryptedKey:
+          :version_added: '2.6'
+      :index:
+        :version_added: '2.6'
+      :initializeParams:
+        :version_added: '2.6'
+        :diskName:
+          :version_added: '2.6'
+        :diskSizeGb:
+          :version_added: '2.6'
+        :diskType:
+          :version_added: '2.6'
+        :sourceImage:
+          :version_added: '2.6'
+        :sourceImageEncryptionKey:
+          :version_added: '2.6'
+          :rawKey:
+            :version_added: '2.6'
+      :interface:
+        :version_added: '2.6'
+      :mode:
+        :version_added: '2.6'
+      :source:
+        :version_added: '2.6'
+      :type:
+        :version_added: '2.6'
+    :guestAccelerators:
+      :version_added: '2.6'
+      :acceleratorCount:
+        :version_added: '2.6'
+      :acceleratorType:
+        :version_added: '2.6'
+    :labels:
+      :version_added: '2.9'
+    :metadata:
+      :version_added: '2.6'
+    :machineType:
+      :version_added: '2.6'
+    :minCpuPlatform:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :networkInterfaces:
+      :version_added: '2.6'
+      :accessConfigs:
+        :version_added: '2.6'
+        :name:
+          :version_added: '2.6'
+        :natIP:
+          :version_added: '2.6'
+        :type:
+          :version_added: '2.6'
+      :aliasIpRanges:
+        :version_added: '2.6'
+        :ipCidrRange:
+          :version_added: '2.6'
+        :subnetworkRangeName:
+          :version_added: '2.6'
+      :network:
+        :version_added: '2.6'
+      :networkIP:
+        :version_added: '2.6'
+      :subnetwork:
+        :version_added: '2.6'
+    :scheduling:
+      :version_added: '2.6'
+      :automaticRestart:
+        :version_added: '2.6'
+      :onHostMaintenance:
+        :version_added: '2.6'
+      :preemptible:
+        :version_added: '2.6'
+    :serviceAccounts:
+      :version_added: '2.6'
+      :email:
+        :version_added: '2.6'
+      :scopes:
+        :version_added: '2.6'
+    :status:
+      :version_added: '2.8'
+    :tags:
+      :version_added: '2.6'
+      :fingerprint:
+        :version_added: '2.6'
+      :items:
+        :version_added: '2.6'
+    :zone:
+      :version_added: '2.6'
+  :InstanceGroup:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :namedPorts:
+      :version_added: '2.6'
+      :name:
+        :version_added: '2.6'
+      :port:
+        :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :region:
+      :version_added: '2.6'
+    :subnetwork:
+      :version_added: '2.6'
+    :zone:
+      :version_added: '2.6'
+    :instances:
+      :version_added: '2.8'
+  :InstanceGroupManager:
+    :version_added: '2.6'
+    :baseInstanceName:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :instanceTemplate:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :namedPorts:
+      :version_added: '2.6'
+      :name:
+        :version_added: '2.6'
+      :port:
+        :version_added: '2.6'
+    :targetPools:
+      :version_added: '2.6'
+    :targetSize:
+      :version_added: '2.6'
+    :zone:
+      :version_added: '2.6'
+  :InterconnectAttachment:
+    :version_added: '2.8'
+    :interconnect:
+      :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :edgeAvailabilityDomain:
+      :version_added: '2.8'
+    :type:
+      :version_added: '2.8'
+    :router:
+      :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :candidateSubnets:
+      :version_added: '2.8'
+    :vlanTag8021q:
+      :version_added: '2.8'
+    :region:
+      :version_added: '2.8'
+  :Network:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :ipv4_range:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :autoCreateSubnetworks:
+      :version_added: '2.6'
+    :routingConfig:
+      :version_added: '2.8'
+      :routingMode:
+        :version_added: '2.8'
+  :RegionDisk:
+    :version_added: '2.8'
+    :description:
+      :version_added: '2.8'
+    :labels:
+      :version_added: '2.8'
+    :licenses:
+      :version_added: '2.8'
+    :name:
+      :version_added: '2.8'
+    :sizeGb:
+      :version_added: '2.8'
+    :physicalBlockSizeBytes:
+      :version_added: '2.8'
+    :replicaZones:
+      :version_added: '2.8'
+    :type:
+      :version_added: '2.8'
+    :region:
+      :version_added: '2.8'
+    :diskEncryptionKey:
+      :version_added: '2.8'
+      :rawKey:
+        :version_added: '2.8'
+      :kmsKeyName:
+        :version_added: '2.8'
+    :sourceSnapshot:
+      :version_added: '2.8'
+    :sourceSnapshotEncryptionKey:
+      :version_added: '2.8'
+      :rawKey:
+        :version_added: '2.8'
+      :kmsKeyName:
+        :version_added: '2.8'
+  :Route:
+    :version_added: '2.6'
+    :destRange:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :priority:
+      :version_added: '2.6'
+    :tags:
+      :version_added: '2.6'
+    :nextHopGateway:
+      :version_added: '2.6'
+    :nextHopInstance:
+      :version_added: '2.6'
+    :nextHopIp:
+      :version_added: '2.6'
+    :nextHopVpnTunnel:
+      :version_added: '2.6'
+  :Router:
+    :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :description:
+      :version_added: '2.7'
+    :network:
+      :version_added: '2.7'
+    :bgp:
+      :version_added: '2.7'
+      :asn:
+        :version_added: '2.7'
+      :advertiseMode:
+        :version_added: '2.7'
+      :advertisedGroups:
+        :version_added: '2.7'
+      :advertisedIpRanges:
+        :version_added: '2.7'
+        :range:
+          :version_added: '2.7'
+        :description:
+          :version_added: '2.7'
+    :region:
+      :version_added: '2.7'
+  :SslCertificate:
+    :version_added: '2.6'
+    :certificate:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :privateKey:
+      :version_added: '2.6'
+  :SslPolicy:
+    :version_added: '2.7'
+    :description:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :profile:
+      :version_added: '2.7'
+    :minTlsVersion:
+      :version_added: '2.7'
+    :customFeatures:
+      :version_added: '2.7'
+  :Subnetwork:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :ipCidrRange:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :enableFlowLogs:
+      :version_added: '2.8'
+    :secondaryIpRanges:
+      :version_added: '2.8'
+      :rangeName:
+        :version_added: '2.8'
+      :ipCidrRange:
+        :version_added: '2.8'
+    :privateIpGoogleAccess:
+      :version_added: '2.6'
+    :region:
+      :version_added: '2.6'
+  :TargetHttpProxy:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :urlMap:
+      :version_added: '2.6'
+  :TargetHttpsProxy:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :quicOverride:
+      :version_added: '2.7'
+    :sslCertificates:
+      :version_added: '2.6'
+    :sslPolicy:
+      :version_added: '2.8'
+    :urlMap:
+      :version_added: '2.6'
+  :TargetPool:
+    :version_added: '2.6'
+    :backupPool:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :failoverRatio:
+      :version_added: '2.6'
+    :healthCheck:
+      :version_added: '2.6'
+    :instances:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :sessionAffinity:
+      :version_added: '2.6'
+    :region:
+      :version_added: '2.6'
+  :TargetSslProxy:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :proxyHeader:
+      :version_added: '2.6'
+    :service:
+      :version_added: '2.6'
+    :sslCertificates:
+      :version_added: '2.6'
+    :sslPolicy:
+      :version_added: '2.8'
+  :TargetTcpProxy:
+    :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :proxyHeader:
+      :version_added: '2.6'
+    :service:
+      :version_added: '2.6'
+  :TargetVpnGateway:
+    :version_added: '2.7'
+    :description:
+      :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :network:
+      :version_added: '2.7'
+    :region:
+      :version_added: '2.7'
+  :UrlMap:
+    :version_added: '2.6'
+    :defaultService:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :hostRules:
+      :version_added: '2.6'
+      :description:
+        :version_added: '2.6'
+      :hosts:
+        :version_added: '2.6'
+      :pathMatcher:
+        :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :pathMatchers:
+      :version_added: '2.6'
+      :defaultService:
+        :version_added: '2.6'
+      :description:
+        :version_added: '2.6'
+      :name:
+        :version_added: '2.6'
+      :pathRules:
+        :version_added: '2.6'
+        :paths:
+          :version_added: '2.6'
+        :service:
+          :version_added: '2.6'
+    :tests:
+      :version_added: '2.6'
+      :description:
+        :version_added: '2.6'
+      :host:
+        :version_added: '2.6'
+      :path:
+        :version_added: '2.6'
+      :service:
+        :version_added: '2.6'
+  :VpnTunnel:
+    :version_added: '2.7'
+    :name:
+      :version_added: '2.7'
+    :description:
+      :version_added: '2.7'
+    :targetVpnGateway:
+      :version_added: '2.7'
+    :router:
+      :version_added: '2.7'
+    :peerIp:
+      :version_added: '2.7'
+    :sharedSecret:
+      :version_added: '2.7'
+    :ikeVersion:
+      :version_added: '2.7'
+    :localTrafficSelector:
+      :version_added: '2.7'
+    :remoteTrafficSelector:
+      :version_added: '2.7'
+    :region:
+      :version_added: '2.7'

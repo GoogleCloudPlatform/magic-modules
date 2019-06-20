@@ -54,6 +54,7 @@ module Google
     def self.first_sentence(text)
       period_pos = text.index(/[\.\?!]/)
       return text if period_pos.nil?
+
       text[0, period_pos + 1]
     end
   end

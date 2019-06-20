@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version.nil? || version == 'ga' -%>
 
 import (
 	"fmt"
@@ -10,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"google.golang.org/api/servicenetworking/v1beta"
+	"google.golang.org/api/servicenetworking/v1"
 )
 
 func resourceServiceNetworkingConnection() *schema.Resource {
@@ -235,6 +234,3 @@ func formatParentService(service string) string {
 		return service
 	}
 }
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>

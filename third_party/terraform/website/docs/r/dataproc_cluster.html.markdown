@@ -31,7 +31,7 @@ resource "google_dataproc_cluster" "simplecluster" {
 resource "google_dataproc_cluster" "mycluster" {
     name       = "mycluster"
     region     = "us-central1"
-    labels {
+    labels = {
         foo = "bar"
     }
 
@@ -43,15 +43,16 @@ resource "google_dataproc_cluster" "mycluster" {
             machine_type      = "n1-standard-1"
             disk_config {
                 boot_disk_type = "pd-ssd"
-                boot_disk_size_gb = 10
+                boot_disk_size_gb = 15
             }
         }
 
         worker_config {
             num_instances     = 2
             machine_type      = "n1-standard-1"
+            min_cpu_platform  = "Intel Skylake"
             disk_config {
-                boot_disk_size_gb = 10
+                boot_disk_size_gb = 15
                 num_local_ssds    = 1
             }
         }
@@ -139,6 +140,7 @@ The `cluster_config` block supports:
 
         # You can define multiple initialization_action blocks
         initialization_action     { ... }
+        encryption_config         { ... }
     }
 ```
 
@@ -160,7 +162,7 @@ The `cluster_config` block supports:
    in a cluster.. Structure defined below.
 
 * `preemptible_worker_config` (Optional) The Google Compute Engine config settings for the additional (aka
-   preemptible) instancesin a cluster. Structure defined below.
+   preemptible) instances in a cluster. Structure defined below.
 
 * `software_config` (Optional) The config settings for software inside the cluster.
    Structure defined below.
@@ -168,6 +170,8 @@ The `cluster_config` block supports:
 * `initialization_action` (Optional) Commands to execute on each node after config is completed.
    You can specify multiple versions of these. Structure defined below.
 
+* `encryption_config` (Optional) The Customer managed encryption keys settings for the cluster.
+   Structure defined below.
 - - -
 
 The `cluster_config.gce_cluster_config` block supports:
@@ -235,9 +239,10 @@ The `cluster_config.master_config` block supports:
         master_config {
             num_instances     = 1
             machine_type      = "n1-standard-1"
+            min_cpu_platform  = "Intel Skylake"
             disk_config {
                 boot_disk_type    = "pd-ssd"
-                boot_disk_size_gb = 10
+                boot_disk_size_gb = 15
                 num_local_ssds    = 1
             }
         }
@@ -250,6 +255,14 @@ The `cluster_config.master_config` block supports:
 * `machine_type` - (Optional, Computed) The name of a Google Compute Engine machine type
    to create for the master. If not specified, GCP will default to a predetermined
    computed value (currently `n1-standard-4`).
+
+* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The name of a minimum generation of CPU family
+   for the master. If not specified, GCP will default to a predetermined computed value
+   for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+   for details about which CPU families are available (and defaulted) for each zone.
+
+* `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
+    for more information.
 
 * `disk_config` (Optional) Disk Config
 
@@ -284,9 +297,10 @@ The `cluster_config.worker_config` block supports:
         worker_config {
             num_instances     = 3
             machine_type      = "n1-standard-1"
+            min_cpu_platform  = "Intel Skylake"
             disk_config {
                 boot_disk_type    = "pd-standard"
-                boot_disk_size_gb = 10
+                boot_disk_size_gb = 15
                 num_local_ssds    = 1
             }
         }
@@ -305,6 +319,11 @@ The `cluster_config.worker_config` block supports:
    to create for the worker nodes. If not specified, GCP will default to a predetermined
    computed value (currently `n1-standard-4`).
 
+* `min_cpu_platform` - (Optional, Computed, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The name of a minimum generation of CPU family
+   for the master. If not specified, GCP will default to a predetermined computed value
+   for each zone. See [the guide](https://cloud.google.com/compute/docs/instances/specify-min-cpu-platform)
+   for details about which CPU families are available (and defaulted) for each zone.
+
 * `disk_config` (Optional) Disk Config
 
     * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each node.
@@ -317,6 +336,9 @@ The `cluster_config.worker_config` block supports:
 
     * `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each worker cluster node. Defaults to 0.
+
+* `image_uri` (Optional) The URI for the image to use for this worker.  See [the guide](https://cloud.google.com/dataproc/docs/guides/dataproc-images)
+    for more information.
 
 * `accelerators` (Optional) The Compute Engine accelerator configuration for these instances. Can be specified multiple times.
 
@@ -337,7 +359,9 @@ The `cluster_config.preemptible_worker_config` block supports:
         preemptible_worker_config {
             num_instances     = 1
             disk_config {
-                boot_disk_size_gb = 10
+                boot_disk_type    = "pd-standard"
+                boot_disk_size_gb = 15
+                num_local_ssds    = 1
             }
         }
     }
@@ -351,10 +375,16 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
 * `disk_config` (Optional) Disk Config
 
+    * `boot_disk_type` - (Optional) The disk type of the primary disk attached to each preemptible worker node.
+	One of `"pd-ssd"` or `"pd-standard"`. Defaults to `"pd-standard"`.
+
     * `boot_disk_size_gb` - (Optional, Computed) Size of the primary disk attached to each preemptible worker node, specified
     in GB. The smallest allowed disk size is 10GB. GCP will default to a predetermined
     computed value if not set (currently 500GB). Note: If SSDs are not
 	attached, it also contains the HDFS data blocks and Hadoop working directories.
+
+	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
+	attached to each preemptible worker node. Defaults to 0.
 
 - - -
 
@@ -404,32 +434,49 @@ The `initialization_action` block (Optional) can be specified multiple times and
    allowed to take to execute its action. GCP will default to a predetermined
    computed value if not set (currently 300).
 
+- - -
+
+The `encryption_config` block supports:
+
+```hcl
+    cluster_config {
+        encryption_config {
+            kms_key_name = "projects/projectId/locations/region/keyRings/keyRingName/cryptoKeys/keyName"
+        }
+    }
+}
+```
+
+* `kms_key_name` - (Required) The Cloud KMS key name to use for PD disk encryption for
+   all instances in the cluster.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `cluster_config.master_config.instance_names` - List of master instance names which
+* `cluster_config.0.master_config.0.instance_names` - List of master instance names which
    have been assigned to the cluster.
 
-* `cluster_config.worker_config.instance_names` - List of worker instance names which have been assigned
+* `cluster_config.0.worker_config.0.instance_names` - List of worker instance names which have been assigned
 	to the cluster.
 
-* `cluster_config.preemptible_worker_config.instance_names` - List of preemptible instance names which have been assigned
+* `cluster_config.0.preemptible_worker_config.0.instance_names` - List of preemptible instance names which have been assigned
 	to the cluster.
 
-* `cluster_config.bucket` - The name of the cloud storage bucket ultimately used to house the staging data
+* `cluster_config.0.bucket` - The name of the cloud storage bucket ultimately used to house the staging data
    for the cluster. If `staging_bucket` is specified, it will contain this value, otherwise
    it will be the auto generated name.
 
-* `cluster_config.software_config.properties` - A list of the properties used to set the daemon config files.
+* `cluster_config.0.software_config.0.properties` - A list of the properties used to set the daemon config files.
    This will include any values supplied by the user via `cluster_config.software_config.override_properties`
+
 
 ## Timeouts
 
-`google_dataproc_cluster` provides the following
+This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - (Default `10 minutes`) Used for creating clusters.
-- `update` - (Default `5 minutes`) Used for updating clusters
-- `delete` - (Default `5 minutes`) Used for destroying clusters.
+- `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.

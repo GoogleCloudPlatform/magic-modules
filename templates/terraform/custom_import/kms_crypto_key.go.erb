@@ -1,0 +1,12 @@
+
+	config := meta.(*Config)
+
+	cryptoKeyId, err := parseKmsCryptoKeyId(d.Id(), config)
+	if err != nil {
+		return nil, err
+	}
+
+	d.Set("key_ring", cryptoKeyId.KeyRingId.keyRingId())
+	d.Set("name", cryptoKeyId.Name)
+
+	return []*schema.ResourceData{d}, nil

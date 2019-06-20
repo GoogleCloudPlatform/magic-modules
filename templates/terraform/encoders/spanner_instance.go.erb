@@ -1,0 +1,10 @@
+newObj := make(map[string]interface{})
+newObj["instance"] = obj
+if obj["name"] == nil {
+	d.Set("name", resource.PrefixedUniqueId("tfgen-spanid-")[:30])
+	newObj["instanceId"] = d.Get("name").(string)
+} else {
+	newObj["instanceId"] = obj["name"]
+}
+delete(obj, "name")
+return newObj, nil

@@ -1,0 +1,136 @@
+<%= lines(autogen_notice :go) -%>
+
+package azurerm
+
+import (
+    "fmt"
+    "testing"
+
+    "github.com/hashicorp/terraform/helper/resource"
+    "github.com/hashicorp/terraform/terraform"
+    "github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+    "github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
+)
+<%
+    resource_name = "AzureRM" + object.name
+    terraform_name = "azurerm_" + object.name.underscore
+    azure_client_name = object.azure_sdk_definition.go_client
+    properties = object.all_user_properties
+    contains_acctests = object.instance_variable_defined?(:@acctests)
+-%>
+
+<%
+    test_hcls = Hash.new
+    if contains_acctests
+      object.acctests.each do |test|
+        test.steps.uniq.each do |name|
+          test_hcl, random_vars = build_test_hcl_from_example(name)
+          test_hcls[name] = { :hcl => test_hcl, :random_vars => random_vars }
+        end
+-%>
+func TestAcc<%= resource_name -%>_<%= test.name -%>(t *testing.T) {
+    resourceName := "<%= terraform_name -%>.test"
+<%      test.steps.map{|step| test_hcls[step][:random_vars]}.flatten.uniq(&:variable_name).each do |param| -%>
+    <%=   param.variable_name -%> := <%= lines(param.create_expression) -%>
+<%      end -%>
+
+    resource.ParallelTest(t, resource.TestCase{
+        PreCheck:     func() { testAccPreCheck(t) },
+        Providers:    testAccProviders,
+        CheckDestroy: testCheck<%= resource_name -%>Destroy,
+        Steps: []resource.TestStep{
+<%      test.steps.each do |step| -%>
+<%        hcl_params = test_hcls[step][:random_vars].map(&:variable_name).uniq -%>
+<%        props_to_check = get_example_properties_to_check(step, object) -%>
+            {
+                Config: testAcc<%= resource_name -%>_<%= step -%>(<%= hcl_params.join(", ") -%>),
+                Check: resource.ComposeTestCheckFunc(
+                    testCheck<%= resource_name -%>Exists(resourceName),
+<%        props_to_check.each do |propName, propValue| -%>
+<%          if propValue == :AttrSet -%>
+                    resource.TestCheckResourceAttrSet(resourceName, "<%= propName -%>"),
+<%          else -%>
+                    resource.TestCheckResourceAttr(resourceName, "<%= propName -%>", "<%= propValue -%>"),
+<%          end -%>
+<%        end -%>
+                ),
+            },
+<%      end -%>
+<%      if test.steps.count == 1 -%>
+            {
+                ResourceName:      resourceName,
+                ImportState:       true,
+                ImportStateVerify: true,
+            },
+<%      end -%>
+        },
+    })
+}
+
+<%    end -%>
+<%  end -%>
+
+func testCheck<%= resource_name -%>Exists(resourceName string) resource.TestCheckFunc {
+    return func(s *terraform.State) error {
+        rs, ok := s.RootModule().Resources[resourceName]
+        if !ok {
+            return fmt.Errorf("<%= object.name.titlecase -%> not found: %s", resourceName)
+        }
+
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties)) -%>
+
+        client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
+
+        ctx := testAccProvider.Meta().(*ArmClient).StopContext
+
+        if resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>; err != nil {
+            if utils.ResponseWasNotFound(resp.Response) {
+                return <%= build_errorf_with_resource_name("Bad: %s does not exist", false, object.azure_sdk_definition.delete, properties, object) -%>
+
+            }
+            return fmt.Errorf("Bad: Get on <%= azure_client_name -%>: %+v", err)
+        }
+
+        return nil
+    }
+}
+
+func testCheck<%= resource_name -%>Destroy(s *terraform.State) error {
+    client := testAccProvider.Meta().(*ArmClient).<%= azure_client_name -%>
+
+    ctx := testAccProvider.Meta().(*ArmClient).StopContext
+
+    for _, rs := range s.RootModule().Resources {
+        if rs.Type != "<%= terraform_name -%>" {
+            continue
+        }
+
+<%= lines(build_acctest_parameters_from_schema(object.azure_sdk_definition.read, properties)) -%>
+
+        if resp, err := <%= build_sdk_func_invocation(object.azure_sdk_definition.read) -%>; err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return fmt.Errorf("Bad: Get on <%= azure_client_name -%>: %+v", err)
+            }
+        }
+
+        return nil
+    }
+
+    return nil
+}
+
+<%
+    if contains_acctests
+      test_hcls.each do |name, test_hcl|
+        uniq_params = test_hcl[:random_vars].uniq(&:parameter_name).map{|p| "#{p.parameter_name} #{p.go_type}"}
+-%>
+func testAcc<%= resource_name -%>_<%= name -%>(<%= uniq_params.join(", ") -%>) string {
+    return fmt.Sprintf(`
+<%=     lines(test_hcl[:hcl]) -%>
+`, <%=  test_hcl[:random_vars].map(&:parameter_name).join(", ") -%>)
+}
+
+<%
+      end
+    end
+-%>

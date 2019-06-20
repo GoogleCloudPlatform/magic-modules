@@ -12,24 +12,74 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-name: AccessContextManager
-overrides: !ruby/object:Provider::ResourceOverrides
-  AccessPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  AccessPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360
+      update_sec: 360
+      delete_sec: 360
+    autogen_async: true
     import_format: ["{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "access_context_manager_access_policy_basic"
         skip_test: true
         primary_resource_id: "access-policy"
-        version: <%= _version_name %>
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
         description: |
           Resource name of the AccessPolicy. Format: {policy_id}
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
       post_create: templates/terraform/post_create/accesspolicy.erb
+  AccessLevel: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360
+      update_sec: 360
+      delete_sec: 360
+    autogen_async: true
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    examples:
+    - !ruby/object:Provider::Terraform::Examples
+      name: "access_context_manager_access_level_basic"
+      skip_test: true
+      primary_resource_id: "access-level"
+      vars:
+        access_level_name: "chromeos_no_lock"
+    properties:
+      parent: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      basic.combiningFunction: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
+      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
+  ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360
+      update_sec: 360
+      delete_sec: 360
+    autogen_async: true
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "access_context_manager_service_perimeter_basic"
+        skip_test: true
+        primary_resource_id: "service-perimeter"
+        vars:
+          access_level_name: "chromeos_no_lock"
+          service_perimeter_name: "restrict_all"
+    properties:
+      parent: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+      perimeterType: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
+        input: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
+      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

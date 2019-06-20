@@ -21,8 +21,12 @@ a restricted host and strong password.
 ### SQL First Generation
 
 ```hcl
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
 resource "google_sql_database_instance" "master" {
-  name = "master-instance"
+  name = "master-instance-${random_id.db_name_suffix.hex}"
   database_version = "MYSQL_5_6"
   # First-generation instance regions are not the conventional
   # Google Compute Engine regions. See argument reference below.
@@ -57,7 +61,7 @@ resource "google_compute_instance" "apps" {
   count        = 8
   name         = "apps-${count.index + 1}"
   machine_type = "f1-micro"
-  
+
   boot_disk {
     initialize_params {
       image = "ubuntu-os-cloud/ubuntu-1804-lts"
@@ -91,13 +95,17 @@ data "null_data_source" "auth_netw_postgres_allowed_2" {
   }
 }
 
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
 resource "google_sql_database_instance" "postgres" {
-  name = "postgres-instance"
+  name = "postgres-instance-${random_id.db_name_suffix.hex}"
   database_version = "POSTGRES_9_6"
 
   settings {
     tier = "db-f1-micro"
-    
+
     ip_configuration {
       authorized_networks = [
         "${data.null_data_source.auth_netw_postgres_allowed_1.*.outputs}",
@@ -105,6 +113,63 @@ resource "google_sql_database_instance" "postgres" {
       ]
     }
   }
+}
+```
+
+### Private IP Instance
+~> **NOTE**: For private IP instance setup, note that the `google_sql_database_instance` does not actually interpolate values from `google_service_networking_connection`. You must explicitly add a `depends_on`reference as shown below.
+
+```hcl
+resource "google_compute_network" "private_network" {
+  provider = "google-beta"
+
+  name       = "private-network"
+}
+
+resource "google_compute_global_address" "private_ip_address" {
+  provider = "google-beta"
+
+  name          = "private-ip-address"
+  purpose       = "VPC_PEERING"
+  address_type = "INTERNAL"
+  prefix_length = 16
+  network       = "${google_compute_network.private_network.self_link}"
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  provider = "google-beta"
+
+  network       = "${google_compute_network.private_network.self_link}"
+  service       = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = ["${google_compute_global_address.private_ip_address.name}"]
+}
+
+resource "random_id" "db_name_suffix" {
+  byte_length = 4
+}
+
+resource "google_sql_database_instance" "instance" {
+  provider = "google-beta"
+
+  name = "private-instance-${random_id.db_name_suffix.hex}"
+  region = "us-central1"
+
+  depends_on = [
+    "google_service_networking_connection.private_vpc_connection"
+  ]
+
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled = "false"
+      private_network = "${google_compute_network.private_network.self_link}"
+    }
+  }
+}
+
+provider "google-beta"{
+  region = "us-central1"
+  zone   = "us-central1-a"
 }
 ```
 
@@ -125,11 +190,11 @@ The following arguments are supported:
 
 - - -
 
-* `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL version to
+* `database_version` - (Optional, Default: `MYSQL_5_6`) The MySQL or PostgreSQL version to
     use. Can be `MYSQL_5_6`, `MYSQL_5_7` or `POSTGRES_9_6` for second-generation
     instances, or `MYSQL_5_5` or `MYSQL_5_6` for first-generation instances.
     See [Second Generation Capabilities](https://cloud.google.com/sql/docs/1st-2nd-gen-differences)
-    for more information. `POSTGRES_9_6` support is in beta.
+    for more information.
 
 * `name` - (Optional, Computed) The name of the instance. If the name is left
     blank, Terraform will randomly generate one when the instance is first
@@ -190,7 +255,8 @@ The optional `settings.database_flags` sublist supports:
 The optional `settings.backup_configuration` subblock supports:
 
 * `binary_log_enabled` - (Optional) True if binary logging is enabled. If
-    `logging` is false, this must be as well. Cannot be used with Postgres.
+    `settings.backup_configuration.enabled` is false, this must be as well. 
+    Cannot be used with Postgres.
 
 * `enabled` - (Optional) True if backup configuration is enabled.
 
@@ -199,9 +265,14 @@ The optional `settings.backup_configuration` subblock supports:
 
 The optional `settings.ip_configuration` subblock supports:
 
-* `ipv4_enabled` - (Optional) True if the instance should be assigned an IP
-    address. The IPv4 address cannot be disabled for Second Generation instances.
+* `ipv4_enabled` - (Optional) Whether this Cloud SQL instance should be assigned
+a public IPV4 address. Either `ipv4_enabled` must be enabled or a
+`private_network` must be configured.
 
+* `private_network` - (Optional) The VPC network from which the Cloud SQL
+instance is accessible for private IP. Specifying a network enables private IP.
+Either `ipv4_enabled` must be enabled or a `private_network` must be configured.
+ 
 * `require_ssl` - (Optional) True if mysqld should default to `REQUIRE X509`
     for users connecting over IP.
 
@@ -275,22 +346,44 @@ to work, cannot be updated, and supports:
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `first_ip_address` - The first IPv4 address of the addresses assigned. This is
-is to support accessing the [first address in the list in a terraform output](https://github.com/terraform-providers/terraform-provider-google/issues/912)
-when the resource is configured with a `count`.
+* `self_link` - The URI of the created resource.
 
-* `connection_name` - The connection name of the instance to be used in connection strings.
+* `connection_name` - The connection name of the instance to be used in
+connection strings. For example, when connecting with [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/connect-admin-proxy).
+
+* `service_account_email_address` - The service account email address assigned to the
+instance. This property is applicable only to Second Generation instances.
 
 * `ip_address.0.ip_address` - The IPv4 address assigned.
 
 * `ip_address.0.time_to_retire` - The time this IP address will be retired, in RFC
     3339 format.
 
-* `self_link` - The URI of the created resource.
+* `ip_address.0.type` - The type of this IP address.
+
+  * A `PRIMARY` address is an address that can accept incoming connections.
+  
+  * An `OUTGOING` address is the source address of connections originating from the instance, if supported.
+  
+  * A `PRIVATE` address is an address for an instance which has been configured to use private networking see: [Private IP](https://cloud.google.com/sql/docs/mysql/private-ip).
+  
+* `first_ip_address` - The first IPv4 address of any type assigned. This is to
+support accessing the [first address in the list in a terraform output](https://github.com/terraform-providers/terraform-provider-google/issues/912)
+when the resource is configured with a `count`.
+
+* `public_ip_address` - The first public (`PRIMARY`) IPv4 address assigned. This is
+a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp/terraform/issues/17048)
+but also provides a convenient way to access an IP of a specific type without
+performing filtering in a Terraform config.
+
+* `private_ip_address` - The first private (`PRIVATE`) IPv4 address assigned. This is
+a workaround for an [issue fixed in Terraform 0.12](https://github.com/hashicorp/terraform/issues/17048)
+but also provides a convenient way to access an IP of a specific type without
+performing filtering in a Terraform config.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
-    
+
 * `server_ca_cert.0.cert` - The CA Certificate used to connect to the SQL Instance via SSL.
 
 * `server_ca_cert.0.common_name` - The CN valid for the CA Cert.
@@ -301,17 +394,14 @@ when the resource is configured with a `count`.
 
 * `server_ca_cert.0.sha1_fingerprint` - SHA Fingerprint of the CA Cert.
 
-* `service_account_email_address` - The service account email address assigned to the
-instance. This property is applicable only to Second Generation instances.
-
 ## Timeouts
 
 `google_sql_database_instance` provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is 10 minutes.
-- `update` - Default is 10 minutes.
-- `delete` - Default is 10 minutes.
+- `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
+- `delete` - Default is 20 minutes.
 
 ## Import
 

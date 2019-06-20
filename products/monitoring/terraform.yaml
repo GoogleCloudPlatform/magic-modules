@@ -11,78 +11,105 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  AlertPolicy: !ruby/object:Provider::Terraform::ResourceOverride
+overrides: !ruby/object:Overrides::ResourceOverrides
+  AlertPolicy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
     import_format: ["{{name}}"]
     mutex: alertPolicy/{{project}}
-    examples: |
-      ### Basic Usage
-      ```hcl
-      resource "google_monitoring_alert_policy" "basic" {
-        display_name = "Test Policy Basic"
-        combiner = "OR"
-        conditions = [
-          {
-            display_name = "test condition"
-            condition_threshold {
-              filter = "metric.type=\"compute.googleapis.com/instance/disk/write_bytes_count\" AND resource.type=\"gce_instance\""
-              duration = "60s"
-              comparison = "COMPARISON_GT"
-              aggregations = [
-                {
-                  alignment_period = "60s"
-                  per_series_aligner = "ALIGN_RATE"
-                }
-              ]
-            }
-          }
-        ]
-      }
-      ```
-
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_alert_policy_basic"
+        primary_resource_id: "alert_policy"
+        vars:
+          alert_policy_display_name: "My Alert Policy"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
+      extra_schema_entry: templates/terraform/extra_schema_entry/alert_policy.erb
+  Group: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    mutex: stackdriver/groups/{{project}}
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_group_basic"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "New Test Group"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "monitoring_group_subgroup"
+        primary_resource_id: "subgroup"
+        vars:
+          display_name: "New Test SubGroup"
+          display_name2: "New Test SubGroup"
+    properties:
+      parentName: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareSelfLinkRelativePaths'
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       custom_import: templates/terraform/custom_import/self_link_as_name.erb
       post_create: templates/terraform/post_create/set_computed_name.erb
 
-  Group: !ruby/object:Provider::Terraform::ResourceOverride
+  NotificationChannel: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{name}}"
-    examples: |
-      ### Basic Usage
-      ```hcl
-      resource "google_monitoring_group" "test" {
-        display_name = "New Group"
-        filter = "resource.metadata.region=\"europe-west2\""
-      }
-      ```
-
-      ### Full Usage
-      ```hcl
-      resource "google_monitoring_group" "parent_group" {
-        display_name = "Parent Group"
-        filter = "resource.metadata.region=\"europe-west2\""
-        is_cluster = true
-      }
-
-      resource "google_monitoring_group" "child_group" {
-        display_name = "Child Group"
-        parent_name = "${google_monitoring_group.parent_group.name}"
-        filter = "resource.metadata.region=\"europe-west2\""
-      }
-
-      output "parent_group_name" {
-        value = "${google_monitoring_group.parent_group.name}"
-      }
-      ```
-    properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      parentName: !ruby/object:Provider::Terraform::PropertyOverride
-        custom_expand: 'templates/terraform/custom_expand/monitoring_group_name.erb'
-        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+    import_format: ["{{name}}"]
+    mutex: stackdriver/notifications/{{project}}
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "notification_channel_basic"
+        primary_resource_id: "basic"
+        vars:
+          display_name: "Test Notification Channel"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      post_create: templates/terraform/post_create/group.erb
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
+    properties:
+      labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        description: |
+          Configuration fields that define the channel and its behavior. The
+          permissible and required labels are specified in the
+          NotificationChannelDescriptor corresponding to the type field.
+
+          **Note**: Some NotificationChannelDescriptor labels are
+          sensitive and the API will return an partially-obfuscated value.
+          For example, for `"type": "slack"` channels, an `auth_token`
+          label with value "SECRET" will be obfuscated as "**CRET". In order
+          to avoid a diff, Terraform will use the state value if it appears
+          that the obfuscated value matches the state value in
+          length/unobfuscated characters. However, Terraform will not detect a
+          a diff if the obfuscated portion of the value was changed outside of
+          Terraform.
+        custom_flatten: "templates/terraform/custom_flatten/monitoring_obfuscated_labels.go.erb"
+
+  UptimeCheckConfig: !ruby/object:Overrides::Terraform::ResourceOverride
+    id_format: "{{name}}"
+    import_format: ["{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "uptime_check_config_http"
+        primary_resource_id: "http"
+        vars:
+          display_name: "http-uptime-check"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "uptime_check_tcp"
+        primary_resource_id: "tcp_group"
+        vars:
+          display_name: "tcp-uptime-check"
+          group_display_name: "uptime-check-group"
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      custom_import: templates/terraform/custom_import/self_link_as_name.erb
+      post_create: templates/terraform/post_create/set_computed_name.erb
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: uptimeCheckId
+        custom_flatten: "templates/terraform/custom_flatten/id_from_name.erb"
+      httpCheck.authInfo.password: !ruby/object:Overrides::Terraform::PropertyOverride
+        sensitive: true
+        custom_flatten: "templates/terraform/custom_flatten/uptime_check_http_password.erb"
+      httpCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      resourceGroup.groupId: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: "templates/terraform/custom_expand/resource_from_self_link.go.erb"
+        custom_flatten: "templates/terraform/custom_flatten/group_id_to_name.erb"
 
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

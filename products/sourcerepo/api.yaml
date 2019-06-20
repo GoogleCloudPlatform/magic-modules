@@ -1,0 +1,60 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: SourceRepo
+display_name: Cloud Source Repositories
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://sourcerepo.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-platform
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Source Repositories API
+    url: https://console.cloud.google.com/apis/library/sourcerepo.googleapis.com/
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Repository'
+    base_url: projects/{{project}}/repos
+    self_link: 'projects/{{project}}/repos/{{name}}'
+    # this is a lie- the resource supports update but is missing the field
+    # with update right now
+    input: true
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        'Official Documentation': 'https://cloud.google.com/source-repositories/'
+      api: 'https://cloud.google.com/source-repositories/docs/reference/rest/v1/projects.repos'
+    collection_url_key: 'repos'
+    name_pattern: 'projects/{{project}}/repos/{{name}}'
+    description: |
+      A repository (or repo) is a Git repository storing versioned source content.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          Resource name of the repository, of the form projects/{{project}}/repos/{{repo}}.
+          The repo name may contain slashes. eg, projects/myproject/repos/name/with/slash
+      - !ruby/object:Api::Type::String
+        name: 'url'
+        output: true
+        description: |
+          URL to clone the repository from Google Cloud Source Repositories.
+      - !ruby/object:Api::Type::Integer
+        name: 'size'
+        output: true
+        description: |
+          The disk usage of the repo, in bytes.

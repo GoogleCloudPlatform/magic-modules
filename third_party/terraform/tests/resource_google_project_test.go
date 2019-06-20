@@ -35,7 +35,7 @@ func TestAccProject_createWithoutOrg(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
-			resource.TestStep{
+			{
 				Config: testAccProject_createWithoutOrg(pid, pname),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
@@ -57,7 +57,7 @@ func TestAccProject_create(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project
-			resource.TestStep{
+			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
@@ -81,27 +81,28 @@ func TestAccProject_billing(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			// This step creates a new project with a billing account
-			resource.TestStep{
+			{
 				Config: testAccProject_createBilling(pid, pname, org, billingId),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount("google_project.acceptance", pid, billingId),
 				),
 			},
 			// Make sure import supports billing account
-			resource.TestStep{
-				ResourceName:      "google_project.acceptance",
-				ImportState:       true,
-				ImportStateVerify: true,
+			{
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"skip_delete"},
 			},
 			// Update to a different  billing account
-			resource.TestStep{
+			{
 				Config: testAccProject_createBilling(pid, pname, org, billingId2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount("google_project.acceptance", pid, billingId2),
 				),
 			},
 			// Unlink the billing account
-			resource.TestStep{
+			{
 				Config: testAccProject_create(pid, pname, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasBillingAccount("google_project.acceptance", pid, ""),
@@ -129,9 +130,10 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// Make sure import supports labels
 			{
-				ResourceName:      "google_project.acceptance",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"skip_delete"},
 			},
 			// update project with labels
 			{
@@ -282,7 +284,7 @@ func testAccCheckGoogleProjectHasNoLabels(r, pid string) resource.TestCheckFunc 
 		}
 
 		// State should have zero labels
-		if rs.Primary.Attributes["labels.%"] != "0" {
+		if v, ok := rs.Primary.Attributes["labels.%"]; ok && v != "0" {
 			return fmt.Errorf("Expected 0 labels, got %s", rs.Primary.Attributes["labels.%"])
 		}
 
@@ -327,7 +329,7 @@ resource "google_project" "acceptance" {
     project_id = "%s"
     name       = "%s"
     org_id     = "%s"
-	labels {`, pid, name, org)
+	labels = {`, pid, name, org)
 
 	l := ""
 	for key, value := range labels {

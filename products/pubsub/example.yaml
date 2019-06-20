@@ -12,9 +12,6 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Example::Config
-# This is where custom code would be defined eventually.
-objects: !ruby/object:Api::Resource::HashArray
-
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # All of these files will be copied verbatim.
@@ -28,4 +25,3 @@ files: !ruby/object:Provider::Config::Files
 # This is for custom testing code. All of our tests follow a specific pattern
 # that sometimes needs to be deviated from. We're working towards a world where
 # these handwritten tests would be unnecessary in many cases (custom types).
-tests: !ruby/object:Api::Resource::HashArray

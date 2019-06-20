@@ -12,35 +12,6 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-func TestAccComputeRegionAutoscaler_basic(t *testing.T) {
-	var ascaler compute.Autoscaler
-
-	var it_name = fmt.Sprintf("region-autoscaler-test-%s", acctest.RandString(10))
-	var tp_name = fmt.Sprintf("region-autoscaler-test-%s", acctest.RandString(10))
-	var igm_name = fmt.Sprintf("region-autoscaler-test-%s", acctest.RandString(10))
-	var autoscaler_name = fmt.Sprintf("region-autoscaler-test-%s", acctest.RandString(10))
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeRegionAutoscalerDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeRegionAutoscaler_basic(it_name, tp_name, igm_name, autoscaler_name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRegionAutoscalerExists(
-						"google_compute_region_autoscaler.foobar", &ascaler),
-				),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_region_autoscaler.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccComputeRegionAutoscaler_update(t *testing.T) {
 	var ascaler compute.Autoscaler
 
@@ -155,10 +126,6 @@ resource "google_compute_instance_template" "foobar" {
 		network = "default"
 	}
 
-	metadata {
-		foo = "bar"
-	}
-
 	service_account {
 		scopes = ["userinfo-email", "compute-ro", "storage-ro"]
 	}
@@ -191,11 +158,11 @@ resource "google_compute_region_autoscaler" "foobar" {
 	name = "%s"
 	region = "us-central1"
 	target = "${google_compute_region_instance_group_manager.foobar.self_link}"
-	autoscaling_policy = {
+	autoscaling_policy {
 		max_replicas = 5
 		min_replicas = 1
 		cooldown_period = 60
-		cpu_utilization = {
+		cpu_utilization {
 			target = 0.5
 		}
 	}
@@ -227,10 +194,6 @@ resource "google_compute_instance_template" "foobar" {
 		network = "default"
 	}
 
-	metadata {
-		foo = "bar"
-	}
-
 	service_account {
 		scopes = ["userinfo-email", "compute-ro", "storage-ro"]
 	}
@@ -263,11 +226,11 @@ resource "google_compute_region_autoscaler" "foobar" {
 	name = "%s"
 	region = "us-central1"
 	target = "${google_compute_region_instance_group_manager.foobar.self_link}"
-	autoscaling_policy = {
+	autoscaling_policy {
 		max_replicas = 10
 		min_replicas = 1
 		cooldown_period = 60
-		cpu_utilization = {
+		cpu_utilization {
 			target = 0.5
 		}
 	}

@@ -2,6 +2,7 @@
 # - name of patch directory
 # - commit message
 # - author
+# - target branch
 function apply_patches {
   # Apply necessary downstream patches.
   shopt -s nullglob
@@ -16,5 +17,5 @@ function apply_patches {
   # We keep all the changes (--soft).
   git reset --soft "$(git merge-base HEAD "$4")"
   # Then we commit again.
-  git commit -m "$2" --author="$3" || true  # don't crash if no changes
+  git commit -m "$2" --author="$3" --signoff || true  # don't crash if no changes
 }

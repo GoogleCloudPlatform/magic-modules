@@ -1,0 +1,77 @@
+#!/bin/bash
+# Peforms basic checks for tools required by Magic Modules.
+
+set -e
+
+if [ -t 1 ]; then
+    red=$'\e[1;31m'
+    grn=$'\e[1;32m'
+    yel=$'\e[1;33m'
+    blu=$'\e[1;34m'
+    mag=$'\e[1;35m'
+    cyn=$'\e[1;36m'
+    end=$'\e[0m'
+else
+    red=''
+    grn=''
+    yel=''
+    blu=''
+    mag=''
+    cyn=''
+    end=''
+fi
+
+warn() {
+    printf "%s\n" "${!1}${2}${end}"
+}
+
+found=0
+count_in_path() {
+    echo "Check for ${1} in path..."
+    found=$(which -a "${1}" | uniq | wc -l)
+}
+
+count_in_path "rbenv"
+if [ $found -eq 0 ]; then
+    warn "yel" "   rbenv not found. See https://github.com/rbenv/rbenv for information on installing it."
+else
+    warn "grn" "   found!"
+    echo "Checking ruby version..."
+    rbenv version
+
+    count_in_path "bundler"
+    if [ $found -eq 0 ]; then
+        warn "yel" "   bundler not found. Run 'gem install bundler' to install it it."
+    else
+        warn "grn" "   found!"
+    fi
+fi
+
+count_in_path "go"
+if [ $found -eq 0 ]; then
+    warn "yel" "   go not found. See https://golang.org/doc/install for information on installing it."
+else
+    warn "grn" "   found!"
+fi
+
+count_in_path "goimports"
+if [ $found -eq 0 ]; then
+    warn "yel" "   goimports not found. Run 'go get golang.org/x/tools/cmd/goimports' to install it."
+else
+    warn "grn" "   found!"
+fi
+
+count_in_path "python"
+if [ $found -eq 0 ]; then
+    warn "yel" "   python not found. See https://golang.org/doc/install for information on installing it."
+else
+    warn "grn" "   found!"
+fi
+
+count_in_path "git"
+if [ $found -eq 0 ]; then
+    warn "yel" "   git not found. See https://docs.python-guide.org/starting/installation/ "
+    warn "yel" "   for information on installing it."
+else
+    warn "grn" "   found!"
+fi

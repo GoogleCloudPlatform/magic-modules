@@ -23,7 +23,7 @@ resource "google_bigquery_dataset" "default" {
   location                    = "EU"
   default_table_expiration_ms = 3600000
 
-  labels {
+  labels = {
     env = "default"
   }
 
@@ -52,6 +52,10 @@ The following arguments are supported:
 
 * `description` - (Optional) A user-friendly description of the dataset.
 
+* `delete_contents_on_destroy` - (Optional) If set to `true`, delete all the
+    tables in the dataset when destroying the resource; otherwise, destroying
+    the resource will fail if tables are present.
+
 * `location` - (Optional) The geographic location where the dataset should reside.
     See [official docs](https://cloud.google.com/bigquery/docs/dataset-locations).
 
@@ -60,11 +64,28 @@ The following arguments are supported:
     multi-regional location is a large geographic area, such as the United States,
     that contains at least two geographic places
 
-    Possible regional values include: `asia-northeast1`
+    Possible regional values include: `asia-east1`, `asia-northeast1`, `asia-southeast1`
+     `australia-southeast1`, `europe-north1`, `europe-west2` and `us-east4`.
+
     Possible multi-regional values:`EU` and `US`.
 
     The default value is multi-regional location `US`.
     Changing this forces a new resource to be created.
+
+* `default_partition_expiration_ms` - (Optional) The default partition expiration
+    for all partitioned tables in the dataset, in milliseconds.
+
+    Once this property is set, all newly-created partitioned tables in the dataset
+    will have an expirationMs property in the timePartitioning settings set to this
+    value, and changing the value will only affect new tables, not existing ones.
+    The storage in a partition will have an expiration time of its partition time
+    plus this value. Setting this property overrides the use of
+    `defaultTableExpirationMs` for partitioned tables: only one of
+    `defaultTableExpirationMs` and `defaultPartitionExpirationMs` will be used for
+    any new partitioned table. If you provide an explicit
+    `timePartitioning.expirationMs` when creating or updating a partitioned table,
+    that value takes precedence over the default partition expiration time
+    indicated by this property.
 
 * `default_table_expiration_ms` - (Optional) The default lifetime of all
     tables in the dataset, in milliseconds. The minimum value is 3600000
@@ -88,9 +109,13 @@ The following arguments are supported:
 The `access` block supports the following fields (exactly one of `domain`,
 `group_by_email`, `special_group`, `user_by_email`, or `view` must be set,
 even though they are marked optional):
+
 * `role` - (Required unless `view` is set) Describes the rights granted to
-    the user specified by the other member of the access object. The following
-    string values are supported: `READER`, `WRITER`, `OWNER`.
+    the user specified by the other member of the access object. 
+    Primitive, Predefined and custom roles are supported.
+    Predefined roles that have equivalent primitive roles are swapped 
+    by the API to their Primitive counterparts, and will show a diff post-create. 
+    See [official docs](https://cloud.google.com/bigquery/docs/access-control).
 
 * `domain` - (Optional) A domain to grant access to.
 
@@ -113,6 +138,7 @@ even though they are marked optional):
     via an update operation. Structure is documented below.
 
 The `access.view` block supports:
+
 * `dataset_id` - (Required) The ID of the dataset containing this table.
 
 * `project_id` - (Required) The ID of the project containing this table.

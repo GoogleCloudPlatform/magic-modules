@@ -1,0 +1,55 @@
+# Copyright 2018 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Node: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 900
+      update_sec: 900
+      delete_sec: 900
+    id_format: "{{project}}/{{zone}}/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{zone}}/nodes/{{name}}"]
+    autogen_async: true
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "tpu_node_basic"
+        primary_resource_id: "tpu"
+        vars:
+          node_name: "test-tpu"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "tpu_node_full"
+        primary_resource_id: "tpu"
+        vars:
+          node_name: "test-tpu"
+          network_name: "test-tpu-network"
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
+      network: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+        diff_suppress_func: 'compareSelfLinkOrResourceName'
+      schedulingConfig: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareTpuNodeSchedulingConfig'
+      schedulingConfig.preemptible: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'compareTpuNodeSchedulingConfig'
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      constants:  'templates/terraform/constants/tpu_node.erb'
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

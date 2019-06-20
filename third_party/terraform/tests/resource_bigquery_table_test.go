@@ -63,7 +63,7 @@ func TestAccBigQueryTable_View(t *testing.T) {
 	})
 }
 
-func TestAccBigQueryTable_ViewWithLegacySQL(t *testing.T) {
+func TestAccBigQueryTable_updateView(t *testing.T) {
 	t.Parallel()
 
 	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(10))
@@ -122,7 +122,8 @@ resource "google_bigquery_table" "test" {
 
   time_partitioning {
     type = "DAY"
-    field = "ts"	
+    field = "ts"
+    require_partition_filter = true
   }
 
   schema = <<EOH
@@ -195,7 +196,7 @@ resource "google_bigquery_table" "test" {
   	query = "%s"
   	use_legacy_sql = false
   }
-}`, datasetID, tableID, "SELECT state FROM `lookerdata:cdc.project_tycho_reports`")
+}`, datasetID, tableID, "SELECT state FROM `lookerdata.cdc.project_tycho_reports`")
 }
 
 func testAccBigQueryTableUpdated(datasetID, tableID string) string {

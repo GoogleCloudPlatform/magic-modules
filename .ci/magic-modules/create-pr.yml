@@ -7,8 +7,8 @@ platform: linux
 image_resource:
     type: docker-image
     source:
-        repository: nmckinley/hub
-        tag: 'latest'
+        repository: gcr.io/magic-modules/hub
+        tag: '1.0'
 
 inputs:
     - name: magic-modules
@@ -22,7 +22,6 @@ run:
 
 params:
   GITHUB_TOKEN: ""
-  TERRAFORM_REPO_USER: ""
   ANSIBLE_REPO_USER: ""
   INSPEC_REPO_USER: ""
   TERRAFORM_VERSIONS: ""

@@ -12,97 +12,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<%= compile 'templates/license.erb' -%>
+# frozen_string_literal: false
 
 <%= lines(autogen_notice :ruby) -%>
-
 <%
   require 'google/string_utils'
+
 
   inside_indent = 8
 
   requires = generate_requires(object.all_user_properties)
-  requires << 'inspec/resource'
+  requires << 'gcp_backend'
 -%>
 <%= lines(emit_requires(requires)) -%>
 
-# A provider to manage <%= @api.name -%> resources.
-class <%= object.name -%> < Inspec.resource(1)
-
+# A provider to manage <%= @api.product_full_name -%> resources.
+class <%= object.name -%> < GcpResourceBase
   name '<%= resource_name(object, product_ns) -%>'
   desc '<%= object.name -%>'
-  supports platform: 'gcp2'
+  supports platform: 'gcp'
 
-<% object.properties.each do |prop| -%>
+  attr_reader :params
+<% object.all_user_properties.each do |prop| -%>
   <%= "attr_reader :#{prop.out_name}" -%>
 
 <% end -%>
-  def base
-    '<%= object.self_link_url[0].join %>'
-  end
 
-  def url
-    '<%= format_url(object.self_link_url[1]) %>'
-  end
-
-<% if object.self_link_query.nil? -%>
+<% if object.nested_query.nil? -%>
   def initialize(params)
-    @fetched = fetch_resource(params)
+    super(params.merge({ use_http_transport: true }))
+    @params = params
+    @fetched = @connection.fetch(product_url, resource_base_url, params)
     parse unless @fetched.nil?
   end
-<% else # object.self_link_query.nil? -%>
-    # TODO(slevenick) for other products
-    def initialize(params)
-      raise 'Not implemented'
-    end
-<% end # object.self_link_query.nil? -%>
-
-  def fetch_resource(params)
-    get_request = inspec.backend.fetch(base, url, params)
-  end
-
-<% if object.self_link_query.nil? -%>
+<% else # object.nested_query.nil? -%>
   def initialize(params)
-    @fetched = fetch_resource(params)
+    super(params.merge({ use_http_transport: true }))
+    @params = params
+    fetched = @connection.fetch(product_url, resource_base_url, params)
+    @fetched = unwrap(fetched, params)
     parse unless @fetched.nil?
   end
-<% else # object.self_link_query.nil? -%>
-   # TODO(slevenick) for other products
-   def initialize(params)
-     raise 'Not implemented'
-   end
-<% end # object.self_link_query.nil? -%>
 
-  def fetch_resource(params)
-    get_request = inspec.backend.fetch(base, url, params)
+<% identity_outs = object.identity.map { |id| id.out_name } -%>
+  def identity
+    %w{<%= identity_outs.join(' ') -%>}
   end
+
+  def collection_item
+    '<%= object.collection_url_key -%>'
+  end
+
+  def unwrap(fetched, params)
+    fetched[collection_item].find { |result| identity.all? { |id| result[id.to_sym] == params[id] } }
+  end
+<% end # object.nested_query.nil? -%>
 
   def parse
 <%
-  parse_code = object.properties.map do |prop|
-    name = prop.out_name
-
-    if time?(prop)
-      init = "DateTime.parse(@fetched['#{prop.api_name}'])"
-    elsif primitive?(prop)
-      init = "@fetched['#{prop.api_name}']"
-    elsif typed_array?(prop)
-      init = "#{prop.property_type}.parse(@fetched['#{prop.api_name}'])"
-    else
-      init = "#{prop.property_type}.new(@fetched['#{prop.api_name}'])"    
-    end
-    
-    assignment = "@#{name} = #{init}"
+  parse_code = object.all_user_properties.map do |prop|
+    assignment = "@#{prop.out_name} = #{parse_code(prop, '@fetched')}"
   end
 -%>
 <%= lines(indent(parse_code, 4)) -%>
   end
 
+  # Handles parsing RFC3339 time string
+  def parse_time_string(time_string)
+    time_string ? Time.parse(time_string) : nil
+  end
+
   def exists?
     !@fetched.nil?
+  end
+
+<% 
+individual_url = format_url(object.self_link_url)
+best_guess_identifier = extract_identifiers(individual_url).last 
+-%>
+  def to_s
+    "<%= object.name -%> #{@params[:<%= best_guess_identifier -%>]}"
   end
 <% unless object&.additional_functions.nil? -%>
 
 <%= lines(indent(object.additional_functions, 2)) -%>
 <% end -%>
+
+  private
+
+  def product_url
+    '<%= object.product_url || object.__product.base_url %>'
+  end
+
+  def resource_base_url
+    '<%= object.self_link || object.base_url + '/{{name}}' %>'
+  end
 end

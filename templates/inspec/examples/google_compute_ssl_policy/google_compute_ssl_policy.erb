@@ -1,0 +1,12 @@
+<% ssl_policy = grab_attributes['ssl_policy'] -%>
+describe google_compute_ssl_policy(project: <%= "#{external_attribute('gcp_project_id', doc_generation)}" -%>, name: <%= doc_generation ? "'#{ssl_policy['name']}'" : "ssl_policy['name']" -%>) do
+  it { should exist }
+  its('min_tls_version') { should eq <%= doc_generation ? "'#{ssl_policy['min_tls_version']}'" : "ssl_policy['min_tls_version']" -%> }
+  its('profile') { should eq <%= doc_generation ? "'#{ssl_policy['profile']}'" : "ssl_policy['profile']" -%> }
+  its('custom_features') { should include <%= doc_generation ? "'#{ssl_policy['custom_feature']}'" : "ssl_policy['custom_feature']" -%> }
+  its('custom_features') { should include <%= doc_generation ? "'#{ssl_policy['custom_feature2']}'" : "ssl_policy['custom_feature2']" -%> }
+end
+
+describe google_compute_ssl_policy(project: <%= "#{external_attribute('gcp_project_id', doc_generation)}" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

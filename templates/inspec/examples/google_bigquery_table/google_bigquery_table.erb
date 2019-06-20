@@ -1,0 +1,14 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% bigquery_table = grab_attributes['bigquery_table'] -%>
+<% dataset = grab_attributes['dataset'] -%>
+describe google_bigquery_table(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, dataset: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>, name: <%= doc_generation ? "'#{bigquery_table['table_id']}'" : "bigquery_table['table_id']" -%>) do
+  it { should exist }
+
+  its('expiration_time') { should cmp <%= doc_generation ? "'#{bigquery_table['expiration_time']}'" : "bigquery_table['expiration_time']" -%> }
+  its('time_partitioning.type') { should eq <%= doc_generation ? "'#{bigquery_table['time_partitioning_type']}'" : "bigquery_table['time_partitioning_type']" -%> }
+  its('description') { should eq <%= doc_generation ? "'#{bigquery_table['description']}'" : "bigquery_table['description']" -%> }
+end
+
+describe google_bigquery_table(project: <%= doc_generation ? "#{gcp_project_id}" : "gcp_project_id" -%>, dataset: <%= doc_generation ? "'#{dataset['dataset_id']}'" : "dataset['dataset_id']" -%>, name: 'nonexistent') do
+  it { should_not exist }
+end

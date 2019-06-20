@@ -1,4 +1,9 @@
 <% properties_with_classes(object.all_user_properties).each do |prop| -%>
+<%
+  # Reject output-only properties because:
+  # request: can't specify output-only properties
+  # response: output-only values make diffing much harder.
+-%>
 class <%= prop.property_class[-1] -%>(object):
 <% if prop.is_a?(Api::Type::NestedObject) -%>
     def __init__(self, request, module):
@@ -9,14 +14,10 @@ class <%= prop.property_class[-1] -%>(object):
             self.request = {}
 
     def to_request(self):
-        return remove_nones_from_dict({
-<%= lines(request_properties_in_classes(prop.properties, 12)) -%>
-        })
+        return remove_nones_from_dict(<%= lines(python_literal(request_properties(prop.properties.reject(&:output), 'self.request', 'self.module'), use_hash_brackets: true)) -%>)
 
     def from_response(self):
-        return remove_nones_from_dict({
-<%= lines(response_properties_in_classes(prop.properties, 12)) -%>
-        })
+        return remove_nones_from_dict(<%= lines(python_literal(response_properties(prop.properties.reject(&:output), 'self.request', 'self.module'), use_hash_brackets: true)) -%>)
 <% elsif prop.is_a?(Api::Type::Array) && prop.item_type.is_a?(Api::Type::NestedObject) -%>
     def __init__(self, request, module):
         self.module = module
@@ -38,18 +39,10 @@ class <%= prop.property_class[-1] -%>(object):
         return items
 
     def _request_for_item(self, item):
-        return remove_nones_from_dict({
-<%=
-  lines(request_properties_in_classes(prop.item_type.properties, 12, 'item'))
--%>
-        })
+        return remove_nones_from_dict(<%= lines(python_literal(request_properties(prop.item_type.properties.reject(&:output), 'item', 'self.module'), use_hash_brackets: true))-%>)
 
     def _response_from_item(self, item):
-        return remove_nones_from_dict({
-<%=
-  lines(response_properties_in_classes(prop.item_type.properties, 12, 'item'))
--%>
-        })
+        return remove_nones_from_dict(<%= lines(python_literal(response_properties(prop.item_type.properties.reject(&:output), 'item', 'self.module'), use_hash_brackets: true))-%>)
 <% end # prop.is_a? NestedObject -%>
 <%=
   unless prop == properties_with_classes(object.all_user_properties).last

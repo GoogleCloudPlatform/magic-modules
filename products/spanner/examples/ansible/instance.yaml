@@ -14,7 +14,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_spanner_instance
   code:
-    name: <%= ctx[:name] %>
+    name: "testinstance"
     display_name: 'My Spanner Instance'
     node_count: 2
     labels:

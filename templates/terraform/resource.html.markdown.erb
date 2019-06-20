@@ -36,22 +36,31 @@
     directly inserted from YAML.
 -%>
 <%
-  resource_name = object.name.underscore
-  properties = object.all_user_properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}
+  if @config.legacy_name.nil?
+    terraform_name = "google_" + (product_ns + object.name).underscore
+  else
+    terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+  end
+  properties = object.all_user_properties
+  timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
-layout: "azurerm"
-page_title: "Azure Resource Manager: azurerm_<%= resource_name -%>"
-sidebar_current: "docs-azurerm-resource-<%= resource_name.gsub("_", "-") -%>"
+layout: "google"
+page_title: "Google: <%= terraform_name -%>"
+sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
 description: |-
 <%= indent(object.description.first_sentence, 2) %>
 ---
 
-# azurerm_<%= resource_name -%>
-
+# <%= terraform_name.gsub("_", "\\_") %>
 
 <%= lines(object.description) -%>
+
+<% if object.min_version.name == 'beta' -%>
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+<% end -%>
 
 <% if !object.references.nil? -%>
 To get more information about <%= object.name -%>, see:
@@ -71,53 +80,82 @@ To get more information about <%= object.name -%>, see:
 ~> **Warning:** <%= object.docs.warning -%>
 <%- end -%>
 
-<% unless object.examples.nil? -%>
-## Example Usage
-<%= "\n" + object.examples -%>
-
-<% end -%>
-<% unless object.example.empty? -%>
-  <%- object.example.each do |example| -%>
+<%#- We over-generate examples/oics buttons here; they'll all be _valid_ just not necessarily intended for this provider version.
+     Unless/Until we split our docs, this is a non-issue. -%>
+<% unless object.examples.empty? -%>
+  <%- object.examples.each do |example| -%>
+    <%- unless example.skip_test -%>
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="<%= example.oics_link %>" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+    <%- end -%>
 ## Example Usage - <%= example.name.camelize(:upper).uncombine %>
 
 
 <%= example.config_documentation -%>
   <%- end %>
 <%- end -%>
-<%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? -%>
-<%    object.document_examples.each do |example_ref| -%>
-## <%= example_ref.title -%>
-
-
-```hcl
-<%= lines(build_documentation_hcl_from_example(example_ref.example_name, example_ref.resource_name_hints)) -%>
-```
-
-<%    end -%>
-<%  end -%>
 ## Argument Reference
 
 The following arguments are supported:
-<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+
+<% properties.select(&:required).each do |prop| -%>
+<%   if prop.flatten_object -%>
+<%     if prop.nested_properties? -%>
+<%       prop.nested_properties.each do |p| -%>
+<%=        lines(build_property_documentation(p)) -%>
+<%       end -%>
+<%     end -%>
+<%   else -%>
 <%= lines(build_property_documentation(prop)) -%>
-<% end -%>
-<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
-<% end -%>
-<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
-<% end -%>
-<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%   end -%>
 <% end -%>
 
+<% properties.select(&:required).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<%- unless object.docs.required_properties.nil? -%>
+<%= "\n" + object.docs.required_properties -%>
+<% end -%>
+
+- - -
+
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%   if prop.flatten_object -%>
+<%     if prop.nested_properties? -%>
+<%       prop.nested_properties.each do |p| -%>
+<%=        lines(build_property_documentation(p)) -%>
+<%       end -%>
+<%     end -%>
+<%   else -%>
+<%=    lines(build_property_documentation(prop)) -%>
+<%   end -%>
+<% end -%>
+<% if object.base_url.include?("{{project}}")-%>
+<%# The following new line allow for project to be bullet-formatted properly. -%>
+
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the provider project is used.
+<% end -%>
+
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<%- unless object.docs.optional_properties.nil? -%>
+<%= "\n" + object.docs.optional_properties -%>
+<% end -%>
+
+<% unless properties.select(&:output).empty? && object.docs.attributes.nil? -%>
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the arguments listed above, the following computed attributes are exported:
+
 <% properties.select(&:output).each do |prop| -%>
 <%= lines(build_property_documentation(prop)) -%>
 <% end -%>
-<% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
+<% if object.has_self_link -%>
 * `self_link` - The URI of the created resource.
 <% end -%>
 
@@ -127,13 +165,28 @@ The following attributes are exported:
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>
 <% end -%>
+<% end -%>
 
-<%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? && !object.document_examples.empty? -%>
+## Timeouts
+
+This resource provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - Default is <%= timeouts.insert_sec / 60 -%> minutes.
+<% if updatable?(object, properties) -%>
+- `update` - Default is <%= timeouts.update_sec / 60 -%> minutes.
+<% end -%>
+- `delete` - Default is <%= timeouts.delete_sec / 60 -%> minutes.
+
 ## Import
 
-<%= object.name.titlecase -%> can be imported using the `resource id`, e.g.
+<%= object.name -%> can be imported using any of these accepted formats:
 
-```shell
-$ terraform import azurerm_<%= resource_name -%>.example <%= lines(build_documentation_import_resource_id(object, object.document_examples[0])) -%>
 ```
-<%  end -%>
+<% import_id_formats(object).each do |id_format| -%>
+$ terraform import <% if object.min_version.name == 'beta' %>-provider=google-beta <% end -%><%= terraform_name -%>.default <%= id_format %>
+<% end -%>
+```
+
+-> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
+as an argument so that Terraform uses the correct provider to import your resource.

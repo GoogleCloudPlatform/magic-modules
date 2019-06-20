@@ -13,7 +13,7 @@
 
 require 'spec_helper'
 require 'google/yaml_validator'
-require 'provider/terraform/resource_override'
+require 'overrides/terraform/resource_override'
 
 class File
   class << self
@@ -22,10 +22,10 @@ class File
   end
 end
 
-describe Provider::Terraform::ResourceOverride do
+describe Overrides::Terraform::ResourceOverride do
   context 'good resource' do
     let(:resource) do
-      Provider::Terraform::ResourceOverride.parse(
+      Overrides::Terraform::ResourceOverride.parse(
         IO.read('spec/data/good-resource.yaml')
       )
     end
@@ -36,22 +36,22 @@ describe Provider::Terraform::ResourceOverride do
       resource.validate
     end
 
-    subject { resource.description }
-
-    context 'with no override' do
-      before(:each) { Provider::Terraform::ResourceOverride.new.apply resource }
-      it { is_expected.to eq 'foo' }
-    end
+    # The ResourceOverride object will get the new description.
+    # During the application phase, if the ResourceOverride object
+    # has a description, it'll be applied to the new Api Object.
+    subject { override.description }
 
     context 'with extend description' do
-      before(:each) do
-        create_override('description', '{{description}}bar').apply resource
-      end
+      let(:override) { create_override('description', '{{description}}bar') }
+      subject { override.description }
+      before(:each) { override.apply resource }
       it { is_expected.to eq 'foobar' }
     end
 
     context 'with override description' do
-      before(:each) { create_override('description', 'bar').apply resource }
+      let(:override) { create_override('description', 'bar') }
+      subject { override.description }
+      before(:each) { override.apply resource }
       it { is_expected.to eq 'bar' }
     end
   end
@@ -65,7 +65,7 @@ describe Provider::Terraform::ResourceOverride do
 
   def create_override(property_name, override_val)
     Google::YamlValidator.parse(
-      ['--- !ruby/object:Provider::Terraform::ResourceOverride',
+      ['--- !ruby/object:Overrides::Terraform::ResourceOverride',
        "#{property_name}: '#{override_val}'"].join("\n")
     )
   end

@@ -1,0 +1,295 @@
+<%- # the license inside this block applies to this file
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%= lines(autogen_notice :go) -%>
+
+package azurerm
+
+<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
+
+<%
+    properties = object.all_user_properties
+    schema_properties = properties.reject{|p| p.name == 'id' || get_property_value(p, 'hide_from_schema', false)}
+    # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
+    # can just be read in anyways, and after a Read they will need to be set in every Update.
+    settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
+    # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
+    updatable_properties = settable_properties.reject{|p| !object.azure_sdk_definition.update.nil? && get_applicable_reference(p.azure_sdk_references, object.azure_sdk_definition.update.request).nil?}
+    output_properties = properties.reject{|p| p.name == 'id'}
+    # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
+    api_name_lower = String.new(product_ns)
+    api_name_lower[0] = api_name_lower[0].downcase
+    api_client_name = api_name_lower.downcase
+    has_project = object.base_url.include?("{{project}}")
+    has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
+-%>
+<%
+    resource_name = "Arm" + object.name
+    terraform_name = "azurerm_" + object.name.underscore
+    azure_client_name = object.azure_sdk_definition.go_client
+    sdk_package = object.azure_sdk_definition.go_client_namespace
+
+    expand_queue = Array.new
+    flatten_queue = Array.new
+
+    combine_create_update = object.azure_sdk_definition.update.nil? || (object.azure_sdk_definition.create.go_func_name == object.azure_sdk_definition.update.go_func_name)
+    create_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Create")
+    update_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Update")
+-%>
+
+func resource<%= resource_name -%>() *schema.Resource {
+    return &schema.Resource{
+        Create: resource<%= resource_name -%><%= create_func_name_postfix -%>,
+        Read: resource<%= resource_name -%>Read,
+<%      if updatable?(object, properties) -%>
+        Update: resource<%= resource_name -%><%= update_func_name_postfix -%>,
+<%      end -%>
+        Delete: resource<%= resource_name -%>Delete,
+<%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+        CustomizeDiff: customdiff.All(
+<%=         
+            settable_properties.select { |p| p.unordered_list }
+                               .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
+                               .join(",\n")
+-%>
+        ),
+<%      end -%>
+
+        Importer: &schema.ResourceImporter{
+            State: schema.ImportStatePassthrough,
+        },
+
+<%      unless object.async.nil? -%>
+        Timeouts: &schema.ResourceTimeout {
+            Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
+<%          if updatable?(object, properties) -%>
+            Update: schema.DefaultTimeout(<%= object.async.operation.timeouts.update_sec -%> * time.Second),
+<%          end -%>
+            Delete: schema.DefaultTimeout(<%= object.async.operation.timeouts.delete_sec -%> * time.Second),
+        },
+<%      end -%>
+<%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
+
+        Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
+<%          order_azure_properties(schema_properties).each do |prop| -%>
+<%=             lines_before(build_schema_property(prop, object, 12)) -%>
+
+<%          end -%>
+<%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+        },
+    }
+}
+<% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
+func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
+<%=
+    compile_template('templates/terraform/unordered_list_customize_diff.erb',
+                     prop: prop,
+                     resource_name: resource_name)
+-%>
+}
+<% end -%>
+
+<%  sdk_operation = object.azure_sdk_definition.create -%>
+<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, true -%>
+<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, expand_queue, sdktype, settable_properties -%>
+func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
+    ctx := meta.(*ArmClient).StopContext
+
+<%  settable_properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
+<%    output_var = var_name || prop.name.camelcase(:lower) -%>
+<%=   lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
+<%  end -%>
+
+    if requireResourcesToBeImported {
+        resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
+        if err != nil {
+            if !utils.ResponseWasNotFound(resp.Response) {
+                return <%= lines(build_errorf_with_resource_name("Error checking for present of existing %s", true, object.azure_sdk_definition.read, properties, object)) -%>
+            }
+        }
+        if !utils.ResponseWasNotFound(resp.Response) {
+            return tf.ImportAsExistsError("<%= terraform_name -%>", *resp.ID)
+        }
+    }
+
+<%  settable_properties.select{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
+<%    output_var = var_name || prop.name.camelcase(:lower) -%>
+<%=   lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
+<%  end -%>
+
+    <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
+<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
+    }
+
+<%= lines(build_property_to_sdk_object_empty_sensitive(sdk_marshal)) -%>
+<%  if object.mutex -%>
+    lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+    if err != nil {
+        return err
+    }
+    mutexKV.Lock(lockName)
+    defer mutexKV.Unlock(lockName)
+<%  end -%>
+
+<%  unless sdk_operation.async -%>
+    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object)) -%>
+    }
+<%  else -%>
+    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
+    if err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object)) -%>
+    }
+    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error waiting for creation of %s", true, sdk_operation, properties, object)) -%>
+    }
+<%  end -%>
+
+<%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
+
+    resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
+    if err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.read, properties, object)) -%>
+    }
+    if resp.ID == nil {
+        return <%= lines(build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.read, properties, object)) -%>
+    }
+    d.SetId(*resp.ID)
+
+    return resource<%= resource_name -%>Read(d, meta)
+}
+
+<%  sdk_operation = object.azure_sdk_definition.read -%>
+<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, false -%>
+<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, flatten_queue, sdktype, output_properties -%>
+func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
+    ctx := meta.(*ArmClient).StopContext
+
+<%= lines(build_azure_id_parser(object.azure_sdk_definition.read, object)) -%>
+
+    resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
+    if err != nil {
+        if utils.ResponseWasNotFound(resp.Response) {
+            log.Printf("[INFO] <%= object.name.titlecase -%> %q does not exist - removing from state", d.Id())
+            d.SetId("")
+            return nil
+        }
+        return <%= lines(build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, output_properties, object)) -%>
+    }
+
+<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
+
+<%= lines(build_sdk_object_to_property('resp', 'd', sdk_marshal)) -%>
+
+    return nil
+}
+
+<%  if !combine_create_update -%>
+<%    sdk_operation = object.azure_sdk_definition.update -%>
+func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
+    ctx := meta.(*ArmClient).StopContext
+
+<%  updatable_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%    if prop.name != "location" -%>
+<%      var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
+<%      output_var = var_name || prop.name.camelcase(:lower) -%>
+<%=     lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
+<%    end -%>
+<%  end -%>
+
+    <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
+<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, true -%>
+<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, expand_queue, sdktype, updatable_properties -%>
+<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
+    }
+
+<%= lines(build_property_to_sdk_object_empty_sensitive(sdk_marshal)) -%>
+
+<%  unless sdk_operation.async -%>
+    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object)) -%>
+    }
+<%  else -%>
+    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
+    if err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object)) -%>
+    }
+    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error waiting for update of %s", true, sdk_operation, properties, object)) -%>
+    }
+<%  end -%>
+
+    return resource<%= resource_name -%>Read(d, meta)
+}
+<%  end -%>
+
+<%  sdk_operation = object.azure_sdk_definition.delete -%>
+func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
+    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
+    ctx := meta.(*ArmClient).StopContext
+
+<%  if object.mutex -%>
+    lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+    if err != nil {
+        return err
+    }
+    mutexKV.Lock(lockName)
+    defer mutexKV.Unlock(lockName)
+<%  end -%>
+
+<%= lines(build_azure_id_parser(sdk_operation, object)) -%>
+
+<%  unless sdk_operation.async -%>
+    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
+        return <%= lines(build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object)) -%>
+    }
+<%  else -%>
+    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
+    if err != nil {
+        if response.WasNotFound(future.Response()) {
+            return nil
+        }
+        return <%= lines(build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object)) -%>
+    }
+
+    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
+        if !response.WasNotFound(future.Response()) {
+            return <%= lines(build_errorf_with_resource_name("Error waiting for deleting %s", true, sdk_operation, properties, object)) -%>
+        }
+    }
+<%  end -%>
+
+    return nil
+}
+
+<%  while !expand_queue.empty? -%>
+<%    descriptor = expand_queue.shift -%>
+<%=   lines(build_expand_method(descriptor)) -%>
+
+<%  end -%>
+
+<%  while !flatten_queue.empty? -%>
+<%    descriptor = flatten_queue.shift -%>
+<%=   lines(build_flatten_method(descriptor)) -%>
+
+<%  end -%>
+
+<%  if object.custom_code.extra_functions -%>
+<%=   lines(compile(get_custom_template_path(object.custom_code.extra_functions))) -%>
+<%  end -%>

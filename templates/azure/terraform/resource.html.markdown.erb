@@ -1,0 +1,139 @@
+<%- # the license inside this block applies to this file
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%# NOTE NOTE NOTE
+    The newlines in this file are *load bearing*.  This file outputs
+    Markdown, which is extremely sensitive to newlines.  You have got
+    to have a newline after every attribute and property, because
+    otherwise MD will think the next element is part of the previous
+    property's bullet point.  You cannot have any double newlines in the
+    middle of a property or attribute, because MD will think that the
+    empty line ends the bullet point and the indentation will be off.
+    You must have a newline before and after all --- document indicators,
+    and you must have a newline before and after all - - - hlines.
+    You cannot have more than one blank line between properties.
+    The --- document indicator must be the first line of the file.
+    As long as you only use `build_property_documentation`, it all works
+    fine - but when you need to add custom docs (notes, etc), you need
+    to remember these things.
+
+    Know also that the `lines` function in heavy use in MagicModules will
+    strip exactly one trailing newline - unless that's what you've designed
+    your docstring for, it's easier to insert newlines where you need them
+    manually.  That's why, in this file, we use `lines` on anything which
+    is generated from a ruby function, but skip it on anything that is
+    directly inserted from YAML.
+-%>
+<%
+  resource_name = object.name.underscore
+  properties = object.all_user_properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}
+-%>
+---
+<%= lines(autogen_notice :yaml) -%>
+layout: "azurerm"
+page_title: "Azure Resource Manager: azurerm_<%= resource_name -%>"
+sidebar_current: "docs-azurerm-resource-<%= resource_name.gsub("_", "-") -%>"
+description: |-
+<%= indent(object.description.first_sentence, 2) %>
+---
+
+# azurerm_<%= resource_name -%>
+
+
+<%= lines(object.description) -%>
+
+<% if !object.references.nil? -%>
+To get more information about <%= object.name -%>, see:
+
+<%   if !object.references.api.nil? -%>
+* [API documentation](<%= object.references.api -%>)
+<%   end # object...api.nil? -%>
+<%   if !object.references.guides.empty? -%>
+* How-to Guides
+<%     object.references.guides.each do |title, link| -%>
+    * [<%= title -%>](<%= link -%>)
+<%     end # object...guides.each -%>
+<%   end # object...guides.empty? -%>
+<% end # object...api.nil? -%>
+<%- unless object.docs.warning.nil? -%>
+
+~> **Warning:** <%= object.docs.warning -%>
+<%- end -%>
+
+<% unless object.examples.nil? -%>
+## Example Usage
+<%= "\n" + object.examples -%>
+
+<% end -%>
+<% unless object.example.empty? -%>
+  <%- object.example.each do |example| -%>
+## Example Usage - <%= example.name.camelize(:upper).uncombine %>
+
+
+<%= example.config_documentation -%>
+  <%- end %>
+<%- end -%>
+<%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? -%>
+<%    object.document_examples.each do |example_ref| -%>
+## <%= example_ref.title -%>
+
+
+```hcl
+<%= lines(build_documentation_hcl_from_example(example_ref.example_name, example_ref.resource_name_hints)) -%>
+```
+
+<%    end -%>
+<%  end -%>
+## Argument Reference
+
+The following arguments are supported:
+<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_property_documentation(prop)) -%>
+<% end -%>
+<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_property_documentation(prop)) -%>
+<% end -%>
+<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+
+## Attributes Reference
+
+The following attributes are exported:
+<% properties.select(&:output).each do |prop| -%>
+<%= lines(build_property_documentation(prop)) -%>
+<% end -%>
+<% if (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)} -%>
+* `self_link` - The URI of the created resource.
+<% end -%>
+
+<% properties.select(&:output).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
+<%- unless object.docs.attributes.nil? -%>
+<%= "\n" + object.docs.attributes -%>
+<% end -%>
+
+<%  if object.instance_variable_defined?(:@document_examples) && !object.document_examples.nil? && !object.document_examples.empty? -%>
+## Import
+
+<%= object.name.titlecase -%> can be imported using the `resource id`, e.g.
+
+```shell
+$ terraform import azurerm_<%= resource_name -%>.example <%= lines(build_documentation_import_resource_id(object, object.document_examples[0])) -%>
+```
+<%  end -%>

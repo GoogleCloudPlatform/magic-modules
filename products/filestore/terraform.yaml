@@ -12,27 +12,29 @@
 # limitations under the License.
 
 --- !ruby/object:Provider::Terraform::Config
-overrides: !ruby/object:Provider::ResourceOverrides
-  Instance: !ruby/object:Provider::Terraform::ResourceOverride
-    exclude: false
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_sec: 360
+      update_sec: 360
+      delete_sec: 360
+    autogen_async: true
     id_format: "{{project}}/{{zone}}/{{name}}"
     import_format: ["projects/{{project}}/locations/{{zone}}/instances/{{name}}"]
-    example:
+    examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "filestore_instance_basic"
         primary_resource_id: "instance"
-        version: <%= _version_name %>
         vars:
           instance_name: "test-instance"
     properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-      zone: !ruby/object:Provider::Terraform::PropertyOverride
+      zone: !ruby/object:Overrides::Terraform::PropertyOverride
         ignore_read: true
-      networks.reservedIpRange: !ruby/object:Provider::Terraform::PropertyOverride
+      networks.reservedIpRange: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      pre_update: templates/terraform/pre_update/update_mask.erb
       constants: templates/terraform/constants/filestore.erb
 
 # This is for copying files over

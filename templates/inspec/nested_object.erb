@@ -12,55 +12,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<%= compile('templates/license.erb') -%>
+<%
+  # This template file generates both NestedObjects + Arrays of NestedObjects.
+  nested_property = if property.is_a?(Api::Type::Array)
+                    property.item_type
+                  else
+                    property
+                  end
+  class_name = qualified_property_class(nested_property).camelize(:upper)
+  product_ns = product.name.camelize(:upper)
+-%>
+# frozen_string_literal: false
 
 <%= lines(autogen_notice :ruby) -%>
-
 <%
-  requires = generate_requires(nested_properties)
+  requires = generate_requires(nested_property.nested_properties)
 -%>
 <%= lines(emit_requires(requires)) -%>
-module Google
+module GoogleInSpec
   module <%= product_ns %>
     module Property
       class <%= class_name -%>
+<% if property.nested_properties? -%>
+<% property.nested_properties.each do |prop| -%>
 
-<% if !nested_properties.empty? -%>
-<% nested_properties.each do |prop| -%>
         attr_reader :<%= prop.out_name %>
-<% end # nested_properties.each -%>
+<% end # property.nested_properties.each -%>
 
-<% end # if !nested_properties.empty? -%>
-
-        def initialize(args = nil)
-          return nil if args.nil?
-<% nested_properties.each do |prop| -%>
+<% end # if property.nested_properties? -%>
+        def initialize(args = nil, parent_identifier = nil)
+          return if args.nil?
+          @parent_identifier = parent_identifier
+<% property.nested_properties.each do |prop| -%>
 <%
-  if time?(prop)
-      init = "DateTime.parse(args['#{prop.api_name}'])"
-  elsif primitive?(prop)
-    init = "args['#{prop.api_name}']"
-  elsif typed_array?(prop)
-    init = "#{prop.property_type}.parse(args['#{prop.api_name}'])"
-  else 
-    init = "#{prop.property_type}.new(args['#{prop.api_name}'])"    
-  end
-  parse_code = "@#{prop.out_name} = #{init}"
+  parse_code = "@#{prop.out_name} = #{parse_code(prop, 'args')}"
 -%>
 <%= lines(indent(parse_code, 10)) -%>
-<% end # nested_properties.each -%>
+<% end # property.nested_properties.each -%>
         end
-      end
 
-<% if emit_array -%>
-      class <%= class_name %>Array
-        def self.parse(value)
-          return if value.nil?
-          return <%= class_name %>.new(value) unless value.is_a?(::Array)
-          value.map { |v| <%= class_name %>.new(v) }
+        def to_s
+          "#{@parent_identifier} <%= class_name -%>"
         end
       end
-<% end #if emit_array -%>
+<% if property.is_a?(Api::Type::Array) -%>
+
+      class <%= class_name %>Array
+        def self.parse(value, parent_identifier)
+          return if value.nil?
+          return <%= class_name %>.new(value, parent_identifier) unless value.is_a?(::Array)
+          value.map { |v| <%= class_name %>.new(v, parent_identifier) }
+        end
+      end
+<% end #if property is Array -%>
     end
   end
 end

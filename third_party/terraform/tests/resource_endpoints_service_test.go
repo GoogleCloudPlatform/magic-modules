@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fmt"
+
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -19,7 +20,7 @@ func TestAccEndpointsService_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEndpointsService_basic(random_name),
 				Check:  testAccCheckEndpointExistsByName(random_name),
 			},
@@ -35,7 +36,7 @@ func TestAccEndpointsService_grpc(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccEndpointsService_grpc(random_name),
 				Check:  testAccCheckEndpointExistsByName(random_name),
 			},
@@ -156,7 +157,7 @@ usage:
   - selector: endpoints.examples.bookstore.Bookstore.ListShelves
     allow_unregistered_calls: true
 EOF
-  protoc_output_base64 = "${base64encode(file("test-fixtures/test_api_descriptor.pb"))}"
+  protoc_output_base64 = "${filebase64("test-fixtures/test_api_descriptor.pb")}"
 }`, random_name, getTestProjectFromEnv(), getTestProjectFromEnv(), random_name, getTestProjectFromEnv())
 }
 

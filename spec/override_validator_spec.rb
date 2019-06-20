@@ -13,18 +13,18 @@
 
 require 'spec_helper'
 
-class TestResourceOverride < Provider::Overrides::ResourceOverride
+class TestResourceOverride < Overrides::ResourceOverride
   def self.attributes
     [:test_field]
   end
 end
 
-describe Provider::Overrides::Validator do
+describe Overrides::Validator do
   context 'simple overrides' do
     describe 'should be able identify a bad field' do
       let(:overrides) do
-        Provider::Overrides::ResourceOverrides.new(
-          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::ResourceOverride.new(
             'blahbad' => 'A description'
           )
         )
@@ -32,15 +32,15 @@ describe Provider::Overrides::Validator do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::Overrides::Validator.new(api, overrides)
+        runner = Overrides::Validator.new(api, overrides)
         expect { runner.run }.to raise_error(RuntimeError,
-                                             '@blahbad does not exist on AnotherResource')
+                                             /@blahbad does not exist on AnotherResource/)
       }
     end
     describe 'should be able identify a bad property' do
       let(:overrides) do
-        Provider::Overrides::ResourceOverrides.new(
-          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::ResourceOverride.new(
             'properties' => {
               'blahbad' => TestResourceOverride.new(
                 'description' => 'A description'
@@ -52,17 +52,16 @@ describe Provider::Overrides::Validator do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::Overrides::Validator.new(api, overrides)
+        runner = Overrides::Validator.new(api, overrides)
         expect { runner.run }.to raise_error(RuntimeError,
-                                             ['blahbad does not exist on AnotherResource (is it ',
-                                              'mislabeled as a property, not a parameter?)'].join)
+                                             /blahbad does not exist on AnotherResource/)
       }
     end
 
     describe 'should be able validate a namevalues nestedobject properly' do
       let(:overrides) do
-        Provider::Overrides::ResourceOverrides.new(
-          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::ResourceOverride.new(
             'properties' => {
               'namevalue-property.nv-prop1' => TestResourceOverride.new(
                 'description' => 'A description'
@@ -74,15 +73,15 @@ describe Provider::Overrides::Validator do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::Overrides::Validator.new(api, overrides)
+        runner = Overrides::Validator.new(api, overrides)
         expect { runner.run }.not_to raise_error
       }
     end
 
     describe 'should be able validate a changed type with new properties' do
       let(:overrides) do
-        Provider::Overrides::ResourceOverrides.new(
-          'AnotherResource' => Provider::Overrides::ResourceOverride.new(
+        Overrides::ResourceOverrides.new(
+          'AnotherResource' => Overrides::ResourceOverride.new(
             'properties' => {
               'namevalue-property.nv-prop1' => TestResourceOverride.new(
                 'type' => 'Api::Type::Enum',
@@ -95,7 +94,7 @@ describe Provider::Overrides::Validator do
       let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
 
       it {
-        runner = Provider::Overrides::Validator.new(api, overrides)
+        runner = Overrides::Validator.new(api, overrides)
         expect { runner.run }.not_to raise_error
       }
     end

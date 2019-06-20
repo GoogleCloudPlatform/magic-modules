@@ -8,43 +8,84 @@ description: |-
 
 # google\_container\_node\_pool
 
-Manages a Node Pool resource within GKE. For more information see
-[the official documentation](https://cloud.google.com/container-engine/docs/node-pools)
-and
-[API](https://cloud.google.com/container-engine/reference/rest/v1/projects.zones.clusters.nodePools).
+Manages a node pool in a Google Kubernetes Engine (GKE) cluster separately from
+the cluster control plane. For more information see [the official documentation](https://cloud.google.com/container-engine/docs/node-pools)
+and [the API reference](https://cloud.google.com/container-engine/reference/rest/v1/projects.zones.clusters.nodePools).
 
-## Example usage
-### Standard usage
+### Example Usage - using a separately managed node pool (recommended)
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name     = "my-gke-cluster"
+  location = "us-central1"
+  
+  # We can't create a cluster with no node pool defined, but we want to only use
+  # separately managed node pools. So we create the smallest possible default
+  # node pool and immediately delete it.
+  remove_default_node_pool = true
+  initial_node_count = 1
+}
+
+resource "google_container_node_pool" "primary_preemptible_nodes" {
+  name       = "my-node-pool"
+  location   = "us-central1"
+  cluster    = "${google_container_cluster.primary.name}"
+  node_count = 1
+
+  node_config {
+    preemptible  = true
+    machine_type = "n1-standard-1"
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+    ]
+  }
+}
+```
+
+### Example Usage - 2 node pools, 1 separately managed + the default node pool
+
 ```hcl
 resource "google_container_node_pool" "np" {
   name       = "my-node-pool"
-  zone       = "us-central1-a"
+  location   = "us-central1-a"
   cluster    = "${google_container_cluster.primary.name}"
   node_count = 3
+
+  timeouts {
+    create = "30m"
+    update = "20m"
+  }
 }
 
 resource "google_container_cluster" "primary" {
   name               = "marcellus-wallace"
-  zone               = "us-central1-a"
+  location           = "us-central1-a"
   initial_node_count = 3
 
-  additional_zones = [
-    "us-central1-b",
+  node_locations = [
     "us-central1-c",
   ]
 
   master_auth {
-    username = "mr.yoda"
-    password = "adoy.rm"
+    username = ""
+    password = ""
+
+    client_certificate_config {
+      issue_client_certificate = false
+    }
   }
 
   node_config {
     oauth_scopes = [
-      "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/devstorage.read_only",
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
     ]
+
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
 
     guest_accelerator {
       type  = "nvidia-tesla-k80"
@@ -54,71 +95,24 @@ resource "google_container_cluster" "primary" {
 }
 
 ```
-### Usage with an empty default pool.
-```hcl
-resource "google_container_node_pool" "np" {
-  name       = "my-node-pool"
-  zone       = "us-central1-a"
-  cluster    = "${google_container_cluster.primary.name}"
-  node_count = 1
-
-  node_config {
-    preemptible  = true
-    machine_type = "n1-standard-1"
-
-    oauth_scopes = [
-      "compute-rw",
-      "storage-ro",
-      "logging-write",
-      "monitoring",
-    ]
-  }
-}
-
-resource "google_container_cluster" "primary" {
-  name = "marcellus-wallace"
-  zone = "us-central1-a"
-
-  lifecycle {
-    ignore_changes = ["node_pool"]
-  }
-
-  node_pool {
-    name = "default-pool"
-  }
-}
-
-```
-
-### Usage with a regional cluster
-
-```hcl
-
-resource "google_container_cluster" "regional" {
-  name   = "marcellus-wallace"
-  region = "us-central1"
-}
-
-resource "google_container_node_pool" "regional-np" {
-  name       = "my-node-pool"
-  region     = "us-central1"
-  cluster    = "${google_container_cluster.primary.name}"
-  node_count = 1
-}
-
-```
 
 ## Argument Reference
 
-* `zone` - (Optional) The zone in which the cluster resides.
-
-* `region` - (Optional) The region in which the cluster resides (for regional clusters).
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
-
 * `cluster` - (Required) The cluster to create the node pool for.  Cluster must be present in `zone` provided for zonal clusters.
 
-Note: You must be provide region for regional clusters and zone for zonal clusters
+- - -
+
+* `location` - (Optional) The location (region or zone) in which the cluster
+resides.
+
+* `zone` - (Optional, Deprecated) The zone in which the cluster resides. `zone`
+has been deprecated in favor of `location`.
+
+* `region` - (Optional, Deprecated) The region in which the cluster resides (for
+regional clusters). `zone` has been deprecated in favor of `location`.
+
+-> Note: You must specify a `location` for either cluster type or the
+type-specific `region` for regional clusters / `zone` for zonal clusters.
 
 - - -
 
@@ -131,11 +125,11 @@ Note: You must be provide region for regional clusters and zone for zonal cluste
 * `management` - (Optional) Node management configuration, wherein auto-repair and
     auto-upgrade is configured. Structure is documented below.
 
-* `max_pods_per_node` - (Optional) The maximum number of pods per node in this node pool.
+* `max_pods_per_node` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) The maximum number of pods per node in this node pool.
     Note that this does not work on node pools which are "route-based" - that is, node
     pools belonging to clusters that do not have IP Aliasing enabled.
-    This property is in beta, and should be used with the terraform-provider-google-beta provider.
-    See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta fields.
+    See the [official documentation](https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr)
+    for more information.
 
 * `name` - (Optional) The name of the node pool. If left blank, Terraform will
     auto-generate a unique name.
@@ -151,11 +145,14 @@ Note: You must be provide region for regional clusters and zone for zonal cluste
 
 * `version` - (Optional) The Kubernetes version for the nodes in this pool. Note that if this field
     and `auto_upgrade` are both specified, they will fight each other for what the node version should
-    be, so setting both is highly discouraged.
+    be, so setting both is highly discouraged. While a fuzzy version can be specified, it's
+    recommended that you specify explicit versions as Terraform will see spurious diffs
+    when fuzzy versions are used. See the `google_container_engine_versions` data source's
+    `version_prefix` field to approximate fuzzy versions in a Terraform-compatible way.
 
 The `autoscaling` block supports:
 
-* `min_node_count` - (Required) Minimum number of nodes in the NodePool. Must be >=1 and
+* `min_node_count` - (Required) Minimum number of nodes in the NodePool. Must be >=0 and
     <= `max_node_count`.
 
 * `max_node_count` - (Required) Maximum number of nodes in the NodePool. Must be >= min_node_count.
@@ -165,6 +162,16 @@ The `management` block supports:
 * `auto_repair` - (Optional) Whether the nodes will be automatically repaired.
 
 * `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded.
+
+<a id="timeouts"></a>
+## Timeouts
+
+`google_container_node_pool` provides the following
+[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
+
+- `create` - (Default `30 minutes`) Used for adding node pools
+- `update` - (Default `10 minutes`) Used for updates to node pools
+- `delete` - (Default `10 minutes`) Used for removing node pools.
 
 ## Import
 

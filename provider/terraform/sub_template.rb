@@ -25,6 +25,12 @@ module Provider
                          object: object
       end
 
+      def build_subresource_schema(property, object)
+        compile_template'templates/terraform/schema_subresource.erb',
+                        property: property,
+                        object: object
+      end
+
       # Transforms a Cloud API representation of a property into a Terraform
       # schema representation.
       def build_flatten_method(ef_desc)

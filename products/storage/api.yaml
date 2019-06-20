@@ -12,22 +12,50 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud Storage
-prefix: gstorage
+name: Storage
+display_name: Cloud Storage
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/storage/v1/
 scopes:
   - https://www.googleapis.com/auth/devstorage.full_control
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Google CLoud Storage
+    url: https://console.cloud.google.com/apis/library/storage-component.googleapis.com/
 objects:
+  - !ruby/object:Api::Resource
+    name: 'Object'
+    base_url: b/{{bucket}}/o/
+    description: Upload or download a file from a GCS bucket.
+    properties:
+      - !ruby/object:Api::Type::Enum
+        name: 'action'
+        description: 'Upload or download from the bucket'
+        values:
+          - :download
+          - :upload
+      - !ruby/object:Api::Type::Boolean
+        name: 'overwrite'
+        description: |
+          'Overwrite the file on the bucket/local machine. If overwrite is
+          false and a difference exists between GCS + local, module will fail
+          with error'
+      - !ruby/object:Api::Type::Path
+        name: 'src'
+        description: Source location of file (may be local machine or cloud depending on action)
+      - !ruby/object:Api::Type::Path
+        name: 'dest'
+        description: Destination location of file (may be local machine or cloud depending on action)
+      - !ruby/object:Api::Type::String
+        name: 'bucket'
+        description: 'The name of the bucket'
   - !ruby/object:Api::Resource
     name: 'Bucket'
     kind: 'storage#bucket'
     base_url: b?project={{project}}
     self_link: b/{{name}}?projection=full
-    exports:
-      - name
     description: |
       The Buckets resource represents a bucket in Google Cloud Storage. There is
       a single global namespace shared by all buckets. For more information, see
@@ -45,7 +73,68 @@ objects:
         description: 'Access controls on the bucket.'
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
-<%= indent(compile('products/storage/bucket_access_control.yaml'), 12) %>
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'bucket'
+              resource: 'Bucket'
+              imports: 'name'
+              description: 'The name of the bucket.'
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'domain'
+              description: 'The domain associated with the entity.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'email'
+              description: 'The email address associated with the entity.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'entity'
+              description: |
+                The entity holding the permission, in one of the following forms:
+                  user-userId
+                  user-email
+                  group-groupId
+                  group-email
+                  domain-domain
+                  project-team-projectId
+                  allUsers
+                  allAuthenticatedUsers
+                Examples:
+                  The user liz@example.com would be user-liz@example.com.
+                  The group example@googlegroups.com would be
+                  group-example@googlegroups.com.
+                  To refer to all members of the Google Apps for Business domain
+                  example.com, the entity would be domain-example.com.
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'entityId'
+              description: 'The ID for the entity'
+            # | 'etag' is not applicable for state convergence.
+            - !ruby/object:Api::Type::String
+              name: 'id'
+              description: 'The ID of the access-control entry.'
+              output: true
+            - !ruby/object:Api::Type::NestedObject
+              name: 'projectTeam'
+              description: 'The project team associated with the entity'
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'projectNumber'
+                  description: 'The project team associated with the entity'
+                - !ruby/object:Api::Type::Enum
+                  name: 'team'
+                  description: 'The team.'
+                  values:
+                    - :editors
+                    - :owners
+                    - :viewers
+            - !ruby/object:Api::Type::Enum
+              name: 'role'
+              description: 'The access permission for the entity.'
+              values:
+                - :OWNER
+                - :READER
+                - :WRITER
       - !ruby/object:Api::Type::Array
         name: 'cors'
         description: |
@@ -79,17 +168,78 @@ objects:
               item_type: Api::Type::String
       - !ruby/object:Api::Type::Array
         name: 'defaultObjectAcl'
-        item_type: !ruby/object:Api::Type::NestedObject
-          properties:
-<%# This template takes an argument which defines whethwe the 'object' attribute is required. -%>
-<%# It is not required when this template is used for a Default Object ACL, but it is -%>
-<%# required when it is used for a standard object ACL. -%>
-<% object_required = false -%>
-<%= indent(compile('products/storage/object_access_control.yaml'), 12) %>
         description: |
           Default access controls to apply to new objects when no ACL is
           provided.
         input: true
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'bucket'
+              resource: 'Bucket'
+              imports: 'name'
+              description: 'The name of the bucket.'
+              required: true
+            - !ruby/object:Api::Type::String
+              name: 'domain'
+              description: 'The domain associated with the entity.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'email'
+              description: 'The email address associated with the entity.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'entity'
+              required: true
+              description: |
+                The entity holding the permission, in one of the following forms:
+                  * user-{{userId}}
+                  * user-{{email}} (such as "user-liz@example.com")
+                  * group-{{groupId}}
+                  * group-{{email}} (such as "group-example@googlegroups.com")
+                  * domain-{{domain}} (such as "domain-example.com")
+                  * project-team-{{projectId}}
+                  * allUsers
+                  * allAuthenticatedUsers
+            - !ruby/object:Api::Type::String
+              name: 'entityId'
+              output: true
+              description: 'The ID for the entity'
+            # | 'etag' is not applicable for state convergence.
+            - !ruby/object:Api::Type::Integer
+              name: 'generation'
+              description: 'The content generation of the object, if applied to an object.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'id'
+              description: 'The ID of the access-control entry.'
+              output: true
+            - !ruby/object:Api::Type::String
+              name: 'object'
+              description: 'The name of the object, if applied to an object.'
+              required: false
+            - !ruby/object:Api::Type::NestedObject
+              name: 'projectTeam'
+              description: 'The project team associated with the entity'
+              output: true
+              properties:
+                - !ruby/object:Api::Type::String
+                  name: 'projectNumber'
+                  description: 'The project team associated with the entity'
+                - !ruby/object:Api::Type::Enum
+                  name: 'team'
+                  description: 'The team.'
+                  values:
+                    - :editors
+                    - :owners
+                    - :viewers
+            - !ruby/object:Api::Type::Enum
+              name: 'role'
+              description: 'The access permission for the entity.'
+              required: true
+              values:
+                - :OWNER
+                - :READER
       # | 'etag' is not applicable for state convergene.
       - !ruby/object:Api::Type::String
         name: 'id'
@@ -316,7 +466,68 @@ objects:
       information, see Access Control, with the caveat that this API uses
       READER, WRITER, and OWNER instead of READ, WRITE, and FULL_CONTROL.
     properties:
-<%= indent(compile('products/storage/bucket_access_control.yaml'), 6) %>
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'bucket'
+        resource: 'Bucket'
+        imports: 'name'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: 'The domain associated with the entity.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'email'
+        description: 'The email address associated with the entity.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'entity'
+        description: |
+          The entity holding the permission, in one of the following forms:
+            user-userId
+            user-email
+            group-groupId
+            group-email
+            domain-domain
+            project-team-projectId
+            allUsers
+            allAuthenticatedUsers
+          Examples:
+            The user liz@example.com would be user-liz@example.com.
+            The group example@googlegroups.com would be
+            group-example@googlegroups.com.
+            To refer to all members of the Google Apps for Business domain
+            example.com, the entity would be domain-example.com.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'entityId'
+        description: 'The ID for the entity'
+      # | 'etag' is not applicable for state convergence.
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'The ID of the access-control entry.'
+        output: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'projectTeam'
+        description: 'The project team associated with the entity'
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'projectNumber'
+            description: 'The project team associated with the entity'
+          - !ruby/object:Api::Type::Enum
+            name: 'team'
+            description: 'The team.'
+            values:
+              - :editors
+              - :owners
+              - :viewers
+      - !ruby/object:Api::Type::Enum
+        name: 'role'
+        description: 'The access permission for the entity.'
+        values:
+          - :OWNER
+          - :READER
+          - :WRITER
   - !ruby/object:Api::Resource
     name: 'ObjectAccessControl'
     kind: 'storage#objectAccessControl'
@@ -340,8 +551,72 @@ objects:
       For more information, see Access Control, with the caveat that this API
       uses READER and OWNER instead of READ and FULL_CONTROL.
     properties:
-<% object_required = true -%>
-<%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'bucket'
+        resource: 'Bucket'
+        imports: 'name'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: 'The domain associated with the entity.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'email'
+        description: 'The email address associated with the entity.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'entity'
+        required: true
+        description: |
+          The entity holding the permission, in one of the following forms:
+            * user-{{userId}}
+            * user-{{email}} (such as "user-liz@example.com")
+            * group-{{groupId}}
+            * group-{{email}} (such as "group-example@googlegroups.com")
+            * domain-{{domain}} (such as "domain-example.com")
+            * project-team-{{projectId}}
+            * allUsers
+            * allAuthenticatedUsers
+      - !ruby/object:Api::Type::String
+        name: 'entityId'
+        output: true
+        description: 'The ID for the entity'
+      # | 'etag' is not applicable for state convergence.
+      - !ruby/object:Api::Type::Integer
+        name: 'generation'
+        description: 'The content generation of the object, if applied to an object.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'The ID of the access-control entry.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'object'
+        description: 'The name of the object, if applied to an object.'
+        required: true
+      - !ruby/object:Api::Type::NestedObject
+        name: 'projectTeam'
+        description: 'The project team associated with the entity'
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'projectNumber'
+            description: 'The project team associated with the entity'
+          - !ruby/object:Api::Type::Enum
+            name: 'team'
+            description: 'The team.'
+            values:
+              - :editors
+              - :owners
+              - :viewers
+      - !ruby/object:Api::Type::Enum
+        name: 'role'
+        description: 'The access permission for the entity.'
+        required: true
+        values:
+          - :OWNER
+          - :READER
   - !ruby/object:Api::Resource
     name: 'DefaultObjectACL'
     kind: 'storage#objectAccessControl'
@@ -366,7 +641,71 @@ objects:
       For more information, see Access Control, with the caveat that this API
       uses READER and OWNER instead of READ and FULL_CONTROL.
     properties:
-<% object_required = false -%>
-<%= indent(compile('products/storage/object_access_control.yaml'), 6) %>
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'bucket'
+        resource: 'Bucket'
+        imports: 'name'
+        description: 'The name of the bucket.'
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'domain'
+        description: 'The domain associated with the entity.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'email'
+        description: 'The email address associated with the entity.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'entity'
+        required: true
+        description: |
+          The entity holding the permission, in one of the following forms:
+            * user-{{userId}}
+            * user-{{email}} (such as "user-liz@example.com")
+            * group-{{groupId}}
+            * group-{{email}} (such as "group-example@googlegroups.com")
+            * domain-{{domain}} (such as "domain-example.com")
+            * project-team-{{projectId}}
+            * allUsers
+            * allAuthenticatedUsers
+      - !ruby/object:Api::Type::String
+        name: 'entityId'
+        output: true
+        description: 'The ID for the entity'
+      # | 'etag' is not applicable for state convergence.
+      - !ruby/object:Api::Type::Integer
+        name: 'generation'
+        description: 'The content generation of the object, if applied to an object.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'id'
+        description: 'The ID of the access-control entry.'
+        output: true
+      - !ruby/object:Api::Type::String
+        name: 'object'
+        description: 'The name of the object, if applied to an object.'
+        required: false
+      - !ruby/object:Api::Type::NestedObject
+        name: 'projectTeam'
+        description: 'The project team associated with the entity'
+        output: true
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'projectNumber'
+            description: 'The project team associated with the entity'
+          - !ruby/object:Api::Type::Enum
+            name: 'team'
+            description: 'The team.'
+            values:
+              - :editors
+              - :owners
+              - :viewers
+      - !ruby/object:Api::Type::Enum
+        name: 'role'
+        description: 'The access permission for the entity.'
+        required: true
+        values:
+          - :OWNER
+          - :READER
 
   

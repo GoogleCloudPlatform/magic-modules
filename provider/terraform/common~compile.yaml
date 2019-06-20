@@ -13,27 +13,34 @@
 # These files contains code that needs to be compiled before being delivered to
 # the final module tree structure:
 <% dir = version_name == 'beta' ? 'google-beta' : 'google' -%>
-'website/google.erb': 'third_party/terraform/website/google.erb'
+'website/google.erb': 'third_party/terraform/website-compiled/google.erb'
 <%  Dir["third_party/terraform/tests/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/tests/<%= fname -%>'
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/tests/<%= fname -%>'
 <% end -%>
 <%
   Dir["third_party/terraform/resources/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/resources/<%= fname -%>'
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/resources/<%= fname -%>'
 <% end -%>
 <%
   Dir["third_party/terraform/data_sources/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'third_party/terraform/data_sources/<%= fname -%>'
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/data_sources/<%= fname -%>'
 <% end -%>
 <%
-  Dir["provider/terraform/utils/*.go.erb"].each do |file_path|
+  Dir["third_party/terraform/utils/*.go.erb"].each do |file_path|
     fname = file_path.split('/')[-1]
 -%>
-'<%= dir -%>/<%= fname.split(".erb")[0] -%>': 'provider/terraform/utils/<%= fname -%>'
+'<%= dir -%>/<%= fname.delete_suffix(".erb") -%>': 'third_party/terraform/utils/<%= fname -%>'
 <% end -%>
+<%
+  Dir["third_party/terraform/scripts/**/*.erb"].each do |file_path|
+    fname = file_path.delete_prefix("third_party/terraform/")
+-%>
+'<%= fname.delete_suffix(".erb") -%>': '<%= file_path -%>'
+<% end -%>
+'main.go': 'third_party/terraform/main.go.erb'

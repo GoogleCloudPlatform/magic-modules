@@ -1,0 +1,100 @@
+<%- # the license inside this block applies to this file
+	# Copyright 2019 Google Inc.
+	# Licensed under the Apache License, Version 2.0 (the "License");
+	# you may not use this file except in compliance with the License.
+	# You may obtain a copy of the License at
+	#
+	#     http://www.apache.org/licenses/LICENSE-2.0
+	#
+	# Unless required by applicable law or agreed to in writing, software
+	# distributed under the License is distributed on an "AS IS" BASIS,
+	# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	# See the License for the specific language governing permissions and
+	# limitations under the License.
+-%>
+func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	log.Printf("[DEBUG] hashing %v", m)
+
+	if group, err := getRelativePath(m["group"].(string)); err != nil {
+		log.Printf("[WARN] Error on retrieving relative path of instance group: %s", err)
+		buf.WriteString(fmt.Sprintf("%s-", m["group"].(string)))
+	} else {
+		buf.WriteString(fmt.Sprintf("%s-", group))
+	}
+
+	if v, ok := m["balancing_mode"]; ok {
+		if v == nil {
+			v = ""
+		}
+
+		buf.WriteString(fmt.Sprintf("%v-", v))
+	}
+	if v, ok := m["capacity_scaler"]; ok {
+		if v == nil {
+			v = 0.0
+		}
+
+		// floats can't be added to the hash with %v as the other values are because
+		// %v and %f are not equivalent strings so this must remain as a float so that
+		// the hash function doesn't return something else.
+		buf.WriteString(fmt.Sprintf("%f-", v.(float64)))
+	}
+	if v, ok := m["description"]; ok {
+		if v == nil {
+			v = ""
+		}
+
+		log.Printf("[DEBUG] writing description %s", v)
+		buf.WriteString(fmt.Sprintf("%v-", v))
+	}
+	if v, ok := m["max_rate"]; ok {
+		if v == nil {
+			v = 0
+		}
+
+		buf.WriteString(fmt.Sprintf("%v-", v))
+	}
+	if v, ok := m["max_rate_per_instance"]; ok {
+		if v == nil {
+			v = 0.0
+		}
+
+		// floats can't be added to the hash with %v as the other values are because
+		// %v and %f are not equivalent strings so this must remain as a float so that
+		// the hash function doesn't return something else.
+		buf.WriteString(fmt.Sprintf("%f-", v.(float64)))
+	}
+	if v, ok := m["max_connections"]; ok {
+		if v == nil {
+			v = 0
+		}
+
+		buf.WriteString(fmt.Sprintf("%v-", v))
+	}
+	if v, ok := m["max_connections_per_instance"]; ok {
+		if v == nil {
+			v = 0
+		}
+
+		buf.WriteString(fmt.Sprintf("%v-", v))
+	}
+	if v, ok := m["max_rate_per_instance"]; ok {
+		if v == nil {
+			v = 0.0
+		}
+
+		// floats can't be added to the hash with %v as the other values are because
+		// %v and %f are not equivalent strings so this must remain as a float so that
+		// the hash function doesn't return something else.
+		buf.WriteString(fmt.Sprintf("%f-", v.(float64)))
+	}
+
+	log.Printf("[DEBUG] computed hash value of %v from %v", hashcode.String(buf.String()), buf.String())
+	return hashcode.String(buf.String())
+}

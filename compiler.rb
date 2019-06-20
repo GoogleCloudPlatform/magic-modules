@@ -27,20 +27,20 @@ require 'api/compiler'
 require 'google/logger'
 require 'optparse'
 require 'provider/ansible'
-require 'provider/ansible/bundle'
-require 'provider/example'
 require 'provider/inspec'
 require 'provider/terraform'
-require 'provider/terraform_example'
+require 'provider/terraform_oics'
+require 'provider/terraform_object_library'
 require 'pp' if ENV['COMPILER_DEBUG']
 
 product_names = nil
 all_products = false
+yaml_dump = false
 output_path = nil
 provider_name = nil
 force_provider = nil
 types_to_generate = []
-version = nil
+version = 'ga'
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -52,6 +52,9 @@ OptionParser.new do |opt|
   end
   opt.on('-a', '--all', 'Build all products. Cannot be used with --product.') do
     all_products = true
+  end
+  opt.on('-y', '--yaml-dump', 'Dump the final api.yaml output to a file.') do
+    yaml_dump = true
   end
   opt.on('-o', '--output OUTPUT', 'Folder for module output') do |o|
     output_path = o
@@ -78,7 +81,7 @@ OptionParser.new do |opt|
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
-raise 'Cannt use -p/--products and -a/--all simultaneously' if product_names && all_products
+raise 'Cannot use -p/--products and -a/--all simultaneously' if product_names && all_products
 raise 'Either -p/--products OR -a/--all must be present' if product_names.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
@@ -91,6 +94,8 @@ if all_products
 
   raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
 end
+
+start_time = Time.now
 
 provider = nil
 # rubocop:disable Metrics/BlockLength
@@ -106,7 +111,7 @@ product_names.each do |product_name|
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
 
-  Google::LOGGER.info "Compiling '#{product_name}' output to '#{output_path}'"
+  Google::LOGGER.info "Compiling '#{product_name}' (at #{version}) output to '#{output_path}'"
   Google::LOGGER.info \
     "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
 
@@ -120,16 +125,18 @@ product_names.each do |product_name|
     next
   end
 
-  provider_config = \
+  product_api, provider_config, = \
     Provider::Config.parse(provider_yaml_path, product_api, version)
+
   pp provider_config if ENV['COMPILER_DEBUG']
 
   if force_provider.nil?
-    provider = provider_config.provider.new(provider_config, product_api)
+    provider = provider_config.provider.new(provider_config, product_api, start_time)
 
   else
     override_providers = {
-      'examples' => Provider::TerraformExample
+      'oics' => Provider::TerraformOiCS,
+      'validator' => Provider::TerraformObjectLibrary
     }
 
     provider_class = override_providers[force_provider]
@@ -137,10 +144,10 @@ product_names.each do |product_name|
       if provider_class.nil?
 
     provider = \
-      override_providers[force_provider].new(provider_config, product_api)
+      override_providers[force_provider].new(provider_config, product_api, start_time)
   end
 
-  provider.generate output_path, types_to_generate, version
+  provider.generate output_path, types_to_generate, version, product_name, yaml_dump
 end
 
 # In order to only copy/compile files once per provider this must be called outside

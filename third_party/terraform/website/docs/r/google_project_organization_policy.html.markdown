@@ -91,7 +91,10 @@ The following arguments are supported:
 
 * `list_policy` - (Optional) A policy that can define specific values that are allowed or denied for the given constraint. It can also be used to allow or deny all values. Structure is documented below.
 
-* `restore_policy` - (Optional) A restore policy is a constraint to restore the default policy. Structure is documented below. 
+* `restore_policy` - (Optional) A restore policy is a constraint to restore the default policy. Structure is documented below.
+
+~> **Note:** If none of [`boolean_policy`, `list_policy`, `restore_policy`] are defined the policy for a given constraint will
+effectively be unset. This is represented in the UI as the constraint being 'Inherited'.
 
 - - -
 
@@ -104,6 +107,9 @@ The `list_policy` block supports:
 * `allow` or `deny` - (Optional) One or the other must be set.
 
 * `suggested_values` - (Optional) The Google Cloud Console will try to default to a configuration that matches the value specified in this field.
+
+* `inherit_from_parent` - (Optional) If set to true, the values from the effective Policy of the parent resource
+are inherited, meaning the values set in this Policy are added to the values inherited up the hierarchy.
 
 The `allow` or `deny` blocks support:
 
@@ -123,3 +129,13 @@ exported:
 * `etag` - (Computed) The etag of the organization policy. `etag` is used for optimistic concurrency control as a way to help prevent simultaneous updates of a policy from overwriting each other.
 
 * `update_time` - (Computed) The timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds, representing when the variable was last updated. Example: "2016-10-09T12:33:37.578138407Z".
+
+## Import
+
+Project organization policies can be imported using any of the follow formats:
+
+```
+$ terraform import google_project_organization_policy.policy projects/test-project:constraints/serviceuser.services
+$ terraform import google_project_organization_policy.policy test-project:constraints/serviceuser.services
+$ terraform import google_project_organization_policy.policy test-project:serviceuser.services
+```

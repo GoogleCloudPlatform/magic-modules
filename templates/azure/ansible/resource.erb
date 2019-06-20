@@ -1,0 +1,261 @@
+#!/usr/bin/python
+#
+# Copyright (C) 2019 <%= lines(@config.manifest.get('author', object)) -%>
+#
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+<%= lines(autogen_notice :python) -%>
+
+from __future__ import absolute_import, division, print_function
+__metaclass__ = type
+
+<%
+  metadata_version = quote_string(@config.manifest.get('metadata_version',
+                                                       object))
+  supported_by = quote_string(@config.manifest.get('supported_by', object))
+  update_props = properties_by_custom_update(object.all_user_properties)
+-%>
+<%
+    combine_create_update = object.azure_sdk_definition.update.nil? || (object.azure_sdk_definition.create.python_func_name == object.azure_sdk_definition.update.python_func_name)
+    python_sdk_client = object.azure_sdk_definition.python_client.split(".")[0]
+    python_sdk_sub_client = object.azure_sdk_definition.python_client.split(".")[1]
+
+    input_properties = object.all_user_properties.reject(&:output).sort_by{|p| [p.order, p.name]}
+    output_properties = object.all_user_properties.select(&:output)
+    root_object_field = object.azure_sdk_definition.create.request["/"].python_variable_name
+-%>
+ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
+                    'status': [<%= @config.manifest.get('status', object).map{|item| "'#{item}'"}.join(', ') -%>],
+                    'supported_by': <%= supported_by -%>}
+
+
+DOCUMENTATION = '''
+---
+module: <%= lines(module_name(object)) -%>
+version_added: "<%= @config.manifest.get('version_added', object).to_f -%>"
+short_description: <%= lines(object.description) -%>
+description:
+    - Create, update and delete instance of Azure <%= object.name.titlecase -%>.
+
+<%= lines(word_wrap_for_yaml(to_yaml({
+  'options' => [
+    input_properties.reject{|p| is_tags?(p)}.map{|p| documentation_for_property(p, object)},
+    {
+      'state' => {
+        'description' => [
+          "Assert the state of the #{object.name.titlecase}.",
+          "Use 'present' to create or update a #{object.name.titlecase} and 'absent' to delete it."
+        ],
+        'default' => 'present',
+        'choices' => ['present', 'absent'],
+      },
+    }
+  ].flatten.compact.reduce({}, :merge),
+  'notes' => (
+    [
+      ("API Reference: U(#{object.references.api})" if object.references.api),
+      object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
+    ].flatten.compact if object.references
+  )
+}).split("\n"))) -%>
+
+extends_documentation_fragment:
+    - azure
+    <%= lines('- azure_tags') if is_tags_defined?(object) -%>
+
+author:
+    - "<%= @config.manifest.get('author', object) -%>"
+'''
+
+<%  unless object.examples.empty? -%>
+<%    code = object.examples.map{|exref| lines(build_documentation_yaml_from_example(exref))} -%>
+EXAMPLES = '''
+<%=   lines(indent(code.join("\n"), 2)) -%>
+'''
+<% end -%>
+
+RETURN = '''
+<%= lines(word_wrap_for_yaml(to_yaml(output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)).split("\n"))) -%>
+'''
+
+import time
+<%= lines('from ansible.module_utils.azure_rm_common import normalize_location_name') if is_location_defined?(object) -%>
+from ansible.module_utils.azure_rm_common_ext import AzureRMModuleBaseExt
+from ansible.module_utils.common.dict_transformations import _snake_to_camel
+
+try:
+    from msrestazure.azure_exceptions import CloudError
+    from msrest.polling import LROPoller
+    from msrestazure.azure_operation import AzureOperationPoller
+    from msrest.serialization import Model
+    from <%= object.azure_sdk_definition.python_client_namespace -%> import <%= python_sdk_client -%>
+
+except ImportError:
+    # This is handled in azure_rm_common
+    pass
+
+
+class Actions:
+    NoAction, Create, Update, Delete = range(4)
+
+
+class AzureRM<%= object.name -%>(AzureRMModuleBaseExt):
+    """Configuration class for an Azure RM <%= object.name.titleize -%> resource"""
+
+    def __init__(self):
+        self.module_arg_spec = dict(
+<%= lines(indent_list(input_properties.reject{|p| is_tags?(p)}.map{|p| python_dict_for_property(p, object)}, 12, true)) -%>
+            state=dict(
+                type='str',
+                default='present',
+                choices=['present', 'absent']
+            )
+        )
+
+<%= lines(build_class_instance_variable_init(object.azure_sdk_definition.create, object)) -%>
+
+        self.results = dict(changed=False)
+        self.mgmt_client = None
+        self.state = None
+        self.to_do = Actions.NoAction
+
+<%= lines(build_multiline_method_call("super(AzureRM#{object.name}, self).__init__(", [
+      "derived_arg_spec=self.module_arg_spec",
+      "supports_check_mode=True",
+      "supports_tags=#{python_literal(is_tags_defined?(object))}"
+    ], ')', 8)) -%>
+
+    def exec_module(self, **kwargs):
+        """Main module execution method"""
+
+        for key in list(self.module_arg_spec.keys())<%= " + ['tags']" if is_tags_defined?(object) -%>:
+            if hasattr(self, key):
+                setattr(self, key, kwargs[key])
+            elif kwargs[key] is not None:
+                self.<%= root_object_field -%>[key] = kwargs[key]
+
+<%  sdk_marshal = Provider::Azure::Ansible::SDK::MarshalDescriptor.new input_properties.reject{|p| is_tags?(p)}, object.azure_sdk_definition.create, "self.#{root_object_field}", "self.#{root_object_field}" -%>
+<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
+
+        response = None
+
+        self.mgmt_client = self.get_mgmt_svc_client(<%= python_sdk_client -%>,
+                                                    base_url=self._cloud_environment.endpoints.resource_manager)
+
+        old_response = self.get_<%= object.name.downcase -%>()
+
+        if not old_response:
+            self.log("<%= object.name.titlecase -%> instance doesn't exist")
+            if self.state == 'absent':
+                self.log("Old instance didn't exist")
+            else:
+                self.to_do = Actions.Create
+        else:
+            self.log("<%= object.name.titlecase -%> instance already exists")
+            if self.state == 'absent':
+                self.to_do = Actions.Delete
+            elif self.state == 'present':
+                self.results['old'] = old_response
+                self.results['new'] = self.<%= lines(root_object_field) -%>
+                if not self.idempotency_check(old_response, self.<%= root_object_field -%>):
+                    self.to_do = Actions.Update
+
+        if (self.to_do == Actions.Create) or (self.to_do == Actions.Update):
+            self.log("Need to Create / Update the <%= object.name.titlecase -%> instance")
+
+            self.results['changed'] = True
+            if self.check_mode:
+                return self.results
+
+            response = self.create_update_<%= object.name.downcase -%>()
+
+            self.log("Creation / Update done")
+        elif self.to_do == Actions.Delete:
+            self.log("<%= object.name.titlecase -%> instance deleted")
+            self.results['changed'] = True
+
+            if self.check_mode:
+                return self.results
+
+            self.delete_<%= object.name.downcase -%>()
+        else:
+            self.log("<%= object.name.titlecase -%> instance unchanged")
+            self.results['changed'] = False
+            response = old_response
+
+        if self.state == 'present':
+            self.results.update({
+<%= lines(build_response_properties_update(output_properties, object.azure_sdk_definition.read.response)) -%>
+            })
+        return self.results
+
+    def create_update_<%= object.name.downcase -%>(self):
+        '''
+        Creates or updates <%= object.name.titlecase -%> with the specified configuration.
+
+        :return: deserialized <%= object.name.titlecase -%> instance state dictionary
+        '''
+        self.log("Creating / Updating the <%= object.name.titlecase -%> instance {0}".format(self.name))
+
+        try:
+<%  if combine_create_update -%>
+<%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.create)) -%>
+<%  else -%>
+            if self.to_do == Actions.Create:
+<%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.create, 16)) -%>
+            else:
+<%=   lines(build_sdk_method_invocation(python_sdk_sub_client, object.azure_sdk_definition.update, 16)) -%>
+<%  end -%>
+            if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
+                response = self.get_poller_result(response)
+        except CloudError as exc:
+            self.log('Error attempting to create the <%= object.name.titlecase -%> instance.')
+            self.fail("Error creating the <%= object.name.titlecase -%> instance: {0}".format(str(exc)))
+        return response.as_dict()
+
+<%  sdk_operation = object.azure_sdk_definition.delete -%>
+    def delete_<%= object.name.downcase -%>(self):
+        '''
+        Deletes specified <%= object.name.titlecase -%> instance in the specified subscription and resource group.
+
+        :return: True
+        '''
+        self.log("Deleting the <%= object.name.titlecase -%> instance {0}".format(self.name))
+        try:
+<%= lines(build_sdk_method_invocation(python_sdk_sub_client, sdk_operation)) -%>
+        except CloudError as e:
+            self.log('Error attempting to delete the <%= object.name.titlecase -%> instance.')
+            self.fail("Error deleting the <%= object.name.titlecase -%> instance: {0}".format(str(e)))
+
+        if isinstance(response, LROPoller) or isinstance(response, AzureOperationPoller):
+            response = self.get_poller_result(response)
+        return True
+
+<%  sdk_operation = object.azure_sdk_definition.read -%>
+    def get_<%= object.name.downcase -%>(self):
+        '''
+        Gets the properties of the specified <%= object.name.titlecase -%>
+
+        :return: deserialized <%= object.name.titlecase -%> instance state dictionary
+        '''
+        self.log("Checking if the <%= object.name.titlecase -%> instance {0} is present".format(self.name))
+        found = False
+        try:
+<%= lines(build_sdk_method_invocation(python_sdk_sub_client, sdk_operation)) -%>
+            found = True
+            self.log("Response : {0}".format(response))
+            self.log("<%= object.name.titlecase -%> instance : {0} found".format(response.name))
+        except CloudError as e:
+            self.log('Did not find the <%= object.name.titlecase -%> instance.')
+        if found is True:
+            return response.as_dict()
+        return False
+
+
+def main():
+    """Main execution"""
+    AzureRM<%= object.name -%>()
+
+
+if __name__ == '__main__':
+    main()

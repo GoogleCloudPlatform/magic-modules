@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/servicemanagement/v1"
 )
@@ -20,75 +21,75 @@ func resourceEndpointsService() *schema.Resource {
 		MigrateState:  migrateEndpointsService,
 
 		Schema: map[string]*schema.Schema{
-			"service_name": &schema.Schema{
+			"service_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"openapi_config": &schema.Schema{
+			"openapi_config": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"grpc_config", "protoc_output_base64"},
 			},
-			"grpc_config": &schema.Schema{
+			"grpc_config": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"protoc_output": &schema.Schema{
+			"protoc_output": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				Removed:  "Please use protoc_output_base64 instead.",
 			},
-			"protoc_output_base64": &schema.Schema{
+			"protoc_output_base64": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"project": &schema.Schema{
+			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"config_id": &schema.Schema{
+			"config_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"apis": &schema.Schema{
+			"apis": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"syntax": &schema.Schema{
+						"syntax": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"version": &schema.Schema{
+						"version": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"methods": &schema.Schema{
+						"methods": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"name": &schema.Schema{
+									"name": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"syntax": &schema.Schema{
+									"syntax": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"request_type": &schema.Schema{
+									"request_type": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"response_type": &schema.Schema{
+									"response_type": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -98,20 +99,20 @@ func resourceEndpointsService() *schema.Resource {
 					},
 				},
 			},
-			"dns_address": &schema.Schema{
+			"dns_address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"endpoints": &schema.Schema{
+			"endpoints": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"address": &schema.Schema{
+						"address": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -228,7 +229,9 @@ func resourceEndpointsServiceUpdate(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 	var serviceConfig servicemanagement.SubmitConfigSourceResponse
-	json.Unmarshal(s, &serviceConfig)
+	if err := json.Unmarshal(s, &serviceConfig); err != nil {
+		return err
+	}
 
 	// Next, we create a new rollout with the new config value, and wait for it to complete.
 	rolloutService := servicemanagement.NewServicesRolloutsService(config.clientServiceMan)

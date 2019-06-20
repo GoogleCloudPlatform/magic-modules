@@ -1,0 +1,72 @@
+<%= lines(autogen_notice :go) -%>
+
+package google
+
+<%
+    resource_name = product_ns + object.name
+    properties = object.all_user_properties
+    api_version = version.base_url.split("/")[-1]
+    # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
+    asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (!object.self_link.nil? && !object.self_link.empty? ? object.self_link : object.base_url + '/{{name}}')
+%>
+
+<%# constants usually contain functions called from inside the setup file. -%>
+<%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
+
+func Get<%= resource_name -%>CaiObject(d TerraformResourceData, config *Config) (Asset, error) {
+    name, err := assetName(d, config, "<%= asset_name_template -%>")
+    if err != nil {
+        return Asset{}, err
+    }
+    if obj, err := Get<%= resource_name -%>ApiObject(d, config); err == nil {
+        return Asset{
+            Name: name,
+            Type: "<%= product_ns.downcase -%>.googleapis.com/<%= object.name -%>",
+            Resource: &AssetResource{
+                Version: "<%= api_version -%>",
+                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/<%= product_ns.downcase -%>/<%= api_version -%>/rest",
+                DiscoveryName: "<%= object.name -%>",
+                Data: obj,
+            },
+        }, nil
+    } else {
+        return Asset{}, err
+    }
+}
+
+func Get<%= resource_name -%>ApiObject(d TerraformResourceData, config *Config) (map[string]interface{}, error) {
+    obj := make(map[string]interface{})
+<%  object.settable_properties.each do |prop| -%>
+<%    if prop.flatten_object -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(nil, d, config)
+<%    else # if flatten -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(d.Get("<%= prop.name.underscore -%>"), d, config)
+<%    end -%>
+    if err != nil {
+        return nil, err
+<%      unless prop.send_empty_value -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
+<%  end -%>
+
+<%  if object.custom_code.encoder -%>
+    return resource<%= resource_name -%>Encoder(d, config, obj)
+<%  else -%>
+    return obj, nil
+<%  end -%>
+}
+
+<% if object.custom_code.encoder -%>
+func resource<%= resource_name -%>Encoder(d TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.encoder)) -%>
+}
+<% end -%>
+
+<% object.settable_properties.each do |prop| -%>
+<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<% end -%>
+

@@ -25,9 +25,9 @@ describe Provider::Terraform do
   context 'static' do
     let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
     let(:config) do
-      Provider::Config.parse('spec/data/terraform-config.yaml', product)
+      Provider::Config.parse('spec/data/terraform-config.yaml', product)[1]
     end
-    let(:provider) { Provider::Terraform.new(config, product) }
+    let(:provider) { Provider::Terraform.new(config, product, Time.now) }
 
     before do
       allow_open 'spec/data/good-file.yaml'
@@ -60,9 +60,15 @@ describe Provider::Terraform do
     end
 
     def resource(*data)
-      Google::YamlValidator.parse(['--- !ruby/object:Api::Resource']
-                                    .concat(data)
-                                    .join("\n"))
+      res = Google::YamlValidator.parse(['--- !ruby/object:Api::Resource']
+                                 .concat(["name: 'testobject'"])
+                                 .concat(data)
+                                 .join("\n"))
+      product.objects.append(res)
+      new_product = Overrides::Runner.build(product, config.overrides,
+                                            config.resource_override,
+                                            config.property_override)
+      new_product.objects.last
     end
   end
 end

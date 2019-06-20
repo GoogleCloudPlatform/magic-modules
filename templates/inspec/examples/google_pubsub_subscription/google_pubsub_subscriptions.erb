@@ -1,0 +1,11 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% subscription = grab_attributes['subscription'] -%>
+describe google_pubsub_subscriptions(project: <%= gcp_project_id -%>) do
+  its('count') { should be >= 1 }
+end
+
+google_pubsub_subscriptions(project: <%= gcp_project_id -%>).names.each do |subscription_name|
+  describe google_pubsub_subscription(project: <%= gcp_project_id -%>, name: subscription_name) do
+    it { should exist }
+  end
+end

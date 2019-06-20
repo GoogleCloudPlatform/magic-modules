@@ -1,0 +1,197 @@
+---
+:facts:
+  :Cluster:
+    :version_added: '2.8'
+  :NodePool:
+    :version_added: '2.8'
+:regular:
+  :Cluster:
+    :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :description:
+      :version_added: '2.6'
+    :initialNodeCount:
+      :version_added: '2.6'
+    :nodeConfig:
+      :version_added: '2.6'
+      :machineType:
+        :version_added: '2.6'
+      :diskSizeGb:
+        :version_added: '2.6'
+      :oauthScopes:
+        :version_added: '2.6'
+      :serviceAccount:
+        :version_added: '2.6'
+      :metadata:
+        :version_added: '2.6'
+      :imageType:
+        :version_added: '2.6'
+      :labels:
+        :version_added: '2.6'
+      :localSsdCount:
+        :version_added: '2.6'
+      :tags:
+        :version_added: '2.6'
+      :preemptible:
+        :version_added: '2.6'
+      :accelerators:
+        :version_added: '2.9'
+        :acceleratorCount:
+          :version_added: '2.9'
+        :acceleratorType:
+          :version_added: '2.9'
+      :diskType:
+        :version_added: '2.9'
+      :minCpuPlatform:
+        :version_added: '2.9'
+      :taints:
+        :version_added: '2.9'
+        :key:
+          :version_added: '2.9'
+        :value:
+          :version_added: '2.9'
+        :effect:
+          :version_added: '2.9'
+    :masterAuth:
+      :version_added: '2.6'
+      :username:
+        :version_added: '2.6'
+      :password:
+        :version_added: '2.6'
+      :clientCertificateConfig:
+        :version_added: '2.9'
+        :issueClientCertificate:
+          :version_added: '2.9'
+    :loggingService:
+      :version_added: '2.6'
+    :monitoringService:
+      :version_added: '2.6'
+    :network:
+      :version_added: '2.6'
+    :privateClusterConfig:
+      :version_added: '2.8'
+      :enablePrivateNodes:
+        :version_added: '2.8'
+      :enablePrivateEndpoint:
+        :version_added: '2.8'
+      :masterIpv4CidrBlock:
+        :version_added: '2.8'
+    :clusterIpv4Cidr:
+      :version_added: '2.6'
+    :addonsConfig:
+      :version_added: '2.6'
+      :httpLoadBalancing:
+        :version_added: '2.6'
+        :disabled:
+          :version_added: '2.6'
+      :horizontalPodAutoscaling:
+        :version_added: '2.6'
+        :disabled:
+          :version_added: '2.6'
+      :networkPolicyConfig:
+        :version_added: '2.9'
+        :disabled:
+          :version_added: '2.9'
+    :subnetwork:
+      :version_added: '2.6'
+    :locations:
+      :version_added: '2.9'
+    :resourceLabels:
+      :version_added: '2.9'
+    :legacyAbac:
+      :version_added: '2.9'
+      :enabled:
+        :version_added: '2.9'
+    :networkPolicy:
+      :version_added: '2.9'
+      :provider:
+        :version_added: '2.9'
+      :enabled:
+        :version_added: '2.9'
+    :defaultMaxPodsConstraint:
+      :version_added: '2.9'
+      :maxPodsPerNode:
+        :version_added: '2.9'
+    :enableTpu:
+      :version_added: '2.9'
+    :tpuIpv4CidrBlock:
+      :version_added: '2.9'
+    :location:
+      :version_added: '2.8'
+  :NodePool:
+    :version_added: '2.6'
+    :name:
+      :version_added: '2.6'
+    :config:
+      :version_added: '2.6'
+      :machineType:
+        :version_added: '2.6'
+      :diskSizeGb:
+        :version_added: '2.6'
+      :oauthScopes:
+        :version_added: '2.6'
+      :serviceAccount:
+        :version_added: '2.6'
+      :metadata:
+        :version_added: '2.6'
+      :imageType:
+        :version_added: '2.6'
+      :labels:
+        :version_added: '2.6'
+      :localSsdCount:
+        :version_added: '2.6'
+      :tags:
+        :version_added: '2.6'
+      :preemptible:
+        :version_added: '2.6'
+      :accelerators:
+        :version_added: '2.9'
+        :acceleratorCount:
+          :version_added: '2.9'
+        :acceleratorType:
+          :version_added: '2.9'
+      :diskType:
+        :version_added: '2.9'
+      :minCpuPlatform:
+        :version_added: '2.9'
+      :taints:
+        :version_added: '2.9'
+        :key:
+          :version_added: '2.9'
+        :value:
+          :version_added: '2.9'
+        :effect:
+          :version_added: '2.9'
+    :initialNodeCount:
+      :version_added: '2.6'
+    :version:
+      :version_added: '2.8'
+    :autoscaling:
+      :version_added: '2.6'
+      :enabled:
+        :version_added: '2.6'
+      :minNodeCount:
+        :version_added: '2.6'
+      :maxNodeCount:
+        :version_added: '2.6'
+    :management:
+      :version_added: '2.6'
+      :autoUpgrade:
+        :version_added: '2.6'
+      :autoRepair:
+        :version_added: '2.6'
+      :upgradeOptions:
+        :version_added: '2.6'
+    :maxPodsConstraint:
+      :version_added: '2.9'
+      :maxPodsPerNode:
+        :version_added: '2.9'
+    :conditions:
+      :version_added: '2.9'
+      :code:
+        :version_added: '2.9'
+    :cluster:
+      :version_added: '2.6'
+    :location:
+      :version_added: '2.8'

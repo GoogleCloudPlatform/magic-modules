@@ -206,35 +206,6 @@ func TestAccComputeDisk_imageDiffSuppressPublicVendorsFamilyNames(t *testing.T) 
 	}
 }
 
-func TestAccComputeDisk_basic(t *testing.T) {
-	t.Parallel()
-
-	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	var disk compute.Disk
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeDiskDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeDisk_basic(diskName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeDiskExists(
-						"google_compute_disk.foobar", getTestProjectFromEnv(), &disk),
-					testAccCheckComputeDiskHasLabel(&disk, "my-label", "my-label-value"),
-					testAccCheckComputeDiskHasLabelFingerprint(&disk, "google_compute_disk.foobar"),
-				),
-			},
-			resource.TestStep{
-				ResourceName:      "google_compute_disk.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccComputeDisk_timeout(t *testing.T) {
 	t.Parallel()
 
@@ -343,16 +314,12 @@ func TestAccComputeDisk_encryption(t *testing.T) {
 	})
 }
 
-<% unless version.nil? || version == 'ga' -%>
 func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 	t.Parallel()
 
-	org := getTestOrgFromEnv(t)
-	pid := "tf-test-" + acctest.RandString(10)
-	billingAccount := getTestBillingAccountFromEnv(t)
+	kms := BootstrapKMSKey(t)
+	pid := getTestProjectFromEnv()
 	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	keyRingName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
-	keyName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 	importID := fmt.Sprintf("%s/%s/%s", pid, "us-central1-a", diskName)
 	var disk compute.Disk
 
@@ -361,8 +328,8 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeDiskDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeDisk_encryptionKMS(pid, pname, org, billingAccount, diskName, keyRingName, keyName),
+			{
+				Config: testAccComputeDisk_encryptionKMS(pid, diskName, kms.CryptoKey.Name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeDiskExists(
 						"google_compute_disk.foobar", pid, &disk),
@@ -370,7 +337,7 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 						"google_compute_disk.foobar", &disk),
 				),
 			},
-			resource.TestStep{
+			{
 				ResourceName:      "google_compute_disk.foobar",
 				ImportStateId:     importID,
 				ImportState:       true,
@@ -379,7 +346,6 @@ func TestAccComputeDisk_encryptionKMS(t *testing.T) {
 		},
 	})
 }
-<% end -%>
 
 func TestAccComputeDisk_deleteDetach(t *testing.T) {
 	t.Parallel()
@@ -470,38 +436,6 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 			},
 		},
 	})
-}
-
-func TestAccComputeDisk_computeDiskUserRegex(t *testing.T) {
-
-	shouldPass := []string{
-
-		"https://www.googleapis.com/compute/v1/projects/project-id/zones/us-central1/instances/123",
-		"https://www.googleapis.com/compute/v1/projects/123123/zones/us-central1/instances/123",
-		"https://www.googleapis.com/compute/v1/projects/hashicorptest.net:project-123/zones/us-central1/instances/123",
-		"https://www.googleapis.com/compute/v1/projects/123/zones/456/instances/789",
-	}
-
-	shouldFail := []string{
-		"https://www.googleapis.com/compute/v1/projects/project#/zones/us-central1/instances/123",
-		"https://www.googleapis.com/compute/v1/projects/project/zones/us-central#/instances/123",
-		"https://www.googleapis.com/compute/v1/projects/project/zones/us-central1/instances/?",
-		"https://www.googleapis.com/compute/v1/projects/foo.com:bar:baz/zones/us-central1/instances/?",
-		"https://www.googleapis.com/compute/v1/projects/foo.com:/zones/us-central1/instances/?",
-	}
-
-	for _, element := range shouldPass {
-		if !computeDiskUserRegex.MatchString(element) {
-			t.Error("computeDiskUserRegex should match on '" + element + "' but doesn't")
-		}
-	}
-
-	for _, element := range shouldFail {
-		if computeDiskUserRegex.MatchString(element) {
-			t.Error("computeDiskUserRegex shouldn't match on '" + element + "' but does")
-		}
-	}
-
 }
 
 func testAccCheckComputeDiskExists(n, p string, disk *compute.Disk) resource.TestCheckFunc {
@@ -617,7 +551,7 @@ resource "google_compute_disk" "foobar" {
 	size = 50
 	type = "pd-ssd"
 	zone = "us-central1-a"
-	labels {
+	labels = {
 		my-label = "my-label-value"
 	}
 }`, diskName)
@@ -655,7 +589,7 @@ resource "google_compute_disk" "foobar" {
 	size = 100
 	type = "pd-ssd"
 	zone = "us-central1-a"
-	labels {
+	labels = {
 		my-label = "my-updated-label-value"
 		a-new-label = "a-new-label-value"
 	}
@@ -712,14 +646,11 @@ resource "google_compute_disk" "foobar" {
 	}
 }`, diskName)
 }
-<% unless version.nil? || version == 'ga' %>
-func testAccComputeDisk_encryptionKMS(pid, pname, org, billing, diskName, keyRingName, keyName string) string {
+
+func testAccComputeDisk_encryptionKMS(pid, diskName, kmsKey string) string {
 	return fmt.Sprintf(`
-resource "google_project" "project" {
-  project_id      = "%s"
-  name            = "%s"
-  org_id          = "%s"
-  billing_account = "%s"
+data "google_project" "project" {
+	project_id = "%s"
 }
 
 data "google_compute_image" "my_image" {
@@ -727,47 +658,10 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-resource "google_project_services" "apis" {
-  project = "${google_project.project.project_id}"
-
-  services = [
-    "oslogin.googleapis.com",
-    "compute.googleapis.com",
-    "cloudkms.googleapis.com",
-    "appengine.googleapis.com",
-  ]
-}
-
 resource "google_project_iam_member" "kms-project-binding" {
-  project = "${google_project.project.project_id}"
+  project = "${data.google_project.project.project_id}"
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-  member  = "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com"
-
-  depends_on = ["google_project_services.apis"]
-}
-
-resource "google_kms_crypto_key_iam_binding" "kms-key-binding" {
-  crypto_key_id = "${google_kms_crypto_key.my_crypto_key.self_link}"
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  members = [
-    "serviceAccount:service-${google_project.project.number}@compute-system.iam.gserviceaccount.com",
-  ]
-
-  depends_on = ["google_project_services.apis"]
-}
-
-resource "google_kms_key_ring" "my_key_ring" {
-  name     = "%s"
-  project  = "${google_project.project.project_id}"
-  location = "us-central1"
-
-  depends_on = ["google_project_services.apis"]
-}
-
-resource "google_kms_crypto_key" "my_crypto_key" {
-  name     = "%s"
-  key_ring = "${google_kms_key_ring.my_key_ring.self_link}"
+  member  = "serviceAccount:service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
 }
 
 resource "google_compute_disk" "foobar" {
@@ -776,20 +670,14 @@ resource "google_compute_disk" "foobar" {
   size    = 10
   type    = "pd-ssd"
   zone    = "us-central1-a"
-  project = "${google_project.project.project_id}"
 
   disk_encryption_key {
-    kms_key_self_link = "${google_kms_crypto_key.my_crypto_key.self_link}"
+    kms_key_self_link = "%s"
   }
+}
+`, pid, diskName, kmsKey)
+}
 
-  depends_on = [
-    "google_kms_crypto_key_iam_binding.kms-key-binding",
-    "google_project_iam_member.kms-project-binding",
-  ]
-}
-`, pid, pname, org, billing, keyRingName, keyName, diskName)
-}
-<% end -%>
 func testAccComputeDisk_deleteDetach(instanceName, diskName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -877,5 +765,9 @@ resource "google_compute_instance_group_manager" "manager" {
 <% end -%>
   zone               = "us-central1-a"
   target_size        = 1
+
+  // block on instances being ready so that when they get deleted, we don't try
+  // to continue interacting with them in other resources
+  wait_for_instances = true
 }`, diskName, mgrName)
 }

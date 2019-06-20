@@ -81,7 +81,7 @@ resource "google_compute_instance" "vm_instance" {
   network_interface {
     # A default network is created for all GCP projects
     network       = "default"
-    access_config = {
+    access_config {
     }
   }
 }
@@ -135,7 +135,7 @@ network_interface {
 -  # A default network is created for all GCP projects
 -  network = "default"
 +  network = "${google_compute_network.vpc_network.self_link}"
-  access_config = {
+  access_config {
 ```
 
 This means that when we create the VM instance, it will use
@@ -190,7 +190,7 @@ resource "google_compute_instance" "vm_instance" {
   network_interface {
     # A default network is created for all GCP projects
     network       = "${google_compute_network.vpc_network.self_link}"
-    access_config = {
+    access_config {
     }
   }
 }
@@ -227,5 +227,7 @@ You can also check out the [GCP Community tutorials](https://cloud.google.com/co
 such as:
 
 * [Getting started with Terraform on Google Cloud Platform](https://cloud.google.com/community/tutorials/getting-started-on-gcp-with-terraform)
+
 * [Managing GCP Projects with Terraform](https://cloud.google.com/community/tutorials/managing-gcp-projects-with-terraform)
+
 * [Modular Load Balancing with Terraform](https://cloud.google.com/community/tutorials/modular-load-balancing-with-terraform)

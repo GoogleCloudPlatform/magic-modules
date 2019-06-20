@@ -12,67 +12,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 -%>
-<%= compile 'templates/license.erb' -%>
+# frozen_string_literal: false
 
 <%= lines(autogen_notice :ruby) -%>
-
-require 'inspec/resource'
-class <%= object.name -%>s < Inspec.resource(1)
-
+require 'gcp_backend'
+class <%= object.name -%>s < GcpResourceBase
 <%
 name = "google_#{product_ns.downcase}_#{object.name.underscore}"
 -%>
   name '<%= name.pluralize -%>'
   desc '<%= object.name -%> plural resource'
-  supports platform: 'gcp2'
+  supports platform: 'gcp'
+
+  attr_reader :table
 
   filter_table_config = FilterTable.create
-<% object.all_user_properties.each do |prop| -%>
+<% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
 
-  <%= "filter_table_config.add(:#{prop.out_name.pluralize}, field: :#{prop.name})" -%>
+  <%= "filter_table_config.add(:#{(prop.override_name || prop.out_name).pluralize}, field: :#{prop.override_name || prop.out_name})" -%>
 <% end # object.all_user_properties.each do -%>
 
 
-  filter_table_config.connect(self, :fetch_data)
-
-<%
-base = "'#{object.self_link_url[0].join}'"
--%>
-  def base
-    <%= base %>
-  end
-
-  def url
-    '<%= format_url(object.base_url) %>'
-  end
-
-  def initialize(params = {}) 
-    @params = params
-  end
-
-  def fetch_resource(params)
-    inspec.backend.fetch_all(base, url, params)
-  end
+  filter_table_config.connect(self, :table)
 
 <% 
-link_query = object.self_link_query || object.collection_url_response
+link_query_items = object&.nested_query&.keys&.first || object.collection_url_key
 -%>
-  def fetch_data
-  	@data = fetch_wrapped_resource(<%= "'#{link_query.kind}'" -%>, <%= "'#{link_query.items}'" -%>)
+  def initialize(params = {})
+    super(params.merge({ use_http_transport: true }))
+    @params = params
+<%= indent("@table = fetch_wrapped_resource('#{link_query_items}')", 4) %>
   end
 
-  def fetch_wrapped_resource(wrap_kind, wrap_path)
+  def fetch_wrapped_resource(wrap_path)
     # fetch_resource returns an array of responses (to handle pagination)
-    result = fetch_resource(@params)
+    result = @connection.fetch_all(product_url, resource_base_url, @params)
     return if result.nil?
 
     # Conversion of string -> object hash to symbol -> object hash that InSpec needs
     converted = []
     result.each do |response|
-      return if response.nil? || !response.key?(wrap_path)
+      next if response.nil? || !response.key?(wrap_path)
       response[wrap_path].each do |hash|
         hash_with_symbols = {}
-        hash.each_pair { |k, v| hash_with_symbols[k.to_sym] = v }
+        hash.each_key do |key|
+          name, value = transform(key, hash)
+          hash_with_symbols[name] = value
+        end
         converted.push(hash_with_symbols)
       end
     end
@@ -80,4 +66,32 @@ link_query = object.self_link_query || object.collection_url_response
     converted
   end
 
+  def transform(key, value)
+    return transformers[key].call(value) if transformers.key?(key)
+
+    [key.to_sym, value]
+  end
+
+  def transformers
+    {
+<% object.all_user_properties.reject(&:exclude_plural).each do |prop| -%>
+      '<%= prop.api_name -%>' => ->(obj) { <%= "return :#{ prop.override_name || prop.out_name }, #{parse_code(prop, 'obj')}" -%> },
+<% end # object.all_user_properties.each -%>
+    }
+  end
+
+  # Handles parsing RFC3339 time string
+  def parse_time_string(time_string)
+    time_string ? Time.parse(time_string) : nil
+  end
+
+  private
+
+  def product_url
+    '<%= object.product_url || object.__product.base_url %>'
+  end
+
+  def resource_base_url
+    '<%= object.base_url %>'
+  end
 end

@@ -14,6 +14,6 @@
 -%>
 // ResourceRef only supports 1 type and UrlMap has references to a BackendBucket or BackendService. Just read the self_link string
 // instead of extracting the name and making a self_link out of it.
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (interface{}, error) {
+func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d TerraformResourceData, config *Config) (interface{}, error) {
 	return v, nil
 }

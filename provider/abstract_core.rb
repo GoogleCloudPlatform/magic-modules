@@ -21,6 +21,8 @@ module Provider
     # rubocop:disable Layout/EmptyLineBetweenDefs
     def generate_resource(data) end
     def generate_resource_tests(data) end
+    # Generates IAM policy support for the resource
+    def generate_iam_policy(data) end
     # rubocop:enable Layout/EmptyLineBetweenDefs
   end
 end

@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: Google Cloud BigQuery
-prefix: gbigquery
+name: BigQuery
+display_name: BigQuery
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -21,12 +21,16 @@ versions:
     default: true
 scopes:
   - https://www.googleapis.com/auth/bigquery
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: BigQuery API
+    url: https://console.cloud.google.com/apis/library/bigquery-json.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
     name: 'Dataset'
     kind: 'bigquery#dataset'
     base_url: projects/{{project}}/datasets
-    description: >
+    description: |
       Datasets allow you to organize and control access to your tables.
     properties:
       - !ruby/object:Api::Type::String
@@ -39,7 +43,7 @@ objects:
           properties:
             - !ruby/object:Api::Type::String
               name: 'domain'
-              description: >
+              description: |
                 A domain to grant access to. Any users signed in with the
                 domain specified will be granted the specified access
             - !ruby/object:Api::Type::String
@@ -47,7 +51,7 @@ objects:
               description: An email address of a Google Group to grant access to
             - !ruby/object:Api::Type::Enum
               name: 'role'
-              description: >
+              description: |
                 Describes the rights granted to the user specified by the other
                 member of the access object
               values:
@@ -59,12 +63,12 @@ objects:
               description: A special group to grant access to.
             - !ruby/object:Api::Type::String
               name: 'userByEmail'
-              description: >
+              description: |
                 An email address of a user to grant access to. For example:
                 fred@example.com
             - !ruby/object:Api::Type::NestedObject
               name: 'view'
-              description: >
+              description: |
                 A view from a different dataset to grant access to. Queries
                 executed against that view will have read access to tables in
                 this dataset. The role field is not required when this field is
@@ -81,7 +85,7 @@ objects:
                   required: true
                 - !ruby/object:Api::Type::String
                   name: 'tableId'
-                  description: >
+                  description: |
                     The ID of the table. The ID must contain only letters (a-z,
                     A-Z), numbers (0-9), or underscores (_). The maximum length
                     is 1,024 characters.
@@ -89,7 +93,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
         output: true
-        description: >
+        description: |
           The time when this dataset was created, in milliseconds since the
           epoch.
       - !ruby/object:Api::Type::NestedObject
@@ -99,7 +103,7 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'datasetId'
-            description: >
+            description: |
               A unique ID for this dataset, without the project name. The ID
               must contain only letters (a-z, A-Z), numbers (0-9), or
               underscores (_). The maximum length is 1,024 characters.
@@ -109,7 +113,7 @@ objects:
             description: The ID of the project containing this dataset.
       - !ruby/object:Api::Type::Integer
         name: 'defaultTableExpirationMs'
-        description: >
+        description: |
           The default lifetime of all tables in the dataset, in milliseconds
       - !ruby/object:Api::Type::String
         name: 'description'
@@ -120,24 +124,24 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'id'
         output: true
-        description: >
+        description: |
           The fully-qualified unique name of the dataset in the format
           projectId:datasetId. The dataset name without the project name is
           given in the datasetId field
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: >
+        description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets
       - !ruby/object:Api::Type::Integer
         name: 'lastModifiedTime'
-        description: >
+        description: |
           The date when this dataset or any of its tables was last modified, in
           milliseconds since the epoch.
         output: true
       - !ruby/object:Api::Type::String
         name: 'location'
-        description: >
+        description: |
           The geographic location where the dataset should reside. Possible
           values include EU and US. The default value is US.
         default_value: US
@@ -145,7 +149,7 @@ objects:
     name: 'Table'
     kind: 'bigquery#table'
     base_url: projects/{{project}}/datasets/{{dataset}}/tables
-    description: >
+    description: |
       A Table that belongs to a Dataset
     parameters:
       # TODO(alexstephen): Remove once we have support for placing
@@ -162,7 +166,7 @@ objects:
             name: 'datasetId'
             description: The ID of the dataset containing this table
           - !ruby/object:Api::Type::String
-            name: 'projectid'
+            name: 'projectId'
             description: The ID of the project containing this table
           - !ruby/object:Api::Type::String
             name: 'tableId'
@@ -170,7 +174,7 @@ objects:
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
         output: true
-        description: >
+        description: |
           The time when this dataset was created, in milliseconds since the
           epoch.
       - !ruby/object:Api::Type::String
@@ -185,36 +189,39 @@ objects:
         output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
-        description: >
+        description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets
       - !ruby/object:Api::Type::Integer
         name: 'lastModifiedTime'
-        description: >
+        description: |
           The time when this table was last modified, in milliseconds since the
           epoch.
         output: true
       - !ruby/object:Api::Type::String
         name: 'location'
-        description: >
+        description: |
           The geographic location where the table resides. This value is
           inherited from the dataset.
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: 'Name of the table'
       - !ruby/object:Api::Type::Integer
         name: 'numBytes'
-        description: >
+        description: |
           The size of this table in bytes, excluding any data in the streaming
           buffer.
         output: true
       - !ruby/object:Api::Type::Integer
         name: 'numLongTermBytes'
-        description: >
+        description: |
           The number of bytes in the table that are considered "long-term
           storage".
         output: true
       - !ruby/object:Api::Type::Integer
         name: 'numRows'
-        description: >
+        description: |
           The number of rows of data in this table, excluding any data in the
           streaming buffer.
         output: true
@@ -232,17 +239,17 @@ objects:
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'useLegacySql'
-            description: >
+            description: |
               Specifies whether to use BigQuery's legacy SQL for this view
           - !ruby/object:Api::Type::Array
             name: 'userDefinedFunctionResources'
-            description: >
+            description: |
               Describes user-defined function resources used in the query.
             item_type: !ruby/object:Api::Type::NestedObject
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'inlineCode'
-                  description: >
+                  description: |
                     An inline resource that contains code for a user-defined
                     function (UDF). Providing a inline code resource is
                     equivalent to providing a URI for a file containing the
@@ -250,29 +257,29 @@ objects:
                 # TODO: Convert into cross-product ResourceRef
                 - !ruby/object:Api::Type::String
                   name: 'resourceUri'
-                  description: >
+                  description: |
                     A code resource to load from a Google Cloud Storage URI
                     (gs://bucket/path).
       - !ruby/object:Api::Type::NestedObject
         name: 'timePartitioning'
-        description: >
+        description: |
           If specified, configures time-based partitioning for this table.
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'expirationMs'
-            description: >
+            description: |
               Number of milliseconds for which to keep the storage for a
               partition.
           - !ruby/object:Api::Type::Enum
             name: 'type'
-            description: >
+            description: |
               The only type supported is DAY, which will generate one partition
               per day.
             values:
               - :DAY
       - !ruby/object:Api::Type::NestedObject
         name: 'streamingBuffer'
-        description: >
+        description: |
           Contains information regarding this table's streaming buffer, if one
           is present. This field will be absent if the table is not being
           streamed to or if there is no data in the streaming buffer.
@@ -280,19 +287,19 @@ objects:
         properties:
           - !ruby/object:Api::Type::Integer
             name: 'estimatedBytes'
-            description: >
+            description: |
               A lower-bound estimate of the number of bytes currently in the
               streaming buffer.
             output: true
           - !ruby/object:Api::Type::Integer
             name: 'estimatedRows'
-            description: >
+            description: |
               A lower-bound estimate of the number of rows currently in the
               streaming buffer.
             output: true
           - !ruby/object:Api::Type::Integer
             name: 'oldestEntryTime'
-            description: >
+            description: |
               Contains the timestamp of the oldest entry in the streaming
               buffer, in milliseconds since the epoch, if the streaming buffer
               is available.
@@ -308,12 +315,12 @@ objects:
               properties:
                 - !ruby/object:Api::Type::String
                   name: 'description'
-                  description: >
+                  description: |
                     The field description. The maximum length is 1,024
                     characters.
                 - !ruby/object:Api::Type::Array
                   name: 'fields'
-                  description: >
+                  description: |
                     Describes the nested schema fields if the type property is
                     set to RECORD.
                   item_type: Api::Type::String
@@ -346,26 +353,26 @@ objects:
         properties:
           - !ruby/object:Api::Type::String
             name: 'kmsKeyName'
-            description: >
+            description: |
               Describes the Cloud KMS encryption key that will be used to
               protect destination BigQuery table. The BigQuery Service Account
               associated with your project requires access to this encryption
               key.
       - !ruby/object:Api::Type::Integer
         name: 'expirationTime'
-        description: >
+        description: |
           The time when this table expires, in milliseconds since the epoch. If
           not present, the table will persist indefinitely.
       - !ruby/object:Api::Type::NestedObject
         name: 'externalDataConfiguration'
-        description: >
+        description: |
           Describes the data format, location, and other properties of a table
           stored outside of BigQuery. By defining these properties, the data
           source can then be queried as if it were a standard BigQuery table.
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'autodetect'
-            description: >
+            description: |
               Try to detect schema and format options automatically. Any option
               specified explicitly will be honored.
           - !ruby/object:Api::Type::Enum
@@ -376,12 +383,12 @@ objects:
               - :NONE
           - !ruby/object:Api::Type::Boolean
             name: 'ignoreUnknownValues'
-            description: >
+            description: |
               Indicates if BigQuery should allow extra values that are not
               represented in the table schema
           - !ruby/object:Api::Type::Integer
             name: 'maxBadRecords'
-            description: >
+            description: |
               The maximum number of bad records that BigQuery can ignore when reading data
             default_value: 0
           - !ruby/object:Api::Type::Enum
@@ -398,7 +405,7 @@ objects:
           # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
           - !ruby/object:Api::Type::Array
             name: 'sourceUris'
-            description: >
+            description: |
               The fully-qualified URIs that point to your data in Google Cloud.
               For Google Cloud Storage URIs: Each URI can contain one '*'
               wildcard character and it must come after the 'bucket' name. Size
@@ -423,7 +430,7 @@ objects:
                       description: The field description
                     - !ruby/object:Api::Type::Array
                       name: 'fields'
-                      description: >
+                      description: |
                         Describes the nested schema fields if the type property
                         is set to RECORD
                       item_type: Api::Type::String
@@ -456,7 +463,7 @@ objects:
             properties:
               - !ruby/object:Api::Type::Integer
                 name: 'skipLeadingRows'
-                description: >
+                description: |
                   The number of rows at the top of a Google Sheet that BigQuery
                   will skip when reading the data.
                 default_value: 0
@@ -466,12 +473,12 @@ objects:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'allowJaggedRows'
-                description: >
+                description: |
                   Indicates if BigQuery should accept rows that are missing
                   trailing optional columns
               - !ruby/object:Api::Type::Boolean
                 name: 'allowQuotedNewlines'
-                description: >
+                description: |
                   Indicates if BigQuery should allow quoted data sections that
                   contain newline characters in a CSV file
               - !ruby/object:Api::Type::Enum
@@ -488,7 +495,7 @@ objects:
                 description: 'The value that is used to quote data sections in a CSV file'
               - !ruby/object:Api::Type::Integer
                 name: 'skipLeadingRows'
-                description: >
+                description: |
                   The number of rows at the top of a CSV file that BigQuery
                   will skip when reading the data.
                 default_value: 0
@@ -498,24 +505,24 @@ objects:
             properties:
               - !ruby/object:Api::Type::Boolean
                 name: 'ignoreUnspecifiedColumnFamilies'
-                description: >
+                description: |
                   If field is true, then the column families that are not specified in
                   columnFamilies list are not exposed in the table schema
               - !ruby/object:Api::Type::Boolean
                 name: 'readRowkeyAsString'
-                description: >
+                description: |
                   If field is true, then the rowkey column families will be
                   read and converted to string.
               - !ruby/object:Api::Type::Array
                 name: 'columnFamilies'
-                description: >
+                description: |
                   List of column families to expose in the table schema along
                   with their types.
                 item_type: !ruby/object:Api::Type::NestedObject
                   properties:
                     - !ruby/object:Api::Type::Array
                       name: 'columns'
-                      description: >
+                      description: |
                          Lists of columns that should be exposed as individual
                          fields as opposed to a list of (column name, value) pairs.
                       item_type: !ruby/object:Api::Type::NestedObject
@@ -528,14 +535,14 @@ objects:
                               - :BINARY
                           - !ruby/object:Api::Type::String
                              name: 'fieldName'
-                             description: >
+                             description: |
                                If the qualifier is not a valid BigQuery field
                                identifier, a valid identifier must be provided as
                                the column field name and is used as field name in
                                queries.
                           - !ruby/object:Api::Type::Boolean
                              name: 'onlyReadLatest'
-                             description: >
+                             description: |
                                If this is set, only the latest version of value in this column are exposed
                           - !ruby/object:Api::Type::String
                              name: 'qualifierString'
@@ -561,7 +568,7 @@ objects:
                       description: Identifier of the column family.
                     - !ruby/object:Api::Type::Boolean
                       name: 'onlyReadLatest'
-                      description: >
+                      description: |
                         If this is set only the latest version of value are
                         exposed for all columns in this column family
                     - !ruby/object:Api::Type::Enum

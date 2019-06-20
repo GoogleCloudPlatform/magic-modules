@@ -14,83 +14,88 @@
 -%>
 <%= lines(autogen_notice :go) -%>
 
-package azurerm
+package google
 
 <%= lines(compile(object.custom_code.constants)) if object.custom_code.constants -%>
 
 <%
+    resource_name = product_ns + object.name
     properties = object.all_user_properties
-    schema_properties = properties.reject{|p| p.name == 'id' || get_property_value(p, 'hide_from_schema', false)}
-    # Fingerprints aren't *really* settable properties, but they behave like one. At Create, they have no value but they
-    # can just be read in anyways, and after a Read they will need to be set in every Update.
-    settable_properties = properties.reject{ |v| v.output && !v.is_a?(Api::Type::Fingerprint) }.reject(&:url_param_only)
-    # PUT needs parameters like `name` to be set in the resource body, but we don't want to send them in PATCH
-    updatable_properties = settable_properties.reject{|p| !object.azure_sdk_definition.update.nil? && get_applicable_reference(p.azure_sdk_references, object.azure_sdk_definition.update.request).nil?}
-    output_properties = properties.reject{|p| p.name == 'id'}
+    update_body_properties = object.settable_properties
+    update_body_properties = object.settable_properties.reject(&:input) if object.update_verb == :PATCH
     # Handwritten TF Operation objects will be shaped like accessContextManager while the Google Go Client will have a name like accesscontextmanager
-    api_name_lower = String.new(product_ns)
-    api_name_lower[0] = api_name_lower[0].downcase
-    api_client_name = api_name_lower.downcase
-    has_project = object.base_url.include?("{{project}}")
-    has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
--%>
-<%
-    resource_name = "Arm" + object.name
-    terraform_name = "azurerm_" + object.name.underscore
-    azure_client_name = object.azure_sdk_definition.go_client
-    sdk_package = object.azure_sdk_definition.go_client_namespace
-
-    expand_queue = Array.new
-    flatten_queue = Array.new
-
-    combine_create_update = object.azure_sdk_definition.update.nil? || (object.azure_sdk_definition.create.go_func_name == object.azure_sdk_definition.update.go_func_name)
-    create_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Create")
-    update_func_name_postfix = (combine_create_update ? "CreateUpdate" : "Update")
+    client_name_camel = String.new(if @config.client_name then @config.client_name else product_ns end)
+    client_name_camel[0] = client_name_camel[0].downcase
+    client_name_pascal = String.new(client_name_camel)
+    client_name_pascal[0] = client_name_pascal[0].upcase
+    client_name_lower = client_name_camel.downcase
+    has_project = object.base_url.include?('{{project}}')
+    has_region = object.base_url.include?('{{region}}') && object.parameters.any?{ |p| p.name == 'region' && p.ignore_read }
+    timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
 -%>
 
 func resource<%= resource_name -%>() *schema.Resource {
     return &schema.Resource{
-        Create: resource<%= resource_name -%><%= create_func_name_postfix -%>,
+        Create: resource<%= resource_name -%>Create,
         Read: resource<%= resource_name -%>Read,
 <%      if updatable?(object, properties) -%>
-        Update: resource<%= resource_name -%><%= update_func_name_postfix -%>,
+        Update: resource<%= resource_name -%>Update,
 <%      end -%>
         Delete: resource<%= resource_name -%>Delete,
-<%      if settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
+<%      if object.settable_properties.any? {|p| p.unordered_list} && !object.custom_code.resource_definition -%>
         CustomizeDiff: customdiff.All(
-<%=         
-            settable_properties.select { |p| p.unordered_list }
+<%=
+            object.settable_properties.select { |p| p.unordered_list }
                                .map { |p| "resource#{resource_name}#{p.name.camelize(:upper)}SetStyleDiff"}
                                .join(",\n")
 -%>
         ),
 <%      end -%>
 
+<%      unless object.exclude_import -%>
         Importer: &schema.ResourceImporter{
-            State: schema.ImportStatePassthrough,
-        },
-
-<%      unless object.async.nil? -%>
-        Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= object.async.operation.timeouts.insert_sec -%> * time.Second),
-<%          if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= object.async.operation.timeouts.update_sec -%> * time.Second),
-<%          end -%>
-            Delete: schema.DefaultTimeout(<%= object.async.operation.timeouts.delete_sec -%> * time.Second),
+            State: resource<%= resource_name -%>Import,
         },
 <%      end -%>
+
+        Timeouts: &schema.ResourceTimeout {
+            Create: schema.DefaultTimeout(<%= timeouts.insert_sec  -%> * time.Second),
+<%          if updatable?(object, properties) -%>
+            Update: schema.DefaultTimeout(<%= timeouts.update_sec -%> * time.Second),
+<%          end -%>
+            Delete: schema.DefaultTimeout(<%= timeouts.delete_sec -%> * time.Second),
+        },
+
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
-        Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
-<%          order_azure_properties(schema_properties).each do |prop| -%>
-<%=             lines_before(build_schema_property(prop, object, 12)) -%>
-
+        Schema: map[string]*schema.Schema{
+<%          order_properties(properties).each do |prop| -%>
+<%=             lines(build_schema_property(prop, object)) -%>
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
+<%          if has_project -%>
+            "project": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Computed: true,
+                ForceNew: true,
+            },
+<%          end -%>
+<%          if object.has_self_link -%>
+            "self_link": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+<%          end -%>
         },
     }
 }
-<% settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
+
+<% properties.each do |prop| -%>
+<%= lines(build_subresource_schema(prop, object), 1) -%>
+<% end -%>
+
+<% object.settable_properties.select {|p| p.unordered_list}.each do |prop| -%>
 func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff(diff *schema.ResourceDiff, meta interface{}) error {
 <%=
     compile_template('templates/terraform/unordered_list_customize_diff.erb',
@@ -100,42 +105,33 @@ func resource<%= resource_name -%><%= prop.name.camelize(:upper) -%>SetStyleDiff
 }
 <% end -%>
 
-<%  sdk_operation = object.azure_sdk_definition.create -%>
-<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, true -%>
-<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, expand_queue, sdktype, settable_properties -%>
-func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
-    ctx := meta.(*ArmClient).StopContext
+func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{}) error {
+    config := meta.(*Config)
 
-<%  settable_properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
-<%    output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=   lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
+    obj := make(map[string]interface{})
+<%  object.settable_properties.each do |prop| -%>
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+    if err != nil {
+        return err
+<%    if prop.send_empty_value -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%    elsif prop.flatten_object -%>
+    } else if !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) {
+<%    else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(<%= prop.api_name -%>Prop)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%    end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+    }
 <%  end -%>
 
-    if requireResourcesToBeImported {
-        resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
-        if err != nil {
-            if !utils.ResponseWasNotFound(resp.Response) {
-                return <%= lines(build_errorf_with_resource_name("Error checking for present of existing %s", true, object.azure_sdk_definition.read, properties, object)) -%>
-            }
-        }
-        if !utils.ResponseWasNotFound(resp.Response) {
-            return tf.ImportAsExistsError("<%= terraform_name -%>", *resp.ID)
-        }
+<%  if object.custom_code.encoder -%>
+    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+    if err != nil {
+        return err
     }
-
-<%  settable_properties.select{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).start_with?("/")}.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%    var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
-<%    output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=   lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
 <%  end -%>
 
-    <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
-<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
-    }
-
-<%= lines(build_property_to_sdk_object_empty_sensitive(sdk_marshal)) -%>
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
@@ -145,104 +141,272 @@ func resource<%= resource_name -%><%= create_func_name_postfix -%>(d *schema.Res
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-<%  unless sdk_operation.async -%>
-    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object)) -%>
-    }
-<%  else -%>
-    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error creating %s", true, sdk_operation, properties, object)) -%>
+        return err
     }
-    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error waiting for creation of %s", true, sdk_operation, properties, object)) -%>
+
+    log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutCreate))
+    if err != nil {
+        return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
+    }
+
+    // Store the ID now
+    id, err := replaceVars(d, config, "<%= object.id_format -%>")
+    if err != nil {
+        return fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+
+<%  unless object.async.nil? -%>
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
     }
 <%  end -%>
+<% if object.autogen_async -%>
+    waitErr := <%= client_name_camel -%>OperationWaitTime(
+    config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutCreate).Minutes()))
+<% else -%>
+    op := &<%= client_name_lower -%>.Operation{}
+    err = Convert(res, op)
+    if err != nil {
+        return err
+    }
+
+    waitErr := <%= client_name_camel -%>OperationWaitTime(
+    config.client<%= client_name_pascal -%>, op,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutCreate).Minutes()))
+<% end -%>
+
+    if waitErr != nil {
+        // The resource didn't actually create
+        d.SetId("")
+        return fmt.Errorf("Error waiting to create <%= object.name -%>: %s", waitErr)
+    }
+<%  end -%>
+
+    log.Printf("[DEBUG] Finished creating <%= object.name -%> %q: %#v", d.Id(), res)
 
 <%= lines(compile(object.custom_code.post_create)) if object.custom_code.post_create -%>
 
-    resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
-    if err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error retrieving %s", true, object.azure_sdk_definition.read, properties, object)) -%>
-    }
-    if resp.ID == nil {
-        return <%= lines(build_errorf_with_resource_name("Cannot read %s ID", false, object.azure_sdk_definition.read, properties, object)) -%>
-    }
-    d.SetId(*resp.ID)
-
     return resource<%= resource_name -%>Read(d, meta)
 }
 
-<%  sdk_operation = object.azure_sdk_definition.read -%>
-<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, false -%>
-<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, flatten_queue, sdktype, output_properties -%>
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
-    ctx := meta.(*ArmClient).StopContext
+    config := meta.(*Config)
 
-<%= lines(build_azure_id_parser(object.azure_sdk_definition.read, object)) -%>
-
-    resp, err := <%= lines(build_sdk_func_invocation(object.azure_sdk_definition.read)) -%>
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
-        if utils.ResponseWasNotFound(resp.Response) {
-            log.Printf("[INFO] <%= object.name.titlecase -%> %q does not exist - removing from state", d.Id())
-            d.SetId("")
-            return nil
-        }
-        return <%= lines(build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, output_properties, object)) -%>
+        return err
     }
 
-<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
+res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil)
+    if err != nil {
+        return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
+    }
 
-<%= lines(build_sdk_object_to_property('resp', 'd', sdk_marshal)) -%>
+<%  if object.nested_query -%>
+    res, err = flattenNested<%= resource_name -%>(d, meta, res)
+    if err != nil {
+        return err
+    }
+
+    if res == nil {
+        // Object isn't there any more - remove it from the state.
+        log.Printf("[DEBUG] Removing <%= resource_name -%> because it couldn't be matched.")
+        d.SetId("")
+        return nil
+    }
+<%  end -%>
+
+<%  if object.custom_code.decoder -%>
+    res, err = resource<%= resource_name -%>Decoder(d, meta, res)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("project", project); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
+
+<%  if has_region -%>
+    region, err := getRegion(d, config)
+    if err != nil {
+        return err
+    }
+    if err := d.Set("region", region); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
+
+<%  object.gettable_properties.reject{|p| p.ignore_read }.each do |prop| -%>
+<%    if prop.flatten_object -%>
+// Terraform must set the top level schema field, but since this object contains collapsed properties
+// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+    if flattenedProp := flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d); flattenedProp != nil {
+        casted := flattenedProp.([]interface{})[0]
+        if casted != nil {
+            for k, v := range casted.(map[string]interface{}) {
+                d.Set(k, v)
+            }
+        }
+    }
+<%    else -%>
+    if err := d.Set("<%= prop.name.underscore -%>", flatten<%= resource_name -%><%= titlelize_property(prop) -%>(res["<%= prop.api_name -%>"], d)); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%    end -%>
+<%  end -%>
+<%  if object.has_self_link -%>
+    if err := d.Set("self_link", ConvertSelfLinkToV1(res["selfLink"].(string))); err != nil {
+        return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
+    }
+<%  end -%>
 
     return nil
 }
 
-<%  if !combine_create_update -%>
-<%    sdk_operation = object.azure_sdk_definition.update -%>
-func resource<%= resource_name -%><%= update_func_name_postfix -%>(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
-    ctx := meta.(*ArmClient).StopContext
+<% if updatable?(object, object.root_properties) -%>
+func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
+    config := meta.(*Config)
 
-<%  updatable_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%    if prop.name != "location" -%>
-<%      var_name = get_sdk_typedef_by_references(prop.azure_sdk_references, sdk_operation.request).go_variable_name -%>
-<%      output_var = var_name || prop.name.camelcase(:lower) -%>
-<%=     lines(build_schema_property_get('d', output_var, prop, sdk_marshal, 4)) -%>
-<%    end -%>
+<%  if object.input -%>
+    d.Partial(true)
+
+<%  properties_by_custom_update(object.root_properties).each do |key, props| -%>
+if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' || ' -%> {
+        obj := make(map[string]interface{})
+<%      custom_update_properties_by_url(properties, key[:update_url]).each do |prop| -%>
+        <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+        <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
+        if err != nil {
+            return err
+<%#         There is some nuance in when we choose to send a value to an update function.
+            This is unfortunate, but it's because of the way that GCP works, so there's
+            no easy way out.  Some APIs require you to send `enable_foo: false`, while
+            others will crash if you send `attribute: ''`.  We require this nuance to
+            be annotated in api.yaml, since it is not discoverable automatically.
+
+            The behavior here, which we believe to be correct, is to send a value if
+            * It is non-empty OR
+            * It is marked send_empty_value in api.yaml.
+            AND
+            * It has been set by the user OR
+            * It has been modified by the expander in any way
+
+            This subsumes both `ForceSendFields` and `NullFields` in the go API client -
+            `NullFields` is a special case of `send_empty_value` where the empty value
+            in question is go's literal nil.
+-%>
+<%          unless prop.send_empty_value -%>
+        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%          else -%>
+        } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%          end -%>
+            obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
+        }
+<%    end # props.each -%>
+
+<%      if object.mutex -%>
+        lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+        if err != nil {
+            return err
+        }
+        mutexKV.Lock(lockName)
+        defer mutexKV.Unlock(lockName)
+<%      end -%>
+
+        url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
+        if err != nil {
+            return err
+        }
+<%      if object.async.nil? -%>
+        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+<%      else -%>
+        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+<%      end -%>
+        if err != nil {
+            return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
+        }
+
+<%      unless object.async.nil? -%>
+<%      if has_project -%>
+        project, err := getProject(d, config)
+        if err != nil {
+            return err
+        }
+<%      end -%>
+<% if object.autogen_async -%>
+
+        err = <%= client_name_camel -%>OperationWaitTime(
+            config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+<% else -%>
+        op := &<%= client_name_lower -%>.Operation{}
+        err = Convert(res, op)
+        if err != nil {
+            return err
+        }
+
+        err = <%= client_name_camel -%>OperationWaitTime(
+            config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+            int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+
+<% end -%>
+        if err != nil {
+            return err
+        }
+
+<%      end -%>
+
+<%      props.each do |prop|    -%>
+        d.SetPartial("<%= prop.name.underscore -%>")
+<%      end -%>
+    }
 <%  end -%>
 
-    <%= sdk_operation.request['/'].go_variable_name -%> := <%= sdk_package -%>.<%= sdk_operation.request['/'].go_type_name -%>{
-<%  sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, true -%>
-<%  sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, expand_queue, sdktype, updatable_properties -%>
-<%= lines(build_property_to_sdk_object(sdk_marshal, 8)) -%>
-    }
-
-<%= lines(build_property_to_sdk_object_empty_sensitive(sdk_marshal)) -%>
-
-<%  unless sdk_operation.async -%>
-    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object)) -%>
-    }
-<%  else -%>
-    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
+    d.Partial(false)
+<%  else # if object.input -%>
+    obj := make(map[string]interface{})
+<%  update_body_properties.each do |prop| -%>
+    <%# flattened objects won't have something stored in state so instead nil is passed to the next expander. -%>
+    <% schemaPrefix = prop.flatten_object ? "nil" : "d.Get( \"#{prop.name.underscore}\" )" -%>
+    <%= prop.api_name -%>Prop, err := expand<%= resource_name -%><%= titlelize_property(prop) -%>(<%= schemaPrefix -%>, d, config)
     if err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error updating %s", true, sdk_operation, properties, object)) -%>
-    }
-    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error waiting for update of %s", true, sdk_operation, properties, object)) -%>
+        return err
+<%      unless prop.send_empty_value -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop)) {
+<%      else -%>
+    } else if v, ok := d.GetOkExists("<%= prop.name.underscore -%>"); ok || !reflect.DeepEqual(v, <%= prop.api_name -%>Prop) {
+<%      end -%>
+        obj["<%= prop.api_name -%>"] = <%= prop.api_name -%>Prop
     }
 <%  end -%>
 
-    return resource<%= resource_name -%>Read(d, meta)
-}
+<%# We need to decide what encoder to use here - if there's an update encoder, use that! -%>
+<%  if object.custom_code.update_encoder -%>
+    obj, err = resource<%= resource_name -%>UpdateEncoder(d, meta, obj)
+    if err != nil {
+    	return err
+    }
+<%  elsif object.custom_code.encoder -%>
+    obj, err = resource<%= resource_name -%>Encoder(d, meta, obj)
+    if err != nil {
+    	return err
+    }
 <%  end -%>
-
-<%  sdk_operation = object.azure_sdk_definition.delete -%>
-func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
-    client := meta.(*ArmClient).<%= lines(azure_client_name) -%>
-    ctx := meta.(*ArmClient).StopContext
 
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
@@ -253,43 +417,178 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-<%= lines(build_azure_id_parser(sdk_operation, object)) -%>
-
-<%  unless sdk_operation.async -%>
-    if _, err := <%= build_sdk_func_invocation(sdk_operation) -%>; err != nil {
-        return <%= lines(build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object)) -%>
-    }
-<%  else -%>
-    future, err := <%= lines(build_sdk_func_invocation(sdk_operation)) -%>
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
-        if response.WasNotFound(future.Response()) {
-            return nil
-        }
-        return <%= lines(build_errorf_with_resource_name("Error deleting %s", true, sdk_operation, properties, object)) -%>
+        return err
     }
 
-    if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-        if !response.WasNotFound(future.Response()) {
-            return <%= lines(build_errorf_with_resource_name("Error waiting for deleting %s", true, sdk_operation, properties, object)) -%>
-        }
+    log.Printf("[DEBUG] Updating <%= object.name -%> %q: %#v", d.Id(), obj)
+<%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
+<%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
+<%  if object.async.nil? -%>
+    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+<%  else -%>
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+<% end -%>
+
+    if err != nil {
+    return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
+    }
+
+<%  unless object.async.nil? -%>
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+<% if object.autogen_async -%>
+
+    err = <%= client_name_camel -%>OperationWaitTime(
+    config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+<% else -%>
+    op := &<%= client_name_lower -%>.Operation{}
+    err = Convert(res, op)
+    if err != nil {
+        return err
+    }
+
+    err = <%= client_name_camel -%>OperationWaitTime(
+    config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
+    int(d.Timeout(schema.TimeoutUpdate).Minutes()))
+<% end -%>
+
+    if err != nil {
+        return err
+    }
+<%  end -%>
+<%  end # if object.input -%>
+
+<%= lines(compile(object.custom_code.post_update)) if object.custom_code.post_update -%>
+    return resource<%= resource_name -%>Read(d, meta)
+}
+<% end # if updatable? -%>
+
+func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{}) error {
+<% if object.custom_code.custom_delete -%>
+<%= lines(compile(object.custom_code.custom_delete)) -%>
+<% else -%>
+    config := meta.(*Config)
+
+<%  if object.mutex -%>
+    lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
+    if err != nil {
+        return err
+    }
+    mutexKV.Lock(lockName)
+    defer mutexKV.Unlock(lockName)
+<%  end -%>
+
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
+    if err != nil {
+        return err
+    }
+
+<%# If the deletion of the object requires sending a request body, the custom code will set 'obj' -%>
+    var obj map[string]interface{}
+<%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
+    log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
+    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutDelete))
+    if err != nil {
+        return handleNotFoundError(err, d, "<%= object.name -%>")
+    }
+
+<%  unless object.async.nil? -%>
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+<% if object.autogen_async -%>
+
+    err = <%= client_name_camel -%>OperationWaitTime(
+        config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutDelete).Minutes()))
+<% else -%>
+    op := &<%= client_name_lower -%>.Operation{}
+    err = Convert(res, op)
+    if err != nil {
+        return err
+    }
+
+    err = <%= client_name_camel -%>OperationWaitTime(
+        config.client<%= client_name_pascal -%>, op, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
+        int(d.Timeout(schema.TimeoutDelete).Minutes()))
+<% end -%>
+
+    if err != nil {
+        return err
     }
 <%  end -%>
 
+    log.Printf("[DEBUG] Finished deleting <%= object.name -%> %q: %#v", d.Id(), res)
     return nil
+<% end -%>
 }
 
-<%  while !expand_queue.empty? -%>
-<%    descriptor = expand_queue.shift -%>
-<%=   lines(build_expand_method(descriptor)) -%>
+<% unless object.exclude_import -%>
+func resource<%= resource_name -%>Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+<% if object.custom_code.custom_import -%>
+<%= lines(compile(object.custom_code.custom_import)) -%>
+<% else -%>
+    config := meta.(*Config)
+    if err := parseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.join('","') -%>"}, d, config); err != nil {
+      return nil, err
+    }
 
-<%  end -%>
+    // Replace import id for the resource id
+    id, err := replaceVars(d, config, "<%= object.id_format -%>")
+    if err != nil {
+        return nil, fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
+<%= lines(compile(object.custom_code.post_import)) if object.custom_code.post_import -%>
 
-<%  while !flatten_queue.empty? -%>
-<%    descriptor = flatten_queue.shift -%>
-<%=   lines(build_flatten_method(descriptor)) -%>
+    return []*schema.ResourceData{d}, nil
+<% end -%>
+}
+<% end -%>
 
-<%  end -%>
+<% object.gettable_properties.reject(&:ignore_read).each do |prop| -%>
+<%= lines(build_flatten_method(resource_name, prop), 1) -%>
+<% end -%>
 
-<%  if object.custom_code.extra_functions -%>
-<%=   lines(compile(get_custom_template_path(object.custom_code.extra_functions))) -%>
-<%  end -%>
+<% object.settable_properties.each do |prop| -%>
+<%= lines(build_expand_method(resource_name, prop), 1) -%>
+<% end -%>
+
+<% if object.custom_code.encoder -%>
+func resource<%= resource_name -%>Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.encoder)) -%>
+}
+<% end -%>
+
+<% if object.custom_code.update_encoder-%>
+func resource<%= resource_name -%>UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.update_encoder)) -%>
+}
+<% end -%>
+
+<%  if object.nested_query -%>
+<%# Note that if both nested_query and custom_code.decoder are provided,
+  #the decoder will be included via nested_query.go.erb -%>
+func flattenNested<%= resource_name -%>(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    <%=     compile_template('templates/terraform/nested_query.go.erb',
+                         object: object,
+                         settable_properties: object.settable_properties,
+                         resource_name: resource_name) -%>
+}
+<% end -%>
+
+<% if object.custom_code.decoder -%>
+func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+<%= lines(compile(object.custom_code.decoder)) -%>
+}
+<% end -%>

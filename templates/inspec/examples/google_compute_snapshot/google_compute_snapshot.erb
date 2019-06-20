@@ -1,0 +1,12 @@
+<% gcp_project_id = "#{external_attribute('gcp_project_id', doc_generation)}" -%>
+<% snapshot = grab_attributes['snapshot'] -%>
+<% gcp_zone = "#{external_attribute('gcp_zone', doc_generation)}" %>
+<% gcp_compute_disk_name = "#{external_attribute('gcp_compute_disk_name', doc_generation)}" -%>
+describe google_compute_snapshot(project: <%= gcp_project_id -%>, name: <%= doc_generation ? "'#{snapshot['name']}'" : "snapshot['name']" -%>) do
+  it { should exist }
+  its('source_disk') { should match <%= gcp_compute_disk_name -%> }
+end
+
+describe google_compute_snapshot(project: <%= gcp_project_id -%>, name: 'nonexistent') do
+  it { should_not exist }
+end
