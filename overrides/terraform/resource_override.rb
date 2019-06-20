@@ -48,7 +48,9 @@ module Overrides
           # (i.e. terraform-provider-conversion)
           :exclude_validator,
 
-          :timeouts
+          :timeouts,
+
+          :schema_version
         ]
       end
 
@@ -71,6 +73,7 @@ module Overrides
         check :exclude_import, type: :boolean, default: false
 
         check :timeouts, type: Api::Timeouts, default: Api::Timeouts.new
+        check :schema_version, type: Integer
       end
 
       def apply(resource)
