@@ -84,5 +84,4 @@ if __name__ == '__main__':
 
     # TODO(emilymye): Replace this no-op print statement with code after
     # verifying w/ pipeline.
-    print("I'll try to downstream your pr changes later! This is a pipeline test")
-    # downstream_changelog_info(gh, pr_num, downstream_urls)
+    downstream_changelog_info(gh, pr_num, downstream_urls)
