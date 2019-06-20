@@ -68,7 +68,15 @@ func resource<%= resource_name -%>() *schema.Resource {
 
 <%      if object.schema_version -%>
         SchemaVersion: <%= object.schema_version -%>,
-        MigrateState: resource<%= resource_name -%>MigrateState,
+        StateUpgraders: []schema.StateUpgrader{
+<%        for v in 0..object.schema_version-1 -%>
+            {
+                Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+                Upgrade: resource<%= "#{resource_name}UpgradeV#{v}" -%>,
+                Version: <%= v -%>,
+            },
+        },
+<%        end -%>
 <%      end -%>
 
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>

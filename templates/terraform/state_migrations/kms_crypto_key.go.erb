@@ -1,32 +1,40 @@
-func resourceKmsCryptoKeyMigrateState(v int, s *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
-	if s.Empty() {
-		log.Println("[DEBUG] Empty InstanceState; nothing to migrate.")
-		return s, nil
-	}
-
-	switch v {
-	case 0:
-		log.Println("[INFO] Found Google CryptoKey State v0; migrating to v1")
-		s, err := migrateKmsCryptoKeyStateV0toV1(s, meta.(*Config))
-		if err != nil {
-			return s, err
-		}
-		return s, nil
-	default:
-		return s, fmt.Errorf("Unexpected schema version: %d", v)
+func resourceKmsCryptoKeyResourceV0() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"key_ring": {
+				Type:             schema.TypeString,
+				Required:         true,
+			},
+			"rotation_period": {
+				Type:         schema.TypeString,
+				Optional:     true,
+			},
+			"version_template": {
+				Type:     schema.TypeList,
+				Optional: true,
+			},
+			"self_link": {
+				Type:     schema.TypeString,
+			},
+		},
 	}
 }
 
-func migrateKmsCryptoKeyStateV0toV1(s *terraform.InstanceState, config *Config) (*terraform.InstanceState, error) {
-	log.Printf("[DEBUG] Attributes before migration: %#v", s.Attributes)
+func resourceKmsCryptoKeyUpgradeV0(rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
-	keyRingId := s.Attributes["key_ring"]
+	config := meta.(*Config)
+	keyRingId := rawState["key_ring"].(string)
 	parsed, err := parseKmsKeyRingId(keyRingId, config)
 	if err != nil {
 		return nil, err
 	}
-	s.Attributes["key_ring"] = parsed.keyRingId()
+	rawState["key_ring"] = parsed.keyRingId()
 
-	log.Printf("[DEBUG] Attributes after migration: %#v", s.Attributes)
-	return s, nil
+	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
+	return rawState, nil
 }

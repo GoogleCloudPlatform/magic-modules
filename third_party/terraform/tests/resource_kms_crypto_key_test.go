@@ -109,18 +109,16 @@ func TestCryptoKeyNextRotationCalculation_validation(t *testing.T) {
 	}
 }
 
-func TestCryptoKeyMigrateState(t *testing.T) {
+func TestCryptoKeyStateUpgradeV0(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
-		StateVersion int
-		Attributes   map[string]string
-		Expected     map[string]string
-		Meta         interface{}
+		Attributes map[string]interface{}
+		Expected   map[string]string
+		Meta       interface{}
 	}{
 		"change key_ring from terraform id fmt to link fmt": {
-			StateVersion: 0,
-			Attributes: map[string]string{
+			Attributes: map[string]interface{}{
 				"key_ring": "my-project/my-location/my-key-ring",
 			},
 			Expected: map[string]string{
@@ -129,8 +127,7 @@ func TestCryptoKeyMigrateState(t *testing.T) {
 			Meta: &Config{},
 		},
 		"key_ring link fmt stays as link fmt": {
-			StateVersion: 0,
-			Attributes: map[string]string{
+			Attributes: map[string]interface{}{
 				"key_ring": "projects/my-project/locations/my-location/keyRings/my-key-ring",
 			},
 			Expected: map[string]string{
@@ -139,8 +136,7 @@ func TestCryptoKeyMigrateState(t *testing.T) {
 			Meta: &Config{},
 		},
 		"key_ring without project to link fmt": {
-			StateVersion: 0,
-			Attributes: map[string]string{
+			Attributes: map[string]interface{}{
 				"key_ring": "my-location/my-key-ring",
 			},
 			Expected: map[string]string{
@@ -152,24 +148,20 @@ func TestCryptoKeyMigrateState(t *testing.T) {
 		},
 	}
 	for tn, tc := range cases {
-		is := &terraform.InstanceState{
-			ID:         "abc123",
-			Attributes: tc.Attributes,
-		}
-		is, err := resourceKmsCryptoKeyMigrateState(
-			tc.StateVersion, is, tc.Meta)
+		t.Run(tn, func(t *testing.T) {
+			actual, err := resourceKmsCryptoKeyUpgradeV0(tc.Attributes, tc.Meta)
 
-		if err != nil {
-			t.Fatalf("bad: %s, err: %#v", tn, err)
-		}
-
-		for k, v := range tc.Expected {
-			if is.Attributes[k] != v {
-				t.Fatalf(
-					"bad: %s\n\n expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
-					tn, k, v, k, is.Attributes[k], is.Attributes)
+			if err != nil {
+				t.Error(err)
 			}
-		}
+
+			for k, v := range tc.Expected {
+				if actual[k] != v {
+					t.Errorf("expected: %#v -> %#v\n got: %#v -> %#v\n in: %#v",
+						k, v, k, actual[k], actual)
+				}
+			}
+		})
 	}
 }
 
