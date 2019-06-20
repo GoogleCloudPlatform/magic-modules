@@ -439,7 +439,7 @@ jobs:
           - get: mm-approved-prs
             attempts: 2
           - task: downstream-changelog-metadata
-            file: magic-modules/.ci/magic-modules/downstream-changelog-metadata.yml
+            file: mm-approved-prs/.ci/magic-modules/downstream-changelog-metadata-mergeprs.yml
             params:
               GITHUB_TOKEN: ((github-account.password))
               DOWNSTREAM_REPOS: "{{','.join(vars.downstreams_with_changelogs)}}"
