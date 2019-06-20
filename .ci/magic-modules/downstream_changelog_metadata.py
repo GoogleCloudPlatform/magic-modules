@@ -13,6 +13,7 @@ unset.
 from pyutils import strutils, downstreams
 from github import Github
 import os
+import sys
 import argparse
 
 CHANGELOG_LABEL_PREFIX = "changelog: "
@@ -26,50 +27,55 @@ def downstream_changelog_info(gh, upstream_pr_num, changelog_repos):
     changelog_repos: List of repo names to downstream changelog metadata for
   """
   # Parse CHANGELOG info from upstream
-  upstream_pr = gh.get_repo(downstreams.UPSTREAM_REPO).get_pull(pr_num)
-  release_note = changelog.get_release_note(upstream_pr.body)
-  labels_to_add = changelog.find_prefixed_labels(
+  upstream_pr = gh.get_repo(downstreams.UPSTREAM_REPO)\
+                  .get_pull(upstream_pr_num)
+  release_note = strutils.get_release_note(upstream_pr.body)
+  labels_to_add = strutils.find_prefixed_labels(
     [l.name for l in upstream_pr.labels],
     CHANGELOG_LABEL_PREFIX)
 
   print "Applying changelog info to downstreams for upstream PR %d:" % (
     upstream_pr.number)
   print "Release Note: \"%s\"" % release_note
-  print "Labels: [%s]" % changelog_labels
+  print "Labels: [%s]" % labels_to_add
 
-  for repo_name, pulls in downstreams.get_parsed_downstream_urls(gh, pr_num):
+  parsed_urls = downstreams.get_parsed_downstream_urls(gh, upstream_pr_num)
+  for repo_name, pulls in parsed_urls:
     if repo_name not in changelog_repos:
-      print "[DEBUG] skipping repo %s" % repo_name
+      print "[DEBUG] skipping repo %s with no CHANGELOG" % repo_name
       continue
 
     ghrepo = gh.get_repo(repo_name)
-    for _r, pr_num in pulls:
-      pr = ghrepo.get_pull(int(pr_num))
-      set_changelog_info(pr, release_note, changelog_labels)
+    for _r, prnum in pulls:
+      pr = ghrepo.get_pull(int(prnum))
+      set_changelog_info(pr, release_note, labels_to_add)
 
 def set_changelog_info(gh_pull, release_note, labels_to_add):
   """Set release note and labels on a downstream PR in Github.
 
   Args:
-    gh_pull: A github.PullRequest.PullRequest
+    gh_pull: A github.PullRequest.PullRequest handle
     release_note: String of release note text to set
-    changelog_labels: List of strings changelog labels to set
+    labels_to_add: List of strings. Changelog-related labels to add/replace.
   """
-  print "Setting changelog info for downstream PR %s" % downstream_pull.html_url
-  edited_body = strutils.set_release_note(release_note, downstream_pull.body)
-  downstream_pull.edit(body=edited_body)
+  print "Setting changelog info for downstream PR %s" % gh_pull.html_url
+  edited_body = strutils.set_release_note(release_note, gh_pull.body)
+  gh_pull.edit(body=edited_body)
 
   # Get all non-changelog-related labels
-  original_labels = [l.name for l in downstream_pull.get_labels()]
-  new_labels = [l for l in original if not l.startswith(CHANGELOG_LABEL_PREFIX)]
-  new_labels += labels_to_add
-  downstream_pull.set_labels(*new_labels)
+  labels_to_set = []
+  for l in gh_pull.get_labels():
+    if not l.name.startswith(CHANGELOG_LABEL_PREFIX):
+      labels_to_set.append(l.name)
+  labels_to_set += labels_to_add
+  gh_pull.set_labels(*labels_to_set)
 
 if __name__ == '__main__':
   downstream_urls = os.environ.get('DOWNSTREAM_REPOS').split(',')
   if len(downstream_urls) == 0:
-    puts "Skipping, no downstreams repos given to downstream changelog info for"
+    print "Skipping, no downstreams repos given to downstream changelog info for"
     sys.exit(0)
+
   gh = Github(os.environ.get('GITHUB_TOKEN'))
 
   assert len(sys.argv) == 2, "expected id filename as argument"
@@ -77,6 +83,6 @@ if __name__ == '__main__':
     pr_num = int(f.read())
 
     # TODO(emilymye): Replace this no-op print statement with code after
-    # deploying pipeline so we can verify code.
-    puts "I'll try to downstream your pr changes later! This is a pipeline test"
-    # downstream_changelog_info(gh, downstream_urls)
+    # verifying w/ pipeline.
+    print("I'll try to downstream your pr changes later! This is a pipeline test")
+    # downstream_changelog_info(gh, pr_num, downstream_urls)

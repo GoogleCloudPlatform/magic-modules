@@ -387,10 +387,8 @@ jobs:
                   path: mm-initial-pr
               get_params:
                   skip_clone: true
-
-          # TODO(emilymye): Clean up create-or-update-pr script and aggregate
-          # this task into that one
-          # (since we should do it while updating downstreams)
+          # TODO(emilymye): Aggregate or add into create-or-update-pr
+          # to group updates to downstreams
           - task: downstream-changelog-metadata
             file: magic-modules/.ci/magic-modules/downstream-changelog-metadata.yml
             params:

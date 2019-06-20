@@ -89,13 +89,12 @@ def set_release_note(release_note, body):
   return edited
 
 def find_prefixed_labels(labels, prefix):
-  """Util for filtering and cleaning labels that are changelog-relevant.
+  """Util for filtering and cleaning labels that start with a given prefix.
 
-  Given a list of labels, find only the changelog-specific labels and
-  removes the prefix indicating they are for downstreams.
+  Given a list of labels, find only the specific labels with the given prefix.
 
   Args:
-    prefix: String expected to be prefix of CHANGELOG-relevant labels
+    prefix: String expected to be prefix of relevant labels
     labels: List of string labels
 
   Return:
