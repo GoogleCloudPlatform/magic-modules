@@ -66,6 +66,19 @@ func resource<%= resource_name -%>() *schema.Resource {
             Delete: schema.DefaultTimeout(<%= timeouts.delete_sec -%> * time.Second),
         },
 
+<%      if object.schema_version -%>
+        SchemaVersion: <%= object.schema_version -%>,
+        StateUpgraders: []schema.StateUpgrader{
+<%        for v in 0..object.schema_version-1 -%>
+            {
+                Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+                Upgrade: resource<%= "#{resource_name}UpgradeV#{v}" -%>,
+                Version: <%= v -%>,
+            },
+        },
+<%        end -%>
+<%      end -%>
+
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
         Schema: map[string]*schema.Schema{
@@ -592,3 +605,14 @@ func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface
 <%= lines(compile(object.custom_code.decoder)) -%>
 }
 <% end -%>
+
+<%
+    if object.schema_version
+          if @config.legacy_name.nil?
+            terraform_name = (product_ns + object.name).underscore
+          else
+            terraform_name = @config.legacy_name + '_' + object.name.underscore
+          end
+-%>
+<%= lines(compile("templates/terraform/state_migrations/#{terraform_name}.go.erb")) -%>
+<%  end -%>
