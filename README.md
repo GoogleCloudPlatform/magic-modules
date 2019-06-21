@@ -34,9 +34,19 @@ effect, an issue solved in one tool will be solved for each other tool.
 
 ## Getting Started with Magic Modules
 
-We've prepared an interactive tutorial that you can try out with Open in Cloud
-Shell below; if you're getting set up on a local workstation, this guide serves
-as a reference.
+We've prepared a [codelab to introduce you to Magic Modules](https://codelabs.developers.google.com/codelabs/magic-modules/index.html).
+It will walk you through adding a GCP service as a product to Magic Modules.
+It's more extensive than the contents of this README, and will help you if
+you're interested in adding a new resource or if you're modifying generated ones.
+
+If you're in this repo to modify a handwritten Terraform resource, or you just
+need a refresher, you can read the shorter quickstart below.
+
+---
+
+You can try out Magic Modules immediately with Open in Cloud Shell below; if
+you're getting set up on a local workstation, this guide serves as a reference
+to help you get it set up.
 
 [![Open in Cloud Shell](http://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/GoogleCloudPlatform/magic-modules&tutorial=TUTORIAL.md)
 
