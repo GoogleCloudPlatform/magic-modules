@@ -24,7 +24,7 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-<%= to_yaml({
+<%= ansible_style_yaml({
   'module' => "#{module_name(object)}_facts",
   'description' => ["Gather facts for GCP #{object.name}"],
   'short_description' => "Gather facts for GCP #{object.name}",
@@ -50,7 +50,7 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml({
+<%= ansible_style_yaml({
   'resources' => {
     'description' => 'List of resources',
     'returned' => 'always',
