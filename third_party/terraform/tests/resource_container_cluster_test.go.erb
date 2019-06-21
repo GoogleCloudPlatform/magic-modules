@@ -1894,6 +1894,40 @@ func TestAccContainerCluster_withDatabaseEncryption(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerCluster_withResourceUsageExportConfig(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(10)
+	clusterName := fmt.Sprintf("cluster-test-%s", suffix)
+	datesetId := fmt.Sprintf("tf_test_cluster_resource_usage_%s", suffix)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, true),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+			{
+				Config: testAccContainerCluster_withResourceUsageExportConfig(clusterName, datesetId, false),
+			},
+			{
+				ResourceName:        "google_container_cluster.with_resource_usage_export_config",
+				ImportStateIdPrefix: "us-central1-a/",
+				ImportState:         true,
+				ImportStateVerify:   true,
+			},
+		},
+	})
+}
 <% end -%>
 
 func testAccCheckContainerClusterDestroy(s *terraform.State) error {
@@ -3256,6 +3290,35 @@ resource "google_container_cluster" "with_pod_security_policy" {
 		enabled = %v
 	}
 }`, clusterName, enabled)
+}
+
+func testAccContainerCluster_withResourceUsageExportConfig(clusterName, datasetId string, resourceUsage bool) string {
+	resourceUsageConfig := ""
+	if resourceUsage {
+		resourceUsageConfig = `
+		resource_usage_export_config {
+			enable_network_egress_metering = true
+
+			bigquery_destination {
+				dataset_id = "${google_bigquery_dataset.default.dataset_id}"
+			}
+		}`
+	}
+
+	config := fmt.Sprintf(`
+	resource "google_bigquery_dataset" "default" {
+		dataset_id                 = "%s"
+		description                = "gke resource usage dataset tests"
+		delete_contents_on_destroy = true
+	}
+
+	resource "google_container_cluster" "with_resource_usage_export_config" {
+		name               = "cluster-test-%s"
+		zone               = "us-central1-a"
+		initial_node_count = 1
+		%s
+	}`, datasetId, clusterName, resourceUsageConfig)
+	return config
 }
 <% end -%>
 
