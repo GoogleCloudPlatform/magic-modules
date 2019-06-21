@@ -7,6 +7,11 @@ class Kubectl(object):
     kubectl_path must be set or this will fail.
     """
     def write_file(self):
+        try:
+            import yaml
+        except ImportError:
+            self.module.fail_json(msg="Please install the pyyaml module")
+
         with open(self.module.params['kubectl_path'], 'w') as f:
             f.write(yaml.dump(self._contents()))
 

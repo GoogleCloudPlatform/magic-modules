@@ -39,7 +39,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "'my-pool' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
-    imports: ["yaml"]
     notes:
       - This module does not create any node pools (including default). Please use
         the M(gcp_container_node_pool) module to create node pools.
