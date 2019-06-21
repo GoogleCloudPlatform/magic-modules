@@ -21,6 +21,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dataset_basic"
+        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -43,6 +44,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_fhir_store_basic"
+        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -55,6 +57,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.erb
   DicomStore: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}
@@ -63,6 +66,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_dicom_store_basic"
+        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -75,6 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      custom_import: templates/terraform/custom_import/healthcare_dicom_store.go.erb
   Hl7V2Store: !ruby/object:Overrides::Terraform::ResourceOverride
     description: |
       {{description}}
@@ -83,6 +88,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "healthcare_hl7_v2_store_basic"
+        skip_test: true
         primary_resource_id: "default"
         vars:
           dataset_name: "example-dataset"
@@ -95,6 +101,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

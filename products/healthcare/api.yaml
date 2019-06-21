@@ -23,7 +23,7 @@ scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
-    name: Cloud Healthcare API (Healthcare) API
+    name: Cloud Healthcare API
     url: https://console.cloud.google.com/apis/library/healthcare.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
@@ -31,7 +31,6 @@ objects:
     kind: "healthcare#dataset"
     base_url: 'projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}'
     self_link: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
-    input: true
     update_verb: :PATCH
     update_mask: true
     description: |
@@ -54,7 +53,6 @@ objects:
       - !ruby/object:Api::Type::String
         name: "timeZone"
         update_url: 'projects/{{project}}/locations/{{location}}/datasets/{{name}}'
-        update_verb: :PATCH
         description: |
           The default timezone used by this dataset. Must be a either a valid IANA time zone name such as
           "America/New_York" or empty, which defaults to UTC. This is used for parsing times in resources
@@ -82,7 +80,7 @@ objects:
     kind: "healthcare#dicomStore"
     base_url: '{{dataset}}/dicomStores?dicomStoreId={{name}}'
     self_link: '{{dataset}}/dicomStores/{{name}}'
-    input: true
+    update_verb: :PATCH
     update_mask: true
     description: |
       A DicomStore is a datastore inside a Healthcare dataset that conforms to the DICOM
@@ -103,13 +101,14 @@ objects:
         name: 'name'
         description: |
           The resource name for the DicomStore.
+
+          ** Changing this property may recreate the Dicom store (removing all data) **
         required: true
         input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
         update_url: '{{dataset}}/dicomStores/{{name}}'
-        update_verb: :PATCH
         description: |
           User-supplied key-value pairs used to organize DICOM stores.
 
@@ -128,7 +127,6 @@ objects:
         name: notificationConfig
         required: false
         update_url: '{{dataset}}/dicomStores/{{name}}'
-        update_verb: :PATCH
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic
@@ -154,7 +152,7 @@ objects:
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Creating a fhirStore':
+        'Creating a DICOM store':
           'https://cloud.google.com/healthcare/docs/how-tos/dicom'
       api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.dicomStores'
   - !ruby/object:Api::Resource
@@ -162,7 +160,7 @@ objects:
     kind: "healthcare#fhirStore"
     base_url: '{{dataset}}/fhirStores?fhirStoreId={{name}}'
     self_link: '{{dataset}}/fhirStores/{{name}}'
-    input: true
+    update_verb: :PATCH
     update_mask: true
     description: |
       A FhirStore is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/fhir/STU3/)
@@ -183,6 +181,8 @@ objects:
         name: 'name'
         description: |
           The resource name for the FhirStore.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
         required: true
         input: true
       - !ruby/object:Api::Type::Boolean
@@ -196,7 +196,6 @@ objects:
           notifications.
         required: false
         update_url: '{{dataset}}/fhirStores/{{name}}'
-        update_verb: :PATCH
       - !ruby/object:Api::Type::Boolean
         name: 'disableReferentialIntegrity'
         description: |
@@ -205,9 +204,10 @@ objects:
           requests that will result in inconsistent state in the FHIR store. When this field is set to true, the API
           will skip referential integrity check. Consequently, operations that rely on references, such as
           Patient.get$everything, will not return all the results if broken references exist.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
         required: false
-        update_url: '{{dataset}}/fhirStores/{{name}}'
-        update_verb: :PATCH
+        input: true
       - !ruby/object:Api::Type::Boolean
         name: 'disableResourceVersioning'
         description: |
@@ -216,9 +216,10 @@ objects:
           versions to be recorded automatically. The historical versions can be fetched through the history APIs, but
           cannot be updated. If set to true, no historical versions will be kept. The server will send back errors for
           attempts to read the historical versions.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
         required: false
-        update_url: '{{dataset}}/fhirStores/{{name}}'
-        update_verb: :PATCH
+        input: true
       - !ruby/object:Api::Type::Boolean
         name: 'enableHistoryImport'
         description: |
@@ -226,14 +227,16 @@ objects:
           versions into the FHIR store. Importing resource histories creates resource interactions that appear to have
           occurred in the past, which clients may not want to allow. If set to false, history bundles within an import
           will fail with an error.
+
+          ** Changing this property may recreate the FHIR store (removing all data) **
+
+          ** This property can be changed manually in the Google Cloud Healthcare admin console without recreating the FHIR store **
         required: false
-        update_url: '{{dataset}}/fhirStores/{{name}}'
-        update_verb: :PATCH
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: labels
         required: false
         update_url: '{{dataset}}/fhirStores/{{name}}'
-        update_verb: :PATCH
         description: |
           User-supplied key-value pairs used to organize FHIR stores.
 
@@ -252,7 +255,6 @@ objects:
         name: notificationConfig
         required: false
         update_url: '{{dataset}}/fhirStores/{{name}}'
-        update_verb: :PATCH
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic
@@ -278,7 +280,7 @@ objects:
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Creating a fhirStore':
+        'Creating a FHIR store':
           'https://cloud.google.com/healthcare/docs/how-tos/fhir'
       api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.fhirStores'
   - !ruby/object:Api::Resource
@@ -286,7 +288,7 @@ objects:
     kind: "healthcare#hl7V2Store"
     base_url: '{{dataset}}/hl7V2Stores?hl7V2StoreId={{name}}'
     self_link: '{{dataset}}/hl7V2Stores/{{name}}'
-    input: true
+    update_verb: :PATCH
     update_mask: true
     description: |
       A Hl7V2Store is a datastore inside a Healthcare dataset that conforms to the FHIR (https://www.hl7.org/hl7V2/STU3/)
@@ -307,13 +309,14 @@ objects:
         name: 'name'
         description: |
           The resource name for the Hl7V2Store.
+
+          ** Changing this property may recreate the Hl7v2 store (removing all data) **
         required: true
         input: true
       - !ruby/object:Api::Type::NestedObject
         name: parserConfig
         required: false
         update_url: '{{dataset}}/hl7V2Stores/{{name}}'
-        update_verb: :PATCH
         properties:
           - !ruby/object:Api::Type::Boolean
             name: allowNullHeader
@@ -330,9 +333,8 @@ objects:
         name: labels
         required: false
         update_url: '{{dataset}}/hl7V2Stores/{{name}}'
-        update_verb: :PATCH
         description: |
-          User-supplied key-value pairs used to organize HL7V2 stores.
+          User-supplied key-value pairs used to organize HL7v2 stores.
 
           Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes, and must
           conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
@@ -349,7 +351,6 @@ objects:
         name: notificationConfig
         required: false
         update_url: '{{dataset}}/hl7V2Stores/{{name}}'
-        update_verb: :PATCH
         properties:
           - !ruby/object:Api::Type::String
             name: pubsubTopic
@@ -375,6 +376,6 @@ objects:
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
-        'Creating a hl7V2Store':
+        'Creating a HL7v2 Store':
           'https://cloud.google.com/healthcare/docs/how-tos/hl7v2'
       api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1beta1/projects.locations.datasets.hl7V2Stores'
