@@ -16,6 +16,7 @@ require 'api/product/api_reference'
 require 'api/product/version'
 require 'google/logger'
 require 'compile/core'
+require 'overrides/resources'
 require 'json'
 
 module Api
