@@ -602,7 +602,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'backends'
         description: |
-          The list of backends that serve this BackendService.
+          The set of backends that serve this BackendService.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::Enum
@@ -819,7 +819,7 @@ objects:
         min_size: 1
         max_size: 1
         description: |
-           The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
+           The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
            for health checking this BackendService. Currently at most one health
            check can be specified, and a health check is required.
 
