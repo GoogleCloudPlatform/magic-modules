@@ -12,7 +12,7 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-<%= to_yaml({
+<%= ansible_style_yaml({
   'module' => module_name(object),
   'description' => format_description(object.description),
   'short_description' => "Creates a GCP #{object.name}",
@@ -53,5 +53,5 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
+<%= ansible_style_yaml(object.all_user_properties.map { |p| returns_for_property(p) }.reduce({}, :merge)) -%>
 '''
