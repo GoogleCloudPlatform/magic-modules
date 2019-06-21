@@ -2,10 +2,17 @@
 package google
 <% unless version == 'ga' -%>
 import (
+	"fmt"
+	"path"
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/acctest"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestFhirStoreIdParsing(t *testing.T) {
+func TestAccHealthcareFhirStoreIdParsing(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
@@ -62,6 +69,164 @@ func TestFhirStoreIdParsing(t *testing.T) {
 		if fhirStoreId.fhirStoreId() != tc.ExpectedFhirStoreId {
 			t.Fatalf("bad: %s, expected FhirStore ID to be `%s` but is `%s`", tn, tc.ExpectedFhirStoreId, fhirStoreId.fhirStoreId())
 		}
+	}
+}
+
+func TestAccHealthcareFhirStore_basic(t *testing.T) {
+	t.Parallel()
+
+	datasetName := fmt.Sprintf("tf-test-dataset-%s", acctest.RandString(10))
+	fhirStoreName := fmt.Sprintf("tf-test-fhir-store-%s", acctest.RandString(10))
+	pubsubTopic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(10))
+	resourceName := "google_healthcare_fhir_store.default"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckHealthcareFhirStoreDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleHealthcareFhirStore_basic(fhirStoreName, datasetName),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testGoogleHealthcareFhirStore_update(fhirStoreName, datasetName, pubsubTopic),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testGoogleHealthcareFhirStore_basic(fhirStoreName, datasetName string) string {
+	return fmt.Sprintf(`
+resource "google_healthcare_fhir_store" "default" {
+  name                          = "%s"
+  dataset                       = "${google_healthcare_dataset.dataset.id}"
+
+  enable_update_create          = false
+  disable_referential_integrity = false
+  disable_resource_versioning   = false
+  enable_history_import         = false
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  name         = "%s"
+  location     = "us-central1"
+}
+`, fhirStoreName, datasetName)
+}
+
+func testGoogleHealthcareFhirStore_update(fhirStoreName, datasetName, pubsubTopic string) string {
+	return fmt.Sprintf(`
+resource "google_healthcare_fhir_store" "default" {
+  name                          = "%s"
+  dataset                       = "${google_healthcare_dataset.dataset.id}"
+
+  enable_update_create          = true
+
+  notification_config {
+    pubsub_topic = "${google_pubsub_topic.topic.id}"
+  }
+
+  labels = {
+    label1 = "labelvalue1"
+  }
+}
+
+resource "google_healthcare_dataset" "dataset" {
+  name         = "%s"
+  location     = "us-central1"
+}
+
+resource "google_pubsub_topic" "topic" {
+  name         = "%s"
+}
+
+`, fhirStoreName, datasetName, pubsubTopic)
+}
+
+func testAccCheckHealthcareFhirStoreDestroy(s *terraform.State) error {
+	for name, rs := range s.RootModule().Resources {
+		if rs.Type != "google_healthcare_fhir_store" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
+			continue
+		}
+
+		config := testAccProvider.Meta().(*Config)
+
+		url, err := replaceVarsForTest(rs, "{{HealthcareBasePath}}{{dataset}}/fhirStores/{{name}}")
+		if err != nil {
+			return err
+		}
+
+		_, err = sendRequest(config, "GET", url, nil)
+		if err == nil {
+			return fmt.Errorf("HealthcareFhirStore still exists at %s", url)
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		var foundResource = false
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_healthcare_fhir_store" {
+				continue
+			}
+			foundResource = true
+
+			config := testAccProvider.Meta().(*Config)
+
+			gcpResourceUri, err := replaceVarsForTest(rs, "{{dataset}}/fhirStores/{{name}}")
+			if err != nil {
+				return err
+			}
+
+			response, err := config.clientHealthcare.Projects.Locations.Datasets.FhirStores.Get(gcpResourceUri).Do()
+			if err != nil {
+				return fmt.Errorf("Unexpected failure while verifying 'updated' dataset: %s", err)
+			}
+
+			if !response.EnableUpdateCreate {
+				return fmt.Errorf("fhirStore 'EnableUpdateCreate' not updated: %s", gcpResourceUri)
+			}
+
+			// because the GET for the FHIR store resource does not return the "enableHistoryImport" flag, this value
+			// will always be false and cannot be relied upon
+
+			//if !response.EnableHistoryImport {
+			//	return fmt.Errorf("fhirStore 'EnableHistoryImport' not updated: %s", gcpResourceUri)
+			//}
+
+			if len(response.Labels) == 0 || response.Labels["label1"] != "labelvalue1" {
+				return fmt.Errorf("fhirStore labels not updated: %s", gcpResourceUri)
+			}
+
+			topicName := path.Base(response.NotificationConfig.PubsubTopic)
+			if topicName != pubsubTopic {
+				return fmt.Errorf("fhirStore 'NotificationConfig' not updated ('%s' != '%s'): %s", topicName, pubsubTopic, gcpResourceUri)
+			}
+		}
+
+		if !foundResource {
+			return fmt.Errorf("google_healthcare_fhir_store resource was missing")
+		}
+		return nil
 	}
 }
 <% else %>

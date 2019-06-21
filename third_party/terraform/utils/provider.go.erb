@@ -107,6 +107,7 @@ func Provider() terraform.ResourceProvider {
 			// Handwritten Products / Versioned / Atypical Entries
 			<% unless version == 'ga' -%>
 			// start beta-only products
+			HealthcareCustomEndpointEntryKey: HealthcareCustomEndpointEntry,
 			IAPCustomEndpointEntryKey: IAPCustomEndpointEntry,
 			// end beta-only products
 			<% end -%>
@@ -414,6 +415,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.TpuBasePath = d.Get(TpuCustomEndpointEntryKey).(string)
 
 	<% unless version == 'ga' -%>
+	config.HealthcareBasePath = d.Get(HealthcareCustomEndpointEntryKey).(string)
 	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
 	<% end -%>
 	config.CloudBillingBasePath = d.Get(CloudBillingCustomEndpointEntryKey).(string)

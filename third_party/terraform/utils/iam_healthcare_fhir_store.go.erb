@@ -86,7 +86,7 @@ func (u *HealthcareFhirStoreIamUpdater) GetResourceId() string {
 }
 
 func (u *HealthcareFhirStoreIamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-healthcare-fhir-store-%s", u.resourceId)
+	return u.resourceId
 }
 
 func (u *HealthcareFhirStoreIamUpdater) DescribeResource() string {

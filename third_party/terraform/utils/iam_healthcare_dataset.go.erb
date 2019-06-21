@@ -87,11 +87,11 @@ func (u *HealthcareDatasetIamUpdater) GetResourceId() string {
 }
 
 func (u *HealthcareDatasetIamUpdater) GetMutexKey() string {
-	return fmt.Sprintf("iam-healthcare-key-ring-%s", u.resourceId)
+	return u.resourceId
 }
 
 func (u *HealthcareDatasetIamUpdater) DescribeResource() string {
-	return fmt.Sprintf("KMS Dataset %q", u.resourceId)
+	return fmt.Sprintf("Healthcare Dataset %q", u.resourceId)
 }
 
 func resourceManagerToHealthcarePolicy(p *cloudresourcemanager.Policy) (*healthcare.Policy, error) {
