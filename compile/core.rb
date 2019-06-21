@@ -150,7 +150,7 @@ module Compile
       compiled
     end
 
-    def to_yaml(obj, options = {})
+    def ansible_style_yaml(obj, options = {})
       if obj.is_a?(::Hash)
         obj.reject { |_, v| v.nil? }.to_yaml(options).sub("---\n", '')
       else
