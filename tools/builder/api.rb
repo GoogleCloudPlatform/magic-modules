@@ -177,7 +177,7 @@ class DiscoveryResource
     res = Api::Resource.new
     res.name = @schema.dig('id')
     res.kind = @schema.dig('properties', 'kind', 'default')
-    #res.base_url = base_url_format(@methods['list']['path'])
+    res.base_url = base_url_format(@methods['list']['path'])
     res.description = @schema.dig('description')
     res.properties = properties
     res
@@ -219,7 +219,9 @@ class DiscoveryProduct
 
   def get_methods_for_resource(resource)
     return if resource.nil?
-    @results.dig 'resources', resource.pluralize.camelize(:lower), 'methods'
+    methods = @results.dig 'resources', resource.pluralize.camelize(:lower), 'methods'
+    return methods unless methods.nil?
+    @results.dig 'resources', 'namespaces', 'resources', resource.pluralize.camelize(:lower), 'methods'
   end
 
   def get_product
