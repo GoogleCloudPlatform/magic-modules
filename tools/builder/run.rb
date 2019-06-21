@@ -28,5 +28,10 @@ end.parse!
 raise "Must include a URL, object_name and product" unless options.keys.length == 3
 
 discovery = DiscoveryProduct.new(options[:url], options[:obj]).get_product
-new_handwritten = HumanApi.new(discovery, Api::Compiler.new("products/#{options[:product]}/api.yaml").run).build
+handwritten = if File.exists?("products/#{options[:product]}/api.yaml")
+                Api::Compiler.new("products/#{options[:product]}/api.yaml").run
+              else
+                nil
+              end
+new_handwritten = HumanApi.new(discovery, handwritten).build
 File.write("api.yaml", YAML.dump(new_handwritten))
