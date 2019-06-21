@@ -13,7 +13,7 @@ OptionParser.new do |opts|
   opts.banner = "api.yaml builder: run.rb [options]"
 
   opts.on("-u", "--url URL", "Discovery Doc URL") do |url|
-    options[:url] = v
+    options[:url] = url
   end
 
   opts.on("-o", "--object OBJECT", "The object you want to generate") do |obj|
@@ -23,7 +23,7 @@ OptionParser.new do |opts|
   opts.on("-p", "--product product", "The name of the product you're building") do |prod|
     options[:prod] = prod
   end
-end
+end.parse!
 
 raise "Must include a URL, object_name and product" unless options.keys.length == 3
 
