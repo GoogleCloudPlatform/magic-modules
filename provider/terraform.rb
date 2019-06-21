@@ -131,7 +131,7 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(data)
-      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
       target_folder = File.join(data.output_folder, dir)
 
       name = data.object.name.underscore
@@ -163,7 +163,7 @@ module Provider
                 end
                     .empty?
 
-      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
       target_folder = File.join(data.output_folder, dir)
 
       name = data.object.name.underscore
@@ -185,7 +185,7 @@ module Provider
 
       product_name = @api.name.underscore
       data = build_object_data(@api.objects.first, output_folder, version_name)
-      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
       target_folder = File.join(data.output_folder, dir)
 
       data.object = @api.objects.select(&:autogen_async).first
