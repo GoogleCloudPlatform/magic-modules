@@ -5,7 +5,7 @@ package google
 <%
     resource_name = product_ns + object.name
     properties = object.all_user_properties
-    api_version = version.base_url.split("/")[-1]
+    api_version = object.base_url.split("/")[-1]
     # See discussion on asset name here: https://github.com/GoogleCloudPlatform/magic-modules/pull/1520
     asset_name_template = '//' + product_ns.downcase + '.googleapis.com/' + (!object.self_link.nil? && !object.self_link.empty? ? object.self_link : object.base_url + '/{{name}}')
 %>
