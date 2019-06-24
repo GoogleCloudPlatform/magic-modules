@@ -15,13 +15,13 @@
 name: Dns
 display_name: Cloud DNS
 versions:
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://www.googleapis.com/dns/v1beta2/
-  - !ruby/object:Api::Product::Version
+    - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/dns/v1/
     default: true
+  - !ruby/object:Api::Product::Version
+    name: beta
+    base_url: https://www.googleapis.com/dns/v1beta2/
 scopes:
   - https://www.googleapis.com/auth/ndev.clouddns.readwrite
 apis_required:
