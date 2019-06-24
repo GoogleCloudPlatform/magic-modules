@@ -85,7 +85,7 @@ module Api
     end
 
     # Default to most general version that exists for the product
-    # If GA is present, use that, else beta, else alpha  
+    # If GA is present, use that, else beta, else alpha
     def default_version
       Version::ORDER.each do |ordered_version_name|
         @versions.each do |product_version|
