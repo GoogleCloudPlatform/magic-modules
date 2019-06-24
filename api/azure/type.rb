@@ -3,23 +3,24 @@ require 'api/type'
 module Api
   module Azure
     module Type
+
       class ResourceGroupName < Api::Type::String
         def validate
-          @order ||= 550
+          @order ||= 3
           super
         end
       end
 
       class Location < Api::Type::String
         def validate
-          @order ||= 600
+          @order ||= 5
           super
         end
       end
 
       class Tags < Api::Type::KeyValuePairs
         def validate
-          @order ||= 2000
+          @order ||= 20
           super
         end
       end
@@ -29,9 +30,10 @@ module Api
 
         def validate
           super
-          check_property :resource_type_name, ::String
+          check :resource_type_name, type: ::String, required: true
         end
       end
+
     end
   end
 end

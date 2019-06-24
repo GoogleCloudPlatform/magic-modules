@@ -5,13 +5,13 @@ package azurerm
 <%
     resource_name = "Arm" + object.name
     sdk_package = object.azure_sdk_definition.go_client_namespace
+    sdk_operation = object.azure_sdk_definition.read
 
     properties = object.all_user_properties
     schema_properties = properties.reject{|p| p.name == 'id' || get_property_value(p, 'hide_from_schema', false)}
-    input_properties = properties.reject(&:output)
+    input_properties = properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).nil?}
 
     flatten_queue = Array.new
-    sdk_operation = object.azure_sdk_definition.read
     sdktype = Provider::Azure::Terraform::SDK::TypeDefinitionDescriptor.new sdk_operation, false
     sdk_marshal = Provider::Azure::Terraform::SDK::MarshalDescriptor.new sdk_package, resource_name, flatten_queue, sdktype, schema_properties
 -%>
@@ -21,8 +21,8 @@ func dataSource<%= resource_name -%>() *schema.Resource {
         Read: dataSource<%= resource_name -%>Read,
 
         Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
-<%  order_azure_properties(schema_properties).each do |prop| -%>
-<%=   lines_before(build_schema_property(prop, object, 12)) -%>
+<%  order_azure_properties(schema_properties, input_properties).each do |prop| -%>
+<%=   lines_before(build_azure_schema_property(prop, object, 12, input_properties)) -%>
 
 <%  end -%>
 <%= lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>
@@ -50,7 +50,7 @@ func dataSource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{
 
     d.SetId(*resp.ID)
 
-<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
+<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.respond_to?(:post_read) && object.custom_code.post_read -%>
 
 <%= lines(build_sdk_object_to_property('resp', 'd', sdk_marshal)) -%>
 

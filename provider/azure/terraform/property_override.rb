@@ -1,39 +1,34 @@
-require 'provider/terraform/property_override'
+require 'overrides/terraform/property_override'
 
 module Provider
   module Azure
     module Terraform
-      module OverrideFields
-        attr_reader :name_in_logs
-        attr_reader :hide_from_schema
-        attr_reader :custom_schema_definition
-        attr_reader :custom_schema_get
-        attr_reader :custom_schema_set
-        attr_reader :custom_sdkfield_assign
-        include Provider::Terraform::OverrideFields
-      end
 
-      class PropertyOverride < Provider::Terraform::PropertyOverride
-        include Provider::Azure::Terraform::OverrideFields
+      class PropertyOverride < Overrides::Terraform::PropertyOverride
+        def self.attributes
+          super.concat(%i[
+            name_in_logs
+            hide_from_schema
+            custom_schema_definition
+            custom_schema_get
+            custom_schema_set
+            custom_sdkfield_assign
+          ])
+        end
+
+        attr_reader(*attributes)
 
         def validate
           super
-          @hide_from_schema ||= false
-          check_optional_property :name_in_logs, String
-          check_optional_property :hide_from_schema, :boolean
-          check_optional_property :custom_schema_definition, String
-          check_optional_property :custom_schema_get, String
-          check_optional_property :custom_schema_set, String
-          check_optional_property :custom_sdkfield_assign, String
+          check :name_in_logs, type: ::String
+          check :hide_from_schema, type: :boolean, default: false
+          check :custom_schema_definition, type: ::String
+          check :custom_schema_get, type: ::String
+          check :custom_schema_set, type: ::String
+          check :custom_sdkfield_assign, type: ::String
         end
-
-        private
-
-        def overriden
-          Provider::Azure::Terraform::OverrideFields
-        end
-
       end
+
     end
   end
 end

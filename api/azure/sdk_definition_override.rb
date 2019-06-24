@@ -11,10 +11,10 @@ module Api
 
       def validate
         super
-        check_optional_property :create, Api::Azure::SDKOperationDefinitionOverride
-        check_optional_property :read, Api::Azure::SDKOperationDefinitionOverride
-        check_optional_property :update, Api::Azure::SDKOperationDefinitionOverride
-        check_optional_property :delete, Api::Azure::SDKOperationDefinitionOverride
+        check :create, type: SDKOperationDefinitionOverride
+        check :read, type: SDKOperationDefinitionOverride
+        check :update, type: SDKOperationDefinitionOverride
+        check :delete, type: SDKOperationDefinitionOverride
       end
     end
   end

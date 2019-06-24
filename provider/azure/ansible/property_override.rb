@@ -1,34 +1,32 @@
-require 'provider/ansible/property_override'
+require 'overrides/ansible/property_override'
 
 module Provider
   module Azure
     module Ansible
-      module OverrideFields
-        attr_reader :resource_type_name
-        attr_reader :document_sample_value
-        attr_reader :custom_normalize
-        attr_reader :inline_custom_response_format
-        include Provider::Ansible::OverrideFields
-      end
 
-      class PropertyOverride < Provider::Ansible::PropertyOverride
-        include Provider::Azure::Ansible::OverrideFields
+      class PropertyOverride < Overrides::Ansible::PropertyOverride
+        # Collection of fields allowed in the PropertyOverride section for
+        # Ansible. All fields should be `attr_reader :<property>`
+        def self.attributes
+          super.concat(%i[
+            resource_type_name
+            document_sample_value
+            custom_normalize
+            inline_custom_response_format
+          ])
+        end
+
+        attr_reader(*attributes)
 
         def validate
           super
-          check_optional_property :resource_type_name, String
-          check_optional_property :document_sample_value, String
-          check_optional_property :custom_normalize, String
-          check_optional_property :inline_custom_response_format, String
+          check :resource_type_name, type: ::String
+          check :document_sample_value, type: ::String
+          check :custom_normalize, type: ::String
+          check :inline_custom_response_format, type: ::String
         end
-
-        private
-
-        def overriden
-          Provider::Azure::Ansible::OverrideFields
-        end
-
       end
+
     end
   end
 end

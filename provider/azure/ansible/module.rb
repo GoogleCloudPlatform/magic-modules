@@ -5,7 +5,7 @@ module Provider
     module Ansible
       module Module
 
-        include Azure::PythonUtils
+        include ::Azure::PythonUtils
 
         def azure_python_dict_for_property(prop, dict, object)
           orig_name = prop.name.underscore

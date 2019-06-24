@@ -13,14 +13,17 @@
 
 require 'api/object'
 require 'google/string_utils'
+require 'api/azure/type_extension'
 
 module Api
   # Represents a property type
   class Type < Api::Object::Named
+    include Api::Azure::Type::TypeExtension
     # The list of properties (attr_reader) that can be overridden in
     # <provider>.yaml.
     module Fields
       include Api::Object::Named::Properties
+      include Api::Azure::Type::Fields
 
       attr_reader :default_value
       attr_reader :description
@@ -60,10 +63,6 @@ module Api
 
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
-
-      attr_reader :order
-      attr_reader :sample_value
-      attr_reader :azure_sdk_references
     end
 
     include Fields
@@ -75,6 +74,7 @@ module Api
 
     def validate
       super
+      azure_validate
       check :description, type: ::String, required: true
       check :exclude, type: :boolean, default: false, required: true
       check :deprecation_message, type: ::String
@@ -92,12 +92,6 @@ module Api
                           default: @__resource&.update_verb
 
       check :update_url, type: ::String
-
-      check_optional_property :order, ::Integer
-      @order ||= 750
-
-      @azure_sdk_references ||= []
-      check_property :azure_sdk_references, ::Array
 
       check_default_value_property
       check_conflicts

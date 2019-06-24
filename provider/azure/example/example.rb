@@ -9,8 +9,8 @@ module Provider
 
       def validate
         super
-        check_optional_property :product, String
-        check_property :example, String
+        check :product, type: ::String
+        check :example, type: ::String, required: true
       end
     end
 
@@ -22,11 +22,10 @@ module Provider
 
       def validate
         super
-        check_property :resource, String
-        check_optional_property :description, String
-        check_optional_property :prerequisites, Array
-        check_optional_property_list :prerequisites, ExampleReference
-        check_property :properties, Hash
+        check :resource, type: ::String, required: true
+        check :description, type: ::String
+        check :prerequisites, type: ::Array, item_type: ExampleReference
+        check :properties, type: ::Hash, required: true
       end
     end
   end

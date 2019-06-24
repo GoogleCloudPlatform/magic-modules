@@ -29,7 +29,7 @@ module Provider
       end
 
       def python_dict_for_property(prop)
-        azure_python_dict_for_property {
+        azure_python_dict_for_property({
           prop.name.underscore => {
             'required' => (true if prop.required && !prop.default_value),
             'default' => prop.default_value,
@@ -44,7 +44,7 @@ module Provider
                           end
                          )
           }.reject { |_, v| v.nil? }
-        }
+        })
       end
 
       # GcpModule is acting as a dictionary and doesn't need the dict() notation on

@@ -1,0 +1,144 @@
+<%
+    sdk_package = object.azure_sdk_definition.go_client_namespace
+-%>
+<% if property.flatten_object -%>
+<%   order_properties(property.properties).each do |prop| -%>
+<%=     lines(build_azure_schema_property(prop, object, 0, data_source_input)) -%>
+<%   end -%>
+<% elsif tf_types.include?(property.class) -%>
+"<%= property.name.underscore -%>": {
+<%   if property.is_set -%>
+    Type: schema.TypeSet,
+<%   else -%>
+    Type: <%= tf_type(property) %>,
+<%   end -%>
+<%   if property.default_from_api && data_source_input.empty? -%>
+    Computed: true,
+    Optional: true,
+<%     if property.schema_config_mode_attr -%>
+    ConfigMode: schema.SchemaConfigModeAttr,
+<%     end -%>
+<%   elsif property.required && (data_source_input.empty? || data_source_input.include?(property)) -%>
+    Required: true,
+<%   elsif property.output || (!data_source_input.empty? && !data_source_input.include?(property)) -%>
+    Computed: true,
+<%   else -%>
+    Optional: true,
+<%   end -%>
+<%   if property.deprecated? -%>
+    Deprecated: "<%= property.deprecation_message %>",
+<%   end -%>
+<%   if force_new?(property, object) && data_source_input.empty? -%>
+    ForceNew: true,
+<%   end -%>
+<%   unless property.validation.nil? || property.output -%>
+<%     if !property.validation.regex.nil? && (data_source_input.empty? || data_source_input.include?(property)) -%>
+    ValidateFunc: validateRegexp(`<%= property.validation.regex -%>`),
+<%     elsif !property.validation.function.nil? && (data_source_input.empty? || data_source_input.include?(property)) -%>
+    ValidateFunc: <%= property.validation.function -%>,
+<%     end # property.validation.nil?  -%>
+<%   end # property.validation.nil?  -%>
+<%   if property.is_a?(Api::Type::Enum) && property.validation.nil? && !property.output && (data_source_input.empty? || data_source_input.include?(property)) -%>
+<%
+       enum_values = property.values
+       sdk_type = get_sdk_typedef_by_references(property.azure_sdk_references, object.azure_sdk_definition.create.request)
+-%>
+    ValidateFunc: validation.StringInSlice([]string{
+<%     enum_values.each do |val| -%>
+        <%= go_literal((sdk_type.go_enum_const_prefix + val.to_s).to_sym, sdk_package) -%>,
+<%     end -%>
+    }, false),
+<%   end -%>
+<%   if !property.diff_suppress_func.nil? -%>
+    DiffSuppressFunc: <%= property.diff_suppress_func %>,
+<%   elsif property.is_a?(Api::Type::ResourceRef) -%>
+    DiffSuppressFunc: compareSelfLinkOrResourceName,
+<%   end -%>
+<%   unless property.state_func.nil? -%>
+    StateFunc: <%= property.state_func %>,
+<%   end -%>
+<%   if property.is_a?(Api::Type::NestedObject) -%>
+<%=    lines('    MaxItems: 1,') unless property.output || (!data_source_input.empty? && !data_source_input.include?(property)) -%>
+    Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+<%     order_properties(property.properties).each do |prop| -%>
+<%=      lines(build_azure_schema_property(prop, object, 12, data_source_input)) -%>
+<%     end -%>
+        },
+    },
+<%   elsif property.is_a?(Api::Type::Array) -%>
+<%     unless property.min_size.nil? && data_source_input.empty? -%>
+    MinItems: <%= property.min_size %>,
+<%     end -%>
+<%     unless property.max_size.nil? && data_source_input.empty? -%>
+    MaxItems: <%= property.max_size %>,
+<%     end -%>
+<%     if property.item_type.is_a?(Api::Type::NestedObject) -%>
+<%       if property.is_set -%>
+    Elem: <%= namespace_property_from_object(property, object) -%>Schema(),
+<%       else -%>
+    Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+<%         order_properties(property.item_type.properties).each do |prop| -%>
+<%=          lines(build_azure_schema_property(prop, object, 12, data_source_input)) -%>
+<%         end -%>
+        },
+    },
+<%       end -%>
+<%     elsif property.item_type.is_a?(String) # Basic type like Api::Type::String -%>
+    Elem: &schema.Schema{
+        Type: <%= tf_types[property.item_type] -%>,
+    },
+<%     else # array of basic types -%>
+    Elem: &schema.Schema{
+        Type: <%= tf_types[property.item_type.class] -%>,
+    },
+<%     end -%>
+<%     if property.is_set -%>
+<%       if !property.set_hash_func.nil? -%>
+    Set: <%= property.set_hash_func -%>,
+<%       elsif property.item_type.is_a?(String) -%>
+    Set: schema.HashString,
+<%       else -%>
+    // Default schema.HashSchema is used.
+<%       end -%>
+<%     end -%>
+<%   elsif property.is_a?(Api::Type::KeyValuePairs) -%>
+    Elem: &schema.Schema{Type: schema.TypeString},
+<%   elsif property.is_a?(Api::Type::Map) -%>
+    Elem: &schema.Resource{
+        Schema: map[string]*schema.Schema{
+            "<%= property.key_name -%>": {
+                Type:     schema.TypeString,
+                Required: true,
+<%     if force_new?(property, object) -%>
+                ForceNew: true,
+<%     end -%>
+            },
+<%     order_properties(property.value_type.properties).each do |prop| -%>
+<%=      lines(build_azure_schema_property(prop, object, 16, data_source_input)) -%>
+<%     end -%>
+        },
+    },
+<%     if !property.set_hash_func.nil? -%>
+    Set: <%= property.set_hash_func -%>,
+<%     end -%>
+<%   end -%>
+<%   if property.sensitive -%>
+    Sensitive: true,
+<%   end -%>
+<%   unless property.default_value.nil? || !data_source_input.empty? -%>
+<%     if property.is_a?(Api::Type::Enum) -%>
+    Default: <%= go_literal((sdk_type.go_enum_const_prefix + property.default_value.to_s).to_sym, sdk_package) -%>,
+<%     else -%>
+    Default: <%= go_literal(property.default_value) -%>,
+<%     end -%>
+<%   end -%>
+<%   unless property.conflicting().empty? -%>
+<% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
+    ConflictsWith: <%= go_literal(conflicting_props) -%>,
+<%   end -%>
+},
+<% else -%>
+  // TODO: Property '<%= property.name -%>' of type <%= property.class -%> is not supported
+<% end # tf_types.include?(property.class) -%>

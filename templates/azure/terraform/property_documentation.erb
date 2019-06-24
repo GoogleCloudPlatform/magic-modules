@@ -1,14 +1,14 @@
 
 <%
     prefix = ""
-    prefix = "(Required) " if property.required && !property.output
-    prefix = "(Optional) " if !property.required && !property.output
+    prefix = "(Required) " if property.required && !property.output && data_source_input.empty? || property.required && data_source_input.include?(property)
+    prefix = "(Optional) " if !property.required && !property.output && data_source_input.empty? || !property.required && data_source_input.include?(property)
 
     force_new_postfix = ""
-    force_new_postfix = " Changing this forces a new resource to be created." if property.input && !property.output && !is_data_source
+    force_new_postfix = " Changing this forces a new resource to be created." if property.input && !property.output && data_source_input.empty?
 
     default_value_postfix = ""
-    default_value_postfix = " Defaults to `#{property.default_value}`." if property.default_value != nil && !property.output
+    default_value_postfix = " Defaults to `#{property.default_value}`." if property.default_value != nil && !property.output && data_source_input.empty?
 -%>
 <% if property.is_a?(Api::Type::NestedObject) || property.is_a?(Api::Type::Map) || (property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject)) -%>
 * `<%= property.name.underscore -%>` - <%= prefix %>One<%= ' or more' unless property.is_a?(Api::Type::NestedObject) -%> `<%= property.name.underscore.singularize -%>` block defined below.<%= force_new_postfix -%>

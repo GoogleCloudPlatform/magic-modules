@@ -50,6 +50,8 @@ module Overrides
         field_symbol = field_name[1..-1].to_sym
         next if check_if_exists(res, field_symbol, overrides.class.attributes)
 
+        print overrides.class.attributes
+        print "\n"
         raise "#{field_name} does not exist on #{res.name}"
       end
       # Use instance_variable_get to get excluded properties

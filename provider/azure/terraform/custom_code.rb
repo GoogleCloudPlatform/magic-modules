@@ -16,8 +16,8 @@ module Provider
 
         def validate
           super
-          check_optional_property :post_read, String
-          check_optional_property :extra_functions, String
+          check :post_read, type: ::String
+          check :extra_functions, type: ::String
         end
       end
 

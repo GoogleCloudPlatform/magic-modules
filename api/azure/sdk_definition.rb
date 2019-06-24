@@ -18,17 +18,18 @@ module Api
 
       def validate
         super
-        check_property :provider_name, String
-        check_property :go_client_namespace, String
-        check_property :go_client, String
-        check_property :python_client_namespace, String
-        check_property :python_client, String
-        check_property :create, Api::Azure::SDKOperationDefinition
-        check_property :read, Api::Azure::SDKOperationDefinition
-        check_optional_property :update, Api::Azure::SDKOperationDefinition
-        check_property :delete, Api::Azure::SDKOperationDefinition
-        check_optional_property :list_by_resource_group, Api::Azure::SDKOperationDefinition
-        check_optional_property :list_by_subscription, Api::Azure::SDKOperationDefinition
+        check :provider_name, type: ::String, required: true
+        check :go_client_namespace, type: ::String, required: true
+        check :go_client, type: ::String, required: true
+        check :python_client_namespace, type: ::String, required: true
+        check :python_client, type: ::String, required: true
+        check :create, type: Api::Azure::SDKOperationDefinition, required: true
+        check :read, type: Api::Azure::SDKOperationDefinition, required: true
+        check :update, type: Api::Azure::SDKOperationDefinition
+        check :delete, type: Api::Azure::SDKOperationDefinition, required: true
+        check :list_by_parent, type: Api::Azure::SDKOperationDefinition
+        check :list_by_resource_group, type: Api::Azure::SDKOperationDefinition
+        check :list_by_subscription, type: Api::Azure::SDKOperationDefinition
       end
 
       def filter_language!(language)
@@ -40,9 +41,9 @@ module Api
 
       def merge_overrides!(overrides)
         @create.merge_overrides!(overrides.create) if !@create.nil? && !overrides.create.nil?
-        @read.merge_overrides!(nil) if !@read.nil? && !overrides.read.nil?
-        @update.merge_overrides!(nil) if !@update.nil? && !overrides.update.nil?
-        @delete.merge_overrides!(nil) if !@delete.nil? && !overrides.delete.nil?
+        @read.merge_overrides!(overrides.read) if !@read.nil? && !overrides.read.nil?
+        @update.merge_overrides!(overrides.update) if !@update.nil? && !overrides.update.nil?
+        @delete.merge_overrides!(overrides.delete) if !@delete.nil? && !overrides.delete.nil?
       end
     end
   end

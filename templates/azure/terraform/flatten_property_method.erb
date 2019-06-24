@@ -30,7 +30,7 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
 
     result := make(map[string]interface{})
 
-<%= lines(build_sdk_object_to_property('input', 'result', sdk_marshal.clone(nil, nested_properties(property)))) -%>
+<%= lines(build_sdk_object_to_property('input', 'result', sdk_marshal.clone(nil, property.nested_properties))) -%>
 
     return []interface{}{result}
 <% elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::NestedObject) -%>
@@ -42,7 +42,7 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
     for _, item := range input {
         v := make(map[string]interface{})
 
-<%= lines(build_sdk_object_to_property('item', 'v', sdk_marshal.clone(nil, nested_properties(property)), 8)) -%>
+<%= lines(build_sdk_object_to_property('item', 'v', sdk_marshal.clone(nil, property.nested_properties), 8)) -%>
 
         results = append(results, v)
     }
@@ -96,8 +96,8 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
   return v
 <% end # property.is_a?(Api::Type::NestedObject) -%>
 }
-<% if !nested_properties(property).empty? -%>
-  <% nested_properties(property).each do |prop| -%>
+<% if !property.nested_properties.empty? -%>
+  <% property.nested_properties.each do |prop| -%>
     <%# lines(build_flatten_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% end -%>

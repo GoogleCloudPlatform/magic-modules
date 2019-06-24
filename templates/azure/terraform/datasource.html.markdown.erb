@@ -2,10 +2,10 @@
   resource_name = object.name.underscore
   terraform_name = "azurerm_" + object.name.underscore
 
-  properties = object.all_user_properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}
-  input_properties = properties.reject(&:output)
-
   sdk_operation = object.azure_sdk_definition.read
+  properties = object.all_user_properties.reject{|p| get_property_value(p, 'hide_from_schema', false)}
+  input_properties = properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).nil?}
+  output_properties = properties.select{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).nil?}
 -%>
 ---
 <%= lines(autogen_notice :yaml) -%>
@@ -50,29 +50,29 @@ output "<%= outName -%>" {
 ## Argument Reference
 
 The following arguments are supported:
-<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_property_documentation(prop, true)) -%>
+<% input_properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_azure_property_documentation(prop, input_properties)) -%>
 <% end -%>
-<% properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<% input_properties.select(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_azure_nested_property_documentation(prop, input_properties)) -%>
 <% end -%>
-<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_property_documentation(prop, true)) -%>
+<% input_properties.reject(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_azure_property_documentation(prop, input_properties)) -%>
 <% end -%>
-<% properties.reject(&:required).reject(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<% input_properties.reject(&:required).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_azure_nested_property_documentation(prop, input_properties)) -%>
 <% end -%>
 
 
 ## Attributes Reference
 
 The following attributes are exported:
-<% properties.select(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_property_documentation(prop, true)) -%>
+<% output_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_azure_property_documentation(prop, input_properties)) -%>
 <% end -%>
 
-<% properties.select(&:output).sort_by{|p| [p.order, p.name]}.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<% output_properties.sort_by{|p| [p.order, p.name]}.each do |prop| -%>
+<%= lines(build_azure_nested_property_documentation(prop, input_properties)) -%>
 <% end -%>
 <%- unless object.docs.attributes.nil? -%>
 <%= "\n" + object.docs.attributes -%>

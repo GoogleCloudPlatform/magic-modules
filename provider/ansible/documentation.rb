@@ -27,7 +27,7 @@ module Provider
       # This will eventually be converted to YAML
       def documentation_for_property(prop)
         required = prop.required && !prop.default_value ? true : false
-        azure_documentation_for_property {
+        azure_documentation_for_property({
           prop.name.underscore => {
             'description' => [
               format_description(prop.description),
@@ -53,7 +53,7 @@ module Provider
                 end
               )
           }.reject { |_, v| v.nil? }
-        }
+        })
       end
 
       # Builds out the RETURNS for a property.
@@ -68,7 +68,7 @@ module Provider
         type = 'complex' if prop.is_a?(Api::Type::NestedObject) \
                             || (prop.is_a?(Api::Type::Array) \
                             && prop.item_type.is_a?(Api::Type::NestedObject))
-        azure_returns_for_property {
+        azure_returns_for_property({
           prop.name => {
             'description' => format_description(prop.description),
             'returned' => 'success',
@@ -80,7 +80,7 @@ module Provider
               end
             )
           }.reject { |_, v| v.nil? }
-        }
+        })
       end
 
       def autogen_notice_contrib

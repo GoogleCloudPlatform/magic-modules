@@ -1,57 +1,49 @@
-require 'provider/ansible/resource_override'
+require 'overrides/ansible/resource_override'
 require 'provider/azure/example/example'
 
 module Provider
   module Azure
     module Ansible
-      module OverrideProperties
-        attr_reader :inttests
-        attr_reader :examples
-        include Provider::Ansible::OverrideProperties
-      end
 
-      class ResourceOverride < Provider::Ansible::ResourceOverride
-        include Provider::Azure::Ansible::OverrideProperties
+      class IntegrationTestDefinition < ExampleReference
+        attr_reader :delete_example
+        attr_reader :info_by_name_example
+        attr_reader :info_by_resource_group_example
 
         def validate
           super
-          default_value_property :examples, []
-          check_optional_property :examples, Array
-          check_optional_property_list :examples, Provider::Azure::ExampleReference
-          default_value_property :inttests, []
-          check_optional_property :inttests, Array
-          check_optional_property_list :inttests, IntegrationTestDefinition
-        end
-
-        class IntegrationTestDefinition < ExampleReference
-          attr_reader :delete_example
-          attr_reader :info_by_name_example
-          attr_reader :info_by_resource_group_example
-
-          def validate
-            super
-            check_property :delete_example, String
-            check_optional_property :info_by_name_example, String
-            check_optional_property :info_by_resource_group_example, String
-          end
-        end
-
-        class DocumentExampleReference < ExampleReference
-          attr_reader :resource_name_hints
-  
-          def validate
-            super
-            check_optional_property :resource_name_hints, Hash
-            check_optional_property_hash :resource_name_hints, String, String
-          end
-        end
-
-        private
-
-        def overriden
-          Provider::Azure::Ansible::OverrideProperties
+          check :delete_example, type: ::String, required: true
+          check :info_by_name_example, type: ::String
+          check :info_by_resource_group_example, type: ::String
         end
       end
+
+      class DocumentExampleReference < ExampleReference
+        attr_reader :resource_name_hints
+
+        def validate
+          super
+          check_ext :resource_name_hints, type: ::Hash, key_type: ::String, item_type: ::String
+        end
+      end
+
+      class ResourceOverride < Overrides::Ansible::ResourceOverride
+        def self.attributes
+          super.concat(%i[
+            inttests
+            examples
+          ])
+        end
+
+        attr_reader(*attributes)
+
+        def validate
+          super
+          check :examples, type: ::Array, default: [], item_type: DocumentExampleReference
+          check :inttests, type: ::Array, default: [], item_type: IntegrationTestDefinition
+        end
+      end
+
     end
   end
 end

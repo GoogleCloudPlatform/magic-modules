@@ -12,7 +12,7 @@ module Api
 
       # Azure-extended validate function of Api::Resource::validate
       def azure_validate
-        check_property :azure_sdk_definition, Api::Azure::SDKDefinition
+        check :azure_sdk_definition, type: Api::Azure::SDKDefinition, required: true
       end
 
     end

@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'google/yaml_validator'
-require 'overrides/azure/resources'
+require 'overrides/azure/resources_extension'
 
 module Overrides
   # All overrides act as a Hash under-the-hood.
@@ -83,9 +83,8 @@ module Overrides
 
   # Override to an Api::Resource in api.yaml
   class ResourceOverride < OverrideResource
-    include Overrides::Azure::ResourceOverride
+    include Overrides::Azure::ResourceOverrideExtension
     def apply(_resource)
-      azure_apply(_resource)
       self
     end
   end

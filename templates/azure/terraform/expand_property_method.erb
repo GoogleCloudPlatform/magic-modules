@@ -1,17 +1,3 @@
-<%# The license inside this block applies to this file.
-  # Copyright 2017 Google Inc.
-  # Licensed under the Apache License, Version 2.0 (the "License");
-  # you may not use this file except in compliance with the License.
-  # You may obtain a copy of the License at
-  #
-  #     http://www.apache.org/licenses/LICENSE-2.0
-  #
-  # Unless required by applicable law or agreed to in writing, software
-  # distributed under the License is distributed on an "AS IS" BASIS,
-  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  # See the License for the specific language governing permissions and
-  # limitations under the License.
--%>
 <%
     property = descriptor.property
     sdk_marshal = descriptor.sdkmarshal
@@ -31,7 +17,7 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
     original := raw.(map[string]interface{})
     transformed := make(map[string]interface{})
 
-<%      nested_properties(property.value_type).each do |prop| -%>
+<%      property.value_type.nested_properties.each do |prop| -%>
 <%        next if prop.name == property.key_name -%>
     transformed<%= titlelize_property(prop) -%>, err := expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%><%= titlelize_property(prop) -%>(original["<%= Google::StringUtils.underscore(prop.name) -%>"], d, config)
     if err != nil {
@@ -46,7 +32,7 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
   return m, nil
 }
 
-<%      nested_properties(property.value_type).each do |prop| -%>
+<%      property.value_type.nested_properties.each do |prop| -%>
 <%        next if prop.name == property.key_name -%>
 <%#      lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%      end -%>
@@ -64,8 +50,8 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
 <%    elsif tf_types.include?(property.class) -%>
 func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go_type(property) -%>) *<%= '[]' if property.is_a?(Api::Type::Array) -%><%= sdk_marshal.package -%>.<%= sdk_marshal.sdktype.go_type_name -%> {
 <%
-        if !nested_properties(property).empty?
-          nested_properties = nested_properties(property)
+        if !property.nested_properties.empty?
+          nested_properties = property.nested_properties
           if property.is_set
 -%>
     v := input.(*schema.Set).List()

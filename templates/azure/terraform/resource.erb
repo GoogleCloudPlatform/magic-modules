@@ -1,17 +1,3 @@
-<%- # the license inside this block applies to this file
-# Copyright 2017 Google Inc.
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
--%>
 <%= lines(autogen_notice :go) -%>
 
 package azurerm
@@ -31,8 +17,6 @@ package azurerm
     api_name_lower = String.new(product_ns)
     api_name_lower[0] = api_name_lower[0].downcase
     api_client_name = api_name_lower.downcase
-    has_project = object.base_url.include?("{{project}}")
-    has_self_link = (object.exports || []).any? { |e| e.is_a?(Api::Type::SelfLink)}
 -%>
 <%
     resource_name = "Arm" + object.name
@@ -83,7 +67,7 @@ func resource<%= resource_name -%>() *schema.Resource {
 
         Schema: map[string]*schema.Schema{<% # This block will remove the line-ending here -%>
 <%          order_azure_properties(schema_properties).each do |prop| -%>
-<%=             lines_before(build_schema_property(prop, object, 12)) -%>
+<%=             lines_before(build_azure_schema_property(prop, object, 12)) -%>
 
 <%          end -%>
 <%=         lines(compile(object.custom_code.extra_schema_entry)) if object.custom_code.extra_schema_entry -%>

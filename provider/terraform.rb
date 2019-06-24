@@ -21,7 +21,7 @@ require 'overrides/terraform/resource_override'
 require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
-require 'provider/azure/terraform'
+require 'provider/azure/terraform_extension'
 
 module Provider
   # Code generator for Terraform Resources that manage Google Cloud Platform
@@ -30,7 +30,7 @@ module Provider
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
-    include Provider::Azure::Terraform
+    include Provider::Azure::TerraformExtension
 
     # FileTemplate with Terraform specific fields
     class TerraformFileTemplate < Provider::FileTemplate
@@ -72,7 +72,7 @@ module Provider
     # Converts between the Magic Modules type of an object and its type in the
     # TF schema
     def tf_types
-      azure_tf_types {
+      azure_tf_types({
         Api::Type::Boolean => 'schema.TypeBool',
         Api::Type::Double => 'schema.TypeFloat',
         Api::Type::Integer => 'schema.TypeInt',
@@ -87,7 +87,7 @@ module Provider
         Api::Type::KeyValuePairs => 'schema.TypeMap',
         Api::Type::Map => 'schema.TypeSet',
         Api::Type::Fingerprint => 'schema.TypeString'
-      }
+      })
     end
 
     def updatable?(resource, properties)
@@ -133,53 +133,62 @@ module Provider
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(data)
-      dir = data.version == 'beta' ? 'google-beta' : 'google'
-      target_folder = File.join(data.output_folder, dir)
+      # TODO: Azure switch
+      azure_generate_resource data
 
-      name = data.object.name.underscore
-      product_name = data.product.name.underscore
-      filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
+      # dir = data.version == 'beta' ? 'google-beta' : 'google'
+      # target_folder = File.join(data.output_folder, dir)
 
-      data.generate('templates/terraform/resource.erb', filepath, self)
-      generate_documentation(data)
+      # name = data.object.name.underscore
+      # product_name = data.product.name.underscore
+      # filepath = File.join(target_folder, "resource_#{product_name}_#{name}.go")
+
+      # data.generate('templates/terraform/resource.erb', filepath, self)
+      # generate_documentation(data)
     end
 
     def generate_documentation(data)
-      target_folder = data.output_folder
-      target_folder = File.join(target_folder, 'website', 'docs', 'r')
-      FileUtils.mkpath target_folder
-      name = data.object.name.underscore
-      product_name = data.product.name.underscore
+      # TODO: Azure switch
+      azure_generate_documentation data
 
-      filepath =
-        File.join(target_folder, "#{product_name}_#{name}.html.markdown")
-      data.generate('templates/terraform/resource.html.markdown.erb', filepath, self)
+      # target_folder = data.output_folder
+      # target_folder = File.join(target_folder, 'website', 'docs', 'r')
+      # FileUtils.mkpath target_folder
+      # name = data.object.name.underscore
+      # product_name = data.product.name.underscore
+
+      # filepath =
+      #   File.join(target_folder, "#{product_name}_#{name}.html.markdown")
+      # data.generate('templates/terraform/resource.html.markdown.erb', filepath, self)
     end
 
     def generate_resource_tests(data)
-      return if data.object.examples
-                    .reject(&:skip_test)
-                    .reject do |e|
-                  @api.version_obj_or_default(data.version) \
-                < @api.version_obj_or_default(e.min_version)
-                end
-                    .empty?
+      # TODO: Azure switch
+      azure_generate_resource_tests data
 
-      dir = data.version == 'beta' ? 'google-beta' : 'google'
-      target_folder = File.join(data.output_folder, dir)
+      # return if data.object.examples
+      #               .reject(&:skip_test)
+      #               .reject do |e|
+      #             @api.version_obj_or_default(data.version) \
+      #           < @api.version_obj_or_default(e.min_version)
+      #           end
+      #               .empty?
 
-      name = data.object.name.underscore
-      product_name = data.product.name.underscore
-      filepath =
-        File.join(
-          target_folder,
-          "resource_#{product_name}_#{name}_generated_test.go"
-        )
+      # dir = data.version == 'beta' ? 'google-beta' : 'google'
+      # target_folder = File.join(data.output_folder, dir)
 
-      data.product = data.product.name
-      data.resource_name = data.object.name.camelize(:upper)
-      data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
-                    filepath, self)
+      # name = data.object.name.underscore
+      # product_name = data.product.name.underscore
+      # filepath =
+      #   File.join(
+      #     target_folder,
+      #     "resource_#{product_name}_#{name}_generated_test.go"
+      #   )
+
+      # data.product = data.product.name
+      # data.resource_name = data.object.name.camelize(:upper)
+      # data.generate('templates/terraform/examples/base_configs/test_file.go.erb',
+      #               filepath, self)
     end
 
     def generate_operation(output_folder, _types, version_name)

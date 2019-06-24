@@ -15,13 +15,11 @@ module Api
         @request ||= Hash.new
         @response ||= Hash.new
 
-        check_property :go_func_name, String
-        check_property :python_func_name, String
-        check_optional_property :async, :boolean
-        check_property :request, Hash
-        check_property_hash :request, String, Api::Azure::SDKTypeDefinition
-        check_property :response, Hash
-        check_property_hash :response, String, Api::Azure::SDKTypeDefinition
+        check :go_func_name, type: ::String, required: true
+        check :python_func_name, type: ::String, required: true
+        check :async, type: :boolean
+        check_ext :request, type: ::Hash, key_type: ::String, item_type: SDKTypeDefinition, required: true
+        check_ext :response, type: ::Hash, key_type: ::String, item_type: SDKTypeDefinition, required: true
       end
 
       def filter_language!(language)

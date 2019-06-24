@@ -1,15 +1,18 @@
+
 <%
   if property.nested_properties? && (property.flatten_object.nil? || !property.flatten_object)
 -%>
-The `<%= property.name.underscore -%>` block <%= if property.output then "contains" else "supports" end -%>:
+---
+
+The `<%= property.name.underscore.singularize -%>` block <%= if property.output || !data_source_input.empty? then "contains" else "supports" end -%> the following:
 <%- if property.is_a?(Api::Type::Map) %>
 * `<%= property.key_name.underscore -%>` - (Required) The identifier for this object. Format specified above.
 <% end -%>
 <% property.nested_properties.each do |prop| -%>
-<%= lines(build_property_documentation(prop)) -%>
+<%= lines(build_azure_property_documentation(prop, data_source_input)) -%>
 <% end -%>
 
 <% property.nested_properties.each do |prop| -%>
-<%= lines(build_nested_property_documentation(prop)) -%>
+<%= lines(build_azure_nested_property_documentation(prop, data_source_input)) -%>
 <% end -%>
 <% end -%>

@@ -15,18 +15,15 @@ module Api
 
       def validate
         super
-        @empty_value_sensitive ||= false
-
-        check_optional_property :id_portion, String
-        check_optional_property :applicable_to, Array
-        check_property :empty_value_sensitive, :boolean
-        check_optional_property_list_oneof :applicable_to, ['go', 'python'], String
-        check_optional_property :go_variable_name, String
-        check_optional_property :go_field_name, String
-        check_optional_property :go_type_name, String
-        check_optional_property :python_parameter_name, String
-        check_optional_property :python_variable_name, String
-        check_optional_property :python_field_name, String
+        check :id_portion, type: ::String
+        check_ext :applicable_to, type: ::Array, item_type: ::String, item_allowed: ['go', 'python'], default: ['go', 'python']
+        check :empty_value_sensitive, type: :boolean, default: false
+        check :go_variable_name, type: ::String
+        check :go_field_name, type: ::String
+        check :go_type_name, type: ::String
+        check :python_parameter_name, type: ::String
+        check :python_variable_name, type: ::String
+        check :python_field_name, type: ::String
       end
 
       def merge_overrides!(overrides)
@@ -63,9 +60,8 @@ module Api
 
         def validate
           super
-          @go_enum_const_prefix ||= ''
-          check_optional_property :go_enum_type_name, String
-          check_optional_property :go_enum_const_prefix, String
+          check :go_enum_type_name, type: ::String
+          check :go_enum_const_prefix, type: ::String, default: ''
         end
       end
 

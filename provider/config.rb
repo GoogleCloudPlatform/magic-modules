@@ -14,14 +14,14 @@
 require 'api/object'
 require 'compile/core'
 require 'overrides/runner'
-require 'provider/azure/config'
+require 'provider/azure/config_extension'
 
 module Provider
   # Settings for the provider
   class Config < Api::Object
     include Compile::Core
+    include Provider::Azure::ConfigExtension
     extend Compile::Core
-    include Provider::Azure::Config
 
     # Overrides for datasources
     attr_reader :datasources
@@ -67,7 +67,7 @@ module Provider
                                     config.resource_override,
                                     config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
-      azure_parse cfg_file
+      config.azure_parse cfg_file
       config.validate
       api.validate
       [api, config]

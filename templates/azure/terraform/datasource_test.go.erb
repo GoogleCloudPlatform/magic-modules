@@ -15,8 +15,9 @@ import (
     terraform_name = "azurerm_" + object.name.underscore
     azure_client_name = object.azure_sdk_definition.go_client
 
+    sdk_operation = object.azure_sdk_definition.read
     properties = object.all_user_properties
-    input_properties = properties.reject(&:output)
+    input_properties = properties.reject{|p| get_applicable_reference(p.azure_sdk_references, sdk_operation.request).nil?}
     datasource_props = input_properties.map{|p| [p.name.underscore, "${#{terraform_name}.test.#{p.name.underscore}}"]}.to_h
 
     test_hcls = Hash.new

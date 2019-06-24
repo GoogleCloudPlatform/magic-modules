@@ -13,10 +13,12 @@
 
 require 'google/logger'
 require 'yaml'
+require 'azure/yaml_validator_extension'
 
 module Google
   # A helper class to validate contents coming from YAML files.
   class YamlValidator
+    include Azure::YamlValidatorExtension
     class << self
       def parse(content)
         # TODO(nelsonjr): Allow specifying which symbols to restrict it further.
