@@ -114,7 +114,7 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 
 	config := testAccProvider.Meta().(*Config)
 
-	url, err := replaceVarsForTest(rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
+	url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
 	if err != nil {
 		return err
 	}
