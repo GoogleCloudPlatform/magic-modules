@@ -211,12 +211,12 @@ class DiscoveryProduct
 
   def initialize(url, object)
     @results = send_request(url)
-    @object = object
+    @object = object.split(',').map(&:strip)
   end
 
   def resources
     @results['schemas'].map do |name, _|
-      next if name != @object
+      next unless @object.include?(name)
 
       get_resource(name).resource
     end.compact

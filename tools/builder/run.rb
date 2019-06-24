@@ -40,7 +40,7 @@ end.parse!
 
 raise 'Must include a URL, object_name and product' unless options.keys.length == 3
 
-discovery = DiscoveryProduct.new(options[:url], options[:obj]).get_product
+discovery = DiscoveryProduct.new(options[:url], options[:obj]).product
 handwritten = if File.exist?("products/#{options[:product]}/api.yaml")
                 Api::Compiler.new("products/#{options[:product]}/api.yaml").run
               end
