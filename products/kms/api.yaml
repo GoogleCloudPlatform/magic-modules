@@ -84,6 +84,10 @@ objects:
         required: true
         input: true
         url_param_only: true
+      - !ruby/object:Api::Type::KeyValuePairs
+        name: 'labels'
+        description: |
+          Labels with user-defined metadata to apply to this reosure.
       - !ruby/object:Api::Type::Enum
         name: 'purpose'
         description: |
