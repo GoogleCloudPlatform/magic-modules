@@ -17,6 +17,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     properties:
       location: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["region", "zone"]
+      kubectlPath: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
+      kubectlContext: !ruby/object:Overrides::Ansible::PropertyOverride
+        exclude: true
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
@@ -37,8 +41,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "'my-pool' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
           "'my-pool' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
-  KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
   Cluster: !ruby/object:Overrides::Ansible::ResourceOverride
     notes:
@@ -53,10 +55,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         aliases: ['zone']
     post_create: |
       delete_default_node_pool(module)
+    post_action: |
+      if module.params.get('kubectl_path'):
+          Kubectl(module).write_file()
     provider_helpers:
       - 'products/container/helpers/python/provider_cluster.py'
-  KubeConfig: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
+      - 'products/container/helpers/python/kubectl.py'
   NodePool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
