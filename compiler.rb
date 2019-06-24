@@ -26,6 +26,7 @@ ENV['TZ'] = 'UTC'
 require 'api/compiler'
 require 'google/logger'
 require 'optparse'
+require 'pathname'
 require 'provider/ansible'
 require 'provider/inspec'
 require 'provider/terraform'
@@ -41,6 +42,7 @@ provider_name = nil
 force_provider = nil
 types_to_generate = []
 version = 'ga'
+override_dir = nil
 
 ARGV << '-h' if ARGV.empty?
 Google::LOGGER.level = Logger::INFO
@@ -71,6 +73,9 @@ OptionParser.new do |opt|
   opt.on('-v', '--version VERSION', 'API version to generate') do |v|
     version = v
   end
+  opt.on('-r', '--override OVERRIDE', 'Directory containing api.yaml overrides') do |r|
+    override_dir = r
+  end
   opt.on('-h', '--help', 'Show this message') do
     puts opt
     exit
@@ -88,11 +93,18 @@ raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
 if all_products
   product_names = []
-  Dir["products/**/#{provider_name}.yaml"].each do |file_path|
+  Dir['products/**/api.yaml'].each do |file_path|
     product_names.push(File.dirname(file_path))
   end
 
-  raise "No #{provider_name}.yaml files found. Check provider/engine name." if product_names.empty?
+  if override_dir
+    Dir["#{override_dir}/products/**/api.yaml"].each do |file_path|
+      product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
+      product_names.push(product) unless product_names.include? product
+    end
+  end
+
+  raise 'No api.yaml files found. Check provider/engine name.' if product_names.empty?
 end
 
 start_time = Time.now
@@ -100,13 +112,31 @@ start_time = Time.now
 provider = nil
 # rubocop:disable Metrics/BlockLength
 product_names.each do |product_name|
+  product_override_path = ''
+  provider_override_path = ''
+  product_override_path = File.join(override_dir, product_name, 'api.yaml') if override_dir
   product_yaml_path = File.join(product_name, 'api.yaml')
-  raise "Product '#{product_name}' does not have an api.yaml file" \
-    unless File.exist?(product_yaml_path)
-
+  provider_override_path = File.join(override_dir, product_name, "#{provider_name}.yaml") \
+    if override_dir
   provider_yaml_path = File.join(product_name, "#{provider_name}.yaml")
-  raise "Product '#{product_name}' does not have a #{provider_name}.yaml file" \
-    unless File.exist?(provider_yaml_path)
+
+  unless File.exist?(product_yaml_path) || File.exist?(product_override_path)
+    raise "Product '#{product_name}' does not have an api.yaml file"
+  end
+
+  product_yaml = File.read(product_yaml_path)
+
+  if File.exist?(product_override_path)
+    orig = YAML.load_file(product_yaml_path)
+    result = orig.merge(YAML.load_file(product_override_path))
+    product_yaml = result.to_yaml
+  end
+
+  unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
+    Google::LOGGER.info "Skipping product '#{product_name}' as no #{provider_name}.yaml file exists"
+    next
+  end
+  # provider_yaml = File.read(provider_yaml_path)
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
@@ -115,7 +145,7 @@ product_names.each do |product_name|
   Google::LOGGER.info \
     "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
 
-  product_api = Api::Compiler.new(product_yaml_path).run
+  product_api = Api::Compiler.new(product_yaml).run
   product_api.validate
   pp product_api if ENV['COMPILER_DEBUG']
 
