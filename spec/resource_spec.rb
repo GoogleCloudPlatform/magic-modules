@@ -16,7 +16,7 @@ require 'api/object'
 
 describe Api::Resource do
   context 'uses the correct API version' do
-    let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:product) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
     before { product.validate }
 
