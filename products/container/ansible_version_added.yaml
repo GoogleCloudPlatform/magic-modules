@@ -7,6 +7,10 @@
 :regular:
   :Cluster:
     :version_added: '2.6'
+    :kubectlPath:
+      :version_added: '2.9'
+    :kubectlContext:
+      :version_added: '2.9'
     :name:
       :version_added: '2.6'
     :description:
