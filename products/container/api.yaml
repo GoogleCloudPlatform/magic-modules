@@ -65,7 +65,7 @@ objects:
 
           The file will not be created if this path is unset.
 
-          Any existing file at this path will be completely overridden.
+          Any existing file at this path will be completely overwritten.
 
           This requires the PyYaml library.
         required: true
