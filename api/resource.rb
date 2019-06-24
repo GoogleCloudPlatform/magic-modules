@@ -274,7 +274,7 @@ module Api
 
     def min_version
       if @min_version.nil?
-        @__product.versions.first
+        @__product.default_version
       else
         @__product.version_obj(@min_version)
       end

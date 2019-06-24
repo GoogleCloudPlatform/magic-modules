@@ -84,6 +84,17 @@ module Api
       end
     end
 
+    # Default to most general version that exists for the product
+    # If GA is present, use that, else beta, else alpha  
+    def default_version
+      Version::ORDER.each do |ordered_version_name|
+        @versions.each do |product_version|
+          return product_version if ordered_version_name == product_version.name
+        end
+      end
+      raise "Unable to find default_version for product #{product_full_name}"
+    end
+
     def version_obj(name)
       @versions.each do |v|
         return v if v.name == name

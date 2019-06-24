@@ -15,7 +15,7 @@
 name: Dns
 display_name: Cloud DNS
 versions:
-    - !ruby/object:Api::Product::Version
+  - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/dns/v1/
     default: true
