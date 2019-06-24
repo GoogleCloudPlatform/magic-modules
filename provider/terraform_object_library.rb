@@ -17,8 +17,8 @@ module Provider
   # Code generator for a library converting terraform state to gcp objects.
   class TerraformObjectLibrary < Provider::Terraform
     def generate(output_folder, types, version_name, _product_path, _dump_yaml)
-      @version_name = version_name
-      generate_objects(output_folder, types, version_name)
+      version = @api.version_obj_or_default(version_name)
+      generate_objects(output_folder, types, version.name)
     end
 
     def generate_object(object, output_folder, version_name)
