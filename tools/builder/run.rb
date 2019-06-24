@@ -29,7 +29,7 @@ OptionParser.new do |opts|
     options[:url] = url
   end
 
-  opts.on('-o', '--object OBJECT', 'The object you want to generate') do |obj|
+  opts.on('-o', '--object OBJECT', 'The objects you want to generate (comma-separated)') do |obj|
     options[:obj] = obj
   end
 
