@@ -18,7 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/dns/v1/
-    default: true
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://www.googleapis.com/dns/v1beta2/

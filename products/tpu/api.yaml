@@ -18,7 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://tpu.googleapis.com/v1/
-    default: true
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 async: !ruby/object:Api::Async

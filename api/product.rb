@@ -62,7 +62,7 @@ module Api
 
       check :async, type: Api::Async
 
-      validate_versions
+      check :versions, type: Array, item_type: Api::Product::Version, required: true
     end
 
     # ====================
@@ -177,24 +177,6 @@ module Api
       end
 
       JSON.generate(json_out, opts)
-    end
-
-    private
-
-    def validate_versions
-      check :versions, type: Array, item_type: Api::Product::Version, required: true
-
-      # Confirm that at most one version is the default
-      defaults = 0
-      @versions.each do |v|
-        defaults += 1 if v.default
-      end
-
-      raise "Product '#{@name}' must specify at most one default API version" \
-        if defaults > 1
-
-      raise "Product '#{@name}' must specify a default API version" \
-        if defaults.zero? && @versions.length > 1
     end
   end
 end
