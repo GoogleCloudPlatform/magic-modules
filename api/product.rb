@@ -84,14 +84,6 @@ module Api
       end
     end
 
-    def default_version
-      @versions.each do |v|
-        return v if v.default
-      end
-
-      return @versions.last if @versions.length == 1
-    end
-
     def version_obj(name)
       @versions.each do |v|
         return v if v.name == name
@@ -101,7 +93,17 @@ module Api
     end
 
     def version_obj_or_default(name)
-      exists_at_version(name) ? version_obj(name) : default_version
+      return version_obj(name) if exists_at_version(name)
+
+      # versions should fall back to the closest version to them that exists
+      name ||= Version::ORDER[0]
+      lower_versions = Version::ORDER[0..Version::ORDER.index(name)]
+
+      lower_versions.reverse_each do |version|
+        return version_obj(version) if exists_at_version(version)
+      end
+
+      raise "Could not find object for version #{name} and product #{product_full_name}"
     end
 
     def exists_at_version_or_lower(name)
