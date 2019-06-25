@@ -16,7 +16,7 @@ $LOAD_PATH.unshift File.dirname(__FILE__)
 
 # Run from compiler dir so all references are relative to the compiler
 # executable. This allows the following command line:
-#   puppet-google-compute$ ../puppet-codegen/compiler products/compute $PWD
+#   ruby compiler.rb -p products/compute -e ansible -o build/ansible
 Dir.chdir(File.dirname(__FILE__))
 
 # Our default timezone is UTC, to avoid local time compromise test code seed
