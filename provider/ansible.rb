@@ -23,13 +23,13 @@ require 'provider/ansible/version_added'
 require 'provider/ansible/facts_override'
 require 'overrides/ansible/resource_override'
 require 'overrides/ansible/property_override'
-require 'provider/azure/ansible'
+require 'provider/azure/ansible_extension'
 
 module Provider
   # Ansible Provider module containing helper functions and the Ansible Provider
   # implementation "Core"
   module Ansible
-    include Provider::Azure::Ansible
+    include Provider::Azure::AnsibleExtension
     # Code generator for Ansible Cookbooks that manage Google Cloud Platform
     # resources.
     # TODO(alexstephen): Split up class into multiple modules.
@@ -61,7 +61,8 @@ module Provider
         @api.set_properties_based_on_version(version)
 
         # Generate version_added_file
-        @version_added = build_version_added
+        # TODO: Azure switch
+        # @version_added = build_version_added
         version
       end
 
@@ -234,57 +235,66 @@ module Provider
       end
 
       def generate_resource(data)
-        target_folder = data.output_folder
-        name = module_name(data.object)
-        path = File.join(target_folder,
-                         "lib/ansible/modules/cloud/google/#{name}.py")
-        data.generate(
-          data.object.template || 'templates/ansible/resource.erb',
-          path,
-          self
-        )
+        # TODO: Azure switch
+        azure_generate_resource(data)
+
+        # target_folder = data.output_folder
+        # name = module_name(data.object)
+        # path = File.join(target_folder,
+        #                  "lib/ansible/modules/cloud/google/#{name}.py")
+        # data.generate(
+        #   data.object.template || 'templates/ansible/resource.erb',
+        #   path,
+        #   self
+        # )
       end
 
       def generate_resource_tests(data)
-        prod_name = data.object.name.underscore
-        path = ["products/#{data.product.api_name}",
-                "examples/ansible/#{prod_name}.yaml"].join('/')
+        # TODO: Azure switch
+        azure_generate_resource_tests(data)
 
-        return unless data.object.has_tests
-        # Unlike other providers, all resources will not be built at once or
-        # in close timing to each other (due to external PRs).
-        # This means that examples might not be built out for every resource
-        # in a GCP product.
-        return unless File.file?(path)
+        # prod_name = data.object.name.underscore
+        # path = ["products/#{data.product.api_name}",
+        #         "examples/ansible/#{prod_name}.yaml"].join('/')
 
-        target_folder = data.output_folder
+        # return unless data.object.has_tests
+        # # Unlike other providers, all resources will not be built at once or
+        # # in close timing to each other (due to external PRs).
+        # # This means that examples might not be built out for every resource
+        # # in a GCP product.
+        # return unless File.file?(path)
 
-        name = module_name(data.object)
-        path = File.join(target_folder,
-                         "test/integration/targets/#{name}/tasks/main.yml")
-        data.generate(
-          'templates/ansible/integration_test.erb',
-          path,
-          self
-        )
+        # target_folder = data.output_folder
 
-        # Generate 'defaults' file that contains variables.
-        path = File.join(target_folder,
-                         "test/integration/targets/#{name}/defaults/main.yml")
-        data.generate(
-          'templates/ansible/integration_test_variables.erb',
-          path,
-          self
-        )
+        # name = module_name(data.object)
+        # path = File.join(target_folder,
+        #                  "test/integration/targets/#{name}/tasks/main.yml")
+        # data.generate(
+        #   'templates/ansible/integration_test.erb',
+        #   path,
+        #   self
+        # )
+
+        # # Generate 'defaults' file that contains variables.
+        # path = File.join(target_folder,
+        #                  "test/integration/targets/#{name}/defaults/main.yml")
+        # data.generate(
+        #   'templates/ansible/integration_test_variables.erb',
+        #   path,
+        #   self
+        # )
       end
 
       def compile_datasource(data)
-        target_folder = data.output_folder
-        name = "#{module_name(data.object)}_facts"
-        data.generate('templates/ansible/facts.erb',
-                      File.join(target_folder,
-                                "lib/ansible/modules/cloud/google/#{name}.py"),
-                      self)
+        # TODO: Azure switch
+        azure_compile_datasource(data)
+
+        # target_folder = data.output_folder
+        # name = "#{module_name(data.object)}_facts"
+        # data.generate('templates/ansible/facts.erb',
+        #               File.join(target_folder,
+        #                         "lib/ansible/modules/cloud/google/#{name}.py"),
+        #               self)
       end
 
       def generate_objects(output_folder, types, version_name)

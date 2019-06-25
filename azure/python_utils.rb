@@ -7,7 +7,7 @@ module Azure
     # Azure extended `python_literal` function (see 'google/python_utils.rb')
     # It will treat Azure SDK enumerations differently
     def azure_python_literal(value, **opts)
-      "'#{value.to_s.underscore}'" if value.is_a?(Symbol)
+      return "'#{value.to_s.underscore}'" if value.is_a?(Symbol)
       python_literal(value, opts)
     end
 

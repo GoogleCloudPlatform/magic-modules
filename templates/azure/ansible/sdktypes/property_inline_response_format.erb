@@ -1,5 +1,5 @@
 <%
-    py_var = python_variable_name(property, sdk_operation)
+    py_var = azure_python_variable_name(property, sdk_operation)
     py_fields = []
     sdk_ref = get_applicable_reference(property.azure_sdk_references, sdk_operation.response)
     unless sdk_ref.nil?

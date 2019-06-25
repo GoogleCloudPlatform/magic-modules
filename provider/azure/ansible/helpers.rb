@@ -36,6 +36,13 @@ module Provider
           property.required || !property.default_value.nil?
         end
 
+        def order_azure_properties(properties, data_source_input = [])
+          special_props = properties.select{|p| p.name == 'id' || p.name == 'name' || p.name == 'location' || p.name == 'resourceGroupName' || p.name == 'resourceGroup' || data_source_input.include?(p)}
+          other_props = properties.reject{|p| p.name == 'id' || p.name == 'name' || p.name == 'location' || p.name == 'resourceGroupName' || p.name == 'resourceGroup' || data_source_input.include?(p)}
+          sorted_special = special_props.sort_by{|p| p.name == 'resourceGroup' || p.name == 'resourceGroupName' ? 0 : p.order }
+          sorted_special + other_props.sort_by(&:name)
+        end
+
         def word_wrap_for_yaml(lines, width = 160)
           wrapped = Array.new
           lines.each do |line|

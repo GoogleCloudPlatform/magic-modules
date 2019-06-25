@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright (C) 2019 <%= lines(@config.manifest.get('author', object)) -%>
+# Copyright (C) 2019 <%= lines(@config.author) -%>
 #
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
@@ -10,68 +10,16 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 <%
-  metadata_version = quote_string(@config.manifest.get('metadata_version',
-                                                       object))
-  supported_by = quote_string(@config.manifest.get('supported_by', object))
-
-  uri_props = object.uri_properties.reject { |para| para.nil? || para.name == 'name' }
--%>
-<%
     python_sdk_client = object.azure_sdk_definition.python_client.split(".")[0]
     python_sdk_sub_client = object.azure_sdk_definition.python_client.split(".")[1]
 
-    input_properties = object.all_user_properties.reject{|p| p.output || get_applicable_reference(p.azure_sdk_references, object.azure_sdk_definition.read.request).nil?}.sort_by{|p| [p.order, p.name]}
-    output_properties = object.all_user_properties.sort_by{|p| [p.order, p.name]}
+    is_data_source = true
+
+    sdk_operation = object.azure_sdk_definition.read.request
+    input_properties = order_azure_properties(object.all_user_properties.reject{|p| !is_tags?(p) && (p.output || get_applicable_reference(p.azure_sdk_references, sdk_operation).nil?)})
+    output_properties = order_azure_properties(object.all_user_properties)
 -%>
-ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
-                    'status': <%= @config.manifest.get('status', object) -%>,
-                    'supported_by': <%= supported_by -%>}
-
-DOCUMENTATION = '''
----
-module: <%= module_name(object) -%>_info
-version_added: "<%= @config.manifest.get('version_added', object).to_f -%>"
-short_description: Gather info for Azure <%= lines(object.name.titlecase) -%>
-description:
-    - Gather info for Azure <%= object.name.titlecase -%>.
-
-<%
-    if is_tags_defined?(object)
-      tags_prop = get_tags_property(object).clone
-      tags_prop.instance_variable_set(:@description, "Limit results by providing a list of tags. Format tags as 'key' or 'key:value'.")
-    end
--%>
-<%= to_yaml({
-  'options' => [
-    input_properties.map{|p| documentation_for_property(p, object)},
-    (documentation_for_property(tags_prop, object) if is_tags_defined?(object))
-  ].flatten.compact.reduce({}, :merge)
-}) -%>
-
-extends_documentation_fragment:
-    - azure
-
-author:
-    - "<%= @config.manifest.get('author', object) -%>"
-'''
-
-<%  unless object.examples.empty? -%>
-<%    code = object.examples.map{|exref| lines(build_documentation_yaml_from_example(exref))} -%>
-EXAMPLES = '''
-<%=   lines(indent(code.join("\n"), 2)) -%>
-'''
-<% end -%>
-
-RETURN = '''
-<%= lines(word_wrap_for_yaml(to_yaml({
-  'items' => {
-    'description' => 'List of items',
-    'returned' => 'always',
-    'type' => 'complex',
-    'contains' => output_properties.map{|p| returns_for_property(p, object)}.reduce({}, :merge)
-  }
-}).split("\n"))) -%>
-'''
+<%= lines(compile('templates/azure/ansible/documentation.erb')) -%>
 
 from ansible.module_utils.azure_rm_common import AzureRMModuleBase
 
@@ -88,8 +36,7 @@ class AzureRM<%= object.name -%>Info(AzureRMModuleBase):
     def __init__(self):
         # define user inputs into argument
         self.module_arg_spec = dict(
-<%= indent_list(input_properties.map{|p| python_dict_for_property(p, object)}, 12, false) -%>
-<%= ",\n" + indent(python_dict_for_property(get_tags_property(object), object), 12) if is_tags_defined?(object) -%>
+<%= indent_list(input_properties.map{|p| azure_python_dict_for_property(p, object)}, 12, false) -%>
 <%= "\n" -%>        )
         # store the results of the module operation
         self.results = dict(

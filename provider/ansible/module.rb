@@ -12,7 +12,7 @@
 # limitations under the License.
 
 require 'google/python_utils'
-require 'provider/azure/ansible/module'
+require 'provider/azure/ansible/module_extension'
 
 module Provider
   module Ansible
@@ -20,7 +20,7 @@ module Provider
     # AnsibleModule is responsible for input validation.
     module Module
       include Google::PythonUtils
-      include Provider::Azure::Ansible::Module
+      include Provider::Azure::Ansible::ModuleExtension
       # Returns an array of all base options for a given property.
       def ansible_module(properties)
         properties.reject(&:output)
@@ -29,7 +29,7 @@ module Provider
       end
 
       def python_dict_for_property(prop)
-        azure_python_dict_for_property({
+        {
           prop.name.underscore => {
             'required' => (true if prop.required && !prop.default_value),
             'default' => prop.default_value,
@@ -44,7 +44,7 @@ module Provider
                           end
                          )
           }.reject { |_, v| v.nil? }
-        })
+        }
       end
 
       # GcpModule is acting as a dictionary and doesn't need the dict() notation on

@@ -30,6 +30,7 @@ module Provider
       class ResourceOverride < Overrides::Ansible::ResourceOverride
         def self.attributes
           super.concat(%i[
+            azure_sdk_definition
             inttests
             examples
           ])
@@ -41,6 +42,13 @@ module Provider
           super
           check :examples, type: ::Array, default: [], item_type: DocumentExampleReference
           check :inttests, type: ::Array, default: [], item_type: IntegrationTestDefinition
+        end
+
+        def apply(_resource)
+          filter_azure_sdk_language _resource, "python"
+          merge_azure_sdk_definition _resource, @azure_sdk_definition
+          @azure_sdk_definition = nil
+          super
         end
       end
 

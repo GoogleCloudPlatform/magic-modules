@@ -1,0 +1,66 @@
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+
+DOCUMENTATION = '''
+---
+module: <%= azure_module_name(object) -%><%= is_data_source ? lines('_info') : "\n" -%>
+version_added: "<%= @config.version_added.to_f -%>"
+short_description: <%= lines(object.description) -%>
+description:
+    - <%= lines(is_data_source ? object.description + '.' : "Create, update and delete instance of Azure #{object.name.titlecase}.") -%>
+
+<%= lines(word_wrap_for_yaml(to_yaml({
+  'options' => [
+    input_properties.reject{|p| is_tags?(p) && !is_data_source}.map{|p| azure_documentation_for_property(p, object, is_data_source)},
+    ({
+      'state' => {
+        'description' => [
+          "Assert the state of the #{object.name.titlecase}.",
+          "Use 'present' to create or update a #{object.name.titlecase} and 'absent' to delete it."
+        ],
+        'default' => 'present',
+        'choices' => ['present', 'absent'],
+      },
+    } if !is_data_source)
+  ].flatten.compact.reduce({}, :merge),
+  'notes' => (
+    [
+      ("API Reference: U(#{object.references.api})" if object.references.api),
+      object.references.guides.map { |guide, link| "#{guide}: U(#{link})" }
+    ].flatten.compact if object.references
+  )
+}, { :line_width => -1, :indentation => 4 }).split("\n"))) -%>
+
+extends_documentation_fragment:
+    - azure
+    <%= lines('- azure_tags') if is_tags_defined?(object) && !is_data_source -%>
+
+author:
+    - "<%= @config.author -%>"
+'''
+
+<%  unless object.examples.empty? -%>
+<%    code = object.examples.map{|exref| lines(build_documentation_yaml_from_example(exref))} -%>
+EXAMPLES = '''
+<%=   lines(indent(code.join("\n"), 2)) -%>
+'''
+<% end -%>
+
+<%
+    output_hash = output_properties.map{|p| azure_returns_for_property(p, object)}.reduce({}, :merge)
+    output_hash = {
+      'items' => {
+        'description' => 'List of items',
+        'returned' => 'always',
+        'type' => 'complex',
+        'contains' => output_hash
+      }
+    } if is_data_source
+-%>
+RETURN = '''
+<%= lines(word_wrap_for_yaml(to_yaml(
+    output_hash,
+    { :line_width => -1, :indentation => 4 }).split("\n"))) -%>
+'''

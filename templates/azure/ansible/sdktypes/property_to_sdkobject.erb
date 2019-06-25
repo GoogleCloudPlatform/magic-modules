@@ -5,7 +5,7 @@
       relative_refs = ref[sdk_marshal.parent_reference.length..-1].split('/')
       next if relative_refs.length == 0
 
-      var = python_variable_name(prop, sdk_marshal.operation)
+      var = azure_python_variable_name(prop, sdk_marshal.operation)
       sdk_type = sdk_marshal.operation.request[ref]
       need_normalize = (relative_refs.length > 1)
       if relative_refs.length == 1

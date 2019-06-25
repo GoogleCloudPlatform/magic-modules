@@ -12,7 +12,7 @@ module Api
         def azure_validate
           default_order = 10
           default_order = 1 if @name == "name"
-          default_order = 0 if @name == "id"
+          default_order = -1 if @name == "id"
           check :order, type: ::Integer, default: default_order
           check :azure_sdk_references, type: ::Array, item_type: ::String, required: true
         end
