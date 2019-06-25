@@ -191,10 +191,6 @@ type Config struct {
 
 	StorageTransferBasePath string
 	clientStorageTransfer   *storagetransfer.Service
-	clientStorageTransfer        *storagetransfer.Service
-	<% unless version == 'ga' -%>
-	clientHealthcare						 *healthcare.Service
-	<% end -%>
 
 	bigtableClientFactory *BigtableClientFactory
 }
@@ -555,18 +551,12 @@ func (c *Config) LoadAndValidate() error {
 		return err
 	}
 	c.clientStorageTransfer.UserAgent = userAgent
-  c.clientStorageTransfer.BasePath = storageTransferClientBasePath
+  	c.clientStorageTransfer.BasePath = storageTransferClientBasePath
 
 	<% unless version == 'ga' -%>
-	log.Printf("[INFO] Instantiating IAP Client...")
-	c.clientHealthcare, err = healthcare.NewService(context, option.WithHTTPClient(client))
-	if err != nil {
-		return err
-	}
-	c.clientHealthcare.UserAgent = userAgent
-
 	healthcareClientBasePath := removeBasePathVersion(c.HealthcareBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Healthcare client for path %s", healthcareClientBasePath)
+
 	c.clientHealthcare, err = healthcare.NewService(context, option.WithHTTPClient(client))
 	if err != nil {
 		return err
