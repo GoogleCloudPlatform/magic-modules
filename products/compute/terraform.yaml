@@ -1271,6 +1271,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
         schema_config_mode_attr: true
         send_empty_value: true
+        description: |
+          {{description}}This field uses attr-as-block mode to avoid breaking
+          users during the 0.12 upgrade. See [the Attr-as-Block page](https://www.terraform.io/docs/configuration/attr-as-blocks.html)
+          for more details.
       secondaryIpRanges.rangeName: !ruby/object:Overrides::Terraform::PropertyOverride
         validation: !ruby/object:Provider::Terraform::Validation
           function: 'validateGCPName'
