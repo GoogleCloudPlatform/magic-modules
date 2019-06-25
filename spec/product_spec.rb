@@ -42,74 +42,6 @@ describe Api::Product do
     it { is_expected.to raise_error(StandardError, /Missing 'versions'/) }
   end
 
-  context 'requires at most one default version' do
-    subject do
-      lambda do
-        product('name: "foo"',
-                'scopes:',
-                '  - link/to/scope',
-                'name: "Bar"',
-                'versions:',
-                '  - !ruby/object:Api::Product::Version',
-                '    name: ga',
-                '    base_url: "http://foo/var/v1"',
-                '    default: true',
-                '  - !ruby/object:Api::Product::Version',
-                '    name: beta',
-                '    base_url: "http://foo/var/beta"',
-                '    default: true',
-                'objects:',
-                '  - !ruby/object:Api::Resource',
-                '    kind: foo#resource',
-                '    base_url: myres/',
-                '    description: foo',
-                '    name: "res1"',
-                '    properties:',
-                '      - !ruby/object:Api::Type',
-                '        name: var',
-                '        description: desc').validate
-      end
-    end
-
-    it do
-      is_expected.to raise_error(StandardError,
-                                 /must specify at most one default/)
-    end
-  end
-
-  context 'requires at least one default version' do
-    subject do
-      lambda do
-        product('name: "foo"',
-                'scopes:',
-                '  - link/to/scope',
-                'name: "Bar"',
-                'versions:',
-                '  - !ruby/object:Api::Product::Version',
-                '    name: ga',
-                '    base_url: "http://foo/var/v1"',
-                '  - !ruby/object:Api::Product::Version',
-                '    name: beta',
-                '    base_url: "http://foo/var/beta"',
-                'objects:',
-                '  - !ruby/object:Api::Resource',
-                '    kind: foo#resource',
-                '    base_url: myres/',
-                '    description: foo',
-                '    name: "res1"',
-                '    properties:',
-                '      - !ruby/object:Api::Type',
-                '        name: var',
-                '        description: desc').validate
-      end
-    end
-
-    it do
-      is_expected.to raise_error(StandardError,
-                                 /must specify a default/)
-    end
-  end
-
   context 'requires objects' do
     subject do
       lambda do
@@ -122,6 +54,69 @@ describe Api::Product do
       end
     end
     it { is_expected.to raise_error(StandardError, /Missing 'objects'/) }
+  end
+
+  context 'lowest version' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: ga',
+              '    base_url: "ga_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: alpha',
+              '    base_url: "alpha"').lowest_version.name
+    end
+    it { is_expected.to eq 'ga' }
+  end
+
+  context 'lowest version beta' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: alpha',
+              '    base_url: "alpha"').lowest_version.name
+    end
+    it { is_expected.to eq 'beta' }
+  end
+
+  context 'closest version object to ga' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: ga',
+              '    base_url: "ga_url"').version_obj_or_closest('ga').name
+    end
+    it { is_expected.to eq 'ga' }
+  end
+
+  context 'closest version object to alpha' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: ga',
+              '    base_url: "ga_url"').version_obj_or_closest('alpha').name
+    end
+    it { is_expected.to eq 'beta' }
   end
 
   context 'only allows Resources as objects' do

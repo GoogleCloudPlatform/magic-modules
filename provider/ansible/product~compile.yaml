@@ -16,7 +16,7 @@
 <% unless config.nil? -%>
 <%
   return unless api.objects.first.__product
-  version = api.version_obj_or_default(version_name)
+  version = api.version_obj_or_closest(version_name)
   # Overrides have not been assembled yet.
   overrides = config.overrides
   excludes = overrides.instance_variables

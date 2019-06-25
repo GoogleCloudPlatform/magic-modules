@@ -17,7 +17,6 @@ display_name: Google Kubernetes Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    default: true
     base_url: https://container.googleapis.com/v1/
   - !ruby/object:Api::Product::Version
     name: beta

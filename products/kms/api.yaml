@@ -18,7 +18,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://cloudkms.googleapis.com/v1/
-    default: true
 scopes:
   - https://www.googleapis.com/auth/cloudkms
 apis_required:
