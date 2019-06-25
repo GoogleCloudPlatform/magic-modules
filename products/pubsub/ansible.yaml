@@ -30,12 +30,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
         does_not_exist: |
           "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Subscription: !ruby/object:Overrides::Ansible::ResourceOverride
-    transport: !ruby/object:Overrides::Ansible::Transport
-      encoder: encode_request
-      decoder: decode_request
-    provider_helpers:
-      - 'products/pubsub/helpers/python/provider_subscription.py'
 files: !ruby/object:Provider::Config::Files
   compile:
 <%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>

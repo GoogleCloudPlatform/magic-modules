@@ -3,7 +3,7 @@
   prop_names = p.pattern.scan(/{{([a-z]*)}}/).flatten
   props = object.all_user_properties.select { |p| prop_names.include?(p.name) }
 -%>
-def <%= p.name.underscore -%>_pattern(name, params):
+def <%= p.name.underscore -%>_pattern(name, module):
     if name is None:
         return
 
@@ -17,8 +17,9 @@ def <%= p.name.underscore -%>_pattern(name, params):
           '<%= url_prop.name -%>': replace_resource_dict(module.params['<%= url_prop.name -%>'], '<%= url_prop.imports -%>'),
 <% end -%>
         }
+        name = <%= build_url(p.pattern) -%>.format(**formatted_params)
 <% else -%>
-        name = <%= build_url(p.pattern) -%>.format(**params)
+        name = <%= build_url(p.pattern) -%>.format(**module.params)
 <% end -%>
 
     return name
