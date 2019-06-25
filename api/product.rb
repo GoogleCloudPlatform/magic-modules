@@ -84,15 +84,15 @@ module Api
       end
     end
 
-    # Default to most general version that exists for the product
+    # Most general version that exists for the product
     # If GA is present, use that, else beta, else alpha
-    def default_version
+    def lowest_version
       Version::ORDER.each do |ordered_version_name|
         @versions.each do |product_version|
           return product_version if ordered_version_name == product_version.name
         end
       end
-      raise "Unable to find default_version for product #{product_full_name}"
+      raise "Unable to find lowest version for product #{product_full_name}"
     end
 
     def version_obj(name)
@@ -103,7 +103,9 @@ module Api
       raise "API version '#{name}' does not exist for product '#{@name}'"
     end
 
-    def version_obj_or_default(name)
+    # Get the version of the object specified by the version given if present
+    # Or else fall back to the closest version in the chain defined by Version::ORDER
+    def version_obj_or_closest(name)
       return version_obj(name) if exists_at_version(name)
 
       # versions should fall back to the closest version to them that exists

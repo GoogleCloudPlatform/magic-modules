@@ -269,7 +269,7 @@ module Provider
     end
 
     def api_version_setup(version_name)
-      version = @api.version_obj_or_default(version_name)
+      version = @api.version_obj_or_closest(version_name)
       @api.set_properties_based_on_version(version)
       version
     end
@@ -325,7 +325,7 @@ module Provider
                                      @config.property_override)
       @api.validate
 
-      version = @api.version_obj_or_default(version_name)
+      version = @api.version_obj_or_closest(version_name)
       @api.set_properties_based_on_version(version)
       @api.objects.each do |object|
         if !types.empty? && !types.include?(object.name)

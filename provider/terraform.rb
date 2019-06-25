@@ -158,8 +158,8 @@ module Provider
       return if data.object.examples
                     .reject(&:skip_test)
                     .reject do |e|
-                  @api.version_obj_or_default(data.version) \
-                < @api.version_obj_or_default(e.min_version)
+                  @api.version_obj_or_closest(data.version) \
+                < @api.version_obj_or_closest(e.min_version)
                 end
                     .empty?
 
