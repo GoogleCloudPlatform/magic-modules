@@ -20,7 +20,7 @@ class Kubectl(object):
     """
     def _contents(self):
         token = self._auth_token()
-        endpoint = "https://{}".format(self.fetch["endpoint"])
+        endpoint = "https://%s" % self.fetch["endpoint"]
         context = self.module.params.get('kubectl_context')
         if not context:
             context = self.module.params['name']
