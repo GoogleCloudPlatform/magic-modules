@@ -941,41 +941,6 @@ objects:
         message is returned. Not specifying this field will result in uptime checks
         running from all regions.
       item_type: Api::Type::String
-    - !ruby/object:Api::Type::Boolean
-      name: isInternal
-      description: If this is true, then checks are made only from the 'internal_checkers'.
-        If it is false, then checks are made only from the 'selected_regions'. It is
-        an error to provide 'selected_regions' when is_internal is true, or to provide
-        'internal_checkers' when is_internal is false.
-    - !ruby/object:Api::Type::Array
-      name: internalCheckers
-      description: The internal checkers that this check will egress from. If is_internal
-        is true and this list is empty, the check will egress from all the InternalCheckers
-        configured for the project that owns this CheckConfig.
-      item_type: !ruby/object:Api::Type::NestedObject
-        properties:
-        - !ruby/object:Api::Type::String
-          name: gcpZone
-          description: The GCP zone the uptime check should egress from. Only respected
-            for internal uptime checks, where internal_network is specified.
-        - !ruby/object:Api::Type::String
-          name: peerProjectId
-          description: The GCP project_id where the internal checker lives. Not necessary
-            the same as the workspace project.
-        - !ruby/object:Api::Type::String
-          name: name
-          description: A unique resource name for this InternalChecker. The format is projects/[PROJECT_ID]/internalCheckers/[INTERNAL_CHECKER_ID].
-            PROJECT_ID is the stackdriver workspace project for the uptime check config associated
-            with the internal checker.
-        - !ruby/object:Api::Type::String
-          name: network
-          description: 'The GCP VPC network (https://cloud.google.com/vpc/docs/vpc)
-            where the internal resource lives (ex: "default").'
-        - !ruby/object:Api::Type::String
-          name: displayName
-          description: The checker's human-readable name. The display name should be
-            unique within a Stackdriver Workspace in order to make it easier to identify;
-            however, uniqueness is not enforced.
     - !ruby/object:Api::Type::NestedObject
       name: httpCheck
       description: Contains information needed to make an HTTP or HTTPS check.
