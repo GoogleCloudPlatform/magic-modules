@@ -1,10 +1,12 @@
-def name_partial_to_full(name, params):
+<% object.all_user_properties.select(&:pattern).each do |p| -%>
+def <%= p.name.underscore -%>_pattern(name, params):
     if name is None:
         return
 
-    url = r<%= lines(build_url(regex_url(object.name_pattern))) -%>
+    regex = r<%= lines(build_url(regex_url(p.pattern))) -%>
 
-    if not re.match(url, name):
-        name = <%= build_url(object.name_pattern) -%>.format(**params)
+    if not re.match(regex, name):
+        name = <%= build_url(p.pattern) -%>.format(**params)
 
     return name
+<% end -%>
