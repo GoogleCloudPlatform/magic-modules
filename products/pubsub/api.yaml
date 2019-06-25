@@ -40,6 +40,7 @@ objects:
         required: true
         description: 'Name of the topic.'
         input: true
+        pattern: 'projects/{{project}}/topics/{{name}}'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
         description: |
