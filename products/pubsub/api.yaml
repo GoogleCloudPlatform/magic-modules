@@ -40,6 +40,14 @@ objects:
         required: true
         description: 'Name of the topic.'
         input: true
+      - !ruby/object:Api::Type::String
+        name: 'kmsKeyName'
+        description: |
+          The resource name of the Cloud KMS CryptoKey to be used to protect access
+          to messsages published on this topic.
+          
+          The expected format is `projects/*/locations/*/keyRings/*/cryptoKeys/*`
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
