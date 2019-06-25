@@ -60,6 +60,9 @@ module Api
 
       # Can only be overriden - we should never set this ourselves.
       attr_reader :new_type
+
+      # A pattern that maps expected user input to expected API input.
+      attr_reader :pattern
     end
 
     include Fields
@@ -88,6 +91,7 @@ module Api
                           default: @__resource&.update_verb
 
       check :update_url, type: ::String
+      check :pattern, type: String
 
       check_default_value_property
       check_conflicts
