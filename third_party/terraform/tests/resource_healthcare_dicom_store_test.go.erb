@@ -159,7 +159,7 @@ func testAccCheckHealthcareDicomStoreDestroy(s *terraform.State) error {
 
 		config := testAccProvider.Meta().(*Config)
 
-		url, err := replaceVarsForTest(rs, "{{HealthcareBasePath}}{{dataset}}/dicomStores/{{name}}")
+		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/dicomStores/{{name}}")
 		if err != nil {
 			return err
 		}
@@ -184,7 +184,7 @@ func testAccCheckGoogleHealthcareDicomStoreUpdate(pubsubTopic string) resource.T
 
 			config := testAccProvider.Meta().(*Config)
 
-			gcpResourceUri, err := replaceVarsForTest(rs, "{{dataset}}/dicomStores/{{name}}")
+			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/dicomStores/{{name}}")
 			if err != nil {
 				return err
 			}
