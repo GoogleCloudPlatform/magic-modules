@@ -91,7 +91,7 @@ module Api
                           default: @__resource&.update_verb
 
       check :update_url, type: ::String
-      check :pattern, type: String
+      check :pattern, type: ::String
 
       check_default_value_property
       check_conflicts

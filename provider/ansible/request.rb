@@ -61,9 +61,9 @@ module Provider
         end
       end
 
-      def request_output(prop, hash_name, module_name, allow_pattern = True)
+      def request_output(prop, hash_name, module_name, allow_pattern = true)
         # If type has a pattern, use the function.
-        return "#{prop.name.underscore}_pattern(#{request_output(prop, hash_name, module_name, False)})" \
+        return "#{prop.name.underscore}_pattern(#{request_output(prop, hash_name, module_name, false)})" \
           if prop.pattern && allow_pattern
 
         return "response.get(#{quote_string(prop.name)})" \
