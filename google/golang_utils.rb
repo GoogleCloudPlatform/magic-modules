@@ -24,11 +24,9 @@ module Google
     # quotes becomes a ruby string without quotes unless you explicitly set
     # quotes in the string like "\"foo\"" which is not a pattern we want to
     # see in our yaml config files.
-    def go_literal(value, go_package = nil)
-      if value.is_a?(String)
+    def go_literal(value)
+      if value.is_a?(String) || value.is_a?(Symbol)
         "\"#{value}\""
-      elsif value.is_a?(Symbol)
-        "string(#{go_package}#{'.' unless go_package.nil?}#{value})"
       elsif value.is_a?(Numeric)
         value.to_s
       elsif value.is_a?(Array) && value.all? { |v| v.is_a?(String) || v.is_a?(Symbol) }

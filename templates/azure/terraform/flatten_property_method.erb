@@ -98,7 +98,7 @@ func flatten<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input *<%= 
 }
 <% if !property.nested_properties.empty? -%>
   <% property.nested_properties.each do |prop| -%>
-    <%# lines(build_flatten_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+    <%# lines(build_azure_flatten_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
   <% end -%>
 <% end -%>
 <% else -%>

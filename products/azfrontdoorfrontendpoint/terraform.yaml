@@ -1,8 +1,0 @@
---- !ruby/object:Provider::Terraform::Config
-name: azfrontdoorfrontendpoint
-overrides: !ruby/object:Provider::ResourceOverrides
-  FrontDoorFrontendEndpoint: !ruby/object:Provider::Azure::Terraform::ResourceOverride
-    properties:
-      name: !ruby/object:Provider::Terraform::PropertyOverride
-        validation: !ruby/object:Provider::Terraform::Validation
-          function: validate.NoEmptyStrings

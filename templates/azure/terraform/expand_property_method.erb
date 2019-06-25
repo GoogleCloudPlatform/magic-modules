@@ -34,7 +34,7 @@ func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v in
 
 <%      property.value_type.nested_properties.each do |prop| -%>
 <%        next if prop.name == property.key_name -%>
-<%#      lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+<%#      lines(build_azure_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%      end -%>
 <%    elsif property.is_a?(Api::Type::KeyValuePairs) -%>
 func expand<%= sdk_marshal.resource -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *Config) (map[string]string, error) {
@@ -91,7 +91,7 @@ func expand<%= sdk_marshal.resource -%><%= descriptor.func_name -%>(input <%= go
 }
 
 <%        nested_properties.each do |prop| -%>
-<%#        lines(build_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
+<%#        lines(build_azure_expand_method(sdk_marshal.resource + titlelize_property(property), prop), 1) -%>
 <%        end -%>
 <%      elsif property.is_a?(Api::Type::Array) && property.item_type.is_a?(Api::Type::ResourceRef) -%>
   l := v.([]interface{})

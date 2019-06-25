@@ -45,7 +45,7 @@
 -%>
     ValidateFunc: validation.StringInSlice([]string{
 <%     enum_values.each do |val| -%>
-        <%= go_literal((sdk_type.go_enum_const_prefix + val.to_s).to_sym, sdk_package) -%>,
+        <%= azure_go_literal((sdk_type.go_enum_const_prefix + val.to_s).to_sym, sdk_package) -%>,
 <%     end -%>
     }, false),
 <%   end -%>
@@ -129,14 +129,14 @@
 <%   end -%>
 <%   unless property.default_value.nil? || !data_source_input.empty? -%>
 <%     if property.is_a?(Api::Type::Enum) -%>
-    Default: <%= go_literal((sdk_type.go_enum_const_prefix + property.default_value.to_s).to_sym, sdk_package) -%>,
+    Default: <%= azure_go_literal((sdk_type.go_enum_const_prefix + property.default_value.to_s).to_sym, sdk_package) -%>,
 <%     else -%>
-    Default: <%= go_literal(property.default_value) -%>,
+    Default: <%= azure_go_literal(property.default_value) -%>,
 <%     end -%>
 <%   end -%>
 <%   unless property.conflicting().empty? -%>
 <% conflicting_props = property.conflicting().map(&:name).map(&:underscore) -%>
-    ConflictsWith: <%= go_literal(conflicting_props) -%>,
+    ConflictsWith: <%= azure_go_literal(conflicting_props) -%>,
 <%   end -%>
 },
 <% else -%>

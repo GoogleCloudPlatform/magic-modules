@@ -29,16 +29,31 @@ module Provider
                         object: object
       end
 
+      # Transforms a Cloud API representation of a property into a Terraform
+      # schema representation.
+      def build_flatten_method(prefix, property)
+        compile_template 'templates/terraform/flatten_property_method.erb',
+                         prefix: prefix,
+                         property: property
+      end
+
+      # Transforms a Terraform schema representation of a property into a
+      # representation used by the Cloud API.
+      def build_expand_method(prefix, property)
+        compile_template 'templates/terraform/expand_property_method.erb',
+                         prefix: prefix,
+                         property: property
+      end
+
       def build_expand_resource_ref(var_name, property)
         compile_template 'templates/terraform/expand_resource_ref.erb',
                          var_name: var_name,
                          property: property
       end
 
-      def build_property_documentation(property, is_data_source = false)
+      def build_property_documentation(property)
         compile_template 'templates/terraform/property_documentation.erb',
-                         property: property,
-                         is_data_source: is_data_source
+                         property: property
       end
 
       def build_nested_property_documentation(property)
@@ -51,6 +66,7 @@ module Provider
       private
 
       def autogen_notice_contrib
+        # TODO: Azure Switch
         ['Please read more about how to change this file at',
          'https://github.com/Azure/magic-module-specs']
       end
@@ -62,8 +78,7 @@ module Provider
       def compile_template(template_file, data)
         ctx = binding
         data.each { |name, value| ctx.local_variable_set(name, value) }
-        result = compile_file(ctx, template_file).join("\n")
-        indent result, data[:indentation] || 0
+        azure_compile_template(compile_file(ctx, template_file).join("\n"), data)
       end
     end
   end

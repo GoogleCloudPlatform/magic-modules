@@ -264,13 +264,13 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%  while !expand_queue.empty? -%>
 <%    descriptor = expand_queue.shift -%>
-<%=   lines(build_expand_method(descriptor)) -%>
+<%=   lines(build_azure_expand_method(descriptor)) -%>
 
 <%  end -%>
 
 <%  while !flatten_queue.empty? -%>
 <%    descriptor = flatten_queue.shift -%>
-<%=   lines(build_flatten_method(descriptor)) -%>
+<%=   lines(build_azure_flatten_method(descriptor)) -%>
 
 <%  end -%>
 

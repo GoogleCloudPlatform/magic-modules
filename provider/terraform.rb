@@ -21,6 +21,7 @@ require 'overrides/terraform/resource_override'
 require 'overrides/terraform/property_override'
 require 'provider/terraform/sub_template'
 require 'google/golang_utils'
+require 'azure/golang_utils'
 require 'provider/azure/terraform_extension'
 
 module Provider
@@ -30,6 +31,7 @@ module Provider
     include Provider::Terraform::Import
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
+    include ::Azure::GolangUtils
     include Provider::Azure::TerraformExtension
 
     # FileTemplate with Terraform specific fields

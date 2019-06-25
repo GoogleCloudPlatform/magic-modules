@@ -3,6 +3,10 @@ module Provider
     module Terraform
 
       module SubTemplate
+        def azure_compile_template(template, data)
+          indent template, data[:indentation] || 0
+        end
+
         def build_azure_id_parser(sdk_op_def, object, indentation = 4)
           compile_template 'templates/azure/terraform/sdk/azure_id_parser.erb',
                            indentation: indentation,
@@ -30,14 +34,14 @@ module Provider
 
         # Transforms a Cloud API representation of a property into a Terraform
         # schema representation.
-        def build_flatten_method(ef_desc)
+        def build_azure_flatten_method(ef_desc)
           compile_template 'templates/azure/terraform/flatten_property_method.erb',
                            descriptor: ef_desc
         end
 
         # Transforms a Terraform schema representation of a property into a
         # representation used by the Cloud API.
-        def build_expand_method(ef_desc)
+        def build_azure_expand_method(ef_desc)
           compile_template 'templates/azure/terraform/expand_property_method.erb',
                            descriptor: ef_desc
         end
