@@ -56,6 +56,69 @@ describe Api::Product do
     it { is_expected.to raise_error(StandardError, /Missing 'objects'/) }
   end
 
+  context 'lowest version' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: ga',
+              '    base_url: "ga_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: alpha',
+              '    base_url: "alpha"').lowest_version.name
+    end
+    it { is_expected.to eq 'ga' }
+  end
+
+  context 'lowest version beta' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: alpha',
+              '    base_url: "alpha"').lowest_version.name
+    end
+    it { is_expected.to eq 'beta' }
+  end
+
+  context 'closest version object to ga' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: ga',
+              '    base_url: "ga_url"').version_obj_or_closest('ga').name
+    end
+    it { is_expected.to eq 'ga' }
+  end
+
+  context 'closest version object to alpha' do
+    subject do
+      product('name: "foo"',
+              'name: "Bar"',
+              'versions:',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: beta',
+              '    base_url: "beta_url"',
+              '  - !ruby/object:Api::Product::Version',
+              '    name: ga',
+              '    base_url: "ga_url"').version_obj_or_closest('alpha').name
+    end
+    it { is_expected.to eq 'beta' }
+  end
+
   context 'only allows Resources as objects' do
     subject do
       lambda do
