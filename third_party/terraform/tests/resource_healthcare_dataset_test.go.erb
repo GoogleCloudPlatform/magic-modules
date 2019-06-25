@@ -118,7 +118,7 @@ func testAccCheckHealthcareDatasetDestroy(s *terraform.State) error {
 
 		config := testAccProvider.Meta().(*Config)
 
-		url, err := replaceVarsForTest(rs, "{{HealthcareBasePath}}projects/{{project}}/locations/{{location}}/datasets/{{name}}")
+		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}projects/{{project}}/locations/{{location}}/datasets/{{name}}")
 		if err != nil {
 			return err
 		}
@@ -141,7 +141,7 @@ func testAccCheckGoogleHealthcareDatasetUpdate(timeZone string) resource.TestChe
 
 			config := testAccProvider.Meta().(*Config)
 
-			gcpResourceUri, err := replaceVarsForTest(rs, "projects/{{project}}/locations/{{location}}/datasets/{{name}}")
+			gcpResourceUri, err := replaceVarsForTest(config, rs, "projects/{{project}}/locations/{{location}}/datasets/{{name}}")
 			if err != nil {
 				return err
 			}

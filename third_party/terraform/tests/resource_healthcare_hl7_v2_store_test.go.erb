@@ -164,7 +164,7 @@ func testAccCheckHealthcareHl7V2StoreDestroy(s *terraform.State) error {
 
 		config := testAccProvider.Meta().(*Config)
 
-		url, err := replaceVarsForTest(rs, "{{HealthcareBasePath}}{{dataset}}/hl7V2Stores/{{name}}")
+		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/hl7V2Stores/{{name}}")
 		if err != nil {
 			return err
 		}
@@ -189,7 +189,7 @@ func testAccCheckGoogleHealthcareHl7V2StoreUpdate(pubsubTopic string) resource.T
 
 			config := testAccProvider.Meta().(*Config)
 
-			gcpResourceUri, err := replaceVarsForTest(rs, "{{dataset}}/hl7V2Stores/{{name}}")
+			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/hl7V2Stores/{{name}}")
 			if err != nil {
 				return err
 			}

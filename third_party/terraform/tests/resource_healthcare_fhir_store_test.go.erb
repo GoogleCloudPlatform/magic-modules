@@ -167,7 +167,7 @@ func testAccCheckHealthcareFhirStoreDestroy(s *terraform.State) error {
 
 		config := testAccProvider.Meta().(*Config)
 
-		url, err := replaceVarsForTest(rs, "{{HealthcareBasePath}}{{dataset}}/fhirStores/{{name}}")
+		url, err := replaceVarsForTest(config, rs, "{{HealthcareBasePath}}{{dataset}}/fhirStores/{{name}}")
 		if err != nil {
 			return err
 		}
@@ -192,7 +192,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(pubsubTopic string) resource.Te
 
 			config := testAccProvider.Meta().(*Config)
 
-			gcpResourceUri, err := replaceVarsForTest(rs, "{{dataset}}/fhirStores/{{name}}")
+			gcpResourceUri, err := replaceVarsForTest(config, rs, "{{dataset}}/fhirStores/{{name}}")
 			if err != nil {
 				return err
 			}
