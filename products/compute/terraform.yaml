@@ -1016,8 +1016,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       nextHopGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
         custom_expand: templates/terraform/custom_expand/route_gateway.erb
-        # Description here is overridden because puppet won't compile if you ask
-        # it to include docs greater than 80 characters.
         description: |+
           URL to a gateway that should handle matching packets.
           Currently, you can only specify the internet gateway, using a full or
@@ -1028,8 +1026,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           * The string `default-internet-gateway`.
       nextHopInstance: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_expand: templates/terraform/custom_expand/route_instance.erb
-        # Description here is overridden because puppet won't compile if you ask
-        # it to include docs greater than 80 characters.
         description: |+
           URL to an instance that should handle matching packets.
           You can specify this as a full or partial URL. For example:
