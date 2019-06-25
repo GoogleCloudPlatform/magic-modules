@@ -3,7 +3,7 @@
 # CI sets the contents of our json account secret in our environment; dump it
 # to disk for use in tests.
 echo "${SERVICE_ACCOUNT_KEY}" > /tmp/google-account.json
-echo "${ANSIBLE_TEMPLATE}" > /tmp/ansible-template.yml
+echo "${ANSIBLE_TEMPLATE}" > /tmp/ansible-template.ini
 
 set -e
 set -x
@@ -21,7 +21,7 @@ popd
 pushd magic-modules-gcp/build/ansible
 
 # Setup Cloud configuration template with variables
-cp /tmp/ansible-template.yml test/integration/cloud-config-gcp.yml
+cp /tmp/ansible-template.ini test/integration/cloud-config-gcp.ini
 
 # Install dependencies for ansible
 pip install -r requirements.txt
