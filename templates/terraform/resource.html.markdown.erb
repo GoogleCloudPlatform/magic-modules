@@ -172,11 +172,11 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - Default is <%= timeouts.insert_sec / 60 -%> minutes.
+- `create` - Default is <%= timeouts.insert_minutes -%> minutes.
 <% if updatable?(object, properties) -%>
-- `update` - Default is <%= timeouts.update_sec / 60 -%> minutes.
+- `update` - Default is <%= timeouts.update_minutes -%> minutes.
 <% end -%>
-- `delete` - Default is <%= timeouts.delete_sec / 60 -%> minutes.
+- `delete` - Default is <%= timeouts.delete_minutes -%> minutes.
 
 ## Import
 
