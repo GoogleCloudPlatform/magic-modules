@@ -32,7 +32,7 @@ var <%= product_ns -%>CustomEndpointEntry = &schema.Schema{
 }
 
 var Generated<%= product_ns -%>ResourcesMap = map[string]*schema.Resource{
-<% product.objects.reject { |r| r.exclude || r.not_in_version?(product.version_obj_or_default(version)) }.each do |object| -%>
+<% product.objects.reject { |r| r.exclude || r.not_in_version?(product.version_obj_or_closest(version)) }.each do |object| -%>
 <%
 if @config.legacy_name.nil?
 	terraform_name = "google_" + (product_ns + object.name).underscore

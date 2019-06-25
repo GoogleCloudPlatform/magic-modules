@@ -18,6 +18,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "scan_config_basic"
         primary_resource_id: "scan-config"
+        min_version: beta
         vars:
           address_name: "scan-basic-static-ip"
           scan_config_name: "terraform-scan-config"
