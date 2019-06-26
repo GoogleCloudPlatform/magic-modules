@@ -13,7 +13,7 @@
         need_normalize = true if is_location? prop
         need_normalize = true if prop.is_a? Api::Type::Enum
       end
-      next unless need_normalize || prop.is_a?(Api::Type::Composite)
+      # next unless need_normalize || prop.is_a?(Api::Type::Composite)
 
       if need_normalize
         indent = 4
@@ -33,8 +33,12 @@ if <%= sdk_marshal.input -%>.get('<%= var -%>') is not None:
 
       if prop.is_a? Api::Type::NestedObject
         child_sdk_path = sdk_marshal.parent_reference + relative_refs.join('/') + '/'
-        child_sdk_marshal = Provider::Azure::Ansible::SDK::MarshalDescriptor.new prop.properties, sdk_marshal.operation, 'input', '|', child_sdk_path
-        build_property_to_sdk_object child_sdk_marshal
+        new_input = "#{sdk_marshal.input}['#{var}']"
+        new_output = "#{sdk_marshal.output}['#{var}']"
+        child_sdk_marshal = Provider::Azure::Ansible::SDK::MarshalDescriptor.new prop.properties, sdk_marshal.operation, new_input, new_output, child_sdk_path
+-%>
+<%=     lines(build_property_to_sdk_object(child_sdk_marshal)) -%>
+<%
       end
     end
 -%>

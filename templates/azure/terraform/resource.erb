@@ -176,7 +176,7 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return <%= lines(build_errorf_with_resource_name("Error reading %s", true, object.azure_sdk_definition.read, output_properties, object)) -%>
     }
 
-<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.post_read -%>
+<%= lines(compile_template(object.custom_code.post_read, indentation: 4)) if object.custom_code.respond_to?(:post_read) && object.custom_code.post_read -%>
 
 <%= lines(build_sdk_object_to_property('resp', 'd', sdk_marshal)) -%>
 
@@ -274,6 +274,6 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 
 <%  end -%>
 
-<%  if object.custom_code.extra_functions -%>
+<%  if object.custom_code.respond_to?(:extra_functions) && object.custom_code.extra_functions -%>
 <%=   lines(compile(get_custom_template_path(object.custom_code.extra_functions))) -%>
 <%  end -%>

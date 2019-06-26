@@ -65,6 +65,12 @@ module Api
         end
       end
 
+      class ISO8601DurationObject < StringObject
+      end
+
+      class ISO8601DateTimeObject < SDKTypeDefinition
+      end
+
       class ComplexObject < SDKTypeDefinition
       end
 

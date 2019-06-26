@@ -34,6 +34,12 @@ module Api
         end
       end
 
+      class ISO8601Duration < Api::Type::String
+      end
+
+      class ISO8601DateTime < Api::Type::String
+      end
+
     end
   end
 end

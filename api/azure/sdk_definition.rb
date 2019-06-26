@@ -13,6 +13,7 @@ module Api
       attr_reader :read
       attr_reader :update
       attr_reader :delete
+      attr_reader :list_by_parent
       attr_reader :list_by_resource_group
       attr_reader :list_by_subscription
 

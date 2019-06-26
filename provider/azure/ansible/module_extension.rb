@@ -27,12 +27,12 @@ module Provider
         # Creates a Python dictionary representing a nested object property
         # for validation.
         def azure_nested_obj_dict(prop, object, properties, spaces)
-          name = python_variable_name(prop, object.azure_sdk_definition.create)
+          name = azure_python_variable_name(prop, object.azure_sdk_definition.create)
           options = azure_prop_options(prop, object, spaces).join("\n")
           [
             "#{name}=dict(\n#{indent_list(options, 4, true)}\n    options=dict(",
             indent_list(properties.map do |p|
-              python_dict_for_property(p, object, spaces + 4)
+              azure_python_dict_for_property(p, object, spaces + 4)
             end, 8),
             "    )\n)"
           ]

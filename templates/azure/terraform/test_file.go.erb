@@ -16,7 +16,7 @@ import (
     terraform_name = "azurerm_" + object.name.underscore
     azure_client_name = object.azure_sdk_definition.go_client
     properties = object.all_user_properties
-    contains_acctests = object.instance_variable_defined?(:@acctests)
+    contains_acctests = object.respond_to?(:acctests) && !object.acctests.nil? && !object.acctests.empty?
 -%>
 
 <%
