@@ -170,7 +170,10 @@ The `cvs_options` block supports:
 * `field_delimiter` (Optional) - The separator for fields in a CSV file.
 
 * `quote` (Optional) - The value that is used to quote data sections in a
-    CSV file.
+    CSV file. If your data does not contain quoted sections, set the
+    property value to an empty string. If your data contains quoted newline
+    characters, you must also set the `allow_quoted_newlines` property to true.
+    Default value is ".
 
 * `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
     file that BigQuery will skip when reading the data.
