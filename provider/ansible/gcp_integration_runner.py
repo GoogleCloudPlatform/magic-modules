@@ -6,8 +6,9 @@ from __future__ import absolute_import, print_function
 import os
 
 from lib.util import (
+    ApplicationError,
     display,
-    ConfigParser,
+    ConfigParser
 )
 
 from lib.cloud import (
