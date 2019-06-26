@@ -133,6 +133,11 @@ func testAccCheckBigQueryExtData(s *terraform.State) error {
 		if res.Type != "EXTERNAL" {
 			return fmt.Errorf("Table \"%s.%s\" is of type \"%s\", expecterd EXTERNAL.", dataset, table, res.Type)
 		}
+		edc := res.ExternalDataConfiguration
+		cvsOpts := edc.CsvOptions
+		if cvsOpts == nil || *cvsOpts.Quote != "" {
+			return fmt.Errorf("Table \"%s.%s\" quote should be '' but was '%s'", dataset, table, *cvsOpts.Quote)
+		}
 	}
 	return nil
 }
@@ -326,6 +331,10 @@ resource "google_bigquery_table" "test" {
   external_data_configuration {
     autodetect    = true
     source_format = "%s"
+    csv_options {
+      encoding = "UTF-8"
+      quote    = ""
+    }
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"

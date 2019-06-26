@@ -129,7 +129,7 @@ func resourceBigQueryTable() *schema.Resource {
 									"quote": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Default:  "\"",
+										Computed: true,
 									},
 									// SkipLeadingRows: [Optional] The number of rows at the top
 									// of a CSV file that BigQuery will skip when reading the data.
@@ -676,6 +676,8 @@ func expandCsvOptions(configured interface{}) *bigquery.CsvOptions {
 		opts.Quote = &quote
 	}
 
+	opts.ForceSendFields = []string{"Quote"}
+
 	return opts
 }
 
@@ -702,7 +704,7 @@ func flattenCsvOptions(opts *bigquery.CsvOptions) []map[string]interface{} {
 		result["skip_leading_rows"] = opts.SkipLeadingRows
 	}
 
-	if *opts.Quote != "" {
+	if opts.Quote != nil {
 		result["quote"] = *opts.Quote
 	}
 
