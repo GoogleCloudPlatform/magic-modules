@@ -23,9 +23,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
                     "{{instance}}/{{name}}",
                     "{{name}}"]
     timeouts: !ruby/object:Api::Timeouts
-      insert_sec: 900
-      update_sec: 600
-      delete_sec: 600
+      insert_minutes: 15
+      update_minutes: 10
+      delete_minutes: 10
     properties:
       collation: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
