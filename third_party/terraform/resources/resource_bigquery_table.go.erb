@@ -80,6 +80,20 @@ func resourceBigQueryTable() *schema.Resource {
 							Type:     schema.TypeBool,
 							Required: true,
 						},
+						// SourceFormat [Required] The data format.
+						"source_format": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP",
+							}, false),
+						},
+						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
+						"source_uris": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 						// Compression: [Optional] The compression type of the data source.
 						"compression": {
 							Type:         schema.TypeString,
@@ -182,20 +196,6 @@ func resourceBigQueryTable() *schema.Resource {
 						"max_bad_records": {
 							Type:     schema.TypeInt,
 							Optional: true,
-						},
-						// SourceFormat [Required] The data format.
-						"source_format": {
-							Type:     schema.TypeString,
-							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"CSV", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO", "DATSTORE_BACKUP",
-							}, false),
-						},
-						// SourceURIs [Required] The fully-qualified URIs that point to your data in Google Cloud.
-						"source_uris": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
