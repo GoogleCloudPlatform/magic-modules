@@ -59,11 +59,11 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= timeouts.insert_sec  -%> * time.Second),
+            Create: schema.DefaultTimeout(<%= timeouts.insert_minutes  -%> * time.Minute),
 <%          if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= timeouts.update_sec -%> * time.Second),
+            Update: schema.DefaultTimeout(<%= timeouts.update_minutes -%> * time.Minute),
 <%          end -%>
-            Delete: schema.DefaultTimeout(<%= timeouts.delete_sec -%> * time.Second),
+            Delete: schema.DefaultTimeout(<%= timeouts.delete_minutes -%> * time.Minute),
         },
 
 <%      if object.schema_version -%>
