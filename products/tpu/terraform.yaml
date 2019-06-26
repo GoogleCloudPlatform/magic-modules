@@ -32,7 +32,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "tpu"
         vars:
           node_name: "test-tpu"
-          network_name: "test-tpu-network"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
