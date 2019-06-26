@@ -106,8 +106,11 @@ The following arguments are supported:
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
-* `schema` - (Optional) A JSON schema for the table. For more information
-    see the [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
+* `schema` - (Optional) A JSON schema for the table. Schema is required
+    for CSV and JSON formats and is disallowed for Google Cloud
+    Bigtable, Cloud Datastore backups, and Avro formats when using
+    external tables. For more information see the
+    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is documented below.
@@ -140,13 +143,7 @@ The `external_data_configuration` block supports:
 * `max_bad_records` (Optional) - The maximum number of bad records that
     BigQuery can ignore when reading data.
 
-* `schema` (Optional) - A JSON schema for the data. Schema is required
-    for CSV and JSON formats schema is disallowed for Google Cloud
-    Bigtable, Cloud Datastore backups, and Avro formats. For more
-    information see the
-    [BigQuery API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#resource).
-
-* `schema_format` (Required) - The data format. Supported values are:
+* `source_format` (Required) - The data format. Supported values are:
     "CVS", "GOOGLE_SHEETS", "NEWLINE_DELIMITED_JSON", "AVRO",
     and "DATSTORE_BACKUP". To use "GOOGLE_SHEETS"
     the `scopes` must include
