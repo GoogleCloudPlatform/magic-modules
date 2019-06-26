@@ -44,7 +44,7 @@ func TestAccProjectServices_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					config := testAccProvider.Meta().(*Config)
-					if err := enableService(oobService, pid, config); err != nil {
+					if err := enableServiceUsageProjectServices([]string{oobService}, pid, config); err != nil {
 						t.Fatalf("Error enabling %q: %v", oobService, err)
 					}
 				},
@@ -89,7 +89,7 @@ func TestAccProjectServices_authoritative(t *testing.T) {
 			{
 				PreConfig: func() {
 					config := testAccProvider.Meta().(*Config)
-					if err := enableService(oobService, pid, config); err != nil {
+					if err := enableServiceUsageProjectServices([]string{oobService}, pid, config); err != nil {
 						t.Fatalf("Error enabling %q: %v", oobService, err)
 					}
 				},
@@ -130,7 +130,7 @@ func TestAccProjectServices_authoritative2(t *testing.T) {
 				PreConfig: func() {
 					config := testAccProvider.Meta().(*Config)
 					for _, s := range oobServices {
-						if err := enableService(s, pid, config); err != nil {
+						if err := enableServiceUsageProjectServices([]string{s}, pid, config); err != nil {
 							t.Fatalf("Error enabling %q: %v", s, err)
 						}
 					}
@@ -302,11 +302,12 @@ func testProjectServicesMatch(services []string, pid string) resource.TestCheckF
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		apiServices, err := getApiServices(pid, config, ignoreProjectServices)
+		enabledServices, err := getEnabledServiceSet(pid, config, ignoredProjectServicesSet)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)
 		}
 
+		apiServices := stringSliceFromGolangSet(enabledServices)
 		sort.Strings(services)
 		sort.Strings(apiServices)
 		if !reflect.DeepEqual(services, apiServices) {
