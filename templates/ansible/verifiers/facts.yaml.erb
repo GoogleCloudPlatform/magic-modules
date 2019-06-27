@@ -43,7 +43,7 @@
 <% else # object.has_filters -%>
 <% # use maps on names to make tests less flakey -%>
 <% if object.all_user_properties.any? { |x| x.name == 'name' } -%>
-      - results['resources'] | map(attribute='name') | select("equalto", "<%= @parameters['name'] -%>") | length == <%= _state == 'present' ? 1 : 0 %>
+      - results['resources'] | map(attribute='name') | select("match", ".*<%= name_parameter -%>.*") | list | length == <%= _state == 'present' ? 1 : 0 %>
 <% else -%>
       - results['resources'] | length <%= _state == 'present' ? '>= 1' : '== 0' %>
 <% end # x.name == 'name' -%>
