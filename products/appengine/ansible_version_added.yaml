@@ -1,0 +1,15 @@
+---
+:facts:
+  :FirewallRule:
+    :version_added: '2.9'
+:regular:
+  :FirewallRule:
+    :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :sourceRange:
+      :version_added: '2.9'
+    :action:
+      :version_added: '2.9'
+    :priority:
+      :version_added: '2.9'
