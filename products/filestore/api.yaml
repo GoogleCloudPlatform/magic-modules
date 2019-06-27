@@ -130,7 +130,8 @@ objects:
             - !ruby/object:Api::Type::Integer
               name: 'capacityGb'
               description: |
-                File share capacity in GB.
+                File share capacity in GiB. This must be at least 1024 GiB
+                for the standard tier, or 2560 GiB for the premium tier.
               required: true
       - !ruby/object:Api::Type::Array
         name: 'networks'
