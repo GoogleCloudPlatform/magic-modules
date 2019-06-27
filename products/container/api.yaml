@@ -67,7 +67,6 @@ objects:
           Any existing file at this path will be completely overwritten.
 
           This requires the PyYaml library.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'kubectlContext'
         description: 'The name of the context for the kubectl config file. Will default to the cluster name'
