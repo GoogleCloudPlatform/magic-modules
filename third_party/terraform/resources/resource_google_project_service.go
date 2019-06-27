@@ -15,7 +15,7 @@ func resourceGoogleProjectService() *schema.Resource {
 		Update: resourceGoogleProjectServiceUpdate,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceGoogleProjectServiceImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -45,6 +45,16 @@ func resourceGoogleProjectService() *schema.Resource {
 	}
 }
 
+func resourceGoogleProjectServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("Invalid google_project_service id format for import, expecting `{project}/{service}`, found %s", d.Id())
+	}
+	d.Set("project", parts[0])
+	d.Set("service", parts[1])
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -59,39 +69,38 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	id := &projectServiceId{
-		project: project,
-		service: srv,
+	id, err := replaceVars(d, config, "{{project}}/{{service}}")
+	if err != nil {
+		return fmt.Errorf("unable to construct ID: %s", err)
 	}
-	d.SetId(id.terraformId())
+	d.SetId(id)
 	return resourceGoogleProjectServiceRead(d, meta)
 }
 
 func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	id, err := parseProjectServiceId(d.Id())
+	project, err := getProject(d, config)
 	if err != nil {
 		return err
 	}
 
-	enabledServices, err := readEnabledServiceUsageProjectServices(id.project, config)
+	enabledServices, err := readEnabledServiceUsageProjectServices(project, config)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 
-	d.Set("project", id.project)
-
-	srv := id.service
+	srv := d.Get("service")
 	for _, s := range enabledServices {
 		if s == srv {
+			d.Set("project", project)
 			d.Set("service", s)
 			return nil
 		}
 	}
 
 	// The service is was not found in enabled services - remove it from state
-	log.Printf("[DEBUG] service %s not in enabled services for project %s, removing from state", srv, id.project)
+	log.Printf("[DEBUG] service %s not in enabled services for project %s, removing from state", srv, project)
 	d.SetId("")
 	return nil
 }
@@ -124,24 +133,4 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 	// This update method is no-op because the only updatable fields
 	// are state/config-only, i.e. they aren't sent in requests to the API.
 	return nil
-}
-
-// Parts that make up the id of a `google_project_service` resource.
-// Project is included in order to allow multiple projects to enable the same service within the same Terraform state
-type projectServiceId struct {
-	project string
-	service string
-}
-
-func (id projectServiceId) terraformId() string {
-	return fmt.Sprintf("%s/%s", id.project, id.service)
-}
-
-func parseProjectServiceId(id string) (*projectServiceId, error) {
-	parts := strings.Split(id, "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("Invalid google_project_service id format, expecting `{project}/{service}`, found %s", id)
-	}
-
-	return &projectServiceId{parts[0], parts[1]}, nil
 }
