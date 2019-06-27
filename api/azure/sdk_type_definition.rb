@@ -9,6 +9,7 @@ module Api
       attr_reader :go_variable_name
       attr_reader :go_field_name
       attr_reader :go_type_name
+      attr_reader :is_pointer_type
       attr_reader :python_parameter_name
       attr_reader :python_variable_name
       attr_reader :python_field_name
@@ -21,6 +22,7 @@ module Api
         check :go_variable_name, type: ::String
         check :go_field_name, type: ::String
         check :go_type_name, type: ::String
+        check :is_pointer_type, type: :boolean, default: false
         check :python_parameter_name, type: ::String
         check :python_variable_name, type: ::String
         check :python_field_name, type: ::String
@@ -31,6 +33,7 @@ module Api
         @empty_value_sensitive = overrides.empty_value_sensitive unless overrides.empty_value_sensitive.nil?
         @go_variable_name = overrides.go_variable_name unless overrides.go_variable_name.nil?
         @go_field_name = overrides.go_field_name unless overrides.go_field_name.nil?
+        @is_pointer_type = overrides.is_pointer_type unless overrides.is_pointer_type.nil?
         @python_parameter_name = overrides.python_parameter_name unless overrides.python_parameter_name.nil?
         @python_variable_name = overrides.python_variable_name unless overrides.python_variable_name.nil?
         @python_field_name = overrides.python_field_name unless overrides.python_field_name.nil?

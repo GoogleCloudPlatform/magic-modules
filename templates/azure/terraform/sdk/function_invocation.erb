@@ -1,3 +1,3 @@
 <%  params = sdk_op_def.request.reject {|k, v| k.start_with?("/") && k != "/"} -%>
-<%  param_vars = params.values.map{|v| v.go_variable_name} -%>
+<%  param_vars = params.values.map{|v| (v.is_pointer_type ? '&' : '') + v.go_variable_name} -%>
 client.<%= sdk_op_def.go_func_name -%>(ctx, <%= param_vars.join(", ") -%>)
