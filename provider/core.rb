@@ -106,7 +106,8 @@ module Provider
       old_file_chmod_mode = File.stat(template).mode
       FileUtils.chmod(old_file_chmod_mode, path)
 
-      format_output_file(path)
+      # TODO: Azure Switch
+      # format_output_file(path)
     end
 
     private
