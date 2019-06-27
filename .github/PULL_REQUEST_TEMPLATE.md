@@ -7,7 +7,7 @@ Thanks for contributing!
 -->
 
 <!-- CHANGELOG for Downstream PRs.
-EXTERNAL CONTRIBUTERS: Your reviewer will most likely fill this in for you, so don't worry about this section!
+EXTERNAL CONTRIBUTORS: Your reviewer will most likely fill this in for you, so don't worry about this section!
 
 For some repos (currently Terraform GA/beta providers), we have the
 ability to autogenerate CHANGELOGs.
