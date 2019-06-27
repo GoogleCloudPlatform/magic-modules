@@ -135,14 +135,14 @@ func testAccCheckProjectService(services []string, pid string, expectEnabled boo
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		enabledSet, err := getEnabledServiceSet(pid, config, ignoredProjectServicesSet)
+		currentlyEnabled, err := listCurrentlyEnabledServices(pid, config)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)
 		}
 
 		for _, expected := range services {
 			exists := false
-			for actual := range enabledSet {
+			for actual := range currentlyEnabled {
 				if expected == actual {
 					exists = true
 				}

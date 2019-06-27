@@ -3,7 +3,6 @@ package google
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"reflect"
 	"sort"
 	"testing"
@@ -302,12 +301,12 @@ func testProjectServicesMatch(services []string, pid string) resource.TestCheckF
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
 
-		enabledServices, err := getEnabledServiceSet(pid, config, ignoredProjectServicesSet)
+		currentlyEnabled, err := listCurrentlyEnabledServices(pid, config)
 		if err != nil {
 			return fmt.Errorf("Error listing services for project %q: %v", pid, err)
 		}
 
-		apiServices := stringSliceFromGolangSet(enabledServices)
+		apiServices := stringSliceFromGolangSet(currentlyEnabled)
 		sort.Strings(services)
 		sort.Strings(apiServices)
 		if !reflect.DeepEqual(services, apiServices) {
@@ -326,7 +325,5 @@ func testStringsToString(s []string) string {
 			b.WriteString(",")
 		}
 	}
-	r := b.String()
-	log.Printf("[DEBUG]: Converted list of strings to %s", r)
 	return b.String()
 }
