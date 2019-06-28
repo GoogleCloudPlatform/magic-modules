@@ -1,0 +1,39 @@
+<%
+    must_have_value = property.required || !property.default_value.nil?
+    indentation = (must_have_value ? 0 : 4)
+
+    reference = get_applicable_reference(property.azure_sdk_references, sdk_marshal.operation.request)
+    var_name = azure_python_variable_name(property, sdk_marshal.operation)
+-%>
+<%  if !must_have_value -%>
+if <%= sdk_marshal.input -%>.get('<%= var_name -%>') is not None:
+<%  end -%>
+<%
+  print reference + ":\n  "
+  print sdk_marshal.parent_reference + "\n  "
+
+
+    need_remove = false
+    if reference.start_with?(sdk_marshal.parent_reference)
+      relative_references = reference[sdk_marshal.parent_reference.length..-1].split('/').reject(&:empty?)
+print relative_references
+print "\n"
+      need_remove = true if relative_references.length != 1
+      sdk_type = get_sdk_typedef_by_references(property.azure_sdk_references, sdk_marshal.operation.request)
+      need_remove = true if relative_references.length == 1 && sdk_type.python_field_name != var_name
+    else
+      need_remove = true
+    end
+    input_expression = "#{sdk_marshal.input}#{need_remove ? '.pop(' : '['}'#{var_name}'#{need_remove ? ')' : ']'}"
+-%>
+<%
+    normalize_format = '%s'
+    if property.is_a? Api::Type::Enum
+      normalize_format = '_snake_to_camel(%s, True)'
+    elsif property.is_a? Api::Azure::Type::ResourceReference
+      normalize_format = "self.normalize_resource_id(\n    %s,\n    '#{property.sample_value}')"
+    else
+      normalize_format = '# TODO: Not implemented template for %s'
+    end
+-%>
+<%= lines(build_sdk_reference_assignment(normalize_format % input_expression, reference, sdk_marshal, indentation)) -%>

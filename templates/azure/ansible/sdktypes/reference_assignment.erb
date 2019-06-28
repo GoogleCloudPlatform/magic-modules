@@ -1,0 +1,19 @@
+<%
+    sdk_type = sdk_marshal.operation.request[reference]
+    parent_ref = get_parent_reference(reference)
+
+    output_expression = "#{sdk_marshal.marshalled_references[parent_ref]}['#{sdk_type.python_field_name}']"
+
+    assignment = "# TODO: SDK assignment not implemented for #{reference}"
+    if sdk_marshal.marshalled_references.include?(parent_ref)
+      assignment = "#{output_expression} = #{input_expression}"
+    else
+      new_object = "'#{sdk_type.python_field_name}': #{input_expression}"
+      new_object = "{\n#{indent(new_object, 4)}\n}"
+      assignment = build_sdk_reference_assignment(new_object, parent_ref, sdk_marshal)
+      output_expression = "#{sdk_marshal.marshalled_references[parent_ref]}['#{sdk_type.python_field_name}']"
+    end
+
+    sdk_marshal.add_marshalled_reference(reference, output_expression)
+-%>
+<%= lines(assignment) -%>

@@ -1,0 +1,3 @@
+resource_group = self.get_resource_group(self.resource_group)
+if <%= sdk_marshal.input -%>.get('location') is None:
+    <%= sdk_marshal.output -%>['location'] = resource_group.location
