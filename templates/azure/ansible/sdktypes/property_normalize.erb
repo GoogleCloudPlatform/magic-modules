@@ -9,15 +9,9 @@
 if <%= sdk_marshal.input -%>.get('<%= var_name -%>') is not None:
 <%  end -%>
 <%
-  print reference + ":\n  "
-  print sdk_marshal.parent_reference + "\n  "
-
-
     need_remove = false
     if reference.start_with?(sdk_marshal.parent_reference)
       relative_references = reference[sdk_marshal.parent_reference.length..-1].split('/').reject(&:empty?)
-print relative_references
-print "\n"
       need_remove = true if relative_references.length != 1
       sdk_type = get_sdk_typedef_by_references(property.azure_sdk_references, sdk_marshal.operation.request)
       need_remove = true if relative_references.length == 1 && sdk_type.python_field_name != var_name
