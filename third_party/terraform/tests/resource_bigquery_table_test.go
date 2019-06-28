@@ -109,37 +109,43 @@ func TestAccBigQueryExternalDataTable_CSV(t *testing.T) {
 		CheckDestroy: testAccCheckBigQueryTableDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableFromGCS(datasetID, tableID, bucketName, objectName, TEST_CSV, "CSV"),
-				Check:  testAccCheckBigQueryExtData,
+				Config: testAccBigQueryTableFromGCS(datasetID, tableID, bucketName, objectName, TEST_CSV, "CSV", "\\\""),
+				Check:  testAccCheckBigQueryExtData("\""),
+			},
+			{
+				Config: testAccBigQueryTableFromGCS(datasetID, tableID, bucketName, objectName, TEST_CSV, "CSV", ""),
+				Check:  testAccCheckBigQueryExtData(""),
 			},
 		},
 	})
 }
 
-func testAccCheckBigQueryExtData(s *terraform.State) error {
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "google_bigquery_table" {
-			continue
-		}
+func testAccCheckBigQueryExtData(expectedQuoteChar string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_bigquery_table" {
+				continue
+			}
 
-		config := testAccProvider.Meta().(*Config)
-		dataset := rs.Primary.Attributes["dataset_id"]
-		table := rs.Primary.Attributes["table_id"]
-		res, err := config.clientBigQuery.Tables.Get(config.Project, dataset, table).Do()
-		if err != nil {
-			return err
-		}
+			config := testAccProvider.Meta().(*Config)
+			dataset := rs.Primary.Attributes["dataset_id"]
+			table := rs.Primary.Attributes["table_id"]
+			res, err := config.clientBigQuery.Tables.Get(config.Project, dataset, table).Do()
+			if err != nil {
+				return err
+			}
 
-		if res.Type != "EXTERNAL" {
-			return fmt.Errorf("Table \"%s.%s\" is of type \"%s\", expecterd EXTERNAL.", dataset, table, res.Type)
+			if res.Type != "EXTERNAL" {
+				return fmt.Errorf("Table \"%s.%s\" is of type \"%s\", expecterd EXTERNAL.", dataset, table, res.Type)
+			}
+			edc := res.ExternalDataConfiguration
+			cvsOpts := edc.CsvOptions
+			if cvsOpts == nil || *cvsOpts.Quote != expectedQuoteChar {
+				return fmt.Errorf("Table \"%s.%s\" quote should be '%s' but was '%s'", dataset, table, expectedQuoteChar, *cvsOpts.Quote)
+			}
 		}
-		edc := res.ExternalDataConfiguration
-		cvsOpts := edc.CsvOptions
-		if cvsOpts == nil || *cvsOpts.Quote != "" {
-			return fmt.Errorf("Table \"%s.%s\" quote should be '' but was '%s'", dataset, table, *cvsOpts.Quote)
-		}
+		return nil
 	}
-	return nil
 }
 
 func testAccCheckBigQueryTableDestroy(s *terraform.State) error {
@@ -306,7 +312,7 @@ EOH
 }`, datasetID, tableID)
 }
 
-func testAccBigQueryTableFromGCS(datasetID, tableID, bucketName, objectName, content, format string) string {
+func testAccBigQueryTableFromGCS(datasetID, tableID, bucketName, objectName, content, format, quoteChar string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
   dataset_id = "%s"
@@ -333,14 +339,14 @@ resource "google_bigquery_table" "test" {
     source_format = "%s"
     csv_options {
       encoding = "UTF-8"
-      quote    = ""
+      quote    = "%s"
     }
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}"
     ]
   }
-}`, datasetID, bucketName, objectName, content, tableID, format)
+}`, datasetID, bucketName, objectName, content, tableID, format, quoteChar)
 }
 
 var TEST_CSV = `lifelock,LifeLock,,web,Tempe,AZ,1-May-07,6850000,USD,b
