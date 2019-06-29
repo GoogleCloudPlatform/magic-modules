@@ -32,3 +32,5 @@ ehthumbs.db
 Thumbs.db
 
 .vscode/
+
+.bundle/
