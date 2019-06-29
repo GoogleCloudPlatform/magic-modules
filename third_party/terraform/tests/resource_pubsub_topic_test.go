@@ -88,7 +88,7 @@ resource "google_project_iam_member" "kms-project-binding" {
 
 resource "google_pubsub_topic" "topic" {
   name         = "%s"
-  project      = "${data.google_project.project.project_id}"
+  project      = "${google_project_iam_member.kms-project-binding.project}"
   kms_key_name = "%s"
 }
 `, pid, topicName, kmsKey)
