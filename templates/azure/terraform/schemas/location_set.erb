@@ -1,7 +1,7 @@
 if location := <%= input_var -%>; location != nil {
 <%  if output_var == 'd' -%>
-    d.Set("<%= prop_name -%>", azureRMNormalizeLocation(*location))
+    d.Set("<%= prop_name -%>", azure.NormalizeLocation(*location))
 <%  else -%>
-    <%= output_var -%>["<%= prop_name -%>"] = azureRMNormalizeLocation(*location)
+    <%= output_var -%>["<%= prop_name -%>"] = azure.NormalizeLocation(*location)
 <%  end -%>
 }

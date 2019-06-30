@@ -1,5 +1,5 @@
 <%  if input_var == 'd' -%>
-<%=   output_var -%> := azureRMNormalizeLocation(d.Get("<%= prop_name -%>").(<%= go_type(property) -%>))
+<%=   output_var -%> := azure.NormalizeLocation(d.Get("<%= prop_name -%>").(<%= go_type(property) -%>))
 <%  else -%>
-<%=   output_var -%> := azureRMNormalizeLocation(<%= input_var -%>["<%= prop_name -%>"].(<%= go_type(property) -%>))
+<%=   output_var -%> := azure.NormalizeLocation(<%= input_var -%>["<%= prop_name -%>"].(<%= go_type(property) -%>))
 <%  end -%>
