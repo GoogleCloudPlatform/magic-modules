@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -329,6 +328,3 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing, note, attestor)
 }
 
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
-<% end -%>
