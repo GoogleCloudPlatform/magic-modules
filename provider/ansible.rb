@@ -52,6 +52,9 @@ module Provider
       class AnsibleProductFileTemplate < Provider::ProductFileTemplate
         # The Ansible example object.
         attr_accessor :example
+
+        # The suffix used for differenating between facts/info modules.
+        attr_accessor :module_suffix
       end
 
       def api_version_setup(version_name)
@@ -280,14 +283,14 @@ module Provider
 
       def compile_datasource(data)
         target_folder = data.output_folder
-        module_suffix = 'info'
+        data.module_suffix = 'info'
         name = "#{module_name(data.object)}_info"
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
                                 "lib/ansible/modules/cloud/google/#{name}.py"),
                       self)
 
-        module_suffix = 'facts'
+        data.module_suffix = 'facts'
         name = "#{module_name(data.object)}_facts"
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
