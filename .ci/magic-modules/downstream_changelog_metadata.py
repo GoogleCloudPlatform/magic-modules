@@ -71,8 +71,8 @@ def set_changelog_info(gh_pull, release_note, labels_to_add):
   gh_pull.set_labels(*labels_to_set)
 
 if __name__ == '__main__':
-  downstream_urls = os.environ.get('DOWNSTREAM_REPOS').split(',')
-  if len(downstream_urls) == 0:
+  downstream_repos = os.environ.get('DOWNSTREAM_REPOS').split(',')
+  if len(downstream_repos) == 0:
     print "Skipping, no downstreams repos given to downstream changelog info for"
     sys.exit(0)
 
@@ -84,4 +84,4 @@ if __name__ == '__main__':
 
     # TODO(emilymye): Replace this no-op print statement with code after
     # verifying w/ pipeline.
-    downstream_changelog_info(gh, pr_num, downstream_urls)
+    downstream_changelog_info(gh, pr_num, downstream_repos)

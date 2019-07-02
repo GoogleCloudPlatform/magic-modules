@@ -1,6 +1,6 @@
 import re
 
-RELEASE_NOTE_RE = r'```releasenote[\s]*(?P<release_note>[^`{3}]*)```'
+RELEASE_NOTE_RE = r'```releasenote(?P<release_note>.*)```'
 
 def find_dependency_urls_in_comment(body):
   """Util to parse downstream dependencies from a given comment body.
@@ -54,7 +54,7 @@ def get_release_note(body):
   Returns:
     Release note if found or empty string.
   """
-  m = re.search(RELEASE_NOTE_RE, body, re.MULTILINE)
+  m = re.search(RELEASE_NOTE_RE, body, re.S)
   return m.groupdict("")["release_note"].strip() if m else ""
 
 def set_release_note(release_note, body):
