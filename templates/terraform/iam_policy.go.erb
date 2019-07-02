@@ -64,22 +64,53 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
     values[k] = v
 	}
 
-	return &<%= resource_name -%>IamUpdater{
+	u := &<%= resource_name -%>IamUpdater{
 <% params.each do |param| -%>
 		<%= param -%>: values["<%= param -%>"],
 <% end -%>
 		d:       d,
 		Config:  config,
-	}, nil
+	}
+	d.SetId(u.GetResourceId())
+
+	return u, nil
 }
 
 func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) error {
-	d.Set("topic", d.Id())
+	values := make(map[string]string)
+	
+<% if params.include?('project') -%>
+	project, err := getProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	values["project"] = project
+<% end -%>
+
+	m, err := samParseImportId([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Id())
+	if err != nil {
+		return err
+	}
+
+	for k, v := range m {
+    values[k] = v
+	}
+
+	u := &<%= resource_name -%>IamUpdater{
+<% params.each do |param| -%>
+		<%= param -%>: values["<%= param -%>"],
+<% end -%>
+		d:       d,
+		Config:  config,
+	}
+	d.Set("<%= object.name.underscore -%>", u.GetResourceId())
+	d.SetId(u.GetResourceId())
 	return nil
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url := qualifyUrl(u, "getIamPolicy")
+	url := qualify<%= object.name -%>Url(u, "getIamPolicy")
 
 	policy, err := sendRequest(u.Config, "GET", url, nil)
 	if err != nil {
@@ -104,7 +135,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	obj := make(map[string]interface{})
 	obj["policy"] = json
 
-	url := qualifyUrl(u, "setIamPolicy")
+	url := qualify<%= object.name -%>Url(u, "setIamPolicy")
 	
 	_, err = sendRequestWithTimeout(u.Config, "POST", url, obj, u.d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -114,13 +145,14 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	return nil
 }
 
-func qualifyUrl(u *<%= resource_name -%>IamUpdater, methodIdentifier string) string {
-	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", u.GetResourceId(), methodIdentifier)
+<% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
+<% string_qualifiers = params.map{|param| "u.#{param}"}.join(', ') -%>
+func qualify<%= object.name -%>Url(u *<%= resource_name -%>IamUpdater, methodIdentifier string) string {
+	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }
 
-<% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 func (u *<%= resource_name -%>IamUpdater) GetResourceId() string {
-	return fmt.Sprintf("<%= import_url -%>", <%= params.map{|param| "u.#{param}"}.join(', ') -%>)
+	return fmt.Sprintf("<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}").gsub(/({{)(\w+)(}})/, '%s') -%>", <%= string_qualifiers -%>)
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
@@ -129,74 +161,4 @@ func (u *<%= resource_name -%>IamUpdater) GetMutexKey() string {
 
 func (u *<%= resource_name -%>IamUpdater) DescribeResource() string {
 	return fmt.Sprintf("<%= product_ns.downcase -%> <%= object.name.downcase -%> %q", u.GetResourceId())
-}
-
-// Parse an import id extracting field values using the given list of regexes.
-// They are applied in order. The first in the list is tried first.
-//
-// e.g:
-// - projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+) (applied first)
-// - (?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+),
-// - (?P<name>[^/]+) (applied last)
-func samParseImportId(idRegexes []string, d TerraformResourceData, config *Config, id string) (map[string]string, error) {
-	for _, idFormat := range idRegexes {
-		re, err := regexp.Compile(idFormat)
-
-		if err != nil {
-			log.Printf("[DEBUG] Could not compile %s.", idFormat)
-			return nil, fmt.Errorf("Import is not supported. Invalid regex formats.")
-		}
-
-		if fieldValues := re.FindStringSubmatch(id); fieldValues != nil {
-			var result map[string]string
-			result = make(map[string]string)
-			log.Printf("[DEBUG] matching ID %s to regex %s.", id, idFormat)
-			// Starting at index 1, the first match is the full string.
-			for i := 1; i < len(fieldValues); i++ {
-				fieldName := re.SubexpNames()[i]
-				fieldValue := fieldValues[i]
-				result[fieldName] = fieldValue
-			}
-
-			// The first id format is applied first and contains all the fields.
-			defaults, err := samSetDefaultValues(idRegexes[0], d, config)
-			if err != nil {
-				return nil, err
-			}
-
-			for k, v := range defaults {
-				result[k] = v
-			}
-
-			return result, nil
-		}
-	}
-	return nil, fmt.Errorf("Resource id %q doesn't match any of the accepted formats: %v", id, idRegexes)
-}
-
-func samSetDefaultValues(idRegex string, d TerraformResourceData, config *Config) (map[string]string, error) {
-	var result map[string]string
-	result = make(map[string]string)
-	if _, ok := d.GetOk("project"); !ok && strings.Contains(idRegex, "?P<project>") {
-		project, err := getProject(d, config)
-		if err != nil {
-			return nil, err
-		}
-		result["project"] = project
-	}
-	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
-		region, err := getRegion(d, config)
-		if err != nil {
-			return nil, err
-		}
-		result["region"] = region
-	}
-	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
-		zone, err := getZone(d, config)
-		if err != nil {
-			return nil, err
-		}
-		result["zone"] = zone
-	}
-	return result, nil
 }

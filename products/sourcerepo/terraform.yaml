@@ -15,6 +15,10 @@
 legacy_name: 'sourcerepo'
 overrides: !ruby/object:Overrides::ResourceOverrides
   Repository: !ruby/object:Overrides::Terraform::ResourceOverride
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      primary_resource_name: "fmt.Sprintf(\"my-repository-%s\", context[\"random_suffix\"])"
     id_format: '{{project}}/{{name}}'
     examples:
       - !ruby/object:Provider::Terraform::Examples
