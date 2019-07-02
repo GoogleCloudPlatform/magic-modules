@@ -287,8 +287,8 @@ module Provider
                       self)
 
         # Generate symlink for old `facts` modules.
-        File.symlink "build/ansible/lib/ansible/modules/cloud/google/#{name}_info.py",
-                     "build/ansible/lib/ansible/modules/cloud/google/#{name}_facts.py"
+        File.symlink "#{name}_info.py",
+                     "build/ansible/lib/ansible/modules/cloud/google/#{name}_facts.py",
 
       end
 
