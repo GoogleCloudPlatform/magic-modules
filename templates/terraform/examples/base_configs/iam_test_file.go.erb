@@ -11,14 +11,21 @@ import (
 )
 
 <% example = object.examples.reject(&:skip_test)
-         .reject { |e| @api.version_obj_or_default(version) < @api.version_obj_or_default(e.min_version) }
+         .reject { |e| @api.version_obj_or_closest(version) < @api.version_obj_or_closest(e.min_version) }
          .first -%>
 <% resource_name = product_ns + object.name -%>
 <% 
 individual_url = object.self_link_url
 params = individual_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
 -%>
-func TestAcc<%= resource_name -%>IamBinding(t *testing.T) {
+<% 
+if @config.legacy_name.nil?
+	terraform_name = "google_" + (product_ns + object.name).underscore
+else
+	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
+end 
+-%>
+func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -45,20 +52,20 @@ func TestAcc<%= resource_name -%>IamBinding(t *testing.T) {
 		CheckDestroy: testAccCheck<%= resource_name -%>Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAcc<%= resource_name -%>IamBinding_basic(context),
+				Config: testAcc<%= resource_name -%>IamBinding_basicGenerated(context),
 			},
 			{
-				ResourceName:      "google_<%= resource_name.underscore -%>_iam_binding.foo",
+				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			{
 				// Test Iam Binding update
-				Config: testAcc<%= resource_name -%>IamBinding_update(context),
+				Config: testAcc<%= resource_name -%>IamBinding_updateGenerated(context),
 			},
 			{
-				ResourceName:      "google_<%= resource_name.underscore -%>_iam_binding.foo",
+				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -67,7 +74,7 @@ func TestAcc<%= resource_name -%>IamBinding(t *testing.T) {
 	})
 }
 
-func TestAcc<%= resource_name -%>IamMember(t *testing.T) {
+func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -82,10 +89,10 @@ func TestAcc<%= resource_name -%>IamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test Iam Member creation (no update for member, no need to test)
-				Config: testAcc<%= resource_name -%>IamMember_basic(context),
+				Config: testAcc<%= resource_name -%>IamMember_basicGenerated(context),
 			},
 			{
-				ResourceName:      "google_<%= resource_name.underscore -%>_iam_member.foo",
+				ResourceName:      "<%= terraform_name -%>_iam_member.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor user:admin@hashicorptest.com", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -94,7 +101,7 @@ func TestAcc<%= resource_name -%>IamMember(t *testing.T) {
 	})
 }
 
-func TestAcc<%= resource_name -%>IamPolicy(t *testing.T) {
+func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -108,11 +115,11 @@ func TestAcc<%= resource_name -%>IamPolicy(t *testing.T) {
 		CheckDestroy: testAccCheck<%= resource_name -%>Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAcc<%= resource_name -%>IamPolicy_basic(context),
+				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
 			},
 			// Test a few import formats
 			{
-				ResourceName:      "google_<%= resource_name.underscore -%>_iam_policy.foo",
+				ResourceName:      "<%= terraform_name -%>_iam_policy.foo",
 				ImportStateId:     fmt.Sprintf("<%= import_url -%>", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -121,19 +128,19 @@ func TestAcc<%= resource_name -%>IamPolicy(t *testing.T) {
 	})
 }
 
-func testAcc<%= resource_name -%>IamMember_basic(context map[string]interface{}) string {
+func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 <%= example.config_test_body -%>
 
-resource "google_<%= resource_name.underscore -%>_iam_member" "foo" {
-	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+resource "<%= terraform_name -%>_iam_member" "foo" {
+	<%= object.name.underscore -%> = "${<%= terraform_name -%>.<%= example.primary_resource_id -%>.id}"
 	role          = "%{role}"
 	member        = "user:admin@hashicorptest.com"
 }
 `, context)
 }
 
-func testAcc<%= resource_name -%>IamPolicy_basic(context map[string]interface{}) string {
+func testAcc<%= resource_name -%>IamPolicy_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 <%= example.config_test_body -%>
 
@@ -144,31 +151,31 @@ data "google_iam_policy" "foo" {
 	}
 }
 
-resource "google_<%= resource_name.underscore -%>_iam_policy" "foo" {
-	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+resource "<%= terraform_name -%>_iam_policy" "foo" {
+	<%= object.name.underscore -%> = "${<%= terraform_name -%>.<%= example.primary_resource_id -%>.id}"
 	policy_data   = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
 }
 
-func testAcc<%= resource_name -%>IamBinding_basic(context map[string]interface{}) string {
+func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 <%= example.config_test_body -%>
 
-resource "google_<%= resource_name.underscore -%>_iam_binding" "foo" {
-	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+resource "<%= terraform_name -%>_iam_binding" "foo" {
+	<%= object.name.underscore -%> = "${<%= terraform_name -%>.<%= example.primary_resource_id -%>.id}"
 	role          = "%{role}"
 	members       = ["user:admin@hashicorptest.com"]
 }
 `, context)
 }
 
-func testAcc<%= resource_name -%>IamBinding_update(context map[string]interface{}) string {
+func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]interface{}) string {
 	return Nprintf(`
 <%= example.config_test_body -%>
 
-resource "google_<%= resource_name.underscore -%>_iam_binding" "foo" {
-	topic = "${google_<%= resource_name.underscore -%>.<%= example.primary_resource_id -%>.id}"
+resource "<%= terraform_name -%>_iam_binding" "foo" {
+	<%= object.name.underscore -%> = "${<%= terraform_name -%>.<%= example.primary_resource_id -%>.id}"
 	role          = "%{role}"
 	members       = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
