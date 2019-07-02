@@ -34,10 +34,13 @@ def downstream_changelog_info(gh, upstream_pr_num, changelog_repos):
     [l.name for l in upstream_pr.labels],
     CHANGELOG_LABEL_PREFIX)
 
+  if not labels_to_add and not release_note:
+    print "skipping - no release note and labels"
+
   print "Applying changelog info to downstreams for upstream PR %d:" % (
     upstream_pr.number)
   print "Release Note: \"%s\"" % release_note
-  print "Labels: [%s]" % labels_to_add
+  print "Labels: %s" % labels_to_add
 
   parsed_urls = downstreams.get_parsed_downstream_urls(gh, upstream_pr_num)
   for repo_name, pulls in parsed_urls:
