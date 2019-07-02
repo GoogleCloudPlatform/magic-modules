@@ -25,7 +25,7 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 DOCUMENTATION = '''
 ---
 <%= ansible_style_yaml({
-  'module' => "#{module_name(object)}_#{module_suffix}",
+  'module' => "#{module_name(object)}_info",
   'description' => ["Gather facts for GCP #{object.name}",
                     (version_added(object, :facts) < '2.9' ? "This module was previously called #{module_name(object)}_facts. The usage has not changed" : nil)
                    ].compact,
@@ -90,8 +90,9 @@ def main():
   })), 12)
 -%>
     )
-<% if version_added(object, :facts) < '2.9' && module_suffix == 'facts' -%>
-    module.deprecate("The '<%= module_name(object) -%>_facts' has been renamed to '<%= module_name(object) -%>_info'", version='2.13')
+<% if version_added(object, :facts) < '2.9' -%>
+    if module._name == '<%= module_name(object) -%>_facts:
+        module.deprecate("The '<%= module_name(object) -%>_facts' has been renamed to '<%= module_name(object) -%>_info'", version='2.13')
 <% end -%>
 
     if not module.params['scopes']:
