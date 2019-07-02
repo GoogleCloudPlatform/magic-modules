@@ -9,3 +9,7 @@ This will output a new api.yaml file at the root of the Magic Modules directory.
 
 ## What this is not
 * This will not generate perfect api.yamls! This is meant to help get through the boilerplate. You will absolutely need to change descriptions and add fields!
+
+## FAQs
+
+* **Why doesn't this overwrite the original api.yaml?** Machine-outputted YAML has different string formatting and whitespace choices. This will create an unintentionally large diff.

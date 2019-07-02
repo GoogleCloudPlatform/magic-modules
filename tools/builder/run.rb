@@ -33,7 +33,7 @@ OptionParser.new do |opts|
     options[:obj] = obj
   end
 
-  opts.on('-p', '--product product', "The name of the product you're building") do |prod|
+  opts.on('-p', '--product product', "The name of the product you're building (in products/ format") do |prod|
     options[:prod] = prod
   end
 end.parse!
@@ -41,8 +41,8 @@ end.parse!
 raise 'Must include a URL, object_name and product' unless options.keys.length == 3
 
 discovery = DiscoveryProduct.new(options[:url], options[:obj]).product
-handwritten = if File.exist?("products/#{options[:product]}/api.yaml")
-                Api::Compiler.new("products/#{options[:product]}/api.yaml").run
+handwritten = if File.exist?("#{options[:product]}/api.yaml")
+                Api::Compiler.new("#{options[:product]}/api.yaml").run
               end
 new_handwritten = HumanApi.new(discovery, handwritten).build
 File.write('api.yaml', YAML.dump(new_handwritten))
