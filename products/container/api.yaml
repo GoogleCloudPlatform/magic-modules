@@ -69,6 +69,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'kubectlContext'
         description: 'The name of the context for the kubectl config file. Will default to the cluster name'
+    properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
@@ -76,7 +77,6 @@ objects:
           and location, and can be up to 40 characters. Must be Lowercase letters,
           numbers, and hyphens only. Must start with a letter. Must end with a
           number or a letter.
-    properties:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: 'An optional description of this cluster.'
