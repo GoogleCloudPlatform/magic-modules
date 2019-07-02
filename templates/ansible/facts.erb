@@ -91,6 +91,7 @@ def main():
 -%>
     )
 <% if version_added(object, :facts) < '2.9' -%>
+
     if module._name == '<%= module_name(object) -%>_facts:
         module.deprecate("The '<%= module_name(object) -%>_facts' has been renamed to '<%= module_name(object) -%>_info'", version='2.13')
 <% end -%>
