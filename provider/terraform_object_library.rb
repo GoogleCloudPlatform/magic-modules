@@ -116,5 +116,7 @@ module Provider
     end
 
     def generate_resource_tests(data) end
+
+    def generate_iam_policy(data) end
   end
 end
