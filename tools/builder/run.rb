@@ -22,6 +22,7 @@ require 'api/compiler'
 require 'optparse'
 
 options = {}
+# rubocop:disable Metrics/LineLength
 OptionParser.new do |opts|
   opts.banner = 'api.yaml builder: run.rb [options]'
 
@@ -37,6 +38,7 @@ OptionParser.new do |opts|
     options[:prod] = prod
   end
 end.parse!
+# rubocop:enable Metrics/LineLength
 
 raise 'Must include a URL, object_name and product' unless options.keys.length == 3
 
