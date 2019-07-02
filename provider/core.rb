@@ -423,5 +423,7 @@ module Provider
       end
       Time.now.year
     end
+
+    def generate_iam_policy(data) end
   end
 end

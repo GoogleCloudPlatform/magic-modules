@@ -120,7 +120,7 @@ module Provider
         body = config_test_body
         lines(compile_file(
                 {
-                  content: body,
+                  content: body
                 },
                 'templates/terraform/examples/base_configs/test_body.go.erb'
               ))
@@ -138,7 +138,7 @@ module Provider
                        "templates/terraform/examples/#{name}.tf.erb"
                      ))
 
-        return substitute_test_paths body
+        substitute_test_paths body
       end
 
       def config_example

@@ -196,7 +196,6 @@ module Provider
                     self)
     end
 
-
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
@@ -209,8 +208,13 @@ module Provider
 
       data.generate('templates/terraform/iam_policy.go.erb', filepath, self)
 
-      filepath = File.join(target_folder, "resource_#{product_name}_#{name}_iam_policy_generated_test.go")
-      data.generate('templates/terraform/examples/base_configs/iam_test_file.go.erb', filepath, self)
+      generated_test_name = "resource_#{product_name}_#{name}_iam_policy_generated_test.go"
+      filepath = File.join(target_folder, generated_test_name)
+      data.generate(
+        'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+        filepath,
+        self
+      )
     end
 
     def build_object_data(object, output_folder, version)
