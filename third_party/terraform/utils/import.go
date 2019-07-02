@@ -100,12 +100,13 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *Config) e
 
 // Parse an import id extracting field values using the given list of regexes.
 // They are applied in order. The first in the list is tried first.
+// This does not mutate any of the parameters, returning a map of matches
 //
 // e.g:
 // - projects/(?P<project>[^/]+)/regions/(?P<region>[^/]+)/subnetworks/(?P<name>[^/]+) (applied first)
 // - (?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+),
 // - (?P<name>[^/]+) (applied last)
-func samParseImportId(idRegexes []string, d TerraformResourceData, config *Config, id string) (map[string]string, error) {
+func getImportIdQualifiers(idRegexes []string, d TerraformResourceData, config *Config, id string) (map[string]string, error) {
 	for _, idFormat := range idRegexes {
 		re, err := regexp.Compile(idFormat)
 
@@ -126,7 +127,7 @@ func samParseImportId(idRegexes []string, d TerraformResourceData, config *Confi
 			}
 
 			// The first id format is applied first and contains all the fields.
-			defaults, err := samSetDefaultValues(idRegexes[0], d, config)
+			defaults, err := getDefaultValues(idRegexes[0], d, config)
 			if err != nil {
 				return nil, err
 			}
@@ -141,7 +142,9 @@ func samParseImportId(idRegexes []string, d TerraformResourceData, config *Confi
 	return nil, fmt.Errorf("Resource id %q doesn't match any of the accepted formats: %v", id, idRegexes)
 }
 
-func samSetDefaultValues(idRegex string, d TerraformResourceData, config *Config) (map[string]string, error) {
+// Returns a set of default values that are contained in a regular expression
+// This does not mutate any parameters, instead returning a map of defaults
+func getDefaultValues(idRegex string, d TerraformResourceData, config *Config) (map[string]string, error) {
 	var result map[string]string
 	result = make(map[string]string)
 	if _, ok := d.GetOk("project"); !ok && strings.Contains(idRegex, "?P<project>") {
