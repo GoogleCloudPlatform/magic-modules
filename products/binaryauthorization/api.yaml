@@ -16,6 +16,9 @@ name: BinaryAuthorization
 display_name: Binary Authorization
 versions:
   - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://binaryauthorization.googleapis.com/v1/
+  - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://binaryauthorization.googleapis.com/v1beta1/
 scopes:
