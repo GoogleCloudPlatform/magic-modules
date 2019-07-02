@@ -21,6 +21,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "example"
         vars:
           topic_name: "example-topic"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_topic_cmek"
+        primary_resource_id: "example"
+        skip_test: true
+        vars:
+          topic_name: "example-topic"
+          key_name: "example-key"
+          keyring_name: "example-keyring"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
