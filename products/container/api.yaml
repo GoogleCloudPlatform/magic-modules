@@ -56,7 +56,6 @@ objects:
         name: 'location'
         description: 'The location where the cluster is deployed'
         required: true
-    properties:
       - !ruby/object:Api::Type::String
         name: 'kubectlPath'
         description: |
@@ -70,6 +69,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'kubectlContext'
         description: 'The name of the context for the kubectl config file. Will default to the cluster name'
+    properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: |
