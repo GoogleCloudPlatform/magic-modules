@@ -31,6 +31,10 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -44,6 +48,8 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   RegionDiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   TargetInstance:  !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -244,9 +250,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   # This means that virtual objects are a poor fit.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
   License: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   MachineType: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NetworkEndpoint: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  NetworkEndpointGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   NodeGroup: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true

@@ -29,7 +29,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -45,7 +45,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -66,7 +66,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -90,7 +90,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -113,7 +113,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -135,7 +135,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides)
@@ -157,7 +157,7 @@ describe Overrides::Runner do
           )
         )
       end
-      let(:api) { Api::Compiler.new('spec/data/good-file.yaml').run }
+      let(:api) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
 
       it {
         new_api = Overrides::Runner.build(api, overrides, TestResourceOverride)

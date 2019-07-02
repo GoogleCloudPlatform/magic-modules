@@ -15,7 +15,7 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_sourcerepo_repository
   code:
-    name: "projects/<%= ctx[:project] -%>/repos/<%= ctx[:name] %>"
+    name: "<%= ctx[:name] %>"
     project: <%= ctx[:project] %>
     auth_kind: <%= ctx[:auth_kind] %>
     service_account_file: <%= ctx[:service_account_file] %>

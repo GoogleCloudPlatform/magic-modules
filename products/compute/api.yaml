@@ -20,7 +20,6 @@ versions:
   - !ruby/object:Api::Product::Version
     name: ga
     base_url: https://www.googleapis.com/compute/v1/
-    default: true
   - !ruby/object:Api::Product::Version
     name: beta
     base_url: https://www.googleapis.com/compute/beta/
@@ -602,7 +601,7 @@ objects:
       - !ruby/object:Api::Type::Array
         name: 'backends'
         description: |
-          The list of backends that serve this BackendService.
+          The set of backends that serve this BackendService.
         item_type: !ruby/object:Api::Type::NestedObject
           properties:
             - !ruby/object:Api::Type::Enum
@@ -620,6 +619,7 @@ objects:
                 and CONNECTION (for TCP/SSL).
             - !ruby/object:Api::Type::Double
               name: 'capacityScaler'
+              send_empty_value: true
               default_value: 1.0
               description: |
                 A multiplier applied to the group's maximum servicing capacity
@@ -660,8 +660,9 @@ objects:
                 The max number of simultaneous connections for the group. Can
                 be used with either CONNECTION or UTILIZATION balancing modes.
 
-                For CONNECTION mode, either maxConnections or
-                maxConnectionsPerInstance must be set.
+                For CONNECTION mode, either maxConnections or one
+                of maxConnectionsPerInstance or maxConnectionsPerEndpoint,
+                as appropriate for group type, must be set.
             - !ruby/object:Api::Type::Integer
               name: 'maxConnectionsPerInstance'
               description: |
@@ -673,13 +674,24 @@ objects:
                 For CONNECTION mode, either maxConnections or
                 maxConnectionsPerInstance must be set.
             - !ruby/object:Api::Type::Integer
+              name: 'maxConnectionsPerEndpoint'
+              description: |
+                The max number of simultaneous connections that a single backend
+                network endpoint can handle. This is used to calculate the
+                capacity of the group. Can be used in either CONNECTION or
+                UTILIZATION balancing modes.
+
+                For CONNECTION mode, either
+                maxConnections or maxConnectionsPerEndpoint must be set.
+            - !ruby/object:Api::Type::Integer
               name: 'maxRate'
               description: |
                 The max requests per second (RPS) of the group.
 
                 Can be used with either RATE or UTILIZATION balancing modes,
-                but required if RATE mode. For RATE mode, either maxRate or
-                maxRatePerInstance must be set.
+                but required if RATE mode. For RATE mode, either maxRate or one
+                of maxRatePerInstance or maxRatePerEndpoint, as appropriate for
+                group type, must be set.
             - !ruby/object:Api::Type::Double
               name: 'maxRatePerInstance'
               description: |
@@ -688,7 +700,15 @@ objects:
                 the group. Can be used in either balancing mode. For RATE mode,
                 either maxRate or maxRatePerInstance must be set.
             - !ruby/object:Api::Type::Double
+              name: 'maxRatePerEndpoint'
+              description: |
+                The max requests per second (RPS) that a single backend network
+                endpoint can handle. This is used to calculate the capacity of
+                the group. Can be used in either balancing mode. For RATE mode,
+                either maxRate or maxRatePerEndpoint must be set.
+            - !ruby/object:Api::Type::Double
               name: 'maxUtilization'
+              send_empty_value: true
               default_value: 0.8
               description: |
                 Used when balancingMode is UTILIZATION. This ratio defines the
@@ -798,7 +818,7 @@ objects:
         min_size: 1
         max_size: 1
         description: |
-           The list of URLs to the HttpHealthCheck or HttpsHealthCheck resource
+           The set of URLs to the HttpHealthCheck or HttpsHealthCheck resource
            for health checking this BackendService. Currently at most one health
            check can be specified, and a health check is required.
 
@@ -1296,7 +1316,7 @@ objects:
         # Larger disks were timing out at creation. Bumping up to 5 minutes.
         # https://github.com/terraform-providers/terraform-provider-google/issues/703
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 300 # 5 minutes
+          insert_minutes: 5
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
       status: !ruby/object:Api::Async::Status
@@ -2183,7 +2203,6 @@ objects:
         output: true
       - !ruby/object:Api::Type::Integer
         name: 'prefixLength'
-        min_version: beta
         description: |
           The prefix length of the IP range. If not present, it means the
           address field is a single IP address.
@@ -2210,7 +2229,6 @@ objects:
           This should only be set when using an Internal address.
         values:
         - :VPC_PEERING
-        min_version: beta
       - !ruby/object:Api::Type::ResourceRef
         name: 'network'
         resource: 'Network'
@@ -2221,7 +2239,6 @@ objects:
           any reserved IP ranges referring to it.
 
           This should only be set when using an Internal address.
-        min_version: beta
       # status is not useful for state convergence
       # users[] is not useful for state convergence
   - !ruby/object:Api::Resource
@@ -3675,9 +3692,9 @@ objects:
         # Users were experiencing timeouts. Bumping up to 6 minutes.
         # https://github.com/terraform-providers/terraform-provider-google/issues/852
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360 # 6 minutes
-          update_sec: 360 # 6 minutes
-          delete_sec: 360 # 6 minutes
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
       status: !ruby/object:Api::Async::Status
@@ -4898,7 +4915,6 @@ objects:
       single subnet. **NOTE**: Network endpoints cannot be created outside of a
       network endpoint group.
     input: true
-    min_version: beta
     create_verb: :POST
     create_url: projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/attachNetworkEndpoints
     delete_verb: :POST
@@ -4978,7 +4994,7 @@ objects:
     kind: 'compute#networkEndpointGroup'
     base_url: 'projects/{{project}}/zones/{{zone}}/networkEndpointGroups'
     input: true
-    min_version: beta
+    has_self_link: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Official Documentation': 'https://cloud.google.com/load-balancing/docs/negs/'
@@ -5723,7 +5739,7 @@ objects:
         base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 300 # 5 minutes
+          insert_minutes: 5
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
       status: !ruby/object:Api::Async::Status
@@ -6407,9 +6423,9 @@ objects:
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 300 # 5 minutes
-          update_sec: 300 # 5 minutes
-          delete_sec: 300 # 5 minutes
+          insert_minutes: 5
+          update_minutes: 5
+          delete_minutes: 5
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
       status: !ruby/object:Api::Async::Status
@@ -6641,11 +6657,11 @@ objects:
         base_url: 'projects/{{project}}/global/operations/{{op_id}}'
         wait_ms: 1000
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360 # 6 minutes
-          update_sec: 360 # 6 minutes
+          insert_minutes: 6
+          update_minutes: 6
           # Deletes can take 20-30 minutes to complete, since they depend
           # on the provisioning process either succeeding or failing completely.
-          delete_sec: 1800 # 30 minutes
+          delete_minutes: 30
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
       status: !ruby/object:Api::Async::Status
@@ -6867,9 +6883,9 @@ objects:
         # Users were experiencing timeout. Bumping up to 6 minutes.
         # https://github.com/terraform-providers/terraform-provider-google/issues/718
         timeouts: !ruby/object:Api::Timeouts
-          insert_sec: 360 # 6 minutes
-          update_sec: 360 # 6 minutes
-          delete_sec: 360 # 6 minutes
+          insert_minutes: 6
+          update_minutes: 6
+          delete_minutes: 6
       result: !ruby/object:Api::Async::Result
         path: 'targetLink'
       status: !ruby/object:Api::Async::Status
@@ -7799,6 +7815,81 @@ objects:
               name: 'ipAddress'
               description: 'The external IP address for this VPN gateway interface.'
   - !ruby/object:Api::Resource
+    name: 'ExternalVpnGateway'
+    kind: 'compute#externalVpnGateway'
+    base_url: projects/{{project}}/global/externalVpnGateways
+    collection_url_key: 'items'
+    input: true
+    has_self_link: true
+    min_version: beta
+    description: |
+      Represents a VPN gateway managed outside of GCP.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      api: https://cloud.google.com/compute/docs/reference/rest/beta/externalVpnGateways
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/global/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: 'An optional description of this resource.'
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035.  Specifically, the name must be 1-63 characters long and
+          match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means
+          the first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+        required: true
+      - !ruby/object:Api::Type::Enum
+        name: 'redundancyType'
+        description: |
+          Indicates the redundancy type of this external VPN gateway
+        values:
+          - :FOUR_IPS_REDUNDANCY
+          - :SINGLE_IP_INTERNALLY_REDUNDANT
+          - :TWO_IPS_REDUNDANCY
+      - !ruby/object:Api::Type::Array
+        name: 'interfaces'
+        description: |
+          A list of interfaces on this external VPN gateway.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::Integer
+              name: 'id'
+              send_empty_value: true
+              description: |
+                The numberic ID for this interface. Allowed values are based on the redundancy type
+                of this external VPN gateway
+                * `0 - SINGLE_IP_INTERNALLY_REDUNDANT`
+                * `0, 1 - TWO_IPS_REDUNDANCY`
+                * `0, 1, 2, 3 - FOUR_IPS_REDUNDANCY`
+            - !ruby/object:Api::Type::String
+              name: 'ipAddress'
+              description: |
+                IP address of the interface in the external VPN gateway.
+                Only IPv4 is supported. This IP address can be either from
+                your on-premise gateway or another Cloud provider’s VPN gateway,
+                it cannot be an IP address from Google Compute Engine.
+  - !ruby/object:Api::Resource
     name: 'UrlMap'
     kind: 'compute#urlMap'
     base_url: projects/{{project}}/global/urlMaps
@@ -8043,8 +8134,11 @@ objects:
         input: true
         send_empty_value: true
         min_version: beta
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::ResourceRef
         name: 'peerExternalGateway'
+        resource: 'ExternalVpnGateway'
+        imports: 'selfLink'
+        input: true
         description: |
           URL of the peer side external VPN gateway to which this VPN tunnel is connected.
         min_version: beta

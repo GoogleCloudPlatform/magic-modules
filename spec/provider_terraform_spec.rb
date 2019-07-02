@@ -22,7 +22,7 @@ end
 
 describe Provider::Terraform do
   context 'good file product' do
-    let(:product) { Api::Compiler.new('spec/data/good-file.yaml').run }
+    let(:product) { Api::Compiler.new(File.read('spec/data/good-file.yaml')).run }
     let(:config) do
       Provider::Config.parse('spec/data/terraform-config.yaml', product)[1]
     end
@@ -65,7 +65,7 @@ describe Provider::Terraform do
     describe '#collection_url' do
       subject { resource.collection_url }
       it do
-        version = product.version_obj_or_default(nil)
+        version = product.version_obj_or_closest(nil)
         product.set_properties_based_on_version(version)
         is_expected.to eq 'http://myproduct.google.com/api/referencedresource'
       end
@@ -74,7 +74,7 @@ describe Provider::Terraform do
     describe '#collection_url beta' do
       subject { resource.collection_url }
       it do
-        version = product.version_obj_or_default('beta')
+        version = product.version_obj_or_closest('beta')
         product.set_properties_based_on_version(version)
         is_expected.to eq 'http://myproduct.google.com/api/beta/referencedresource'
       end
@@ -83,7 +83,7 @@ describe Provider::Terraform do
     describe '#self_link_url' do
       subject { resource.self_link_url }
       it do
-        version = product.version_obj_or_default(nil)
+        version = product.version_obj_or_closest(nil)
         product.set_properties_based_on_version(version)
         is_expected.to eq(
           'http://myproduct.google.com/api/referencedresource/{{name}}'
@@ -94,7 +94,7 @@ describe Provider::Terraform do
     describe '#self_link_url beta' do
       subject { resource.self_link_url }
       it do
-        version = product.version_obj_or_default('beta')
+        version = product.version_obj_or_closest('beta')
         product.set_properties_based_on_version(version)
         is_expected.to eq(
           'http://myproduct.google.com/api/beta/referencedresource/{{name}}'

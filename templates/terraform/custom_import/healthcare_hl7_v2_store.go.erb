@@ -1,0 +1,12 @@
+
+  config := meta.(*Config)
+
+  hl7v2StoreId, err := parseHealthcareHl7V2StoreId(d.Id(), config)
+  if err != nil {
+    return nil, err
+  }
+
+  d.Set("dataset", hl7v2StoreId.DatasetId.datasetId())
+  d.Set("name", hl7v2StoreId.Name)
+
+  return []*schema.ResourceData{d}, nil

@@ -1,0 +1,27 @@
+---
+:facts:
+  :Node:
+    :version_added: '2.9'
+:regular:
+  :Node:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :acceleratorType:
+      :version_added: '2.9'
+    :tensorflowVersion:
+      :version_added: '2.9'
+    :network:
+      :version_added: '2.9'
+    :cidrBlock:
+      :version_added: '2.9'
+    :schedulingConfig:
+      :version_added: '2.9'
+      :preemptible:
+        :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
+    :zone:
+      :version_added: '2.9'

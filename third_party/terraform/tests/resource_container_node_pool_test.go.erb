@@ -228,6 +228,30 @@ func TestAccContainerNodePool_withWorkloadIdentityConfig(t *testing.T) {
 		},
 	})
 }
+
+func TestAccContainerNodePool_withSandboxConfig(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withSandboxConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.with_sandbox_config",
+						"node_config.0.sandbox_config.0.sandbox_type", "gvisor"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_sandbox_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 <% end -%>
 
 func TestAccContainerNodePool_withGPU(t *testing.T) {
@@ -559,19 +583,66 @@ func TestAccContainerNodePool_012_ConfigModeAttr(t *testing.T) {
 				Config: testAccContainerNodePool_012_ConfigModeAttr1(cluster, np),
 			},
 			{
-				ResourceName:      "google_container_node_pool.np",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
 			},
 			{
 				Config: testAccContainerNodePool_012_ConfigModeAttr2(cluster, np),
 			},
 			{
-				ResourceName:      "google_container_node_pool.np",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_EmptyGuestAccelerator(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-nodepool-test-%s", acctest.RandString(10))
+	np := fmt.Sprintf("tf-nodepool-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckContainerNodePoolDestroy,
+		Steps: []resource.TestStep{
+			{
+				// Test alternative way to specify an empty node pool
+				Config: testAccContainerNodePool_EmptyGuestAccelerator(cluster, np),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
+			},
+			{
+				// Test alternative way to specify an empty node pool
+				Config: testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, 1),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"max_pods_per_node"},
+			},
+			{
+				// Assert that changes in count from 1 result in a diff
+				Config:             testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np, 2),
+				ExpectNonEmptyPlan: true,
+				PlanOnly:           true,
+			},
+			{
+				// Assert that adding another accelerator block will also result in a diff
+				Config:             testAccContainerNodePool_PartialEmptyGuestAccelerator2(cluster, np),
+				ExpectNonEmptyPlan: true,
+				PlanOnly:           true,
 			},
 		},
 	})
@@ -980,7 +1051,6 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
 `, acctest.RandString(10), acctest.RandString(10))
 }
 
-
 func testAccContainerNodePool_withWorkloadMetadataConfig_gkeMetadataServer(projectID string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {
@@ -1007,7 +1077,6 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
   zone = "us-central1-a"
   cluster = "${google_container_cluster.cluster.name}"
   initial_node_count = 1
-
   node_config {
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -1020,6 +1089,39 @@ resource "google_container_node_pool" "with_workload_metadata_config" {
   }
 }
 `, projectID, acctest.RandString(10), acctest.RandString(10))
+}
+
+
+func testAccContainerNodePool_withSandboxConfig() string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  zone = "us-central1-a"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "tf-cluster-nodepool-test-%s"
+  zone               = "us-central1-a"
+  initial_node_count = 1
+  min_master_version = "${data.google_container_engine_versions.central1a.latest_master_version}"
+}
+
+resource "google_container_node_pool" "with_sandbox_config" {
+  name = "tf-nodepool-test-%s"
+  zone = "us-central1-a"
+  cluster = "${google_container_cluster.cluster.name}"
+  initial_node_count = 1
+  node_config {
+	image_type = "COS_CONTAINERD"
+	sandbox_config {
+	  sandbox_type = "gvisor"
+	}
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring"
+    ]
+  }
+}
+`, acctest.RandString(10), acctest.RandString(10))
 }
 <% end -%>
 
@@ -1174,6 +1276,90 @@ resource "google_container_node_pool" "np" {
 
 	node_config {
 		guest_accelerator = []
+	}
+}`, cluster, np)
+}
+
+func testAccContainerNodePool_EmptyGuestAccelerator(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	initial_node_count = 3
+}
+
+resource "google_container_node_pool" "np" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	cluster            = "${google_container_cluster.cluster.name}"
+	initial_node_count = 1
+
+	node_config {
+		guest_accelerator {
+			count = 0
+			type  = "nvidia-tesla-p100"
+		}
+	}
+}`, cluster, np)
+}
+
+func testAccContainerNodePool_PartialEmptyGuestAccelerator(cluster, np string, count int) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	initial_node_count = 3
+}
+
+resource "google_container_node_pool" "np" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	cluster            = "${google_container_cluster.cluster.name}"
+	initial_node_count = 1
+
+	node_config {
+		guest_accelerator {
+			count = 0
+			type  = "nvidia-tesla-p100"
+		}
+
+		guest_accelerator {
+			count = %d
+			type  = "nvidia-tesla-p100"
+		}
+	}
+}`, cluster, np, count)
+}
+
+func testAccContainerNodePool_PartialEmptyGuestAccelerator2(cluster, np string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	initial_node_count = 3
+}
+
+resource "google_container_node_pool" "np" {
+	name               = "%s"
+	zone               = "us-central1-f"
+	cluster            = "${google_container_cluster.cluster.name}"
+	initial_node_count = 1
+
+	node_config {
+		guest_accelerator {
+			count = 0
+			type  = "nvidia-tesla-p100"
+		}
+
+		guest_accelerator {
+			count = 1
+			type  = "nvidia-tesla-p100"
+		}
+
+		guest_accelerator {
+			count = 1
+			type  = "nvidia-tesla-p9000"
+		}
 	}
 }`, cluster, np)
 }

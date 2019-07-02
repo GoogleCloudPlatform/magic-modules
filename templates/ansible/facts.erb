@@ -24,10 +24,10 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 
 DOCUMENTATION = '''
 ---
-<%= to_yaml({
+<%= ansible_style_yaml({
   'module' => "#{module_name(object)}_info",
-  'description' => version_added(object, :facts) < '2.9' ? ["Gather information for GCP #{object.name}.", "This module was called C(#{module_name(object)}_facts) before Ansible 2.9. The usage did not change."] : ["Gather information for GCP #{object.name}."],
-  'short_description' => "Gather information for GCP #{object.name}",
+  'description' => ersion_added(object, :facts) < '2.9' ? ["Gather information for GCP #{object.name}.", "This module was called C(#{module_name(object)}_facts) before Ansible 2.9. The usage did not change."] : ["Gather information for GCP #{object.name}."],
+  'short_description' => "Gather facts for GCP #{object.name}",
   'version_added' => version_added(object, :facts).to_f,
   'author' => "Google Inc. (@googlecloudplatform)",
   'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"],
@@ -50,7 +50,7 @@ EXAMPLES = '''
 <% end -%>
 
 RETURN = '''
-<%= to_yaml({
+<%= ansible_style_yaml({
   'resources' => {
     'description' => 'List of resources',
     'returned' => 'always',

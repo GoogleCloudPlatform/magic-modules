@@ -97,11 +97,11 @@ module Provider
       end
 
       def build_test(state, object, noop = false)
-        to_yaml([build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)])
+        ansible_style_yaml([build_task(state, INTEGRATION_TEST_DEFAULTS, object, noop)])
       end
 
       def build_example(state, object)
-        to_yaml([build_task(state, EXAMPLE_DEFAULTS, object)])
+        ansible_style_yaml([build_task(state, EXAMPLE_DEFAULTS, object)])
       end
 
       private

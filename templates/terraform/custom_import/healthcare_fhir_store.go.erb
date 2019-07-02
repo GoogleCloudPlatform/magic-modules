@@ -1,0 +1,12 @@
+
+  config := meta.(*Config)
+
+  fhirStoreId, err := parseHealthcareFhirStoreId(d.Id(), config)
+  if err != nil {
+    return nil, err
+  }
+
+  d.Set("dataset", fhirStoreId.DatasetId.datasetId())
+  d.Set("name", fhirStoreId.Name)
+
+  return []*schema.ResourceData{d}, nil

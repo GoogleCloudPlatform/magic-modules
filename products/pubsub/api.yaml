@@ -31,7 +31,6 @@ objects:
     create_verb: :PUT
     description: |
       A named resource to which messages are sent by publishers.
-    input: true
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: true
       method_name_separator: ':'
@@ -40,10 +39,14 @@ objects:
         name: 'name'
         required: true
         description: 'Name of the topic.'
+        input: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
           A set of key/value label pairs to assign to this Topic.
+    update_verb: :PATCH
+    update_mask: true
+    update_url: projects/{{project}}/topics/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Managing Topics':

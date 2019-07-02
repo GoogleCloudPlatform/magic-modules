@@ -1,0 +1,110 @@
+# Copyright 2019 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Provider::Terraform::Config
+overrides: !ruby/object:Overrides::ResourceOverrides
+  Dataset: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+    id_format: "projects/{{project}}/locations/{{location}}/datasets/{{name}}"
+    import_format: ["projects/{{project}}/locations/{{location}}/datasets/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_dataset_basic"
+        skip_test: true
+        primary_resource_id: "default"
+        vars:
+          dataset_name: "example-dataset"
+          location: "us-central1"
+          time_zone: "America/New_York"
+    properties:
+      timeZone: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+  FhirStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+    id_format: "{{dataset}}/fhirStores/{{name}}"
+    import_format: ["{{dataset}}/fhirStores/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_fhir_store_basic"
+        skip_test: true
+        primary_resource_id: "default"
+        vars:
+          dataset_name: "example-dataset"
+          fhir_store_name: "example-fhir-store"
+          pubsub_topic: "fhir-notifications"
+    properties:
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      custom_import: templates/terraform/custom_import/healthcare_fhir_store.go.erb
+  DicomStore: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+    id_format: "{{dataset}}/dicomStores/{{name}}"
+    import_format: ["{{dataset}}/dicomStores/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_dicom_store_basic"
+        skip_test: true
+        primary_resource_id: "default"
+        vars:
+          dataset_name: "example-dataset"
+          dicom_store_name: "example-dicom-store"
+          pubsub_topic: "dicom-notifications"
+    properties:
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      custom_import: templates/terraform/custom_import/healthcare_dicom_store.go.erb
+  Hl7V2Store: !ruby/object:Overrides::Terraform::ResourceOverride
+    description: |
+      {{description}}
+    id_format: "{{dataset}}/hl7V2Stores/{{name}}"
+    import_format: ["{{dataset}}/hl7V2Stores/{{name}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "healthcare_hl7_v2_store_basic"
+        skip_test: true
+        primary_resource_id: "default"
+        vars:
+          dataset_name: "example-dataset"
+          hl7_v2_store_name: "example-hl7-v2-store"
+          pubsub_topic: "hl7-v2-notifications"
+    properties:
+      creationTime: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      selfLink: !ruby/object:Overrides::Terraform::PropertyOverride
+        ignore_read: true
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
+      custom_import: templates/terraform/custom_import/healthcare_hl7_v2_store.go.erb
+# This is for copying files over
+files: !ruby/object:Provider::Config::Files
+  # These files have templating (ERB) code that will be run.
+  # This is usually to add licensing info, autogeneration notices, etc.
+  compile:
+<%= lines(indent(compile('provider/terraform/product~compile.yaml'), 4)) -%>

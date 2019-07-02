@@ -35,7 +35,7 @@ module Provider
 
         # Build out paths for regular modules.
         @api.objects.reject(&:exclude).each do |obj|
-          next if obj.not_in_version?(@api.version_obj_or_default('ga'))
+          next if obj.not_in_version?(@api.version_obj_or_closest('ga'))
 
           resource = {
             version_added: correct_version([:regular, obj.name], versions)
@@ -45,7 +45,7 @@ module Provider
           # Only properties that aren't output-only + excluded should get versions.
           # These are the only properties that become module fields.
           obj.all_user_properties.reject(&:exclude).reject(&:output).each do |prop|
-            next if prop.min_version > @api.version_obj_or_default('ga')
+            next if prop.min_version > @api.version_obj_or_closest('ga')
 
             resource[prop.name.to_sym] = property_version(prop, [:regular, obj.name], versions)
           end

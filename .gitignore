@@ -16,7 +16,9 @@
 *#
 *.swp
 
+# Python
 *.pyc
+*.python-version
 
 # IDEA files
 .idea/*

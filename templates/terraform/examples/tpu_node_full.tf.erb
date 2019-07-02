@@ -1,8 +1,3 @@
-resource "google_compute_network" "tpu_network" {
-	name               = "<%= ctx[:vars]["network_name"] %>"
-	auto_create_subnetworks = false
-}
-
 data "google_tpu_tensorflow_versions" "available" { }
 
 <%#-
@@ -20,7 +15,13 @@ resource "google_tpu_node" "<%= ctx[:primary_resource_id] %>" {
 	tensorflow_version = "${data.google_tpu_tensorflow_versions.available.versions[0]}"
 
 	description = "Terraform Google Provider test TPU"
-	network = "${google_compute_network.tpu_network.name}"
+<%#-
+	  We previously used a separate network resource here, but TPUs only allow using 50
+	  different network names, ever. This caused our tests to start failing, so just
+	  use the default network in order to still demonstrate using as many fields as
+	  possible on the resource.
+-%>
+	network = "default"
 
 	labels = {
 		foo = "bar"

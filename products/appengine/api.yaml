@@ -35,6 +35,7 @@ objects:
         'Official Documentation':
           'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
       api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
+    collection_url_key: 'ingressRules'
     parameters:
       - !ruby/object:Api::Type::Integer
         name: 'priority'

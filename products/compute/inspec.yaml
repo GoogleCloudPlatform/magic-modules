@@ -21,6 +21,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   DiskType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
+  ExternalVpnGateway: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
   Firewall: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   ForwardingRule: !ruby/object:Overrides::Inspec::ResourceOverride
@@ -43,6 +45,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   MachineType: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   Network: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  NetworkEndpoint: !ruby/object:Overrides::Inspec::ResourceOverride
+    exclude: true
+  NetworkEndpointGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true
   NodeGroup: !ruby/object:Overrides::Inspec::ResourceOverride
     exclude: true

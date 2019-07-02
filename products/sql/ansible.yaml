@@ -21,17 +21,17 @@ datasources: !ruby/object:Overrides::ResourceOverrides
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "\"{{resource_name}}\" in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   User: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
       test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
         exists: |
-          "'test-user' in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-user' in \"{{ results['resources'] | map(attribute='name') | list }}\""
         does_not_exist: |
-          "'test-user' not in \"{{ results['items'] | map(attribute='name') | list }}\""
+          "'test-user' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   Tier: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   SslCert: !ruby/object:Overrides::Ansible::ResourceOverride

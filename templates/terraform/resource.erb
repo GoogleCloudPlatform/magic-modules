@@ -59,12 +59,25 @@ func resource<%= resource_name -%>() *schema.Resource {
 <%      end -%>
 
         Timeouts: &schema.ResourceTimeout {
-            Create: schema.DefaultTimeout(<%= timeouts.insert_sec  -%> * time.Second),
+            Create: schema.DefaultTimeout(<%= timeouts.insert_minutes  -%> * time.Minute),
 <%          if updatable?(object, properties) -%>
-            Update: schema.DefaultTimeout(<%= timeouts.update_sec -%> * time.Second),
+            Update: schema.DefaultTimeout(<%= timeouts.update_minutes -%> * time.Minute),
 <%          end -%>
-            Delete: schema.DefaultTimeout(<%= timeouts.delete_sec -%> * time.Second),
+            Delete: schema.DefaultTimeout(<%= timeouts.delete_minutes -%> * time.Minute),
         },
+
+<%      if object.schema_version -%>
+        SchemaVersion: <%= object.schema_version -%>,
+        StateUpgraders: []schema.StateUpgrader{
+<%        for v in 0..object.schema_version-1 -%>
+            {
+                Type: resource<%= "#{resource_name}ResourceV#{v}" -%>().CoreConfigSchema().ImpliedType(),
+                Upgrade: resource<%= "#{resource_name}UpgradeV#{v}" -%>,
+                Version: <%= v -%>,
+            },
+        },
+<%        end -%>
+<%      end -%>
 
 <%=     lines(compile(object.custom_code.resource_definition)) if object.custom_code.resource_definition -%>
 
@@ -141,7 +154,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= object.full_create_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.create_uri}" -%>")
     if err != nil {
         return err
     }
@@ -199,7 +212,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
 func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
 
-    url, err := replaceVars(d, config, "<%= object.self_link_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
     if err != nil {
         return err
     }
@@ -327,7 +340,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         defer mutexKV.Unlock(lockName)
 <%      end -%>
 
-        url, err := replaceVars(d, config, "<%= update_url(object, key[:update_url]) -%>")
+        url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, key[:update_url])}" -%>")
         if err != nil {
             return err
         }
@@ -417,7 +430,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= update_url(object, object.update_url) -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{update_uri(object, object.update_url)}" -%>")
     if err != nil {
         return err
     }
@@ -485,7 +498,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     defer mutexKV.Unlock(lockName)
 <%  end -%>
 
-    url, err := replaceVars(d, config, "<%= object.full_delete_url -%>")
+    url, err := replaceVars(d, config, "<%= "{{#{object.__product.name}BasePath}}#{object.delete_uri}" -%>")
     if err != nil {
         return err
     }
@@ -592,3 +605,14 @@ func resource<%= resource_name -%>Decoder(d *schema.ResourceData, meta interface
 <%= lines(compile(object.custom_code.decoder)) -%>
 }
 <% end -%>
+
+<%
+    if object.schema_version
+          if @config.legacy_name.nil?
+            terraform_name = (product_ns + object.name).underscore
+          else
+            terraform_name = @config.legacy_name + '_' + object.name.underscore
+          end
+-%>
+<%= lines(compile("templates/terraform/state_migrations/#{terraform_name}.go.erb")) -%>
+<%  end -%>

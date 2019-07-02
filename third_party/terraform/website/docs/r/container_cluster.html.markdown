@@ -49,7 +49,7 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
     preemptible  = true
     machine_type = "n1-standard-1"
 
-    metadata {
+    metadata = {
       disable-legacy-endpoints = "true"
     }
 
@@ -84,7 +84,7 @@ resource "google_container_cluster" "primary" {
       "https://www.googleapis.com/auth/monitoring",
     ]
 
-    metadata {
+    metadata = {
       disable-legacy-endpoints = "true"
     }
 
@@ -157,7 +157,11 @@ deprecated in favour of `node_locations`.
     this cluster. Default is an automatically assigned CIDR.
 
 * `cluster_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html))
-    Configuration for per-cluster autoscaling features, including node autoprovisioning. See [guide in Google docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning). Structure is documented below.
+Per-cluster configuration of Node Auto-Provisioning with Cluster Autoscaler to
+automatically adjust the size of the cluster and create/delete node pools based
+on the current needs of the cluster's workload. See the
+[guide to using Node Auto-Provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
+for more details. Structure is documented below.
 
 * `database_encryption` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)).
     Structure is documented below.
@@ -198,13 +202,17 @@ deprecated in favour of `node_locations`.
 
 * `logging_service` - (Optional) The logging service that the cluster should
     write logs to. Available options include `logging.googleapis.com`,
-    `logging.googleapis.com/kubernetes` (beta), and `none`. Defaults to `logging.googleapis.com`
+    `logging.googleapis.com/kubernetes`, and `none`. Defaults to `logging.googleapis.com`
 
 * `maintenance_policy` - (Optional) The maintenance policy to use for the cluster. Structure is
     documented below.
 
 * `master_auth` - (Optional) The authentication information for accessing the
-    Kubernetes master. Structure is documented below.
+Kubernetes master. Some values in this block are only returned by the API if
+your service account has permission to get credentials for your GKE cluster. If
+you see an unexpected diff removing a username/password or unsetting your client
+cert, ensure you have the `container.clusters.getCredentials` permission.
+Structure is documented below.
 
 * `master_authorized_networks_config` - (Optional) The desired configuration options
     for master authorized networks. Omit the nested `cidr_blocks` attribute to disallow
@@ -230,7 +238,7 @@ to the datasource. A `region` can have a different set of supported versions tha
     Automatically send metrics from pods in the cluster to the Google Cloud Monitoring API.
     VM metrics will be collected by Google Compute Engine regardless of this setting
     Available options include
-    `monitoring.googleapis.com`, `monitoring.googleapis.com/kubernetes` (beta) and `none`.
+    `monitoring.googleapis.com`, `monitoring.googleapis.com/kubernetes`, and `none`.
     Defaults to `monitoring.googleapis.com`
 
 * `network` - (Optional) The name or self_link of the Google Compute Engine
@@ -284,6 +292,10 @@ to the datasource. A `region` can have a different set of supported versions tha
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
+* `resource_usage_export_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) Configuration for the
+    [ResourceUsageExportConfig](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-usage-metering) feature.
+    Structure is documented below.
+
 * `subnetwork` - (Optional) The name or self_link of the Google Compute Engine subnetwork in
     which the cluster's instances are launched.
 
@@ -313,7 +325,7 @@ The `addons_config` block supports:
 
 * `kubernetes_dashboard` - (Optional) The status of the Kubernetes Dashboard
     add-on, which controls whether the Kubernetes Dashboard is enabled for this cluster.
-    It is enabled by default; set `disabled = true` to disable.
+    It is disabled by default; set `disabled = false` to enable.
 
 * `network_policy_config` - (Optional) Whether we should enable the network policy addon
     for the master.  This must be enabled in order to enable network policy for the nodes.
@@ -357,21 +369,23 @@ The `istio_config` block supports:
 
 The `cluster_autoscaling` block supports:
 
-* `enabled` - (Required) Whether cluster-wide autoscaling is enabled (i.e.node autoprovisioning is enabled). To set this to true, make sure your config meets the rest of the requirements.  Notably, you'll need `min_master_version` of at least `1.11.2`.
+* `enabled` - (Required) Whether node auto-provisioning is enabled. Resource
+limits for `cpu` and `memory` must be defined to enable node auto-provisioning.
 
-* `resource_limits` - (Optional) A list of limits on the autoprovisioning.
-    See [the docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
-    for an explanation of what options are available.  If enabling autoprovisioning, make
-    sure to set at least `cpu` and `memory`.  Structure is documented below.
+* `resource_limits` - (Optional) Global constraints for machine resources in the
+cluster. Configuring the `cpu` and `memory` types is required if node
+auto-provisioning is enabled. These limits will apply to node pool autoscaling
+in addition to node auto-provisioning. Structure is documented below.
 
 The `resource_limits` block supports:
 
-* `resource_type` - (Required) See [the docs](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
-    for a list of permitted types - `cpu`, `memory`, and others.
+* `resource_type` - (Required) The type of the resource. For example, `cpu` and
+`memory`.  See the [guide to using Node Auto-Provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)
+for a list of types.
 
-* `minimum` - (Optional) The minimum value for the resource type specified.
+* `minimum` - (Optional) Minimum amount of the resource in the cluster.
 
-* `maximum` - (Optional) The maximum value for the resource type specified.
+* `maximum` - (Optional) Maximum amount of the resource in the cluster.
 
 The `authenticator_groups_config` block supports:
 
@@ -526,6 +540,9 @@ The `node_config` block supports:
     are preemptible. See the [official documentation](https://cloud.google.com/container-engine/docs/preemptible-vm)
     for more information. Defaults to false.
 
+* `sandbox_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/provider_versions.html)) [GKE Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods) configuration. When enabling this feature you must specify `image_type = "COS_CONTAINERD"` and `node_version = "1.12.7-gke.17"` or later to use it. 
+    Structure is documented below.
+
 * `service_account` - (Optional) The service account to be used by the Node VMs.
     If not specified, the "default" service account is used.
     In order to use the configured `oauth_scopes` for logging and monitoring, the service account being used needs the
@@ -571,6 +588,31 @@ In addition, the `private_cluster_config` allows access to the following read-on
 * `private_endpoint` - The internal IP address of this cluster's master endpoint.
 
 * `public_endpoint` - The external IP address of this cluster's master endpoint.
+
+The `sandbox_type` block supports:
+
+* `sandbox_type` (Required) Which sandbox to use for pods in the node pool.
+    Accepted values are:
+
+    * `"gvisor"`: Pods run within a gVisor sandbox.
+
+The `resource_usage_export_config` block supports:
+
+* `enable_network_egress_metering` (Optional) - Whether to enable network egress metering for this cluster. If enabled, a daemonset will be created
+    in the cluster to meter network egress traffic.
+
+* `bigquery_destination` (Required) - Parameters for using BigQuery as the destination of resource usage export.
+
+* `bigquery_destination.dataset_id` (Required) - The ID of a BigQuery Dataset. For Example:
+
+```
+resource_usage_export_config {
+  enable_network_egress_metering = false
+  bigquery_destination {
+    dataset_id = "cluster_resource_usage"
+  }
+}
+```
 
 The `taint` block supports:
 
@@ -629,15 +671,14 @@ exported:
   notation (e.g. `1.2.3.4/29`). Service addresses are typically put in the last
   `/16` from the container CIDR.
 
-<a id="timeouts"></a>
 ## Timeouts
 
-`google_container_cluster` provides the following
+This resource provides the following
 [Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
 
-- `create` - (Default `30 minutes`) Used for clusters
-- `update` - (Default `30 minutes`) Used for updates to clusters
-- `delete` - (Default `30 minutes`) Used for destroying clusters.
+- `create` - Default is 30 minutes.
+- `update` - Default is 60 minutes.
+- `delete` - Default is 30 minutes.
 
 ## Import
 

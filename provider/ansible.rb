@@ -55,7 +55,7 @@ module Provider
       end
 
       def api_version_setup(version_name)
-        version = @api.version_obj_or_default(version_name)
+        version = @api.version_obj_or_closest(version_name)
         @api.set_properties_based_on_version(version)
 
         # Generate version_added_file
@@ -320,6 +320,11 @@ module Provider
         parts.delete('project')
         parts.map { |pt| object.all_user_properties.select { |p| p.name == pt }[0] }
       end.flatten
+    end
+
+    # Convert a URL to a regex.
+    def regex_url(url)
+      url.gsub(/{{[a-z]*}}/, '.*')
     end
   end
 end
