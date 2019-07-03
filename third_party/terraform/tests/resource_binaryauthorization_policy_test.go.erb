@@ -210,6 +210,7 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing)
 }
 
+<% unless version == 'ga' -%>
 func testAccBinaryAuthorizationPolicyFull(pid, pname, org, billing, note, attestor string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
@@ -334,3 +335,4 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing, note, attestor)
 }
 
+<% end -%>
