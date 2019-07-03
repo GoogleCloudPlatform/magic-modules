@@ -28,18 +28,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: decode_response
     custom_create_resource: true
     custom_update_resource: true
-    delete: |
-      auth = GcpSession(module, 'spanner')
-      return return_if_object(module, auth.delete(link), True)
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
-    delete: |
-      auth = GcpSession(module, 'spanner')
-      return return_if_object(module, auth.delete(link), True)
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
   # Virtual => true objects that don't need dedicated resources.

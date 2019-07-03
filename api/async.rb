@@ -22,6 +22,9 @@ module Api
     attr_reader :status
     attr_reader :error
 
+    # The list of methods where operations are used.
+    attr_reader :actions
+
     def validate
       super
 
@@ -29,6 +32,11 @@ module Api
       check :result, type: Result, required: true
       check :status, type: Status, required: true
       check :error, type: Error, required: true
+      check :actions, default: ['create', 'delete', 'update'], type: ::Array, item_type: ::String
+    end
+
+    def allow?(method)
+      @actions.include?(method.downcase)
     end
 
     # Represents the operations (requests) issues to watch for completion

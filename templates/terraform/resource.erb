@@ -179,7 +179,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
         return err
     }
 <%  end -%>
-<% if object.autogen_async -%>
+<% if object.autogen_async && object.async.allow?('create') -%>
     waitErr := <%= client_name_camel -%>OperationWaitTime(
     config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
         int(d.Timeout(schema.TimeoutCreate).Minutes()))
@@ -360,7 +360,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%      end -%>
-<% if object.autogen_async -%>
+<% if object.autogen_async && object.async.allow?('update') -%>
 
         err = <%= client_name_camel -%>OperationWaitTime(
             config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
@@ -455,7 +455,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
         return err
     }
 <%  end -%>
-<% if object.autogen_async -%>
+<% if object.autogen_async && object.async.allow?('update') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
     config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
@@ -519,7 +519,7 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return err
     }
 <%  end -%>
-<% if object.autogen_async -%>
+<% if object.autogen_async && object.async.allow?('delete') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",

@@ -156,7 +156,7 @@ def main():
 -%>
 <%
   method = method_call(
-    object.async ? 'wait_for_operation' : 'return_if_object',
+    object.async && object.async.allow?('create') ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth#{create_verb}",
                  ['link', "#{create_request}(module)"]),
@@ -217,7 +217,7 @@ def main():
 <%
   update_verb = object.update_verb.to_s.downcase
   method = method_call(
-    object.async ? 'wait_for_operation' : 'return_if_object',
+    object.async && object.async.allow?('update') ? 'wait_for_operation' : 'return_if_object',
     [
      'module',
      method_call("auth.#{update_verb}", method_args),
@@ -285,7 +285,7 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
   delete_verb = object.delete_verb.to_s.downcase
 
   method = method_call(
-    object.async ? 'wait_for_operation' : 'return_if_object',
+    object.async && object.async.allow?('delete') ? 'wait_for_operation' : 'return_if_object',
     ['module',
      method_call("auth.#{delete_verb}", ['link']),
      ('kind' if !object.async && object.kind?)
