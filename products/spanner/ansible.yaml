@@ -16,19 +16,9 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Instance: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
-        exists: |
-          "\"{{resource_name}}\" in \"{{ results['resources'] | map(attribute='name') | list }}\""
-        does_not_exist: |
-          "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
-      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
-        exists: |
-          "'webstore' in \"{{ results['resources'] | map(attribute='name') | list }}\""
-        does_not_exist: |
-          "'webstore' not in \"{{ results['resources'] | map(attribute='name') | list }}\""
   # Virtual => true objects that don't need dedicated resources.
   InstanceConfig: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
@@ -38,6 +28,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: decode_response
     custom_create_resource: true
     custom_update_resource: true
+    delete: |
+      auth = GcpSession(module, 'spanner')
+      return return_if_object(module, auth.delete(link), True)
     provider_helpers:
       - 'products/spanner/helpers/python/instance_helpers.py.erb'
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
