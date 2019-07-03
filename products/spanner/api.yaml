@@ -130,6 +130,7 @@ objects:
         'Official Documentation': 'https://cloud.google.com/spanner/'
       api: 'https://cloud.google.com/spanner/docs/reference/rest/v1/projects.instances.databases'
     async: !ruby/object:Api::Async
+      actions: ['create']
       operation: !ruby/object:Api::Async::Operation
         path: 'name'
         base_url: '{{op_id}}'
