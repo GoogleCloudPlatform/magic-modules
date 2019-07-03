@@ -22,8 +22,13 @@ def decode_request(response, module):
 
 
 def encode_request(request, module):
-    request['topic'] = '/'.join(['projects', module.params['project'],
-                                 'topics', replace_resource_dict(request['topic'], 'name')])
+    if isinstance(module.params.get('topic'), dict):
+        request['topic'] = '/'.join(['projects', module.params['project'],
+                                     'topics', replace_resource_dict(module.params.get(u'topic', {}), 'name')])
+    else:
+        request['topic'] = '/'.join(['projects', module.params['project'],
+                                     'topics', module.params['topic']])
+
     request['name'] = '/'.join(['projects', module.params['project'],
                                 'subscriptions', module.params['name']])
 
