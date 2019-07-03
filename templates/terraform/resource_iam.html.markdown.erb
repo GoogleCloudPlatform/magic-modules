@@ -1,0 +1,156 @@
+<%- # the license inside this block applies to this file
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+-%>
+<%# NOTE NOTE NOTE
+    The newlines in this file are *load bearing*.  This file outputs
+    Markdown, which is extremely sensitive to newlines.  You have got
+    to have a newline after every attribute and property, because
+    otherwise MD will think the next element is part of the previous
+    property's bullet point.  You cannot have any double newlines in the
+    middle of a property or attribute, because MD will think that the
+    empty line ends the bullet point and the indentation will be off.
+    You must have a newline before and after all --- document indicators,
+    and you must have a newline before and after all - - - hlines.
+    You cannot have more than one blank line between properties.
+    The --- document indicator must be the first line of the file.
+    As long as you only use `build_property_documentation`, it all works
+    fine - but when you need to add custom docs (notes, etc), you need
+    to remember these things.
+
+    Know also that the `lines` function in heavy use in MagicModules will
+    strip exactly one trailing newline - unless that's what you've designed
+    your docstring for, it's easier to insert newlines where you need them
+    manually.  That's why, in this file, we use `lines` on anything which
+    is generated from a ruby function, but skip it on anything that is
+    directly inserted from YAML.
+-%>
+<%
+  if @config.legacy_name.nil?
+    terraform_name = "google_" + (product_ns + object.name).underscore + "_iam"
+  else
+    terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore + "_iam"
+  end
+  properties = object.all_user_properties
+  timeouts = object.async.nil? ? Api::Timeouts.new : object.timeouts
+-%>
+---
+<%= lines(autogen_notice :yaml) -%>
+layout: "google"
+page_title: "Google: <%= terraform_name -%>"
+sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
+description: |-
+  Collection of resources to manage IAM policy for <%= product_ns -%> <%= object.name -%>
+
+Three different resources help you manage your IAM policy for <%= product_ns -%> <%= object.name -%>. Each of these resources serves a different use case:
+
+* `<%= terraform_name -%>_policy`: Authoritative. Sets the IAM policy for the <%= object.name.downcase -%> and replaces any existing policy already attached.
+* `<%= terraform_name -%>_binding`: Authoritative for a given role. Updates the IAM policy to grant a role to a list of members. Other roles within the IAM policy for the <%= object.name.downcase -%> are preserved.
+* `<%= terraform_name -%>_member`: Non-authoritative. Updates the IAM policy to grant a role to a new member. Other members for the role for the <%= object.name.downcase -%> are preserved.
+
+~> **Note:** `<%= terraform_name -%>_policy` **cannot** be used in conjunction with `<%= terraform_name -%>_binding` and `<%= terraform_name -%>_member` or they will fight over what your policy should be.
+
+~> **Note:** `<%= terraform_name -%>_binding` resources **can be** used in conjunction with `<%= terraform_name -%>_member` resources **only if** they do not grant privilege to the same role.
+
+<% if object.min_version.name == 'beta' -%>
+~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
+See [Provider Versions](https://terraform.io/docs/providers/google/provider_versions.html) for more details on beta resources.
+<% end -%>
+
+<% markdown_escaped_name = terraform_name.gsub("_", "\\_") %>
+## <%= markdown_escaped_name -%>\_policy
+
+```hcl
+data "google_iam_policy" "admin" {
+  binding {
+    role    = "roles/editor"
+    members = [
+      "user:jane@example.com",
+    ]
+  }
+}
+
+resource "<%= terraform_name -%>_policy" "editor" {
+  <%= object.name.underscore -%>       = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  policy_data = "${data.google_iam_policy.admin.policy_data}"
+}
+```
+
+## <%= markdown_escaped_name -%>\_binding
+
+```hcl
+resource "<%= terraform_name -%>_binding" "editor" {
+  <%= object.name.underscore -%>   = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  role    = "roles/editor"
+  members = [
+    "user:jane@example.com",
+  ]
+}
+```
+
+## <%= markdown_escaped_name -%>\_member
+
+```hcl
+resource "<%= terraform_name -%>_member" "editor" {
+  <%= object.name.underscore -%>  = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+  role   = "roles/editor"
+  member = "user:jane@example.com"
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `<%= object.name.downcase -%>` - (Required) The <%= object.name.downcase -%> name or id to bind to attach IAM policy to.
+
+* `project` - (Optional) The project in which the resource belongs. If it
+    is not provided, the provider project is used.
+
+* `member/members` - (Required) Identities that will be granted the privilege in `role`.
+  Each entry can have one of the following values:
+  * **allUsers**: A special identifier that represents anyone who is on the internet; with or without a Google account.
+  * **allAuthenticatedUsers**: A special identifier that represents anyone who is authenticated with a Google account or a service account.
+  * **user:{emailid}**: An email address that represents a specific Google account. For example, alice@gmail.com or joe@example.com.
+  * **serviceAccount:{emailid}**: An email address that represents a service account. For example, my-other-app@appspot.gserviceaccount.com.
+  * **group:{emailid}**: An email address that represents a Google group. For example, admins@example.com.
+  * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
+
+* `role` - (Required) The role that should be applied. Only one
+    `<%= terraform_name -%>_binding` can be used per role. Note that custom roles must be of the format
+    `[projects|organizations]/{parent-name}/roles/{role-name}`.
+
+* `policy_data` - (Required only by `<%= terraform_name -%>_policy`) The policy data generated by
+  a `google_iam_policy` data source.
+
+## Attributes Reference
+
+In addition to the arguments listed above, the following computed attributes are
+exported:
+
+* `etag` - (Computed) The etag of the <%= object.name.downcase -%>'s IAM policy.
+
+## Import
+
+<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, <%= object.name.downcase -%> name, role and member.
+
+```
+$ terraform import <%= terraform_name -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%>
+
+$ terraform import <%= terraform_name -%>_binding.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> roles/editor"
+
+$ terraform import <%= terraform_name -%>_member.editor "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%> roles/editor jane@example.com"
+```
+
+-> If you're importing a resource with beta features, make sure to include `-provider=google-beta`
+as an argument so that Terraform uses the correct provider to import your resource.

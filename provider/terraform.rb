@@ -215,6 +215,20 @@ module Provider
         filepath,
         self
       )
+
+      generate_iam_documentation(data)
+    end
+
+    def generate_iam_documentation(data)
+      target_folder = data.output_folder
+      target_folder = File.join(target_folder, 'website', 'docs', 'r')
+      FileUtils.mkpath target_folder
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
+
+      filepath =
+        File.join(target_folder, "#{product_name}_#{name}_iam.html.markdown")
+      data.generate('templates/terraform/resource_iam.html.markdown.erb', filepath, self)
     end
 
     def build_object_data(object, output_folder, version)
