@@ -218,6 +218,11 @@ module Provider
             .reject(&:empty?)
       end
 
+      def example
+        return @example if @example
+        raise "No example exists! Please write one or place 'exclude: true' inside the overrides"
+      end
+
       private
 
       def get_example(cfg_file)
