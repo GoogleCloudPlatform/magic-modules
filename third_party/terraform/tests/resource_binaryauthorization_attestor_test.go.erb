@@ -1,4 +1,5 @@
 <% autogen_exception -%>
+<% unless version == 'ga' -%>
 package google
 
 import (
@@ -182,3 +183,7 @@ MAU9vdm1DIv567meMqTaVZgR3w7bck2P49AO8lO5ERFpVkErtu/98y+rUy9d789l
 +OPuS1NGnxI1YKsNaWJF4uJVuvQuZ1twrhCbGNtVorO2U12+cEq+YtUxj7kmdOC1
 qoIRW6y0+UlAc+MbqfL0ziHDOAmcqz1GnROg
 =6Bvm`
+<% else %>
+// Because Container Analysis is still in beta, we can't run any of the tests that call that
+// resource without vendoring in the full beta provider.
+<% end -%>

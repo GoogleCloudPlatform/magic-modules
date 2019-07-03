@@ -39,6 +39,7 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	t.Parallel()
 
@@ -148,7 +149,12 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 		},
 	})
 }
+<% else -%>
 
+// Because Container Analysis is still in beta, we can't run any of the tests that call that
+// resource without vendoring in the full beta provider.
+
+<% end -%>
 func testAccCheckBinaryAuthorizationPolicyDefault(pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
