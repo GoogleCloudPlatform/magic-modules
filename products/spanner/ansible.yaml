@@ -37,6 +37,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
+    delete: |
+      auth = GcpSession(module, 'spanner')
+      return return_if_object(module, auth.delete(link), True)
     provider_helpers:
       - 'products/spanner/helpers/python/database_helpers.py.erb'
   # Virtual => true objects that don't need dedicated resources.
