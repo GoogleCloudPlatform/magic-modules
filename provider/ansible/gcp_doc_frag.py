@@ -36,6 +36,12 @@ options:
         description:
             - Array of scopes to be used.
         type: list
+    env_type:
+        description:
+            - Specifies which Ansible environment you're running this module within.
+            - This should not be set unless you know what you're doing.
+            - This only alters the User Agent string for any API requests.
+        type: str
 notes:
   - for authentication, you can set service_account_file using the
     c(gcp_service_account_file) env variable.
