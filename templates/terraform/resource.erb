@@ -353,7 +353,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
-<%      if object.async.nil? && object.async.allow?('update') -%>
+<%      if !object.async.nil? && object.async.allow?('update') -%>
 <%      if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
