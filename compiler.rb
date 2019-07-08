@@ -136,7 +136,6 @@ product_names.each do |product_name|
     Google::LOGGER.info "Skipping product '#{product_name}' as no #{provider_name}.yaml file exists"
     next
   end
-  # provider_yaml = File.read(provider_yaml_path)
 
   raise "Output path '#{output_path}' does not exist or is not a directory" \
     unless Dir.exist?(output_path)
@@ -155,8 +154,15 @@ product_names.each do |product_name|
     next
   end
 
-  product_api, provider_config, = \
-    Provider::Config.parse(provider_yaml_path, product_api, version)
+  if File.exist?(provider_yaml_path)
+    product_api, provider_config, = \
+      Provider::Config.parse(provider_yaml_path, product_api, version)
+  end
+  # Load any dynamic overrides passed in with -r
+  if File.exist?(provider_override_path)
+    product_api, provider_config, = \
+      Provider::Config.parse(provider_override_path, product_api, version)
+  end
 
   pp provider_config if ENV['COMPILER_DEBUG']
 
