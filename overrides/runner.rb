@@ -51,6 +51,9 @@ module Overrides
 
       def build(api, overrides, res_override_class = Overrides::ResourceOverride,
                 prop_override_class = Overrides::PropertyOverride)
+
+        overrides = Overrides::ResourceOverrides.new if overrides.nil?
+
         validator = Overrides::Validator.new(api, overrides)
         validator.run
         build_product(api, overrides, resource: res_override_class, property: prop_override_class)
