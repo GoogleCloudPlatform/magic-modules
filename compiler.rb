@@ -124,12 +124,15 @@ product_names.each do |product_name|
     raise "Product '#{product_name}' does not have an api.yaml file"
   end
 
-  product_yaml = File.read(product_yaml_path)
-
   if File.exist?(product_override_path)
-    orig = YAML.load_file(product_yaml_path)
-    result = orig.merge(YAML.load_file(product_override_path))
+    if File.exist?(product_yaml_path)
+      result = YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
+    else
+      result = YAML.load_file(product_override_path)
+    end
     product_yaml = result.to_yaml
+  else
+    product_yaml = File.read(product_yaml_path)
   end
 
   unless File.exist?(provider_yaml_path) || File.exist?(provider_override_path)
