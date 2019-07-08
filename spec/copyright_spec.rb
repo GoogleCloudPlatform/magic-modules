@@ -31,7 +31,8 @@ describe 'ensure files have copyright notice' do
                   !my_tests && !artifacts && !vendor && !presubmit && !version_added
                 end
     checker = Google::CopyrightChecker.new(files)
-    missing = checker.check_missing.collect { |f| "  - #{f}" }
+    # Ignore copywright for files not tracked by git
+    missing = checker.check_missing.select { |m| system("git ls-files --error-unmatch #{m}") }
     raise "Files missing (or outdated) copyright:\n#{missing.join("\n")}" \
       unless missing.empty?
   end
