@@ -1156,13 +1156,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	name := containerClusterFullName(project, location, clusterName)
 	cluster, err := config.clientContainerBeta.Projects.Locations.Clusters.Get(name).Do()
 	if err != nil {
-		return err
+		return handleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
 	}
 	if cluster.Status == "ERROR" || cluster.Status == "DEGRADED" {
 		return fmt.Errorf("Cluster %q has status %q with message %q", d.Get("name"), cluster.Status, cluster.StatusMessage)
-	}
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Container Cluster %q", d.Get("name").(string)))
 	}
 
 	d.Set("name", cluster.Name)
