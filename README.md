@@ -87,6 +87,10 @@ git clone https://github.com/terraform-providers/terraform-provider-google.git $
 git clone https://github.com/terraform-providers/terraform-provider-google-beta.git $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
 ```
 
+Magic Modules won't work with old versions of the Terraform provider repos. If
+you're encountering issues with vendoring and paths, make sure both MM and the
+Terraform provider are running on up to date copies of `master`.
+
 Once you've prepared the target folders for the tools, run the following to
 finish getting Magic Modules set up by installing the Ruby gems it needs to run:
 
