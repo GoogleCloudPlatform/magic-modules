@@ -48,9 +48,6 @@
   assert:
     that:
       - result.changed == true
-<% if object.kind? -%>
-      - result.has_key('kind') == False
-<% end # if object.kind? -%>
 <% unless example.verifier.nil? -%>
 <%= lines(example.verifier.build_task('absent', object)) -%>
 <% end -%>
@@ -61,9 +58,6 @@
   assert:
     that:
       - result.changed == false
-<% if object.kind? -%>
-      - result.has_key('kind') == False
-<% end # if object.kind? -%>
 <% end # object.readonly -%>
 <% if example.dependencies and !example.dependencies.empty? -%>
 #---------------------------------------------------------

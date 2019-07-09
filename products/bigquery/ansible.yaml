@@ -17,9 +17,19 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Table: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          results['resources'] | map(attribute='tableReference') | map(attribute='tableId') | select("match", ".*example_table.*") | list | length == 1
+        does_not_exist: |
+          results['resources'] | map(attribute='tableReference') | map(attribute='tableId') | select("match", ".*example_table.*") | list | length == 0
   Dataset: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+      test: !ruby/object:Provider::Ansible::AnsibleFactsTestInformation
+        exists: |
+          results['resources'] | map(attribute='datasetReference') | map(attribute='datasetId') | select("match", ".*my_example_dataset.*") | list | length == 1
+        does_not_exist: |
+          results['resources'] | map(attribute='datasetReference') | map(attribute='datasetId') | select("match", ".*my_example_dataset.*") | list | length == 0
 overrides: !ruby/object:Overrides::ResourceOverrides
   Dataset: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
