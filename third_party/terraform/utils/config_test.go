@@ -150,3 +150,70 @@ func TestConfigLoadAndValidate_customScopes(t *testing.T) {
 		t.Fatalf("expected scope to be %q, got %q", "https://www.googleapis.com/auth/compute", config.Scopes[0])
 	}
 }
+
+func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
+	// Use default batching config
+	batchCfg, err := expandProviderBatchingConfig(nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	config := &Config{
+		Credentials:    testFakeCredentialsPath,
+		Project:        "my-gce-project",
+		Region:         "us-central1",
+		BatchingConfig: batchCfg,
+	}
+
+	err = config.LoadAndValidate()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedDur := time.Second * defaultBatchSendIntervalSec
+	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
+		t.Fatalf("expected sendAfter to be %d seconds, got %v",
+			defaultBatchSendIntervalSec,
+			config.requestBatcherServiceUsage.sendAfter)
+	}
+}
+
+func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
+	batchCfg, err := expandProviderBatchingConfig([]interface{}{
+		map[string]interface{}{
+			"send_after":       "1s",
+			"disable_batching": true,
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if batchCfg.sendAfter != time.Second {
+		t.Fatalf("expected batchCfg sendAfter to be 1 second, got %v", batchCfg.sendAfter)
+	}
+	if !batchCfg.disableBatching {
+		t.Fatalf("expected batchCfg disableBatching to be true")
+	}
+
+	config := &Config{
+		Credentials:    testFakeCredentialsPath,
+		Project:        "my-gce-project",
+		Region:         "us-central1",
+		BatchingConfig: batchCfg,
+	}
+
+	err = config.LoadAndValidate()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedDur := time.Second * 1
+	if config.requestBatcherServiceUsage.sendAfter != expectedDur {
+		t.Fatalf("expected sendAfter to be %d seconds, got %v",
+			1,
+			config.requestBatcherServiceUsage.sendAfter)
+	}
+
+	if !config.requestBatcherServiceUsage.disableBatching {
+		t.Fatalf("expected disableBatching to be true")
+	}
+}

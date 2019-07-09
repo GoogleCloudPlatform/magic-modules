@@ -77,6 +77,26 @@ func Provider() terraform.ResourceProvider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
+			"global_batching": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"send_after": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "10s",
+						},
+						"disable_batching": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+					},
+				},
+			},
+
 			// Generated Products
 			<% unless version == 'ga' -%>
 			// start beta-only products
@@ -388,6 +408,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	for i, scope := range scopes {
 		config.Scopes[i] = scope.(string)
 	}
+
+	batchCfg, err := expandProviderBatchingConfig(d.Get("global_batching"))
+	if err != nil {
+		return nil, err
+	}
+	config.BatchingConfig = batchCfg
 
 	<% unless version == 'ga' -%>
 	config.BinaryAuthorizationBasePath = d.Get(BinaryAuthorizationCustomEndpointEntryKey).(string)
