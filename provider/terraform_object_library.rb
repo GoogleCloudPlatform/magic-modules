@@ -112,6 +112,8 @@ module Provider
                         'third_party/terraform/utils/service_scope.go'],
                        ['google/kms_utils.go',
                         'third_party/terraform/utils/kms_utils.go']
+                       ['google/batcher.go',
+                        'third_party/terraform/utils/batcher.go']
                      ])
     end
 
