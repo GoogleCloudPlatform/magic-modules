@@ -50,7 +50,7 @@ layout: "google"
 page_title: "Google: <%= terraform_name -%>"
 sidebar_current: "docs-<%= terraform_name.gsub("_", "-") -%>"
 description: |-
-  Collection of resources to manage IAM policy for <%= product_ns -%> <%= object.name -%>
+  Collection of resources to manage IAM policy for <%= "#{product_ns}#{object.name}" %>
 
 Three different resources help you manage your IAM policy for <%= product_ns -%> <%= object.name -%>. Each of these resources serves a different use case:
 
