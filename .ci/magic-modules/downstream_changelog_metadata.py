@@ -34,10 +34,13 @@ def downstream_changelog_info(gh, upstream_pr_num, changelog_repos):
     [l.name for l in upstream_pr.labels],
     CHANGELOG_LABEL_PREFIX)
 
+  if not labels_to_add and not release_note:
+    print "skipping - no release note and labels"
+
   print "Applying changelog info to downstreams for upstream PR %d:" % (
     upstream_pr.number)
   print "Release Note: \"%s\"" % release_note
-  print "Labels: [%s]" % labels_to_add
+  print "Labels: %s" % labels_to_add
 
   parsed_urls = downstreams.get_parsed_downstream_urls(gh, upstream_pr_num)
   for repo_name, pulls in parsed_urls:
@@ -71,8 +74,8 @@ def set_changelog_info(gh_pull, release_note, labels_to_add):
   gh_pull.set_labels(*labels_to_set)
 
 if __name__ == '__main__':
-  downstream_urls = os.environ.get('DOWNSTREAM_REPOS').split(',')
-  if len(downstream_urls) == 0:
+  downstream_repos = os.environ.get('DOWNSTREAM_REPOS').split(',')
+  if len(downstream_repos) == 0:
     print "Skipping, no downstreams repos given to downstream changelog info for"
     sys.exit(0)
 
@@ -84,4 +87,4 @@ if __name__ == '__main__':
 
     # TODO(emilymye): Replace this no-op print statement with code after
     # verifying w/ pipeline.
-    downstream_changelog_info(gh, pr_num, downstream_urls)
+    downstream_changelog_info(gh, pr_num, downstream_repos)
