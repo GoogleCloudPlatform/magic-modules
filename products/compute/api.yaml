@@ -4193,8 +4193,7 @@ objects:
     description: |
       Represents an Instance Group resource. Instance groups are self-managed
       and can contain identical or different instances. Instance groups do not
-      use an instance template. Unlike managed instance groups, you must create
-      and add instances to an instance group manually.
+      use an instance template. 
     async: !ruby/object:Api::Async
       operation: !ruby/object:Api::Async::Operation
         kind: 'compute#operation'
