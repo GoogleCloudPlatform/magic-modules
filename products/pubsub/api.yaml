@@ -34,7 +34,6 @@ objects:
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
-      primary_resource_name: "fmt.Sprintf(\"example-topic-%s\", context[\"random_suffix\"])"
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

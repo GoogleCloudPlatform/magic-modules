@@ -13,12 +13,12 @@ import (
 )
 <% resource_name = product_ns + object.name -%>
 <% 
-individual_url = object.self_link_url
-params = individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+resource_uri = object.self_link_url
+resource_params = resource_uri.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
 -%>
 
 var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
-<% params.each do |param| -%>
+<% resource_params.each do |param| -%>
 	"<%= param -%>": {
 		Type:             schema.TypeString,
 <% if ['project', 'zone', 'region', 'location'].include?(param) -%>
@@ -32,13 +32,13 @@ var <%= resource_name -%>IamSchema = map[string]*schema.Schema{
 		DiffSuppressFunc: compareSelfLinkOrResourceName,
 <% end # param == object.name -%>
 	},
-<% end # params.each -%>
+<% end # resource_params.each -%>
 }
 
 type <%= resource_name -%>IamUpdater struct {
-<% params.each do |param| -%>
+<% resource_params.each do |param| -%>
 	<%= param -%> string
-<% end # params.each -%>
+<% end # resource_params.each -%>
 	d       *schema.ResourceData
 	Config  *Config
 }
@@ -46,7 +46,7 @@ type <%= resource_name -%>IamUpdater struct {
 func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Config) (ResourceIamUpdater, error) {
 	values := make(map[string]string)
 	
-<% if params.include?('project') -%>
+<% if resource_params.include?('project') -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return nil, err
@@ -61,11 +61,11 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	}
 
 	for k, v := range m {
-    values[k] = v
+		values[k] = v
 	}
 
 	u := &<%= resource_name -%>IamUpdater{
-<% params.each do |param| -%>
+<% resource_params.each do |param| -%>
 		<%= param -%>: values["<%= param -%>"],
 <% end -%>
 		d:       d,
@@ -79,7 +79,7 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) error {
 	values := make(map[string]string)
 	
-<% if params.include?('project') -%>
+<% if resource_params.include?('project') -%>
 	project, err := getProject(d, config)
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 	}
 
 	u := &<%= resource_name -%>IamUpdater{
-<% params.each do |param| -%>
+<% resource_params.each do |param| -%>
 		<%= param -%>: values["<%= param -%>"],
 <% end -%>
 		d:       d,
@@ -145,8 +145,8 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	return nil
 }
 
-<% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
-<% string_qualifiers = params.map{|param| "u.#{param}"}.join(', ') -%>
+<% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
+<% string_qualifiers = resource_params.map{|param| "u.#{param}"}.join(', ') -%>
 func qualify<%= object.name -%>Url(u *<%= resource_name -%>IamUpdater, methodIdentifier string) string {
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }

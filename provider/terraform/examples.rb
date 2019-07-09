@@ -89,6 +89,10 @@ module Provider
       # Whether to skip generating tests for this resource
       attr_reader :skip_test
 
+      # The name of the primary resource for use in IAM tests. IAM tests need
+      # a reference to the primary resource to create IAM policies for
+      attr_reader :primary_resource_name
+
       def config_documentation
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
@@ -191,6 +195,7 @@ module Provider
         check :vars, type: Hash
         check :test_env_vars, type: Hash
         check :ignore_read_extra, type: Array, item_type: String, default: []
+        check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
       end
     end

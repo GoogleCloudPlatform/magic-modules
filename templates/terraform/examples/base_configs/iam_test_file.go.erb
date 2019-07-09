@@ -26,14 +26,6 @@ else
 	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
 end 
 -%>
-func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(10),
-		"role":          "roles/editor",
-	}
-
 <% import_url = individual_url.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 <% import_str = Array.new(params.length, '%s').join('/') -%>
 <% import_qualifiers = [] -%>
@@ -46,6 +38,13 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 		<% import_qualifiers.push('getTestRegionFromEnv(t)') -%>
 	<% end -%>
 <% end -%>
+func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(10),
+		"role":          "roles/editor",
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -57,7 +56,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -67,7 +66,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -94,7 +93,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor user:admin@hashicorptest.com", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor user:admin@hashicorptest.com", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -118,10 +117,9 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 			{
 				Config: testAcc<%= resource_name -%>IamPolicy_basicGenerated(context),
 			},
-			// Test a few import formats
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%>", <%= import_qualifiers.join(', ') -%>, <%= object.iam_policy.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%>", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
