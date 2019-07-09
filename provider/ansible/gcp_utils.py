@@ -167,7 +167,7 @@ class GcpSession(object):
     def _headers(self):
         if self.module.params.get('env_type'):
             return {
-                'User-Agent': "Google-Ansible-MM-{0}-{1}".format(self.module.params.get('env_type'), self.product)
+                'User-Agent': "Google-Ansible-MM-{0}-{1}".format(self.product, self.module.params.get('env_type'))
             }
         else:
             return {
