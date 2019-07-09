@@ -23,9 +23,9 @@ func resourceGoogleProjectService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"service": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: StringNotInSlice(ignoredProjectServices, false),
 			},
 			"project": {
