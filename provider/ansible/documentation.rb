@@ -41,7 +41,7 @@ module Provider
               else
                 prop.default_value&.to_s
               end),
-            'type' => ('bool' if prop.is_a? Api::Type::Boolean),
+            'type' => python_type(prop),
             'aliases' => prop.aliases,
             'version_added' => (version_added(prop)&.to_f),
             'suboptions' => (
