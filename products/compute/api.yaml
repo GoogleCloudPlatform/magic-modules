@@ -6401,7 +6401,6 @@ objects:
       api: 'https://cloud.google.com/compute/docs/reference/rest/v1/snapshots'
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: true
-      primary_resource_name: "my-snapshot-%{random_suffix}"
     description: |
       Represents a Persistent Disk Snapshot resource.
 
