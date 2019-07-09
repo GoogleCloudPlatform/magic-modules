@@ -2,7 +2,10 @@ package google
 
 import (
 	"fmt"
+	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/serviceusage/v1"
 	"log"
 	"strings"
 )
@@ -23,6 +26,7 @@ func resourceGoogleProjectService() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: StringNotInSlice(ignoredProjectServices, false),
 			},
 			"project": {
 				Type:     schema.TypeString,
@@ -64,7 +68,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	srv := d.Get("service").(string)
-	err = enableServiceUsageProjectServices([]string{srv}, project, config)
+	err = globalBatchEnableServices([]string{srv}, project, config)
 	if err != nil {
 		return err
 	}
@@ -84,19 +88,16 @@ func resourceGoogleProjectServiceRead(d *schema.ResourceData, meta interface{}) 
 	if err != nil {
 		return err
 	}
+	srv := d.Get("service").(string)
 
-	enabledServices, err := readEnabledServiceUsageProjectServices(project, config)
+	enabled, err := isServiceEnabled(project, srv, config)
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
-
-	srv := d.Get("service")
-	for _, s := range enabledServices {
-		if s == srv {
-			d.Set("project", project)
-			d.Set("service", s)
-			return nil
-		}
+	if enabled {
+		d.Set("project", project)
+		d.Set("service", srv)
+		return nil
 	}
 
 	// The service is was not found in enabled services - remove it from state
@@ -133,4 +134,32 @@ func resourceGoogleProjectServiceUpdate(d *schema.ResourceData, meta interface{}
 	// This update method is no-op because the only updatable fields
 	// are state/config-only, i.e. they aren't sent in requests to the API.
 	return nil
+}
+
+// Retrieve enablement state for a given project's service
+func isServiceEnabled(project, serviceName string, config *Config) (bool, error) {
+	// Verify project for services still exists
+	p, err := config.clientResourceManager.Projects.Get(project).Do()
+	if err != nil {
+		return false, err
+	}
+	if p.LifecycleState == "DELETE_REQUESTED" {
+		// Construct a 404 error for handleNotFoundError
+		return false, &googleapi.Error{
+			Code:    404,
+			Message: "Project deletion was requested",
+		}
+	}
+
+	resourceName := fmt.Sprintf("projects/%s/services/%s", project, serviceName)
+	var srv *serviceusage.GoogleApiServiceusageV1Service
+	err = retryTime(func() error {
+		var currErr error
+		srv, currErr = config.clientServiceUsage.Services.Get(resourceName).Do()
+		return currErr
+	}, 10)
+	if err != nil {
+		return false, errwrap.Wrapf(fmt.Sprintf("Failed to list enabled services for project %s: {{err}}", project), err)
+	}
+	return srv.State == "ENABLED", nil
 }
