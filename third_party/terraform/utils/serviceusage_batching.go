@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	batchTypeServiceUsageEnableServices = "project/services:batchEnable"
+	batchKeyTmplServiceUsageEnableServices = "project/%s/services:batchEnable"
 )
 
 // globalBatchEnableServices can be used to batch requests to enable services
@@ -14,15 +14,15 @@ const (
 // google_project_service(s) resources.
 func globalBatchEnableServices(services []string, project string, config *Config) error {
 	req := &BatchRequest{
-		DebugId:      fmt.Sprintf("Enable Project Services %s: %+v", project, services),
 		ResourceName: project,
 		Body:         services,
 		CombineF:     combineServiceUsageServicesBatches,
 		SendF:        sendBatchFuncEnableServices(config),
+		DebugId:      fmt.Sprintf("Enable Project Services %s: %+v", project, services),
 	}
 
 	_, err := config.requestBatcherServiceUsage.SendRequestWithTimeout(
-		batchTypeServiceUsageEnableServices,
+		fmt.Sprintf(batchKeyTmplServiceUsageEnableServices, project),
 		req,
 		time.Minute*10)
 	return err

@@ -19,7 +19,9 @@ type RequestBatcher struct {
 
 // BatchRequest represents a single request to a global batcher.
 type BatchRequest struct {
-	// ResourceName determine the resource name to be passed to SendF.
+	// ResourceName represents the underlying resource for which
+	// a request is made. Its format is determined by what SendF expects, but
+	// typically should be the name of the parent GCP resource being changed.
 	ResourceName string
 
 	// Body is this request's data to be passed to SendF, and may be combined
@@ -29,8 +31,10 @@ type BatchRequest struct {
 	// CombineF function determines how to combine bodies from two batches.
 	CombineF batcherCombineFunc
 
-	// CombineF function determines how to actually send a batched request to a
-	// third party service.
+	// SendF function determines how to actually send a batched request to a
+	// third party service. The arguments given to this function are
+	// (ResourceName, Body) where Body may have been combined with other request
+	// Bodies.
 	SendF batcherSendFunc
 
 	// ID for debugging request. This should be specific to a single request
@@ -80,7 +84,11 @@ func NewRequestBatcher(config *batchingConfig) *RequestBatcher {
 
 // SendRequestWithTimeout is expected to be called per parallel call.
 // It manages waiting on the result of a batch request.
-func (b *RequestBatcher) SendRequestWithTimeout(batchType string, request *BatchRequest, timeout time.Duration) (interface{}, error) {
+//
+// Batch requests are grouped by the given batchKey, and thus batchKey
+// should be unique to the type of batch request being sent and the affected
+// third-party resource.
+func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchRequest, timeout time.Duration) (interface{}, error) {
 	if request == nil {
 		return nil, fmt.Errorf("error, cannot request batching for nil BatchRequest")
 	}
@@ -92,10 +100,10 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchType string, request *Batch
 	}
 	if b.disableBatching {
 		log.Printf("[DEBUG] Batching is disabled, sending single request for %q", request.DebugId)
-		return request.SendF(request.ResourceName, request.Body)
+		return request.SendF(batchKey, request.Body)
 	}
 
-	respCh, err := b.startBatchRequest(batchType, request)
+	respCh, err := b.startBatchRequest(batchKey, request)
 	if err != nil {
 		return nil, fmt.Errorf("error adding request to batch: %s", err)
 	}
@@ -105,35 +113,34 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchType string, request *Batch
 	select {
 	case resp := <-respCh:
 		if resp.err != nil {
-			return nil, fmt.Errorf("Batch %q Request %q returned error: %v", batchType, request.DebugId, resp.err)
+			return nil, fmt.Errorf("Batch %q for request %q returned error: %v", batchKey, request.DebugId, resp.err)
 		}
 		return resp.body, nil
 	case <-timer.C:
 		break
 	}
-	return nil, fmt.Errorf("Request %s timed out after %v", batchType, timeout)
+	return nil, fmt.Errorf("Request %s timed out after %v", batchKey, timeout)
 }
 
 // startBatchRequest manages batching logic that access shared information
 // (i.e. existing batches)
-func (b *RequestBatcher) startBatchRequest(batchType string, newRequest *BatchRequest) (<-chan batchResponse, error) {
+func (b *RequestBatcher) startBatchRequest(batchKey string, newRequest *BatchRequest) (<-chan batchResponse, error) {
 	b.Lock()
 	defer b.Unlock()
 
 	// The calling goroutine will need a channel to wait on for a response.
 	respCh := make(chan batchResponse, 1)
 
-	batchId := fmt.Sprintf("%s:%s", batchType, newRequest.ResourceName)
 	// If batch already exists, combine this request into existing request.
-	if batch, ok := b.batches[batchId]; ok {
-		log.Printf("[DEBUG] Adding batch request %q to existing batch %q", newRequest.DebugId, batchId)
+	if batch, ok := b.batches[batchKey]; ok {
+		log.Printf("[DEBUG] Adding batch request %q to existing batch %q", newRequest.DebugId, batchKey)
 		if batch.CombineF == nil {
-			return nil, fmt.Errorf("Provider Error: unable to add request %q to batch %q with no CombineF", newRequest.DebugId, batchId)
+			return nil, fmt.Errorf("Provider Error: unable to add request %q to batch %q with no CombineF", newRequest.DebugId, batchKey)
 		}
 
 		newBody, err := batch.CombineF(batch.Body, newRequest.Body)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to combine request %q data into existing batch %q: %v", newRequest.DebugId, batchId, err)
+			return nil, fmt.Errorf("Unable to combine request %q data into existing batch %q: %v", newRequest.DebugId, batchKey, err)
 		}
 
 		batch.Body = newBody
@@ -142,23 +149,23 @@ func (b *RequestBatcher) startBatchRequest(batchType string, newRequest *BatchRe
 		return respCh, nil
 	}
 
-	log.Printf("[DEBUG] Creating new batch %q from request %q", newRequest.DebugId, batchId)
+	log.Printf("[DEBUG] Creating new batch %q from request %q", newRequest.DebugId, batchKey)
 	// Create a new batch.
-	b.batches[batchId] = &startedBatch{
+	b.batches[batchKey] = &startedBatch{
 		BatchRequest: newRequest,
 		listeners:    []chan batchResponse{respCh},
 	}
 
 	// Start a timer to send the request
-	b.batches[batchId].timer = time.AfterFunc(b.sendAfter, func() {
-		batch := b.popBatch(batchId)
+	b.batches[batchKey].timer = time.AfterFunc(b.sendAfter, func() {
+		batch := b.popBatch(batchKey)
 
 		var resp batchResponse
 		if batch == nil {
-			log.Printf("[DEBUG] Batch not found in saved batches, running single request batch %q", batchId)
+			log.Printf("[DEBUG] Batch not found in saved batches, running single request batch %q", batchKey)
 			resp = newRequest.send()
 		} else {
-			log.Printf("[DEBUG] Sending batch %q combining %d requests)", batchId, len(batch.listeners))
+			log.Printf("[DEBUG] Sending batch %q combining %d requests)", batchKey, len(batch.listeners))
 			resp = batch.send()
 		}
 
