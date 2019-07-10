@@ -34,7 +34,7 @@ provider "google-beta" {
 }
 ```
 
-## Example Usage - Using beta features with `google-beta` 
+## Example Usage - Using beta features with `google-beta`
 
 To use Google Cloud Platform features that are in beta, you need to both:
 
@@ -68,7 +68,7 @@ provider "google-beta" {}
 The following attributes can be used to configure the provider. The quick
 reference should be sufficient for most use cases, but see the full reference
 if you're interested in more details. Both `google` and `google-beta` share the
-same configuration. 
+same configuration.
 
 ### Quick Reference
 
@@ -103,6 +103,15 @@ the service. This can be used to configure the Google provider to communicate
 with GCP-like APIs such as [the Cloud Functions emulator](https://github.com/googlearchive/cloud-functions-emulator).
 Values are expected to include the version of the service, such as
 `https://www.googleapis.com/compute/v1/`.
+
+* `batching` - (Optional) This block controls batching GCP calls for groups of specific resource types. Structure is documented below.
+~>**NOTE**: Batching is not implemented for the majority or resources/request types and is bounded by the core [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) flag. Adding or changing this config likely won't affect a Terraform run at all unless the user is creating enough of a particular type of resource to run into quota issues.
+
+The `batching` fields supports:
+
+* `send_after` - (Optional) A duration string representing the amount of time after which a request should be sent. Defaults to 10s.
+
+* `disable_batching` - (Optional) Defaults to false. If true, disables batching and each request is sent normally.
 
 ### Full Reference
 
@@ -278,3 +287,22 @@ as their versioned counterpart but that won't necessarily always be the case.
 [service accounts]: https://cloud.google.com/docs/authentication/getting-started
 [GCE metadata]: https://cloud.google.com/docs/authentication/production#obtaining_credentials_on_compute_engine_kubernetes_engine_app_engine_flexible_environment_and_cloud_functions
 [scopes]: https://developers.google.com/identity/protocols/googlescopes
+
+---
+
+* `batching` - (Optional) Controls batching for specific GCP request types where users have encountered quota or speed issues using `count` with resources that affect the same GCP resource (e.g. `google_project_service`). It is not used for every resource/request type and can only group parallel similar calls for nodes at a similar traversal time in the graph during `terraform apply` (e.g. resources created using `count` that affect a single `project`). Thus, it is also bounded by the `terraform` [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) flag, as reducing the number of parallel calls will reduce the number of simultaneous requests being added to a batcher.
+
+~> **NOTE**: Not every resource or request has had batching implemented for it.
+In addition, if you're not completely sure you need it, you should avoid using or changing this configuration, as it doesn't affect runs for smaller configs or config using the majority of resources.
+
+In general, batching is really only needed for resources where several requests are made at the same time to an underlying GCP resource protected by a fairly low default quota, or with very slow operations with slower eventual propagatation. This specifically has included the following example configs:
+
+* enabling a large number of services with several `google_project_service` resources
+* Setting global (project/org/folder) IAM policies using several `bindings` or `members` (batching not implemented yet)
+
+
+The `batching` block supports the following fields.
+
+* `send_after` - (Optional) A duration string representing the amount of time after which a request should be sent. Defaults to 10s. Should be a non-negative sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+
+* `disable_batching` - (Optional) Defaults to false. If true, disables global batching and each request is sent normally.

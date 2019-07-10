@@ -77,7 +77,7 @@ func Provider() terraform.ResourceProvider {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
-			"global_batching": {
+			"batching": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
@@ -409,7 +409,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Scopes[i] = scope.(string)
 	}
 
-	batchCfg, err := expandProviderBatchingConfig(d.Get("global_batching"))
+	batchCfg, err := expandProviderBatchingConfig(d.Get("batching"))
 	if err != nil {
 		return nil, err
 	}
