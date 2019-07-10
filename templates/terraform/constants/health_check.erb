@@ -1,0 +1,47 @@
+// Whether the port should be set or not
+// TODO: With the next breaking change we should remove the defaultPort.
+// We've added the ability to check if port is set to the defaultPort here,
+// then just remove it in the encoder.  However, a better fix would be to
+// not set the default port, but this will be a breaking change.
+func validatePortSpec(diff *schema.ResourceDiff, blockName string, defaultPort int) error {
+    block := diff.Get(blockName+".0").(map[string]interface{})
+    portSpec := block["port_specification"]
+    portName := block["port_name"]
+    port := block["port"]
+
+    incorrectPort := (port != defaultPort && port != nil && port != 0)
+    noName := (portName == nil || portName == "")
+
+    if portSpec == "USE_NAMED_PORT" && incorrectPort {
+        return fmt.Errorf("Error in %s: port cannot be specified when using port_specification USE_NAMED_PORT.", blockName)
+    }
+    if portSpec == "USE_NAMED_PORT" && noName {
+        return fmt.Errorf("Error in %s: Must specify port_name when using USE_NAMED_PORT as port_specification.", blockName)
+    }
+
+    if portSpec == "USE_SERVING_PORT" && incorrectPort {
+        return fmt.Errorf("Error in %s: port cannot be specified when using port_specification USE_SERVING_PORT.", blockName)
+    }
+    if portSpec == "USE_SERVING_PORT" && !noName {
+        return fmt.Errorf("Error in %s: port_name cannot be specified when using port_specification USE_SERVING_PORT.", blockName)
+    }    
+
+    return nil
+}
+
+func healthCheckCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
+    if diff.Get("http_health_check") != nil {
+        return validatePortSpec(diff, "http_health_check", 80)
+    }
+    if diff.Get("https_health_check") != nil {
+        return validatePortSpec(diff, "https_health_check", 443)
+    }
+    if diff.Get("tcp_health_check") != nil {
+        return validatePortSpec(diff, "tcp_health_check", 80)
+    }
+    if diff.Get("ssl_health_check") != nil {
+        return validatePortSpec(diff, "ssl_health_check", 443)
+    }
+
+    return nil
+}

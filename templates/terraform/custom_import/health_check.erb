@@ -1,0 +1,29 @@
+// TODO: With the next breaking change we should remove setting the port to the default port.
+// Because we have default ports set, we use the encoder to remove them 
+// Explicitly set to default as a workaround for `ImportStateVerify` tests, and so that users
+// don't see a diff immediately after import.
+var blockName string
+var defaultPort int
+
+if d.Get("http_health_check") != nil {
+	blockName = "http_health_check"
+	defaultPort = 80
+}
+if d.Get("https_health_check") != nil {
+	blockName = "https_health_check"
+    defaultPort = 443
+}
+if d.Get("tcp_health_check") != nil {
+	blockName = "tcp_health_check"
+	defaultPort = 80
+}
+if d.Get("ssl_health_check") != nil {
+	blockName = "ssl_health_check"
+    defaultPort = 443
+}
+
+block := d.Get(blockName+".0").(map[string]interface{})
+
+if block["port_specification"] == "USE_NAMED_PORT" || block["port_specification"] == "USE_SERVING_PORT" {
+    d.Set(blockName+".0.port", defaultPort)
+} 

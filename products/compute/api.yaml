@@ -2784,7 +2784,7 @@ objects:
                   port or named port specified in the Backend Service is used for health
                   checking.
 
-                If not specified, TCP health check follows behavior specified in `port` and
+                If not specified, HTTP health check follows behavior specified in `port` and
                 `portName` fields.
               values:
                 - :USE_FIXED_PORT
@@ -2849,7 +2849,7 @@ objects:
                   port or named port specified in the Backend Service is used for health
                   checking.
 
-                If not specified, TCP health check follows behavior specified in `port` and
+                If not specified, HTTPS health check follows behavior specified in `port` and
                 `portName` fields.
               values:
                 - :USE_FIXED_PORT
@@ -2969,7 +2969,7 @@ objects:
                   port or named port specified in the Backend Service is used for health
                   checking.
 
-                If not specified, TCP health check follows behavior specified in `port` and
+                If not specified, SSL health check follows behavior specified in `port` and
                 `portName` fields.
               values:
                 - :USE_FIXED_PORT
