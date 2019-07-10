@@ -1,4 +1,3 @@
-<% autogen_exception -%>
 package google
 
 import (
