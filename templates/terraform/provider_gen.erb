@@ -41,5 +41,12 @@ else
 end
 -%>
 	"<%= terraform_name -%>": resource<%= product_ns + object.name -%>(),
+<% iam_policy = object&.iam_policy -%>
+<% unless iam_policy.nil? || iam_policy.exclude -%>
+<%   iam_class_name = product_ns + object.name -%>
+	"<%= terraform_name -%>_iam_binding":              ResourceIamBindingWithImport(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
+	"<%= terraform_name -%>_iam_member":               ResourceIamMemberWithImport(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
+	"<%= terraform_name -%>_iam_policy":               ResourceIamPolicyWithImport(<%= iam_class_name -%>IamSchema, <%= iam_class_name -%>IamUpdaterProducer, <%= iam_class_name -%>IdParseFunc),
+<% end # unless object.iam_policy -%>
 <% end -%>
 }

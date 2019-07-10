@@ -196,6 +196,41 @@ module Provider
                     self)
     end
 
+    # Generate the IAM policy for this object. This is used to query and test
+    # IAM policies separately from the resource itself
+    def generate_iam_policy(data)
+      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      target_folder = File.join(data.output_folder, dir)
+
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
+      filepath = File.join(target_folder, "iam_#{product_name}_#{name}.go")
+
+      data.generate('templates/terraform/iam_policy.go.erb', filepath, self)
+
+      generated_test_name = "iam_#{product_name}_#{name}_generated_test.go"
+      filepath = File.join(target_folder, generated_test_name)
+      data.generate(
+        'templates/terraform/examples/base_configs/iam_test_file.go.erb',
+        filepath,
+        self
+      )
+
+      generate_iam_documentation(data)
+    end
+
+    def generate_iam_documentation(data)
+      target_folder = data.output_folder
+      target_folder = File.join(target_folder, 'website', 'docs', 'r')
+      FileUtils.mkpath target_folder
+      name = data.object.name.underscore
+      product_name = data.product.name.underscore
+
+      filepath =
+        File.join(target_folder, "#{product_name}_#{name}_iam.html.markdown")
+      data.generate('templates/terraform/resource_iam.html.markdown.erb', filepath, self)
+    end
+
     def build_object_data(object, output_folder, version)
       TerraformFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
