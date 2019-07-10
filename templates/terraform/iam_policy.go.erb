@@ -150,7 +150,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 
 <% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 <% string_qualifiers = resource_params.map{|param| "u.#{param}"}.join(', ') -%>
-func (u *<+ resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) string {
+func (u *<%= resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) string {
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }
 
