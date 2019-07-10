@@ -630,7 +630,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: templates/terraform/decoders/health_check.erb
       constants: templates/terraform/constants/health_check.erb
       resource_definition: templates/terraform/resource_definition/health_check.erb
-      post_import: templates/terraform/custom_import/health_check.erb
     properties:
      id: !ruby/object:Overrides::Terraform::PropertyOverride
        exclude: true
