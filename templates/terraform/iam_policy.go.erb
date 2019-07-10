@@ -113,7 +113,7 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 }
 
 func (u *<%= resource_name -%>IamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
-	url := qualify<%= object.name -%>Url(u, "getIamPolicy")
+	url := u.qualify<%= object.name -%>Url("getIamPolicy")
 
 	policy, err := sendRequest(u.Config, "GET", url, nil)
 	if err != nil {
@@ -138,7 +138,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 	obj := make(map[string]interface{})
 	obj["policy"] = json
 
-	url := qualify<%= object.name -%>Url(u, "setIamPolicy")
+	url := u.qualify<%= object.name -%>Url("setIamPolicy")
 	
 	_, err = sendRequestWithTimeout(u.Config, "POST", url, obj, u.d.Timeout(schema.TimeoutCreate))
 	if err != nil {
@@ -150,7 +150,7 @@ func (u *<%= resource_name -%>IamUpdater) SetResourceIamPolicy(policy *cloudreso
 
 <% import_url = resource_uri.gsub(/({{)(\w+)(}})/, '%s').gsub(object.__product.base_url, '') -%>
 <% string_qualifiers = resource_params.map{|param| "u.#{param}"}.join(', ') -%>
-func qualify<%= object.name -%>Url(u *<%= resource_name -%>IamUpdater, methodIdentifier string) string {
+func (u *<+ resource_name -%>IamUpdater) qualify<%= object.name -%>Url(methodIdentifier string) string {
 	return fmt.Sprintf("<%= object.__product.base_url -%>%s<%= object.iam_policy.method_name_separator -%>%s", fmt.Sprintf("<%= import_url -%>", <%= string_qualifiers -%>), methodIdentifier)
 }
 
