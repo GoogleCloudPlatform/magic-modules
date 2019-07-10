@@ -194,7 +194,7 @@ class GcpModule(AnsibleModule):
                     type='str',
                     fallback=(env_fallback, ['GCP_PROJECT'])),
                 auth_kind=dict(
-                    required=False,
+                    required=True,
                     fallback=(env_fallback, ['GCP_AUTH_KIND']),
                     choices=['machineaccount', 'serviceaccount', 'application'],
                     type='str'),
