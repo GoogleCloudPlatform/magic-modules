@@ -15,7 +15,7 @@ task: !ruby/object:Provider::Ansible::Task
   name: gcp_compute_region_disk
   code:
     name: <%= ctx[:name] %>
-    size_gb: 50
+    size_gb: 500
     disk_encryption_key:
       raw_key: 'SGVsbG8gZnJvbSBHb29nbGUgQ2xvdWQgUGxhdGZvcm0='
     region: 'us-central1'
