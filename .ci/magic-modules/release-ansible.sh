@@ -78,6 +78,7 @@ for filename in mm-bug*; do
   done < $filename
 
   git checkout magician/devel -- "lib/ansible/module_utils/gcp_utils.py"
+  git checkout magician/devel -- "lib/ansible/plugins/doc_fragments/gcp.py"
 
   # This commit may be empty
   set +e
