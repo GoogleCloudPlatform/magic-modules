@@ -1,7 +1,7 @@
 import re
 
-RELEASE_NOTE_RE = r'```releasenote(?P<release_note>.*)```'
-
+RELEASE_NOTE_RE = r'`{3}releasenote(?P<release_note>.*?)`{3}'
+RELEASE_NOTE_SUB_RE = r'`{3}releasenote'
 def find_dependency_urls_in_comment(body):
   """Util to parse downstream dependencies from a given comment body.
 
@@ -62,7 +62,9 @@ def set_release_note(release_note, body):
 
   For a given text block, removes any existing "releasenote" markdown code
   blocks and adds the given release note at the end.
-
+```releasenote
+      This should be replaced
+      ```
   Example:
     # Set a release note
     > print set_release_note(
@@ -82,7 +84,11 @@ def set_release_note(release_note, body):
   Returns:
     Modified text
   """
-  edited = re.sub(RELEASE_NOTE_RE, '', body)
+  edited = ""
+  for segment in re.split(r'`{3}releasenote', body, re.S):
+    idx = segment.find('```\n')
+    edited += segment if idx < 0 else segment[idx+3:]
+
   release_note = release_note.strip()
   if release_note:
     edited += "\n```releasenote\n%s\n```\n" % release_note.strip()
