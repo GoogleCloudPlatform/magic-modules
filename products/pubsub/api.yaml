@@ -40,6 +40,7 @@ objects:
         required: true
         description: 'Name of the topic.'
         input: true
+        pattern: 'projects/{{project}}/topics/{{name}}'
       - !ruby/object:Api::Type::String
         name: 'kmsKeyName'
         description: |
@@ -86,6 +87,7 @@ objects:
         description: 'Name of the subscription.'
         required: true
         input: true
+        pattern: 'projects/{{project}}/subscriptions/{{name}}'
       - !ruby/object:Api::Type::ResourceRef
         name: 'topic'
         resource: 'Topic'
@@ -94,6 +96,7 @@ objects:
           A reference to a Topic resource.
         required: true
         input: true
+        pattern: 'projects/{{project}}/topics/{{topic}}'
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         description: |
