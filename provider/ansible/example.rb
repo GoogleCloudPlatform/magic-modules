@@ -135,7 +135,7 @@ module Provider
         elsif code.is_a?(Hash)
           code.map { |k, vv| [k, compiled_code(vv, hash)] }.to_h
         elsif code.is_a?(TrueClass) || code.is_a?(FalseClass) || code.is_a?(String)
-          compile_string(hash, code.to_s.delete("\n")).join
+          compile_string(hash, code.to_s).join("\n")
         else
           code
         end
