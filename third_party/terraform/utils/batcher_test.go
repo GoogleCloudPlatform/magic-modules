@@ -91,7 +91,7 @@ func TestRequestBatcher_errInSend(t *testing.T) {
 	}
 
 	testSendBatch := func(resourceName string, cnt interface{}) (interface{}, error) {
-		return cnt, errors.New(fmt.Sprintf(sendErrTmpl, resourceName))
+		return cnt, fmt.Errorf(sendErrTmpl, resourceName)
 	}
 
 	wg := sync.WaitGroup{}
@@ -182,11 +182,11 @@ func testBasicCountBatches(t *testing.T, testName string, numBatches int) {
 	wg.Add(numBatches)
 
 	for i := 0; i < numBatches; i++ {
-		go func() {
+		go func(idx int) {
 			defer wg.Done()
 
 			req := &BatchRequest{
-				DebugId:      fmt.Sprintf("Test '%s' Request #%d", testName, i),
+				DebugId:      fmt.Sprintf("Test '%s' Request #%d", testName, idx),
 				ResourceName: testName,
 				Body:         1,
 				CombineF:     testCombine,
@@ -205,6 +205,6 @@ func testBasicCountBatches(t *testing.T, testName string, numBatches int) {
 			if resp != expected {
 				t.Errorf("expected response %s, got %s", expected, resp)
 			}
-		}()
+		}(i)
 	}
 }
