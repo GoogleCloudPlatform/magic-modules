@@ -109,8 +109,11 @@ class TestStringUtils(unittest.TestCase):
     self.assertIn("More text\n", replaced)
 
   def test_find_prefixed_labels(self):
-    self.assertFalse(find_prefixed_labels([]))
-    self.assertFalse(find_prefixed_labels(["", ""]))
+    self.assertFalse(find_prefixed_labels([], "test: "))
+    self.assertFalse(find_prefixed_labels(["", ""], "test: "))
+    labels = find_prefixed_labels(["foo", "bar"], "")
+    self.assertIn("foo", labels)
+    self.assertIn("bar", labels)
 
     test_labels = [
       "test: foo",
