@@ -199,7 +199,7 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
-      dir = data.version == 'beta' ? 'google-beta' : 'google'
+      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
       target_folder = File.join(data.output_folder, dir)
 
       name = data.object.name.underscore
