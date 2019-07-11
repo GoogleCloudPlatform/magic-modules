@@ -179,7 +179,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 
 	res, err := sendRequestWithTimeout(config, "POST", url, obj, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
-		return fmt.Errorf("Error removing connection from network %s: %s", d.Id(), err)
+		return handleNotFoundError(err, d, fmt.Sprintf("ServiceNetworkingConnection %q", d.Id()))
 	}
 
 	project, err := getProject(d, config)

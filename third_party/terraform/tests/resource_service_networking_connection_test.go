@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-
 )
 
 func TestAccServiceNetworkingConnectionCreate(t *testing.T) {
@@ -62,7 +61,6 @@ func TestAccServiceNetworkingConnectionDestroy(t *testing.T) {
 	})
 }
 
-
 func TestAccServiceNetworkingConnectionUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -105,7 +103,6 @@ func testServiceNetworkingConnectionDestroy(parent, network, project string) res
 		config := testAccProvider.Meta().(*Config)
 		parentService := "services/" + parent
 		networkName := fmt.Sprintf("projects/%s/global/networks/%s", project, network)
-
 
 		response, err := config.clientServiceNetworking.Services.Connections.List(parentService).
 			Network(networkName).Do()
