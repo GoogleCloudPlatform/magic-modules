@@ -98,11 +98,11 @@ func TestRequestBatcher_errInSend(t *testing.T) {
 	wg.Add(2)
 
 	for i := 0; i < 2; i++ {
-		go func() {
+		go func(idx int) {
 			defer wg.Done()
 
 			req := &BatchRequest{
-				DebugId:      fmt.Sprintf("sendError %d", i),
+				DebugId:      fmt.Sprintf("sendError %d", idx),
 				ResourceName: testResource,
 				Body:         nil,
 				CombineF:     testCombine,
@@ -118,7 +118,7 @@ func TestRequestBatcher_errInSend(t *testing.T) {
 			if !strings.Contains(err.Error(), fmt.Sprintf(sendErrTmpl, testResource)) {
 				t.Errorf("expected error %q, got error: %v", expectedErr, err)
 			}
-		}()
+		}(i)
 	}
 
 	wg.Wait()
