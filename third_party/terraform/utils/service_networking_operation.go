@@ -1,8 +1,6 @@
-<% autogen_exception -%>
 package google
 
 import (
-	"github.com/hashicorp/terraform/helper/resource"
 	"google.golang.org/api/servicenetworking/v1"
 )
 
