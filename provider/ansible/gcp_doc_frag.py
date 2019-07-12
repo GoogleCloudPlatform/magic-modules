@@ -27,6 +27,7 @@ options:
     service_account_file:
         description:
             - The path of a Service Account JSON file if serviceaccount is selected as type.
+        type: path
     service_account_email:
         description:
             - An optional service account email address if machineaccount is selected
