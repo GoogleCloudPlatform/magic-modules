@@ -125,11 +125,11 @@ product_names.each do |product_name|
   end
 
   if File.exist?(product_override_path)
-    if File.exist?(product_yaml_path)
-      result = YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
-    else
-      result = YAML.load_file(product_override_path)
-    end
+    result = if File.exist?(product_yaml_path)
+               YAML.load_file(product_yaml_path).merge(YAML.load_file(product_override_path))
+             else
+               YAML.load_file(product_override_path)
+             end
     product_yaml = result.to_yaml
   else
     product_yaml = File.read(product_yaml_path)
