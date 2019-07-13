@@ -67,6 +67,7 @@ type batchResponse struct {
 // channel, representing parallel callers that are waiting on requests
 // combined into this batch.
 type startedBatch struct {
+	batchKey string
 	*BatchRequest
 
 	listeners []chan batchResponse
@@ -145,26 +146,14 @@ func (b *RequestBatcher) startBatchRequest(batchKey string, newRequest *BatchReq
 
 	// If batch already exists, combine this request into existing request.
 	if batch, ok := b.batches[batchKey]; ok {
-		log.Printf("[DEBUG] Adding batch request %q to existing batch %q", newRequest.DebugId, batchKey)
-		if batch.CombineF == nil {
-			return nil, fmt.Errorf("Provider Error: unable to add request %q to batch %q with no CombineF", newRequest.DebugId, batchKey)
-		}
-
-		newBody, err := batch.CombineF(batch.Body, newRequest.Body)
-		if err != nil {
-			return nil, fmt.Errorf("Unable to combine request %q data into existing batch %q: %v", newRequest.DebugId, batchKey, err)
-		}
-
-		batch.Body = newBody
-		log.Printf("[DEBUG] Added batch request %q to batch. New batch body: %v", newRequest.DebugId, batch.Body)
-		batch.listeners = append(batch.listeners, respCh)
-		return respCh, nil
+		batch.addRequest(newRequest)
 	}
 
 	log.Printf("[DEBUG] Creating new batch %q from request %q", newRequest.DebugId, batchKey)
 	// Create a new batch.
 	b.batches[batchKey] = &startedBatch{
 		BatchRequest: newRequest,
+		batchKey:     batchKey,
 		listeners:    []chan batchResponse{respCh},
 	}
 
@@ -187,6 +176,24 @@ func (b *RequestBatcher) startBatchRequest(batchKey string, newRequest *BatchReq
 			close(ch)
 		}
 	})
+
+	return respCh, nil
+}
+
+func (batch *startedBatch) addRequest(newRequest *BatchRequest) (<-chan batchResponse, error) {
+	log.Printf("[DEBUG] Adding batch request %q to existing batch %q", newRequest.DebugId, batch.batchKey)
+	if batch.CombineF == nil {
+		return nil, fmt.Errorf("Provider Error: unable to add request %q to batch %q with no CombineF", newRequest.DebugId, batch.batchKey)
+	}
+	newBody, err := batch.CombineF(batch.Body, newRequest.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to combine request %q data into existing batch %q: %v", newRequest.DebugId, batch.batchKey, err)
+	}
+	batch.Body = newBody
+
+	log.Printf("[DEBUG] Added batch request %q to batch. New batch body: %v", newRequest.DebugId, batch.Body)
+	respCh := make(chan batchResponse, 1)
+	batch.listeners = append(batch.listeners, respCh)
 
 	return respCh, nil
 }
