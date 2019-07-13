@@ -2,7 +2,7 @@ package google
 
 import (
 	"fmt"
-	"time"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 const (
@@ -12,7 +12,7 @@ const (
 // globalBatchEnableServices can be used to batch requests to enable services
 // across resource nodes, i.e. to batch creation of several
 // google_project_service(s) resources.
-func globalBatchEnableServices(services []string, project string, config *Config) error {
+func globalBatchEnableServices(services []string, project string, d *schema.ResourceData, config *Config) error {
 	req := &BatchRequest{
 		ResourceName: project,
 		Body:         services,
@@ -24,7 +24,7 @@ func globalBatchEnableServices(services []string, project string, config *Config
 	_, err := config.requestBatcherServiceUsage.SendRequestWithTimeout(
 		fmt.Sprintf(batchKeyTmplServiceUsageEnableServices, project),
 		req,
-		time.Minute*10)
+		d.Timeout(schema.TimeoutCreate))
 	return err
 }
 

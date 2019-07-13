@@ -8,6 +8,7 @@ import (
 	"google.golang.org/api/serviceusage/v1"
 	"log"
 	"strings"
+	"time"
 )
 
 func resourceGoogleProjectService() *schema.Resource {
@@ -19,6 +20,12 @@ func resourceGoogleProjectService() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			State: resourceGoogleProjectServiceImport,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Read:   schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -68,7 +75,7 @@ func resourceGoogleProjectServiceCreate(d *schema.ResourceData, meta interface{}
 	}
 
 	srv := d.Get("service").(string)
-	err = globalBatchEnableServices([]string{srv}, project, config)
+	err = globalBatchEnableServices([]string{srv}, project, d, config)
 	if err != nil {
 		return err
 	}
