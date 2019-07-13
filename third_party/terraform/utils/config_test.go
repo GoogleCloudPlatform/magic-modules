@@ -181,8 +181,8 @@ func TestConfigLoadAndValidate_defaultBatchingConfig(t *testing.T) {
 func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	batchCfg, err := expandProviderBatchingConfig([]interface{}{
 		map[string]interface{}{
-			"send_after":       "1s",
-			"disable_batching": true,
+			"send_after":      "1s",
+			"enable_batching": false,
 		},
 	})
 	if err != nil {
@@ -191,8 +191,8 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	if batchCfg.sendAfter != time.Second {
 		t.Fatalf("expected batchCfg sendAfter to be 1 second, got %v", batchCfg.sendAfter)
 	}
-	if !batchCfg.disableBatching {
-		t.Fatalf("expected batchCfg disableBatching to be true")
+	if !batchCfg.enableBatching {
+		t.Fatalf("expected batchCfg enableBatching to be true")
 	}
 
 	config := &Config{
@@ -214,7 +214,7 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 			config.requestBatcherServiceUsage.sendAfter)
 	}
 
-	if !config.requestBatcherServiceUsage.disableBatching {
-		t.Fatalf("expected disableBatching to be true")
+	if config.requestBatcherServiceUsage.enableBatching {
+		t.Fatalf("expected enableBatching to be false")
 	}
 }

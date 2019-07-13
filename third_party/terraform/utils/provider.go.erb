@@ -87,11 +87,12 @@ func Provider() terraform.ResourceProvider {
 							Type:     schema.TypeString,
 							Optional: true,
 							Default:  "10s",
+							ValidateFunc: validateNonNegativeDuration(),
 						},
-						"disable_batching": {
+						"enable_batching": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  false,
+							Default:  true,
 						},
 					},
 				},

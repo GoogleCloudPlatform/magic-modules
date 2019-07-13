@@ -70,8 +70,8 @@ type startedBatch struct {
 
 // batchingConfig contains user configuration for controlling batch requests.
 type batchingConfig struct {
-	sendAfter       time.Duration
-	disableBatching bool
+	sendAfter      time.Duration
+	enableBatching bool
 }
 
 // Initializes a new batcher
@@ -98,7 +98,7 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 	if request.SendF == nil {
 		return nil, fmt.Errorf("error, cannot request batching for BatchRequest with nil SendF")
 	}
-	if b.disableBatching {
+	if !b.enableBatching {
 		log.Printf("[DEBUG] Batching is disabled, sending single request for %q", request.DebugId)
 		return request.SendF(batchKey, request.Body)
 	}

@@ -109,9 +109,11 @@ Values are expected to include the version of the service, such as
 
 The `batching` fields supports:
 
-* `send_after` - (Optional) A duration string representing the amount of time after which a request should be sent. Defaults to 10s.
+* `send_after` - (Optional) A duration string representing the amount of time
+after which a request should be sent. Defaults to 10s.
 
-* `disable_batching` - (Optional) Defaults to false. If true, disables batching and each request is sent normally.
+* `enable_batching` - (Optional) Defaults to true. If false, disables batching
+   so requests that have batching capabilities are instead is sent one by one.
 
 ### Full Reference
 
@@ -290,19 +292,35 @@ as their versioned counterpart but that won't necessarily always be the case.
 
 ---
 
-* `batching` - (Optional) Controls batching for specific GCP request types where users have encountered quota or speed issues using `count` with resources that affect the same GCP resource (e.g. `google_project_service`). It is not used for every resource/request type and can only group parallel similar calls for nodes at a similar traversal time in the graph during `terraform apply` (e.g. resources created using `count` that affect a single `project`). Thus, it is also bounded by the `terraform` [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) flag, as reducing the number of parallel calls will reduce the number of simultaneous requests being added to a batcher.
+* `batching` - (Optional) Controls batching for specific GCP request types
+  where users have encountered quota or speed issues using `count` with
+  resources that affect the same GCP resource (e.g. `google_project_service`). 
+  It is not used for every resource/request type and can only group parallel
+  similar calls for nodes at a similar traversal time in the graph during
+  `terraform apply` (e.g. resources created using `count` that affect a single
+  `project`). Thus, it is also bounded by the `terraform` 
+  [`-parallelism`](https://www.terraform.io/docs/commands/apply.html#parallelism-n) 
+  flag, as reducing the number of parallel calls will reduce the number of
+  simultaneous requests being added to a batcher.
 
-~> **NOTE**: Not every resource or request has had batching implemented for it.
-In addition, if you're not completely sure you need it, you should avoid using or changing this configuration, as it doesn't affect runs for smaller configs or config using the majority of resources.
+  ~> **NOTE** Most resources/GCP request do not have batching implemented (see
+  below for requests which use batching) Batching is really only needed for
+  resources where several requests are made at the same time to an underlying
+  GCP resource protected by a fairly low default quota, or with very slow
+  operations with slower eventual propagatation. If you're not completely sure
+  what you are doing, avoid setting custom batching configuration.
 
-In general, batching is really only needed for resources where several requests are made at the same time to an underlying GCP resource protected by a fairly low default quota, or with very slow operations with slower eventual propagatation. This specifically has included the following example configs:
+**So far, batching is implemented for**:
 
-* enabling a large number of services with several `google_project_service` resources
-* Setting global (project/org/folder) IAM policies using several `bindings` or `members` (batching not implemented yet)
-
+* enabling project services using `google_project_service` or
+  `google_project_services`
 
 The `batching` block supports the following fields.
 
-* `send_after` - (Optional) A duration string representing the amount of time after which a request should be sent. Defaults to 10s. Should be a non-negative sequence of decimal numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m". Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+* `send_after` - (Optional) A duration string representing the amount of time
+after which a request should be sent. Defaults to 10s. Should be a non-negative
+integer or float string with a unit suffix, such as "300ms", "1.5h" or "2h45m".
+Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 
-* `disable_batching` - (Optional) Defaults to false. If true, disables global batching and each request is sent normally.
+* `disable_batching` - (Optional) Defaults to false. If true, disables global
+batching and each request is sent normally.

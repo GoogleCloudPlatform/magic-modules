@@ -600,7 +600,7 @@ func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 		return config, nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return config, nil
 	}
 
