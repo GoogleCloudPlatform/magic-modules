@@ -9,7 +9,12 @@ import (
 
 const defaultBatchSendIntervalSec = 10
 
-// RequestBatcher a global batcher object.
+// RequestBatcher is a global batcher object that keeps track of
+// existing batches.
+// In general, a batcher should be created per service that requires batching
+// in order to prevent blocking batching for one service due to another,
+// and to minimize the possiblity of overlap in batchKey formats
+// (see SendRequestWithTimeout)
 type RequestBatcher struct {
 	sync.Mutex
 
@@ -74,7 +79,7 @@ type batchingConfig struct {
 	enableBatching bool
 }
 
-// Initializes a new batcher
+// Initializes a new batcher.
 func NewRequestBatcher(config *batchingConfig) *RequestBatcher {
 	return &RequestBatcher{
 		batchingConfig: config,
@@ -85,9 +90,17 @@ func NewRequestBatcher(config *batchingConfig) *RequestBatcher {
 // SendRequestWithTimeout is expected to be called per parallel call.
 // It manages waiting on the result of a batch request.
 //
-// Batch requests are grouped by the given batchKey, and thus batchKey
-// should be unique to the type of batch request being sent and the affected
-// third-party resource.
+// Batch requests are grouped by the given batchKey. batchKey
+// should be unique to the API request being sent, most likely similar to
+// the HTTP request URL with GCP resource ID included in the URL (the caller
+// may choose to use a key with method if needed to diff GET/read and
+// POST/create)
+//
+// As an example, for google_project_service and google_project_services, the
+// batcher is called to batch services.batchEnable() calls for a project
+// $PROJECT. The calling code uses the template
+// "serviceusage:projects/$PROJECT/services:batchEnable", which mirrors the HTTP request:
+// POST https://serviceusage.googleapis.com/v1/projects/$PROJECT/services:batchEnable
 func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchRequest, timeout time.Duration) (interface{}, error) {
 	if request == nil {
 		return nil, fmt.Errorf("error, cannot request batching for nil BatchRequest")
@@ -109,7 +122,6 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 	}
 
 	timer := time.NewTimer(timeout)
-
 	select {
 	case resp := <-respCh:
 		if resp.err != nil {
