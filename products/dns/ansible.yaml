@@ -73,5 +73,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     # TODO(alexstephen): Re-evaluate merging Project into Ansible
     exclude: true
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

@@ -46,7 +46,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           must contain only letters (a-z, A-Z), numbers (0-9), or
           underscores. The maximum length is 1,024 characters.
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

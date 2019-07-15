@@ -41,8 +41,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     template: 'products/iam/helpers/ansible/service_account_key_template.erb'
     has_tests: false
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
-
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
