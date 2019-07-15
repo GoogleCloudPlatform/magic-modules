@@ -164,7 +164,7 @@ product_names.each do |product_name|
   # Load any dynamic overrides passed in with -r
   if File.exist?(provider_override_path)
     product_api, provider_config, = \
-      Provider::Config.parse(provider_override_path, product_api, version)
+      Provider::Config.parse(provider_override_path, product_api, version, override_dir)
   end
 
   pp provider_config if ENV['COMPILER_DEBUG']
