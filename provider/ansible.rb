@@ -327,6 +327,9 @@ module Provider
       url.gsub(/{{[a-z]*}}/, '.*')
     end
 
+    # Generates files on a per-resource basis.
+    # All paths are allowed a '%s' where the module name
+    # will be added.
     def generate_resource_files(data)
       return unless @config&.files&.resource
 
