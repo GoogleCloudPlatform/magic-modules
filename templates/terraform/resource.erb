@@ -172,7 +172,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
     d.SetId(id)
 
-<%  unless object.async.nil? -%>
+<%  if !object.async.nil? && object.async.allow?('create') -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
@@ -353,7 +353,7 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
-<%      unless object.async.nil? -%>
+<%      if !object.async.nil? && object.async.allow?('update') -%>
 <%      if has_project -%>
         project, err := getProject(d, config)
         if err != nil {
@@ -448,14 +448,14 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
     }
 
-<%  unless object.async.nil? -%>
+<%  if !object.async.nil? && object.async.allow?('update') -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
 <%  end -%>
-<% if object.autogen_async -%>
+<% if object.autogen_async && object.async.allow?('update') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
     config, res, <% if has_project -%> project, <% end -%> "Updating <%= object.name -%>",
@@ -512,14 +512,14 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
 
-<%  unless object.async.nil? -%>
+<%  if !object.async.nil? && object.async.allow?('delete') -%>
 <%  if has_project -%>
     project, err := getProject(d, config)
     if err != nil {
         return err
     }
 <%  end -%>
-<% if object.autogen_async -%>
+<% if object.autogen_async && object.async.allow?('delete') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
         config, res, <% if has_project -%> project, <% end -%> "Deleting <%= object.name -%>",
