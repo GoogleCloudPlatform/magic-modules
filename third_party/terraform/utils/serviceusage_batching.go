@@ -3,6 +3,7 @@ package google
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"time"
 )
 
 const (
@@ -17,7 +18,7 @@ func globalBatchEnableServices(services []string, project string, d *schema.Reso
 		ResourceName: project,
 		Body:         services,
 		CombineF:     combineServiceUsageServicesBatches,
-		SendF:        sendBatchFuncEnableServices(config),
+		SendF:        sendBatchFuncEnableServices(config, d.Timeout(schema.TimeoutCreate)),
 		DebugId:      fmt.Sprintf("Enable Project Services %s: %+v", project, services),
 	}
 
@@ -41,12 +42,12 @@ func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{
 	return append(srvs, toAdd...), nil
 }
 
-func sendBatchFuncEnableServices(config *Config) batcherSendFunc {
+func sendBatchFuncEnableServices(config *Config, timeout time.Duration) batcherSendFunc {
 	return func(project string, toEnableRaw interface{}) (interface{}, error) {
 		toEnable, ok := toEnableRaw.([]string)
 		if !ok {
 			return nil, fmt.Errorf("Expected batch body type to be []string, got %v. This is a provider error.", toEnableRaw)
 		}
-		return nil, enableServiceUsageProjectServices(toEnable, project, config)
+		return nil, enableServiceUsageProjectServices(toEnable, project, config, timeout)
 	}
 }

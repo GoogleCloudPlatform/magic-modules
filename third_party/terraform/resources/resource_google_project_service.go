@@ -24,8 +24,9 @@ func resourceGoogleProjectService() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
 			Read:   schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -129,7 +130,7 @@ func resourceGoogleProjectServiceDelete(d *schema.ResourceData, meta interface{}
 
 	service := d.Get("service").(string)
 	disableDependencies := d.Get("disable_dependent_services").(bool)
-	if err = disableServiceUsageProjectService(service, project, config, disableDependencies); err != nil {
+	if err = disableServiceUsageProjectService(service, project, d, config, disableDependencies); err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Project Service %s", d.Id()))
 	}
 

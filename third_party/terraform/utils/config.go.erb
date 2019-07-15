@@ -592,8 +592,8 @@ func (c *Config) LoadAndValidate() error {
 
 func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 	config := &batchingConfig{
-		sendAfter:       time.Second * defaultBatchSendIntervalSec,
-		disableBatching: false,
+		sendAfter:      time.Second * defaultBatchSendIntervalSec,
+		enableBatching: true,
 	}
 
 	if v == nil {
@@ -613,8 +613,8 @@ func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 		config.sendAfter = sendAfter
 	}
 
-	if disable, ok := cfgV["disable_batching"]; ok && disable.(bool) {
-		config.disableBatching = true
+	if enable, ok := cfgV["enable_batching"]; ok && enable.(bool) {
+		config.enableBatching = true
 	}
 
 	return config, nil

@@ -114,10 +114,10 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 	}
 	if !b.enableBatching {
 		log.Printf("[DEBUG] Batching is disabled, sending single request for %q", request.DebugId)
-		return request.SendF(batchKey, request.Body)
+		return request.SendF(request.ResourceName, request.Body)
 	}
 
-	respCh, err := b.startBatchRequest(batchKey, request)
+	respCh, err := b.registerBatchRequest(batchKey, request)
 	if err != nil {
 		return nil, fmt.Errorf("error adding request to batch: %s", err)
 	}
@@ -135,21 +135,23 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 	return nil, fmt.Errorf("Request %s timed out after %v", batchKey, timeout)
 }
 
-// startBatchRequest manages batching logic that access shared information
-// (i.e. existing batches)
-func (b *RequestBatcher) startBatchRequest(batchKey string, newRequest *BatchRequest) (<-chan batchResponse, error) {
+// registerBatchRequest safetly sees if an existing batch has been started
+// with the given batchKey. If a batch exists, this will combine the new
+// request into this existing batch. Else, this method manages starting a new
+// batch and adding it to the RequestBatcher's started batches.
+func (b *RequestBatcher) registerBatchRequest(batchKey string, newRequest *BatchRequest) (<-chan batchResponse, error) {
 	b.Lock()
 	defer b.Unlock()
 
-	// The calling goroutine will need a channel to wait on for a response.
-	respCh := make(chan batchResponse, 1)
-
 	// If batch already exists, combine this request into existing request.
 	if batch, ok := b.batches[batchKey]; ok {
-		batch.addRequest(newRequest)
+		return batch.addRequest(newRequest)
 	}
 
 	log.Printf("[DEBUG] Creating new batch %q from request %q", newRequest.DebugId, batchKey)
+	// The calling goroutine will need a channel to wait on for a response.
+	respCh := make(chan batchResponse, 1)
+
 	// Create a new batch.
 	b.batches[batchKey] = &startedBatch{
 		BatchRequest: newRequest,
@@ -180,6 +182,22 @@ func (b *RequestBatcher) startBatchRequest(batchKey string, newRequest *BatchReq
 	return respCh, nil
 }
 
+// popBatch safetly gets and removes a batch with given batchkey from the
+// RequestBatcher's started batches.
+func (b *RequestBatcher) popBatch(batchKey string) *startedBatch {
+	b.Lock()
+	defer b.Unlock()
+
+	batch, ok := b.batches[batchKey]
+	if !ok {
+		log.Printf("[DEBUG] Batch with ID %q not found in batcher", batchKey)
+		return nil
+	}
+
+	delete(b.batches, batchKey)
+	return batch
+}
+
 func (batch *startedBatch) addRequest(newRequest *BatchRequest) (<-chan batchResponse, error) {
 	log.Printf("[DEBUG] Adding batch request %q to existing batch %q", newRequest.DebugId, batch.batchKey)
 	if batch.CombineF == nil {
@@ -187,29 +205,15 @@ func (batch *startedBatch) addRequest(newRequest *BatchRequest) (<-chan batchRes
 	}
 	newBody, err := batch.CombineF(batch.Body, newRequest.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to combine request %q data into existing batch %q: %v", newRequest.DebugId, batch.batchKey, err)
+		return nil, fmt.Errorf("Provider Error: Unable to combine request %q data into existing batch %q: %v", newRequest.DebugId, batch.batchKey, err)
 	}
 	batch.Body = newBody
 
 	log.Printf("[DEBUG] Added batch request %q to batch. New batch body: %v", newRequest.DebugId, batch.Body)
+
 	respCh := make(chan batchResponse, 1)
 	batch.listeners = append(batch.listeners, respCh)
-
 	return respCh, nil
-}
-
-func (b *RequestBatcher) popBatch(batchId string) *startedBatch {
-	b.Lock()
-	defer b.Unlock()
-
-	batch, ok := b.batches[batchId]
-	if !ok {
-		log.Printf("[DEBUG] Batch with ID %q not found in batcher", batchId)
-		return nil
-	}
-
-	delete(b.batches, batchId)
-	return batch
 }
 
 func (req *BatchRequest) send() batchResponse {
