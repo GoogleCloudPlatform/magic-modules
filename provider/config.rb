@@ -54,9 +54,13 @@ module Provider
 
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
-      # Replace overrides directory if needed
-      override_replace = source.gsub("{{override_path}}", provider_override_path)
-      config = Google::YamlValidator.parse(override_replace)
+
+      unless provider_override_path.nil?
+        # Replace overrides directory if we are running with a provider override
+        # This allows providers to reference files in their override path
+        source = source.gsub('{{override_path}}', provider_override_path)
+      end
+      config = Google::YamlValidator.parse(source)
 
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
         unless config.class <= Provider::Config
