@@ -66,7 +66,6 @@ module Provider
                                     config.property_override)
       config.spread_api config, api, [], '' unless api.nil?
       config.validate
-      config.provider_override_path = provider_override_path
       api.validate
       [api, config]
     end
