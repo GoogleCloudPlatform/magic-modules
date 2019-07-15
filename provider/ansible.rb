@@ -334,9 +334,9 @@ module Provider
       return unless @config&.files&.resource
 
       files = @config.files.resource
-                           .map { |k, v| [k  % module_name(data.object), v] }
-                           .to_h
-      
+                     .map { |k, v| [k % module_name(data.object), v] }
+                     .to_h
+
       compile_file_list(data.output_folder, files)
     end
   end
