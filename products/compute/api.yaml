@@ -5007,9 +5007,9 @@ objects:
     read_verb: :POST
     self_link: projects/{{project}}/zones/{{zone}}/networkEndpointGroups/{{network_endpoint_group}}/listNetworkEndpoints
     identity:
+      - instance
       - ipAddress
       - port
-      - instance
     nested_query: !ruby/object:Api::Resource::NestedQuery
       keys:
         - items

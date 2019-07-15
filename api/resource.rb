@@ -246,7 +246,7 @@ module Api
       if @identity.nil?
         props.select { |p| p.name == Api::Type::String::NAME.name }
       else
-        props.select { |p| @identity.include?(p.name) }
+        props.select { |p| @identity.include?(p.name) }.sort_by { |p| @identity.index p.name }
       end
     end
 
