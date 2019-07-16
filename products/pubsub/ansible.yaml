@@ -31,5 +31,5 @@ datasources: !ruby/object:Overrides::ResourceOverrides
           "\"{{resource_name}}\" not in \"{{ results['resources'] | map(attribute='name') | list }}\""
 overrides: !ruby/object:Overrides::ResourceOverrides
 files: !ruby/object:Provider::Config::Files
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

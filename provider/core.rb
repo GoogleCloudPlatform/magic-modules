@@ -309,6 +309,8 @@ module Provider
         generate_resource data.clone
         Google::LOGGER.debug "Generating #{object.name} tests"
         generate_resource_tests data.clone
+
+        generate_resource_files data.clone
       end
 
       # if iam_policy is not defined or excluded, don't generate it
@@ -317,6 +319,9 @@ module Provider
       Google::LOGGER.debug "Generating #{object.name} IAM policy"
       generate_iam_policy data.clone
     end
+
+    # Generate files at a per-resource basis.
+    def generate_resource_files(data) end
 
     def generate_datasources(output_folder, types, version_name)
       # We need to apply overrides for datasources

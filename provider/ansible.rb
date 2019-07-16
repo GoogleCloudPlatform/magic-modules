@@ -326,5 +326,18 @@ module Provider
     def regex_url(url)
       url.gsub(/{{[a-z]*}}/, '.*')
     end
+
+    # Generates files on a per-resource basis.
+    # All paths are allowed a '%s' where the module name
+    # will be added.
+    def generate_resource_files(data)
+      return unless @config&.files&.resource
+
+      files = @config.files.resource
+                     .map { |k, v| [k % module_name(data.object), v] }
+                     .to_h
+
+      compile_file_list(data.output_folder, files)
+    end
   end
 end

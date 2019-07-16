@@ -33,7 +33,5 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     return_if_object: |
 <%= lines(indent(compile('products/resourcemanager/helpers/ansible/return_if_object.py'), 6)) -%>
 files: !ruby/object:Provider::Config::Files
-  copy:
-<%= lines(indent(compile('provider/ansible/common~copy.yaml'), 4)) -%>
-  compile:
-<%= lines(indent(compile('provider/ansible/product~compile.yaml'), 4)) -%>
+  resource:
+<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
