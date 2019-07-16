@@ -22,7 +22,7 @@ type RequestBatcher struct {
 	*batchingConfig
 	parentCtx context.Context
 	batches   map[string]*startedBatch
-	debugId string
+	debugId   string
 }
 
 // BatchRequest represents a single request to a global batcher.
@@ -94,8 +94,8 @@ func NewRequestBatcher(debugId string, ctx context.Context, config *batchingConf
 
 	go func(b *RequestBatcher) {
 		select {
-			case <- ctx.Done():
-				b.stop()
+		case <-ctx.Done():
+			b.stop()
 		}
 	}(batcher)
 
