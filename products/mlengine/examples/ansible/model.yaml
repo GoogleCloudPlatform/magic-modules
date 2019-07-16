@@ -12,9 +12,9 @@
 # limitations under the License.
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
-  name: gcp_ml_engine_model
+  name: gcp_mlengine_model
   code:
-    name: <%= ctx[:name] %>
+    name: "{{ resource_name | replace('-', '_') }}"
     description: 'My model'
     regions:
       - 'us-west1'

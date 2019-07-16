@@ -17,7 +17,7 @@ display_name: ML Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://ml.googleapis.com/v1
+    base_url: https://ml.googleapis.com/v1/
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 apis_required:
@@ -28,6 +28,7 @@ objects:
   - !ruby/object:Api::Resource
     name: 'Model'
     base_url: projects/{{project}}/models
+    self_link: projects/{{project}}/models/{{name}}
     # This resources is not updatable (outside of versions, which is a version-level method)
     input: true
     description: |
