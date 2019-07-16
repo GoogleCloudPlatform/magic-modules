@@ -93,10 +93,8 @@ func NewRequestBatcher(debugId string, ctx context.Context, config *batchingConf
 	}
 
 	go func(b *RequestBatcher) {
-		select {
-		case <-ctx.Done():
-			b.stop()
-		}
+		<-ctx.Done()
+		b.stop()
 	}(batcher)
 
 	return batcher
