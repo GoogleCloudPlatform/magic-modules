@@ -149,9 +149,10 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 	}
 
 	ctx, cancel := context.WithTimeout(b.parentCtx, timeout)
+	defer cancel()
+
 	select {
 	case resp := <-respCh:
-		defer cancel()
 		if resp.err != nil {
 			return nil, fmt.Errorf("Batch %q for request %q returned error: %v", batchKey, request.DebugId, resp.err)
 		}
