@@ -613,8 +613,8 @@ func expandProviderBatchingConfig(v interface{}) (*batchingConfig, error) {
 		config.sendAfter = sendAfter
 	}
 
-	if enable, ok := cfgV["enable_batching"]; ok && enable.(bool) {
-		config.enableBatching = true
+	if enable, ok := cfgV["enable_batching"]; ok {
+		config.enableBatching = enable.(bool)
 	}
 
 	return config, nil

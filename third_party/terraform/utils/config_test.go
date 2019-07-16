@@ -191,8 +191,8 @@ func TestConfigLoadAndValidate_customBatchingConfig(t *testing.T) {
 	if batchCfg.sendAfter != time.Second {
 		t.Fatalf("expected batchCfg sendAfter to be 1 second, got %v", batchCfg.sendAfter)
 	}
-	if !batchCfg.enableBatching {
-		t.Fatalf("expected batchCfg enableBatching to be true")
+	if batchCfg.enableBatching {
+		t.Fatalf("expected enableBatching to be false")
 	}
 
 	config := &Config{
