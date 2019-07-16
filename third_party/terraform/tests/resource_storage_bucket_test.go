@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -846,13 +848,72 @@ func TestAccStorageBucket_website(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccStorageBucketDestroy,
 		Steps: []resource.TestStep{
-			{
 				Config: testAccStorageBucket_website(bucketSuffix),
 			},
 			{
 				ResourceName:      "google_storage_bucket.website",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_retentionPolicy(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_retentionPolicy(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketRetentionPolicy(bucketName),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_retentionPolicyLocked(t *testing.T) {
+	t.Parallel()
+
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lockedRetentionPolicy(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageBucketExists(
+						"google_storage_bucket.bucket", bucketName, &bucket),
+					testAccCheckStorageBucketRetentionPolicy(bucketName),
+				),
+			},
+			{
+				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccStorageBucket_retentionPolicy(bucketName),
+				ExpectError: regexp.MustCompile("Bucket '" + bucketName + "' has a locked retention policy and cannot be unlocked."),
 			},
 		},
 	})
@@ -920,6 +981,39 @@ func testAccCheckStorageBucketPutItem(bucketName string) resource.TestCheckFunc 
 			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
 		} else {
 			return fmt.Errorf("Objects.Insert failed: %v", err)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckStorageBucketRetentionPolicy(bucketName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+
+		data := bytes.NewBufferString("test")
+		dataReader := bytes.NewReader(data.Bytes())
+		object := &storage.Object{Name: "bucketDestroyTestFile"}
+
+		// This needs to use Media(io.Reader) call, otherwise it does not go to /upload API and fails
+		if res, err := config.clientStorage.Objects.Insert(bucketName, object).Media(dataReader).Do(); err == nil {
+			log.Printf("[INFO] Created object %v at location %v\n\n", res.Name, res.SelfLink)
+		} else {
+			return fmt.Errorf("Objects.Insert failed: %v", err)
+		}
+
+		// Test deleting immediately, this should fail because of the 10 second retention
+		if err := config.clientStorage.Objects.Delete(bucketName, objectName).Do(); err == nil {
+			return fmt.Errorf("Objects.Delete succeeded: %v", object.Name)
+		}
+
+		// Wait 10 seconds and delete again
+		time.Sleep(10000 * time.Millisecond)
+
+		if err := config.clientStorage.Objects.Delete(bucketName, object.Name).Do(); err == nil {
+			log.Printf("[INFO] Deleted object %v at location %v\n\n", object.Name, object.SelfLink)
+		} else {
+			return fmt.Errorf("Objects.Delete failed: %v", err)
 		}
 
 		return nil
@@ -1363,6 +1457,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
+<<<<<<< HEAD
 func testAccStorageBucket_website(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "website" {
@@ -1375,5 +1470,29 @@ resource "google_storage_bucket" "website" {
 	  not_found_page   = "404.html"
 	}
   }
+=======
+func testAccStorageBucket_retentionPolicy(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+	name = "%s"
+
+	retention_policy {
+	  retention_period = 10
+	}
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lockedRetentionPolicy(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+	name = "%s"
+
+	retention_policy {
+      is_locked = true
+	  retention_period = 10
+	}
+}
+>>>>>>> 437af511... add support for gcs retention policy
 `, bucketName)
 }
