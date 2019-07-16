@@ -14,6 +14,8 @@
 task: !ruby/object:Provider::Ansible::Task
   name: gcp_mlengine_model
   code:
+    # ML Engine doesn't like dashes, which ansible's test name
+    # generator uses.
     name: "{{ resource_name | replace('-', '_') }}"
     description: 'My model'
     regions:
