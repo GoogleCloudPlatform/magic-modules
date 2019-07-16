@@ -84,10 +84,13 @@ def set_release_note(release_note, body):
   Returns:
     Modified text
   """
-  edited = ""
-  for segment in re.split(r'`{3}releasenote', body, re.S):
-    idx = segment.find('```\n')
-    edited += segment if idx < 0 else segment[idx+3:]
+  edited = body
+  tkns = re.split(RELEASE_NOTE_SUB_RE, body, re.S)
+  if len(tkns) > 1:
+    edited = tkns[0]
+    for tkn in tkns[1:]:
+      idx = tkn.find("```")
+      edited += tkn if idx < 0 else tkn[idx+3:]
 
   release_note = release_note.strip()
   if release_note:
