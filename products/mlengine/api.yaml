@@ -12,8 +12,8 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: ML Engine
-display_name: MLEngine
+name: MLEngine
+display_name: ML Engine
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
@@ -62,6 +62,7 @@ objects:
         description: |
           The list of regions where the model is going to be deployed.
           Currently only one region per model is supported
+        item_type: Api::Type::String
       - !ruby/object:Api::Type::Boolean
         name: 'onlinePredictionLogging'
         description:  If true, online prediction access logs are sent to StackDriver Logging.

@@ -1,0 +1,23 @@
+---
+:facts:
+  :Model:
+    :version_added: '2.9'
+:regular:
+  :Model:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :defaultVersion:
+      :version_added: '2.9'
+      :name:
+        :version_added: '2.9'
+    :regions:
+      :version_added: '2.9'
+    :onlinePredictionLogging:
+      :version_added: '2.9'
+    :onlinePredictionConsoleLogging:
+      :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
