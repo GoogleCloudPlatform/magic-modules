@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -18,10 +19,13 @@ func TestRequestBatcher_batchMultiple(t *testing.T) {
 }
 
 func TestRequestBatcher_disableBatching(t *testing.T) {
-	testBatcher := NewRequestBatcher(&batchingConfig{
-		sendAfter:      time.Duration(1) * time.Second,
-		enableBatching: false,
-	})
+	testBatcher := NewRequestBatcher(
+		"testBatcher",
+		context.Background(),
+		&batchingConfig{
+			sendAfter:      time.Duration(1) * time.Second,
+			enableBatching: false,
+		})
 
 	testCombine := func(currV interface{}, toAddV interface{}) (interface{}, error) {
 		return currV.(int) + toAddV.(int), nil
@@ -63,10 +67,13 @@ func TestRequestBatcher_disableBatching(t *testing.T) {
 }
 
 func TestRequestBatcher_errInCombine(t *testing.T) {
-	testBatcher := NewRequestBatcher(&batchingConfig{
-		sendAfter:      time.Duration(5) * time.Second,
-		enableBatching: true,
-	})
+	testBatcher := NewRequestBatcher(
+		"testBatcher",
+		context.Background(),
+		&batchingConfig{
+			sendAfter:      time.Duration(5) * time.Second,
+			enableBatching: true,
+		})
 
 	combineErrText := "this is an expected error in combine"
 	testCombine := func(_ interface{}, _ interface{}) (interface{}, error) {
@@ -124,10 +131,13 @@ func TestRequestBatcher_errInCombine(t *testing.T) {
 }
 
 func TestRequestBatcher_errInSend(t *testing.T) {
-	testBatcher := NewRequestBatcher(&batchingConfig{
-		sendAfter:      time.Duration(5) * time.Second,
-		enableBatching: true,
-	})
+	testBatcher := NewRequestBatcher(
+		"testBatcher",
+		context.Background(),
+		&batchingConfig{
+			sendAfter:      time.Duration(5) * time.Second,
+			enableBatching: true,
+		})
 
 	testResource := "resource for send error"
 	sendErrTmpl := "this is an expected error in send batch for resource %q"
@@ -172,10 +182,13 @@ func TestRequestBatcher_errInSend(t *testing.T) {
 }
 
 func TestRequestBatcher_errTimeout(t *testing.T) {
-	testBatcher := NewRequestBatcher(&batchingConfig{
-		sendAfter:      time.Duration(5) * time.Second,
-		enableBatching: true,
-	})
+	testBatcher := NewRequestBatcher(
+		"testBatcher",
+		context.Background(),
+		&batchingConfig{
+			sendAfter:      time.Duration(5) * time.Second,
+			enableBatching: true,
+		})
 
 	testResource := "resource for send error"
 
@@ -214,10 +227,13 @@ func TestRequestBatcher_errTimeout(t *testing.T) {
 }
 
 func testBasicCountBatches(t *testing.T, testName string, numBatches int) {
-	testBatcher := NewRequestBatcher(&batchingConfig{
-		sendAfter:      time.Duration(1) * time.Second,
-		enableBatching: true,
-	})
+	testBatcher := NewRequestBatcher(
+		"testBatcher",
+		context.Background(),
+		&batchingConfig{
+			sendAfter:      time.Duration(1) * time.Second,
+			enableBatching: true,
+		})
 
 	testCombine := func(currV interface{}, toAddV interface{}) (interface{}, error) {
 		return currV.(int) + toAddV.(int), nil

@@ -22,6 +22,7 @@ type RequestBatcher struct {
 	*batchingConfig
 	parentCtx context.Context
 	batches   map[string]*startedBatch
+	debugId string
 }
 
 // BatchRequest represents a single request to a global batcher.
@@ -83,11 +84,35 @@ type batchingConfig struct {
 }
 
 // Initializes a new batcher.
-func NewRequestBatcher(config *batchingConfig, ctx context.Context) *RequestBatcher {
-	return &RequestBatcher{
+func NewRequestBatcher(debugId string, ctx context.Context, config *batchingConfig) *RequestBatcher {
+	batcher := &RequestBatcher{
+		debugId:        debugId,
 		parentCtx:      ctx,
 		batchingConfig: config,
 		batches:        make(map[string]*startedBatch),
+	}
+
+	go func(b *RequestBatcher) {
+		select {
+			case <- ctx.Done():
+				b.stop()
+		}
+	}(batcher)
+
+	return batcher
+}
+
+func (b *RequestBatcher) stop() {
+	b.Lock()
+	defer b.Unlock()
+
+	log.Printf("[DEBUG] Stopping batcher %q", b.debugId)
+	for batchKey, batch := range b.batches {
+		log.Printf("[DEBUG] Cleaning up batch request %q", batchKey)
+		batch.timer.Stop()
+		for _, l := range batch.listeners {
+			close(l)
+		}
 	}
 }
 

@@ -431,7 +431,7 @@ func (c *Config) LoadAndValidate() error {
 	}
 	c.clientServiceUsage.UserAgent = userAgent
 	c.clientServiceUsage.BasePath = serviceUsageClientBasePath
-	c.requestBatcherServiceUsage = NewRequestBatcher(c.BatchingConfig)
+	c.requestBatcherServiceUsage = NewRequestBatcher("Service Usage", context, c.BatchingConfig)
 
 	cloudBillingClientBasePath := removeBasePathVersion(c.CloudBillingBasePath)
 	log.Printf("[INFO] Instantiating Google Cloud Billing client for path %s", cloudBillingClientBasePath)
