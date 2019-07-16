@@ -49,11 +49,17 @@ module Provider
       end
     end
 
-    def self.parse(cfg_file, api = nil, version_name = 'ga')
+    def self.parse(cfg_file, api = nil, version_name = 'ga', provider_override_path = nil)
       raise 'Version passed to the compiler cannot be nil' if version_name.nil?
 
       # Compile step #1: compile with generic class to instantiate target class
       source = compile(cfg_file)
+
+      unless provider_override_path.nil?
+        # Replace overrides directory if we are running with a provider override
+        # This allows providers to reference files in their override path
+        source = source.gsub('{{override_path}}', provider_override_path)
+      end
       config = Google::YamlValidator.parse(source)
 
       raise "Config #{cfg_file}(#{config.class}) is not a Provider::Config" \
