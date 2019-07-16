@@ -39,11 +39,13 @@ module Provider
     class Files < Api::Object
       attr_reader :compile
       attr_reader :copy
+      attr_reader :resource
 
       def validate
         super
         check :compile, type: Hash
         check :copy, type: Hash
+        check :resource, type: Hash
       end
     end
 

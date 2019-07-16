@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2018 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,14 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# These files contains code that needs to be compiled before being delivered to
+# the final module tree structure:
 
---- !ruby/object:Provider::Ansible::Config
-# This is where custom code would be defined eventually.
-datasources: !ruby/object:Overrides::ResourceOverrides
-  Repository: !ruby/object:Overrides::Ansible::ResourceOverride
-    facts: !ruby/object:Provider::Ansible::FactsOverride
-      has_filters: false
-overrides: !ruby/object:Overrides::ResourceOverrides
-files: !ruby/object:Provider::Config::Files
-  resource:
-<%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
+'test/integration/targets/%s/aliases': 'templates/ansible/aliases'
+'test/integration/targets/%s/meta/main.yml': 'provider/ansible/blank_file.yaml'
