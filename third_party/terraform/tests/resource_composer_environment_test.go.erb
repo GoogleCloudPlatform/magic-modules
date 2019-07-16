@@ -126,6 +126,9 @@ func TestAccComposerEnvironment_private(t *testing.T) {
 	t.Parallel()
 
 	envName := acctest.RandomWithPrefix(testComposerEnvironmentPrefix)
+
+	var env composer.Environment
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -133,12 +136,7 @@ func TestAccComposerEnvironment_private(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComposerEnvironment_private(envName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_composer_environment.test", "config.0.airflow_uri"),
-					resource.TestCheckResourceAttrSet("google_composer_environment.test", "config.0.gke_cluster"),
-					resource.TestCheckResourceAttrSet("google_composer_environment.test", "config.0.node_count"),
-					resource.TestCheckResourceAttrSet("google_composer_environment.test", "config.0.node_config.0.zone"),
-					resource.TestCheckResourceAttrSet("google_composer_environment.test", "config.0.node_config.0.machine_type")),
+				Check:  testAccCheckComposerEnvironmentExists("google_composer_environment.test", &env),
 			},
 			{
 				ResourceName:      "google_composer_environment.test",
@@ -330,6 +328,7 @@ resource "google_composer_environment" "test" {
 			zone = "us-central1-a"
 			ip_allocation_policy {
 				use_ip_aliases = true
+				cluster_ipv4_cidr_block = "10.0.0.0/16"
 			}
 		}
 		private_environment_config {
