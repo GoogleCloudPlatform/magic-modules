@@ -15,8 +15,12 @@
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
   Model: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: false
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Model: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Overrides::Ansible::Transport
+      decoder: decode_response
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>
