@@ -406,6 +406,12 @@ resource "google_container_cluster" "gcp-inspec-regional-cluster" {
   region = "${var.gcp_location}"
   initial_node_count = 1
   remove_default_node_pool = true
+
+  maintenance_policy {
+    daily_maintenance_window {
+      start_time = "23:00"
+    }
+  }
 }
 
 resource "google_compute_route" "gcp-inspec-route" {
