@@ -1,6 +1,7 @@
 package google
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -19,7 +20,8 @@ type RequestBatcher struct {
 	sync.Mutex
 
 	*batchingConfig
-	batches map[string]*startedBatch
+	parentCtx context.Context
+	batches   map[string]*startedBatch
 }
 
 // BatchRequest represents a single request to a global batcher.
@@ -81,8 +83,9 @@ type batchingConfig struct {
 }
 
 // Initializes a new batcher.
-func NewRequestBatcher(config *batchingConfig) *RequestBatcher {
+func NewRequestBatcher(config *batchingConfig, ctx context.Context) *RequestBatcher {
 	return &RequestBatcher{
+		parentCtx:      ctx,
 		batchingConfig: config,
 		batches:        make(map[string]*startedBatch),
 	}
@@ -122,14 +125,15 @@ func (b *RequestBatcher) SendRequestWithTimeout(batchKey string, request *BatchR
 		return nil, fmt.Errorf("error adding request to batch: %s", err)
 	}
 
-	timer := time.NewTimer(timeout)
+	ctx, cancel := context.WithTimeout(b.parentCtx, timeout)
 	select {
 	case resp := <-respCh:
+		defer cancel()
 		if resp.err != nil {
 			return nil, fmt.Errorf("Batch %q for request %q returned error: %v", batchKey, request.DebugId, resp.err)
 		}
 		return resp.body, nil
-	case <-timer.C:
+	case <-ctx.Done():
 		break
 	}
 	return nil, fmt.Errorf("Request %s timed out after %v", batchKey, timeout)
