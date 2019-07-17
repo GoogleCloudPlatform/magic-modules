@@ -18,7 +18,7 @@ def wait_for_operation(module, response):
 <% if object.nested_query.nil? -%>
     wait_done = wait_for_completion(status, op_result, module)
 <% if object.async.result.resource_inside_response -%>
-    raise_if_errors(op_result, <%= err_path -%>, module)
+    raise_if_errors(wait_done, <%= err_path -%>, module)
     return navigate_hash(wait_done, ['response'])
 <% else #if object.async.result.resource_inside_response -%>
 <% res_path = python_literal(object.async.result.path.split('/')) -%>
