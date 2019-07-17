@@ -28,10 +28,10 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - products/mlengine/helpers/ansible/model_decoder.py
   Version: !ruby/object:Overrides::Ansible::ResourceOverride
     update: |
-      if module.params.get('is_default') == True:
+      if module.params.get('is_default') is True:
           set_default(module)
     post_create: |
-      if module.params.get('is_default') == True:
+      if module.params.get('is_default') is True:
           set_default(module)
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
