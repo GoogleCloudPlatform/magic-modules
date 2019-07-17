@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         custom_flatten: templates/terraform/custom_flatten/default_if_empty.erb
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
-      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
+      custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
   ServicePerimeter: !ruby/object:Overrides::Terraform::ResourceOverride
     timeouts: !ruby/object:Api::Timeouts
       insert_minutes: 6
@@ -79,7 +79,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         input: true
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/access_level_never_send_parent.go.erb
-      custom_import: templates/terraform/custom_import/access_level_self_link_as_name_and_set_parent.go.erb
+      custom_import: templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.erb
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
