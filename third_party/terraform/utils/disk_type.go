@@ -11,5 +11,5 @@ func readDiskType(c *Config, d *schema.ResourceData, name string) (*ZonalFieldVa
 
 // readRegionDiskType finds the disk type with the given name.
 func readRegionDiskType(c *Config, d *schema.ResourceData, name string) (*RegionalFieldValue, error) {
-	return parseRegionalFieldValue("diskTypes", name, "project", "region", d, c, false)
+	return parseRegionalFieldValue("diskTypes", name, "project", "region", "zone", d, c, false)
 }
