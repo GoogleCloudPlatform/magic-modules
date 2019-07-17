@@ -1,6 +1,5 @@
 <% autogen_exception -%>
 package google
-<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -40,6 +39,7 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	t.Parallel()
 
@@ -149,7 +149,12 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 		},
 	})
 }
+<% else -%>
 
+// Because Container Analysis is still in beta, we can't run any of the tests that call that
+// resource without vendoring in the full beta provider.
+
+<% end -%>
 func testAccCheckBinaryAuthorizationPolicyDefault(pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -205,6 +210,7 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing)
 }
 
+<% unless version == 'ga' -%>
 func testAccBinaryAuthorizationPolicyFull(pid, pname, org, billing, note, attestor string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
@@ -329,6 +335,4 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing, note, attestor)
 }
 
-<% else %>
-// Magic Modules doesn't let us remove files - blank out beta-only common-compile files for now.
 <% end -%>
