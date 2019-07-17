@@ -304,9 +304,10 @@ The `private_environment_config` block supports:
 
 The `ip_allocation_policy` block supports:
 
-* `use_ap_aliases` -
+* `use_ip_aliases` -
   (Optional)
   Whether or not to enable Alias IPs in the GKE cluster. If true, a VPC-native cluster is created.
+  Defaults to true if the `ip_allocation_block` is present in config.
 
 * `cluster_secondary_range_name` -
   (Optional)
