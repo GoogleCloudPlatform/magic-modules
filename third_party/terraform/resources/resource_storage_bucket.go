@@ -372,6 +372,8 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
+	d.SetId(res.Id)
+
 	if v, ok := d.GetOk("retention_policy"); ok {
 		retention_policies := v.([]interface{})
 
@@ -379,19 +381,16 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 		retentionPolicy := retention_policies[0].(map[string]interface{})
 
-		if locked, ok := retentionPolicy["is_locked"]; ok {
-			if locked.(bool) {
-				err = lockRetentionPolicy(config.clientStorage.Buckets, bucket, res.Metageneration)
-				if err != nil {
-					return err
-				}
+		if locked, ok := retentionPolicy["is_locked"]; ok && locked.(bool) {
+			err = lockRetentionPolicy(config.clientStorage.Buckets, bucket, res.Metageneration)
+			if err != nil {
+				return err
 			}
 		}
 	}
 
 	log.Printf("[DEBUG] Created bucket %v at location %v\n\n", res.Name, res.SelfLink)
 
-	d.SetId(res.Id)
 	return resourceStorageBucketRead(d, meta)
 }
 
@@ -492,6 +491,9 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
+	// Assign the bucket ID as the resource ID
+	d.Set("self_link", res.SelfLink)
+
 	if d.HasChange("retention_policy") {
 		if v, ok := d.GetOk("retention_policy"); ok {
 			retention_policies := v.([]interface{})
@@ -500,12 +502,10 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 			retentionPolicy := retention_policies[0].(map[string]interface{})
 
-			if locked, ok := retentionPolicy["is_locked"]; ok {
-				if locked.(bool) {
-					err = lockRetentionPolicy(config.clientStorage.Buckets, d.Get("name").(string), res.Metageneration)
-					if err != nil {
-						return err
-					}
+			if locked, ok := retentionPolicy["is_locked"]; ok && locked.(bool) {
+				err = lockRetentionPolicy(config.clientStorage.Buckets, d.Get("name").(string), res.Metageneration)
+				if err != nil {
+					return err
 				}
 			}
 		}
@@ -513,8 +513,6 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[DEBUG] Patched bucket %v at location %v\n\n", res.Name, res.SelfLink)
 
-	// Assign the bucket ID as the resource ID
-	d.Set("self_link", res.SelfLink)
 	d.SetId(res.Id)
 
 	return nil
