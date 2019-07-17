@@ -31,6 +31,24 @@ objects:
     self_link: projects/{{project}}/models/{{name}}
     # This resources is not updatable (outside of versions, which is a version-level method)
     input: true
+    async: !ruby/object:Api::Async
+      actions: ['delete']
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
     description: |
       Represents a machine learning solution.
 
@@ -81,12 +99,30 @@ objects:
     description: |
       Each version is a trained model deployed in the cloud, ready to handle
       prediction requests. A model can have multiple versions
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        path: 'name'
+        base_url: '{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'response'
+        resource_inside_response: true
+      status: !ruby/object:Api::Async::Status
+        path: 'done'
+        complete: True
+        allowed:
+          - True
+          - False
+      error: !ruby/object:Api::Async::Error
+        path: 'error'
+        message: 'message'
     parameters:
       - !ruby/object:Api::Type::ResourceRef
         name: 'model'
         description: The model that this version belongs to
         resource: Model
         imports: name
+        required: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -115,7 +151,7 @@ objects:
       - !ruby/object:Api::Type::Time
         name: 'lastUseTime'
         description: The time the version was last used for prediction.
-        output: ture
+        output: true
       - !ruby/object:Api::Type::String
         name: 'runtimeVersion'
         description: The AI Platform runtime version to use for this deployment

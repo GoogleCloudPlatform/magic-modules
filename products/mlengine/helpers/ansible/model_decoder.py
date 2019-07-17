@@ -14,5 +14,6 @@
 # Short names are given (and expected) by the API
 # but are returned as full names.
 def decode_response(response, module):
-    response['name'] = response['name'].split('/')[-1]
+    if 'name' in response and 'metadata' not in response:
+        response['name'] = response['name'].split('/')[-1]
     return response

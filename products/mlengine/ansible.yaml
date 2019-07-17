@@ -17,8 +17,16 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Model: !ruby/object:Overrides::Ansible::ResourceOverride
     facts: !ruby/object:Provider::Ansible::FactsOverride
       has_filters: false
+  Version: !ruby/object:Overrides::Ansible::ResourceOverride
+    facts: !ruby/object:Provider::Ansible::FactsOverride
+      has_filters: false
 overrides: !ruby/object:Overrides::ResourceOverrides
   Model: !ruby/object:Overrides::Ansible::ResourceOverride
+    transport: !ruby/object:Overrides::Ansible::Transport
+      decoder: decode_response
+    provider_helpers:
+      - products/mlengine/helpers/ansible/model_decoder.py
+  Version: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
     provider_helpers:
