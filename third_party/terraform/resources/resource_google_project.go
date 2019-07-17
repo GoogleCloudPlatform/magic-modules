@@ -451,7 +451,7 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 func resourceProjectImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	pid := d.Id()
 	// Project id must start with a letter. This prevents users from importing with project number
-	matched, err := regexp.MatchString("^[^\d]", pid)
+	matched, err := regexp.MatchString("^[^\\d]", pid)
 	if err != nil {
 		return nil, fmt.Errorf("Error matching project %q: %s", pid, err)
 	}
