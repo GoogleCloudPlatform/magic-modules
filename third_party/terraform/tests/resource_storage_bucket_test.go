@@ -1474,11 +1474,11 @@ resource "google_storage_bucket" "website" {
 func testAccStorageBucket_retentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+    name = "%s"
 
-	retention_policy {
-	  retention_period = 10
-	}
+    retention_policy {
+      retention_period = 10
+    }
 }
 `, bucketName)
 }
@@ -1486,12 +1486,12 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_lockedRetentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name = "%s"
+    name = "%s"
 
-	retention_policy {
+    retention_policy {
       is_locked = true
-	  retention_period = 10
-	}
+      retention_period = 10
+    }
 }
 >>>>>>> 437af511... add support for gcs retention policy
 `, bucketName)
