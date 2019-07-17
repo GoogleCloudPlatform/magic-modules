@@ -12,19 +12,16 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-// TODO: With the next breaking change we should remove the code in the
-// encoder for deleting port. We've added the ability to delete the port
-// in the request, because currently with the default ports, it is
-// unintentionally set.  However, a better fix would be to not set the
-// default port, but this will be a breaking change.
 
 if _, ok := d.GetOk("http_health_check"); ok {
 	hc := d.Get("http_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]
 
-	if ps == "USE_SERVING_PORT" || ps == "USE_NAMED_PORT" {
+	if ps == "USE_FIXED_PORT" || ps == "" {
 		m := obj["httpHealthCheck"].(map[string]interface{})
-		delete(m, "port")
+		if m["port"] == nil {
+			m["port"] = 80
+		}
 	}
 	obj["type"] = "HTTP"
 	return obj, nil
@@ -33,9 +30,11 @@ if _, ok := d.GetOk("https_health_check"); ok {
 	hc := d.Get("https_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]
 
-	if ps == "USE_SERVING_PORT" || ps == "USE_NAMED_PORT" {
+	if ps == "USE_FIXED_PORT" || ps == "" {
 		m := obj["httpsHealthCheck"].(map[string]interface{})
-		delete(m, "port")
+		if m["port"] == nil {
+			m["port"] = 443
+		}
 	}
 	obj["type"] = "HTTPS"
 	return obj, nil
@@ -44,9 +43,11 @@ if _, ok := d.GetOk("tcp_health_check"); ok {
 	hc := d.Get("tcp_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]
 
-	if ps == "USE_SERVING_PORT" || ps == "USE_NAMED_PORT" {
+	if ps == "USE_FIXED_PORT" || ps == "" {
 		m := obj["tcpHealthCheck"].(map[string]interface{})
-		delete(m, "port")
+		if m["port"] == nil {
+			m["port"] = 80
+		}
 	}
 	obj["type"] = "TCP"
 	return obj, nil
@@ -55,9 +56,11 @@ if _, ok := d.GetOk("ssl_health_check"); ok {
 	hc := d.Get("ssl_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]
 
-	if ps == "USE_SERVING_PORT" || ps == "USE_NAMED_PORT" {
+	if ps == "USE_FIXED_PORT" || ps == "" {
 		m := obj["sslHealthCheck"].(map[string]interface{})
-		delete(m, "port")
+		if m["port"] == nil {
+			m["port"] = 443
+		}
 	}
 	obj["type"] = "SSL"
 	return obj, nil

@@ -1,15 +1,11 @@
 // Whether the port should be set or not
-// TODO: With the next breaking change we should remove the defaultPort.
-// We've added the ability to check if port is set to the defaultPort here,
-// then just remove it in the encoder.  However, a better fix would be to
-// not set the default port, but this will be a breaking change.
 func validatePortSpec(diff *schema.ResourceDiff, blockName string, defaultPort int) error {
     block := diff.Get(blockName+".0").(map[string]interface{})
     portSpec := block["port_specification"]
     portName := block["port_name"]
     port := block["port"]
 
-    incorrectPort := (port != defaultPort && port != nil && port != 0)
+    incorrectPort := (port != nil && port != 0)
     noName := (portName == nil || portName == "")
 
     if portSpec == "USE_NAMED_PORT" && incorrectPort {
@@ -24,7 +20,7 @@ func validatePortSpec(diff *schema.ResourceDiff, blockName string, defaultPort i
     }
     if portSpec == "USE_SERVING_PORT" && !noName {
         return fmt.Errorf("Error in %s: port_name cannot be specified when using port_specification USE_SERVING_PORT.", blockName)
-    }    
+    }
 
     return nil
 }
@@ -44,4 +40,38 @@ func healthCheckCustomizeDiff(diff *schema.ResourceDiff, v interface{}) error {
     }
 
     return nil
+}
+
+func portDiffSuppress(k, old, new string, _ *schema.ResourceData) bool {
+
+    b := strings.Split(k, ".")
+    if len(b) > 2 {
+        attr := b[2]
+
+        if attr == "port" {
+            var defaultPort int64
+
+            blockType := b[0]
+
+            switch blockType {
+            case "http_health_check":
+                defaultPort = 80
+            case "https_health_check":
+                defaultPort = 443
+            case "tcp_health_check":
+                defaultPort = 80
+            case "ssl_health_check":
+                defaultPort = 443
+            }
+
+            oldPort, _ := strconv.Atoi(old)
+            newPort, _ := strconv.Atoi(new)
+
+            if int64(oldPort) == defaultPort && newPort == 0 {
+                return true
+            }
+        }
+    }
+
+    return false
 }
