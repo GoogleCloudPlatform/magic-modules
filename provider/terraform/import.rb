@@ -38,10 +38,13 @@ module Provider
             /{{[[:word:]]+}}/, &:underscore
           )
 
-          unless resource.identity.nil?
-            id_formats = [underscored_base_url + '/' + resource.identity.map{ |v| "{{#{v.name.underscore}}}"}.join('/')]
-          else
+          if resource.identity.nil? || resource.identity.empty?
             id_formats = [underscored_base_url + '/{{name}}']
+          else
+            identity_path = resource.identity
+                                    .map { |v| "{{#{v.name.underscore}}}" }
+                                    .join('/')
+            id_formats = [underscored_base_url + '/' + identity_path]
           end
         else
           id_formats = resource.import_format
@@ -54,7 +57,7 @@ module Provider
         # short ids without fields with provider-level defaults:
 
         # without project
-        field_markers -= ['{{project}}',]
+        field_markers -= ['{{project}}']
         short_id_default_project_format = field_markers.join('/')
 
         # without project or location

@@ -49,6 +49,7 @@ describe Provider::Terraform do
         is_expected.to contain_exactly(
           'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}',
           '{{project}}/{{region}}/{{name}}',
+          '{{region}}/{{name}}',
           '{{name}}'
         )
       end
