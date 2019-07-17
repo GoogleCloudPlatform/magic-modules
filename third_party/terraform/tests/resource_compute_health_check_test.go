@@ -248,12 +248,11 @@ func TestAccComputeHealthCheck_https_serving_port(t *testing.T) {
 					),
 				),
 			},
-			// TODO: Figure out how we want to import this when defaults are set
-			// {
-			// 	ResourceName:      "google_compute_health_check.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      "google_compute_health_check.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
