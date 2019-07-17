@@ -196,13 +196,16 @@ objects:
           - TENSORFLOW
           - SCIKIT_LEARN
           - XGBOOST
-      - !ruby/object:Api::Type::String
+      - !ruby/object:Api::Type::Enum
         name: 'pythonVersion'
         description: |
           The version of Python used in prediction. If not set, the default
           version is '2.7'. Python '3.5' is available when runtimeVersion is
           set to '1.4' and above. Python '2.7' works with all supported runtime
           versions.
+        values:
+          - '2.7'
+          - '3.5'
       - !ruby/object:Api::Type::String
         name: 'serviceAccount'
         description: Specifies the service account for resource access control.
