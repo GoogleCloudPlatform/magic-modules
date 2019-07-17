@@ -123,6 +123,9 @@ objects:
         resource: Model
         imports: name
         required: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'isDefault'
+        description:  If true, this version will be used to handle prediction requests that do not specify a version
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'

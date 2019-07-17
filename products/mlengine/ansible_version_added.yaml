@@ -55,3 +55,5 @@
       :version_added: '2.9'
     :model:
       :version_added: '2.9'
+    :isDefault:
+      :version_added: '2.9'

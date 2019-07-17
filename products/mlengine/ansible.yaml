@@ -27,10 +27,20 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     provider_helpers:
       - products/mlengine/helpers/ansible/model_decoder.py
   Version: !ruby/object:Overrides::Ansible::ResourceOverride
+    update: |
+      if module.params.get('is_default') == True:
+          set_default(module)
+    post_create: |
+      if module.params.get('is_default') == True:
+          set_default(module)
     transport: !ruby/object:Overrides::Ansible::Transport
       decoder: decode_response
+    properties:
+      isDefault: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['default']
     provider_helpers:
       - products/mlengine/helpers/ansible/model_decoder.py
+      - products/mlengine/helpers/ansible/version_set_default.py
 files: !ruby/object:Provider::Config::Files
   resource:
 <%= lines(indent(compile('provider/ansible/resource~compile.yaml'), 4)) -%>

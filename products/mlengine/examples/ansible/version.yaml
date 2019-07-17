@@ -20,6 +20,7 @@ task: !ruby/object:Provider::Ansible::Task
       model: "{{ model }}"
       runtime_version: 1.13
       python_version: 3.5
+      is_default: true
       deployment_uri: gs://ansible-cloudml-bucket/
       project: <%= ctx[:project] %>
       auth_kind: <%= ctx[:auth_kind] %>
