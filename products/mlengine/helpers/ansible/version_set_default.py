@@ -11,9 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Short names are given (and expected) by the API
-# but are returned as full names.
-def decode_response(response, module):
-    if 'name' in response and 'metadata' not in response:
-        response['name'] = response['name'].split('/')[-1]
-    return response
+# Sets this version as default.
+def set_default(module):
+    res = {'project': module.params['project'], 'model': replace_resource_dict(module.params['model'], 'name'), 'name': module.params['name']}
+    link = "https://ml.googleapis.com/v1/projects/{project}/models/{model}/versions/{name}:setDefault".format(**res)
+
+    auth = GcpSession(module, 'mlengine')
+    return_if_object(module, auth.post(link))
