@@ -343,6 +343,7 @@ end
 				"google_kms_key_ring_iam_policy":               ResourceIamPolicy(IamKmsKeyRingSchema, NewKmsKeyRingIamUpdater, KeyRingIdParseFunc),
 				"google_kms_crypto_key_iam_binding":            ResourceIamBinding(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
 				"google_kms_crypto_key_iam_member":             ResourceIamMember(IamKmsCryptoKeySchema, NewKmsCryptoKeyIamUpdater, CryptoIdParseFunc),
+        "google_ml_engine_model":                       resourceMLEngineModel(),
 				"google_service_networking_connection":         resourceServiceNetworkingConnection(),
 				"google_spanner_instance_iam_binding":          ResourceIamBinding(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
 				"google_spanner_instance_iam_member":           ResourceIamMember(IamSpannerInstanceSchema, NewSpannerInstanceIamUpdater, SpannerInstanceIdParseFunc),
@@ -429,7 +430,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.<%= product[:definitions].name -%>BasePath = d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint").(string)
 	<% end -%>
 
-	// Handwritten Products / Versioned / Atypical Entries
 	<% unless version == 'ga' -%>
 	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
 	<% end -%>
