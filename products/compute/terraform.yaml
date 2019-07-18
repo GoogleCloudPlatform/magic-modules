@@ -627,28 +627,22 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           health_check_name: "internal-service-health-check"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/health_check_type.erb
+      constants: templates/terraform/constants/health_check.erb
+      resource_definition: templates/terraform/resource_definition/health_check.erb
     properties:
-     id: !ruby/object:Overrides::Terraform::PropertyOverride
-       exclude: true
-     type: !ruby/object:Overrides::Terraform::PropertyOverride
-       output: true
-       description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
-     httpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
-       exclude: true
-     httpHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
-       default_value: 80
-     httpsHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
-       exclude: true
-     httpsHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
-       default_value: 443
-     tcpHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
-       exclude: true
-     tcpHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
-       default_value: 80
-     sslHealthCheck.portName: !ruby/object:Overrides::Terraform::PropertyOverride
-       exclude: true
-     sslHealthCheck.port: !ruby/object:Overrides::Terraform::PropertyOverride
-       default_value: 443
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      type: !ruby/object:Overrides::Terraform::PropertyOverride
+        output: true
+        description: The type of the health check. One of HTTP, HTTPS, TCP, or SSL.
+      httpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      httpsHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      tcpHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
+      sslHealthCheck: !ruby/object:Overrides::Terraform::PropertyOverride
+        diff_suppress_func: 'portDiffSuppress'
   Image: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
