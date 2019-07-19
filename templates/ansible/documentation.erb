@@ -24,7 +24,8 @@ DOCUMENTATION = '''
       'state' => {
         'description' => ['Whether the given object should exist in GCP'],
         'choices' => ['present', 'absent'],
-        'default' => 'present'
+        'default' => 'present',
+        'type' => 'str'
       },
     },
     object.all_user_properties.reject(&:output).map { |p| documentation_for_property(p) }
