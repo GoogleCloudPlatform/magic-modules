@@ -230,7 +230,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetPool: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
-      decoder: decode_request
+      decoder: decode_response
     provider_helpers:
       - 'products/compute/helpers/python/provider_target_pool.py'
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
