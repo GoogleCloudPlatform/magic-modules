@@ -438,6 +438,28 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	})
 }
 
+func TestAccComputeDisk_resourcePolicies(t *testing.T) {
+	t.Parallel()
+
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+	policyName := fmt.Sprintf("tf-test-policy-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProvidersOiCS,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeDisk_resourcePolicies(diskName, policyName),
+			},
+			{
+				ResourceName:      "google_compute_disk.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckComputeDiskExists(n, p string, disk *compute.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -770,4 +792,42 @@ resource "google_compute_instance_group_manager" "manager" {
   // to continue interacting with them in other resources
   wait_for_instances = true
 }`, diskName, mgrName)
+}
+
+func testAccComputeDisk_resourcePolicies(diskName, policyName string) string {
+	return fmt.Sprintf(`
+provider "google-beta" {
+  region = "us-central1"
+  zone   = "us-central1-a"
+}
+
+data "google_compute_image" "my_image" {
+  provider = "google-beta"
+  family  = "debian-9"
+  project = "debian-cloud"
+}
+
+resource "google_compute_resource_policy" "foo" {
+  provider = "google-beta"
+  name = "%s"
+  region = "us-central1"
+  snapshot_schedule_policy {
+    schedule {
+      daily_schedule {
+        days_in_cycle = 1
+        start_time = "04:00"
+      }
+    }
+  }
+}
+
+resource "google_compute_disk" "foobar" {
+    provider = "google-beta"
+	name = "%s"
+	image = "${data.google_compute_image.my_image.self_link}"
+	size = 50
+	type = "pd-ssd"
+	zone = "us-central1-a"
+    resource_policies = ["${google_compute_resource_policy.foo.self_link}"]
+}`, policyName, diskName)
 }
