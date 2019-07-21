@@ -98,6 +98,11 @@
       <li<%%= sidebar_current("docs-google-datasource-compute-region-instance-group") %>>
       <a href="/docs/providers/google/d/datasource_compute_region_instance_group.html">google_compute_region_instance_group</a>
       </li>
+<% unless version == 'ga' -%>
+      <li<%%= sidebar_current("docs-google-datasource-compute-resource-policy") %>>
+          <a href="/docs/providers/google/d/google_compute_resource_policy.html">google_compute_resource_policy</a>
+      </li>
+<% end  -%>
       <li<%%= sidebar_current("docs-google-datasource-compute-ssl-certificate") %>>
         <a href="/docs/providers/google/d/datasource_compute_ssl_certificate.html">google_compute_ssl_certificate</a>
       </li>
