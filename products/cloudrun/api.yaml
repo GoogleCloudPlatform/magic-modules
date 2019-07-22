@@ -39,6 +39,17 @@ objects:
     url_param_only: true
     required: true
   properties:
+  - !ruby/object:Api::Type::String
+    name: name
+    url_param_only: true
+    input: true
+    # This is a convenience field handled by terraform encoder/decoders
+    exclude: true
+    description: |-
+      Name should be a verified domain
+  - !ruby/object:Api::Type::String
+    name: kind
+    description: This is always set to DomainMapping
   - !ruby/object:Api::Type::NestedObject
     name: status
     description: The current status of the DomainMapping.
@@ -114,6 +125,7 @@ objects:
   - !ruby/object:Api::Type::NestedObject
     name: spec
     description: The spec for this DomainMapping.
+    required: true
     properties:
     - !ruby/object:Api::Type::Boolean
       name: forceOverride
@@ -124,6 +136,7 @@ objects:
         has given such a warning.
     - !ruby/object:Api::Type::String
       name: routeName
+      required: true
       description: |-
         The name of the Knative Route that this DomainMapping applies to.
         The route must exist.
@@ -136,6 +149,7 @@ objects:
       - :AUTOMATIC
   - !ruby/object:Api::Type::NestedObject
     name: metadata
+    required: true
     description: Metadata associated with this BuildTemplate.
     properties:
     - !ruby/object:Api::Type::KeyValuePairs
@@ -247,8 +261,14 @@ objects:
   - !ruby/object:Api::Type::String
     name: name
     url_param_only: true
+    input: true
+    # This is a convenience field handled by terraform
+    exclude: true
     description: |-
-      Convenience field for metadata.name
+      Name must be unique within a namespace, within a Cloud Run region. Is required when creating resources,
+      although some resources may allow a client to request the generation of an appropriate name automatically.
+      Name is primarily intended for creation idempotence and configuration definition.
+      Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names
   - !ruby/object:Api::Type::String
     name: apiVersion
     description: The API version for this call such as "serving.knative.dev/v1alpha1".

@@ -18,5 +18,5 @@ metadata["name"] = name
 
 // The only acceptable version/kind right now
 obj["apiVersion"] = "serving.knative.dev/v1alpha1"
-obj["kind"] = "Service"
+obj["kind"] = "<%= "#{object.name}" -%>"
 return obj, nil

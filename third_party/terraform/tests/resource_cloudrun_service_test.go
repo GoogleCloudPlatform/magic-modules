@@ -26,7 +26,7 @@ func TestAccCloudrunService_cloudrunServiceUpdate(t *testing.T) {
 				ImportStateId:           "us-central1/" + name,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"metadata.0.resource_version"},
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
 			{
 				Config: testAccCloudrunService_cloudrunServiceUpdate(name, project, "50"),
@@ -36,7 +36,7 @@ func TestAccCloudrunService_cloudrunServiceUpdate(t *testing.T) {
 				ImportStateId:           "us-central1/" + name,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"metadata.0.resource_version"},
+				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
 		},
 	})

@@ -13,6 +13,35 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
+  DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "cloudrun_domain_mapping_basic"
+        min_version: 'beta'
+        primary_resource_id: "default"
+        vars:
+          cloudrun_domain_name: "tftest-domainmapping.com"
+        test_env_vars:
+          namespace: :PROJECT_NAME
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: 'templates/terraform/encoders/cloudrun.go.erb'
+      decoder: 'templates/terraform/decoders/cloudrun.go.erb'
+    properties:
+      name: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: true
+        exclude: false
+      # excluding kind from Terraform code because it only accepts the same single value
+      # so we hard code it in the encoder instead.
+      kind: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
+      apiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        output: true
+      metadata.labels: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
+      metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
@@ -28,18 +57,14 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       decoder: 'templates/terraform/decoders/cloudrun.go.erb'
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
-        description: |-
-          Name must be unique within a namespace, within a Cloud Run region.
-          Is required when creating
-          resources, although some resources may allow a client to request the
-          generation of an appropriate name automatically. Name is primarily intended
-          for creation idempotence and configuration definition. Cannot be updated.
-          More info: http://kubernetes.io/docs/user-guide/identifiers#names
         required: true
+        exclude: false
+      # excluding kind from Terraform code because it only accepts the same single value
+      # so we hard code it in the encoder instead.
       kind: !ruby/object:Overrides::Terraform::PropertyOverride
-        output: true
-      apiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
+      apiVersion: !ruby/object:Overrides::Terraform::PropertyOverride
+        output: true
       spec: !ruby/object:Overrides::Terraform::PropertyOverride
         flatten_object: true
       spec.template: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -48,6 +73,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       metadata.annotations: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
+      # name is 'special' in magic modules and lives at the root of properties.
+      # We are using encoders to set name at the root here.
       metadata.name: !ruby/object:Overrides::Terraform::PropertyOverride
         exclude: true
 
