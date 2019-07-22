@@ -296,7 +296,7 @@ module Provider
 
     def generate_iam_policy(data) end
 
-    def compile_provider_files(products, version) end
+    def compile_provider_files(output_folder, products, version) end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.
