@@ -9,8 +9,6 @@
     :version_added: '2.6'
     :name:
       :version_added: '2.6'
-    :kmsKeyName:
-      :version_added: '2.9'
     :labels:
       :version_added: '2.8'
   :Subscription:
