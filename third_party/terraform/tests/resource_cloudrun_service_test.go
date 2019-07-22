@@ -53,7 +53,7 @@ resource "google_cloudrun_service" "default" {
   }
 
   spec {
-    container {
+    containers {
 	  image = "gcr.io/cloudrun/hello"
 	  args = ["arrgs"]
 	}
