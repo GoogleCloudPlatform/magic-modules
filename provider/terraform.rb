@@ -135,6 +135,11 @@ module Provider
 
       data = ProviderFileTemplate.new(output_folder, version, build_env, products)
       data.generate('third_party/terraform/provider/provider.go.erb', filepath, self)
+
+      config_filepath = File.join(target_folder, 'config.go')
+
+      config_data = ProviderFileTemplate.new(output_folder, version, build_env, products)
+      config_data.generate('third_party/terraform/provider/config.go.erb', config_filepath, self)
     end
 
     private
