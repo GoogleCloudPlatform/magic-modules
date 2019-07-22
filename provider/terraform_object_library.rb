@@ -120,5 +120,7 @@ module Provider
     def generate_resource_tests(data) end
 
     def generate_iam_policy(data) end
+
+    def compile_provider_files(output_folder, products, version) end
   end
 end
