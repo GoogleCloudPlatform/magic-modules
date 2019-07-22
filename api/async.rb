@@ -60,7 +60,7 @@ module Api
 
         check :full_url, type: String
 
-        conflicts [:base_url, :full_url]
+        conflicts %i[base_url full_url]
       end
     end
 
