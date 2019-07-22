@@ -101,7 +101,7 @@ end
 if override_dir
   Dir["#{override_dir}/products/**/api.yaml"].each do |file_path|
     product = File.dirname(Pathname.new(file_path).relative_path_from(override_dir))
-    all_product_files.push(product) unless products_to_compile.include? product
+    all_product_files.push(product) unless all_product_files.include? product
   end
 end
 
