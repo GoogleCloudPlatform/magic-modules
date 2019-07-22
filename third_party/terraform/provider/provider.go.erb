@@ -370,36 +370,17 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 	config.BatchingConfig = batchCfg
 
-	<% unless version == 'ga' -%>
-	config.ContainerAnalysisBasePath = d.Get(ContainerAnalysisCustomEndpointEntryKey).(string)
-	config.SecurityScannerBasePath = d.Get(SecurityScannerCustomEndpointEntryKey).(string)
+	// Generated products
+	<% products.each do |product_name| -%>
+	config.<%= product_name -%>BasePath = d.Get(<%= product_name -%>CustomEndpointEntryKey).(string)
 	<% end -%>
 
-	config.AccessContextManagerBasePath = d.Get(AccessContextManagerCustomEndpointEntryKey).(string)
-	config.CloudSchedulerBasePath = d.Get(CloudSchedulerCustomEndpointEntryKey).(string)
-	config.FirestoreBasePath = d.Get(FirestoreCustomEndpointEntryKey).(string)
-
-	config.AppEngineBasePath = d.Get(AppEngineCustomEndpointEntryKey).(string)
-	config.BinaryAuthorizationBasePath = d.Get(BinaryAuthorizationCustomEndpointEntryKey).(string)
-	config.ComputeBasePath = d.Get(ComputeCustomEndpointEntryKey).(string)
-	config.CloudBuildBasePath = d.Get(CloudBuildCustomEndpointEntryKey).(string)
-	config.DnsBasePath = d.Get(DnsCustomEndpointEntryKey).(string)
-	config.FilestoreBasePath = d.Get(FilestoreCustomEndpointEntryKey).(string)
-	config.KmsBasePath = d.Get(KmsCustomEndpointEntryKey).(string)
-	config.MonitoringBasePath = d.Get(MonitoringCustomEndpointEntryKey).(string)
-	config.PubsubBasePath = d.Get(PubsubCustomEndpointEntryKey).(string)
-	config.RedisBasePath = d.Get(RedisCustomEndpointEntryKey).(string)
-	config.ResourceManagerBasePath = d.Get(ResourceManagerCustomEndpointEntryKey).(string)
-	config.SourceRepoBasePath = d.Get(SourceRepoCustomEndpointEntryKey).(string)
-	config.SpannerBasePath = d.Get(SpannerCustomEndpointEntryKey).(string)
-	config.SqlBasePath = d.Get(SqlCustomEndpointEntryKey).(string)
-	config.StorageBasePath = d.Get(StorageCustomEndpointEntryKey).(string)
-	config.TpuBasePath = d.Get(TpuCustomEndpointEntryKey).(string)
-
+	// Handwritten Products / Versioned / Atypical Entries
 	<% unless version == 'ga' -%>
 	config.HealthcareBasePath = d.Get(HealthcareCustomEndpointEntryKey).(string)
 	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
 	<% end -%>
+
 	config.CloudBillingBasePath = d.Get(CloudBillingCustomEndpointEntryKey).(string)
 	config.ComposerBasePath = d.Get(ComposerCustomEndpointEntryKey).(string)
 	config.ComputeBetaBasePath = d.Get(ComputeBetaCustomEndpointEntryKey).(string)
