@@ -438,6 +438,7 @@ func TestAccComputeDisk_deleteDetachIGM(t *testing.T) {
 	})
 }
 
+<% unless version == 'ga' -%>
 func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 	t.Parallel()
 
@@ -459,6 +460,7 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 		},
 	})
 }
+<% end -%>
 
 func testAccCheckComputeDiskExists(n, p string, disk *compute.Disk) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -794,6 +796,7 @@ resource "google_compute_instance_group_manager" "manager" {
 }`, diskName, mgrName)
 }
 
+<% unless version == 'ga' -%>
 func testAccComputeDisk_resourcePolicies(diskName, policyName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -823,3 +826,4 @@ resource "google_compute_disk" "foobar" {
   resource_policies = ["${google_compute_resource_policy.foo.self_link}"]
 }`, policyName, diskName)
 }
+<% end -%>
