@@ -86,8 +86,10 @@ OptionParser.new do |opt|
 end.parse!
 # rubocop:enable Metrics/BlockLength
 
-raise 'Cannot use -p/--products and -a/--all simultaneously' if products_to_compile && all_products
-raise 'Either -p/--products OR -a/--all must be present' if products_to_compile.nil? && !all_products
+raise 'Cannot use -p/--products and -a/--all simultaneously' \
+  if products_to_compile && all_products
+raise 'Either -p/--products OR -a/--all must be present' \
+  if products_to_compile.nil? && !all_products
 raise 'Option -o/--output is a required parameter' if output_path.nil?
 raise 'Option -e/--engine is a required parameter' if provider_name.nil?
 
@@ -102,7 +104,6 @@ if override_dir
     all_product_files.push(product) unless products_to_compile.include? product
   end
 end
-
 
 if all_products
   products_to_compile = all_product_files
@@ -177,7 +178,6 @@ all_product_files.each do |product_name|
   Google::LOGGER.info "Compiling '#{product_name}' (at #{version}) output to '#{output_path}'"
   Google::LOGGER.info \
     "Generating types: #{types_to_generate.empty? ? 'ALL' : types_to_generate}"
-
 
   pp provider_config if ENV['COMPILER_DEBUG']
 

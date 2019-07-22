@@ -135,7 +135,13 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      InspecProductFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
+      InspecProductFileTemplate.file_for_resource(
+        output_folder,
+        object,
+        @config,
+        version,
+        build_env
+      )
     end
 
     # Generates InSpec markdown documents for the resource

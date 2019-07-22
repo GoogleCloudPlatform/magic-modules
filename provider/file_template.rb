@@ -16,8 +16,9 @@ require 'google/logger'
 require 'pathname'
 
 module Provider
-	class FileTemplate
-		include Compile::Core
+  # Parent class for specific types of files. Contains methods to generate files
+  class FileTemplate
+    include Compile::Core
     # The root folder we're outputting to.
     attr_accessor :output_folder
     # Information about the local environment
@@ -92,22 +93,22 @@ module Provider
     def relative_path(target, base)
       Pathname.new(target).relative_path_from(Pathname.new(base))
     end
-	end
+  end
 
-	# Responsible for compiling provider-level files, rather than product-specific ones
-	class ProviderFileTemplate < Provider::FileTemplate
-		# All the products that are being compiled with the provider on this run
-		attr_accessor :products
+  # Responsible for compiling provider-level files, rather than product-specific ones
+  class ProviderFileTemplate < Provider::FileTemplate
+    # All the products that are being compiled with the provider on this run
+    attr_accessor :products
 
-		def initialize(output_folder, version, env, products)
+    def initialize(output_folder, version, env, products)
       @output_folder = output_folder
       @version = version
       @env = env
       @products = products
     end
-	end
+  end
 
-	# Responsible for generating a file in the context of a product
+  # Responsible for generating a file in the context of a product
   # with a given set of parameters.
   class ProductFileTemplate < Provider::FileTemplate
     # The name of the resource

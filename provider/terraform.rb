@@ -128,10 +128,10 @@ module Provider
     # Compile files that aren't product specific like provider.go
     def compile_provider_files(output_folder, products, version)
       products = products.sort
-      Google::LOGGER.debug "Generating provider level files"
+      Google::LOGGER.debug 'Generating provider level files'
       target_folder = File.join(output_folder, folder_name(version))
 
-      filepath = File.join(target_folder, "provider.go")
+      filepath = File.join(target_folder, 'provider.go')
 
       data = ProviderFileTemplate.new(output_folder, version, build_env, products)
       data.generate('third_party/terraform/provider/provider.go.erb', filepath, self)
@@ -245,7 +245,13 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      TerraformProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
+      TerraformProductFileTemplate.file_for_resource(
+        output_folder,
+        object,
+        version,
+        @config,
+        build_env
+      )
     end
   end
 end
