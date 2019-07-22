@@ -446,7 +446,7 @@ func TestAccComputeDisk_resourcePolicies(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProvidersOiCS,
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeDisk_resourcePolicies(diskName, policyName),
@@ -796,19 +796,12 @@ resource "google_compute_instance_group_manager" "manager" {
 
 func testAccComputeDisk_resourcePolicies(diskName, policyName string) string {
 	return fmt.Sprintf(`
-provider "google-beta" {
-  region = "us-central1"
-  zone   = "us-central1-a"
-}
-
 data "google_compute_image" "my_image" {
-  provider = "google-beta"
   family  = "debian-9"
   project = "debian-cloud"
 }
 
 resource "google_compute_resource_policy" "foo" {
-  provider = "google-beta"
   name = "%s"
   region = "us-central1"
   snapshot_schedule_policy {
@@ -822,7 +815,6 @@ resource "google_compute_resource_policy" "foo" {
 }
 
 resource "google_compute_disk" "foobar" {
-    provider = "google-beta"
 	name = "%s"
 	image = "${data.google_compute_image.my_image.self_link}"
 	size = 50
