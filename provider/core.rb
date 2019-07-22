@@ -15,120 +15,11 @@ require 'compile/core'
 require 'fileutils'
 require 'google/extensions'
 require 'google/logger'
-require 'pathname'
 require 'json'
 require 'overrides/runner'
+require 'provider/file_template'
 
 module Provider
-  # Responsible for generating a file
-  # with a given set of parameters.
-  class FileTemplate
-    include Compile::Core
-    # The name of the resource
-    attr_accessor :name
-    # The resource itself.
-    attr_accessor :object
-    # The entire API object.
-    attr_accessor :product
-    # The API version
-    attr_accessor :version
-    # The root folder we're outputting to.
-    attr_accessor :output_folder
-    # The namespace of the product.
-    attr_accessor :product_ns
-    # The provider-specific configuration.
-    attr_accessor :config
-    # Information about the local environment
-    # (which formatters are enabled, start-time)
-    attr_accessor :env
-
-    class << self
-      # Construct a new FileTemplate based on a resource object
-      def file_for_resource(output_folder, object, version, config, env)
-        file_template = new(output_folder, object.name, object.__product, version, env)
-        file_template.object = object
-        file_template.config = config
-        file_template
-      end
-    end
-
-    def initialize(output_folder, name, product, version, env)
-      @name = name
-      @product = product
-      @product_ns = product.name
-      @output_folder = output_folder
-      @version = version
-      @env = env
-    end
-
-    # Given the data object for a file, write that file and verify that it
-    # passes these conditions:
-    #
-    # - The file has not been generated already this run
-    # - The file has an autogen exception or an autogen notice defined
-    #
-    # Once the file's contents are written, set the proper [chmod] mode and
-    # format the file with a language-appropriate formatter.
-    def generate(template, path, provider)
-      folder = File.dirname(path)
-      FileUtils.mkpath folder unless Dir.exist?(folder)
-
-      # If we've modified a file since starting an MM run, it's a reasonable
-      # assumption that it was this run that modified it.
-      if File.exist?(path) && File.mtime(path) > @env[:start_time]
-        raise "#{path} was already modified during this run"
-      end
-
-      # You're looking at some magic here!
-      # This is how variables are made available in templates; we iterate
-      # through each key:value pair in this object, and we set them
-      # in the scope of the provider.
-      #
-      # The templates get access to everything in the provider +
-      # all of the variables in this object.
-      ctx = provider.provider_binding
-      instance_variables.each do |name|
-        ctx.local_variable_set(name[1..-1], instance_variable_get(name))
-      end
-
-      # This variable is used in ansible/resource.erb
-      ctx.local_variable_set('file_relative', relative_path(path, @output_folder).to_s)
-
-      Google::LOGGER.debug "Generating #{@name}"
-      File.open(path, 'w') { |f| f.puts compile_file(ctx, template) }
-
-      # Files are often generated in parallel.
-      # We can use thread-local variables to ensure that autogen checking
-      # stays specific to the file each thred represents.
-      raise "#{path} missing autogen" unless Thread.current[:autogen]
-
-      old_file_chmod_mode = File.stat(template).mode
-      FileUtils.chmod(old_file_chmod_mode, path)
-
-      format_output_file(path)
-    end
-
-    private
-
-    def format_output_file(path)
-      if path.end_with?('.py') && @env[:pyformat_enabled]
-        run_formatter("python3 -m black --line-length 160 -S #{path}")
-      elsif path.end_with?('.go') && @env[:goformat_enabled]
-        run_formatter("gofmt -w -s #{path}")
-        run_formatter("goimports -w #{path}")
-      end
-    end
-
-    def run_formatter(command)
-      output = %x(#{command} 2>&1)
-      Google::LOGGER.error output unless $CHILD_STATUS.to_i.zero?
-    end
-
-    def relative_path(target, base)
-      Pathname.new(target).relative_path_from(Pathname.new(base))
-    end
-  end
-
   # Basic functionality for code generator providers. Provides basic services,
   # such as compiling and including files, formatting data, etc.
   class Core
@@ -146,7 +37,7 @@ module Provider
       @go_format_enabled = check_goformat
     end
 
-    # This provides the FileTemplate class with access to a provider.
+    # This provides the ProductFileTemplate class with access to a provider.
     def provider_binding
       binding
     end
@@ -257,7 +148,7 @@ module Provider
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
-          FileTemplate.new(
+          ProductFileTemplate.new(
             output_folder,
             target,
             @api,
@@ -358,7 +249,7 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      FileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
+      ProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
 
     def build_env
@@ -403,6 +294,10 @@ module Provider
       url_part
     end
 
+    def generate_iam_policy(data) end
+
+    def compile_provider_files(products, version) end
+
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.
     private
@@ -428,7 +323,5 @@ module Provider
       end
       Time.now.year
     end
-
-    def generate_iam_policy(data) end
   end
 end

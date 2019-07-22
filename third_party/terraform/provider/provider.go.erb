@@ -99,31 +99,9 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			// Generated Products
-			<% unless version == 'ga' -%>
-			// start beta-only products
-			ContainerAnalysisCustomEndpointEntryKey:   ContainerAnalysisCustomEndpointEntry,
-			SecurityScannerCustomEndpointEntryKey:     SecurityScannerCustomEndpointEntry,
-			// end beta-only products
+			<% products.each do |product_name| -%>
+			<%= product_name -%>CustomEndpointEntryKey: <%= product_name -%>CustomEndpointEntry,
 			<% end -%>
-			AccessContextManagerCustomEndpointEntryKey: AccessContextManagerCustomEndpointEntry,
-			AppEngineCustomEndpointEntryKey:            AppEngineCustomEndpointEntry,
-			BinaryAuthorizationCustomEndpointEntryKey: BinaryAuthorizationCustomEndpointEntry,
-			ComputeCustomEndpointEntryKey:              ComputeCustomEndpointEntry,
-			CloudBuildCustomEndpointEntryKey:           CloudBuildCustomEndpointEntry,
-			CloudSchedulerCustomEndpointEntryKey:       CloudSchedulerCustomEndpointEntry,
-			DnsCustomEndpointEntryKey:                  DnsCustomEndpointEntry,
-			FilestoreCustomEndpointEntryKey:            FilestoreCustomEndpointEntry,
-			FirestoreCustomEndpointEntryKey:            FirestoreCustomEndpointEntry,
-			KmsCustomEndpointEntryKey:                  KmsCustomEndpointEntry,
-			MonitoringCustomEndpointEntryKey:           MonitoringCustomEndpointEntry,
-			PubsubCustomEndpointEntryKey:               PubsubCustomEndpointEntry,
-			RedisCustomEndpointEntryKey:                RedisCustomEndpointEntry,
-			ResourceManagerCustomEndpointEntryKey:      ResourceManagerCustomEndpointEntry,
-			SourceRepoCustomEndpointEntryKey:           SourceRepoCustomEndpointEntry,
-			SpannerCustomEndpointEntryKey:              SpannerCustomEndpointEntry,
-			SqlCustomEndpointEntryKey:                  SqlCustomEndpointEntry,
-			StorageCustomEndpointEntryKey:              StorageCustomEndpointEntry,
-			TpuCustomEndpointEntryKey:                  TpuCustomEndpointEntry,
 
 			// Handwritten Products / Versioned / Atypical Entries
 			<% unless version == 'ga' -%>
@@ -222,32 +200,9 @@ func ResourceMap() map[string]*schema.Resource {
 
 func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 	return mergeResourceMaps(
-			<% unless version == 'ga' -%>
-			// start beta-only products
-			GeneratedContainerAnalysisResourcesMap,
-			GeneratedSecurityScannerResourcesMap,
-			GeneratedHealthcareResourcesMap,
-			// end beta-only products
+			<% products.each do |product_name| -%>
+			Generated<%= product_name -%>ResourcesMap,
 			<% end -%>
-			GeneratedAccessContextManagerResourcesMap,
-			GeneratedAppEngineResourcesMap,
-			GeneratedBinaryAuthorizationResourcesMap,
-			GeneratedComputeResourcesMap,
-			GeneratedCloudBuildResourcesMap,
-			GeneratedCloudSchedulerResourcesMap,
-			GeneratedDnsResourcesMap,
-			GeneratedFilestoreResourcesMap,
-			GeneratedFirestoreResourcesMap,
-			GeneratedKmsResourcesMap,
-			GeneratedPubsubResourcesMap,
-			GeneratedRedisResourcesMap,
-			GeneratedResourceManagerResourcesMap,
-			GeneratedSourceRepoResourcesMap,
-			GeneratedSpannerResourcesMap,
-			GeneratedSqlResourcesMap,
-			GeneratedStorageResourcesMap,
-			GeneratedTpuResourcesMap,
-			GeneratedMonitoringResourcesMap,
 			map[string]*schema.Resource{
 				"google_app_engine_application":                resourceAppEngineApplication(),
 				"google_bigquery_dataset":                      resourceBigQueryDataset(),
@@ -481,31 +436,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 // values to a default. After using this, you should call config.LoadAndValidate.
 func ConfigureBasePaths(c *Config) {
 	// Generated Products
-	<% unless version == 'ga' -%>
-	// start beta-only products
-	c.ContainerAnalysisBasePath = ContainerAnalysisDefaultBasePath
-	c.SecurityScannerBasePath = SecurityScannerDefaultBasePath
-	// end beta-only products
+	<% products.each do |product_name| -%>
+	c.<%= product_name -%>BasePath = <%= product_name -%>DefaultBasePath
 	<% end -%>
-	c.AccessContextManagerBasePath = AccessContextManagerDefaultBasePath
-	c.AppEngineBasePath = AppEngineDefaultBasePath
-	c.BinaryAuthorizationBasePath = BinaryAuthorizationDefaultBasePath
-	c.ComputeBasePath = ComputeDefaultBasePath
-	c.CloudBuildBasePath = CloudBuildDefaultBasePath
-	c.CloudSchedulerBasePath = CloudSchedulerDefaultBasePath
-	c.DnsBasePath = DnsDefaultBasePath
-	c.FilestoreBasePath = FilestoreDefaultBasePath
-	c.FirestoreBasePath = FirestoreDefaultBasePath
-	c.KmsBasePath = KmsDefaultBasePath
-	c.MonitoringBasePath = MonitoringDefaultBasePath
-	c.PubsubBasePath = PubsubDefaultBasePath
-	c.RedisBasePath = RedisDefaultBasePath
-	c.ResourceManagerBasePath = ResourceManagerDefaultBasePath
-	c.SourceRepoBasePath = SourceRepoDefaultBasePath
-	c.SpannerBasePath = SpannerDefaultBasePath
-	c.SqlBasePath = SqlDefaultBasePath
-	c.StorageBasePath = StorageDefaultBasePath
-	c.TpuBasePath = TpuDefaultBasePath
 
 	// Handwritten Products / Versioned / Atypical Entries
 	<% unless version == 'ga' -%>

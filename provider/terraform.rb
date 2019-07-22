@@ -30,8 +30,8 @@ module Provider
     include Provider::Terraform::SubTemplate
     include Google::GolangUtils
 
-    # FileTemplate with Terraform specific fields
-    class TerraformFileTemplate < Provider::FileTemplate
+    # ProductFileTemplate with Terraform specific fields
+    class TerraformProductFileTemplate < Provider::ProductFileTemplate
       # The async object used for making operations.
       # We assume that all resources share the same async properties.
       attr_accessor :async
@@ -125,14 +125,30 @@ module Provider
       p
     end
 
+    # Compile files that aren't product specific like provider.go
+    def compile_provider_files(output_folder, products, version)
+      products = products.sort
+      Google::LOGGER.debug "Generating provider level files"
+      target_folder = File.join(output_folder, folder_name(version))
+
+      filepath = File.join(target_folder, "provider.go")
+
+      data = ProviderFileTemplate.new(output_folder, version, build_env, products)
+      data.generate('third_party/terraform/provider/provider.go.erb', filepath, self)
+    end
+
     private
+
+    # Finds the folder name for a given version of the terraform provider
+    def folder_name(version)
+      version == 'ga' ? 'google' : "google-#{version}"
+    end
 
     # This function uses the resource.erb template to create one file
     # per resource. The resource.erb template forms the basis of a single
     # GCP Resource on Terraform.
     def generate_resource(data)
-      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
-      target_folder = File.join(data.output_folder, dir)
+      target_folder = File.join(data.output_folder, folder_name(data.version))
 
       name = data.object.name.underscore
       product_name = data.product.name.underscore
@@ -163,8 +179,7 @@ module Provider
                 end
                     .empty?
 
-      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
-      target_folder = File.join(data.output_folder, dir)
+      target_folder = File.join(data.output_folder, folder_name(data.version))
 
       name = data.object.name.underscore
       product_name = data.product.name.underscore
@@ -185,8 +200,7 @@ module Provider
 
       product_name = @api.name.underscore
       data = build_object_data(@api.objects.first, output_folder, version_name)
-      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
-      target_folder = File.join(data.output_folder, dir)
+      target_folder = File.join(data.output_folder, folder_name(data.version))
 
       data.object = @api.objects.select(&:autogen_async).first
       data.async = data.object.async
@@ -199,8 +213,7 @@ module Provider
     # Generate the IAM policy for this object. This is used to query and test
     # IAM policies separately from the resource itself
     def generate_iam_policy(data)
-      dir = data.version == 'ga' ? 'google' : "google-#{data.version}"
-      target_folder = File.join(data.output_folder, dir)
+      target_folder = File.join(data.output_folder, folder_name(data.version))
 
       name = data.object.name.underscore
       product_name = data.product.name.underscore
@@ -232,7 +245,7 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      TerraformFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
+      TerraformProductFileTemplate.file_for_resource(output_folder, object, version, @config, build_env)
     end
   end
 end

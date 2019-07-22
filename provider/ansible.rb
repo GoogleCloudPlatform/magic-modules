@@ -48,8 +48,8 @@ module Provider
       include Provider::Ansible::Request
       include Provider::Ansible::VersionAdded
 
-      # FileTemplate with Ansible specific fields
-      class AnsibleFileTemplate < Provider::FileTemplate
+      # ProductFileTemplate with Ansible specific fields
+      class AnsibleProductFileTemplate < Provider::ProductFileTemplate
         # The Ansible example object.
         attr_accessor :example
       end
@@ -95,7 +95,7 @@ module Provider
 
       def build_object_data(object, output_folder, version)
         # Method is overriden to add Ansible example objects to the data object.
-        data = AnsibleFileTemplate.file_for_resource(
+        data = AnsibleProductFileTemplate.file_for_resource(
           output_folder,
           object,
           version,

@@ -38,8 +38,8 @@ module Provider
       end
     end
 
-    # Subclass of FileTemplate with InSpec specific fields
-    class InspecFileTemplate < Provider::FileTemplate
+    # Subclass of ProductFileTemplate with InSpec specific fields
+    class InspecProductFileTemplate < Provider::ProductFileTemplate
       # Used within doc template to pluralize names
       attr_accessor :plural
       # If this is a file that is being compiled for doc generation
@@ -53,8 +53,8 @@ module Provider
       attr_accessor :privileged
     end
 
-    # Subclass of FileTemplate with InSpec specific fields
-    class NestedObjectFileTemplate < Provider::FileTemplate
+    # Subclass of ProductFileTemplate with InSpec specific fields
+    class NestedObjectProductFileTemplate < Provider::ProductFileTemplate
       # Property to generate this file for
       attr_accessor :property
     end
@@ -117,7 +117,7 @@ module Provider
     # Generate the files for the properties
     def generate_property_files(properties, data)
       properties.flatten.compact.each do |property|
-        nested_object_template = NestedObjectFileTemplate.new(
+        nested_object_template = NestedObjectProductFileTemplate.new(
           data.output_folder,
           data.name,
           data.product,
@@ -135,7 +135,7 @@ module Provider
     end
 
     def build_object_data(object, output_folder, version)
-      InspecFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
+      InspecProductFileTemplate.file_for_resource(output_folder, object, @config, version, build_env)
     end
 
     # Generates InSpec markdown documents for the resource
