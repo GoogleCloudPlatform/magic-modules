@@ -107,9 +107,12 @@ module Provider
       private
 
       def build_task(state, hash, _object, noop = false)
+        code = compiled_code(@code, hash)
+        code = code.merge('state' => state) if state != 'facts'
+
         {
           'name' => message(state, @name, noop),
-          @name => compiled_code(@code, hash).merge('state' => state),
+          @name => code,
           'register' => @register
         }.reject { |_, v| v.nil? }
       end
