@@ -120,7 +120,6 @@ func Provider() terraform.ResourceProvider {
 			DataflowCustomEndpointEntryKey:               DataflowCustomEndpointEntry,
 			DnsBetaCustomEndpointEntryKey:                DnsBetaCustomEndpointEntry,
 			IamCredentialsCustomEndpointEntryKey:         IamCredentialsCustomEndpointEntry,
-			LoggingCustomEndpointEntryKey:                LoggingCustomEndpointEntry,
 			ResourceManagerV2Beta1CustomEndpointEntryKey: ResourceManagerV2Beta1CustomEndpointEntry,
 			RuntimeconfigCustomEndpointEntryKey:          RuntimeconfigCustomEndpointEntry,
 			IAMCustomEndpointEntryKey:                    IAMCustomEndpointEntry,
@@ -455,7 +454,6 @@ func ConfigureBasePaths(c *Config) {
 	c.DataflowBasePath = DataflowDefaultBasePath
 	c.DnsBetaBasePath = DnsBetaDefaultBasePath
 	c.IamCredentialsBasePath = IamCredentialsDefaultBasePath
-	c.LoggingBasePath = LoggingDefaultBasePath
 	c.ResourceManagerV2Beta1BasePath = ResourceManagerV2Beta1DefaultBasePath
 	c.RuntimeconfigBasePath = RuntimeconfigDefaultBasePath
 	c.IAMBasePath = IAMDefaultBasePath
