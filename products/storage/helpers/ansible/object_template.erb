@@ -63,7 +63,7 @@ def main():
         module.fail_json(msg="File does not exist on disk")
 
     # Check if we'll be overwriting files.
-    if not module.params['overwrite']:
+    if remote_object and not module.params['overwrite']:
         remote_object['changed'] = False
         if module.params['action'] == 'download' and local_file_exists:
             # If files differ, throw an error
