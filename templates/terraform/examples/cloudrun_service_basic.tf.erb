@@ -8,7 +8,7 @@ resource "google_cloudrun_service" "<%= ctx[:primary_resource_id] %>" {
   }
 
   spec {
-    container {
+    containers {
       image = "gcr.io/cloudrun/hello"
     }
   }
