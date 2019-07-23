@@ -118,17 +118,14 @@ func flattenKmsCryptoKeyVersionVersion(v interface{}, d *schema.ResourceData) in
 	if intVal, err := strconv.ParseInt(version, 10, 64); err == nil {
 		return intVal
 	} // let terraform core handle it if we can't convert the string to an int.
-	log.Printf("[DEBUG] Setting Version: %#v", v)
 	return v
 }
 
 func flattenKmsCryptoKeyVersionState(v interface{}, d *schema.ResourceData) interface{} {
-	log.Printf("[DEBUG] Setting State: %#v", v)
 	return v
 }
 
 func flattenKmsCryptoKeyVersionProtectionLevel(v interface{}, d *schema.ResourceData) interface{} {
-	log.Printf("[DEBUG] Setting Level: %#v", v)
 	return v
 }
 
