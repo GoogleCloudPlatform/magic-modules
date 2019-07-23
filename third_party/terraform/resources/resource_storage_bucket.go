@@ -214,15 +214,18 @@ func resourceStorageBucket() *schema.Resource {
 			"retention_policy": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"is_locked": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 						"retention_period": {
-							Type:     schema.TypeInt,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Required:     true,
+							ValidateFunc: validation.IntBetween(1, 3155760000),
 						},
 					},
 				},
@@ -328,10 +331,6 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	if v, ok := d.GetOk("retention_policy"); ok {
 		retention_policies := v.([]interface{})
-
-		if len(retention_policies) > 1 {
-			return fmt.Errorf("At most one retention_policy block is allowed")
-		}
 
 		sb.RetentionPolicy = &storage.BucketRetentionPolicy{}
 
