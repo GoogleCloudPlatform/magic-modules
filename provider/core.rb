@@ -143,7 +143,7 @@ module Provider
     end
 
     # Compiles files that are shared at the provider level
-    def compile_common_files(output_folder, version_name = nil, products = [])
+    def compile_common_files(output_folder, version_name, products)
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
 
