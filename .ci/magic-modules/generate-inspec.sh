@@ -13,10 +13,7 @@ pushd magic-modules-branched
 # Choose the author of the most recent commit as the downstream author
 COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
-for i in $(find products/ -name 'inspec.yaml' -printf '%h\n');
-do
-  bundle exec compiler -p $i -e inspec -o "build/inspec/"
-done
+bundle exec compiler -a -e inspec -o "build/inspec/"
 
 INSPEC_COMMIT_MSG="$(cat .git/title)"
 
