@@ -26,12 +26,12 @@ resource "google_container_analysis_note" "note" {
 }
 
 resource "google_kms_crypto_key" "crypto-key" {
-  name     = "crypto-key-example"
+  name     = "<%= ctx[:vars]["key_name"] %>"
   key_ring = "${google_kms_key_ring.keyring.self_link}"
   purpose  = "ASYMMETRIC_SIGN"
 
   version_template {
-    algorithm = "EC_SIGN_P384_SHA384"
+    algorithm = "RSA_SIGN_PKCS1_4096_SHA512"
   }
 
   lifecycle {
@@ -40,6 +40,6 @@ resource "google_kms_crypto_key" "crypto-key" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  name     = "keyring-example"
+  name     = "<%= ctx[:vars]["keyring_name"] %>"
   location = "global"
 }
