@@ -50,6 +50,26 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['minReplicas']
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['maxReplicas']
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['cooldownPeriod']
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['metric']
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['name']
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['type']
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
   BackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
