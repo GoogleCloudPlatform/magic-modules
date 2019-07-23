@@ -47,13 +47,20 @@ module Api
       attr_reader :wait_ms
       attr_reader :timeouts
 
+      # Use this if the resource includes the full operation url.
+      attr_reader :full_url
+
       def validate
         super
 
         check :kind, type: String
         check :path, type: String, required: true
-        check :base_url, type: String, required: true
+        check :base_url, type: String
         check :wait_ms, type: Integer, required: true
+
+        check :full_url, type: String
+
+        conflicts %i[base_url full_url]
       end
     end
 

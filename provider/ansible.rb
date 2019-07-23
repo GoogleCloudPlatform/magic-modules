@@ -83,7 +83,9 @@ module Provider
       end
 
       def build_url(url)
-        "\"#{url.gsub('{{', '{').gsub('}}', '}')}\""
+        # Return a quoted string, with single pairs of {} brackets and all
+        # requested strings are underscored (as they come from the Ansible configs)
+        "\"#{url.gsub(/{{\w+}}/) { |param| "{#{param[2..-3].underscore}}" }}\""
       end
 
       # Returns the name of the module according to Ansible naming standards.

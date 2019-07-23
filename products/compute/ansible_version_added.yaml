@@ -42,6 +42,8 @@
     :version_added: '2.7'
   :Router:
     :version_added: '2.7'
+  :Snapshot:
+    :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.7'
   :SslPolicy:
@@ -113,10 +115,14 @@
         :version_added: '2.6'
       :maxConnectionsPerInstance:
         :version_added: '2.6'
+      :maxConnectionsPerEndpoint:
+        :version_added: '2.9'
       :maxRate:
         :version_added: '2.6'
       :maxRatePerInstance:
         :version_added: '2.6'
+      :maxRatePerEndpoint:
+        :version_added: '2.9'
       :maxUtilization:
         :version_added: '2.6'
     :cdnPolicy:
@@ -289,8 +295,14 @@
       :version_added: '2.6'
     :ipVersion:
       :version_added: '2.6'
+    :prefixLength:
+      :version_added: '2.9'
     :addressType:
       :version_added: '2.8'
+    :purpose:
+      :version_added: '2.9'
+    :network:
+      :version_added: '2.9'
   :GlobalForwardingRule:
     :version_added: '2.6'
     :description:
@@ -381,6 +393,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
     :httpsHealthCheck:
       :version_added: '2.6'
       :host:
@@ -395,6 +409,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
     :tcpHealthCheck:
       :version_added: '2.6'
       :request:
@@ -407,6 +423,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
     :sslHealthCheck:
       :version_added: '2.6'
       :request:
@@ -419,6 +437,8 @@
         :version_added: '2.6'
       :proxyHeader:
         :version_added: '2.6'
+      :portSpecification:
+        :version_added: '2.9'
   :InstanceTemplate:
     :version_added: '2.6'
     :description:
@@ -829,6 +849,30 @@
           :version_added: '2.7'
     :region:
       :version_added: '2.7'
+  :Snapshot:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
+    :sourceDisk:
+      :version_added: '2.9'
+    :zone:
+      :version_added: '2.9'
+    :snapshotEncryptionKey:
+      :version_added: '2.9'
+      :rawKey:
+        :version_added: '2.9'
+      :kmsKeyName:
+        :version_added: '2.9'
+    :sourceDiskEncryptionKey:
+      :version_added: '2.9'
+      :rawKey:
+        :version_added: '2.9'
+      :kmsKeyName:
+        :version_added: '2.9'
   :SslCertificate:
     :version_added: '2.6'
     :certificate:
