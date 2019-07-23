@@ -1039,9 +1039,6 @@ func dataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 		return false
 	}
 
-	log.Printf("[DEBUG] diff suppress dataproc %q: %+v", old, oldV)
-	log.Printf("[DEBUG] diff suppress dataproc %q: %+v", new, newV)
-
 	if newV.major != oldV.major {
 		return false
 	}
