@@ -337,7 +337,14 @@ module Provider
                      .map { |k, v| [k % module_name(data.object), v] }
                      .to_h
 
-      compile_file_list(data.output_folder, files)
+      file_template = ProductFileTemplate.new(
+        data.output_folder,
+        data.name,
+        @api,
+        data.version,
+        build_env
+      )
+      compile_file_list(data.output_folder, files, file_template)
     end
   end
 end

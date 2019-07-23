@@ -76,7 +76,7 @@ module Provider
       # common-compile.yaml is a special file that will get compiled by the last product
       # used in a single invocation of the compiled. It should not contain product-specific
       # information; instead, it should be run-specific such as the version to compile at.
-      compile_files(output_folder, version_name) \
+      compile_product_files(output_folder, version_name) \
         unless @config.files.nil? || @config.files.compile.nil?
 
       generate_datasources(output_folder, types, version_name) \
@@ -130,31 +130,40 @@ module Provider
       end.map(&:join)
     end
 
-    def compile_files(output_folder, version_name)
-      compile_file_list(output_folder, @config.files.compile, version_name)
+    # Compiles files specified within the product
+    def compile_product_files(output_folder, version_name)
+      file_template = ProductFileTemplate.new(
+        output_folder,
+        nil,
+        @api,
+        version_name,
+        build_env
+      )
+      compile_file_list(output_folder, @config.files.compile, file_template)
     end
 
-    def compile_common_files(output_folder, version_name = nil)
+    # Compiles files that are shared at the provider level
+    def compile_common_files(output_folder, version_name = nil, products = [])
       provider_name = self.class.name.split('::').last.downcase
       return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
 
       Google::LOGGER.info "Compiling common files for #{provider_name}"
       files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
-      compile_file_list(output_folder, files, version_name)
+      file_template = ProviderFileTemplate.new(
+        output_folder,
+        version_name,
+        build_env,
+        products
+      )
+      compile_file_list(output_folder, files, file_template)
     end
 
-    def compile_file_list(output_folder, files, version = nil)
+    def compile_file_list(output_folder, files, file_template)
       files.map do |target, source|
         Thread.new do
           Google::LOGGER.debug "Compiling #{source} => #{target}"
           target_file = File.join(output_folder, target)
-          ProductFileTemplate.new(
-            output_folder,
-            target,
-            @api,
-            version,
-            build_env
-          ).generate(source, target_file, self)
+          file_template.generate(source, target_file, self)
         end
       end.map(&:join)
     end
@@ -295,8 +304,6 @@ module Provider
     end
 
     def generate_iam_policy(data) end
-
-    def compile_provider_files(output_folder, products, version) end
 
     # TODO(nelsonjr): Review all object interfaces and move to private methods
     # that should not be exposed outside the object hierarchy.

@@ -125,17 +125,6 @@ module Provider
       p
     end
 
-    # Compile files that aren't product specific like provider.go
-    # These are stored in third_party/terraform/provider
-    def compile_provider_files(output_folder, products, version)
-      target_folder = File.join(output_folder, folder_name(version))
-      data = ProviderFileTemplate.new(output_folder, version, build_env, products)
-      Dir["third_party/terraform/provider/*"].each do |file_path|
-        fname = file_path.split('/')[-1].delete_suffix(".erb")
-        data.generate(file_path, File.join(target_folder, fname), self)
-      end
-    end
-
     private
 
     # Finds the folder name for a given version of the terraform provider
