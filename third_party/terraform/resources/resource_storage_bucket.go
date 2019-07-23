@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gammazero/workerpool"
+	"github.com/hashicorp/terraform/helper/customdiff"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -29,6 +30,8 @@ func resourceStorageBucket() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceStorageBucketStateImporter,
 		},
+		CustomizeDiff: customdiff.All(
+			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked)),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -291,6 +294,20 @@ func resourceStorageBucket() *schema.Resource {
 	}
 }
 
+// Is the old bucket retention policy locked?
+func isPolicyLocked(old, new, _ interface{}) bool {
+	if old == nil || new == nil {
+		return false
+	}
+
+	// if the old policy is locked, but the new policy is not
+	if old.(bool) && !new.(bool) {
+		return true
+	}
+
+	return false
+}
+
 func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
@@ -425,12 +442,6 @@ func resourceStorageBucketUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if d.HasChange("retention_policy") {
-		// Changing from locked to unlocked is not possible, throw an error
-		old, new := d.GetChange("retention_policy.0.is_locked")
-		if old.(bool) && !new.(bool) {
-			return fmt.Errorf("Bucket '%s' has a locked retention policy and cannot be unlocked.", d.Get("name"))
-		}
-
 		if v, ok := d.GetOk("retention_policy"); ok {
 			sb.RetentionPolicy = expandBucketRetentionPolicy(v.([]interface{}))
 		} else {
