@@ -74,29 +74,18 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
-	<% unless version == 'ga' -%>
-	ContainerAnalysisBasePath   string
-	SecurityScannerBasePath     string
+	<% products.each do |product_name| -%>
+	<%= product_name -%>BasePath string
 	<% end -%>
-
-	AccessContextManagerBasePath string
-	BinaryAuthorizationBasePath string
-	CloudSchedulerBasePath       string
-	FirestoreBasePath            string
-	MonitoringBasePath           string
-	RedisBasePath                string
-	TpuBasePath                  string
 
 	CloudBillingBasePath string
 	clientBilling        *cloudbilling.APIService
 
-	CloudBuildBasePath string
 	clientBuild        *cloudbuild.Service
 
 	ComposerBasePath string
 	clientComposer   *composer.Service
 
-	ComputeBasePath string
 	clientCompute   *compute.Service
 
 	ComputeBetaBasePath string
@@ -117,28 +106,22 @@ type Config struct {
 	DataflowBasePath string
 	clientDataflow   *dataflow.Service
 
-	DnsBasePath string
 	clientDns   *dns.Service
 
 	DnsBetaBasePath string
 	clientDnsBeta   *dnsBeta.Service
 
-	FilestoreBasePath string
 	clientFilestore   *file.Service
 
 	IamCredentialsBasePath string
 	clientIamCredentials   *iamcredentials.Service
 
-	KmsBasePath string
 	clientKms   *cloudkms.Service
 
-	LoggingBasePath string
 	clientLogging   *cloudlogging.Service
 
-	PubsubBasePath string
 	clientPubsub   *pubsub.Service
 
-	ResourceManagerBasePath string
 	clientResourceManager   *cloudresourcemanager.Service
 
 	ResourceManagerV2Beta1BasePath string
@@ -147,23 +130,18 @@ type Config struct {
 	RuntimeconfigBasePath string
 	clientRuntimeconfig   *runtimeconfig.Service
 
-	SpannerBasePath string
 	clientSpanner   *spanner.Service
 
-	SourceRepoBasePath string
 	clientSourceRepo   *sourcerepo.Service
 
-	StorageBasePath string
 	clientStorage   *storage.Service
 
-	SqlBasePath string
 	clientSqlAdmin   *sqladmin.Service
 
 	IAMBasePath string
 	clientIAM   *iam.Service
 	<% unless version == 'ga' -%>
 
-	HealthcareBasePath string
 	clientHealthcare   *healthcare.Service
 
 	IAPBasePath string
@@ -186,7 +164,6 @@ type Config struct {
 	CloudIoTBasePath string
 	clientCloudIoT   *cloudiot.Service
 
-	AppEngineBasePath string
 	clientAppEngine   *appengine.APIService
 
 	ServiceNetworkingBasePath string
