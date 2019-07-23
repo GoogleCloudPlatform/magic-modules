@@ -82,6 +82,16 @@ module Google
         unless opts[:allowed].include?(value)
     end
 
+    def conflicts(list)
+      value_checked = false
+      list.each do |item|
+        next if instance_variable_get("@#{item}").nil?
+        raise "#{list.join(',')} cannot be set at the same time" if value_checked
+
+        value_checked = true
+      end
+    end
+
     private
 
     def check_type(name, object, type)

@@ -24,9 +24,6 @@
 <% else # if object.readonly -%>
       - result.changed == true
 <% end # if object.readonly -%>
-<% if object.kind? -%>
-      - "result.kind == <%= quote_string(object.kind) -%>"
-<% end # if object.kind -%>
 <% unless example.verifier.nil? -%>
 <%= lines(example.verifier.build_task('present', object)) -%>
 <% end -%>
@@ -38,9 +35,6 @@
   assert:
     that:
       - result.changed == false
-<% if object.kind? -%>
-      - "result.kind == <%= quote_string(object.kind) -%>"
-<% end # if object.kind -%>
 #----------------------------------------------------------
 <%= lines(example.task.build_test('absent', object, false)) -%>
   register: result
