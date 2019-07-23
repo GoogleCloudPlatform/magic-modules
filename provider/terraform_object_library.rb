@@ -41,14 +41,21 @@ module Provider
                     self)
     end
 
-    def compile_common_files(output_folder, version_name = 'ga')
+    def compile_common_files(output_folder, version_name, products)
       Google::LOGGER.info 'Compiling common files.'
+      file_template = ProviderFileTemplate.new(
+        output_folder,
+        version_name,
+        build_env,
+        products
+      )
       compile_file_list(output_folder, [
                           ['google/config.go',
                            'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
                            'third_party/terraform/utils/utils.go.erb']
-                        ], version_name)
+                        ],
+                        file_template)
     end
 
     def copy_common_files(output_folder, _version_name)
