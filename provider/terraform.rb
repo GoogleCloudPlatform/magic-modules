@@ -126,20 +126,14 @@ module Provider
     end
 
     # Compile files that aren't product specific like provider.go
+    # These are stored in third_party/terraform/provider
     def compile_provider_files(output_folder, products, version)
-      products = products.sort
-      Google::LOGGER.debug 'Generating provider level files'
       target_folder = File.join(output_folder, folder_name(version))
-
-      filepath = File.join(target_folder, 'provider.go')
-
       data = ProviderFileTemplate.new(output_folder, version, build_env, products)
-      data.generate('third_party/terraform/provider/provider.go.erb', filepath, self)
-
-      config_filepath = File.join(target_folder, 'config.go')
-
-      config_data = ProviderFileTemplate.new(output_folder, version, build_env, products)
-      config_data.generate('third_party/terraform/provider/config.go.erb', config_filepath, self)
+      Dir["third_party/terraform/provider/*"].each do |file_path|
+        fname = file_path.split('/')[-1].delete_suffix(".erb")
+        data.generate(file_path, File.join(target_folder, fname), self)
+      end
     end
 
     private

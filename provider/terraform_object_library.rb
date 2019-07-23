@@ -120,6 +120,7 @@ module Provider
     def generate_iam_policy(data) end
 
     def compile_provider_files(output_folder, products, version)
+      target_folder = File.join(output_folder, folder_name(version))
       config_filepath = File.join(target_folder, 'config.go')
 
       config_data = ProviderFileTemplate.new(output_folder, version, build_env, products)
