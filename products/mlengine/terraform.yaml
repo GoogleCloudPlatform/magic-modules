@@ -19,9 +19,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "ml_model_basic"
         primary_resource_id: "default"
+        vars:
+          model_name: 'default'
       - !ruby/object:Provider::Terraform::Examples
         name: "ml_model_full"
         primary_resource_id: "default"
+        vars:
+          model_name: 'default'
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
