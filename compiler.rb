@@ -203,7 +203,6 @@ end
 # In order to only copy/compile files once per provider this must be called outside
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
-products_for_version = products_for_version.sort
 provider&.copy_common_files(output_path, version)
-provider&.compile_common_files(output_path, version, products_for_version)
+provider&.compile_common_files(output_path, version, products_for_version.sort)
 # rubocop:enable Metrics/BlockLength
