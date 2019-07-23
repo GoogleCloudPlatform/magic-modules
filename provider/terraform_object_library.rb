@@ -44,8 +44,6 @@ module Provider
     def compile_common_files(output_folder, version_name = 'ga')
       Google::LOGGER.info 'Compiling common files.'
       compile_file_list(output_folder, [
-                          ['google/config.go',
-                           'third_party/terraform/utils/config.go.erb'],
                           ['google/utils.go',
                            'third_party/terraform/utils/utils.go.erb']
                         ], version_name)
@@ -121,6 +119,11 @@ module Provider
 
     def generate_iam_policy(data) end
 
-    def compile_provider_files(output_folder, products, version) end
+    def compile_provider_files(output_folder, products, version)
+      config_filepath = File.join(target_folder, 'config.go')
+
+      config_data = ProviderFileTemplate.new(output_folder, version, build_env, products)
+      config_data.generate('third_party/terraform/provider/config.go.erb', config_filepath, self)
+    end
   end
 end
