@@ -100,7 +100,7 @@ func dataSourceGoogleKmsCryptoKeyVersionRead(d *schema.ResourceData, meta interf
 			return err
 		}
 		log.Printf("[DEBUG] Getting public key of CryptoKeyVersion: %#v", url)
-		res, err = sendRequest(config, "GET", url, nil)
+		res, _ = sendRequest(config, "GET", url, nil)
 
 		if err := d.Set("public_key", flattenKmsCryptoKeyVersionPublicKey(res, d)); err != nil {
 			return fmt.Errorf("Error reading CryptoKeyVersion public key: %s", err)

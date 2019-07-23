@@ -56,7 +56,7 @@ func TestAccBinaryAuthorizationAttestor_full(t *testing.T) {
 func TestAccBinaryAuthorizationAttestor_kms(t *testing.T) {
 	t.Parallel()
 
-	kms := BootstrapKMSKeyWithPurposeAlgorithm(t, "ASYMMETRIC_SIGN", "EC_SIGN_P384_SHA384")
+	kms := BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
 	attestorName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
@@ -229,7 +229,7 @@ resource "google_binary_authorization_attestor" "attestor" {
       id = "${data.google_kms_crypto_key_version.version.id}"
       pkix_public_key {
         public_key_pem     = "${data.google_kms_crypto_key_version.version.public_key[0].pem}"
-        signature_algorithm = "ECDSA_P384_SHA384"
+        signature_algorithm = "${data.google_kms_crypto_key_version.version.public_key[0].algorithm}"
       }
     }
   }
