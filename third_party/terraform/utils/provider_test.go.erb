@@ -14,7 +14,7 @@ import (
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
-<% unless version == 'ga' -%>
+<% if version == 'beta' -%>
 var testAccProvidersOiCS map[string]terraform.ResourceProvider
 <% end -%>
 var testAccProvider *schema.Provider
@@ -68,7 +68,7 @@ var billingAccountEnvVars = []string{
 func init() {
 	testAccProvider = Provider().(*schema.Provider)
 	testAccRandomProvider = random.Provider().(*schema.Provider)
-	<% if version == 'ga' -%>
+	<% unless version == 'beta' -%>
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"google": testAccProvider,
 		"random": testAccRandomProvider,
