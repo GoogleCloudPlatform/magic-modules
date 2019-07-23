@@ -241,7 +241,6 @@ func validateNonNegativeDuration() schema.SchemaValidateFunc {
 	}
 }
 
-
 func validateIpAddress(i interface{}, val string) ([]string, []error) {
 	ip := net.ParseIP(i.(string))
 	if ip == nil {
