@@ -43,9 +43,13 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     access_api_results: true
     return_if_object: |
 <%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+    update: |
+      module.fail_json(msg="SQL objects can't be updated to ensure data safety")
   Database: !ruby/object:Overrides::Ansible::ResourceOverride
     return_if_object: |
 <%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
+    update: |
+      module.fail_json(msg="SQL objects can't be updated to ensure data safety")
   User: !ruby/object:Overrides::Ansible::ResourceOverride
     unwrap_resource: true
     return_if_object: |
