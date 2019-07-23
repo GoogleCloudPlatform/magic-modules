@@ -105,9 +105,7 @@ if override_dir
   end
 end
 
-if all_products
-  products_to_compile = all_product_files
-end
+products_to_compile = all_product_files if all_products
 
 raise 'No api.yaml files found. Check provider/engine name.' if products_to_compile.empty?
 
