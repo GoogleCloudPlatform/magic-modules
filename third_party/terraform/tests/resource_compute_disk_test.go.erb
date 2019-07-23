@@ -823,7 +823,7 @@ resource "google_compute_disk" "foobar" {
   size = 50
   type = "pd-ssd"
   zone = "us-central1-a"
-  resource_policies = ["${google_compute_resource_policy.foo.self_link}"]
+  resource_policies = [google_compute_resource_policy.foo.self_link]
 }`, policyName, diskName)
 }
 <% end -%>
