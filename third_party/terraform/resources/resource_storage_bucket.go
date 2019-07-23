@@ -605,6 +605,20 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		if len(res.Items) != 0 {
+			if d.Get("retention_policy.0.is_locked").(bool) {
+				for _, item := range res.Items {
+					expiration, err := time.Parse(time.RFC3339, item.RetentionExpirationTime)
+					if err != nil {
+						return err
+					}
+					if expiration.After(time.Now()) {
+						deleteErr := errors.New("Bucket '" + d.Get("name").(string) + "' contains objects that have not met the retention period yet and cannot be deleted.")
+						log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+						return deleteErr
+					}
+				}
+			}
+
 			if d.Get("force_destroy").(bool) {
 				// GCS requires that a bucket be empty (have no objects or object
 				// versions) before it can be deleted.
