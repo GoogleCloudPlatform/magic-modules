@@ -25,7 +25,7 @@ module Api
       attr_reader :base_url
       attr_reader :name
 
-      ORDER = %w[ga beta alpha].freeze
+      ORDER = %w[ga beta alpha private].freeze
 
       def validate
         super
