@@ -91,8 +91,8 @@ module Provider
       # a reference to the primary resource to create IAM policies for
       attr_reader :primary_resource_name
 
-      # The path to the file containing terraform config to include in the test
-      # If this is not specified use "templates/terraform/examples/{{name}}.tf.erb"
+      # The path to this example's Terraform config.
+      # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
       attr_reader :config_path
 
       def config_documentation
