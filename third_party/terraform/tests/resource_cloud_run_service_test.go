@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccCloudRunService_cloudrunServiceUpdate(t *testing.T) {
+func TestAccCloudRunService_cloudRunServiceUpdate(t *testing.T) {
 	t.Parallel()
 
 	project := getTestProjectFromEnv()
@@ -19,7 +19,7 @@ func TestAccCloudRunService_cloudrunServiceUpdate(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudrunService_cloudrunServiceUpdate(name, project, "10"),
+				Config: testAccCloudRunService_cloudRunServiceUpdate(name, project, "10"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -29,7 +29,7 @@ func TestAccCloudRunService_cloudrunServiceUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata.0.resource_version", "status.0.conditions"},
 			},
 			{
-				Config: testAccCloudRunService_cloudrunServiceUpdate(name, project, "50"),
+				Config: testAccCloudRunService_cloudRunServiceUpdate(name, project, "50"),
 			},
 			{
 				ResourceName:            "google_cloud_run_service.default",
@@ -42,7 +42,7 @@ func TestAccCloudRunService_cloudrunServiceUpdate(t *testing.T) {
 	})
 }
 
-func testAccCloudRunService_cloudrunServiceUpdate(name, project, concurrency string) string {
+func testAccCloudRunService_cloudRunServiceUpdate(name, project, concurrency string) string {
 	return fmt.Sprintf(`
 resource "google_cloud_run_service" "default" {
   name          = "%s"
