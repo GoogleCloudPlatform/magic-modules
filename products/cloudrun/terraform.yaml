@@ -16,11 +16,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloudrun_domain_mapping_basic"
+        name: "cloud_run_domain_mapping_basic"
         min_version: 'beta'
         primary_resource_id: "default"
         vars:
-          cloudrun_domain_name: "tftest-domainmapping.com"
+          cloud_run_domain_name: "tftest-domainmapping.com"
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
@@ -45,11 +45,11 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
-        name: "cloudrun_service_basic"
+        name: "cloud_run_service_basic"
         min_version: 'beta'
         primary_resource_id: "default"
         vars:
-          cloudrun_service_name: "tftest-cloudrun"
+          cloud_run_service_name: "tftest-cloudrun"
         test_env_vars:
           namespace: :PROJECT_NAME
     custom_code: !ruby/object:Provider::Terraform::CustomCode
