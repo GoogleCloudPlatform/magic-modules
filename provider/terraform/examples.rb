@@ -28,8 +28,6 @@ module Provider
       # The name of the example in lower snake_case.
       # Generally takes the form of the resource name followed by some detail
       # about the specific test. For example, "address_with_subnetwork".
-      # The template for the example is expected at the path
-      # "templates/terraform/examples/{{name}}.tf.erb"
       attr_reader :name
 
       # The id of the "primary" resource in an example. Used in import tests.
@@ -93,6 +91,10 @@ module Provider
       # a reference to the primary resource to create IAM policies for
       attr_reader :primary_resource_name
 
+      # The path to this example's Terraform config.
+      # Defaults to `templates/terraform/examples/{{name}}.tf.erb`
+      attr_reader :config_path
+
       def config_documentation
         docs_defaults = {
           PROJECT_NAME: 'my-project-name',
@@ -112,7 +114,7 @@ module Provider
                          test_env_vars: test_env_vars.map { |k, v| [k, docs_defaults[v]] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       "templates/terraform/examples/#{name}.tf.erb"
+                       config_path
                      ))
         lines(compile_file(
                 { content: body },
@@ -139,7 +141,7 @@ module Provider
                          test_env_vars: test_env_vars.map { |k, _| [k, "%{#{k}}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       "templates/terraform/examples/#{name}.tf.erb"
+                       config_path
                      ))
 
         substitute_test_paths body
@@ -153,7 +155,7 @@ module Provider
                          vars: vars.map { |k, str| [k, "#{str}-${local.name_suffix}"] }.to_h,
                          primary_resource_id: primary_resource_id
                        },
-                       "templates/terraform/examples/#{name}.tf.erb"
+                       config_path
                      ))
 
         substitute_example_paths body
@@ -197,6 +199,7 @@ module Provider
         check :ignore_read_extra, type: Array, item_type: String, default: []
         check :primary_resource_name, type: String
         check :skip_test, type: TrueClass
+        check :config_path, type: String, default: "templates/terraform/examples/#{name}.tf.erb"
       end
     end
   end
