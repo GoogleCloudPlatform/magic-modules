@@ -14,13 +14,13 @@
 --- !ruby/object:Provider::Ansible::Config
 # This is where custom code would be defined eventually.
 datasources: !ruby/object:Overrides::ResourceOverrides
-  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   ManagedSslCertificate: !ruby/object:Overrides::Ansible::ResourceOverride
+    exclude: true
+  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   # Readonly resources.
   DiskType: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -37,8 +37,6 @@ datasources: !ruby/object:Overrides::ResourceOverrides
     exclude: true
   NodeTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
-  RegionAutoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   RegionBackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   Region: !ruby/object:Overrides::Ansible::ResourceOverride
@@ -52,6 +50,26 @@ datasources: !ruby/object:Overrides::ResourceOverrides
   Zone: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
 overrides: !ruby/object:Overrides::ResourceOverrides
+  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
+    properties:
+      autoscalingPolicy.minNumReplicas: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['minReplicas']
+      autoscalingPolicy.maxNumReplicas: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['maxReplicas']
+      autoscalingPolicy.coolDownPeriodSec: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['cooldownPeriod']
+      autoscalingPolicy.cpuUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
+      autoscalingPolicy.customMetricUtilizations: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['metric']
+      autoscalingPolicy.customMetricUtilizations.metric: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['name']
+      autoscalingPolicy.customMetricUtilizations.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
+      autoscalingPolicy.customMetricUtilizations.utilizationTargetType: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['type']
+      autoscalingPolicy.loadBalancingUtilization.utilizationTarget: !ruby/object:Overrides::Ansible::PropertyOverride
+        aliases: ['target']
   BackendService: !ruby/object:Overrides::Ansible::ResourceOverride
     properties:
       timeoutSec: !ruby/object:Overrides::Ansible::PropertyOverride
@@ -234,8 +252,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   TargetVpnGateway: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: false
   # Not yet implemented.
-  Autoscaler: !ruby/object:Overrides::Ansible::ResourceOverride
-    exclude: true
   BackendBucketSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   BackendServiceSignedUrlKey: !ruby/object:Overrides::Ansible::ResourceOverride
