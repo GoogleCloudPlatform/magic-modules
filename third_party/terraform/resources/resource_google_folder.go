@@ -55,10 +55,14 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 	displayName := d.Get("display_name").(string)
 	parent := d.Get("parent").(string)
 
-	op, err := config.clientResourceManagerV2Beta1.Folders.Create(&resourceManagerV2Beta1.Folder{
-		DisplayName: displayName,
-	}).Parent(parent).Do()
-
+	var op *resourceManagerV2Beta1.Operation
+	err := retry(func() error {
+		var reqErr error
+		op, reqErr = config.clientResourceManagerV2Beta1.Folders.Create(&resourceManagerV2Beta1.Folder{
+			DisplayName: displayName,
+		}).Parent(parent).Do()
+		return reqErr
+	})
 	if err != nil {
 		return fmt.Errorf("Error creating folder '%s' in '%s': %s", displayName, parent, err)
 	}
@@ -95,7 +99,12 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	folder, err := config.clientResourceManagerV2Beta1.Folders.Get(d.Id()).Do()
+	var folder *resourceManagerV2Beta1.Folder
+	err := retry(func() error {
+		var reqErr error
+		folder, reqErr = config.clientResourceManagerV2Beta1.Folders.Get(d.Id()).Do()
+		return reqErr
+	})
 	if err != nil {
 		return handleNotFoundError(err, d, d.Id())
 	}
@@ -115,10 +124,12 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 
 	d.Partial(true)
 	if d.HasChange("display_name") {
-		_, err := config.clientResourceManagerV2Beta1.Folders.Patch(d.Id(), &resourceManagerV2Beta1.Folder{
-			DisplayName: displayName,
-		}).Do()
-
+		err := retry(func() error {
+			_, reqErr := config.clientResourceManagerV2Beta1.Folders.Patch(d.Id(), &resourceManagerV2Beta1.Folder{
+				DisplayName: displayName,
+			}).Do()
+			return reqErr
+		})
 		if err != nil {
 			return fmt.Errorf("Error updating display_name to '%s': %s", displayName, err)
 		}
@@ -128,10 +139,15 @@ func resourceGoogleFolderUpdate(d *schema.ResourceData, meta interface{}) error 
 
 	if d.HasChange("parent") {
 		newParent := d.Get("parent").(string)
-		op, err := config.clientResourceManagerV2Beta1.Folders.Move(d.Id(), &resourceManagerV2Beta1.MoveFolderRequest{
-			DestinationParent: newParent,
-		}).Do()
 
+		var op *resourceManagerV2Beta1.Operation
+		err := retry(func() error {
+			var reqErr error
+			op, reqErr = config.clientResourceManagerV2Beta1.Folders.Move(d.Id(), &resourceManagerV2Beta1.MoveFolderRequest{
+				DestinationParent: newParent,
+			}).Do()
+			return reqErr
+		})
 		if err != nil {
 			return fmt.Errorf("Error moving folder '%s' to '%s': %s", displayName, newParent, err)
 		}
@@ -158,11 +174,13 @@ func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	displayName := d.Get("display_name").(string)
 
-	_, err := config.clientResourceManagerV2Beta1.Folders.Delete(d.Id()).Do()
+	err := retry(func() error {
+		_, reqErr := config.clientResourceManagerV2Beta1.Folders.Delete(d.Id()).Do()
+		return reqErr
+	})
 	if err != nil {
 		return fmt.Errorf("Error deleting folder '%s': %s", displayName, err)
 	}
-
 	return nil
 }
 
