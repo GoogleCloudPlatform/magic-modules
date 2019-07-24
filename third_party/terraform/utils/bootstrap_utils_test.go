@@ -22,14 +22,18 @@ type bootstrappedKMS struct {
 	*cloudkms.CryptoKey
 }
 
+func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
+	return BootstrapKMSKeyInLocation(t, "global")
+}
+
+func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS {
+	return BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", locationID)
+}
+
 // BootstrapKMSKeyWithPurpose returns a KMS key in the "global" location.
 // See BootstrapKMSKeyWithPurposeInLocation.
 func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) bootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocation(t, purpose, "global")
-}
-
-func BootstrapKMSKey(t *testing.T) bootstrappedKMS {
-	return BootstrapKMSKeyInLocation(t, "global")
 }
 
 /**
@@ -129,10 +133,6 @@ func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID stri
 		keyRing,
 		cryptoKey,
 	}
-}
-
-func BootstrapKMSKeyInLocation(t *testing.T, locationID string) bootstrappedKMS {
-	return BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", locationID)
 }
 
 var serviceAccountEmail = "tf-bootstrap-service-account"
