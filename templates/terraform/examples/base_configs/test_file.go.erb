@@ -113,6 +113,9 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 			continue
 		}
 
+	<% if object.custom_code.test_check_destroy -%>
+<%= lines(compile(object.custom_code.test_check_destroy)) -%>
+	<% else -%>
 	config := testAccProvider.Meta().(*Config)
 
 	url, err := replaceVarsForTest(config, rs, "<%= "{{#{object.__product.name}BasePath}}#{object.self_link_uri}" -%>")
@@ -120,9 +123,6 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 		return err
 	}
 
-	<% if object.custom_code.delete_check -%>
-<%= lines(compile(object.custom_code.delete_check)) -%>
-	<% else -%>
 	_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil)
 	if err == nil {
 			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)

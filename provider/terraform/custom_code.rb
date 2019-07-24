@@ -107,7 +107,7 @@ module Provider
       # This code is run in the generated test file to check that the
       # resource was successfully deleted. Use this if the API responds
       # with a success HTTP code for deleted resources
-      attr_reader :delete_check
+      attr_reader :test_check_destroy
 
       def validate
         super
@@ -124,6 +124,7 @@ module Provider
         check :pre_delete, type: String
         check :custom_import, type: String
         check :post_import, type: String
+        check :test_check_destroy, type: String
       end
     end
   end
