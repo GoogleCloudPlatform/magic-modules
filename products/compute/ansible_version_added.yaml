@@ -2,6 +2,8 @@
 :facts:
   :Address:
     :version_added: '2.7'
+  :Autoscaler:
+    :version_added: '2.9'
   :BackendBucket:
     :version_added: '2.7'
   :BackendService:
@@ -83,6 +85,44 @@
       :version_added: '2.7'
     :region:
       :version_added: '2.6'
+  :Autoscaler:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :autoscalingPolicy:
+      :version_added: '2.9'
+      :minNumReplicas:
+        :version_added: '2.9'
+      :maxNumReplicas:
+        :version_added: '2.9'
+      :coolDownPeriodSec:
+        :version_added: '2.9'
+      :cpuUtilization:
+        :version_added: '2.9'
+        :utilizationTarget:
+          :version_added: '2.9'
+      :customMetricUtilizations:
+        :version_added: '2.9'
+        :metric:
+          :version_added: '2.9'
+        :singleInstanceAssignment:
+          :version_added: '2.9'
+        :utilizationTarget:
+          :version_added: '2.9'
+        :utilizationTargetType:
+          :version_added: '2.9'
+        :filter:
+          :version_added: '2.9'
+      :loadBalancingUtilization:
+        :version_added: '2.9'
+        :utilizationTarget:
+          :version_added: '2.9'
+    :target:
+      :version_added: '2.9'
+    :zone:
+      :version_added: '2.9'
   :BackendBucket:
     :version_added: '2.6'
     :bucketName:
