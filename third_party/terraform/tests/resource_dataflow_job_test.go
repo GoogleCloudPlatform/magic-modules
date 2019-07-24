@@ -360,7 +360,7 @@ func testAccDataflowJobHasLabels(n, key string) resource.TestCheckFunc {
 		}
 
 		if job.Labels[key] != rs.Primary.Attributes["labels."+key] {
-			return fmt.Errorf("Labels do not match.")
+			return fmt.Errorf("Labels do not match what is stored in state.")
 		}
 
 		return nil
