@@ -104,6 +104,10 @@ module Provider
       # is useful for parsing attributes that are necessary for
       # the Read() method to succeed.
       attr_reader :post_import
+      # This code is run in the generated test file to check that the
+      # resource was successfully deleted. Use this if the API responds
+      # with a success HTTP code for deleted resources
+      attr_reader :delete_check
 
       def validate
         super

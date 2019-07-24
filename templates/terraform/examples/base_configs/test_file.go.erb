@@ -120,11 +120,15 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 		return err
 	}
 
+	<% if object.custom_code.delete_check -%>
+<%= lines(compile(object.custom_code.delete_check)) -%>
+	<% else -%>
 	_, err = sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil)
 	if err == nil {
 			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 		}
 	}
+	<% end -%>
 
 	return nil
 }
