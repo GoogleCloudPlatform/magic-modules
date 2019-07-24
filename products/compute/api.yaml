@@ -1566,6 +1566,15 @@ objects:
 
           global/images/family/my-private-family
         input: true
+      - !ruby/object:Api::Type::Array
+        name: 'resourcePolicies'
+        min_version: beta
+        description: 'Resource policies applied to this disk for automatic snapshot creations.'
+        item_type: !ruby/object:Api::Type::ResourceRef
+          name: 'resourcePolicy'
+          resource: 'ResourcePolicy'
+          imports: 'selfLink'
+          description: 'A resource policy applied to this disk for automatic snapshot creations.'
   - !ruby/object:Api::Resource
     name: 'Firewall'
     kind: 'compute#firewall'
