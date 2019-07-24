@@ -841,6 +841,8 @@ func TestAccStorageBucket_website(t *testing.T) {
 	t.Parallel()
 
 	bucketSuffix := acctest.RandomWithPrefix("tf-website-test")
+	var bucket storage.Bucket
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -1461,7 +1463,6 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-<<<<<<< HEAD
 func testAccStorageBucket_website(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "website" {
@@ -1474,7 +1475,9 @@ resource "google_storage_bucket" "website" {
 	  not_found_page   = "404.html"
 	}
   }
-=======
+`, bucketName)
+}
+
 func testAccStorageBucket_retentionPolicy(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -1497,6 +1500,5 @@ resource "google_storage_bucket" "bucket" {
       retention_period = 10
     }
 }
->>>>>>> 437af511... add support for gcs retention policy
 `, bucketName)
 }
