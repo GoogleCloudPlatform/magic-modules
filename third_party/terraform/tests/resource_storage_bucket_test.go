@@ -837,29 +837,6 @@ func TestAccStorageBucket_labels(t *testing.T) {
 	})
 }
 
-func TestAccStorageBucket_website(t *testing.T) {
-	t.Parallel()
-
-	bucketSuffix := acctest.RandomWithPrefix("tf-website-test")
-	var bucket storage.Bucket
-	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt())
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccStorageBucketDestroy,
-		Steps: []resource.TestStep{
-				Config: testAccStorageBucket_website(bucketSuffix),
-			},
-			{
-				ResourceName:      "google_storage_bucket.website",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func TestAccStorageBucket_retentionPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -881,6 +858,28 @@ func TestAccStorageBucket_retentionPolicy(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_storage_bucket.bucket",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccStorageBucket_website(t *testing.T) {
+	t.Parallel()
+
+	bucketSuffix := acctest.RandomWithPrefix("tf-website-test")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccStorageBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_website(bucketSuffix),
+			},
+			{
+				ResourceName:      "google_storage_bucket.website",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
