@@ -30,6 +30,16 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/queues/
     description: |
       A named resource to which messages are sent by publishers.
+    parameters:
+      - !ruby/object:Api::Type::Enum
+        name: 'state'
+        # This is output-only in the API but we need to alter it in order to pause/resume the
+        # task queue.
+        output: false
+        values:
+          - RUNNING
+          - PAUSED
+          - DISABLED
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
@@ -146,6 +156,10 @@ objects:
               A task's retry interval starts at minBackoff, then doubles maxDoublings times,
               then increases linearly, and finally retries retries at intervals of maxBackoff
               up to maxAttempts times.
-      - !ruby/object:Api::Type::NestedObject
+          - !ruby/object:Api::Type::Time
+            name: 'purgeTime'
+            output: true
+            description: The last time this queue was purged.
+
 
 
