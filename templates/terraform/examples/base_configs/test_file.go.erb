@@ -127,8 +127,8 @@ func testAccCheck<%= resource_name -%>Destroy(s *terraform.State) error {
 	if err == nil {
 			return fmt.Errorf("<%= resource_name -%> still exists at %s", url)
 		}
-	}
 	<% end -%>
+	}
 
 	return nil
 }
