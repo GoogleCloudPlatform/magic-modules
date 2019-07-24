@@ -36,10 +36,15 @@ objects:
         # This is output-only in the API but we need to alter it in order to pause/resume the
         # task queue.
         output: false
+        description: The current state of the queue.
         values:
           - RUNNING
           - PAUSED
           - DISABLED
+      - !ruby/object:Api::Type::String
+        name: 'location'
+        required: true
+        description: The location of the queue
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
