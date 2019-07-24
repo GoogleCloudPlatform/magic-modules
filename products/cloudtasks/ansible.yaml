@@ -20,7 +20,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   Queue: !ruby/object:Overrides::Ansible::ResourceOverride
     post_action: |
       if fetch:
-          instance = QueueStatus(module, fetch.get('status'))
+          instance = QueueStatus(module, fetch.get('state'))
           instance.run()
           if module.params.get('status'):
               fetch.update({'status': module.params['status']})

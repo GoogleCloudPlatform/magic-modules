@@ -14,9 +14,9 @@ class QueueStatus(object):
         if GcpRequest({'status': self.current_status}) == GcpRequest({'status': self.desired_status}):
             return
         elif self.desired_status == 'PAUSED':
-            self.start()
-        elif self.desired_status == 'RUNNING':
             self.stop()
+        elif self.desired_status == 'RUNNING':
+            self.start()
 
     def start(self):
         auth = GcpSession(self.module, 'cloudtasks')
@@ -27,7 +27,7 @@ class QueueStatus(object):
         return_if_object(self.module, auth.post(self._stop_url()))
 
     def _start_url(self):
-        return "https://www.googleapis.com/compute/v1/projects/{project}/locations/{location}/queue/{name}/resume".format(**self.module.params)
+        return "https://cloudtasks.googleapis.com/v2/projects/{project}/locations/{location}/queues/{name}:resume".format(**self.module.params)
 
     def _stop_url(self):
-        return "https://www.googleapis.com/compute/v1/projects/{project}/locations/{location}/queue/{name}/pause".format(**self.module.params)
+        return "https://cloudtasks.googleapis.com/v2/projects/{project}/locations/{location}/queues/{name}:pause".format(**self.module.params)

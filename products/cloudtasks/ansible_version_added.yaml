@@ -33,7 +33,7 @@
         :version_added: '2.9'
       :maxDoublings:
         :version_added: '2.9'
-    :state:
+    :status:
       :version_added: '2.9'
     :location:
       :version_added: '2.9'

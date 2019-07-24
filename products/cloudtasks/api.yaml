@@ -27,12 +27,13 @@ apis_required:
 objects:
   - !ruby/object:Api::Resource
     name: 'Queue'
-    base_url: projects/{{project}}/locations/{{location}}/queues/
+    base_url: projects/{{project}}/locations/{{location}}/queues
     description: |
       A named resource to which messages are sent by publishers.
     parameters:
       - !ruby/object:Api::Type::Enum
-        name: 'state'
+        name: 'status'
+        api_name: 'state'
         # This is output-only in the API but we need to alter it in order to pause/resume the
         # task queue.
         output: false
