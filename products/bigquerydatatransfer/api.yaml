@@ -34,24 +34,29 @@ objects:
     description: |
       Represents a data transfer configuration. A transfer configuration
       contains all metadata needed to perform a data transfer.
+    references: !ruby/object:Api::Resource::ReferenceLinks
+      guides:
+        "Official Documentation": "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/"
+      api: "https://cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/create"
     parameters:
       - !ruby/object:Api::Type::String
         name: 'location'
-        description: |
-          The geographic location where the transfer config should reside.
-          Examples: US, EU, asia-northeast1. The default value is US.
         url_param_only: true
         input: true
         default_value: US
+        description: |
+          The geographic location where the transfer config should reside.
+          Examples: US, EU, asia-northeast1. The default value is US.
     properties:
       - !ruby/object:Api::Type::String
         name: 'displayName'
-        description: |
-          The user specified display name for the transfer config.
         input: true
         required: true
+        description: |
+          The user specified display name for the transfer config.
       - !ruby/object:Api::Type::String
         name: 'name'
+        output: true
         description: |
           The resource name of the transfer config. Transfer config names have the
           form projects/{projectId}/locations/{location}/transferConfigs/{configId}.
@@ -59,15 +64,15 @@ objects:
           The name is ignored when creating a transfer config.
       - !ruby/object:Api::Type::String
         name: 'destinationDatasetId'
+        required: true
         description: |
           The BigQuery target dataset id.
-        required: true
       - !ruby/object:Api::Type::String
         name: 'dataSourceId'
-        description: |
-          The data source id. Cannot be changed once the transfer config is created.
         input: true
         required: true
+        description: |
+          The data source id. Cannot be changed once the transfer config is created.
       - !ruby/object:Api::Type::String
         name: 'schedule'
         description: |
@@ -93,6 +98,6 @@ objects:
           When set to true, no runs are scheduled for a given transfer.
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'params'
+        required: true
         description: |
           These parameters are specific to each data source.
-        required: true
