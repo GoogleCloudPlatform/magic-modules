@@ -1,0 +1,39 @@
+---
+:facts:
+  :Queue:
+    :version_added: '2.9'
+:regular:
+  :Queue:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :appEngineRoutingOverride:
+      :version_added: '2.9'
+      :service:
+        :version_added: '2.9'
+      :version:
+        :version_added: '2.9'
+      :instance:
+        :version_added: '2.9'
+    :rateLimits:
+      :version_added: '2.9'
+      :maxDispatchesPerSecond:
+        :version_added: '2.9'
+      :maxConcurrentDispatches:
+        :version_added: '2.9'
+    :retryConfig:
+      :version_added: '2.9'
+      :maxAttempts:
+        :version_added: '2.9'
+      :maxRetryDuration:
+        :version_added: '2.9'
+      :minBackoff:
+        :version_added: '2.9'
+      :maxBackoff:
+        :version_added: '2.9'
+      :maxDoublings:
+        :version_added: '2.9'
+    :status:
+      :version_added: '2.9'
+    :location:
+      :version_added: '2.9'
