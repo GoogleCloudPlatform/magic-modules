@@ -197,6 +197,7 @@ func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("state", job.CurrentState)
 	d.Set("name", job.Name)
 	d.Set("project", project)
+	d.Set("labels", job.Labels)
 
 	if _, ok := dataflowTerminalStatesMap[job.CurrentState]; ok {
 		log.Printf("[DEBUG] Removing resource '%s' because it is in state %s.\n", job.Name, job.CurrentState)
