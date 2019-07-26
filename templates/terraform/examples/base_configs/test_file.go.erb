@@ -63,7 +63,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% elsif var_type == :SERVICE_ACCT -%>
 			"<%= var_name -%>": getTestServiceAccountFromEnv(t),
 		<% elsif var_type == :PROJECT_NAME -%>
-			"<%= var_name -%>": getTestProjectFromEnv(t),
+			"<%= var_name -%>": getTestProjectFromEnv(),
 		<% elsif var_type == :FIRESTORE_PROJECT_NAME -%>
 			"<%= var_name -%>": getTestFirestoreProjectFromEnv(t),
 		<% end -%>
