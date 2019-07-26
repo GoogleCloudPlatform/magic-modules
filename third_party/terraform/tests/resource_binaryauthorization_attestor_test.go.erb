@@ -53,6 +53,29 @@ func TestAccBinaryAuthorizationAttestor_full(t *testing.T) {
 	})
 }
 
+func TestAccBinaryAuthorizationAttestor_kms(t *testing.T) {
+	t.Parallel()
+
+	kms := BootstrapKMSKeyWithPurpose(t, "ASYMMETRIC_SIGN")
+	attestorName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBinaryAuthorizationAttestorDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBinaryAuthorizationAttestorKms(attestorName, kms.CryptoKey.Name),
+			},
+			{
+				ResourceName:      "google_binary_authorization_attestor.attestor",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccBinaryAuthorizationAttestor_update(t *testing.T) {
 	t.Parallel()
 
@@ -183,6 +206,35 @@ MAU9vdm1DIv567meMqTaVZgR3w7bck2P49AO8lO5ERFpVkErtu/98y+rUy9d789l
 +OPuS1NGnxI1YKsNaWJF4uJVuvQuZ1twrhCbGNtVorO2U12+cEq+YtUxj7kmdOC1
 qoIRW6y0+UlAc+MbqfL0ziHDOAmcqz1GnROg
 =6Bvm`
+
+func testAccBinaryAuthorizationAttestorKms(attestorName, kmsKey string) string {
+	return fmt.Sprintf(`data "google_kms_crypto_key_version" "version" {
+  crypto_key = "%s"
+}
+
+resource "google_container_analysis_note" "note" {
+  name = "%s"
+  attestation_authority {
+    hint {
+      human_readable_name = "My Attestor"
+    }
+  }
+}
+
+resource "google_binary_authorization_attestor" "attestor" {
+  name = "%s"
+  attestation_authority_note {
+    note_reference = "${google_container_analysis_note.note.name}"
+    public_keys {
+      id = "${data.google_kms_crypto_key_version.version.id}"
+      pkix_public_key {
+        public_key_pem     = "${data.google_kms_crypto_key_version.version.public_key[0].pem}"
+        signature_algorithm = "${data.google_kms_crypto_key_version.version.public_key[0].algorithm}"
+      }
+    }
+  }
+}`, kmsKey, attestorName, attestorName)
+}
 <% else %>
 // Because Container Analysis is still in beta, we can't run any of the tests that call that
 // resource without vendoring in the full beta provider.
