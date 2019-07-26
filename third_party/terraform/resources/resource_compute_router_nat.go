@@ -84,17 +84,14 @@ func resourceComputeRouterNat() *schema.Resource {
 			"min_ports_per_vm": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"udp_idle_timeout_sec": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"icmp_idle_timeout_sec": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"tcp_established_idle_timeout_sec": {
 				Type:     schema.TypeInt,
@@ -104,7 +101,6 @@ func resourceComputeRouterNat() *schema.Resource {
 			"tcp_transitory_idle_timeout_sec": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"log_config": {
 				Type:     schema.TypeList,
