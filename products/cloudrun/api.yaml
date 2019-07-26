@@ -35,7 +35,7 @@ objects:
     Resource to hold the state and status of a user's domain mapping.
 
     **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
-    Please use this with caution as it may change when the resource moves to beta.
+    Please use this with caution as it may change when the API moves to beta.
   parameters:
   - !ruby/object:Api::Type::String
     name: location
@@ -226,7 +226,7 @@ objects:
       api: 'https://cloud.google.com/run/docs/reference/rest/v1alpha1/projects.locations.services'
   description: |-
     **Note:** Cloud Run as a product is in beta, however the REST API is currently still an alpha.
-    Please use this with caution as it may change when the resource moves to beta.
+    Please use this with caution as it may change when the API moves to beta.
 
     Service acts as a top-level container that manages a set of Routes and
     Configurations which implement a network service. Service exists to provide a

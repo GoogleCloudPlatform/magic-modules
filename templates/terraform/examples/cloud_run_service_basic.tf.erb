@@ -1,5 +1,5 @@
-resource "google_cloudrun_service" "<%= ctx[:primary_resource_id] %>" {
-  name     = "<%= ctx[:vars]['cloudrun_service_name'] %>"
+resource "google_cloud_run_service" "<%= ctx[:primary_resource_id] %>" {
+  name     = "<%= ctx[:vars]['cloud_run_service_name'] %>"
   location = "us-central1"
   provider = "google-beta"
 
@@ -17,12 +17,12 @@ resource "google_cloudrun_service" "<%= ctx[:primary_resource_id] %>" {
 # The Service is ready to be used when the "Ready" condition is True
 # Due to Terraform and API limitations this is best accessed through a local variable
 locals {
-  cloudrun_status = {
-    for cond in google_cloudrun_service.default.status[0].conditions :
+  cloud_run_status = {
+    for cond in google_cloud_run_service.default.status[0].conditions :
     cond.type => cond.status
   }
 }
 
 output "isReady" {
-  value = local.cloudrun_status["Ready"] == "True"
+  value = local.cloud_run_status["Ready"] == "True"
 }
