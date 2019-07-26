@@ -192,7 +192,8 @@ module Api
     end
 
     # Return the user-facing properties in client tools; this ends up meaning
-    # both properties and parameters.
+    # both properties and parameters but without any that are excluded due to
+    # version mismatches or manual exclusion
     def all_user_properties
       properties + parameters
     end
@@ -223,7 +224,7 @@ module Api
     # Returns the list of top-level properties once any nested objects with flatten_object
     # set to true have been collapsed
     def root_properties
-      properties.flat_map do |p|
+      all_user_properties.flat_map do |p|
         if p.flatten_object
           p.root_properties
         else
