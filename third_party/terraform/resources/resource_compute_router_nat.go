@@ -208,7 +208,6 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
-	d.SetId(fmt.Sprintf("%s/%s/%s/%s", project, region, routerName, natName))
 	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		d.SetId("")
