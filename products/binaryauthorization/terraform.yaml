@@ -23,6 +23,15 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       vars:
         attestor_name: "test-attestor"
         note_name: "test-attestor-note"
+     - !ruby/object:Provider::Terraform::Examples
+      name: "binary_authorization_attestor_kms"
+      primary_resource_id: "attestor"
+      skip_test: true
+      vars:
+        attestor_name: "test-attestor"
+        note_name: "test-attestor-note"
+        key_name: "test-attestor-key"
+        keyring_name: "test-attestor-key-ring"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/binauth_attestor_note_field_name.go.erb
       decoder: templates/terraform/decoders/binauth_attestor_note_field_name.go.erb
