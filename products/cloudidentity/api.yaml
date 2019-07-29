@@ -83,16 +83,9 @@ objects:
         output: true
         description: |
           The time when the Group was last updated.
-      - !ruby/object:Api::Type::Map
+      - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
         required: true
         description: |
           Labels for Group resource. For creating Groups under a namespace, set label key
           to `labels/system/groups/external` and label value as empty.
-        key_name: 'label_key'
-        value_type: !ruby/object:Api::Type::NestedObject
-          name: label_value
-          properties:
-            - !ruby/object:Api::Type::String
-              name: value
-              description: Label value

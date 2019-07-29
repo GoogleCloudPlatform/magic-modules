@@ -35,7 +35,7 @@ resource "google_cloud_identity_group" "default" {
   name          = "%s"
   display_name   = "%s"
 
-  labels {
+  labels = {
   	name = "%s"
   	label_key = "Label-Value"
   }
