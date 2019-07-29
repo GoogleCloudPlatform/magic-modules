@@ -1,0 +1,98 @@
+# Copyright 2017 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- !ruby/object:Api::Product
+name: CloudIdentity
+display_name: Cloud Identity
+versions:
+  - !ruby/object:Api::Product::Version
+    name: ga
+    base_url: https://cloudidentity.googleapis.com/v1/
+scopes:
+  - https://www.googleapis.com/auth/cloud-identity
+apis_required:
+  - !ruby/object:Api::Product::ApiReference
+    name: Cloud Identity API
+    url: https://console.cloud.google.com/apis/api/cloudidentity.googleapis.com/overview
+objects:
+  - !ruby/object:Api::Resource
+    name: 'Group'
+    input: true
+    base_url: groups
+    description: |
+      A Cloud Identity resource representing a Group.
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        description: |
+          Resource name of the Group in the format: groups/{group_id}, where group_id
+          is the unique ID assigned to the Group.
+      - !ruby/object:Api::Type::NestedObject
+        name: 'groupKey'
+        description: |
+          EntityKey of the Group.
+        properties:
+          - !ruby/object:Api::Type::String
+            name: 'id'
+            description: |
+              The ID of the entity within the given namespace. The ID must be unique within
+              its namespace.
+          - !ruby/object:Api::Type::String
+            name: 'namespace'
+            output: true
+            description: |
+              Namespaces provide isolation for IDs, so an ID only needs to be unique within its namespace.
+
+              Namespaces are currently only created as part of `IdentitySource` creation from Admin Console.
+              A namespace `identitysources/{identity_source_id}` is created corresponding to every Identity
+              Source identity_source_id.
+      - !ruby/object:Api::Type::String
+        name: 'parent'
+        description: |
+          The entity under which this Group resides in Cloud Identity resource hierarchy.
+          Currently allowed types: `identitysources`.
+      - !ruby/object:Api::Type::String
+        name: 'displayName'
+        description: |
+          The Group's display name.
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An extended description to help users determine the purpose of a Group.
+          For example, you can include information about who should join the Group,
+          the types of messages to send to the Group, links to FAQs about the Group,
+          or related Groups. Maximum length is 4,096 characters.
+      - !ruby/object:Api::Type::String
+        name: 'createTime'
+        output: true
+        description: |
+          The time when the Group was created.
+      - !ruby/object:Api::Type::String
+        name: 'updateTime'
+        output: true
+        description: |
+          The time when the Group was last updated.
+      - !ruby/object:Api::Type::Map
+        name: 'labels'
+        required: true
+        description: |
+          Labels for Group resource. For creating Groups under a namespace, set label key
+          to `labels/system/groups/external` and label value as empty.
+        key_name: 'label_key'
+        value_type: !ruby/object:Api::Type::NestedObject
+          name: label_value
+          properties:
+            - !ruby/object:Api::Type::String
+              name: value
+              description: Label value
