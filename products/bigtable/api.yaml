@@ -12,12 +12,12 @@
 # limitations under the License.
 
 --- !ruby/object:Api::Product
-name: BigTable
+name: Bigtable
 display_name: BigTable
 versions:
   - !ruby/object:Api::Product::Version
     name: ga
-    base_url: https://www.googleapis.com/bigtable/v2/
+    base_url: https://bigtableadmin.googleapis.com/v2/
 scopes:
   - https://www.googleapis.com/auth/bigtable
 apis_required:
@@ -28,14 +28,23 @@ objects:
   - !ruby/object:Api::Resource
     name: 'AppProfile'
     kind: 'bigtable#appProfile'
-    base_url: projects/{{project}}/instances/{{instance}}/appProfiles
+    base_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}
+    create_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}
+    update_url: projects/{{project}}/instances/{{instance}}/appProfiles?updateMask=
+    update_verb: :PATCH
+    delete_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings=true
+    self_link: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
     description: |
       App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
-        description: 'The unique name of the app profile. Values are of the form `projects/<project>/instances/<instance>/appProfiles/[_a-zA-Z0-9][-_.a-zA-Z0-9]*.`'
+        description: 'The unique name of the requested app profile. Values are of the form `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
         output: true
+      - !ruby/object:Api::Type::String
+        name: 'appProfileId'
+        description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+        required: true
       - !ruby/object:Api::Type::String
         name: 'instance'
         description: 'The name of the instance to create the app profile within.'

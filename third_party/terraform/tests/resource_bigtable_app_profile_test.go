@@ -22,6 +22,28 @@ func TestAccBigtableAppProfile_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableAppProfile_multiClusterRouting(instanceName),
+			},
+			{
+				ResourceName:      "google_bigtable_app_profile.ap",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccBigtableAppProfile_singleClusterRouting(t *testing.T) {
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigtableAppProfileDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableAppProfile_singleClusterRouting(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccBigtableAppProfileExists(
 						"google_bigtable_app_profile.ap"),
@@ -74,9 +96,9 @@ func testAccBigtableAppProfileExists(n string) resource.TestCheckFunc {
 
 		defer c.Close()
 
-		_, err = c.GetAppProfile(ctx, rs.Primary.Attributes["instance"], rs.Primary.Attributes["name"])
+		_, err = c.GetAppProfile(ctx, rs.Primary.Attributes["instance"], rs.Primary.Attributes["app_profile_id"])
 		if err != nil {
-			return fmt.Errorf("Error retrieving app profile %s for instance %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance"])
+			return fmt.Errorf("Error retrieving app profile %s for instance %s.", rs.Primary.Attributes["app_profile_id"], rs.Primary.Attributes["instance"])
 		}
 
 		return nil
@@ -97,8 +119,33 @@ resource "google_bigtable_instance" "instance" {
 
 resource "google_bigtable_app_profile" "ap" {
 	instance = google_bigtable_instance.instance.name
+	app_profile_id = "test"
 
 	multi_cluster_routing_use_any = true
 }
 `, instanceName, instanceName)
+}
+
+func testAccBigtableAppProfile_singleClusterRouting(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+	name = "%s"
+	cluster {
+		cluster_id   = "%s"
+		zone         = "us-central1-b"
+		num_nodes    = 3
+		storage_type = "HDD"
+	}
+}
+
+resource "google_bigtable_app_profile" "ap" {
+	instance = google_bigtable_instance.instance.name
+	app_profile_id = "test"
+
+	single_cluster_routing {
+		cluster_id = "%s"
+		allow_transactional_writes = true
+	}
+}
+`, instanceName, instanceName, instanceName)
 }

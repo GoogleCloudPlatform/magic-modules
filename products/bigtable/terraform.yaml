@@ -14,10 +14,11 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   AppProfile: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "{{project}}/{{region}}/{{name}}"
-    properties:
-      multiClusterRoutingUseAny: !ruby/object:Overrides::Terraform::PropertyOverride
-        default_value: true
+    id_format: "{{project}}/{{instance}}/{{app_profile_id}}"
+    import_format: ["projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"]
+    custom_code: !ruby/object:Provider::Terraform::CustomCode
+      encoder: templates/terraform/encoders/app_profile.erb
+      decoder: templates/terraform/decoders/app_profile.erb
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
