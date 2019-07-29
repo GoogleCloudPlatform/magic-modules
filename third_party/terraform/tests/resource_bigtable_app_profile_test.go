@@ -44,10 +44,11 @@ func TestAccBigtableAppProfile_singleClusterRouting(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigtableAppProfile_singleClusterRouting(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccBigtableAppProfileExists(
-						"google_bigtable_app_profile.ap"),
-				),
+			},
+			{
+				ResourceName:      "google_bigtable_app_profile.ap",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -75,34 +76,6 @@ func testAccCheckBigtableAppProfileDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func testAccBigtableAppProfileExists(n string) resource.TestCheckFunc {
-	var ctx = context.Background()
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-		config := testAccProvider.Meta().(*Config)
-		c, err := config.bigtableClientFactory.NewInstanceAdminClient(config.Project)
-		if err != nil {
-			return fmt.Errorf("Error starting instance admin client. %s", err)
-		}
-
-		defer c.Close()
-
-		_, err = c.GetAppProfile(ctx, rs.Primary.Attributes["instance"], rs.Primary.Attributes["app_profile_id"])
-		if err != nil {
-			return fmt.Errorf("Error retrieving app profile %s for instance %s.", rs.Primary.Attributes["app_profile_id"], rs.Primary.Attributes["instance"])
-		}
-
-		return nil
-	}
 }
 
 func testAccBigtableAppProfile_multiClusterRouting(instanceName string) string {
