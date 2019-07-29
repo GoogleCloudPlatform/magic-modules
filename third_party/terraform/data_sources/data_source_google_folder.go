@@ -53,24 +53,17 @@ func dataSourceGoogleFolder() *schema.Resource {
 func dataSourceFolderRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	folderName := d.Get("folder").(string)
-
-	folder, err := config.clientResourceManagerV2Beta1.Folders.Get(canonicalFolderName(folderName)).Do()
-
-	if err != nil {
-		return handleNotFoundError(err, d, fmt.Sprintf("Folder Not Found : %s", folderName))
+	d.SetId(canonicalFolderName(d.Get("folder").(string))
+	if err := resourceGoogleFolderRead(d, meta); err != nil {
+		return err
 	}
-
-	d.SetId(GetResourceNameFromSelfLink(folder.Name))
-	d.Set("name", folder.Name)
-	d.Set("parent", folder.Parent)
-	d.Set("display_name", folder.DisplayName)
-	d.Set("lifecycle_state", folder.LifecycleState)
-	d.Set("create_time", folder.CreateTime)
+	// If resource doesn't exist, 404 was handled in read().
+	if d.Id() == "" {
+		return nil
+	}
 
 	if v, ok := d.GetOk("lookup_organization"); ok && v.(bool) {
 		organization, err := lookupOrganizationName(folder, config)
-
 		if err != nil {
 			return err
 		}
@@ -91,16 +84,13 @@ func canonicalFolderName(ba string) string {
 
 func lookupOrganizationName(folder *resourceManagerV2Beta1.Folder, config *Config) (string, error) {
 	parent := folder.Parent
-
 	if parent == "" || strings.HasPrefix(parent, "organizations/") {
 		return parent, nil
 	} else if strings.HasPrefix(parent, "folders/") {
-		parentFolder, err := config.clientResourceManagerV2Beta1.Folders.Get(parent).Do()
-
+		parentFolder, err := getGoogleFolder(parent, config).Do()
 		if err != nil {
 			return "", fmt.Errorf("Error getting parent folder '%s': %s", parent, err)
 		}
-
 		return lookupOrganizationName(parentFolder, config)
 	} else {
 		return "", fmt.Errorf("Unknown parent type '%s' on folder '%s'", parent, folder.Name)

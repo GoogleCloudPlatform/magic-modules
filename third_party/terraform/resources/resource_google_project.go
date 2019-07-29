@@ -28,6 +28,14 @@ func resourceGoogleProject() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectImportState,
 		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Update: schema.DefaultTimeout(4 * time.Minute),
+			Read:   schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(4 * time.Minute),
+		},
+
 		MigrateState: resourceGoogleProjectMigrateState,
 
 		Schema: map[string]*schema.Schema{
@@ -216,10 +224,10 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	var op *cloudresourcemanager.Operation
-	err = retry(func() (reqErr error) {
+	err = retryTimeDuration(func() (reqErr error) {
 		op, reqErr = config.clientResourceManager.Projects.Create(project).Do()
 		return reqErr
-	})
+	}, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("error creating project %s (%s): %s. "+
 			"If you received a 403 error, make sure you have the"+
@@ -309,10 +317,10 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var ba *cloudbilling.ProjectBillingInfo
-	err = retry(func() (reqErr error) {
+	err = retryTimeDuration(func() (reqErr error) {
 		ba, reqErr = config.clientBilling.Projects.GetBillingInfo(prefixedProject(pid)).Do()
 		return reqErr
-	})
+	}, d.Timeout(schema.TimeoutRead))
 	// Read the billing account
 	if err != nil && !isApiNotEnabledError(err) {
 		return fmt.Errorf("Error reading billing account for project %q: %v", prefixedProject(pid), err)
@@ -394,10 +402,10 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	if ok := d.HasChange("name"); ok {
 		p.Name = project_name
 		// Do update on project
-		if err = retry(func() (updateErr error) {
+		if err = retryTimeDuration(func() (updateErr error) {
 			p, updateErr = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
 			return updateErr
-		}); err != nil {
+		}, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
 
@@ -411,10 +419,10 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 
 		// Do update on project
-		if err = retry(func() (updateErr error) {
+		if err = retryTimeDuration(func() (updateErr error) {
 			p, updateErr = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
 			return updateErr
-		}); err != nil {
+		}, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
 		d.SetPartial("org_id")
@@ -434,10 +442,10 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 		p.Labels = expandLabels(d)
 
 		// Do Update on project
-		if err = retry(func() (updateErr error) {
+		if err = retryTimeDuration(func() (updateErr error) {
 			p, updateErr = config.clientResourceManager.Projects.Update(p.ProjectId, p).Do()
 			return updateErr
-		}); err != nil {
+		}, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
 		d.SetPartial("labels")
@@ -452,10 +460,10 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	// Only delete projects if skip_delete isn't set
 	if !d.Get("skip_delete").(bool) {
 		pid := d.Id()
-		if err := retry(func() error {
+		if err := retryTimeDuration(func() error {
 			_, delErr := config.clientResourceManager.Projects.Delete(pid).Do()
 			return delErr
-		}); err != nil {
+		}, d.Timeout(schema.TimeoutDelete)); err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("Project %s", pid))
 		}
 	}
@@ -561,9 +569,9 @@ func deleteComputeNetwork(project, network string, config *Config) error {
 func readGoogleProject(d *schema.ResourceData, config *Config) (*cloudresourcemanager.Project, error) {
 	var p *cloudresourcemanager.Project
 	// Read the project
-	err := retry(func() (reqErr error) {
+	err := retryTimeDuration(func() (reqErr error) {
 		p, reqErr = config.clientResourceManager.Projects.Get(d.Id()).Do()
 		return reqErr
-	})
+	}, d.Timeout(schema.TimeoutRead))
 	return p, err
 }

@@ -2,6 +2,7 @@ package google
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
@@ -16,6 +17,13 @@ func resourceGoogleProjectOrganizationPolicy() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectOrgPolicyImporter,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Update: schema.DefaultTimeout(4 * time.Minute),
+			Read:   schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
 		Schema: mergeSchemas(
@@ -68,12 +76,12 @@ func resourceGoogleProjectOrganizationPolicyRead(d *schema.ResourceData, meta in
 	project := prefixedProject(d.Get("project").(string))
 
 	var policy *cloudresourcemanager.OrgPolicy
-	err := retry(func() (readErr error) {
+	err := retryTimeDuration(func() (readErr error) {
 		policy, readErr = config.clientResourceManager.Projects.GetOrgPolicy(project, &cloudresourcemanager.GetOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return readErr
-	})
+	}, d.Timeout(schema.TimeoutRead))
 	if err != nil {
 		return handleNotFoundError(err, d, fmt.Sprintf("Organization policy for %s", project))
 	}
@@ -105,12 +113,12 @@ func resourceGoogleProjectOrganizationPolicyDelete(d *schema.ResourceData, meta 
 	config := meta.(*Config)
 	project := prefixedProject(d.Get("project").(string))
 
-	return retry(func() error {
+	return retryTimeDuration(func() error {
 		_, err := config.clientResourceManager.Projects.ClearOrgPolicy(project, &cloudresourcemanager.ClearOrgPolicyRequest{
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return err
-	})
+	}, d.Timeout(schema.TimeoutDelete))
 }
 
 func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
@@ -127,7 +135,7 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	return retry(func() error {
+	return retryTimeDuration(func() error {
 		_, err := config.clientResourceManager.Projects.SetOrgPolicy(project, &cloudresourcemanager.SetOrgPolicyRequest{
 			Policy: &cloudresourcemanager.OrgPolicy{
 				Constraint:     canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
@@ -139,5 +147,5 @@ func setProjectOrganizationPolicy(d *schema.ResourceData, meta interface{}) erro
 			},
 		}).Do()
 		return err
-	})
+	}, d.Timeout(schema.TimeoutCreate))
 }

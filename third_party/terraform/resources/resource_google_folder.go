@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	resourceManagerV2Beta1 "google.golang.org/api/cloudresourcemanager/v2beta1"
 	"strings"
+	"time"
 )
 
 func resourceGoogleFolder() *schema.Resource {
@@ -18,6 +19,14 @@ func resourceGoogleFolder() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceGoogleFolderImportState,
 		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(4 * time.Minute),
+			Update: schema.DefaultTimeout(4 * time.Minute),
+			Read:   schema.DefaultTimeout(4 * time.Minute),
+			Delete: schema.DefaultTimeout(4 * time.Minute),
+		},
+
 
 		Schema: map[string]*schema.Schema{
 			// Format is either folders/{folder_id} or organizations/{org_id}.
@@ -56,13 +65,13 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 	parent := d.Get("parent").(string)
 
 	var op *resourceManagerV2Beta1.Operation
-	err := retry(func() error {
+	err := retryTimeDuration(func() error {
 		var reqErr error
 		op, reqErr = config.clientResourceManagerV2Beta1.Folders.Create(&resourceManagerV2Beta1.Folder{
 			DisplayName: displayName,
 		}).Parent(parent).Do()
 		return reqErr
-	})
+	}, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating folder '%s' in '%s': %s", displayName, parent, err)
 	}
@@ -99,12 +108,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	var folder *resourceManagerV2Beta1.Folder
-	err := retry(func() error {
-		var reqErr error
-		folder, reqErr = config.clientResourceManagerV2Beta1.Folders.Get(d.Id()).Do()
-		return reqErr
-	})
+	folder, err := getGoogleFolder(d, config)
 	if err != nil {
 		return handleNotFoundError(err, d, d.Id())
 	}
@@ -174,10 +178,10 @@ func resourceGoogleFolderDelete(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	displayName := d.Get("display_name").(string)
 
-	err := retry(func() error {
+	err := retryTimeDuration(func() error {
 		_, reqErr := config.clientResourceManagerV2Beta1.Folders.Delete(d.Id()).Do()
 		return reqErr
-	})
+	}, d.Timeout(schema.TimeoutDelete))
 	if err != nil {
 		return fmt.Errorf("Error deleting folder '%s': %s", displayName, err)
 	}
@@ -194,4 +198,17 @@ func resourceGoogleFolderImportState(d *schema.ResourceData, m interface{}) ([]*
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func getGoogleFolder(d *schema.ResourceData, config *Config) (*resourceManagerV2Beta1.Folder, error){
+	var folder *resourceManagerV2Beta1.Folder
+	err := retryTimeDuration(func() error {
+		var reqErr error
+		folder, reqErr = config.clientResourceManagerV2Beta1.Folders.Get(d.Id()).Do()
+		return reqErr
+	}, d.Timeout(schema.TimeoutRead))
+	if err != nil {
+		return nil, err
+	}
+	return folder, nil
 }
