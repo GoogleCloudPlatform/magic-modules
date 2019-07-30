@@ -29,6 +29,8 @@ objects:
     name: 'Dataset'
     kind: 'bigquery#dataset'
     base_url: projects/{{project}}/datasets
+    self_link: projects/{{project}}/datasets/{{dataset_id}}
+    has_self_link: true
     description: |
       Datasets allow you to organize and control access to your tables.
     properties:
@@ -114,9 +116,29 @@ objects:
         name: 'defaultTableExpirationMs'
         description: |
           The default lifetime of all tables in the dataset, in milliseconds
+      - !ruby/object:Api::Type::Integer
+        name: 'defaultPartitionExpirationMs'
+        description: |
+          This default partition expiration, expressed in milliseconds.
+          When new time-partitioned tables are created in a dataset where this
+          property is set, the table will inherit this value, propagated as
+          the TimePartitioning.expirationMs property on the new table.
+
+          If you set TimePartitioning.expirationMs explicitly when creating a
+          table, the defaultPartitionExpirationMs of the containing dataset
+          is ignored.
+
+          When creating a partitioned table, if defaultPartitionExpirationMs
+          is set, the defaultTableExpirationMs value is ignored and the table
+          will not be inherit a table expiration deadline.
       - !ruby/object:Api::Type::String
         name: 'description'
         description: A user-friendly description of the dataset
+      - !ruby/object:Api::Type::String
+        name: 'etag'
+        description: |
+          A hash of the resource.
+        output: true
       - !ruby/object:Api::Type::String
         name: 'friendlyName'
         description: A descriptive name for the dataset

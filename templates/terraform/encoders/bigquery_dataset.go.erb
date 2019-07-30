@@ -1,0 +1,9 @@
+// `datasetId`. and `project` need to be nested within `datasetReference`
+config := meta.(*Config)
+
+dataRefObj := make(map[string]interface{})
+dataRefObj["datasetId"] = d.Get("dataset_id").(string)
+dataRefObj["projectId"], _ = getProject(d, config)
+obj["datasetReference"] = dataRefObj
+
+return obj, nil

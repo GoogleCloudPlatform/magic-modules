@@ -1,0 +1,18 @@
+id := d.Id()
+
+pd := fmt.Sprintf("(%s)[:/](%s)", ProjectRegex, datasetIdRegexp)
+re := regexp.MustCompile(pd)
+if parts := re.FindStringSubmatch(id); parts != nil {
+	d.Set("project", parts[1])
+	d.Set("dataset_id", parts[2])
+	return []*schema.ResourceData{d}, nil
+}
+
+pd = fmt.Sprintf("(%s)", datasetIdRegexp)
+re = regexp.MustCompile(pd)
+if parts := re.FindStringSubmatch(id); parts != nil {
+	d.Set("dataset_id", parts[1])
+	return []*schema.ResourceData{d}, nil
+}
+
+return nil, fmt.Errorf("cannot parse import ID: %s", id)

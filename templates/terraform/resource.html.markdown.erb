@@ -135,6 +135,9 @@ The following arguments are supported:
 <%- unless object.docs.optional_properties.nil? -%>
 <%= "\n" + object.docs.optional_properties -%>
 <% end -%>
+<% properties.reject(&:required).reject(&:output).each do |prop| -%>
+<%= lines(build_nested_property_documentation(prop)) -%>
+<% end -%>
 
 <% unless properties.select(&:output).empty? && object.docs.attributes.nil? -%>
 ## Attributes Reference

@@ -1,0 +1,10 @@
+const datasetIdRegexp = `[0-9A-Za-z_]+`
+
+func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, errors []error) {
+    value := v.(int)
+    if value < 3600000 {
+        errors = append(errors, fmt.Errorf("%q cannot be shorter than 3600000 milliseconds (one hour)", k))
+    }
+
+    return
+}
