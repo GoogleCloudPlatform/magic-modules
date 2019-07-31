@@ -55,7 +55,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 		<% elsif var_type == :CREDENTIALS -%>
 			"<%= var_name -%>": getTestCredsFromEnv(t),
 		<% elsif var_type == :REGION -%>
-			"<%= var_name -%>": getTestRegionFromEnv(t),
+			"<%= var_name -%>": getTestRegionFromEnv(),
 		<% elsif var_type == :ORG_TARGET -%>
 			"<%= var_name -%>": getTestOrgTargetFromEnv(t),
 		<% elsif var_type == :BILLING_ACCT -%>
