@@ -179,13 +179,21 @@ resource "google_bigquery_table" "test" {
     field = "ts"
     require_partition_filter = true
   }
-
+	clustering = ["some_int", "some_string"]
   schema = <<EOH
 [
   {
     "name": "ts",
     "type": "TIMESTAMP"
-  },
+	},
+	{
+		"name": "some_string",
+    "type": "STRING"
+	},
+	{
+		"name": "some_int",
+    "type": "INTEGER"
+	},
   {
     "name": "city",
     "type": "RECORD",
