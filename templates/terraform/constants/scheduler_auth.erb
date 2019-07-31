@@ -1,0 +1,41 @@
+// Both oidc and oauth headers cannot be set
+func validateAuthHeaders(diff *schema.ResourceDiff, v interface{}) error {
+    httpBlock := diff.Get("http_target.0").(map[string]interface{})
+
+    if httpBlock != nil {
+        oauth := httpBlock["oauth_token"]
+        oidc := httpBlock["oidc_token"]
+
+        if oauth != nil && oidc != nil {
+            if len(oidc.([]interface{})) > 0 && len(oauth.([]interface{})) > 0 {
+                return fmt.Errorf("Errof in http_target: only one of oauth_token or oidc_token can be specified, but not both.")
+            }
+        }
+    }
+
+    return nil
+}
+
+func authHeaderDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+    b := strings.Split(k, ".")
+    if b[0] == "http_target" && len(b) > 4 {
+        block := b[2]
+        attr := b[4]
+
+        if block == "oauth_token" && attr == "scope" {
+            if old == "https://www.googleapis.com/auth/cloud-platform" && new == "" {
+                return true
+            }
+        }
+
+        if block == "oidc_token" && attr == "audience" {
+            uri := d.Get(strings.Join(b[0:2], ".")+".uri")
+            if old == uri && new == "" {
+                return true
+            }
+        }
+
+    }
+
+    return false
+}
