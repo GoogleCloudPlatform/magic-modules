@@ -3227,6 +3227,9 @@ objects:
                   values:
                     - :SCRATCH
                     - :PERSISTENT
+          - !ruby/object:Api::Type::KeyValuePairs
+            name: 'labels'
+            description: Labels to apply to this address.  A list of key->value pairs.
           # This machineType seems to be the shortname.
           # This is because machineType selfLinks are zone specific.
           - !ruby/object:Api::Type::ResourceRef
