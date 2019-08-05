@@ -219,7 +219,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       networkInterfaces.network: !ruby/object:Overrides::Ansible::PropertyOverride
         description: |
           Specifies the title of an existing network. Not setting the network
-          title, will select the default network interface, which could have
+          title will select the default network interface, which could have
           SSH already configured
   InstanceTemplate: !ruby/object:Overrides::Ansible::ResourceOverride
     transport: !ruby/object:Overrides::Ansible::Transport
