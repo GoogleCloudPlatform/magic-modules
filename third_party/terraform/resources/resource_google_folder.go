@@ -27,7 +27,6 @@ func resourceGoogleFolder() *schema.Resource {
 			Delete: schema.DefaultTimeout(4 * time.Minute),
 		},
 
-
 		Schema: map[string]*schema.Schema{
 			// Format is either folders/{folder_id} or organizations/{org_id}.
 			"parent": {
@@ -202,7 +201,7 @@ func resourceGoogleFolderImportState(d *schema.ResourceData, m interface{}) ([]*
 
 // Util to get a Folder resource from API. Note that folder described by name is not necessarily the
 // ResourceData resource.
-func getGoogleFolder(folderName string, d *schema.ResourceData, config *Config) (*resourceManagerV2Beta1.Folder, error){
+func getGoogleFolder(folderName string, d *schema.ResourceData, config *Config) (*resourceManagerV2Beta1.Folder, error) {
 	var folder *resourceManagerV2Beta1.Folder
 	err := retryTimeDuration(func() error {
 		var reqErr error

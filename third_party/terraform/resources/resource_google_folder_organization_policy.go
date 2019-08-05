@@ -119,7 +119,7 @@ func resourceGoogleFolderOrganizationPolicyDelete(d *schema.ResourceData, meta i
 			Constraint: canonicalOrgPolicyConstraint(d.Get("constraint").(string)),
 		}).Do()
 		return delErr
-	},  d.Timeout(schema.TimeoutDelete))
+	}, d.Timeout(schema.TimeoutDelete))
 }
 
 func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error {
@@ -148,5 +148,5 @@ func setFolderOrganizationPolicy(d *schema.ResourceData, meta interface{}) error
 			},
 		}).Do()
 		return setErr
-	},  d.Timeout(schema.TimeoutCreate))
+	}, d.Timeout(schema.TimeoutCreate))
 }
