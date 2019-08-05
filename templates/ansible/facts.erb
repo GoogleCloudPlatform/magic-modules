@@ -34,7 +34,7 @@ DOCUMENTATION = '''
   'options' => [
     ({
       object.facts.filter.name.underscore => {
-        'description' => format_description(object.facts.filter.description)
+        'description' => description(object.facts.filter.description)
       }
     } if object.facts.has_filters),
     uri_props.map { |p| documentation_for_property(p) }

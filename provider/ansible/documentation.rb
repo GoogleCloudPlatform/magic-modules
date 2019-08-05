@@ -14,6 +14,7 @@
 require 'compile/core'
 require 'provider/config'
 require 'provider/core'
+require 'provider/ansible/markdown'
 
 # Rubocop doesn't like this file because the hashes are complicated.
 # Humans like this file because the hashes are explicit and easy to read.
@@ -21,6 +22,7 @@ module Provider
   module Ansible
     # Responsible for building out YAML documentation blocks.
     module Documentation
+      include Provider::Ansible::Markdown
       # Builds out the DOCUMENTATION for a property.
       # This will eventually be converted to YAML
       def documentation_for_property(prop)
@@ -28,7 +30,7 @@ module Provider
         {
           prop.name.underscore => {
             'description' => [
-              format_description(prop.description),
+              description(prop.description),
               (resourceref_description(prop) \
                if prop.is_a?(Api::Type::ResourceRef) && !prop.resource_ref.readonly),
               (choices_description(prop) \
@@ -68,7 +70,7 @@ module Provider
                             && prop.item_type.is_a?(Api::Type::NestedObject))
         {
           prop.name => {
-            'description' => format_description(prop.description),
+            'description' => description(prop.description),
             'returned' => 'success',
             'type' => type,
             'contains' => (
@@ -100,15 +102,6 @@ module Provider
 
       def choices_description(prop)
         "Some valid choices include: #{prop.values.map { |x| "\"#{x}\"" }.join(', ')}"
-      end
-
-      # MM puts descriptions in a text block. Ansible needs it in bullets
-      def format_description(desc)
-        desc.split(".\n").map do |paragraph|
-          paragraph += '.' unless paragraph.end_with?('.')
-          paragraph = format_url(paragraph)
-          paragraph.tr("\n", ' ').strip.squeeze(' ')
-        end
       end
 
       # Find URLs and surround with U()
