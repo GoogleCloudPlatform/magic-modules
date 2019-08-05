@@ -53,7 +53,7 @@ func dataSourceGoogleFolder() *schema.Resource {
 func dataSourceFolderRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	d.SetId(canonicalFolderName(d.Get("folder").(string))
+	d.SetId(canonicalFolderName(d.Get("folder").(string)))
 	if err := resourceGoogleFolderRead(d, meta); err != nil {
 		return err
 	}
