@@ -109,7 +109,7 @@ func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 
 	folder, err := getGoogleFolder(d.Id(), d, config)
 	if err != nil {
-		return handleNotFoundError(err, d, d.Id())
+		return handleNotFoundError(err, d, fmt.Sprintf("Folder Not Found : %s", d.Id()))
 	}
 
 	d.Set("name", folder.Name)

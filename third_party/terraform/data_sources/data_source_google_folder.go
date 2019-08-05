@@ -55,7 +55,7 @@ func dataSourceFolderRead(d *schema.ResourceData, meta interface{}) error {
 	if err := resourceGoogleFolderRead(d, meta); err != nil {
 		return err
 	}
-	// If resource doesn't exist, 404 was handled in read().
+	// If resource doesn't exist, read will not set ID and we should return error.
 	if d.Id() == "" {
 		return nil
 	}
