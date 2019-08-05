@@ -108,7 +108,7 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 func resourceGoogleFolderRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
-	folder, err := getGoogleFolder(d, config)
+	folder, err := getGoogleFolder(d.Id(), d, config)
 	if err != nil {
 		return handleNotFoundError(err, d, d.Id())
 	}
@@ -200,11 +200,13 @@ func resourceGoogleFolderImportState(d *schema.ResourceData, m interface{}) ([]*
 	return []*schema.ResourceData{d}, nil
 }
 
-func getGoogleFolder(d *schema.ResourceData, config *Config) (*resourceManagerV2Beta1.Folder, error){
+// Util to get a Folder resource from API. Note that folder described by name is not necessarily the
+// ResourceData resource.
+func getGoogleFolder(folderName string, d *schema.ResourceData, config *Config) (*resourceManagerV2Beta1.Folder, error){
 	var folder *resourceManagerV2Beta1.Folder
 	err := retryTimeDuration(func() error {
 		var reqErr error
-		folder, reqErr = config.clientResourceManagerV2Beta1.Folders.Get(d.Id()).Do()
+		folder, reqErr = config.clientResourceManagerV2Beta1.Folders.Get(folderName).Do()
 		return reqErr
 	}, d.Timeout(schema.TimeoutRead))
 	if err != nil {

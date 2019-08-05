@@ -5,8 +5,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
-
-	resourceManagerV2Beta1 "google.golang.org/api/cloudresourcemanager/v2beta1"
 )
 
 func dataSourceGoogleFolder() *schema.Resource {
@@ -63,7 +61,7 @@ func dataSourceFolderRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if v, ok := d.GetOk("lookup_organization"); ok && v.(bool) {
-		organization, err := lookupOrganizationName(folder, config)
+		organization, err := lookupOrganizationName(d.Id(), d, config)
 		if err != nil {
 			return err
 		}
@@ -82,17 +80,16 @@ func canonicalFolderName(ba string) string {
 	return "folders/" + ba
 }
 
-func lookupOrganizationName(folder *resourceManagerV2Beta1.Folder, config *Config) (string, error) {
-	parent := folder.Parent
+func lookupOrganizationName(parent string, d *schema.ResourceData, config *Config) (string, error) {
 	if parent == "" || strings.HasPrefix(parent, "organizations/") {
 		return parent, nil
 	} else if strings.HasPrefix(parent, "folders/") {
-		parentFolder, err := getGoogleFolder(parent, config).Do()
+		parentFolder, err := getGoogleFolder(parent, d, config)
 		if err != nil {
 			return "", fmt.Errorf("Error getting parent folder '%s': %s", parent, err)
 		}
-		return lookupOrganizationName(parentFolder, config)
+		return lookupOrganizationName(parentFolder.Parent, d, config)
 	} else {
-		return "", fmt.Errorf("Unknown parent type '%s' on folder '%s'", parent, folder.Name)
+		return "", fmt.Errorf("Unknown parent type '%s' on folder '%s'", parent, d.Id())
 	}
 }
