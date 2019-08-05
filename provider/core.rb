@@ -143,11 +143,18 @@ module Provider
     end
 
     # Compiles files that are shared at the provider level
-    def compile_common_files(output_folder, version_name, products, common_compile_file, override_path = nil)
+    def compile_common_files(
+      output_folder,
+      version_name,
+      products,
+      common_compile_file,
+      override_path = nil
+    )
       return unless File.exist?(common_compile_file)
 
       files = YAML.safe_load(compile(common_compile_file))
       return unless files
+
       file_template = ProviderFileTemplate.new(
         output_folder,
         version_name,

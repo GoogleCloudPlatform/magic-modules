@@ -208,10 +208,21 @@ end
 provider&.copy_common_files(output_path, version)
 Google::LOGGER.info "Compiling common files for #{provider_name}"
 common_compile_file = "provider/#{provider_name}/common~compile.yaml"
-provider&.compile_common_files(output_path, version, products_for_version.sort, common_compile_file)
+provider&.compile_common_files(
+  output_path,
+  version,
+  products_for_version.sort,
+  common_compile_file
+)
 if override_dir
   Google::LOGGER.info "Compiling override common files for #{provider_name}"
   common_compile_file = "#{override_dir}/common~compile.yaml"
-  provider&.compile_common_files(output_path, version, products_for_version.sort, common_compile_file, override_dir)
+  provider&.compile_common_files(
+    output_path,
+    version,
+    products_for_version.sort,
+    common_compile_file,
+    override_dir
+  )
 end
 # rubocop:enable Metrics/BlockLength
