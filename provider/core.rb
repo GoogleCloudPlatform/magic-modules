@@ -143,17 +143,17 @@ module Provider
     end
 
     # Compiles files that are shared at the provider level
-    def compile_common_files(output_folder, version_name, products)
-      provider_name = self.class.name.split('::').last.downcase
-      return unless File.exist?("provider/#{provider_name}/common~compile.yaml")
+    def compile_common_files(output_folder, version_name, products, common_compile_file, override_path = nil)
+      return unless File.exist?(common_compile_file)
 
-      Google::LOGGER.info "Compiling common files for #{provider_name}"
-      files = YAML.safe_load(compile("provider/#{provider_name}/common~compile.yaml"))
+      files = YAML.safe_load(compile(common_compile_file))
+      return unless files
       file_template = ProviderFileTemplate.new(
         output_folder,
         version_name,
         build_env,
-        products
+        products,
+        override_path
       )
       compile_file_list(output_folder, files, file_template)
     end

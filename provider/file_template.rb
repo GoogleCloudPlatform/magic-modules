@@ -100,11 +100,17 @@ module Provider
     # All the products that are being compiled with the provider on this run
     attr_accessor :products
 
-    def initialize(output_folder, version, env, products)
+    # Optional path to the directory where overrides reside. Used to locate files
+    # outside of the MM root directory
+    attr_accessor :override_path
+
+
+    def initialize(output_folder, version, env, products, override_path = nil)
       @output_folder = output_folder
       @version = version
       @env = env
       @products = products
+      @override_path = override_path
     end
   end
 

@@ -206,5 +206,12 @@ end
 # of the products loop. This will get called with the provider from the final iteration
 # of the loop
 provider&.copy_common_files(output_path, version)
-provider&.compile_common_files(output_path, version, products_for_version.sort)
+Google::LOGGER.info "Compiling common files for #{provider_name}"
+common_compile_file = "provider/#{provider_name}/common~compile.yaml"
+provider&.compile_common_files(output_path, version, products_for_version.sort, common_compile_file)
+if override_dir
+  Google::LOGGER.info "Compiling override common files for #{provider_name}"
+  common_compile_file = "#{override_dir}/common~compile.yaml"
+  provider&.compile_common_files(output_path, version, products_for_version.sort, common_compile_file, override_dir)
+end
 # rubocop:enable Metrics/BlockLength
