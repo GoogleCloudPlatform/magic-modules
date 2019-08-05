@@ -348,5 +348,9 @@ module Provider
       )
       compile_file_list(data.output_folder, files, file_template)
     end
+
+    def copy_common_files(output_folder, version_name = 'ga', provider_name = 'ansible')
+      super(output_folder, version_name, provider_name)
+    end
   end
 end

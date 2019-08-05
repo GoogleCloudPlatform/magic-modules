@@ -12,7 +12,6 @@
 # limitations under the License.
 
 'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
-'lib/ansible/module_utils/gcp_utils.py': 'provider/ansible/gcp_utils.py'
 'lib/ansible/plugins/doc_fragments/gcp.py':
   'provider/ansible/gcp_doc_frag.py'
 'test/integration/cloud-config-gcp.ini.template':
