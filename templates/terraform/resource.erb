@@ -160,7 +160,7 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutCreate))
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutCreate) <%= object.retry_predicates ? ", " + object.retry_predicates.join(',') : "" -%>)
     if err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
     }

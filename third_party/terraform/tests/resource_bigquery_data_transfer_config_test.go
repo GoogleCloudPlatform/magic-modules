@@ -36,7 +36,17 @@ func TestAccBigqueryDataTransferConfig_scheduledQueryUpdate(t *testing.T) {
 
 func testAccBigqueryDataTransferConfig_scheduledQueryUpdate(random_suffix, schedule, letter string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "permissions" {
+  role = "roles/iam.serviceAccountShortTermTokenMinter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
+
 resource "google_bigquery_data_transfer_config" "query_config" {
+
+  depends_on = [google_project_iam_member.permissions]
+
   display_name = "my-query-%s"
   location = "asia-northeast1"
   data_source_id = "scheduled_query"
@@ -50,6 +60,9 @@ resource "google_bigquery_data_transfer_config" "query_config" {
 }
 
 resource "google_bigquery_dataset" "my-dataset" {
+
+  depends_on = [google_project_iam_member.permissions]
+
   dataset_id = "my_dataset%s"
   friendly_name = "foo"
   description = "bar"

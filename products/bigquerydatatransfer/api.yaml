@@ -30,6 +30,7 @@ objects:
     base_url: projects/{{project}}/locations/{{location}}/transferConfigs
     self_link: "{{name}}"
     update_verb: :PATCH
+    retry_predicates: ["iamMemberMissing"]
     update_mask: true
     description: |
       Represents a data transfer configuration. A transfer configuration

@@ -1,4 +1,14 @@
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "permissions" {
+  role = "roles/iam.serviceAccountShortTermTokenMinter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+}
+
 resource "google_bigquery_data_transfer_config" "<%= ctx[:primary_resource_id] %>" {
+
+  depends_on = [google_project_iam_member.permissions]
+
   display_name = "<%= ctx[:vars]['display_name'] %>"
   location = "asia-northeast1"
   data_source_id = "scheduled_query"
@@ -12,6 +22,9 @@ resource "google_bigquery_data_transfer_config" "<%= ctx[:primary_resource_id] %
 }
 
 resource "google_bigquery_dataset" "my-dataset" {
+
+  depends_on = [google_project_iam_member.permissions]
+
   dataset_id = "<%= ctx[:vars]['dataset_id'].delete("-") %>"
   friendly_name = "foo"
   description = "bar"
