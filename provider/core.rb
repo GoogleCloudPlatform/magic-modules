@@ -108,8 +108,8 @@ module Provider
     # is exposed to the templating logic and version_name is used in other places in the same
     # way so it needs to be named consistently
     # rubocop:disable Lint/UnusedMethodArgument
-    def copy_common_files(output_folder, version_name = 'ga')
-      provider_name = self.class.name.split('::').last.downcase
+    def copy_common_files(output_folder, version_name = 'ga', provider_name = nil)
+      provider_name = self.class.name.split('::').last.downcase unless provider_name
       return unless File.exist?("provider/#{provider_name}/common~copy.yaml")
 
       Google::LOGGER.info "Copying common files for #{provider_name}"
