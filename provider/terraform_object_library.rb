@@ -41,7 +41,7 @@ module Provider
                     self)
     end
 
-    def compile_common_files(output_folder, version_name, products, common_compile_file)
+    def compile_common_files(output_folder, version_name, products, _common_compile_file)
       Google::LOGGER.info 'Compiling common files.'
       file_template = ProviderFileTemplate.new(
         output_folder,
