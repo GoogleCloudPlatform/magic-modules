@@ -280,11 +280,18 @@ module Provider
 
       def compile_datasource(data)
         target_folder = data.output_folder
-        name = "#{module_name(data.object)}_facts"
+        name = module_name(data.object)
         data.generate('templates/ansible/facts.erb',
                       File.join(target_folder,
-                                "lib/ansible/modules/cloud/google/#{name}.py"),
+                                "lib/ansible/modules/cloud/google/#{name}_info.py"),
                       self)
+
+        # Generate symlink for old `facts` modules.
+        deprecated_facts_path = File.join(target_folder,
+                                          "lib/ansible/modules/cloud/google/_#{name}_facts.py")
+        return if File.exist?(deprecated_facts_path)
+
+        File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
       def generate_objects(output_folder, types, version_name)

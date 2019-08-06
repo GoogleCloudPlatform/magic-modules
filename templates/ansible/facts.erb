@@ -25,9 +25,11 @@ ANSIBLE_METADATA = {'metadata_version': <%= metadata_version -%>,
 DOCUMENTATION = '''
 ---
 <%= ansible_style_yaml({
-  'module' => "#{module_name(object)}_facts",
-  'description' => ["Gather facts for GCP #{object.name}"],
-  'short_description' => "Gather facts for GCP #{object.name}",
+  'module' => "#{module_name(object)}_info",
+  'description' => ["Gather info for GCP #{object.name}",
+                    (version_added(object, :facts) < '2.9' ? "This module was previously called #{module_name(object)}_facts before Ansible 2.9. The usage has not changed" : nil)
+                   ].compact,
+  'short_description' => "Gather info for GCP #{object.name}",
   'version_added' => version_added(object, :facts).to_f,
   'author' => "Google Inc. (@googlecloudplatform)",
   'requirements' => ["python >= 2.6", "requests >= 2.18.4", "google-auth >= 1.3.0"],
@@ -88,6 +90,11 @@ def main():
   })), 12)
 -%>
     )
+<% if version_added(object, :facts) < '2.9' -%>
+
+    if module._name == '<%= module_name(object) -%>_facts':
+        module.deprecate("The '<%= module_name(object) -%>_facts' module has been renamed to '<%= module_name(object) -%>_info'", version='2.13')
+<% end -%>
 
     if not module.params['scopes']:
         module.params['scopes'] = <%= python_literal(object.__product.scopes) %>
