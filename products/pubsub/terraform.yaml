@@ -30,6 +30,12 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic_name: "example-topic"
           key_name: "example-key"
           keyring_name: "example-keyring"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_topic_geo_restricted"
+        primary_resource_id: "example"
+        primary_resource_name: "fmt.Sprintf(\"example-topic-%s\", context[\"random_suffix\"])"
+        vars:
+          topic_name: "example-topic"
     properties:
       name: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
