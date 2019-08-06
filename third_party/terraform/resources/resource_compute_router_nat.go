@@ -96,7 +96,6 @@ func resourceComputeRouterNat() *schema.Resource {
 			"tcp_established_idle_timeout_sec": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 			},
 			"tcp_transitory_idle_timeout_sec": {
 				Type:     schema.TypeInt,
@@ -204,6 +203,7 @@ func resourceComputeRouterNatCreate(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return fmt.Errorf("Error patching router %s/%s: %s", region, routerName, err)
 	}
+	d.SetId(fmt.Sprintf("%s/%s/%s/%s", project, region, routerName, natName))
 	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		d.SetId("")
@@ -243,9 +243,8 @@ func resourceComputeRouterNatRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	for _, nat := range router.Nats {
-
 		if nat.Name == natName {
-			d.SetId(fmt.Sprintf("%s/%s/%s", region, routerName, natName))
+			d.SetId(fmt.Sprintf("%s/%s/%s/%s", project, region, routerName, natName))
 			d.Set("nat_ip_allocate_option", nat.NatIpAllocateOption)
 			d.Set("nat_ips", schema.NewSet(schema.HashString, convertStringArrToInterface(convertSelfLinksToV1(nat.NatIps))))
 			d.Set("source_subnetwork_ip_ranges_to_nat", nat.SourceSubnetworkIpRangesToNat)
@@ -298,7 +297,7 @@ func resourceComputeRouterNatUpdate(d *schema.ResourceData, meta interface{}) er
 	router, err := config.clientComputeBeta.Routers.Get(project, region, routerName).Do()
 	if err != nil {
 		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
-			return fmt.Errorf("Router %s not found", routerName)
+			return fmt.Errorf("router %s not found", routerName)
 		}
 
 		return fmt.Errorf("Error reading parent router %s: %s", routerName, err)
@@ -311,8 +310,13 @@ func resourceComputeRouterNatUpdate(d *schema.ResourceData, meta interface{}) er
 			break
 		}
 	}
+	if nat == nil || nat.Name != natName {
+		return fmt.Errorf("nat %s for router %s does not exist, cannot update", natName, routerName)
+	}
+
 	nat.ForceSendFields = []string{
 		"natIps",
+		"logConfig",
 		"subnetworks",
 		"minPortsPerVm",
 		"udpIdleTimeoutSec",
@@ -326,10 +330,8 @@ func resourceComputeRouterNatUpdate(d *schema.ResourceData, meta interface{}) er
 	nat.IcmpIdleTimeoutSec = int64(d.Get("icmp_idle_timeout_sec").(int))
 	nat.TcpEstablishedIdleTimeoutSec = int64(d.Get("tcp_established_idle_timeout_sec").(int))
 	nat.TcpTransitoryIdleTimeoutSec = int64(d.Get("tcp_transitory_idle_timeout_sec").(int))
-
-	if v, ok := d.GetOk("nat_ip_allocate_option"); ok {
-		nat.NatIpAllocateOption = v.(string)
-	}
+	nat.NatIpAllocateOption = d.Get("nat_ip_allocate_option").(string)
+	nat.SourceSubnetworkIpRangesToNat = d.Get("source_subnetwork_ip_ranges_to_nat").(string)
 
 	if v, ok := d.GetOk("nat_ips"); ok {
 		nat.NatIps = convertStringArr(v.(*schema.Set).List())
@@ -341,10 +343,6 @@ func resourceComputeRouterNatUpdate(d *schema.ResourceData, meta interface{}) er
 		nat.Subnetworks = expandSubnetworks(v.(*schema.Set).List())
 	} else {
 		nat.Subnetworks = []*computeBeta.RouterNatSubnetworkToNat{}
-	}
-
-	if v, ok := d.GetOk("source_subnetwork_ip_ranges_to_nat"); ok {
-		nat.SourceSubnetworkIpRangesToNat = v.(string)
 	}
 
 	if v, ok := d.GetOk("log_config"); ok {
@@ -366,7 +364,7 @@ func resourceComputeRouterNatUpdate(d *schema.ResourceData, meta interface{}) er
 	err = computeBetaOperationWaitTime(config.clientCompute, op, project, "Patching router", int(d.Timeout(schema.TimeoutCreate).Minutes()))
 	if err != nil {
 		d.SetId("")
-		return fmt.Errorf("Error waiting to patch router %s/%s: %s", region, routerName, err)
+		return fmt.Errorf("Error while waiting to patch router %s/%s: %s", region, routerName, err)
 	}
 
 	return resourceComputeRouterNatRead(d, meta)
