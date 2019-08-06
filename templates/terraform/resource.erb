@@ -241,6 +241,13 @@ res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil
     if err != nil {
         return err
     }
+
+    if res == nil {
+        // Decoding the object has resulted in it being gone. It may be marked deleted
+        log.Printf("[DEBUG] Removing <%= resource_name -%> because it no longer exists.")
+        d.SetId("")
+        return nil
+    }
 <%  end -%>
 
 <%  if has_project -%>
