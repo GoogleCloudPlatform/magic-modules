@@ -72,7 +72,7 @@ for filename in mm-bug*; do
 
   while read p; do
     git checkout magician/devel -- "lib/ansible/modules/cloud/google/$p.py"
-    if [[ $p != *"facts"* ]]; then
+    if [[ $p != *"info"* ]]; then
       git checkout magician/devel -- "test/integration/targets/$p"
     fi
   done < $filename
@@ -104,7 +104,7 @@ while read module; do
   git checkout -b $module
 
   git checkout magician/devel -- "lib/ansible/modules/cloud/google/$module.py"
-  if [[ $module != *"facts"* ]]; then
+  if [[ $module != *"info"* ]]; then
     git checkout magician/devel -- "test/integration/targets/$module"
   fi
 
