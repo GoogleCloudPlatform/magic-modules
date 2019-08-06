@@ -155,6 +155,15 @@ objects:
       - !ruby/object:Api::Type::String
         name: description
         description: A descriptive comment.
+      - !ruby/object:Api::Type::Enum
+        name: globalPolicyEvaluationMode
+        description: |
+          Controls the evaluation of a Google-maintained global admission policy
+          for common system-level images. Images not covered by the global
+          policy will be subject to the project admission policy.
+        values:
+          - :ENABLE
+          - :DISABLE
       - !ruby/object:Api::Type::Array
         name: admissionWhitelistPatterns
         description: |
