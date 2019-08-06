@@ -287,8 +287,11 @@ module Provider
                       self)
 
         # Generate symlink for old `facts` modules.
-        deprecated_facts_path = File.join(target_folder, "lib/ansible/modules/cloud/google/_#{name}_facts.py")
-        File.symlink "#{name}_info.py", deprecated_facts_path unless File.exists?(deprecated_facts_path)
+        deprecated_facts_path = File.join(target_folder,
+                                          "lib/ansible/modules/cloud/google/_#{name}_facts.py")
+        return if File.exist?(deprecated_facts_path)
+
+        File.symlink "#{name}_info.py", deprecated_facts_path
       end
 
       def generate_objects(output_folder, types, version_name)
