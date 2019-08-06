@@ -39,7 +39,6 @@ func TestAccBinaryAuthorizationPolicy_basic(t *testing.T) {
 	})
 }
 
-<% unless version == 'ga' -%>
 func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 	t.Parallel()
 
@@ -54,7 +53,7 @@ func TestAccBinaryAuthorizationPolicy_full(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, billingId, note, attestor),
+				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, billingId, note, attestor, "DISABLE"),
 			},
 			{
 				ResourceName:      "google_binary_authorization_policy.policy",
@@ -125,7 +124,15 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, billingId, note, attestor),
+				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, billingId, note, attestor, "DISABLE"),
+			},
+			{
+				ResourceName:      "google_binary_authorization_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBinaryAuthorizationPolicyFull(pid, pname, org, billingId, note, attestor, "ENABLE"),
 			},
 			{
 				ResourceName:      "google_binary_authorization_policy.policy",
@@ -149,12 +156,7 @@ func TestAccBinaryAuthorizationPolicy_update(t *testing.T) {
 		},
 	})
 }
-<% else -%>
 
-// Because Container Analysis is still in beta, we can't run any of the tests that call that
-// resource without vendoring in the full beta provider.
-
-<% end -%>
 func testAccCheckBinaryAuthorizationPolicyDefault(pid string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
@@ -210,8 +212,7 @@ resource "google_binary_authorization_policy" "policy" {
 `, pid, pname, org, billing)
 }
 
-<% unless version == 'ga' -%>
-func testAccBinaryAuthorizationPolicyFull(pid, pname, org, billing, note, attestor string) string {
+func testAccBinaryAuthorizationPolicyFull(pid, pname, org, billing, note, attestor, gpmode string) string {
 	return fmt.Sprintf(`
 // Use a separate project since each project can only have one policy
 resource "google_project" "project" {
@@ -269,8 +270,10 @@ resource "google_binary_authorization_policy" "policy" {
     enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
     require_attestations_by = ["${google_binary_authorization_attestor.attestor.name}"]
   }
+
+  global_policy_evaluation mode = "%s"
 }
-`, pid, pname, org, billing, note, attestor)
+`, pid, pname, org, billing, note, attestor, gpmode)
 }
 
 func testAccBinaryAuthorizationPolicy_separateProject(pid, pname, org, billing, note, attestor string) string {
@@ -334,5 +337,3 @@ resource "google_binary_authorization_policy" "policy" {
 }
 `, pid, pname, org, billing, note, attestor)
 }
-
-<% end -%>
