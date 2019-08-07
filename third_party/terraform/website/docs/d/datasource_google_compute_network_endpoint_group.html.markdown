@@ -41,12 +41,11 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition the arguments listed above, the following attributes are exported:
 
 * `network` - The network to which all network endpoints in the NEG belong.
 * `subnetwork` - subnetwork to which all network endpoints in the NEG belong.
 * `description` - The NEG description.
 * `network_endpoint_type` - Type of network endpoints in this network endpoint group.
 * `default_port` - The NEG default port.
-* `self_link` - URI of the  NEG.
 * `size` - Number of network endpoints in the network endpoint group.
