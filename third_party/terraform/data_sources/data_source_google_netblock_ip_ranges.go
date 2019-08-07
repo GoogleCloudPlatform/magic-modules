@@ -86,16 +86,16 @@ func dataSourceGoogleNetblockIpRangesRead(d *schema.ResourceData, meta interface
 		d.Set("cidr_blocks", CidrBlocks["cidr_blocks"])
 		d.Set("cidr_blocks_ipv4", CidrBlocks["cidr_blocks_ipv4"])
 	case "health-checkers":
-		// https://cloud.google.com/load-balancing/docs/health-checks
+		// https://cloud.google.com/load-balancing/docs/health-checks#fw-ruleh
 		CidrBlocks["cidr_blocks_ipv4"] = append(CidrBlocks["cidr_blocks_ipv4"], "35.191.0.0/16")
 		CidrBlocks["cidr_blocks_ipv4"] = append(CidrBlocks["cidr_blocks_ipv4"], "130.211.0.0/22")
 		CidrBlocks["cidr_blocks"] = CidrBlocks["cidr_blocks_ipv4"]
 		d.Set("cidr_blocks", CidrBlocks["cidr_blocks"])
 		d.Set("cidr_blocks_ipv4", CidrBlocks["cidr_blocks_ipv4"])
 	case "legacy-health-checkers":
-		// https://cloud.google.com/load-balancing/docs/health-checks
+		// https://cloud.google.com/load-balancing/docs/health-check#fw-netlbs
 		CidrBlocks["cidr_blocks_ipv4"] = append(CidrBlocks["cidr_blocks_ipv4"], "35.191.0.0/16")
-		CidrBlocks["cidr_blocks_ipv4"] = append(CidrBlocks["cidr_blocks_ipv4"], "130.211.0.0/22")
+		CidrBlocks["cidr_blocks_ipv4"] = append(CidrBlocks["cidr_blocks_ipv4"], "209.85.152.0/22")
 		CidrBlocks["cidr_blocks_ipv4"] = append(CidrBlocks["cidr_blocks_ipv4"], "209.85.204.0/22")
 		CidrBlocks["cidr_blocks"] = CidrBlocks["cidr_blocks_ipv4"]
 		d.Set("cidr_blocks", CidrBlocks["cidr_blocks"])
