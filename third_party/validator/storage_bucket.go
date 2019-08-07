@@ -53,6 +53,7 @@ func GetStorageBucketApiObject(d TerraformResourceData, config *Config) (map[str
 		Name:     bucket,
 		Labels:   expandLabels(d),
 		Location: location,
+		IamConfiguration: expandIamConfiguration(d),
 	}
 
 	if v, ok := d.GetOk("storage_class"); ok {
@@ -259,4 +260,14 @@ func resourceGCSBucketLifecycleCreateOrUpdate(d TerraformResourceData, sb *stora
 	}
 
 	return nil
+}
+
+func expandIamConfiguration(d TerraformResourceData) *storage.BucketIamConfiguration {
+	return &storage.BucketIamConfiguration{
+		ForceSendFields: []string{"BucketPolicyOnly"},
+		BucketPolicyOnly: &storage.BucketIamConfigurationBucketPolicyOnly{
+			Enabled:         d.Get("bucket_policy_only").(bool),
+			ForceSendFields: []string{"Enabled"},
+		},
+	}
 }
