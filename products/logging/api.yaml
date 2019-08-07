@@ -71,6 +71,7 @@ objects:
             description: |
               Whether the measurement is an integer, a floating-point number, etc.
               Some combinations of metricKind and valueType might not be supported.
+              For counter metrics, set this to INT64.
             values:
               - :BOOL
               - :INT64
@@ -84,6 +85,7 @@ objects:
             description: |
               Whether the metric records instantaneous values, changes to a value, etc.
               Some combinations of metricKind and valueType might not be supported.
+              For counter metrics, set this to DELTA.
             values:
               - :DELTA
               - :GAUGE
