@@ -136,7 +136,7 @@ objects:
         name: port
         description: The port number of the exposed Redis endpoint.
         output: true
-      - !ruby/object:Api::Type::Enum
+      - !ruby/object:Api::Type::String
         name: redisVersion
         description: |
           The version of Redis software. If not provided, latest supported
@@ -144,9 +144,6 @@ objects:
 
           - REDIS_4_0 for Redis 4.0 compatibility
           - REDIS_3_2 for Redis 3.2 compatibility
-        values:
-          - :REDIS_3_2
-          - :REDIS_4_0
         input: true
       - !ruby/object:Api::Type::String
         name: reservedIpRange
