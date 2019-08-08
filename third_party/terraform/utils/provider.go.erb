@@ -429,6 +429,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.<%= product[:definitions].name -%>BasePath = d.Get("<%= product[:definitions].name.underscore -%>_custom_endpoint").(string)
 	<% end -%>
 
+	// Handwritten Products / Versioned / Atypical Entries
 	<% unless version == 'ga' -%>
 	config.IAPBasePath = d.Get(IAPCustomEndpointEntryKey).(string)
 	<% end -%>
