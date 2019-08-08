@@ -118,18 +118,22 @@ module Provider
       end
 
       def message(state, name, noop)
-        verb = {
-          present: 'create',
-          absent: 'delete'
-        }[state.to_sym]
-        again = if noop && state == 'present'
-                  ' that already exists'
-                elsif noop && state == 'absent'
-                  ' that does not exist'
-                else
-                  ''
-                end
-        "#{verb} a #{object_name_from_module_name(name)}#{again}"
+        if state != 'facts'
+          verb = {
+            present: 'create',
+            absent: 'delete'
+          }[state.to_sym]
+          again = if noop && state == 'present'
+                    ' that already exists'
+                  elsif noop && state == 'absent'
+                    ' that does not exist'
+                  else
+                    ''
+                  end
+          "#{verb} a #{object_name_from_module_name(name)}#{again}"
+        else
+          "get info on a #{object_name_from_module_name(name)}"
+        end
       end
 
       def compiled_code(code, hash)
@@ -146,7 +150,7 @@ module Provider
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
-        product_name.tr('_', ' ')
+        product_name.gsub('_info', '').tr('_', ' ')
       end
 
       def dependency_name(dependency, resource)

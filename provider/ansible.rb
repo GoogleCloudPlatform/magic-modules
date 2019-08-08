@@ -287,6 +287,8 @@ module Provider
                       self)
 
         # Generate symlink for old `facts` modules.
+        return if version_added(data.object, :facts) >= '2.9'
+
         deprecated_facts_path = File.join(target_folder,
                                           "lib/ansible/modules/cloud/google/_#{name}_facts.py")
         return if File.exist?(deprecated_facts_path)
