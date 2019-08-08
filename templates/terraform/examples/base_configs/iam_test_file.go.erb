@@ -56,7 +56,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%><% unless example.primary_resource_name.nil? -%>, <%= example.primary_resource_name -%><% end -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -66,7 +66,7 @@ func TestAcc<%= resource_name -%>IamBindingGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_binding.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor", <%= import_qualifiers.join(', ') -%><% unless example.primary_resource_name.nil? -%>, <%= example.primary_resource_name -%><% end -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -93,7 +93,7 @@ func TestAcc<%= resource_name -%>IamMemberGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_member.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor user:admin@hashicorptest.com", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%> roles/editor user:admin@hashicorptest.com", <%= import_qualifiers.join(', ') -%><% unless example.primary_resource_name.nil? -%>, <%= example.primary_resource_name -%><% end -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -119,7 +119,7 @@ func TestAcc<%= resource_name -%>IamPolicyGenerated(t *testing.T) {
 			},
 			{
 				ResourceName:      "<%= terraform_name -%>_iam_policy.foo",
-				ImportStateId:     fmt.Sprintf("<%= import_url -%>", <%= import_qualifiers.join(', ') -%>, <%= example.primary_resource_name -%>),
+				ImportStateId:     fmt.Sprintf("<%= import_url -%>", <%= import_qualifiers.join(', ') -%><% unless example.primary_resource_name.nil? -%>, <%= example.primary_resource_name -%> <% end -%>),
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

@@ -21,7 +21,7 @@ versions:
     name: ga
     base_url: https://iam.googleapis.com/v1/
 scopes:
-  - https://www.googleapis.com/auth/iam
+  - https://www.googleapis.com/auth/cloud-platform
 apis_required:
   - !ruby/object:Api::Product::ApiReference
     name: Identity and Access Management (IAM) API
