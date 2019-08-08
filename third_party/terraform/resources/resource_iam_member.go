@@ -109,12 +109,7 @@ func resourceIamMemberRead(newUpdaterFunc newResourceIamUpdaterFunc) schema.Read
 		eMember := getResourceIamMember(d)
 		p, err := iamPolicyReadWithRetry(updater)
 		if err != nil {
-			if isGoogleApiErrorWithCode(err, 404) {
-				log.Printf("[DEBUG]: Binding of member %q with role %q does not exist for non-existent resource %s, removing from state.", eMember.Members[0], eMember.Role, updater.DescribeResource())
-				d.SetId("")
-				return nil
-			}
-			return err
+			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q with IAM Member: Role %q Member %q", updater.DescribeResource(), eMember.Role, eMember.Members[0]))
 		}
 		log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
 
