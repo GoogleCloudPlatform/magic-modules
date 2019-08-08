@@ -1,4 +1,4 @@
-# Copyright 2017 Google Inc.
+# Copyright 2019 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,8 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# TODO(nelsonjr): Make all Zone and Region resource ref
 
 --- !ruby/object:Api::Product
 name: VpcAccess
@@ -32,15 +30,14 @@ objects:
     kind: 'vpcaccess#Connector'
     description: 'Serverless VPC Access connector resource.'
     min_version: beta
+    input: true
     base_url: projects/{{project}}/locations/{{region}}/connectors
     create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
-    self_link: projects/{{project}}/locations/{{region}}/connectors/{{name}}
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
         'Configuring Serverless VPC Access': 'https://cloud.google.com/vpc/docs/configure-serverless-vpc-access'
       api: 'https://cloud.google.com/vpc/docs/reference/vpcaccess/rest/v1beta1/projects.locations.connectors'
     async: !ruby/object:Api::Async
-      actions: ['create', 'update', 'delete']
       operation: !ruby/object:Api::Async::Operation
         path: 'name'
         base_url: '{{op_id}}'
