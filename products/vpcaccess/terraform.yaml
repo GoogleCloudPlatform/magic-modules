@@ -19,7 +19,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       insert_minutes: 6
       update_minutes: 6
       delete_minutes: 10
-    import_format: ["projects/{{project}}/locations/{{region}}/connectors/{{name}}"]
     examples:
       - !ruby/object:Provider::Terraform::Examples
         name: "vpc_access_connector"
@@ -28,7 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         vars:
           name: "my-connector"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: templates/terraform/encoders/vpc_access_connector_noname.erb
+      encoder: templates/terraform/encoders/no_send_name.go.erb
       post_create: templates/terraform/post_create/sleep.go.erb
       decoder: templates/terraform/decoders/long_name_to_self_link.go.erb
     properties:

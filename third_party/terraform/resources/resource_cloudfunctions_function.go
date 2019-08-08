@@ -202,8 +202,9 @@ func resourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"vpc_connector": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: compareSelfLinkOrResourceName,
 			},
 
 			"environment_variables": {
