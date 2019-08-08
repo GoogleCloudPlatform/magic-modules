@@ -150,7 +150,7 @@ module Provider
 
       def object_name_from_module_name(mod_name)
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
-        product_name.tr('_', ' ')
+        product_name.gsub('_info', '').tr('_', ' ')
       end
 
       def dependency_name(dependency, resource)
