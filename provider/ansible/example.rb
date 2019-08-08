@@ -132,7 +132,7 @@ module Provider
                   end
           "#{verb} a #{object_name_from_module_name(name)}#{again}"
         else
-          "get info on a #{object_name_from_module_name(name)}" 
+          "get info on a #{object_name_from_module_name(name)}"
         end
       end
 
