@@ -3826,6 +3826,12 @@ objects:
         name: 'creationTimestamp'
         description: Creation timestamp in RFC3339 text format.
         output: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'deletionProtection'
+        description: Whether the resource should be protected against deletion.
+        # The code for this update will be custom.
+        update_verb: :POST
+        update_url: /projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection
       - !ruby/object:Api::Type::Array
         name: 'disks'
         description: |
@@ -4229,6 +4235,25 @@ objects:
                 The list of scopes to be made available for this service
                 account.
               item_type: Api::Type::String
+      - !ruby/object:Api::Type::NestedObject
+        name: 'shieldedInstanceConfig'
+        description: Configuration for various parameters related to shielded instances.
+        properties:
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableSecureBoot'
+            description: Defines whether the instance has Secure Boot enabled.
+            update_verb: :PATCH
+            update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableVtpm'
+            description: Defines whether the instance has the vTPM enabled
+            update_verb: :PATCH
+            update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
+          - !ruby/object:Api::Type::Boolean
+            name: 'enableIntegrityMonitoring'
+            description: Defines whether the instance has integrity monitoring enabled.
+            update_verb: :PATCH
+            update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
       - !ruby/object:Api::Type::Enum
         name: 'status'
         description: |
