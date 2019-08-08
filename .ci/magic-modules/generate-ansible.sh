@@ -15,7 +15,6 @@ COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
 # Remove all modules so that old files are removed in process.
 rm build/ansible/lib/ansible/modules/cloud/google/gcp_*
-rm build/ansible/lib/ansible/modules/cloud/google/*facts
 
 bundle exec compiler -a -e ansible -o "build/ansible/"
 
