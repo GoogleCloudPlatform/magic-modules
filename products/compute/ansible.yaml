@@ -201,6 +201,9 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     transport: !ruby/object:Overrides::Ansible::Transport
       encoder: encode_request
       decoder: decode_response
+    hidden:
+      - deletion_protection_update
+      - shielded_instance_config_update
     post_action: |
       if fetch:
           instance = InstancePower(module, fetch.get('status'))
@@ -211,6 +214,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - 'products/compute/helpers/python/provider_instance.py'
       - 'products/compute/helpers/python/instance_metadata.py'
       - 'products/compute/helpers/python/instance_start.py'
+      - 'products/compute/helpers/python/instance_update_methods.py'
     properties:
       canIpForward: !ruby/object:Overrides::Ansible::PropertyOverride
         aliases: ["ip_forward"]

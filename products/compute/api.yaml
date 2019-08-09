@@ -4238,6 +4238,8 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'shieldedInstanceConfig'
         description: Configuration for various parameters related to shielded instances.
+        update_verb: :PATCH
+        update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
         properties:
           - !ruby/object:Api::Type::Boolean
             name: 'enableSecureBoot'
