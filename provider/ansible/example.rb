@@ -152,6 +152,7 @@ module Provider
       def a_or_an(item_name)
         words_to_use_a = %w[user]
         return 'a' if words_to_use_a.include?(item_name.split(' ').first)
+
         %w[a e i o u].include?(item_name[0].downcase) ? 'an' : 'a'
       end
 
