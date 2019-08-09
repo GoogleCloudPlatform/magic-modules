@@ -125,7 +125,7 @@ class GcpSession(object):
         """
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
         try:
-            return self.session().get(url, params, **kwargs)
+            return self.session().get(url, params=params, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
             self.module.fail_json(msg=inst.message)
 
