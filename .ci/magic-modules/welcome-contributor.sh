@@ -11,7 +11,7 @@ I have detected that you are a community contributor, so your PR will be assigne
 
 Thanks for your contribution!  A human will be with you soon.
 
-$ASSIGNEE, please review this PR or find an appropriate assignee.
+@$ASSIGNEE, please review this PR or find an appropriate assignee.
 EOF
 
 # Something is preventing the magician from actually assigning the PRs.
