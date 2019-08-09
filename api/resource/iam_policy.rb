@@ -31,7 +31,7 @@ module Api
       attr_reader :method_name_separator
 
       # boolean of if a parent resource is required to apply this IAM policy to
-      # Some IAM policies are applied across multiple resources rather than a 
+      # Some IAM policies are applied across multiple resources rather than a
       # specific resource
       attr_reader :parent_resource_required
 
