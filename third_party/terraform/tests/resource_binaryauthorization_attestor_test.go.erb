@@ -129,7 +129,7 @@ func testAccCheckBinaryAuthorizationAttestorDestroy(s *terraform.State) error {
 		name := rs.Primary.Attributes["name"]
 
 		url := fmt.Sprintf("https://binaryauthorization.googleapis.com/v1beta1/projects/%s/attestors/%s", project, name)
-		_, err = sendRequest(config, "GET", url, nil)
+		_, err = sendRequest(config, "GET", "", url, nil)
 
 		if err == nil {
 			return fmt.Errorf("Error, attestor %s still exists", name)
