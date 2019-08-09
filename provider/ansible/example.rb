@@ -132,7 +132,8 @@ module Provider
                   end
           "#{verb} a #{object_name_from_module_name(name)}#{again}"
         else
-          "get info on a #{object_name_from_module_name(name)}"
+          item_name = object_name_from_module_name(name)
+          "get info on #{a_or_an(item_name)} #{item_name}"
         end
       end
 
@@ -148,9 +149,19 @@ module Provider
         end
       end
 
+      def a_or_an(item_name)
+        words_to_use_a = %w[user]
+        return 'a' if words_to_use_a.include?(item_name.split(' ').first)
+
+        %w[a e i o u].include?(item_name[0].downcase) ? 'an' : 'a'
+      end
+
       def object_name_from_module_name(mod_name)
+        words_to_capitalize = %w[https http tcp ssl url]
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
-        product_name.gsub('_info', '').tr('_', ' ')
+        product_name = product_name.gsub('_info', '').tr('_', ' ')
+        words_to_capitalize.each { |w| product_name.gsub!(w, w.upcase) }
+        product_name
       end
 
       def dependency_name(dependency, resource)
