@@ -154,10 +154,10 @@ module Provider
       end
 
       def object_name_from_module_name(mod_name)
-        words_to_capitalize = %w[https http tcp ssl]
+        words_to_capitalize = %w[https http tcp ssl url]
         product_name = mod_name.match(/gcp_[a-z]*_(.*)/).captures.first
-        product_name.gsub('_info', '').tr('_', ' ')
-        words_to_capitalize.each { |w| product_name.gsub(w, w.upcase) }
+        product_name = product_name.gsub('_info', '').tr('_', ' ')
+        words_to_capitalize.each { |w| product_name.gsub!(w, w.upcase) }
         product_name
       end
 
