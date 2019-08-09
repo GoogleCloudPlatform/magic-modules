@@ -3829,7 +3829,8 @@ objects:
       - !ruby/object:Api::Type::Boolean
         name: 'deletionProtection'
         description: Whether the resource should be protected against deletion.
-        # The code for this update will be custom.
+        # The code for this update will be custom because MM doesn't support
+        # sending empty bodies + the new option as a request parameter.
         update_verb: :POST
         update_url: /projects/{{project}}/zones/{{zone}}/instances/{resourceId}/setDeletionProtection
       - !ruby/object:Api::Type::Array
@@ -4238,6 +4239,8 @@ objects:
       - !ruby/object:Api::Type::NestedObject
         name: 'shieldedInstanceConfig'
         description: Configuration for various parameters related to shielded instances.
+        # The code for this update method will be custom because MM does not support
+        # sending just the nested properties
         update_verb: :PATCH
         update_url: projects/{{project}}/instances/{{name}}/updateShieldedInstanceConfig
         properties:

@@ -73,7 +73,7 @@ module Overrides
         check :create, type: ::String
         check :delete, type: ::String
         check :has_tests, type: :boolean, default: true
-        check :hidden, type: ::Array, item_type: String
+        check :hidden, type: ::Array, item_type: String, default: []
         check :imports, type: ::Array, default: [], item_type: String
         check :notes, type: ::Array, item_type: String
         check :post_create, type: ::String
