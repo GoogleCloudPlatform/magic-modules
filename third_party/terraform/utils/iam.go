@@ -151,7 +151,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	return nil
 }
 
-// Flattens Bindings so each role has a single Binding with combined members
+// Flattens AuditConfigs so each role has a single Binding with combined members
 func mergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	bm := createIamBindingsMap(bindings)
 	return listFromIamBindingMap(bm)
@@ -230,7 +230,6 @@ func mergeAuditConfigs(auditConfigs []*cloudresourcemanager.AuditConfig) []*clou
 func removeAllAuditConfigsWithService(ac []*cloudresourcemanager.AuditConfig, service string) []*cloudresourcemanager.AuditConfig {
 	acMap := createIamAuditConfigsMap(ac)
 	if _, ok := acMap[service]; !ok {
-	} else {
 		delete(acMap, service)
 	}
 

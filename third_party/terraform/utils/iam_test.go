@@ -245,7 +245,7 @@ func TestIamSubtractFromBindings(t *testing.T) {
 			remove: []*cloudresourcemanager.Binding{},
 			expect: []*cloudresourcemanager.Binding{},
 		},
-		// Empty expect should no-op return empty
+		// Empty input should no-op return empty
 		{
 			input: []*cloudresourcemanager.Binding{},
 			remove: []*cloudresourcemanager.Binding{
@@ -272,7 +272,7 @@ func TestIamSubtractFromBindings(t *testing.T) {
 				},
 			},
 		},
-		// Removal not in expect should no-op
+		// Removal not in input should no-op
 		{
 			input: []*cloudresourcemanager.Binding{
 				{
@@ -293,7 +293,7 @@ func TestIamSubtractFromBindings(t *testing.T) {
 				},
 			},
 		},
-		// Same expect/remove should return empty
+		// Same input/remove should return empty
 		{
 			input: []*cloudresourcemanager.Binding{
 				{
