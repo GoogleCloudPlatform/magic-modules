@@ -40,7 +40,9 @@ else
 	terraform_name = "google_" + @config.legacy_name + '_' + object.name.underscore
 end
 -%>
+<% unless object.exclude_resource -%>
 	"<%= terraform_name -%>": resource<%= product_ns + object.name -%>(),
+<% end -%>
 <% iam_policy = object&.iam_policy -%>
 <% unless iam_policy.nil? || iam_policy.exclude -%>
 <%   iam_class_name = product_ns + object.name -%>
