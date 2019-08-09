@@ -249,19 +249,15 @@ func listFromIamAuditConfigMap(acMap map[string]map[string]map[string]struct{}) 
 			logConfigs = append(logConfigs, alc)
 		}
 
-		log.Printf("[DEBUG] Generated ALC list %#v", logConfigs)
-
 		ac = append(ac, &cloudresourcemanager.AuditConfig{
 			Service:         service,
 			AuditLogConfigs: logConfigs,
 		})
 	}
-	log.Printf("[DEBUG] Generated AC list %#v", ac)
 	return ac
 }
 
 func jsonPolicyDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	log.Printf("[DEBUG] here")
 	var oldPolicy, newPolicy cloudresourcemanager.Policy
 	if err := json.Unmarshal([]byte(old), &oldPolicy); err != nil {
 		log.Printf("[ERROR] Could not unmarshal old policy %s: %v", old, err)
@@ -275,7 +271,6 @@ func jsonPolicyDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 }
 
 func compareIamPolicies(a, b *cloudresourcemanager.Policy) bool {
-	log.Printf("[DEBUG] emilyye compare iam policies")
 	if a.Etag != b.Etag {
 		log.Printf("[DEBUG] policies etag differ: %q vs %q", a.Etag, b.Etag)
 		return false
