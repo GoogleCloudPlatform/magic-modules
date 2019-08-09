@@ -151,18 +151,40 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 	return nil
 }
 
-// Given a binding with a role, add this binding and remove any bindings in this list with the same role.
-func overwriteBinding(bindings []*cloudresourcemanager.Binding, override *cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
-	currBindMap := createIamBindingsMap(bindings)
-	delete(currBindMap, override.Role)
-	bindings = listFromIamBindingMap(currBindMap)
-	return append(bindings, override)
-}
-
 // Flattens Bindings so each role has a single Binding with combined members
 func mergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
 	bm := createIamBindingsMap(bindings)
 	return listFromIamBindingMap(bm)
+}
+
+// Flattens Bindings so each role has a single Binding with combined members\
+func removeAllBindingsWithRole(b []*cloudresourcemanager.Binding, role string) []*cloudresourcemanager.Binding {
+	bMap := createIamBindingsMap(b)
+	delete(bMap, role)
+	return listFromIamBindingMap(bMap)
+}
+
+// Removes given role/bound-member pairs from the given Bindings (i.e subtraction).
+func subtractFromBindings(bindings []*cloudresourcemanager.Binding, toRemove ...*cloudresourcemanager.Binding) []*cloudresourcemanager.Binding {
+	currMap := createIamBindingsMap(bindings)
+	toRemoveMap := createIamBindingsMap(toRemove)
+
+	for role, removeSet := range toRemoveMap {
+		members, ok := currMap[role]
+		if !ok {
+			continue
+		}
+		// Remove all removed members
+		for m := range removeSet {
+			delete(members, m)
+		}
+		// Remove role from bindings
+		if len(members) == 0 {
+			delete(currMap, role)
+		}
+	}
+
+	return listFromIamBindingMap(currMap)
 }
 
 // Construct map of role to set of members from list of bindings.
@@ -204,7 +226,18 @@ func mergeAuditConfigs(auditConfigs []*cloudresourcemanager.AuditConfig) []*clou
 	return listFromIamAuditConfigMap(am)
 }
 
-// Build a service map of service to map of log_type to member sets
+// Flattens AuditConfigs so each role has a single Binding with combined members\
+func removeAllAuditConfigsWithService(ac []*cloudresourcemanager.AuditConfig, service string) []*cloudresourcemanager.AuditConfig {
+	acMap := createIamAuditConfigsMap(ac)
+	if _, ok := acMap[service]; !ok {
+	} else {
+		delete(acMap, service)
+	}
+
+	return listFromIamAuditConfigMap(acMap)
+}
+
+// Build a AuditConfig service to audit log config map
 func createIamAuditConfigsMap(auditConfigs []*cloudresourcemanager.AuditConfig) map[string]map[string]map[string]struct{} {
 	acMap := make(map[string]map[string]map[string]struct{})
 

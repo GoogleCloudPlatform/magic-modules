@@ -3,73 +3,76 @@ package google
 import (
 	"encoding/json"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	"reflect"
 	"testing"
 )
 
-func TestIamRemoveBinding(t *testing.T) {
-	table := []struct {
-		input    []*cloudresourcemanager.Binding
-		override *cloudresourcemanager.Binding
-		expect   []*cloudresourcemanager.Binding
-	}{
-		{
-			input: []*cloudresourcemanager.Binding{
-				{
-					Role:    "role-1",
-					Members: []string{"member-1", "member-2"},
-				},
-			},
-			override: &cloudresourcemanager.Binding{
-				Role:    "role-1",
-				Members: []string{"new-member"},
-			},
-			expect: []*cloudresourcemanager.Binding{
-				{
-					Role:    "role-1",
-					Members: []string{"new-member"},
-				},
-			},
-		},
-		{
-
-			input: []*cloudresourcemanager.Binding{
-				{
-					Role:    "role-1",
-					Members: []string{"member-1", "member-2"},
-				},
-			},
-			override: &cloudresourcemanager.Binding{
-				Role:    "role-2",
-				Members: []string{"member-3"},
-			},
-			expect: []*cloudresourcemanager.Binding{
-				{
-					Role:    "role-1",
-					Members: []string{"member-1", "member-2"},
-				},
-				{
-					Role:    "role-2",
-					Members: []string{"member-3"},
-				},
-			},
-		},
-	}
-
-	for _, test := range table {
-		got := overwriteBinding(test.input, test.override)
-		if !compareBindings(got, test.expect) {
-			t.Errorf("OverwriteIamBinding got unexpected value.\nActual: %+v\nExpected: %+v",
-				debugPrintBindings(got),
-				debugPrintBindings(test.expect))
-		}
-	}
-}
-
 func TestIamMergeBindings(t *testing.T) {
-	table := []struct {
+	testCases := []struct {
 		input  []*cloudresourcemanager.Binding
 		expect []*cloudresourcemanager.Binding
 	}{
+		// Nothing to merge - return same list
+		{
+			input:  []*cloudresourcemanager.Binding{},
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Nothing to merge - return same list
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+			},
+		},
+		// Nothing to merge - return same list
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-1",
+					Members: []string{"member-2"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+		},
 		{
 			input: []*cloudresourcemanager.Binding{
 				{
@@ -132,12 +135,967 @@ func TestIamMergeBindings(t *testing.T) {
 			},
 		},
 	}
-	for _, test := range table {
-		got := mergeBindings(test.input)
-		if !compareBindings(got, test.expect) {
-			t.Errorf("MergeBinding return unexpected value.\nActual: %+v\nExpected: %+v",
-				debugPrintBindings(got),
-				debugPrintBindings(test.expect))
+
+	for _, tc := range testCases {
+		got := mergeBindings(tc.input)
+		if !compareBindings(got, tc.expect) {
+			t.Errorf("Unexpected value for mergeBindings(%s).\nActual: %s\nExpected: %s\n",
+				debugPrintBindings(tc.input), debugPrintBindings(got), debugPrintBindings(tc.expect))
+		}
+	}
+}
+
+func TestIamRemoveAllBindingsWithRole(t *testing.T) {
+	testCases := []struct {
+		input  []*cloudresourcemanager.Binding
+		role   string
+		expect []*cloudresourcemanager.Binding
+	}{
+		// No-op
+		{
+			input:  []*cloudresourcemanager.Binding{},
+			role:   "role-1",
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Remove one binding
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			role:   "role-1",
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Remove multiple bindings
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+				{
+					Role:    "role-1",
+					Members: []string{"member-3"},
+				},
+			},
+			role:   "role-1",
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Remove multiple bindings and leave some.
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-3",
+					Members: []string{"member-1", "member-3"},
+				},
+				{
+					Role:    "role-1",
+					Members: []string{"member-2"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			role: "role-1",
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-2",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-3",
+					Members: []string{"member-1", "member-3"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := removeAllBindingsWithRole(tc.input, tc.role)
+		if !compareBindings(got, tc.expect) {
+			t.Errorf("Got unexpected value for removeAllBindingsWithRole(%s, %s).\nActual: %s\nExpected: %s",
+				debugPrintBindings(tc.input), tc.role, debugPrintBindings(got), debugPrintBindings(tc.expect))
+		}
+	}
+}
+
+func TestIamSubtractFromBindings(t *testing.T) {
+	testCases := []struct {
+		input  []*cloudresourcemanager.Binding
+		remove []*cloudresourcemanager.Binding
+		expect []*cloudresourcemanager.Binding
+	}{
+		{
+			input:  []*cloudresourcemanager.Binding{},
+			remove: []*cloudresourcemanager.Binding{},
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Empty expect should no-op return empty
+		{
+			input: []*cloudresourcemanager.Binding{},
+			remove: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Empty removal should return original expect
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			remove: []*cloudresourcemanager.Binding{},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+		},
+		// Removal not in expect should no-op
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-1+"},
+				},
+			},
+			remove: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-1+"},
+				},
+			},
+		},
+		// Same expect/remove should return empty
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			remove: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		// Single removal
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-2"},
+				},
+			},
+			remove: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-2"},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-2", "member-3"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-1",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-3",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
+			},
+			remove: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-2", "member-4"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-2"},
+				},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"member-1", "member-3"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"member-1"},
+				},
+				{
+					Role:    "role-3",
+					Members: []string{"member-1"},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := subtractFromBindings(tc.input, tc.remove...)
+		if !compareBindings(got, tc.expect) {
+			t.Errorf("Unexpected value for subtractFromBindings(%s, %s).\nActual: %s\nExpected: %s\n",
+				debugPrintBindings(tc.input), debugPrintBindings(tc.remove), debugPrintBindings(got), debugPrintBindings(tc.expect))
+		}
+	}
+}
+
+func TestIamCreateIamBindingsMap(t *testing.T) {
+	testCases := []struct {
+		input  []*cloudresourcemanager.Binding
+		expect map[string]map[string]struct{}
+	}{
+		{
+			input:  []*cloudresourcemanager.Binding{},
+			expect: map[string]map[string]struct{}{},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1", "user-2"},
+				},
+			},
+			expect: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}, "user-2": {}},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1", "user-2"},
+				},
+				{
+					Role:    "role-1",
+					Members: []string{"user-3"},
+				},
+			},
+			expect: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}, "user-2": {}, "user-3": {}},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1", "user-2"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"user-1"},
+				},
+			},
+			expect: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}, "user-2": {}},
+				"role-2": {"user-1": {}},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1", "user-2"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"user-1"},
+				},
+				{
+					Role:    "role-1",
+					Members: []string{"user-3"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"user-2"},
+				},
+				{
+					Role:    "role-3",
+					Members: []string{"user-3"},
+				},
+			},
+			expect: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}, "user-2": {}, "user-3": {}},
+				"role-2": {"user-1": {}, "user-2": {}},
+				"role-3": {"user-3": {}},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := createIamBindingsMap(tc.input)
+		if !reflect.DeepEqual(got, tc.expect) {
+			t.Errorf("Unexpected value for subtractFromBindings(%s).\nActual: %#v\nExpected: %#v\n",
+				debugPrintBindings(tc.input), got, tc.expect)
+		}
+	}
+}
+
+func TestIamListFromIamBindingMap(t *testing.T) {
+	testCases := []struct {
+		input  map[string]map[string]struct{}
+		expect []*cloudresourcemanager.Binding
+	}{
+		{
+			input:  map[string]map[string]struct{}{},
+			expect: []*cloudresourcemanager.Binding{},
+		},
+		{
+			input: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}, "user-2": {}},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1", "user-2"},
+				},
+			},
+		},
+		{
+			input: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}},
+				"role-2": {"user-1": {}, "user-2": {}},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1"},
+				},
+				{
+					Role:    "role-2",
+					Members: []string{"user-1", "user-2"},
+				},
+			},
+		},
+		{
+			input: map[string]map[string]struct{}{
+				"role-1": {"user-1": {}, "user-2": {}},
+				"role-2": {},
+			},
+			expect: []*cloudresourcemanager.Binding{
+				{
+					Role:    "role-1",
+					Members: []string{"user-1", "user-2"},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := listFromIamBindingMap(tc.input)
+		if !compareBindings(got, tc.expect) {
+			t.Errorf("Unexpected value for subtractFromBindings(%s).\nActual: %#v\nExpected: %#v\n",
+				tc.input, debugPrintBindings(got), debugPrintBindings(tc.expect))
+		}
+	}
+}
+
+func TestIamMergeAuditConfigs(t *testing.T) {
+	testCases := []struct {
+		input  []*cloudresourcemanager.AuditConfig
+		expect []*cloudresourcemanager.AuditConfig
+	}{
+		{
+			input:  []*cloudresourcemanager.AuditConfig{},
+			expect: []*cloudresourcemanager.AuditConfig{},
+		},
+		{
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+				{
+					Service: "bar.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+				{
+					Service: "bar.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "iam.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+				{
+					Service: "iam.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-3", "user-4"},
+						},
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1", "user-2", "user-3", "user-4"},
+						},
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+				{
+					Service: "iam.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := mergeAuditConfigs(tc.input)
+		if !compareAuditConfigs(got, tc.expect) {
+			t.Errorf("Unexpected value for mergeAuditConfigss(%s).\nActual: %s\nExpected: %s\n",
+				debugPrintAuditConfigs(tc.input), debugPrintAuditConfigs(got), debugPrintAuditConfigs(tc.expect))
+		}
+	}
+}
+
+func TestIamRemoveAllAuditConfigsWithService(t *testing.T) {
+	testCases := []struct {
+		input   []*cloudresourcemanager.AuditConfig
+		service string
+		expect  []*cloudresourcemanager.AuditConfig
+	}{
+		// No-op
+		{
+			service: "foo.googleapis.com",
+			input:   []*cloudresourcemanager.AuditConfig{},
+			expect:  []*cloudresourcemanager.AuditConfig{},
+		},
+		// No-op - service not in audit configs
+		{
+			service: "bar.googleapis.com",
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+			},
+		},
+		// Single removal
+		{
+			service: "foo.googleapis.com",
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+			},
+		},
+		// Multiple removal/merge
+		{
+			service: "kms.googleapis.com",
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "iam.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+				{
+					Service: "iam.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-3", "user-4"},
+						},
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "iam.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := removeAllAuditConfigsWithService(tc.input, tc.service)
+		if !compareAuditConfigs(got, tc.expect) {
+			t.Errorf("Got unexpected value for removeAllAuditConfigssWithRole(%s, %s).\nActual: %s\nExpected: %s",
+				debugPrintAuditConfigs(tc.input), tc.service, debugPrintAuditConfigs(got), debugPrintAuditConfigs(tc.expect))
+		}
+	}
+}
+
+func TestIamCreateIamAuditConfigsMap(t *testing.T) {
+	testCases := []struct {
+		input  []*cloudresourcemanager.AuditConfig
+		expect map[string]map[string]map[string]struct{}
+	}{
+		{
+			input:  []*cloudresourcemanager.AuditConfig{},
+			expect: make(map[string]map[string]map[string]struct{}),
+		},
+		{
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+			},
+			expect: map[string]map[string]map[string]struct{}{
+				"foo.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+			},
+			expect: map[string]map[string]map[string]struct{}{
+				"foo.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{"user-1": {}, "user-2": {}},
+					"DATA_WRITE": map[string]struct{}{"user-1": {}},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+			},
+			expect: map[string]map[string]map[string]struct{}{
+				"foo.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{"user-1": {}, "user-2": {}},
+					"DATA_WRITE": map[string]struct{}{"user-1": {}},
+					"DATA_READ":  map[string]struct{}{"user-2": {}},
+				},
+			},
+		},
+		{
+			input: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+					},
+				},
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+			},
+			expect: map[string]map[string]map[string]struct{}{
+				"kms.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{"user-1": {}, "user-2": {}},
+				},
+				"foo.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{"user-1": {}, "user-2": {}},
+					"DATA_WRITE": map[string]struct{}{"user-1": {}},
+					"DATA_READ":  map[string]struct{}{"user-2": {}},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := createIamAuditConfigsMap(tc.input)
+		if !reflect.DeepEqual(got, tc.expect) {
+			t.Errorf("Unexpected value for subtractFromAuditConfigss(%s).\nActual: %#v\nExpected: %#v\n",
+				debugPrintAuditConfigs(tc.input), got, tc.expect)
+		}
+	}
+}
+
+func TestIamListFromIamAuditConfigsMap(t *testing.T) {
+	testCases := []struct {
+		input  map[string]map[string]map[string]struct{}
+		expect []*cloudresourcemanager.AuditConfig
+	}{
+		{
+			input:  make(map[string]map[string]map[string]struct{}),
+			expect: []*cloudresourcemanager.AuditConfig{},
+		},
+		{
+			input: map[string]map[string]map[string]struct{}{
+				"foo.googleapis.com": {"ADMIN_READ": map[string]struct{}{}},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+					},
+				},
+			},
+		},
+		{
+			input: map[string]map[string]map[string]struct{}{
+				"foo.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{"user-1": {}, "user-2": {}},
+					"DATA_WRITE": map[string]struct{}{"user-1": {}},
+					"DATA_READ":  map[string]struct{}{},
+				},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+						{
+							LogType: "DATA_READ",
+						},
+					},
+				},
+			},
+		},
+		{
+			input: map[string]map[string]map[string]struct{}{
+				"kms.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{},
+					"DATA_READ":  map[string]struct{}{"user-1": {}, "user-2": {}},
+				},
+				"foo.googleapis.com": {
+					"ADMIN_READ": map[string]struct{}{"user-1": {}, "user-2": {}},
+					"DATA_WRITE": map[string]struct{}{"user-1": {}},
+					"DATA_READ":  map[string]struct{}{"user-2": {}},
+				},
+			},
+			expect: []*cloudresourcemanager.AuditConfig{
+				{
+					Service: "kms.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType: "ADMIN_READ",
+						},
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+					},
+				},
+				{
+					Service: "foo.googleapis.com",
+					AuditLogConfigs: []*cloudresourcemanager.AuditLogConfig{
+						{
+							LogType:         "ADMIN_READ",
+							ExemptedMembers: []string{"user-1", "user-2"},
+						},
+						{
+							LogType:         "DATA_WRITE",
+							ExemptedMembers: []string{"user-1"},
+						},
+						{
+							LogType:         "DATA_READ",
+							ExemptedMembers: []string{"user-2"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got := listFromIamAuditConfigMap(tc.input)
+		if !compareAuditConfigs(got, tc.expect) {
+			t.Errorf("Unexpected value for listFromIamAuditConfigMap(%+v).\nActual: %s\nExpected: %s\n",
+				tc.input, debugPrintAuditConfigs(got), debugPrintAuditConfigs(tc.expect))
 		}
 	}
 }

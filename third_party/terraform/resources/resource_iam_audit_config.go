@@ -149,18 +149,8 @@ func resourceIamAuditConfigUpdate(newUpdaterFunc newResourceIamUpdaterFunc) sche
 
 		ac := getResourceIamAuditConfig(d)
 		err = iamPolicyReadModifyWrite(updater, func(p *cloudresourcemanager.Policy) error {
-			var found bool
-			for pos, b := range p.AuditConfigs {
-				if b.Service != ac.Service {
-					continue
-				}
-				found = true
-				p.AuditConfigs[pos] = ac
-				break
-			}
-			if !found {
-				p.AuditConfigs = append(p.AuditConfigs, ac)
-			}
+			cleaned := removeAllAuditConfigsWithService(p.AuditConfigs, ac.Service)
+			p.AuditConfigs = append(cleaned, ac)
 			return nil
 		})
 		if err != nil {
@@ -181,28 +171,11 @@ func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc) sche
 
 		ac := getResourceIamAuditConfig(d)
 		err = iamPolicyReadModifyWrite(updater, func(p *cloudresourcemanager.Policy) error {
-			toRemove := -1
-			for pos, b := range p.AuditConfigs {
-				if b.Service != ac.Service {
-					continue
-				}
-				toRemove = pos
-				break
-			}
-			if toRemove < 0 {
-				log.Printf("[DEBUG]: Policy audit configs for %s did not include an audit config for service %q", updater.DescribeResource(), ac.Service)
-				return nil
-			}
-
-			p.AuditConfigs = append(p.AuditConfigs[:toRemove], p.AuditConfigs[toRemove+1:]...)
+			p.AuditConfigs = removeAllAuditConfigsWithService(p.AuditConfigs, ac.Service)
 			return nil
 		})
 		if err != nil {
-			if isGoogleApiErrorWithCode(err, 404) {
-				log.Printf("[DEBUG]: Resource %s is missing or deleted, marking policy audit config as deleted", updater.DescribeResource())
-				return nil
-			}
-			return err
+			return handleNotFoundError(err, d, fmt.Sprintf("Resource %s with IAM audit config %q", updater.DescribeResource(), d.Id()))
 		}
 
 		return resourceIamAuditConfigRead(newUpdaterFunc)(d, meta)
