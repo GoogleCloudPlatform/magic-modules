@@ -759,7 +759,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         default_from_api: true
       bandwidth: !ruby/object:Overrides::Terraform::PropertyOverride
         required: false
-        default_from_api: true
       router: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
