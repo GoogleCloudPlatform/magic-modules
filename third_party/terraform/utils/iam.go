@@ -157,7 +157,7 @@ func mergeBindings(bindings []*cloudresourcemanager.Binding) []*cloudresourceman
 	return listFromIamBindingMap(bm)
 }
 
-// Flattens Bindings so each role has a single Binding with combined members\
+// Flattens Bindings so each role has a single Binding with combined members
 func removeAllBindingsWithRole(b []*cloudresourcemanager.Binding, role string) []*cloudresourcemanager.Binding {
 	bMap := createIamBindingsMap(b)
 	delete(bMap, role)
