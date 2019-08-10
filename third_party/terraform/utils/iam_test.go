@@ -749,6 +749,7 @@ func TestIamRemoveAllAuditConfigsWithService(t *testing.T) {
 					},
 				},
 			},
+			expect: []*cloudresourcemanager.AuditConfig{},
 		},
 		// Multiple removal/merge
 		{
@@ -842,7 +843,7 @@ func TestIamRemoveAllAuditConfigsWithService(t *testing.T) {
 	for _, tc := range testCases {
 		got := removeAllAuditConfigsWithService(tc.input, tc.service)
 		if !compareAuditConfigs(got, tc.expect) {
-			t.Errorf("Got unexpected value for removeAllAuditConfigssWithRole(%s, %s).\nActual: %s\nExpected: %s",
+			t.Errorf("Got unexpected value for removeAllAuditConfigsWithService(%s, %s).\nActual: %s\nExpected: %s",
 				debugPrintAuditConfigs(tc.input), tc.service, debugPrintAuditConfigs(got), debugPrintAuditConfigs(tc.expect))
 		}
 	}
