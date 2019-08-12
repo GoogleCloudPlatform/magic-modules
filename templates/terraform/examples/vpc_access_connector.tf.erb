@@ -1,8 +1,16 @@
 provider "google-beta" { }
 
+resource "google_project" "my_project" {
+  name       = "tf-test-project"
+  provider   = "google-beta"
+  project_id = "<%= ctx[:vars]['project_id'] %>"
+  org_id     = "<%= ctx[:test_env_vars]['org_id'] %>"
+}
+
 resource "google_vpc_access_connector" "connector" {
   name          = "<%= ctx[:vars]['name'] %>"
   provider      = "google-beta"
+  project       = google_project.my_project.project_id
   region        = "us-central1"
   ip_cidr_range = "10.8.0.0/28"
   network       = "default"
