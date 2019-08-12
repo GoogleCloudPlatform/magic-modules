@@ -83,8 +83,9 @@ func init() {
 	// if the example is versioned as beta; normal beta tests should continue to
 	// use the standard provider map.
 	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
-<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |lower_version| -%>
-		"google-<%= lower_version -%>": testAccProvider,
+<%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
+<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
+		"google-<%= aliased_version -%>": testAccProvider,
 <% end -%>
 		"random": testAccRandomProvider,
 	}
