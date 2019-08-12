@@ -27,6 +27,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         ignore_read: true
     examples:
       - !ruby/object:Provider::Terraform::Examples
+        skip_test: true
         name: "scheduled_query"
         primary_resource_id: "query_config"
         vars:

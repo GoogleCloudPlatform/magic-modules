@@ -2,19 +2,36 @@ package google
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccBigqueryDataTransferConfig_scheduledQueryUpdate(t *testing.T) {
-	t.Parallel()
+// The service account TF uses needs the permission granted in the configs
+// but it will get deleted by parallel tests, so they need to be ran serially.
+func TestAccBigqueryDataTransferConfig(t *testing.T) {
+	testCases := map[string]func(t *testing.T){
+		"basic":  testAccBigqueryDataTransferConfig_scheduledQuery_basic,
+		"update": testAccBigqueryDataTransferConfig_scheduledQuery_update,
+	}
 
+	for name, tc := range testCases {
+		// shadow the tc variable into scope so that when
+		// the loop continues, if t.Run hasn't executed tc(t)
+		// yet, we don't have a race condition
+		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			tc(t)
+		})
+	}
+}
+
+func testAccBigqueryDataTransferConfig_scheduledQuery_basic(t *testing.T) {
 	random_suffix := acctest.RandString(10)
-
-	projectOrg := getTestOrgFromEnv(t)
-	projectBillingAccount := getTestBillingAccountFromEnv(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -22,10 +39,7 @@ func TestAccBigqueryDataTransferConfig_scheduledQueryUpdate(t *testing.T) {
 		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigqueryDataTransferConfig_scheduledQueryUpdate(random_suffix, projectOrg, projectBillingAccount, "first", "y"),
-			},
-			{
-				Config: testAccBigqueryDataTransferConfig_scheduledQueryUpdate(random_suffix, projectOrg, projectBillingAccount, "second", "z"),
+				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, "third", "y"),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
@@ -37,47 +51,66 @@ func TestAccBigqueryDataTransferConfig_scheduledQueryUpdate(t *testing.T) {
 	})
 }
 
-func testAccBigqueryDataTransferConfig_scheduledQueryUpdate(random_suffix, org, billing, schedule, letter string) string {
-	return fmt.Sprintf(`
-resource "google_project" "update" {
-  name = "terraform-%s"
-  project_id = "terraform-%s"
-  org_id = "%s"
-  billing_account = "%s"
+func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
+	random_suffix := acctest.RandString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBigqueryDataTransferConfigDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, "first", "y"),
+			},
+			{
+				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, "second", "z"),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
 }
 
-resource "google_project_services" "update" {
-  project = google_project.update.project_id
-  services = ["bigquerydatatransfer.googleapis.com", "bigquery-json.googleapis.com"]
+func testAccCheckBigqueryDataTransferConfigDestroy(s *terraform.State) error {
+	for name, rs := range s.RootModule().Resources {
+		if rs.Type != "google_bigquery_data_transfer_config" {
+			continue
+		}
+		if strings.HasPrefix(name, "data.") {
+			continue
+		}
+
+		config := testAccProvider.Meta().(*Config)
+
+		url, err := replaceVarsForTest(config, rs, "{{BigqueryDataTransferBasePath}}{{name}}")
+		if err != nil {
+			return err
+		}
+
+		_, err = sendRequest(config, "GET", url, nil)
+		if err == nil {
+			return fmt.Errorf("BigqueryDataTransferConfig still exists at %s", url)
+		}
+	}
+
+	return nil
 }
+
+func testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, schedule, letter string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
 
 resource "google_project_iam_member" "permissions" {
-  depends_on = [google_project_services.update]
-  project = google_project.update.project_id
   role = "roles/iam.serviceAccountShortTermTokenMinter"
-  member = "serviceAccount:service-${google_project.update.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com"
 }
 
-resource "google_bigquery_data_transfer_config" "query_config" {
-  project = google_project.update.project_id
 
-  depends_on = [google_project_iam_member.permissions]
-
-  display_name = "my-query-%s"
-  location = "asia-northeast1"
-  data_source_id = "scheduled_query"
-  schedule = "%s sunday of quarter 00:00"
-  destination_dataset_id = google_bigquery_dataset.my-dataset.dataset_id
-  params = {
-    destination_table_name_template = "my-table"
-    write_disposition = "WRITE_APPEND"
-    query = "SELECT name FROM tabl WHERE x = '%s'"
-  }
-}
-
-resource "google_bigquery_dataset" "my-dataset" {
-  project = google_project.update.project_id
-
+resource "google_bigquery_dataset" "my_dataset" {
   depends_on = [google_project_iam_member.permissions]
 
   dataset_id = "my_dataset%s"
@@ -85,5 +118,20 @@ resource "google_bigquery_dataset" "my-dataset" {
   description = "bar"
   location = "asia-northeast1"
 }
-`, random_suffix, random_suffix, org, billing, random_suffix, schedule, letter, random_suffix)
+
+resource "google_bigquery_data_transfer_config" "query_config" {
+  depends_on = [google_project_iam_member.permissions]
+
+  display_name = "my-query-%s"
+  location = "asia-northeast1"
+  data_source_id = "scheduled_query"
+  schedule = "%s sunday of quarter 00:00"
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  params = {
+    destination_table_name_template = "my-table"
+    write_disposition = "WRITE_APPEND"
+    query = "SELECT name FROM tabl WHERE x = '%s'"
+  }
+}
+`, random_suffix, random_suffix, schedule, letter)
 }
