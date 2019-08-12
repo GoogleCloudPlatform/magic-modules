@@ -14,6 +14,9 @@
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
   Config: !ruby/object:Overrides::Terraform::ResourceOverride
+    timeouts: !ruby/object:Api::Timeouts
+      insert_minutes: 10
+      delete_minutes: 10
     import_format: ["{{name}}"]
     id_format: "{{name}}"
     custom_code: !ruby/object:Provider::Terraform::CustomCode
