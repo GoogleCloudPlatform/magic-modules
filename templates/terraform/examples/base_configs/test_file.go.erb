@@ -71,10 +71,10 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"random_suffix": acctest.RandString(10),
 	}
 
-<% beta_example = example_version == 'beta' && version == 'beta' -%>
+<% versioned_provider = !example_version.nil? && example_version != 'ga' -%>
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		<% unless beta_example -%>
+		<% unless versioned_provider -%>
 		Providers:    testAccProviders,
 		<% else -%>
 		Providers:    testAccProvidersOiCS,
@@ -85,7 +85,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 				Config: testAcc<%= test_slug -%>(context),
 			},
 		<%#- The Terraform test runner doesn't let us import resources with aliased providers (yet) -%>
-		<% unless beta_example -%>
+		<% unless versioned_provider -%>
 			{
 				ResourceName:      "<%= terraform_name -%>.<%= example.primary_resource_id -%>",
 				ImportState:       true,

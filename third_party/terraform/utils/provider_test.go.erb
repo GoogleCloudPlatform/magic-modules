@@ -14,7 +14,7 @@ import (
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
-<% if version == 'beta' -%>
+<% unless version == 'ga' -%>
 var testAccProvidersOiCS map[string]terraform.ResourceProvider
 <% end -%>
 var testAccProvider *schema.Provider
@@ -68,7 +68,7 @@ var billingAccountEnvVars = []string{
 func init() {
 	testAccProvider = Provider().(*schema.Provider)
 	testAccRandomProvider = random.Provider().(*schema.Provider)
-	<% unless version == 'beta' -%>
+	<% if version == 'ga' -%>
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"google": testAccProvider,
 		"random": testAccRandomProvider,
@@ -83,7 +83,10 @@ func init() {
 	// if the example is versioned as beta; normal beta tests should continue to
 	// use the standard provider map.
 	testAccProvidersOiCS = map[string]terraform.ResourceProvider{
-		"google-beta": testAccProvider,
+<%# Add a google-#{version} provider for each version that is supported by this version. This allows us to run google-beta tests within a google-alpha provider.  -%>
+<% Api::Product::Version::ORDER[1..Api::Product::Version::ORDER.index(version)].each do |aliased_version| -%>
+		"google-<%= aliased_version -%>": testAccProvider,
+<% end -%>
 		"random": testAccRandomProvider,
 	}
 	<% end -%>
