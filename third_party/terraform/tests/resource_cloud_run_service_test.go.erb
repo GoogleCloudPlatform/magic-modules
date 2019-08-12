@@ -1,4 +1,6 @@
+<% autogen_exception -%>
 package google
+<% unless version == 'ga' -%>
 
 import (
 	"fmt"
@@ -62,3 +64,7 @@ resource "google_cloud_run_service" "default" {
 }
 `, name, project, concurrency)
 }
+<% else %>
+// Because Cloud Run is still in beta, we can't run any of the tests that call that
+// resource without vendoring in the full beta provider.
+<% end -%>
