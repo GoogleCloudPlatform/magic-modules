@@ -71,7 +71,7 @@ func TestAcc<%= test_slug -%>(t *testing.T) {
 			"random_suffix": acctest.RandString(10),
 	}
 
-<% versioned_provider = !(example_version.nil? || example_version == 'ga') -%>
+<% versioned_provider = !example_version.nil? && example_version != 'ga') -%>
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		<% unless versioned_provider -%>
