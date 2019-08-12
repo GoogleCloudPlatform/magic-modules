@@ -26,9 +26,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         primary_resource_id: "connector"
         vars:
           name: "my-connector"
-          project_id: "test-project"
-        test_env_vars:
-          org_id: :ORG_ID
     custom_code: !ruby/object:Provider::Terraform::CustomCode
       encoder: templates/terraform/encoders/no_send_name.go.erb
       post_create: templates/terraform/post_create/sleep.go.erb

@@ -335,6 +335,8 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 	vpcConnectorName := fmt.Sprintf("tf-test-connector-%s",  acctest.RandString(5))
 	zipFilePath, err := createZIPArchiveForIndexJs(testHTTPTriggerPath)
+	projectNumber := os.Getenv("GOOGLE_PROJECT_NUMBER")
+
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -346,7 +348,7 @@ func TestAccCloudFunctionsFunction_vpcConnector(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudFunctionsFunction_vpcConnector(functionName, bucketName, zipFilePath, vpcConnectorName),
+				Config: testAccCloudFunctionsFunction_vpcConnector(projectNumber, functionName, bucketName, zipFilePath, vpcConnectorName),
 			},
 		},
 	})
@@ -737,8 +739,16 @@ resource "google_cloudfunctions_function" "function" {
 }
 
 <% unless version == 'ga' -%>
-func testAccCloudFunctionsFunction_vpcConnector(functionName, bucketName, zipFilePath, vpcConnectorName string) string {
+func testAccCloudFunctionsFunction_vpcConnector(projectNumber, functionName, bucketName, zipFilePath, vpcConnectorName string) string {
 	return fmt.Sprintf(`
+provider "google-beta" { }
+
+resource "google_project_iam_member" "project" {
+  provider = "google-beta"
+  role     = "roles/editor"
+  member   = "serviceAccount:service-%s@gcf-admin-robot.iam.gserviceaccount.com"
+}
+
 resource "google_vpc_access_connector" "connector" {
   provider      = "google-beta"
 
@@ -750,14 +760,14 @@ resource "google_vpc_access_connector" "connector" {
 
 resource "google_storage_bucket" "bucket" {
   provider = "google-beta"
-  name = "%s"
+  name     = "%s"
 }
 
 resource "google_storage_bucket_object" "archive" {
   provider = "google-beta"
-  name   = "index.zip"
-  bucket = google_storage_bucket.bucket.name
-  source = "%s"
+  name     = "index.zip"
+  bucket   = google_storage_bucket.bucket.name
+  source   = "%s"
 }
 
 resource "google_cloudfunctions_function" "function" {
@@ -779,6 +789,6 @@ resource "google_cloudfunctions_function" "function" {
   }
   max_instances = 10
   vpc_connector = google_vpc_access_connector.connector.self_link
-}`, vpcConnectorName, bucketName, zipFilePath, functionName)
+}`, projectNumber, vpcConnectorName, bucketName, zipFilePath, functionName)
 }
 <% end -%>
