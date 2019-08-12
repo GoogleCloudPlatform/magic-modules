@@ -104,7 +104,8 @@ module Provider
           ORG_ID: '123456789',
           ORG_TARGET: '123456789',
           BILLING_ACCT: '000000-0000000-0000000-000000',
-          SERVICE_ACCT: 'emailAddress:my@service-account.com'
+          SERVICE_ACCT: 'emailAddress:my@service-account.com',
+          DOC_GENERATION: true
         }
         @vars ||= {}
         @test_env_vars ||= {}
