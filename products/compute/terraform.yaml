@@ -761,8 +761,6 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
-      bandwidth: !ruby/object:Overrides::Terraform::PropertyOverride
-        required: false
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
