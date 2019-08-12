@@ -39,6 +39,8 @@ popd
 
 pushd magic-modules-branched
 
+git log
+
 # Choose the author of the most recent commit as the downstream author
 COMMIT_AUTHOR="$(git log --pretty="%an <%ae>" -n1 HEAD)"
 
