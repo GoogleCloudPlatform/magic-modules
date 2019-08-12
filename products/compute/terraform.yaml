@@ -761,6 +761,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         diff_suppress_func: 'compareSelfLinkOrResourceName'
       interconnect: !ruby/object:Overrides::Terraform::PropertyOverride
         diff_suppress_func: 'compareSelfLinkOrResourceName'
+      bandwidth: !ruby/object:Overrides::Terraform::PropertyOverride
+        required: false
       type: !ruby/object:Overrides::Terraform::PropertyOverride
         default_from_api: true
       vlanTag8021q: !ruby/object:Overrides::Terraform::PropertyOverride
@@ -1602,7 +1604,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         resource: 'HaVpnGateway'
       peerGcpGateway: !ruby/object:Overrides::Terraform::PropertyOverride
         description: |
-          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected. 
+          URL of the peer side HA GCP VPN gateway to which this VPN tunnel is connected.
           If provided, the VPN tunnel will automatically use the same vpn_gateway_interface
           ID in the peer GCP VPN gateway.
           This field must reference a `google_compute_ha_vpn_gateway` resource.
