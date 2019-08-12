@@ -78,8 +78,6 @@ module Api
       attr_reader :update_verb
       # [Optional] The HTTP verb used during delete. Defaults to :DELETE.
       attr_reader :delete_verb
-      # [Optional] An array of function names that determine whether an error is retryable.
-      attr_reader :retry_predicates
       # ====================
       # Collection / Identity URL Configuration
       # ====================
@@ -158,7 +156,6 @@ module Api
       check :delete_verb, type: Symbol, default: :DELETE, allowed: %i[POST PUT PATCH DELETE]
       check :update_verb, type: Symbol, default: :PUT, allowed: %i[POST PUT PATCH]
 
-      check :retry_predicates, type: Array, item_type: String
 
       check :input, type: :boolean
       check :min_version, type: String
