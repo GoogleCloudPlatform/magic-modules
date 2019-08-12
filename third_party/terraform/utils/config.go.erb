@@ -564,6 +564,7 @@ func (c *Config) LoadAndValidate() error {
 	c.clientHealthcare.BasePath = healthcareClientBasePath
 	<% end -%>
 
+	c.Region = GetRegionFromRegionSelfLink(c.Region)
 	return nil
 }
 
