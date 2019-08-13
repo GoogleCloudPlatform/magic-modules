@@ -76,7 +76,7 @@ module Overrides
         check :exclude_import, type: :boolean, default: false
 
         check :timeouts, type: Api::Timeouts, default: Api::Timeouts.new
-        check :retry_predicates, type: Array, item_type: String
+        check :error_retry_predicates, type: Array, item_type: String
         check :schema_version, type: Integer
       end
 
