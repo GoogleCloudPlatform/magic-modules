@@ -50,6 +50,9 @@ module Overrides
 
           :timeouts,
 
+          # An array of function names that determine whether an error is retryable.
+          :error_retry_predicates,
+
           :schema_version
         ]
       end
@@ -73,6 +76,7 @@ module Overrides
         check :exclude_import, type: :boolean, default: false
 
         check :timeouts, type: Api::Timeouts, default: Api::Timeouts.new
+        check :error_retry_predicates, type: Array, item_type: String
         check :schema_version, type: Integer
       end
 
