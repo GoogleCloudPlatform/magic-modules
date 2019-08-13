@@ -1,0 +1,10 @@
+resource "google_project" "project" {
+	project_id = "%{pid}"
+	name = "%{pid}"
+	org_id = "%{orgid}"
+}
+
+resource "google_project_service" "project_service" {
+	project = "${google_project.project.id}"
+	service = "iap.googleapis.com"
+}

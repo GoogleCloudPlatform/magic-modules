@@ -31,6 +31,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
       custom_url_qualifier: 'templates/terraform/iam_custom_code/iap_web_type_url_qualifier.go.erb'
       custom_id_function: 'templates/terraform/iam_custom_code/iap_web_type_id_function.go.erb'
+      additional_setup: 'templates/terraform/examples/iap_project.tf.erb'
       optional_properties:
         - !ruby/object:Api::Type::String
           name: 'appEngineId'

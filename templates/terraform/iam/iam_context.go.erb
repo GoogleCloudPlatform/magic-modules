@@ -1,0 +1,4 @@
+context := map[string]interface{}{
+	"random_suffix": acctest.RandString(10),
+	"role":          "<%= object.iam_policy.allowed_iam_role -%>",
+}
