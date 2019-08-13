@@ -34,7 +34,7 @@ var iamBindingSchema = map[string]*schema.Schema{
 }
 
 func ResourceIamBinding(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc) *schema.Resource {
-	return ResourceIamBindingWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, false /* enableBatching */)
+	return ResourceIamBindingWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, IamBatchingDisabled)
 }
 
 // Resource that batches requests to the same IAM policy across multiple IAM fine-grained resources

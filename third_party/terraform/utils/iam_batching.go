@@ -8,6 +8,9 @@ import (
 
 const (
 	batchKeyTmplModifyIamPolicy = "%s modifyIamPolicy"
+
+	IamBatchingEnabled  = true
+	IamBatchingDisabled = false
 )
 
 func batchRequestModifyIamPolicy(updater ResourceIamUpdater, modify iamPolicyModifyFunc, config *Config, reqDesc string) error {

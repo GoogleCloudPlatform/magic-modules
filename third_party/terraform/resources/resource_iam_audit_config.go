@@ -39,7 +39,7 @@ var iamAuditConfigSchema = map[string]*schema.Schema{
 }
 
 func ResourceIamAuditConfig(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc) *schema.Resource {
-	return ResourceIamAuditConfigWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, false /*enableBatching*/)
+	return ResourceIamAuditConfigWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, IamBatchingDisabled)
 }
 
 func ResourceIamAuditConfigWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool) *schema.Resource {

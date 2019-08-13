@@ -58,7 +58,7 @@ func iamMemberImport(resourceIdParser resourceIdParserFunc) schema.StateFunc {
 }
 
 func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc) *schema.Resource {
-	return ResourceIamMemberWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, false /*enableBatching*/)
+	return ResourceIamMemberWithBatching(parentSpecificSchema, newUpdaterFunc, resourceIdParser, IamBatchingDisabled)
 }
 
 func ResourceIamMemberWithBatching(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc newResourceIamUpdaterFunc, resourceIdParser resourceIdParserFunc, enableBatching bool) *schema.Resource {
