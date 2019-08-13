@@ -29,9 +29,10 @@ objects:
     name: 'AppProfile'
     kind: 'bigtable#appProfile'
     base_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}
+    update_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}
+    delete_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}
     update_verb: :PATCH
     update_mask: true
-    delete_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}
     self_link: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
     description: |
       App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
