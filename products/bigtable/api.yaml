@@ -28,26 +28,35 @@ objects:
   - !ruby/object:Api::Resource
     name: 'AppProfile'
     kind: 'bigtable#appProfile'
-    base_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}
-    create_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}
-    update_url: projects/{{project}}/instances/{{instance}}/appProfiles?updateMask=
+    base_url: projects/{{project}}/instances/{{instance}}/appProfiles?appProfileId={{app_profile_id}}
     update_verb: :PATCH
-    delete_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings=true
+    update_mask: true
+    delete_url: projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}?ignoreWarnings={{ignore_warnings}}
     self_link: 'projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}'
     description: |
       App profile is a configuration object describing how Cloud Bigtable should treat traffic from a particular end user application.
+    parameters:
+      - !ruby/object:Api::Type::String
+        name: 'appProfileId'
+        description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
+        required: true
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::String
+        name: 'instance'
+        description: 'The name of the instance to create the app profile within.'
+        input: true
+        url_param_only: true
+      - !ruby/object:Api::Type::Boolean
+        name: 'ignoreWarnings'
+        description: 'If true, ignore safety checks when deleting the app profile.'
+        default_value: false
+        url_param_only: true
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
         description: 'The unique name of the requested app profile. Values are of the form `projects/<project>/instances/<instance>/appProfiles/<appProfileId>`.'
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'appProfileId'
-        description: 'The unique name of the app profile in the form `[_a-zA-Z0-9][-_.a-zA-Z0-9]*`.'
-        required: true
-      - !ruby/object:Api::Type::String
-        name: 'instance'
-        description: 'The name of the instance to create the app profile within.'
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
@@ -60,10 +69,14 @@ objects:
           If true, read/write requests are routed to the nearest cluster in the instance, and will fail over to the nearest cluster that is available
           in the event of transient errors or delays. Clusters in a region are considered equidistant. Choosing this option sacrifices read-your-writes
           consistency to improve availability.
+        input: true
       - !ruby/object:Api::Type::NestedObject
         name: 'singleClusterRouting'
         conflicts:
           - multiClusterRoutingUseAny
+        description: |
+          Use a single-cluster routing policy.
+        input: true
         properties:
             - !ruby/object:Api::Type::String
               name: 'clusterId'

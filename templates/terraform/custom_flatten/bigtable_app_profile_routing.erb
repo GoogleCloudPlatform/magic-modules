@@ -12,11 +12,10 @@
 	# See the License for the specific language governing permissions and
 	# limitations under the License.
 -%>
-	delete(obj, "appProfileId")
-	delete(obj, "instance")
+func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData) interface{} {
+    if v == nil {
+	    return false
+	}
 
-    if mc_routing := d.Get("multi_cluster_routing_use_any").(bool); mc_routing {
-        obj["multiClusterRoutingUseAny"] = bigtableadmin.MultiClusterRoutingUseAny{}
-    }
-
-    return obj, nil
+	return true
+}

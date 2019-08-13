@@ -16,9 +16,27 @@ overrides: !ruby/object:Overrides::ResourceOverrides
   AppProfile: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}/{{instance}}/{{app_profile_id}}"
     import_format: ["projects/{{project}}/instances/{{instance}}/appProfiles/{{app_profile_id}}"]
-    custom_code: !ruby/object:Provider::Terraform::CustomCode
-      encoder: templates/terraform/encoders/app_profile.erb
-      decoder: templates/terraform/decoders/app_profile.erb
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigtable_app_profile_multicluster"
+        primary_resource_id: "ap"
+        vars:
+          instance_name: "tf-test-instance-"
+          app_profile_name: "tf-test-profile-"
+        ignore_read_extra:
+          - "ignore_warnings"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "bigtable_app_profile_singlecluster"
+        primary_resource_id: "ap"
+        vars:
+          instance_name: "tf-test-instance-"
+          app_profile_name: "tf-test-profile-"
+        ignore_read_extra:
+          - "ignore_warnings"
+    properties:
+      multiClusterRoutingUseAny: !ruby/object:Overrides::Terraform::PropertyOverride
+        custom_expand: 'templates/terraform/custom_expand/bigtable_app_profile_routing.erb'
+        custom_flatten: 'templates/terraform/custom_flatten/bigtable_app_profile_routing.erb'
 
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
