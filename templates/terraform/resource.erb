@@ -160,7 +160,13 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     }
 
     log.Printf("[DEBUG] Creating new <%= object.name -%>: %#v", obj)
-    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutCreate) <%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+    res, err := sendRequestWithTimeout(config, "<%= object.create_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutCreate) <%= object.error_retry_predicates ? ", " + object.error_retry_predicates.join(',') : "" -%>)
     if err != nil {
         return fmt.Errorf("Error creating <%= object.name -%>: %s", err)
     }
@@ -173,12 +179,6 @@ func resource<%= resource_name -%>Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 <%  if !object.async.nil? && object.async.allow?('create') -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
 <% if object.autogen_async -%>
     waitErr := <%= client_name_camel -%>OperationWaitTime(
     config, res,<% if has_project -%> project, <% end -%> "Creating <%= object.name -%>",
@@ -217,7 +217,13 @@ func resource<%= resource_name -%>Read(d *schema.ResourceData, meta interface{})
         return err
     }
 
-res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil)
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+    res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, nil)
     if err != nil {
         return handleNotFoundError(err, d, fmt.Sprintf("<%= resource_name -%> %q", d.Id()))
     }
@@ -251,10 +257,6 @@ res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil
 <%  end -%>
 
 <%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
     if err := d.Set("project", project); err != nil {
         return fmt.Errorf("Error reading <%= object.name -%>: %s", err)
     }
@@ -300,6 +302,13 @@ res, err := sendRequest(config, "<%= object.read_verb.to_s.upcase -%>", url, nil
 <% if updatable?(object, object.root_properties) -%>
 func resource<%= resource_name -%>Update(d *schema.ResourceData, meta interface{}) error {
     config := meta.(*Config)
+
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
 
 <%  if object.input -%>
     d.Partial(true)
@@ -352,21 +361,15 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
             return err
         }
 <%      if object.async.nil? -%>
-        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+        _, err = sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      else -%>
-        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+        res, err := sendRequestWithTimeout(config, "<%= key[:update_verb] -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%      end -%>
         if err != nil {
             return fmt.Errorf("Error updating <%= object.name -%> %q: %s", d.Id(), err)
         }
 
 <%      if !object.async.nil? && object.async.allow?('update') -%>
-<%      if has_project -%>
-        project, err := getProject(d, config)
-        if err != nil {
-            return err
-        }
-<%      end -%>
 <% if object.autogen_async -%>
 
         err = <%= client_name_camel -%>OperationWaitTime(
@@ -446,9 +449,9 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
 <%= lines(compile('templates/terraform/update_mask.erb')) if object.update_mask -%>
 <%= lines(compile(object.custom_code.pre_update)) if object.custom_code.pre_update -%>
 <%  if object.async.nil? -%>
-    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+    _, err = sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <%  else -%>
-    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", url, obj, d.Timeout(schema.TimeoutUpdate))
+    res, err := sendRequestWithTimeout(config, "<%= object.update_verb -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutUpdate))
 <% end -%>
 
     if err != nil {
@@ -456,12 +459,6 @@ if <%= props.map { |prop| "d.HasChange(\"#{prop.name.underscore}\")" }.join ' ||
     }
 
 <%  if !object.async.nil? && object.async.allow?('update') -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
 <% if object.autogen_async && object.async.allow?('update') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
@@ -496,6 +493,13 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
 <% else -%>
     config := meta.(*Config)
 
+<%  if has_project -%>
+    project, err := getProject(d, config)
+    if err != nil {
+        return err
+    }
+<%  end -%>
+
 <%  if object.mutex -%>
     lockName, err := replaceVars(d, config, "<%= object.mutex -%>")
     if err != nil {
@@ -514,18 +518,13 @@ func resource<%= resource_name -%>Delete(d *schema.ResourceData, meta interface{
     var obj map[string]interface{}
 <%= lines(compile(object.custom_code.pre_delete)) if object.custom_code.pre_delete -%>
     log.Printf("[DEBUG] Deleting <%= object.name -%> %q", d.Id())
-    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", url, obj, d.Timeout(schema.TimeoutDelete))
+
+    res, err := sendRequestWithTimeout(config, "<%= object.delete_verb.to_s.upcase -%>", <% if has_project %>project<% else %>""<% end %>, url, obj, d.Timeout(schema.TimeoutDelete))
     if err != nil {
         return handleNotFoundError(err, d, "<%= object.name -%>")
     }
 
 <%  if !object.async.nil? && object.async.allow?('delete') -%>
-<%  if has_project -%>
-    project, err := getProject(d, config)
-    if err != nil {
-        return err
-    }
-<%  end -%>
 <% if object.autogen_async && object.async.allow?('delete') -%>
 
     err = <%= client_name_camel -%>OperationWaitTime(
