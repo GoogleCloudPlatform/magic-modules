@@ -26,33 +26,9 @@ apis_required:
     url: https://console.cloud.google.com/apis/library/iap.googleapis.com/
 objects:
   - !ruby/object:Api::Resource
-    name: 'Tunnel'
-    base_url: 'projects/{{project}}/iap_tunnel'
-    self_link: 'projects/{{project}}/iap_tunnel'
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      exclude: true
-      method_name_separator: ':'
-      parent_resource_required: false
-      fetch_iam_policy_verb: 'POST'
-      allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
-    exclude_resource: true
-    description: |
-      Only used to generate IAM resources
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: Dummy property.
-        required: true
-  - !ruby/object:Api::Resource
     name: 'Web'
     base_url: 'projects/{{project}}/iap_web'
     self_link: 'projects/{{project}}/iap_web'
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      exclude: false
-      method_name_separator: ':'
-      parent_resource_required: false
-      fetch_iam_policy_verb: 'POST'
-      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
     exclude_resource: true
     description: |
       Only used to generate IAM resources
@@ -65,42 +41,6 @@ objects:
     name: 'WebType'
     base_url: 'projects/{{project}}/iap_web/compute'
     self_link: 'projects/{{project}}/iap_web/compute'
-    exclude_resource: true
-    description: |
-      Only used to generate IAM resources
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: Dummy property.
-        required: true
-  - !ruby/object:Api::Resource
-    name: 'Zone'
-    base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}'
-    self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}'
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      exclude: true
-      method_name_separator: ':'
-      parent_resource_required: false
-      fetch_iam_policy_verb: 'POST'
-      allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
-    exclude_resource: true
-    description: |
-      Only used to generate IAM resources
-    properties:
-      - !ruby/object:Api::Type::String
-        name: 'name'
-        description: Dummy property.
-        required: true
-  - !ruby/object:Api::Resource
-    name: 'Instance'
-    base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{instance}}'
-    self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{instance}}'
-    iam_policy: !ruby/object:Api::Resource::IamPolicy
-      exclude: true
-      method_name_separator: ':'
-      parent_resource_type: 'google_compute_instance'
-      fetch_iam_policy_verb: 'POST'
-      allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
     exclude_resource: true
     description: |
       Only used to generate IAM resources

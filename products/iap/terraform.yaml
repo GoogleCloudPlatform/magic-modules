@@ -13,12 +13,15 @@
 
 --- !ruby/object:Provider::Terraform::Config
 overrides: !ruby/object:Overrides::ResourceOverrides
-  Tunnel: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/iap_tunnel"
-    import_format: ["projects/{{project}}/iap_tunnel"]
   Web: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "projects/{{project}}/iap_web"
     import_format: ["projects/{{project}}/iap_web"]
+    iam_policy: !ruby/object:Api::Resource::IamPolicy
+      exclude: false
+      method_name_separator: ':'
+      parent_resource_required: false
+      fetch_iam_policy_verb: 'POST'
+      allowed_iam_role: 'roles/iap.httpsResourceAccessor'
   WebType: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
@@ -32,21 +35,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         - !ruby/object:Api::Type::String
           name: 'appEngineId'
           description: Dummy property.
-    id_format: "projects/{{project}}/iap_web/{{web_type}}"
+    id_format: "projects/{{project}}/iap_web"
     import_format: ["projects/{{project}}/iap_web/compute", "projects/{{project}}/iap_web/appengine-{{appEngineId}}"]
-  Zone: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/iap_tunnel/zones/{{zone}}"
-    import_format: ["projects/{{project}}/iap_tunnel/zones/{{zone}}"]
-  Instance: !ruby/object:Overrides::Terraform::ResourceOverride
-    id_format: "projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{instance}}"
-    import_format: ["projects/{{project}}/iap_tunnel/zones/{{zone}}/instances{{instance}}"]
-    examples:
-      - !ruby/object:Provider::Terraform::Examples
-        name: "iap_compute_instance"
-        primary_resource_id: "test"
-        primary_resource_name: "fmt.Sprintf(\"my-instance%s\", context[\"random_suffix\"])"
-        vars:
-          instance_name: "my-instance"
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
