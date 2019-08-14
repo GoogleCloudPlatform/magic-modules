@@ -175,9 +175,6 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 			err = iamPolicyReadModifyWrite(updater, modifyF)
 		}
 		if err != nil {
-			return err
-		}
-		if err != nil {
 			return handleNotFoundError(err, d, fmt.Sprintf("Resource %q for IAM binding with role %q", updater.DescribeResource(), binding.Role))
 		}
 
