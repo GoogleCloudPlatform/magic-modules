@@ -1070,6 +1070,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
         is_set: true
       snapshotSchedulePolicy.snapshotProperties.storageLocations: !ruby/object:Overrides::Terraform::PropertyOverride
         is_set: true
+  Reservation: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "reservation_basic"
+        primary_resource_id: "gce_reservation"
+        vars:
+          reservation_name: "gce-reservation"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        exclude: true
   Route: !ruby/object:Overrides::Terraform::ResourceOverride
     examples:
       - !ruby/object:Provider::Terraform::Examples
