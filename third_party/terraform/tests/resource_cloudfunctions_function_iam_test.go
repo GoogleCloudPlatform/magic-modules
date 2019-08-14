@@ -2,7 +2,6 @@ package google
 
 import (
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -25,9 +24,6 @@ func TestAccCloudFunctionsFunctionIamBinding(t *testing.T) {
 	project := getTestRegionFromEnv()
 	region := getTestRegionFromEnv()
 	importId := fmt.Sprintf("%s/%s/%s %s", project, region, function, role)
-
-	cfg := testAccCloudFunctionsFunctionIamBinding_basic(function, serviceAccount, zipFilePath, role, randSuffix)
-	log.Printf(cfg)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

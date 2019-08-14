@@ -33,8 +33,6 @@ type CloudFunctionsFunctionIamUpdater struct {
 	project  string
 	region   string
 	function string
-
-	d      *schema.ResourceData
 	Config *Config
 }
 
