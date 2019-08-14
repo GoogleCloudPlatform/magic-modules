@@ -989,7 +989,7 @@ func TestIamCreateIamAuditConfigsMap(t *testing.T) {
 	for _, tc := range testCases {
 		got := createIamAuditConfigsMap(tc.input)
 		if !reflect.DeepEqual(got, tc.expect) {
-			t.Errorf("Unexpected value for subtractFromAuditConfigss(%s).\nActual: %#v\nExpected: %#v\n",
+			t.Errorf("Unexpected value for createIamAuditConfigsMap(%s).\nActual: %#v\nExpected: %#v\n",
 				debugPrintAuditConfigs(tc.input), got, tc.expect)
 		}
 	}
