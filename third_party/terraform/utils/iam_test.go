@@ -694,7 +694,7 @@ func TestIamMergeAuditConfigs(t *testing.T) {
 	for _, tc := range testCases {
 		got := mergeAuditConfigs(tc.input)
 		if !compareAuditConfigs(got, tc.expect) {
-			t.Errorf("Unexpected value for mergeAuditConfigss(%s).\nActual: %s\nExpected: %s\n",
+			t.Errorf("Unexpected value for mergeAuditConfigs(%s).\nActual: %s\nExpected: %s\n",
 				debugPrintAuditConfigs(tc.input), debugPrintAuditConfigs(got), debugPrintAuditConfigs(tc.expect))
 		}
 	}
