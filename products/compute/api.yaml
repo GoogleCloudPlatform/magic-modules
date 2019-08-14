@@ -2309,7 +2309,7 @@ objects:
           The address must be a global IP for external global forwarding rules.
 
           If this field is empty, an ephemeral IPv4 address from the same scope
-          (global) is closen. Global forwarding rules supports either IPv4 or IPv6.
+          (global) is chosen. Global forwarding rules supports either IPv4 or IPv6.
 
           When the load balancing scheme is INTERNAL_SELF_MANAGED, this must be
           a URL reference to an existing Address resource (internal regional
