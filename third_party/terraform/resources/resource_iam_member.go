@@ -95,7 +95,7 @@ func resourceIamMemberCreate(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			return nil
 		}
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config,
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config,
 				fmt.Sprintf("Create IAM Members %s %+v for %q", memberBind.Role, memberBind.Members[0], updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)
@@ -169,7 +169,7 @@ func resourceIamMemberDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBat
 			return nil
 		}
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config,
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config,
 				fmt.Sprintf("Delete IAM Members %s %s for %q", memberBind.Role, memberBind.Members[0], updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)

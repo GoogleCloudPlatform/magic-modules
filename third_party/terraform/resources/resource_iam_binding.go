@@ -67,7 +67,7 @@ func resourceIamBindingCreateUpdate(newUpdaterFunc newResourceIamUpdaterFunc, en
 		}
 
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Set IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)
@@ -169,7 +169,7 @@ func resourceIamBindingDelete(newUpdaterFunc newResourceIamUpdaterFunc, enableBa
 		}
 
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Delete IAM Binding for role %q on %q", binding.Role, updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)

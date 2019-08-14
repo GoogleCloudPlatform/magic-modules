@@ -70,7 +70,7 @@ func resourceIamAuditConfigCreate(newUpdaterFunc newResourceIamUpdaterFunc, enab
 		}
 
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Add audit config for service %s on resource %q", ac.Service, updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)
@@ -165,7 +165,7 @@ func resourceIamAuditConfigUpdate(newUpdaterFunc newResourceIamUpdaterFunc, enab
 			return nil
 		}
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Overwrite audit config for service %s on resource %q", ac.Service, updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)
@@ -192,7 +192,7 @@ func resourceIamAuditConfigDelete(newUpdaterFunc newResourceIamUpdaterFunc, enab
 			return nil
 		}
 		if enableBatching {
-			err = batchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
+			err = BatchRequestModifyIamPolicy(updater, modifyF, config, fmt.Sprintf(
 				"Delete audit config for service %s on resource %q", ac.Service, updater.DescribeResource()))
 		} else {
 			err = iamPolicyReadModifyWrite(updater, modifyF)
