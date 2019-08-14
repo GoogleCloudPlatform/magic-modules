@@ -49,6 +49,8 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           An attestation by this attestor is stored as a Container Analysis
           ATTESTATION_AUTHORITY Occurrence that names a container image
           and that links to this Note.
+      attestationAuthorityNote.publicKeys.id: !ruby/object:Overrides::Terraform::PropertyOverride
+        default_from_api: true
   Policy: !ruby/object:Overrides::Terraform::ResourceOverride
     id_format: "{{project}}"
     import_format: ["projects/{{project}}"]
