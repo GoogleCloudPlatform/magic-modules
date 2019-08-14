@@ -1475,7 +1475,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::Time
         name: 'lastDetachTimestamp'
-        description: 'Last dettach timestamp in RFC3339 text format.'
+        description: 'Last detach timestamp in RFC3339 text format.'
         output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
@@ -5964,7 +5964,7 @@ objects:
         output: true
       - !ruby/object:Api::Type::Time
         name: 'lastDetachTimestamp'
-        description: 'Last dettach timestamp in RFC3339 text format.'
+        description: 'Last detach timestamp in RFC3339 text format.'
         output: true
       - !ruby/object:Api::Type::KeyValuePairs
         name: 'labels'
