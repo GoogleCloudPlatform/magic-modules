@@ -39,6 +39,19 @@ if _, ok := d.GetOk("https_health_check"); ok {
 	obj["type"] = "HTTPS"
 	return obj, nil
 }
+if _, ok := d.GetOk("http2_health_check"); ok {
+	hc := d.Get("http2_health_check").([]interface{})[0]
+	ps := hc.(map[string]interface{})["port_specification"]
+
+	if ps == "USE_FIXED_PORT" || ps == "" {
+		m := obj["http2HealthCheck"].(map[string]interface{})
+		if m["port"] == nil {
+			m["port"] = 443
+		}
+	}
+	obj["type"] = "HTTP2"
+	return obj, nil
+}
 if _, ok := d.GetOk("tcp_health_check"); ok {
 	hc := d.Get("tcp_health_check").([]interface{})[0]
 	ps := hc.(map[string]interface{})["port_specification"]

@@ -1,3 +1,4 @@
+<% autogen_exception -%>
 package google
 
 import (
@@ -8,36 +9,38 @@ import (
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+        computeBeta "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/compute/v1"
 )
 
-func TestAccComputeHealthCheck_tcp(t *testing.T) {
+<% unless version == 'ga' -%>
+func TestAccComputeRegionHealthCheck_tcp(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_tcp(hckName),
+				Config: testAccComputeRegionHealthCheck_tcp(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						3, 3, &healthCheck),
-					testAccCheckComputeHealthCheckTcpPort(80, &healthCheck),
-					testAccCheckComputeHealthCheckPortSpec(
+					testAccCheckComputeRegionHealthCheckTcpPort(80, &healthCheck),
+					testAccCheckComputeRegionHealthCheckPortSpec(
 						"TCP", "", &healthCheck,
 					),
 				),
 			},
 			{
-				ResourceName:      "google_compute_health_check.foobar",
+				ResourceName:      "google_compute_region_health_check.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -45,65 +48,65 @@ func TestAccComputeHealthCheck_tcp(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_tcp_update(t *testing.T) {
+func TestAccComputeRegionHealthCheck_tcp_update(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_tcp(hckName),
+				Config: testAccComputeRegionHealthCheck_tcp(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						3, 3, &healthCheck),
-					testAccCheckComputeHealthCheckTcpPort(80, &healthCheck),
+					testAccCheckComputeRegionHealthCheckTcpPort(80, &healthCheck),
 				),
 			},
 			{
-				Config: testAccComputeHealthCheck_tcp_update(hckName),
+				Config: testAccComputeRegionHealthCheck_tcp_update(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						10, 10, &healthCheck),
-					testAccCheckComputeHealthCheckTcpPort(8080, &healthCheck),
+					testAccCheckComputeRegionHealthCheckTcpPort(8080, &healthCheck),
 				),
 			},
 		},
 	})
 }
 
-func TestAccComputeHealthCheck_ssl(t *testing.T) {
+func TestAccComputeRegionHealthCheck_ssl(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_ssl(hckName),
+				Config: testAccComputeRegionHealthCheck_ssl(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						3, 3, &healthCheck),
 				),
 			},
 			{
-				ResourceName:      "google_compute_health_check.foobar",
+				ResourceName:      "google_compute_region_health_check.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -111,24 +114,24 @@ func TestAccComputeHealthCheck_ssl(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_ssl_port_spec(t *testing.T) {
+func TestAccComputeRegionHealthCheck_ssl_port_spec(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_ssl_fixed_port(hckName),
+				Config: testAccComputeRegionHealthCheck_ssl_fixed_port(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckPortSpec(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckPortSpec(
 						"SSL", "USE_FIXED_PORT", &healthCheck),
 				),
 			},
@@ -136,29 +139,29 @@ func TestAccComputeHealthCheck_ssl_port_spec(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_http(t *testing.T) {
+func TestAccComputeRegionHealthCheck_http(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_http(hckName),
+				Config: testAccComputeRegionHealthCheck_http(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						3, 3, &healthCheck),
 				),
 			},
 			{
-				ResourceName:      "google_compute_health_check.foobar",
+				ResourceName:      "google_compute_region_health_check.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -166,28 +169,28 @@ func TestAccComputeHealthCheck_http(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_http_port_spec(t *testing.T) {
+func TestAccComputeRegionHealthCheck_http_port_spec(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeHealthCheck_http_port_spec(hckName),
+				Config:      testAccComputeRegionHealthCheck_http_port_spec(hckName),
 				ExpectError: regexp.MustCompile("Error in http_health_check: Must specify port_name when using USE_NAMED_PORT as port_specification."),
 			},
 			{
-				Config: testAccComputeHealthCheck_http_named_port(hckName),
+				Config: testAccComputeRegionHealthCheck_http_named_port(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckPortSpec(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckPortSpec(
 						"HTTP", "USE_NAMED_PORT", &healthCheck,
 					),
 				),
@@ -196,29 +199,29 @@ func TestAccComputeHealthCheck_http_port_spec(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_https(t *testing.T) {
+func TestAccComputeRegionHealthCheck_https(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_https(hckName),
+				Config: testAccComputeRegionHealthCheck_https(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						3, 3, &healthCheck),
 				),
 			},
 			{
-				ResourceName:      "google_compute_health_check.foobar",
+				ResourceName:      "google_compute_region_health_check.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -226,30 +229,30 @@ func TestAccComputeHealthCheck_https(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_https_serving_port(t *testing.T) {
+func TestAccComputeRegionHealthCheck_https_serving_port(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_https_serving_port(hckName),
+				Config: testAccComputeRegionHealthCheck_https_serving_port(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckPortSpec(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckPortSpec(
 						"HTTPS", "USE_SERVING_PORT", &healthCheck,
 					),
 				),
 			},
 			{
-				ResourceName:      "google_compute_health_check.foobar",
+				ResourceName:      "google_compute_region_health_check.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -257,29 +260,29 @@ func TestAccComputeHealthCheck_https_serving_port(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_http2(t *testing.T) {
+func TestAccComputeRegionHealthCheck_http2(t *testing.T) {
 	t.Parallel()
 
-	var healthCheck compute.HealthCheck
+	var healthCheck computeBeta.HealthCheck
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_http2(hckName),
+				Config: testAccComputeRegionHealthCheck_http2(hckName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeHealthCheckExists(
-						"google_compute_health_check.foobar", &healthCheck),
-					testAccCheckComputeHealthCheckThresholds(
+					testAccCheckComputeRegionHealthCheckExists(
+						"google_compute_region_health_check.foobar", &healthCheck),
+					testAccCheckComputeRegionHealthCheckThresholds(
 						3, 3, &healthCheck),
 				),
 			},
 			{
-				ResourceName:      "google_compute_health_check.foobar",
+				ResourceName:      "google_compute_region_health_check.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -287,7 +290,7 @@ func TestAccComputeHealthCheck_http2(t *testing.T) {
 	})
 }
 
-func TestAccComputeHealthCheck_typeTransition(t *testing.T) {
+func TestAccComputeRegionHealthCheck_typeTransition(t *testing.T) {
 	t.Parallel()
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -295,31 +298,31 @@ func TestAccComputeHealthCheck_typeTransition(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeHealthCheck_https(hckName),
+				Config: testAccComputeRegionHealthCheck_https(hckName),
 			},
 			{
-				Config: testAccComputeHealthCheck_http(hckName),
+				Config: testAccComputeRegionHealthCheck_http(hckName),
 			},
 			{
-				Config: testAccComputeHealthCheck_ssl(hckName),
+				Config: testAccComputeRegionHealthCheck_ssl(hckName),
 			},
 			{
-				Config: testAccComputeHealthCheck_tcp(hckName),
+				Config: testAccComputeRegionHealthCheck_tcp(hckName),
 			},
 			{
-				Config: testAccComputeHealthCheck_http2(hckName),
+				Config: testAccComputeRegionHealthCheck_http2(hckName),
 			},
 			{
-				Config: testAccComputeHealthCheck_https(hckName),
+				Config: testAccComputeRegionHealthCheck_https(hckName),
 			},
 		},
 	})
 }
 
-func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
+func TestAccComputeRegionHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 	t.Parallel()
 
 	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))
@@ -327,17 +330,17 @@ func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeHealthCheckDestroy,
+		CheckDestroy: testAccCheckComputeRegionHealthCheckDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeHealthCheck_tcpAndSsl_shouldFail(hckName),
+				Config:      testAccComputeRegionHealthCheck_tcpAndSsl_shouldFail(hckName),
 				ExpectError: regexp.MustCompile("conflicts with tcp_health_check"),
 			},
 		},
 	})
 }
 
-func testAccCheckComputeHealthCheckExists(n string, healthCheck *compute.HealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeRegionHealthCheckExists(n string, healthCheck *computeBeta.HealthCheck) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -350,8 +353,8 @@ func testAccCheckComputeHealthCheckExists(n string, healthCheck *compute.HealthC
 
 		config := testAccProvider.Meta().(*Config)
 
-		found, err := config.clientCompute.HealthChecks.Get(
-			config.Project, rs.Primary.ID).Do()
+		found, err := config.clientComputeBeta.RegionHealthChecks.Get(
+			config.Project, config.Region, rs.Primary.ID).Do()
 		if err != nil {
 			return err
 		}
@@ -366,7 +369,7 @@ func testAccCheckComputeHealthCheckExists(n string, healthCheck *compute.HealthC
 	}
 }
 
-func testAccCheckComputeHealthCheckThresholds(healthy, unhealthy int64, healthCheck *compute.HealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeRegionHealthCheckThresholds(healthy, unhealthy int64, healthCheck *computeBeta.HealthCheck) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if healthCheck.HealthyThreshold != healthy {
 			return fmt.Errorf("HealthyThreshold doesn't match: expected %d, got %d", healthy, healthCheck.HealthyThreshold)
@@ -380,7 +383,7 @@ func testAccCheckComputeHealthCheckThresholds(healthy, unhealthy int64, healthCh
 	}
 }
 
-func testAccCheckComputeHealthCheckTcpPort(port int64, healthCheck *compute.HealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeRegionHealthCheckTcpPort(port int64, healthCheck *computeBeta.HealthCheck) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if healthCheck.TcpHealthCheck.Port != port {
 			return fmt.Errorf("Port doesn't match: expected %v, got %v", port, healthCheck.TcpHealthCheck.Port)
@@ -389,7 +392,7 @@ func testAccCheckComputeHealthCheckTcpPort(port int64, healthCheck *compute.Heal
 	}
 }
 
-func testAccCheckComputeHealthCheckPortSpec(blockType, portSpec string, healthCheck *compute.HealthCheck) resource.TestCheckFunc {
+func testAccCheckComputeRegionHealthCheckPortSpec(blockType, portSpec string, healthCheck *computeBeta.HealthCheck) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		var actualPortSpec string
 
@@ -412,9 +415,9 @@ func testAccCheckComputeHealthCheckPortSpec(blockType, portSpec string, healthCh
 	}
 }
 
-func testAccComputeHealthCheck_tcp(hckName string) string {
+func testAccComputeRegionHealthCheck_tcp(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -427,9 +430,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_tcp_update(hckName string) string {
+func testAccComputeRegionHealthCheck_tcp_update(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource updated for Terraform acceptance testing"
 	healthy_threshold = 10
@@ -443,9 +446,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_ssl(hckName string) string {
+func testAccComputeRegionHealthCheck_ssl(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -459,9 +462,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_ssl_fixed_port(hckName string) string {
+func testAccComputeRegionHealthCheck_ssl_fixed_port(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -476,9 +479,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_http(hckName string) string {
+func testAccComputeRegionHealthCheck_http(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -492,9 +495,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_http_port_spec(hckName string) string {
+func testAccComputeRegionHealthCheck_http_port_spec(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -508,9 +511,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_http_named_port(hckName string) string {
+func testAccComputeRegionHealthCheck_http_named_port(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -525,9 +528,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_https(hckName string) string {
+func testAccComputeRegionHealthCheck_https(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -541,9 +544,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_https_serving_port(hckName string) string {
+func testAccComputeRegionHealthCheck_https_serving_port(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -557,9 +560,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_http2(hckName string) string {
+func testAccComputeRegionHealthCheck_http2(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -573,9 +576,9 @@ resource "google_compute_health_check" "foobar" {
 `, hckName)
 }
 
-func testAccComputeHealthCheck_tcpAndSsl_shouldFail(hckName string) string {
+func testAccComputeRegionHealthCheck_tcpAndSsl_shouldFail(hckName string) string {
 	return fmt.Sprintf(`
-resource "google_compute_health_check" "foobar" {
+resource "google_compute_region_health_check" "foobar" {
 	check_interval_sec = 3
 	description = "Resource created for Terraform acceptance testing"
 	healthy_threshold = 3
@@ -590,3 +593,4 @@ resource "google_compute_health_check" "foobar" {
 }
 `, hckName)
 }
+<% end -%>
