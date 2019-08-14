@@ -40,6 +40,10 @@ objects:
           A user-defined name of the function. Function names must
           be unique globally and match pattern `projects/*/locations/*/functions/*`.
       - !ruby/object:Api::Type::String
+        name: 'location'
+        required: true
+        description: The location of this cloud function.
+      - !ruby/object:Api::Type::String
         name: 'description'
         description: 'User-provided description of a function.'
       - !ruby/object:Api::Type::Enum

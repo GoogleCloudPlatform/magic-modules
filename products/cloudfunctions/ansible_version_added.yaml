@@ -7,6 +7,8 @@
     :version_added: '2.9'
     :name:
       :version_added: '2.9'
+    :location:
+      :version_added: '2.9'
     :description:
       :version_added: '2.9'
     :entryPoint:

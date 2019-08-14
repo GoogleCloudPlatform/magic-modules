@@ -12,7 +12,7 @@
 # limitations under the License.
 --- !ruby/object:Provider::Ansible::Example
 task: !ruby/object:Provider::Ansible::Task
-  name: gcp_cloud_functions_cloud_function
+  name: gcp_cloudfunctions_cloud_function
   code:
     name: 'projects/<%= ctx[:project] %>/locations/us-west1/<%= ctx[:name] -%>'
     location: 'us-west1'
