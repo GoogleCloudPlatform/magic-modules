@@ -13,7 +13,7 @@ const (
 	IamBatchingDisabled = false
 )
 
-func batchRequestModifyIamPolicy(updater ResourceIamUpdater, modify iamPolicyModifyFunc, config *Config, reqDesc string) error {
+func BatchRequestModifyIamPolicy(updater ResourceIamUpdater, modify iamPolicyModifyFunc, config *Config, reqDesc string) error {
 	batchKey := fmt.Sprintf(batchKeyTmplModifyIamPolicy, updater.GetMutexKey())
 
 	request := &BatchRequest{
