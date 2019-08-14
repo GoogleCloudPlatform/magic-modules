@@ -185,15 +185,15 @@ resource "google_bigquery_table" "test" {
   {
     "name": "ts",
     "type": "TIMESTAMP"
-	},
-	{
-		"name": "some_string",
+  },
+  {
+    "name": "some_string",
     "type": "STRING"
-	},
-	{
-		"name": "some_int",
+  },
+  {
+    "name": "some_int",
     "type": "INTEGER"
-	},
+  },
   {
     "name": "city",
     "type": "RECORD",

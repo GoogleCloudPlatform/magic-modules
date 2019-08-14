@@ -308,7 +308,8 @@ func resourceBigQueryTable() *schema.Resource {
 			"clustering": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
+                                ForceNew: true,
+                                MaxItems: 4,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
