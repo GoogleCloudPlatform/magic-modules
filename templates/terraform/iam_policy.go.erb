@@ -92,9 +92,10 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	for k, v := range m {
 		values[k] = v
 	}
+<%# If we didn't find the URL qualifier in the resource short/long name then try to set from config -%>
 <% resource_params.each do |param| -%>
-	if _, ok := values["<%= param -%>"]; !ok {
-		if v, ok2 := d.GetOkExists("<%= param -%>"); ok2 {
+	if _, found := values["<%= param -%>"]; !found {
+		if v, ok := d.GetOkExists("<%= param -%>"); ok {
 			values["<%= param -%>"] = v.(string)
 		}
 	}
