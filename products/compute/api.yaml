@@ -1995,7 +1995,7 @@ objects:
           the load balanced IP should belong to for this Forwarding Rule. If
           this field is not specified, the default network will be used.
           This field is only used for INTERNAL load balancing.
-      # TODO(nelsonjr): When implementing new types enable convering the
+      # TODO(nelsonjr): When implementing new types enable converting the
       # manifest input from a single value to a range of form NN-NN. The API
       # accepts a single value, e.g. '80', but the API stores and returns
       # '80-80'. This causes idempotency false positive.
@@ -2399,7 +2399,7 @@ objects:
           identifies the network that the load balanced IP should belong to
           for this global forwarding rule. If this field is not specified,
           the default network will be used.
-      # TODO(nelsonjr): When implementing new types enable convering the
+      # TODO(nelsonjr): When implementing new types enable converting the
       # manifest input from a single value to a range of form NN-NN. The API
       # accepts a single value, e.g. '80', but the API stores and returns
       # '80-80'. This causes idempotency false positive.
