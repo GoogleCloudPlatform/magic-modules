@@ -1,4 +1,9 @@
 context := map[string]interface{}{
 	"random_suffix": acctest.RandString(10),
 	"role":          "<%= object.iam_policy.allowed_iam_role -%>",
+<% example.test_env_vars.each do |var_name, var_type| -%>
+<% if var_type == :ORG_ID  -%>
+	"<%= var_name -%>": getTestOrgFromEnv(t),
+<% end -%>
+<% end -%>
 }

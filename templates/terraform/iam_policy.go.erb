@@ -83,11 +83,8 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	values["project"] = project
 <% end -%>
 
-<% if object.iam_policy.parent_resource_required -%>
-	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= object.name.downcase -%>").(string))
-<% else -%>
-	m, err := getDefaultValues("<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.first() -%>", d, config)
-<% end -%>
+	m, err := getImportIdQualifiers([]string{"<%= import_id_formats(object).map{|s| format2regex s}.map{|s| s.gsub('<name>', "<#{object.name.underscore}>")}.join('","') -%>"}, d, config, d.Get("<%= resource_params.last -%>").(string))
+
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +92,13 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 	for k, v := range m {
 		values[k] = v
 	}
+<% resource_params.each do |param| -%>
+	if _, ok := values["<%= param -%>"]; !ok {
+		if v, ok2 := d.GetOkExists("<%= param -%>"); ok2 {
+			values["<%= param -%>"] = v.(string)
+		}
+	}
+<% end -%>
 
 	u := &<%= resource_name -%>IamUpdater{
 <% resource_params.each do |param| -%>
@@ -142,8 +146,10 @@ func <%= resource_name -%>IdParseFunc(d *schema.ResourceData, config *Config) er
 		d:       d,
 		Config:  config,
 	}
-<% if object.iam_policy.parent_resource_required -%>
-	d.Set("<%= object.name.underscore -%>", u.GetResourceId())
+<% if resource_params.last == 'project' -%>
+	d.Set("project", u.project)
+<% else -%>
+	d.Set("<%= resource_params.last -%>", u.GetResourceId())
 <% end -%>
 <% object.iam_policy.optional_properties.each do |prop| -%>
 	if u.<%= prop.name.underscore -%> != "" {

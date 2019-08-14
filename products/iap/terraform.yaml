@@ -19,25 +19,40 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
-      parent_resource_required: false
+      parent_resource_type: 'google_project_service'
       fetch_iam_policy_verb: 'POST'
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      parent_resource_attribute: 'project'
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_project"
+        primary_resource_id: "project_service"
+        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        test_env_vars:
+          org_id: :ORG_ID
   WebType: !ruby/object:Overrides::Terraform::ResourceOverride
     iam_policy: !ruby/object:Api::Resource::IamPolicy
       exclude: false
       method_name_separator: ':'
-      parent_resource_required: false
+      parent_resource_type: 'google_project_service'
       fetch_iam_policy_verb: 'POST'
       allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+      parent_resource_attribute: 'project'
       custom_url_qualifier: 'templates/terraform/iam_custom_code/iap_web_type_url_qualifier.go.erb'
       custom_id_function: 'templates/terraform/iam_custom_code/iap_web_type_id_function.go.erb'
-      additional_setup: 'templates/terraform/examples/iap_project.tf.erb'
       optional_properties:
         - !ruby/object:Api::Type::String
           name: 'appEngineId'
           description: Dummy property.
     id_format: "projects/{{project}}/iap_web"
     import_format: ["projects/{{project}}/iap_web/compute", "projects/{{project}}/iap_web/appengine-{{appEngineId}}"]
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "iap_project"
+        primary_resource_id: "project_service"
+        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        test_env_vars:
+          org_id: :ORG_ID
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.

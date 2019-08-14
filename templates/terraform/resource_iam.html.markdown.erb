@@ -81,9 +81,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= terraform_name -%>_policy" "editor" {
-<% if object.iam_policy.parent_resource_required -%>
   <%= object.name.underscore -%>       = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
-<% end -%>
   policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 ```
@@ -92,9 +90,7 @@ resource "<%= terraform_name -%>_policy" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_binding" "editor" {
-<% if object.iam_policy.parent_resource_required -%>
   <%= object.name.underscore -%>   = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
-<% end -%>
   role    = "<%= object.iam_policy.allowed_iam_role -%>"
   members = [
     "user:jane@example.com",
@@ -106,9 +102,7 @@ resource "<%= terraform_name -%>_binding" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_member" "editor" {
-<% if object.iam_policy.parent_resource_required -%>
   <%= object.name.underscore -%>  = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
-<% end -%>
   role   = "<%= object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
 }
@@ -118,10 +112,8 @@ resource "<%= terraform_name -%>_member" "editor" {
 
 The following arguments are supported:
 
-<% if object.iam_policy.parent_resource_required -%>
 * `<%= object.name.downcase -%>` - (Required) The <%= object.name.downcase -%> name or id to bind to attach 
 IAM policy to.
-<% end -%>
 
 * `project` - (Optional) The project in which the resource belongs. If it
     is not provided, the provider project is used.
@@ -151,11 +143,11 @@ IAM policy to.
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `etag` - (Computed) The etag of the <% if object.iam_policy.parent_resource_required -%><%= object.name.downcase -%>'s <% end -%>IAM policy.
+* `etag` - (Computed) The etag of the <%= object.name.downcase -%>'s IAM policy.
 
 ## Import
 
-<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project<% if object.iam_policy.parent_resource_required -%>, <%= object.name.downcase -%> name<% end -%>, role and member.
+<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, <%= object.name.downcase -%> name, role and member.
 
 ```
 $ terraform import <%= terraform_name -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%>

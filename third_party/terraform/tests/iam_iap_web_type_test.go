@@ -128,15 +128,22 @@ resource "google_project" "my_project" {
   org_id     = "%{org}"
 }
 
+resource "google_project_service" "project_service" {
+	project = "${google_project.my_project.id}"
+	service = "iap.googleapis.com"
+}
+
 resource "google_app_engine_application" "app" {
   project     = "${google_project.my_project.project_id}"
   location_id = "us-central"
 }
 
 resource "google_iap_web_type_iam_member" "foo" {
+	project       = google_project.my_project.project_id
 	app_engine_id = google_app_engine_application.app.app_id
 	role          = "%{role}"
 	member        = "user:admin@hashicorptest.com"
+	depends_on    = [google_project_service.project_service]
 }
 `, context)
 }
@@ -156,14 +163,21 @@ resource "google_project" "my_project" {
   org_id     = "%{org}"
 }
 
+resource "google_project_service" "project_service" {
+	project = "${google_project.my_project.id}"
+	service = "iap.googleapis.com"
+}
+
 resource "google_app_engine_application" "app" {
   project     = "${google_project.my_project.project_id}"
   location_id = "us-central"
 }
 
 resource "google_iap_web_type_iam_policy" "foo" {
+	project       = google_project.my_project.project_id
 	app_engine_id = google_app_engine_application.app.app_id
 	policy_data   = "${data.google_iam_policy.foo.policy_data}"
+	depends_on    = [google_project_service.project_service]
 }
 `, context)
 }
@@ -176,15 +190,22 @@ resource "google_project" "my_project" {
   org_id     = "%{org}"
 }
 
+resource "google_project_service" "project_service" {
+	project = "${google_project.my_project.id}"
+	service = "iap.googleapis.com"
+}
+
 resource "google_app_engine_application" "app" {
   project     = "${google_project.my_project.project_id}"
   location_id = "us-central"
 }
 
 resource "google_iap_web_type_iam_binding" "foo" {
+	project       = google_project.my_project.project_id
 	app_engine_id = google_app_engine_application.app.app_id
 	role          = "%{role}"
 	members       = ["user:admin@hashicorptest.com"]
+	depends_on    = [google_project_service.project_service]
 }
 `, context)
 }
@@ -197,15 +218,22 @@ resource "google_project" "my_project" {
   org_id     = "%{org}"
 }
 
+resource "google_project_service" "project_service" {
+	project = "${google_project.my_project.id}"
+	service = "iap.googleapis.com"
+}
+
 resource "google_app_engine_application" "app" {
   project     = "${google_project.my_project.project_id}"
   location_id = "us-central"
 }
 
 resource "google_iap_web_type_iam_binding" "foo" {
+	project       = google_project.my_project.project_id
 	app_engine_id = google_app_engine_application.app.app_id
 	role          = "%{role}"
 	members       = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
+	depends_on    = [google_project_service.project_service]
 }
 `, context)
 }
