@@ -3261,7 +3261,7 @@ objects:
           #   ]
           # }
           #
-          # Fingerpint is an optimistic locking mechanism for updates, which requires
+          # Fingerprint is an optimistic locking mechanism for updates, which requires
           # adding the 'fingerprint' of the last metadata to allow update.
           #
           # To comply with the API please add an encoder: and decoder: to the provider.
@@ -4046,7 +4046,7 @@ objects:
       #   ]
       # }
       #
-      # Fingerpint is an optimistic locking mechanism for updates, which requires
+      # Fingerprint is an optimistic locking mechanism for updates, which requires
       # adding the 'fingerprint' of the last metadata to allow update.
       #
       # To comply with the API please add an encoder: and decoder: to the provider.
