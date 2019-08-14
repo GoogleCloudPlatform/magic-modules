@@ -61,7 +61,7 @@ func expandComputeInstance(project string, d TerraformResourceData, config *Conf
 				"Error loading machine type: %s",
 				err)
 		}
-		machineTypeUrl = machineType.SelfLink
+		machineTypeUrl = machineType.RelativeLink()
 	}
 
 	// Build up the list of disks

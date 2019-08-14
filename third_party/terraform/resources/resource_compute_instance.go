@@ -651,7 +651,7 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *Confi
 				"Error loading machine type: %s",
 				err)
 		}
-		machineTypeUrl = machineType.SelfLink
+		machineTypeUrl = machineType.RelativeLink()
 	}
 
 	// Build up the list of disks
