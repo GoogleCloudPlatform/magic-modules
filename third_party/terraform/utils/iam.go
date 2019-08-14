@@ -203,7 +203,7 @@ func createIamBindingsMap(bindings []*cloudresourcemanager.Binding) map[string]m
 			// <type> is case sensitive
 			// <value> isn't
 			// so let's lowercase the value and leave the type alone
-			pieces := strings.Split(m, ":")
+			pieces := strings.SplitN(m, ":", 2)
 			if len(pieces) > 1 {
 				pieces[1] = strings.ToLower(pieces[1])
 			}
