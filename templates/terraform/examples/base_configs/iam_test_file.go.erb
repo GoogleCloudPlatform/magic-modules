@@ -121,7 +121,7 @@ func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]int
 <%= example.config_test_body -%>
 
 resource "<%= terraform_name -%>_iam_member" "foo" {
-	<%= object.name.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+	<%= params.last -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
 	role          = "%{role}"
 	member        = "user:admin@hashicorptest.com"
 }

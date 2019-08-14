@@ -110,6 +110,11 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 		d:       d,
 		Config:  config,
 	}
+<% if resource_params.last == 'project' -%>
+	d.Set("project", u.project)
+<% else -%>
+	d.Set("<%= resource_params.last -%>", u.GetResourceId())
+<% end -%>
 	d.SetId(u.GetResourceId())
 
 	return u, nil
