@@ -165,7 +165,7 @@ objects:
         name: origin
         description: |
           A stable, user-visible/meaningful string identifying the origin
-          of the Lien, intended to be inspected programmatically. Maximum length of
+          of the Lien, intended to be inspected programatically. Maximum length of
           200 characters.
         input: true
         required: true
