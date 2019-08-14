@@ -63,6 +63,16 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           topic_project: "topic-project"
           subscription_name: "example-subscription"
           subscription_project: "subscription-project"
+      - !ruby/object:Provider::Terraform::Examples
+        name: "pubsub_subscription_push_with_service_account"
+        primary_resource_id: "example"
+        skip_test: true
+        vars:
+          cloudrun_name: "example-cloudrun"
+          cloudrun_region: "us-central1"
+          topic_name: "example-topic"
+          service_account_id: "example-service-account"
+          subscription_name: "example-subscription"
     docs: !ruby/object:Provider::Terraform::Docs
       attributes: |
         * `path`: Path of the subscription in the format `projects/{project}/subscriptions/{name}`
