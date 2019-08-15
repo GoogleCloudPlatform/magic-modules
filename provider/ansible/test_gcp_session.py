@@ -39,6 +39,9 @@ class FakeModule(object):
 
 
 class GcpSessionTestCase(unittest.TestCase):
+    success_json = {'status': 'SUCCESS'}
+    user_agent = 'Google-Ansible-MM-mock'
+    url = 'http://www.googleapis.com/compute/test_instance'
 
     @contextmanager
     def setup_auth(self):
@@ -55,17 +58,39 @@ class GcpSessionTestCase(unittest.TestCase):
                 yield
 
     @responses.activate
-    def test_full_get(self):
-        url = 'http://www.googleapis.com/compute/test_instance'
-        responses.add(responses.GET, url,
-                      status=200, json={'status': 'SUCCESS'})
+    def test_get(self):
+        responses.add(responses.GET, self.url,
+                      status=200, json=self.success_json)
 
         with self.setup_auth():
             module = FakeModule({ 'scopes': 'foo', 'service_account_file': 'file_name', 'project': 'test_project', 'auth_kind': 'serviceaccount'})
 
             session = GcpSession(module, 'mock')
-            resp = session.get(url)
+            resp = session.get(self.url)
 
-            assert resp.request.headers['User-Agent'] == 'Google-Ansible-MM-mock'
-            assert resp.json() == {'status': 'SUCCESS'}
+            assert responses.calls[0].request.headers['User-Agent'] == self.user_agent
+            assert resp.json() == self.success_json
+            assert resp.status_code == 200
+
+    @responses.activate
+    def test_post(self):
+        url = 'http://www.googleapis.com/compute/test_instance'
+        responses.add(responses.POST, url,
+                      status=200, json=self.success_json)
+
+        with self.setup_auth():
+            body = {'content': 'some_content'} 
+            module = FakeModule({ 'scopes': 'foo', 'service_account_file': 'file_name', 'project': 'test_project', 'auth_kind': 'serviceaccount'})
+
+            session = GcpSession(module, 'mock')
+            resp = session.post(url, body=body, headers={'x-added-header': 'my-header'})
+
+            # Ensure Google header added.
+            assert responses.calls[0].request.headers['User-Agent'] == self.user_agent
+
+            # Ensure all content was passed along.
+            assert responses.calls[0].request.headers['x-added-header'] == 'my-header'
+
+            # Ensure proper request was made.
+            assert resp.json() == self.success_json
             assert resp.status_code == 200
