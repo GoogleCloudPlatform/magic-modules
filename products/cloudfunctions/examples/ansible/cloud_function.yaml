@@ -10,13 +10,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
---- !ruby/object:Provider::Inspec::Config
-overrides: !ruby/object:Overrides::ResourceOverrides
-  CloudFunction: !ruby/object:Overrides::Inspec::ResourceOverride
-    properties:
-      trigger_http: !ruby/object:Overrides::Inspec::PropertyOverride
-        exclude: true
-files: !ruby/object:Provider::Config::Files
-  copy:
-    'Gemfile': 'provider/inspec/Gemfile'
+--- !ruby/object:Provider::Ansible::Example
+task: !ruby/object:Provider::Ansible::Task
+  name: gcp_cloudfunctions_cloud_function
+  code:
+    name: <%= ctx[:name] -%>
+    location: 'us-central1'
+    entry_point: 'helloGET'
+    source_archive_url: gs://ansible-cloudfunctions-bucket/function.zip
+    trigger_http: true
+    project: <%= ctx[:project] %>
+    auth_kind: <%= ctx[:auth_kind] %>
+    service_account_file: <%= ctx[:service_account_file] %>
