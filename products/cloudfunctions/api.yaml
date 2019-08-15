@@ -55,6 +55,10 @@ objects:
         name: 'location'
         required: true
         description: The location of this cloud function.
+        # This is not a real API field.
+        # This is a more user-centric way for users to specify
+        # that they want to use a HTTP Trigger rather than
+        # send httpsTrigger with an empty dictionary.
       - !ruby/object:Api::Type::Boolean
         name: 'trigger_http'
         description: 'Use HTTP to trigger this function'
