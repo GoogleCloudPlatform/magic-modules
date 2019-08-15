@@ -118,67 +118,53 @@ class GcpSession(object):
         """
         kwargs.update({'json': body})
         return self.full_patch(url, **kwargs)
-    
+
+    # The following methods fully mimic the requests API and should be used.
     def full_get(self, url, params=None, **kwargs):
-        """
-        This method fully mimicks the requests API
-        """
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
         try:
             return self.session().get(url, params=params, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=str(inst))
+            # Only log the message to avoid logging any sensitive info.
+            self.module.fail_json(msg=inst.message)
 
     def full_post(self, url, data=None, json=None, **kwargs):
-        """
-        This method fully mimicks the requests API
-        """
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
 
         try:
             return self.session().post(url, data=data, json=json, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=str(inst))
+            self.module.fail_json(msg=inst.message)
 
     def full_put(self, url, data=None, **kwargs):
-        """
-        This method fully mimicks the requests API
-        """
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
 
         try:
             return self.session().put(url, data=data, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=str(inst))
+            self.module.fail_json(msg=inst.message)
 
     def full_patch(self, url, data=None, **kwargs):
-        """
-        This method fully mimicks the requests API
-        """
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
 
         try:
             return self.session().patch(url, data=data, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=str(inst))
+            self.module.fail_json(msg=inst.message)
 
     def full_delete(self, url, **kwargs):
-        """
-        This method fully mimicks the requests API
-        """
         kwargs['headers'] = self._set_headers(kwargs.get('headers'))
 
         try:
             return self.session().delete(url, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=str(inst))
+            self.module.fail_json(msg=inst.message)
 
     def _set_headers(self, headers):
         if headers:
             return self._merge_dictionaries(headers, self._headers())
         else:
             return self._headers()
-
 
     def session(self):
         return AuthorizedSession(
