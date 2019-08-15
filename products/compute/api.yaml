@@ -6731,7 +6731,7 @@ objects:
         input: true
   - !ruby/object:Api::Resource
     # This is intentionally out of alphabetic order because it represents the same
-    # GCP resource as the preceeding certificate object.
+    # GCP resource as the preceding certificate object.
     name: 'ManagedSslCertificate'
     kind: 'compute#sslCertificate'
     min_version: beta
