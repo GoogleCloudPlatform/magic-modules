@@ -1,7 +1,7 @@
 <% url_properties.each do |url_property| -%>
 <% if url_property.name == "name" -%>
-  <%= object.name.underscore -%> = "{{<%= object.name.underscore -%>}}"
+  <%= object.name.underscore -%> = "{{<%= object.name -%>}}"
 <% else -%>
-  <%= url_property.name.underscore -%> = "<%= url_property.description %>"
+  <%= url_property.name.underscore -%> = "{{<%= url_property.name -%>}}"
 <% end -%>
 <% end -%>

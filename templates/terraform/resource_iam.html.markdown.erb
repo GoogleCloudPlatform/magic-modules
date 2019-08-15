@@ -122,7 +122,7 @@ The following arguments are supported:
 <% if param.name == "name" -%>
 * `<%= object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
 <% else -%>
-* `<%= param.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+* `<%= param.name.underscore -%>` - (Required) <%= param.description -%> Used to find the parent resource to bind the IAM policy to
 <% end -%>
 <% end -%>
 <% if object.base_url.include?("{{project}}")-%>

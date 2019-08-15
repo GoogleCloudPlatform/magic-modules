@@ -70,6 +70,6 @@ objects:
       Only used to generate IAM resources
     properties:
       - !ruby/object:Api::Type::String
-        name: 'serviceId'
-        description: Dummy property.
+        name: 'backendServiceName'
+        description: Name or ID of a backend service.
         required: true
