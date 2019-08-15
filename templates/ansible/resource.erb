@@ -263,7 +263,9 @@ def update_fields(module, request, response):
 
 
 <% update_props.each do |key, props| -%>
-def <%= props.first.name.underscore -%>_update(module, request, response):
+<% func_name = "#{props.first.name.underscore}_update" -%>
+<% unless object.hidden.include?(func_name) -%>
+def <%= func_name -%>(module, request, response):
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
     auth.<%= key[:update_verb].downcase -%>(
         ''.join([
@@ -273,7 +275,7 @@ def <%= props.first.name.underscore -%>_update(module, request, response):
 <%= lines(python_literal(request_properties(props), use_hash_brackets: true)) -%>
     )
 
-
+<% end # unless object.hidden.include? -%>
 <% end -%>
 <% end # unless update_props.empty? -%>
 <% if object.update_mask -%>
