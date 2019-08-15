@@ -75,7 +75,7 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
-	<% products.each do |product_name| -%>
+	<% products.map(&:name).each do |product_name| -%>
 	<%= product_name -%>BasePath string
 	<% end -%>
 
