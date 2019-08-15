@@ -111,6 +111,8 @@ raise 'No api.yaml files found. Check provider/engine name.' if products_to_comp
 
 start_time = Time.now
 
+# products_for_version entries are a hash of product definitions (:definitions)
+# and provider config (:overrides) for the product
 products_for_version = []
 provider = nil
 # rubocop:disable Metrics/BlockLength
@@ -167,7 +169,7 @@ all_product_files.each do |product_name|
     product_api, provider_config, = \
       Provider::Config.parse(provider_override_path, product_api, version, override_dir)
   end
-  products_for_version.push(product_api)
+  products_for_version.push({:definitions => product_api, :overrides => provider_config })
 
   unless products_to_compile.include?(product_name)
     Google::LOGGER.info "Skipping product '#{product_name}' as it was not specified to be compiled"
@@ -211,7 +213,7 @@ common_compile_file = "provider/#{provider_name}/common~compile.yaml"
 provider&.compile_common_files(
   output_path,
   version,
-  products_for_version.sort_by(&:name),
+  products_for_version.sort_by{ |p| p[:definitions].name },
   common_compile_file
 )
 if override_dir
@@ -220,7 +222,7 @@ if override_dir
   provider&.compile_common_files(
     output_path,
     version,
-    products_for_version.sort_by(&:name),
+    products_for_version.sort_by{ |p| p[:definitions].name },
     common_compile_file,
     override_dir
   )

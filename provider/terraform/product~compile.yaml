@@ -15,4 +15,5 @@
 <%
   dir = version_name == 'ga' ? 'google' : "google-#{version_name}"
 -%>
-'<%= dir -%>/provider_<%= api.name.underscore -%>_gen.go': 'templates/terraform/provider_gen.erb'
+# No entries right now, but an entry would look like this:
+# '<%= dir -%>/provider_<%= api.name.underscore -%>_gen.go': 'templates/terraform/provider_gen.erb'
