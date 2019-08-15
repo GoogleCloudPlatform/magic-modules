@@ -16,7 +16,7 @@ require 'overrides/resources'
 
 module Overrides
   # Validates that the overrides will be valid as intended.
-  # Throws errors if something invalid will be overriden.
+  # Throws errors if something invalid will be overridden.
   # Validation is split from Application to check for unused overrides,
   # provide better errors, split up code, and allow for validation in different places
   # than application.

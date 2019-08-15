@@ -19,7 +19,7 @@ require 'compile/core'
 require 'json'
 
 module Api
-  # Repesents a product to be managed
+  # Represents a product to be managed
   class Product < Api::Object::Named
     include Compile::Core
 

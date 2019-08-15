@@ -240,7 +240,7 @@ objects:
               values:
                 - :OWNER
                 - :READER
-      # | 'etag' is not applicable for state convergene.
+      # | 'etag' is not applicable for state convergence.
       - !ruby/object:Api::Type::String
         name: 'id'
         description: |

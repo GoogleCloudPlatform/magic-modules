@@ -54,7 +54,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
     unwrap_resource: true
     return_if_object: |
 <%= lines(indent(compile('products/sql/helpers/ansible/return_if_object.py'), 6)) -%>
-  # Objects not implmented yet.
+  # Objects not implemented yet.
   Tier: !ruby/object:Overrides::Ansible::ResourceOverride
     exclude: true
   SslCert: !ruby/object:Overrides::Ansible::ResourceOverride

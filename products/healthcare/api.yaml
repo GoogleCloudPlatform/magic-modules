@@ -67,7 +67,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'selfLink'
         description: |
-          The fully qualifed name of this dataset
+          The fully qualified name of this dataset
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -147,7 +147,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'selfLink'
         description: |
-          The fully qualifed name of this dataset
+          The fully qualified name of this dataset
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -275,7 +275,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'selfLink'
         description: |
-          The fully qualifed name of this dataset
+          The fully qualified name of this dataset
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
@@ -371,7 +371,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'selfLink'
         description: |
-          The fully qualifed name of this dataset
+          The fully qualified name of this dataset
         output: true
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:

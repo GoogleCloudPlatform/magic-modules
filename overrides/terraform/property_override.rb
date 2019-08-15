@@ -83,11 +83,11 @@ module Overrides
           # With great power comes great responsibility.
 
           # Flattens a NestedObject by removing that field from the Terraform
-          # schema but will preserve it in the JSON sent/retreived from the API
+          # schema but will preserve it in the JSON sent/retrieved from the API
           #
           # EX: a API schema where fields are nested (eg: `one.two.three`) and we
           # desire the properties of the deepest nested object (eg: `three`) to
-          # become top level properties in the Terraform schema. By overidding
+          # become top level properties in the Terraform schema. By overriding
           # the properties `one` and `one.two` and setting flatten_object then
           # all the properties in `three` will be at the root of the TF schema.
           #
