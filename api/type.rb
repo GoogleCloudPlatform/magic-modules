@@ -58,7 +58,7 @@ module Api
       # A list of properties that conflict with this property.
       attr_reader :conflicts
 
-      # Can only be overriden - we should never set this ourselves.
+      # Can only be overridden - we should never set this ourselves.
       attr_reader :new_type
 
       # A pattern that maps expected user input to expected API input.

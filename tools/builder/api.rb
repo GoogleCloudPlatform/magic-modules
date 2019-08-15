@@ -27,7 +27,7 @@ require 'api/async'
 # (but only in the context of the linter)
 # rubocop:disable Style/MissingRespondToMissing
 module Api
-  # Api::Object class being overriden.
+  # Api::Object class being overridden.
   class Object
     # Create a setter if the setter doesn't exist
     # Yes, this isn't pretty and I apologize
