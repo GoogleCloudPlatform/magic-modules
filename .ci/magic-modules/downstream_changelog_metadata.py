@@ -27,6 +27,7 @@ def downstream_changelog_info(gh, upstream_pr_num, changelog_repos):
     changelog_repos: List of repo names to downstream changelog metadata for
   """
   # Parse CHANGELOG info from upstream
+  print "Fetching upstream PR '%s'..." % upstream_pr_num
   upstream_pr = gh.get_repo(downstreams.UPSTREAM_REPO)\
                   .get_pull(upstream_pr_num)
   release_note = strutils.get_release_note(upstream_pr.body)
@@ -35,27 +36,35 @@ def downstream_changelog_info(gh, upstream_pr_num, changelog_repos):
     CHANGELOG_LABEL_PREFIX)
 
   if not labels_to_add and not release_note:
-    print "skipping upstream PR %d with no release note/labels" % (
+    print "No release note or labels found, skipping PR %d" % (
       upstream_pr_num)
     return
 
-  print "Applying changelog info to downstreams for upstream PR %d:" % (
+  print "Found changelog info on upstream PR %d:" % (
     upstream_pr.number)
   print "Release Note: \"%s\"" % release_note
   print "Labels: %s" % labels_to_add
 
-  parsed_urls = downstreams.get_parsed_downstream_urls(gh, upstream_pr_num)
+  parsed_urls = downstreams.get_parsed_downstream_urls(gh, upstream_pr.number)
   if not parsed_urls:
-    print "Skipping downstreaming for upstream PR %d - no downstreams"
+    print "No downstreams found for upstream PR %d, returning!" % (
+      upstream_pr.number)
     return
 
   for repo_name, pulls in parsed_urls:
+    print "Found downstream PR for repo %s" % repo_name
+    
     if repo_name not in changelog_repos:
       print "[DEBUG] skipping repo %s with no CHANGELOG" % repo_name
       continue
 
+    print "Generating changelog for pull requests in %s" % repo_name
+    
+    print "Fetching repo %s" % repo_name
     ghrepo = gh.get_repo(repo_name)
+
     for _r, prnum in pulls:
+      print "Fetching %s PR %d" % repo_name, prnum
       pr = ghrepo.get_pull(int(prnum))
       set_changelog_info(pr, release_note, labels_to_add)
 
@@ -67,7 +76,7 @@ def set_changelog_info(gh_pull, release_note, labels_to_add):
     release_note: String of release note text to set
     labels_to_add: List of strings. Changelog-related labels to add/replace.
   """
-  print "Setting changelog info for downstream PR %s" % gh_pull.html_url
+  print "Setting changelog info for downstream PR %d" % prnum
   edited_body = strutils.set_release_note(release_note, gh_pull.body)
   gh_pull.edit(body=edited_body)
 
@@ -78,6 +87,7 @@ def set_changelog_info(gh_pull, release_note, labels_to_add):
       labels_to_set.append(l.name)
   labels_to_set += labels_to_add
   gh_pull.set_labels(*labels_to_set)
+
 
 if __name__ == '__main__':
   downstream_repos = os.environ.get('DOWNSTREAM_REPOS').split(',')
