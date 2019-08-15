@@ -63,7 +63,7 @@ overrides: !ruby/object:Overrides::ResourceOverrides
       - !ruby/object:Provider::Terraform::Examples
         name: "iap_appengine"
         primary_resource_id: "app"
-        primary_resource_name: "fmt.Sprintf(\"tf-test%s\", context[\"random_suffix\"])"
+        primary_resource_name: "context[\"project_id\"]"
         test_env_vars:
           org_id: :ORG_ID
   WebBackendService: !ruby/object:Overrides::Terraform::ResourceOverride
