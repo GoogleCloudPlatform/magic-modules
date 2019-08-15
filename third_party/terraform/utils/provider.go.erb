@@ -104,7 +104,7 @@ func Provider() terraform.ResourceProvider {
 			},
 
 			// Generated Products
-			<% products.each do |product_name| -%>
+			<% products.map(&:name).each do |product_name| -%>
 			<%= product_name -%>CustomEndpointEntryKey: <%= product_name -%>CustomEndpointEntry,
 			<% end -%>
 
@@ -205,7 +205,7 @@ func ResourceMap() map[string]*schema.Resource {
 
 func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 	return mergeResourceMaps(
-			<% products.each do |product_name| -%>
+			<% products.map(&:name).each do |product_name| -%>
 			Generated<%= product_name -%>ResourcesMap,
 			<% end -%>
 			map[string]*schema.Resource{
@@ -377,7 +377,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.BatchingConfig = batchCfg
 
 	// Generated products
-	<% products.each do |product_name| -%>
+	<% products.map(&:name).each do |product_name| -%>
 	config.<%= product_name -%>BasePath = d.Get(<%= product_name -%>CustomEndpointEntryKey).(string)
 	<% end -%>
 
@@ -420,7 +420,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 // values to a default. After using this, you should call config.LoadAndValidate.
 func ConfigureBasePaths(c *Config) {
 	// Generated Products
-	<% products.each do |product_name| -%>
+	<% products.map(&:name).each do |product_name| -%>
 	c.<%= product_name -%>BasePath = <%= product_name -%>DefaultBasePath
 	<% end -%>
 
