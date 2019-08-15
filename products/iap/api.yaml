@@ -38,7 +38,7 @@ objects:
         description: Dummy property.
         required: true
   - !ruby/object:Api::Resource
-    name: 'WebType'
+    name: 'WebTypeCompute'
     base_url: 'projects/{{project}}/iap_web/compute'
     self_link: 'projects/{{project}}/iap_web/compute'
     exclude_resource: true
@@ -47,5 +47,29 @@ objects:
     properties:
       - !ruby/object:Api::Type::String
         name: 'name'
+        description: Dummy property.
+        required: true
+  - !ruby/object:Api::Resource
+    name: 'WebTypeAppEngine'
+    base_url: 'projects/{{project}}/iap_web/appengine-{{appEngineId}}'
+    self_link: 'projects/{{project}}/iap_web/appengine-{{appEngineId}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        description: Dummy property.
+        required: true
+  - !ruby/object:Api::Resource
+    name: 'WebBackendService'
+    base_url: 'projects/{{project}}/iap_web/compute/services/{{backendServiceName}}'
+    self_link: 'projects/{{project}}/iap_web/compute/services/{{backendServiceName}}'
+    exclude_resource: true
+    description: |
+      Only used to generate IAM resources
+    properties:
+      - !ruby/object:Api::Type::String
+        name: 'serviceId'
         description: Dummy property.
         required: true

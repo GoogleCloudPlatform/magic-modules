@@ -43,19 +43,16 @@ module Api
       # This is a role that is acceptable for the given IAM policy resource for use in tests
       attr_reader :allowed_iam_role
 
-      # The code that is rendered within qualify{{resource.name}}Url. This is used for IAP
-      # that supports different URL endpoints based values set in the config
-      attr_reader :custom_url_qualifier
-
-      # The code that is rendered within qualify{{resource.name}}Url. This is used for IAP
-      # that supports different URL endpoints based values set in the config
-      attr_reader :custom_id_function
-
-      # Allows for optional properties to be specified that are allowed in the IAM policy
-      # these are needed for IAP that switches URLs based on the presence of these properties
-      attr_reader :optional_properties
-
+      # Certain resources need an attribute other than "id" from their parent resource
+      # Especially when a parent is not the same type as the IAM resource
       attr_reader :parent_resource_attribute
+
+      # If the IAM resource test needs a new project to be created, this is the name of the project
+      attr_reader :test_project_name
+
+      # Resource name may need a custom diff suppress function. Default is to use 
+      # compareSelfLinkOrResourceName
+      attr_reader :custom_diff_suppress
 
       def validate
         super
@@ -65,10 +62,8 @@ module Api
         check :parent_resource_type, type: String
         check :fetch_iam_policy_verb, type: String, default: 'GET'
         check :allowed_iam_role, type: String, default: 'roles/editor'
-        check :custom_url_qualifier, type: String
-        check :custom_id_function, type: String
-        check :optional_properties, type: Array, item_type: Api::Type, default: []
         check :parent_resource_attribute, type: String, default: 'id'
+        check :test_project_name, type: String
       end
     end
   end

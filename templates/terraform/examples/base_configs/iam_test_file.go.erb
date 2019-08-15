@@ -30,7 +30,11 @@ params = individual_url.gsub('{{name}}', "{{#{object.name.underscore}}}").scan(/
 	<% if param == 'project' -%>
 		<% if i != params.size - 1 -%>
 			<%# If the last parameter is project then we want to create a new project to use for the test, so don't default from the environment -%>
-			<% import_qualifiers.push('getTestProjectFromEnv()') -%>
+			<% if object.iam_policy.test_project_name.nil? -%>
+				<% import_qualifiers.push('getTestProjectFromEnv()') -%>
+			<% else -%>
+				<% import_qualifiers.push('context["project_id"]') -%>
+			<% end -%>
 		<% end -%>
 	<% elsif param == 'zone' -%>
 		<% import_qualifiers.push('getTestZoneFromEnv()') -%>
@@ -121,7 +125,10 @@ func testAcc<%= resource_name -%>IamMember_basicGenerated(context map[string]int
 <%= example.config_test_body -%>
 
 resource "<%= terraform_name -%>_iam_member" "foo" {
-	<%= params.last -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+<% unless object.iam_policy.test_project_name.nil? -%>
+	project       = "%{project_id}"
+<% end -%>
 	role          = "%{role}"
 	member        = "user:admin@hashicorptest.com"
 }
@@ -140,7 +147,10 @@ data "google_iam_policy" "foo" {
 }
 
 resource "<%= terraform_name -%>_iam_policy" "foo" {
-	<%= params.last -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+<% unless object.iam_policy.test_project_name.nil? -%>
+	project       = "%{project_id}"
+<% end -%>
 	policy_data   = "${data.google_iam_policy.foo.policy_data}"
 }
 `, context)
@@ -151,7 +161,10 @@ func testAcc<%= resource_name -%>IamBinding_basicGenerated(context map[string]in
 <%= example.config_test_body -%>
 
 resource "<%= terraform_name -%>_iam_binding" "foo" {
-	<%= params.last -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+<% unless object.iam_policy.test_project_name.nil? -%>
+	project       = "%{project_id}"
+<% end -%>
 	role          = "%{role}"
 	members       = ["user:admin@hashicorptest.com"]
 }
@@ -163,7 +176,10 @@ func testAcc<%= resource_name -%>IamBinding_updateGenerated(context map[string]i
 <%= example.config_test_body -%>
 
 resource "<%= terraform_name -%>_iam_binding" "foo" {
-	<%= params.last -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+	<%= params.last.underscore -%> = "${<%= parent_resource_type_type -%>.<%= example.primary_resource_id -%>.<%= object.iam_policy.parent_resource_attribute -%>}"
+<% unless object.iam_policy.test_project_name.nil? -%>
+	project       = "%{project_id}"
+<% end -%>
 	role          = "%{role}"
 	members       = ["user:admin@hashicorptest.com", "user:paddy@hashicorp.com"]
 }
