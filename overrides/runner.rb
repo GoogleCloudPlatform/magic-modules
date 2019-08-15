@@ -194,7 +194,7 @@ module Overrides
 
       # Overrides have additional values inside the override that do not regularly belong
       # on the Api::* object. These values need to be set + they need getters so they
-      # can be accessed propertly in the templates.
+      # can be accessed properly in the templates.
       def set_additional_values(object, override)
         override.class.attributes.each do |o|
           object.instance_variable_set("@#{o}", override[o])
