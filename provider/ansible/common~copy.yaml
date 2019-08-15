@@ -18,3 +18,4 @@
   'provider/ansible/test_template.yaml'
 'test/runner/lib/cloud/gcp.py': 'provider/ansible/gcp_integration_runner.py'
 'test/units/module_utils/gcp/test_gcp_utils.py': 'provider/ansible/test_gcp_utils.py'
+'test/units/module_utils/gcp/test_gcp_session.py': 'provider/ansible/test_gcp_session.py'
