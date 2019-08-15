@@ -1,0 +1,45 @@
+---
+:facts:
+  :CloudFunction:
+    :version_added: '2.9'
+:regular:
+  :CloudFunction:
+    :version_added: '2.9'
+    :name:
+      :version_added: '2.9'
+    :description:
+      :version_added: '2.9'
+    :entryPoint:
+      :version_added: '2.9'
+    :runtime:
+      :version_added: '2.9'
+    :timeout:
+      :version_added: '2.9'
+    :availableMemoryMb:
+      :version_added: '2.9'
+    :labels:
+      :version_added: '2.9'
+    :environmentVariables:
+      :version_added: '2.9'
+    :sourceArchiveUrl:
+      :version_added: '2.9'
+    :sourceUploadUrl:
+      :version_added: '2.9'
+    :sourceRepository:
+      :version_added: '2.9'
+      :url:
+        :version_added: '2.9'
+    :httpsTrigger:
+      :version_added: '2.9'
+    :eventTrigger:
+      :version_added: '2.9'
+      :eventType:
+        :version_added: '2.9'
+      :resource:
+        :version_added: '2.9'
+      :service:
+        :version_added: '2.9'
+    :location:
+      :version_added: '2.9'
+    :trigger_http:
+      :version_added: '2.9'
