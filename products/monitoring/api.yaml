@@ -803,7 +803,7 @@ objects:
       labels are required.
 
       A list of supported channels per project the `list` endpoint can be
-      accessed programatically or through the api explorer at  https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannelDescriptors/list .
+      accessed programmatically or through the api explorer at  https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.notificationChannelDescriptors/list .
       This provides the channel type and all of the required labels that must be passed.
     references: !ruby/object:Api::Resource::ReferenceLinks
       guides:
