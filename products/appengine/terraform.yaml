@@ -65,6 +65,17 @@ overrides: !ruby/object:Overrides::ResourceOverrides
           org_id: :ORG_ID
   Service: !ruby/object:Overrides::Terraform::ResourceOverride
     exclude: true
+  DomainMapping: !ruby/object:Overrides::Terraform::ResourceOverride
+    examples:
+      - !ruby/object:Provider::Terraform::Examples
+        name: "app_engine_domain_mapping_basic"
+        primary_resource_id: "domain_mapping"
+        vars:
+          domain: "dm-test"
+    properties:
+      id: !ruby/object:Overrides::Terraform::PropertyOverride
+        name: 'domainName'
+
 # This is for copying files over
 files: !ruby/object:Provider::Config::Files
   # These files have templating (ERB) code that will be run.
