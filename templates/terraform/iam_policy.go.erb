@@ -107,11 +107,19 @@ func <%= resource_name -%>IamUpdaterProducer(d *schema.ResourceData, config *Con
 		d:       d,
 		Config:  config,
 	}
-<% if resource_params.last == 'project' -%>
+
+<% resource_params.each_with_index do |param, i| -%>
+<% if i = resource_params.size - 1 -%>
+<% if param == 'project' -%>
 	d.Set("project", u.project)
 <% else -%>
 	d.Set("<%= resource_params.last.underscore -%>", u.GetResourceId())
 <% end -%>
+<% else -%>
+	d.Set("<%= param.underscore -%>", u.<%= param.underscore -%>)
+<% end -%>
+<% end -%>
+
 	d.SetId(u.GetResourceId())
 
 	return u, nil
