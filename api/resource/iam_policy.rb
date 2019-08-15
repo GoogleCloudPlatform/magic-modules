@@ -50,7 +50,7 @@ module Api
       # If the IAM resource test needs a new project to be created, this is the name of the project
       attr_reader :test_project_name
 
-      # Resource name may need a custom diff suppress function. Default is to use 
+      # Resource name may need a custom diff suppress function. Default is to use
       # compareSelfLinkOrResourceName
       attr_reader :custom_diff_suppress
 
