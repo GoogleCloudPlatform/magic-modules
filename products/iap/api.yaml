@@ -58,8 +58,8 @@ objects:
       Only used to generate IAM resources
     properties:
       - !ruby/object:Api::Type::String
-        name: 'name'
-        description: Dummy property.
+        name: 'appEngineId'
+        description: Id of the App Engine application.
         required: true
   - !ruby/object:Api::Resource
     name: 'WebBackendService'

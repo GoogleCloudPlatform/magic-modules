@@ -68,6 +68,12 @@ See [Provider Versions](https://terraform.io/docs/providers/google/provider_vers
 <% end -%>
 
 <% markdown_escaped_name = terraform_name.gsub("_", "\\_") %>
+<% 
+params = object.self_link_url.scan(/({{)(\w+)(}})/).map { |arr| arr[1] }
+-%>
+<%
+url_properties = object.all_user_properties.select { |param| params.include?(param.name) }
+-%>
 ## <%= markdown_escaped_name -%>\_policy
 
 ```hcl
@@ -81,7 +87,7 @@ data "google_iam_policy" "admin" {
 }
 
 resource "<%= terraform_name -%>_policy" "editor" {
-  <%= object.name.underscore -%>       = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+<%= lines(compile("templates/terraform/iam/iam_example_qualifiers.md.erb")) -%>
   policy_data = "${data.google_iam_policy.admin.policy_data}"
 }
 ```
@@ -90,7 +96,7 @@ resource "<%= terraform_name -%>_policy" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_binding" "editor" {
-  <%= object.name.underscore -%>   = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+<%= lines(compile("templates/terraform/iam/iam_example_qualifiers.md.erb")) -%>
   role    = "<%= object.iam_policy.allowed_iam_role -%>"
   members = [
     "user:jane@example.com",
@@ -102,7 +108,7 @@ resource "<%= terraform_name -%>_binding" "editor" {
 
 ```hcl
 resource "<%= terraform_name -%>_member" "editor" {
-  <%= object.name.underscore -%>  = "<%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}")-%>"
+<%= lines(compile("templates/terraform/iam/iam_example_qualifiers.md.erb")) -%>
   role   = "<%= object.iam_policy.allowed_iam_role -%>"
   member = "user:jane@example.com"
 }
@@ -112,11 +118,19 @@ resource "<%= terraform_name -%>_member" "editor" {
 
 The following arguments are supported:
 
-* `<%= object.name.downcase -%>` - (Required) The <%= object.name.downcase -%> name to bind to attach 
-IAM policy to.
+<% url_properties.each do |param| -%>
+<% if param.name == "name" -%>
+* `<%= object.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+<% else -%>
+* `<%= param.name.underscore -%>` - (Required) Used to find the parent resource to bind the IAM policy to
+<% end -%>
+<% end -%>
+<% if object.base_url.include?("{{project}}")-%>
+<%# The following new line allow for project to be bullet-formatted properly. -%>
 
-* `project` - (Optional) The project in which the resource belongs. If it
-    is not provided, the provider project is used.
+* `project` - (Optional) The ID of the project in which the resource belongs.
+    If it is not provided, the provider project is used.
+<% end -%>
 
 * `member/members` - (Required) Identities that will be granted the privilege in `role`.
   Each entry can have one of the following values:
@@ -139,11 +153,11 @@ IAM policy to.
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `etag` - (Computed) The etag of the <%= object.name.downcase -%>'s IAM policy.
+* `etag` - (Computed) The etag of the IAM policy.
 
 ## Import
 
-<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, <%= object.name.downcase -%> name, role and member.
+<%= product_ns -%> <%= object.name.downcase -%> IAM resources can be imported using the project, resource identifiers, role and member.
 
 ```
 $ terraform import <%= terraform_name -%>_policy.editor <%= object.id_format.gsub('{{name}}', "{{#{object.name.underscore}}}") -%>
