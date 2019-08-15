@@ -127,7 +127,7 @@ class GcpSession(object):
         try:
             return self.session().get(url, params=params, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=inst.message)
+            self.module.fail_json(msg=str(inst))
 
     def full_post(self, url, data=None, json=None, **kwargs):
         """
@@ -138,7 +138,7 @@ class GcpSession(object):
         try:
             return self.session().post(url, data=data, json=json, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=inst.message)
+            self.module.fail_json(msg=str(inst))
 
     def full_put(self, url, data=None, **kwargs):
         """
@@ -149,7 +149,7 @@ class GcpSession(object):
         try:
             return self.session().put(url, data=data, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=inst.message)
+            self.module.fail_json(msg=str(inst))
 
     def full_patch(self, url, data=None, **kwargs):
         """
@@ -160,7 +160,7 @@ class GcpSession(object):
         try:
             return self.session().patch(url, data=data, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=inst.message)
+            self.module.fail_json(msg=str(inst))
 
     def full_delete(self, url, **kwargs):
         """
@@ -171,7 +171,7 @@ class GcpSession(object):
         try:
             return self.session().delete(url, **kwargs)
         except getattr(requests.exceptions, 'RequestException') as inst:
-            self.module.fail_json(msg=inst.message)
+            self.module.fail_json(msg=str(inst))
 
     def _set_headers(self, headers):
         if headers:

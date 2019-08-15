@@ -39,16 +39,11 @@ class FakeModule(object):
 
 class GcpSessionTestCase(unittest.TestCase):
 
-    def setup_temp_serviceaccount(self):
-        with tempfile.NamedTemporaryFile as temp:
-            return temp.name
-
-    def test_get(self):
-        url = 'googleapis.com/compute/test_instance'
-        responses.add(responses.GET, 'googleapis.com/compute/test_instance',
+    @responses.activate
+    def test_full_get(self):
+        url = 'http://www.googleapis.com/compute/test_instance'
+        responses.add(responses.GET, url,
                       status=200, json={'status': 'SUCCESS'})
-
-
 
         with patch('google.oauth2.service_account.Credentials.from_service_account_file') as mock:
             with patch.object (AnonymousCredentials, 'with_scopes', create=True) as mock2:
@@ -60,3 +55,7 @@ class GcpSessionTestCase(unittest.TestCase):
 
                 session = GcpSession(module, 'mock')
                 resp = session.get(url)
+
+                assert resp.request.headers['User-Agent'] == 'Google-Ansible-MM-mock'
+                assert resp.json() == {'status': 'SUCCESS'}
+                assert resp.status_code == 200
