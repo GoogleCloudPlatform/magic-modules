@@ -498,6 +498,36 @@ objects:
           name: type
           output: true
           description: Type of domain mapping condition.
+    - !ruby/object:Api::Type::String
+      name: url
+      description: |-
+        From RouteStatus. URL holds the url that will distribute traffic over the provided traffic
+        targets. It generally has the form
+        https://{route-hash}-{project-hash}-{cluster-level-suffix}.a.run.app
+      output: true
+    - !ruby/object:Api::Type::Integer
+      name: observedGeneration
+      description: |-
+        ObservedGeneration is the 'Generation' of the Route that was last processed by the
+        controller.
+
+        Clients polling for completed reconciliation should poll until observedGeneration =
+        metadata.generation and the Ready condition's status is True or False.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: latestCreatedRevisionName
+      description: |-
+        From ConfigurationStatus. LatestCreatedRevisionName is the last revision that was created
+        from this Service's Configuration. It might not be ready yet, for that use
+        LatestReadyRevisionName.
+      output: true
+    - !ruby/object:Api::Type::String
+      name: latestReadyRevisionName
+      description: |-
+        From ConfigurationStatus. LatestReadyRevisionName holds the name of the latest Revision
+        stamped out from this Service's Configuration that has had its "Ready" condition become
+        "True".
+      output: true
 
   - !ruby/object:Api::Type::NestedObject
     name: metadata
