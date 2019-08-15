@@ -193,7 +193,7 @@ module Provider
         else
           Google::LOGGER.info "Generating #{object.name}"
           # exclude_if_not_in_version must be called in order to filter out
-          # beta properties that are nested within GA resrouces
+          # beta properties that are nested within GA resources
           object.exclude_if_not_in_version!(version)
 
           # Make object immutable.

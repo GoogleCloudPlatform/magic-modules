@@ -47,7 +47,7 @@ module Google
     # :default   - the default value for this variable if its nil
     # :type      - the allowed types (single or array) that this value can be
     # :item_type - the allowed types that all values in this array should be
-    #              (impllied that type == array)
+    #              (implied that type == array)
     # :allowed   - the allowed values that this non-array variable should be.
     # :required  - is the variable required? (defaults: false)
     def check(variable, **opts)

@@ -400,7 +400,7 @@ objects:
               - :AVRO
               - :DATASTORE_BACKUP
               - :BIGTABLE
-          # TODO: Investigate if this is feasable as a ResourceRef
+          # TODO: Investigate if this is feasible as a ResourceRef
           # This is a very complicated ResourceRef (one-to-many, where the many are cross-product).
           - !ruby/object:Api::Type::Array
             name: 'sourceUris'

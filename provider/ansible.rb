@@ -96,7 +96,7 @@ module Provider
       end
 
       def build_object_data(object, output_folder, version)
-        # Method is overriden to add Ansible example objects to the data object.
+        # Method is overridden to add Ansible example objects to the data object.
         data = AnsibleProductFileTemplate.file_for_resource(
           output_folder,
           object,

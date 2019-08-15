@@ -105,5 +105,5 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'selfLink'
         description: |
-          The fully qualifed name of this VPC connector
+          The fully qualified name of this VPC connector
         output: true
