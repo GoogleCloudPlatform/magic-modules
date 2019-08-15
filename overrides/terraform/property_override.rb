@@ -87,7 +87,7 @@ module Overrides
           #
           # EX: a API schema where fields are nested (eg: `one.two.three`) and we
           # desire the properties of the deepest nested object (eg: `three`) to
-          # become top level properties in the Terraform schema. By overidding
+          # become top level properties in the Terraform schema. By overriding
           # the properties `one` and `one.two` and setting flatten_object then
           # all the properties in `three` will be at the root of the TF schema.
           #
