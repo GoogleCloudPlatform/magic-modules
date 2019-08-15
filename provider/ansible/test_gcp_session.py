@@ -19,6 +19,7 @@
 from pytest import importorskip
 from units.compat import unittest
 from units.compat.mock import patch
+from contextlib import contextmanager
 from ansible.module_utils.gcp_utils import GcpSession
 import responses
 import tempfile
@@ -39,23 +40,32 @@ class FakeModule(object):
 
 class GcpSessionTestCase(unittest.TestCase):
 
+    @contextmanager
+    def setup_auth(self):
+        """
+        This is a context manager that mocks out
+        the google-auth library and uses the built-in
+        AnonymousCredentials for sending requests.
+        """
+        with patch('google.oauth2.service_account.Credentials.from_service_account_file') as mock:
+            with patch.object (AnonymousCredentials, 'with_scopes', create=True) as mock2:
+                creds = AnonymousCredentials()
+                mock2.return_value = creds
+                mock.return_value = creds
+                yield
+
     @responses.activate
     def test_full_get(self):
         url = 'http://www.googleapis.com/compute/test_instance'
         responses.add(responses.GET, url,
                       status=200, json={'status': 'SUCCESS'})
 
-        with patch('google.oauth2.service_account.Credentials.from_service_account_file') as mock:
-            with patch.object (AnonymousCredentials, 'with_scopes', create=True) as mock2:
-                creds = AnonymousCredentials()
-                mock2.return_value = creds
-                mock.return_value = creds
+        with self.setup_auth():
+            module = FakeModule({ 'scopes': 'foo', 'service_account_file': 'file_name', 'project': 'test_project', 'auth_kind': 'serviceaccount'})
 
-                module = FakeModule({ 'scopes': 'foo', 'service_account_file': 'file_name', 'project': 'test_project', 'auth_kind': 'serviceaccount'})
+            session = GcpSession(module, 'mock')
+            resp = session.get(url)
 
-                session = GcpSession(module, 'mock')
-                resp = session.get(url)
-
-                assert resp.request.headers['User-Agent'] == 'Google-Ansible-MM-mock'
-                assert resp.json() == {'status': 'SUCCESS'}
-                assert resp.status_code == 200
+            assert resp.request.headers['User-Agent'] == 'Google-Ansible-MM-mock'
+            assert resp.json() == {'status': 'SUCCESS'}
+            assert resp.status_code == 200
