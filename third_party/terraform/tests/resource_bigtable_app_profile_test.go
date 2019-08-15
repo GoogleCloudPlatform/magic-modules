@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-func TestAccBigtableAppProfile_basic(t *testing.T) {
+func TestAccBigtableAppProfile_update(t *testing.T) {
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(10))

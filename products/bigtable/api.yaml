@@ -50,7 +50,7 @@ objects:
         url_param_only: true
       - !ruby/object:Api::Type::Boolean
         name: 'ignoreWarnings'
-        description: 'If true, ignore safety checks when deleting the app profile.'
+        description: 'If true, ignore safety checks when deleting/updating the app profile.'
         default_value: false
         url_param_only: true
     properties:
@@ -61,7 +61,7 @@ objects:
       - !ruby/object:Api::Type::String
         name: 'description'
         description: |
-          Optional long form description of the use case for this app profile.
+          Long form description of the use case for this app profile.
       - !ruby/object:Api::Type::Boolean
         name: 'multiClusterRoutingUseAny'
         conflicts:
