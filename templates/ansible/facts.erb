@@ -109,13 +109,8 @@ def main():
     end
   end
 -%>
-    items = <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
-    if items.get(<%= quote_string(object.collection_url_key) -%>):
-        items = items.get(<%= quote_string(object.collection_url_key) -%>)
-    else:
-        items = []
     return_value = {
-        'resources': items
+        'resources': <%= method_call('fetch_list', ['module', 'collection(module)', query_param]) %>
     }
     module.exit_json(**return_value)
 
@@ -126,8 +121,7 @@ def main():
 <%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
 <% prod_name = object.__product.api_name -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    response = <%= method_call('auth.get', ['link', ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
-    return return_if_object(module, response)
+    return <%= method_call('auth.list', ['link', "callback=return_if_object", "array_name='#{object.collection_url_key}'", ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
 
 
 <% if object.facts.has_filters && object.facts.query_options -%>
