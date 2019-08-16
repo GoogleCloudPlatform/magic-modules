@@ -4018,6 +4018,14 @@ objects:
               description: |
                 Full or partial URL of the accelerator type resource to expose
                 to this instance.
+      - !ruby/object:Api::Type::String
+        name: 'hostname'
+        description: |
+          The hostname of the instance to be created. The specified hostname
+          must be RFC1035 compliant. If hostname is not specified, the default
+          hostname is [INSTANCE_NAME].c.[PROJECT_ID].internal when using the
+          global DNS, and [INSTANCE_NAME].[ZONE].c.[PROJECT_ID].internal when
+          using zonal DNS.
       - !ruby/object:Api::Type::Integer
         name: 'id'
         description: |
