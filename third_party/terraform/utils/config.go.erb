@@ -75,8 +75,8 @@ type Config struct {
 
 	tokenSource oauth2.TokenSource
 
-	<% products.map(&:name).each do |product_name| -%>
-	<%= product_name -%>BasePath string
+	<% products.each do |product| -%>
+	<%= product[:definitions].name -%>BasePath string
 	<% end -%>
 
 	CloudBillingBasePath string
@@ -184,6 +184,11 @@ type Config struct {
 	requestBatcherServiceUsage *RequestBatcher
 	requestBatcherIam          *RequestBatcher
 }
+
+// Generated product base paths
+<% products.each do |product| -%>
+var <%= product[:definitions].name -%>DefaultBasePath = "<%= product[:definitions].base_url -%>"
+<% end -%>
 
 var defaultClientScopes = []string{
 	"https://www.googleapis.com/auth/compute",
