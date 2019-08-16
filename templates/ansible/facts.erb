@@ -121,7 +121,7 @@ def main():
 <%= method_decl('fetch_list', ['module', 'link', ('query' if object.facts.has_filters)]) %>
 <% prod_name = object.__product.api_name -%>
     auth = GcpSession(module, <%= quote_string(prod_name) -%>)
-    return <%= method_call('auth.list', ['link', "callback=return_if_object", "array_name='#{object.collection_url_key}'", ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
+    return <%= method_call('auth.list', ['link', "return_if_object", "array_name='#{object.collection_url_key}'", ("params={'#{object.facts.filter_api_param}': query}" if object.facts.has_filters)]) %>
 
 
 <% if object.facts.has_filters && object.facts.query_options -%>

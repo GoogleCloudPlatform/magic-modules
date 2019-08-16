@@ -119,8 +119,8 @@ class GcpSession(object):
         kwargs.update({'json': body})
         return self.full_patch(url, **kwargs)
 
-    def list(self, url, params=None, array_name='items',
-             pageToken='nextPageToken', callback=None, **kwargs):
+    def list(self, url, callback, params=None, array_name='items',
+             pageToken='nextPageToken', **kwargs):
         """
         This should be used for calling the GCP list APIs. It will return
         an array of items
