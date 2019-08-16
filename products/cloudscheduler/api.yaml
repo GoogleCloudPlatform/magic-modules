@@ -258,3 +258,37 @@ objects:
               This map contains the header field names and values. 
               Repeated headers are not supported, but a header value can contain commas.
             required: false
+          - !ruby/object:Api::Type::NestedObject
+            name: 'oauthToken'
+            description: |
+              Contains information needed for generating an OAuth token.
+              This type of authorization should be used when sending requests to a GCP endpoint.
+            input: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: serviceAccountEmail
+                description: |
+                  Service account email to be used for generating OAuth token.
+                  The service account must be within the same project as the job.
+              - !ruby/object:Api::Type::String
+                name: scope
+                description: |
+                  OAuth scope to be used for generating OAuth access token. If not specified,
+                  "https://www.googleapis.com/auth/cloud-platform" will be used.
+          - !ruby/object:Api::Type::NestedObject
+            name: 'oidcToken'
+            description: |
+              Contains information needed for generating an OpenID Connect token.
+              This type of authorization should be used when sending requests to third party endpoints or Cloud Run.
+            input: true
+            properties:
+              - !ruby/object:Api::Type::String
+                name: serviceAccountEmail
+                description: |
+                  Service account email to be used for generating OAuth token.
+                  The service account must be within the same project as the job.
+              - !ruby/object:Api::Type::String
+                name: audience
+                description: |
+                  Audience to be used when generating OIDC token. If not specified,
+                  the URI specified in target will be used.
