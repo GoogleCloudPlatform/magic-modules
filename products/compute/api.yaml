@@ -1370,6 +1370,10 @@ objects:
         # unspecified. Providers should include this as needed via overrides
         # default_value: :TCP
         values:
+          - :HTTP
+          - :HTTPS
+          - :HTTP2
+          - :SSL
           - :TCP
           - :UDP
       - !ruby/object:Api::Type::Enum
@@ -6525,6 +6529,175 @@ objects:
         description: |
           URL of the disk type resource describing which disk type to use to
           create the disk. Provide this when creating the disk.
+  - !ruby/object:Api::Resource
+    name: 'RegionUrlMap'
+    kind: 'compute#urlMap'
+    base_url: projects/{{project}}/regions/{{region}}/urlMaps
+    collection_url_key: 'items'
+    has_self_link: true
+    description: |
+      UrlMaps are used to route requests to a backend service based on rules
+      that you define for the host and path of an incoming URL.
+    async: !ruby/object:Api::Async
+      operation: !ruby/object:Api::Async::Operation
+        kind: 'compute#operation'
+        path: 'name'
+        base_url: 'projects/{{project}}/regions/{{region}}/operations/{{op_id}}'
+        wait_ms: 1000
+      result: !ruby/object:Api::Async::Result
+        path: 'targetLink'
+      status: !ruby/object:Api::Async::Status
+        path: 'status'
+        complete: 'DONE'
+        allowed:
+          - 'PENDING'
+          - 'RUNNING'
+          - 'DONE'
+      error: !ruby/object:Api::Async::Error
+        path: 'error/errors'
+        message: 'message'
+    parameters:
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'region'
+        resource: 'Region'
+        imports: 'name'
+        description: 'A reference to the region where the disk resides.'
+        required: true
+    properties:
+      - !ruby/object:Api::Type::Time
+        name: 'creationTimestamp'
+        description: 'Creation timestamp in RFC3339 text format.'
+        output: true
+      - !ruby/object:Api::Type::ResourceRef
+        name: 'defaultService'
+        resource: 'RegionBackendService'
+        imports: 'selfLink'
+        description:
+          A reference to RegionBackendService resource if none of the hostRules match.
+        required: true
+      - !ruby/object:Api::Type::String
+        name: 'description'
+        description: |
+          An optional description of this resource. Provide this property when
+          you create the resource.
+      # 'fingerprint' used internally for object consistency.
+      - !ruby/object:Api::Type::Array
+        name: 'hostRules'
+        description: 'The list of HostRules to use against the URL.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: |
+                An optional description of this HostRule. Provide this property
+                when you create the resource.
+            - !ruby/object:Api::Type::Array
+              name: 'hosts'
+              required: true
+              item_type: Api::Type::String
+              description: |
+                The list of host patterns to match. They must be valid
+                hostnames, except * will match any string of ([a-z0-9-.]*). In
+                that case, * must be the first character and must be followed in
+                the pattern by either - or ..
+            - !ruby/object:Api::Type::String
+              name: 'pathMatcher'
+              required: true
+              description: |
+                The name of the PathMatcher to use to match the path portion of
+                the URL if the hostRule matches the URL's host portion.
+      - !ruby/object:Api::Type::Integer
+        name: 'id'
+        description: 'The unique identifier for the resource.'
+        output: true
+      - !ruby/object:Api::Type::Fingerprint
+        name: 'fingerprint'
+        description: |
+          Fingerprint of this resource. This field is used internally during
+          updates of this resource.
+      - !ruby/object:Api::Type::String
+        name: 'name'
+        required: true
+        input: true
+        description: |
+          Name of the resource. Provided by the client when the resource is
+          created. The name must be 1-63 characters long, and comply with
+          RFC1035. Specifically, the name must be 1-63 characters long and match
+          the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the
+          first character must be a lowercase letter, and all following
+          characters must be a dash, lowercase letter, or digit, except the last
+          character, which cannot be a dash.
+      - !ruby/object:Api::Type::Array
+        name: 'pathMatchers'
+        description: 'The list of named PathMatchers to use against the URL.'
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'defaultService'
+              required: true
+              resource: 'RegionBackendService'
+              imports: 'selfLink'
+              description: |
+                A reference to a RegionBackendService resource. This will be used if
+                none of the pathRules defined by this PathMatcher is matched by
+                the URL's path portion.
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: 'An optional description of this resource.'
+            - !ruby/object:Api::Type::String
+              name: 'name'
+              required: true
+              description: |
+                The name to which this PathMatcher is referred by the HostRule.
+            - !ruby/object:Api::Type::Array
+              name: 'pathRules'
+              description: 'The list of path rules.'
+              item_type: !ruby/object:Api::Type::NestedObject
+                properties:
+                  - !ruby/object:Api::Type::Array
+                    name: 'paths'
+                    required: true
+                    item_type: Api::Type::String
+                    description: |
+                      The list of path patterns to match. Each must start with /
+                      and the only place a * is allowed is at the end following
+                      a /. The string fed to the path matcher does not include
+                      any text after the first ? or #, and those chars are not
+                      allowed here.
+                  - !ruby/object:Api::Type::ResourceRef
+                    name: 'service'
+                    required: true
+                    resource: 'RegionBackendService'
+                    imports: 'selfLink'
+                    description: |
+                      A reference to the RegionBackendService resource if this rule is
+                      matched.
+      - !ruby/object:Api::Type::Array
+        name: 'tests'
+        description: |
+          The list of expected URL mappings. Requests to update this UrlMap will
+          succeed only if all of the test cases pass.
+        item_type: !ruby/object:Api::Type::NestedObject
+          properties:
+            - !ruby/object:Api::Type::String
+              name: 'description'
+              description: 'Description of this test case.'
+            - !ruby/object:Api::Type::String
+              name: 'host'
+              required: true
+              description: 'Host portion of the URL.'
+            - !ruby/object:Api::Type::String
+              name: 'path'
+              required: true
+              description: 'Path portion of the URL.'
+            - !ruby/object:Api::Type::ResourceRef
+              name: 'service'
+              required: true
+              resource: 'RegionBackendService'
+              imports: 'selfLink'
+              description:
+                A reference to expected RegionBackendService resource the given URL
+                should be mapped to.
   - !ruby/object:Api::Resource
     name: 'RegionHealthCheck'
     min_version: beta
