@@ -170,6 +170,15 @@ objects:
           - !ruby/object:Api::Type::String
             name: 'tableId'
             description: The ID of the the table
+      - !ruby/object:Api::Type::Array
+            name: 'clustering'
+            description: |
+              One or more fields on which data should be clustered. Only
+              top-level, non-repeated, simple-type fields are supported. When
+              you cluster a table using multiple columns, the order of columns
+              you specify is important. The order of the specified columns
+              determines the sort order of the data.
+            item_type: Api::Type::String
       - !ruby/object:Api::Type::Integer
         name: 'creationTime'
         output: true
@@ -223,6 +232,11 @@ objects:
         description: |
           The number of rows of data in this table, excluding any data in the
           streaming buffer.
+      - !ruby/object:Api::Type::Boolean
+        name: 'requirePartitionFilter'
+        description: |
+          If set to true, queries over this table require a partition filter
+          that can be used for partition elimination to be specified.
         output: true
       - !ruby/object:Api::Type::Enum
         name: 'type'
@@ -269,6 +283,15 @@ objects:
             description: |
               Number of milliseconds for which to keep the storage for a
               partition.
+          - !ruby/object:Api::Type::String
+            name: 'field'
+            description: |
+              If not set, the table is partitioned by pseudo column,
+              referenced via either '_PARTITIONTIME' as TIMESTAMP type, or
+              '_PARTITIONDATE' as DATE type. If field is specified, the table
+              is instead partitioned by this field. The field must be a
+              top-level TIMESTAMP or DATE field. Its mode must be NULLABLE or
+              REQUIRED.
           - !ruby/object:Api::Type::Enum
             name: 'type'
             description: |
